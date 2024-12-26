@@ -579,6 +579,8 @@ footer {
             database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
             database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
 
+            console.log("Loaded Database:", database);
+
             const similaritesResponse = await fetch(dropboxSimilaritesFile);
             const similaritesBuffer = await similaritesResponse.arrayBuffer();
             const similaritesWorkbook = XLSX.read(similaritesBuffer, { type: "array" });
