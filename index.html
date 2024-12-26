@@ -585,7 +585,7 @@ footer {
             database.SIMILARITES = XLSX.utils.sheet_to_json(similaritesWorkbook.Sheets["SIMILARITES"] || {}).map(item => ({
                 Item: item.Item || "Unnamed"
             }));
-            console.log("Loaded Database : " ; database)
+            console.log("Loaded Database:", database);
         }
 
         
@@ -597,6 +597,8 @@ function filterCategory(category, button) {
 
     // إضافة الفئة "active" للزر المحدد
     button.classList.add("active");
+
+    console.log("Selected Category:", currentCategory);
 }
 
 
@@ -737,6 +739,13 @@ function searchItems() {
         normalizeString(item["Item Name"] || item["Item"]).includes(query)
     ) || [];
 
+
+ console.log("Search Query:", Query);
+     console.log("Current Category:", currentCategory);
+     console.log("Search Results:", results);
+
+
+    
     if (results.length === 0) {
         // إذا لم يتم العثور على العناصر، أضف الرسالة إلى صندوق النتائج
         resultsContainer.innerHTML = `
