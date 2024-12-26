@@ -566,8 +566,7 @@ footer {
 
 
     <script>
-        const dropboxMainFile = "https://cors-anywhere.herokuapp.com/https://github.com/AhMeD202444/Assal---Office---App/raw/refs/heads/main/baq_prices_cleaned_updated.xlsx";
-";
+        const dropboxMainFile = "https://cors-anywhere.herokuapp.com/https://www.dropbox.com/scl/fi/nl22c9rbj1l7yfn54yrkx/baq_prices_cleaned_updated.xlsx?rlkey=hosnjlsiswyeuxvht1rcp27i2&st=brhpzk2f&dl=1";
         const dropboxSimilaritesFile = "https://cors-anywhere.herokuapp.com/https://www.dropbox.com/scl/fi/9xiuw94pkaxagff6wbopa/data-apps.xlsx?rlkey=bc46aum0qw6ixkct01aazkre9&st=8l0a0oyq&dl=1";
         let database = {};
         let currentCategory = null;
@@ -579,8 +578,6 @@ footer {
             database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {});
             database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
             database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
-
-            console.log("Loaded Database:", database);
 
             const similaritesResponse = await fetch(dropboxSimilaritesFile);
             const similaritesBuffer = await similaritesResponse.arrayBuffer();
