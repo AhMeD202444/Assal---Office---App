@@ -186,6 +186,32 @@ h1 {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
+
+
+
+        .refresh-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 16px;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .refresh-btn:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #66BB6A, #43A047);
+        }
+        .refresh-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+
         
 .results {
     display: grid;
@@ -546,6 +572,10 @@ footer {
             <button onclick="searchItems()"><i class="fas fa-search"></i></button>
         </div>
         <div id="results" class="results"></div>
+
+        </div>
+    <button class="refresh-btn" onclick="refreshData()">تحديث البيانات</button>
+
         
     </div>
     <div class="color-buttons">
@@ -856,6 +886,16 @@ async function confirmExit() {
             document.body.style.background = color;
         }
 
+
+
+ function refreshData() {
+            loadExcelFiles().then(() => {
+                location.reload();
+            });
+        }
+
+
+        
         loadExcelFiles();
     </script>
     <style>
