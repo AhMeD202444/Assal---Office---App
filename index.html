@@ -57,6 +57,59 @@
         }
 
 
+.exit-btn,
+.refresh-btn {
+    flex: none; /* السماح للأزرار بالاحتفاظ بحجمها */
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #8B0000, #B22222); /* لون التدرج */
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.exit-btn:hover,
+.refresh-btn:hover {
+    transform: scale(1.05);
+}
+
+.exit-btn:active,
+.refresh-btn:active {
+    transform: scale(0.9);
+    background: linear-gradient(45deg, #ff4d4d, #ff0000);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), inset 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* تخصيص لون زر تحديث البيانات */
+.refresh-btn {
+    background: linear-gradient(135deg, #004D40, #00796B); /* لون مختلف */
+}
+
+.refresh-btn:active {
+    background: linear-gradient(135deg, #00695C, #004D40);
+}
+
+
+
+
+
+        
+        .button-container {
+    display: flex;
+    justify-content: flex-end; /* ترتيب الأزرار بجانب بعضها */
+    gap: 10px; /* مسافة بين الأزرار */
+    width: 90%; /* عرض الحاوية */
+    margin: 0 auto; /* يجعل الحاوية في المنتصف */
+    margin-top: 20px; /* مسافة من الأعلى */
+}
+
+
+
+
 /* الشعار (Logo) */
 
 
@@ -186,32 +239,6 @@ h1 {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
-
-
-
-        .refresh-btn {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #4CAF50, #388E3C);
-            border: none;
-            border-radius: 50px;
-            color: white;
-            font-size: 16px;
-            font-family: 'Montserrat', sans-serif;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            margin-top: 20px;
-        }
-        .refresh-btn:hover {
-            transform: scale(1.1);
-            background: linear-gradient(135deg, #66BB6A, #43A047);
-        }
-        .refresh-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-
         
 .results {
     display: grid;
@@ -321,28 +348,6 @@ h1 {
     background: rgba(255, 255, 255, 0.2); /* خلفية أفتح */
 }
         
-
-        .exit-btn {
-            margin-top: 20px; /* إضافة مسافة لزر الخروج */
-            padding: 8px 20px;
-            
-background: linear-gradient(135deg, #8B0000, #B22222);
-
-            border: none;
-            border-radius: 50px;
-            color: white;
-            font-family: 'Montserrat', sans-serif; /* تحديد خط عصري */
-            font-size: 16px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            width: 90%; /* تعديل العرض */
-        }
-
-
-
-
-
 
 .back-btn {
     position: relative;
@@ -573,8 +578,12 @@ footer {
         </div>
         <div id="results" class="results"></div>
 
-        </div>
+       <div class="button-container">
+    <button class="exit-btn" onclick="confirmExit()">خروج</button>
     <button class="refresh-btn" onclick="refreshData()">تحديث البيانات</button>
+</div>
+
+
 
         
     </div>
@@ -584,9 +593,6 @@ footer {
         <button class="color-btn" onclick="changeBackgroundColor('#134E5E')"></button>
         <button class="color-btn" onclick="changeBackgroundColor('#2A5298')"></button>
         <button class="color-btn" onclick="changeBackgroundColor('#004D40')"></button>
-    </div>
-    <button class="exit-btn" onclick="confirmExit()">خروج</button>
-
 
 
 <footer>
