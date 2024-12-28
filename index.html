@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phone Parts Pro</title>
@@ -20,80 +17,91 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
+
+
+
+ /* نافذة منبثقة */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .popup.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .popup-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .popup-content img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+
+        .popup-content h2 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .popup-content p {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-close:hover {
+            background: darkred;
+        }
+
+
+
+
+        
         /* Reset and basics */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
-
-
- /* النافذة المنبثقة */
-        .popup {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            max-width: 90%;
-            width: 400px;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .popup.show {
-            display: flex;
-        }
-
-        .popup img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            margin-bottom: 15px;
-            transition: transform 0.3s ease;
-            cursor: pointer;
-        }
-
-        .popup img:active {
-            transform: scale(1.1);
-        }
-
-        .popup h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-
-        .popup p {
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-
-        /* زر إغلاق النافذة */
-        .popup-exit-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #ff4d4d;
-            color: white;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-
-
-     
 
         body {
             font-family: 'Montserrat', sans-serif;
@@ -114,7 +122,6 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
 
         .container {
             background: rgba(255, 255, 255, 0.1);
@@ -633,15 +640,17 @@ footer {
 <body>
 
 
-<!-- نافذة منبثقة -->
+ <!-- النافذة المنبثقة -->
     <div id="popup" class="popup">
-        <button class="popup-exit-btn" onclick="closePopup()">X</button>
-        < img src="images/other.png" alt="صورة">
-        <h1>مرحبًا بك!</h1>
-        <p>شكرًا لاستخدامك تطبيقنا. نحن هنا لخدمتك.</p >
+        <div class="popup-content">
+            <button class="popup-close" onclick="closePopup()">X</button>
+            < img src="images/other.png" alt="Welcome Image">
+            <h2>مرحبًا بك!</h2>
+            <p>شكرًا لاستخدامك تطبيق مكتب عسل. نحن هنا لخدمتك.</p >
+        </div>
     </div>
 
-    
+    <!-- محتوى الصفحة -->
     <div class="container">
     <!-- شعار دائري -->
     <div class="logo-container">
@@ -687,6 +696,21 @@ footer {
 
 
     <script>
+
+  // خيار ظهور النافذة
+        const showPopup = true; // عدّل هذه القيمة إلى false لإيقاف ظهور النافذة
+
+        // عرض النافذة إذا كانت الخاصية true
+        window.onload = () => {
+            if (showPopup) {
+                document.getElementById('popup').classList.add('show');
+            }
+        };
+
+        function closePopup() {
+            document.getElementById('popup').classList.remove('show');
+        }
+
 
         
         const dropboxMainFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file1" + "?t=" + new Date().getTime();
@@ -943,32 +967,6 @@ function searchItems() {
 });
 
 }
-
-
-
-
-
-
-
-  // التحكم في ظهور النافذة
-        const showPopup = true; // تغيير القيمة إلى false إذا لم ترد عرض النافذة.
-
-        window.onload = () => {
-            if (showPopup) {
-                document.getElementById('popup').classList.add('show');
-            }
-        };
-
-        function closePopup() {
-            document.getElementById('popup').classList.remove('show');
-        }
-
-
-
-
-
-
-        
 async function confirmExit() {
     const result = await Swal.fire({
         title: 'تأكيد الخروج',
