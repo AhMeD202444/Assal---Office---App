@@ -572,30 +572,21 @@ footer {
         let database = {};
         let currentCategory = null;
 
-      async function loadExcelFiles() {
-    const timestamp = new Date().getTime(); // إنشاء علامة زمنية لتجاوز الكاش
+        async function loadExcelFiles() {
+            const mainResponse = await fetch(dropboxMainFile);
+            const mainBuffer = await mainResponse.arrayBuffer();
+            const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
+            database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {});
+            database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
+            database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
 
-    // جلب البيانات مع العلامة الزمنية
-    const mainResponse = await fetch(`${dropboxMainFile}?t=${timestamp}`);
-    const mainBuffer = await mainResponse.arrayBuffer();
-    const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
-    database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {});
-    database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
-    database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
-
-    const similaritesResponse = await fetch(`${dropboxSimilaritesFile}?t=${timestamp}`);
-    const similaritesBuffer = await similaritesResponse.arrayBuffer();
-    const similaritesWorkbook = XLSX.read(similaritesBuffer, { type: "array" });
-    database.SIMILARITES = XLSX.utils.sheet_to_json(similaritesWorkbook.Sheets["SIMILARITES"] || {}).map(item => ({
-        Item: item.Item || "Unnamed"
-    }));
-}
-
-// تجاوز الكاش عند فتح التطبيق
-window.onload = function() {
-    location.reload(true); // إعادة تحميل الصفحة مع تجاوز الكاش
-    loadExcelFiles();
-};
+            const similaritesResponse = await fetch(dropboxSimilaritesFile);
+            const similaritesBuffer = await similaritesResponse.arrayBuffer();
+            const similaritesWorkbook = XLSX.read(similaritesBuffer, { type: "array" });
+            database.SIMILARITES = XLSX.utils.sheet_to_json(similaritesWorkbook.Sheets["SIMILARITES"] || {}).map(item => ({
+                Item: item.Item || "Unnamed"
+            }));
+        }
 
         
 function filterCategory(category, button) {
