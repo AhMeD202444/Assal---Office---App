@@ -572,10 +572,8 @@ footer {
         let database = {};
         let currentCategory = null;
 
-      async function loadExcelFiles() {
+    async function loadExcelFiles() {
     const timestamp = new Date().getTime(); // إنشاء علامة زمنية لتجاوز الكاش
-
-    // جلب البيانات مع العلامة الزمنية
     const mainResponse = await fetch(`${dropboxMainFile}?t=${timestamp}`);
     const mainBuffer = await mainResponse.arrayBuffer();
     const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
@@ -589,7 +587,6 @@ footer {
     database.SIMILARITES = XLSX.utils.sheet_to_json(similaritesWorkbook.Sheets["SIMILARITES"] || {}).map(item => ({
         Item: item.Item || "Unnamed"
     }));
-
  
 }
 
