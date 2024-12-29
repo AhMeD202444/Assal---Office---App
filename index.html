@@ -503,21 +503,22 @@ h1 {
             margin-bottom: 10px;
         }
 
-       .color-btn {
-    position: relative; /* لضبط أي تأثيرات داخل حدود الزر */
+    .color-btn {
+    position: relative; /* لجعل الحدود تعمل بشكل صحيح */
     width: 40px;
     height: 40px;
-    border-radius: 50%; /* لجعل الأزرار دائرية */
+    border-radius: 50%; /* لجعل الزر دائريًا بالكامل */
     border: none; /* إزالة الحدود */
-    color: white; /* لون النص */
+    color: white; /* لون النص أو الأيقونة */
     cursor: pointer; /* تغيير المؤشر عند التمرير */
-    font-size: 16px; /* حجم النص */
+    font-size: 16px;
     margin: 0 5px; /* مسافة صغيرة بين الأزرار */
-    overflow: hidden; /* منع أي تأثيرات من الخروج خارج الزر */
+    overflow: hidden; /* منع التأثيرات من الخروج خارج الزر */
     background: linear-gradient(135deg, #4A154B, #6A1B9A, #8E24AA); /* لون افتراضي */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ظل الزر */
     transition: transform 0.3s ease, box-shadow 0.3s ease; /* تأثير سلس */
 }
+
 
         /* تعديل ألوان الأزرار إلى الألوان المطلوبة */
         .color-btn:nth-child(1) {
@@ -554,6 +555,31 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
             box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.3); /* ظل داخلي فقط */
 
         }
+
+
+/* لإزالة أي تأثير مربع داخل الزر */
+.color-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3); /* تأثير خفيف */
+    border-radius: 50%; /* لضمان تطابق الشكل مع الزر */
+    transform: scale(0); /* إخفاء التأثير في البداية */
+    transition: transform 0.3s ease; /* تأثير سلس */
+    z-index: 0; /* خلف أي محتوى داخل الزر */
+}
+
+
+/* تفعيل التأثير عند الضغط */
+.color-btn:active::before {
+    transform: scale(1); /* ظهور التأثير */
+    opacity: 0; /* خفوت التأثير تدريجيًا */
+    transition: transform 0.3s ease, opacity 0.3s ease; /* تأثير سلس للخروج */
+}
+        
 
         /* تعديل حجم النوافذ المنبثقة */
         .
