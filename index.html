@@ -1052,15 +1052,46 @@ async function confirmExit() {
 
 
 
- function refreshData() {
-            loadExcelFiles().then(() => {
-                location.reload();
-            });
-        }
+ async function refreshData() {
+    Swal.fire({
+        title: '<h3 style="font-size: 24px; color: #fff;">جارِ التحديث...</h3>',
+        html: '<p style="font-size: 16px; color: #dcdcdc;">يرجى الانتظار قليلاً أثناء تحميل البيانات</p >',
+        allowOutsideClick: false,
+        backdrop: `
+            rgba(0, 0, 0, 0.7)
+            url("https://i.gifer.com/ZZ5H.gif")
+            center center
+            no-repeat
+        `,
+        showConfirmButton: false,
+        customClass: {
+            popup: 'swal2-popup',
+            title: 'swal2-title',
+            htmlContainer: 'swal2-html-container',
+        },
+        didOpen: () => Swal.showLoading(),
+    });
 
+    await loadExcelFiles();
 
-        
-        loadExcelFiles();
+    Swal.fire({
+        title: '<h3 style="font-size: 24px; color: #fff;">تم التحديث بنجاح!</h3>',
+        html: '<p style="font-size: 16px; color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
+        icon: 'success',
+        backdrop: `
+            rgba(0, 0, 0, 0.7)
+        `,
+        confirmButtonText: 'موافق',
+        customClass: {
+            popup: 'swal2-popup',
+            title: 'swal2-title',
+            htmlContainer: 'swal2-html-container',
+            confirmButton: 'swal2-confirm'
+        },
+    });
+
+    location.reload();
+}
     </script>
     <style>
         .swal2-popup {
