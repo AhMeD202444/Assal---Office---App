@@ -50,7 +50,14 @@
             border-radius: 50%; /* صورة دائرية */
             margin-bottom: 20px;
             border: 3px solid rgba(255, 255, 255, 0.6);
+             transition: transform 0.3s ease; /* تأثير التحرك عند الضغط */
+             cursor: pointer;
         }
+
+        .popup-content img:active {
+        transform: scale(1.1); /* تأثير التكبير عند النقر */
+    }
+
 
         .popup-content h1 {
             font-size: 24px;
@@ -642,12 +649,12 @@ footer {
 </head>
 <body>
 
- <div class="popup-overlay" id="popup">
+ <div class="popup-overlay" id="popup" style="display: none;">
         <div class="popup-content">
             <button class="popup-close-btn" onclick="closePopup()">X</button>
-            <img src="images/default.png" alt="Welcome Image">
-            <h1>مرحبًا بك!</h1>
-            <p>شكرًا لاستخدامك تطبيق مكتب عسل. نحن هنا لخدمتكم.</p >
+            <img src="images/default.png" alt="Welcome Image" calss= "popupe-image">
+            <h1>مرحبًا بكم!</h1>
+            <p>شكرًا لاستخدامكم تطبيق مكتب عسل. نحن هنا لخدمتكم.</p >
         </div>
     </div>
     
@@ -701,13 +708,16 @@ footer {
 
  // إعداد خيار إظهار النافذة
         const showPopup = true; // استخدم false إذا أردت تعطيل النافذة.
+        const showPopupDelay= 3000;
 
         // تشغيل النافذة عند التحميل
         window.onload = () => {
-            if (!showPopup) {
-                document.getElementById('popup').style.display = 'none';
-            }
-        };
+    if (showPopup) {
+        setTimeout(() => {
+            document.getElementById('popup').style.display = 'flex'; // عرض النافذة
+        }, 3000); // 3 ثواني
+    }
+};
 
         // إغلاق النافذة
         function closePopup() {
