@@ -658,6 +658,11 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
 
 
 
+ @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
 
 footer {
     background-color: rgba(0, 0, 0, 0.5);
@@ -739,9 +744,26 @@ footer {
  // إعداد خيار إظهار النافذة
         const showPopup = true; // استخدم false إذا أردت تعطيل النافذة.
 
+     window.onload = () => {
+            const showPopup = !sessionStorage.getItem('hasUpdated');
+            if (showPopup) {
+                setTimeout(() => {
+                    Swal.fire({
+                        title: 'مرحبًا بكم!',
+                        html: '<p style="font-size: 16px; color: #dcdcdc;">شكرًا لاستخدامكم تطبيق مكتب عسل. نحن هنا لخدمتكم.</p >',
+                        backdrop: 'rgba(0, 0, 0, 0.7)',
+                        confirmButtonText: 'موافق',
+                        customClass: {
+                            popup: 'swal2-popup',
+                            title: 'swal2-title',
+                            htmlContainer: 'swal2-html-container',
+                            confirmButton: 'swal2-confirm'
+                        },
+                    });
+                }, 2000);
+            }
+        };
 
-
-        
 
         // إغلاق النافذة
        function closePopup() {
@@ -1046,73 +1068,30 @@ async function confirmExit() {
 
 
 
-// دالة لتحديث البيانات
-async function refreshData() {
-    // عرض نافذة "جارِ التحديث..."
-    Swal.fire({
-        html: `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <div style="width: 100px; height: 100px; border: 8px solid rgba(255, 255, 255, 0.2); border-top: 8px solid #43cea2; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جارِ التحديث... يرجى الانتظار</p >
-            </div>
-        `,
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        backdrop: `
-            rgba(0, 0, 0, 0.8)
-        `,
-        customClass: {
-            popup: 'swal2-popup',
-            htmlContainer: 'swal2-html-container'
-        },
-    });
-
-    // حركة دوران باستخدام CSS
-    const style = document.createElement('style');
-    style.innerHTML = `
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    `;
-    document.head.appendChild(style);
-
-    // استدعاء دالة تحميل البيانات
-    await loadExcelFiles();
-
-    // عرض نافذة نجاح التحديث
-    Swal.fire({
-        title: '<h3 style="font-size: 24px; color: #fff;">تم التحديث بنجاح!</h3>',
-        html: '<p style="font-size: 16px; color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
-        iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
-        backdrop: `
-            rgba(0, 0, 0, 0.7)
-        `,
-        confirmButtonText: 'موافق',
-        customClass: {
-            popup: 'swal2-popup',
-            title: 'swal2-title',
-            htmlContainer: 'swal2-html-container',
-            confirmButton: 'swal2-confirm'
-        },
-    }).then(() => {
-        // منع ظهور رسالة الترحيب بعد التحديث
-        sessionStorage.setItem('hasUpdated', true);
-        location.reload();
-    });
-}
-
-// عرض رسالة الترحيب فقط عند فتح التطبيق لأول مرة
-window.onload = () => {
-    const showPopup = !sessionStorage.getItem('hasUpdated'); // يظهر فقط إذا لم يتم التحديث
-    if (showPopup) {
-        setTimeout(() => {
+ async function refreshData() {
             Swal.fire({
-                title: 'مرحبًا بكم!',
-                html: '<p style="font-size: 16px; color: #dcdcdc;">شكرًا لاستخدامكم تطبيق مكتب عسل. نحن هنا لخدمتكم.</p >',
-                backdrop: `
-                    rgba(0, 0, 0, 0.7)
+                html: `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div style="width: 100px; height: 100px; border: 8px solid rgba(255, 255, 255, 0.2); border-top: 8px solid #43cea2; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جارِ التحديث... يرجى الانتظار</p >
+                    </div>
                 `,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                backdrop: 'rgba(0, 0, 0, 0.8)',
+                customClass: {
+                    popup: 'swal2-popup',
+                    htmlContainer: 'swal2-html-container'
+                },
+            });
+
+            await loadExcelFiles();
+
+            Swal.fire({
+                title: '<h3 style="font-size: 24px; color: #fff;">تم التحديث بنجاح!</h3>',
+                html: '<p style="font-size: 16px; color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
+                iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
+                backdrop: 'rgba(0, 0, 0, 0.7)',
                 confirmButtonText: 'موافق',
                 customClass: {
                     popup: 'swal2-popup',
@@ -1120,18 +1099,15 @@ window.onload = () => {
                     htmlContainer: 'swal2-html-container',
                     confirmButton: 'swal2-confirm'
                 },
+            }).then(() => {
+                sessionStorage.setItem('hasUpdated', true);
+                location.reload();
             });
-        }, 2000); // تظهر بعد ثانيتين
-    }
-};
-  location.reload();
         }
 
-        
-
-
-   
-}
+        async function loadExcelFiles() {
+            // شيفرة تحميل البيانات من الإكسل
+        }
 
     </script>
     <style>
