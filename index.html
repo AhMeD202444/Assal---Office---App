@@ -1052,15 +1052,56 @@ async function confirmExit() {
 
 
 
- function refreshData() {
-            loadExcelFiles().then(() => {
-                location.reload();
-            });
+async function refreshData() {
+    Swal.fire({
+        html: `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="width: 100px; height: 100px; border: 8px solid rgba(255, 255, 255, 0.2); border-top: 8px solid #43cea2; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جارِ التحديث... يرجى الانتظار</p >
+            </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        backdrop: `
+            rgba(0, 0, 0, 0.8)
+        `,
+        customClass: {
+            popup: 'swal2-popup',
+            htmlContainer: 'swal2-html-container'
+        },
+    });
+
+    // حركة دوران باستخدام CSS
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
+    `;
+    document.head.appendChild(style);
 
+    await loadExcelFiles();
 
-        
-        loadExcelFiles();
+    Swal.fire({
+        title: '<h3 style="font-size: 24px; color: #fff;">تم التحديث بنجاح!</h3>',
+        html: '<p style="font-size: 16px; color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
+        icon: 'success',
+        backdrop: `
+            rgba(0, 0, 0, 0.7)
+        `,
+        confirmButtonText: 'موافق',
+        customClass: {
+            popup: 'swal2-popup',
+            title: 'swal2-title',
+            htmlContainer: 'swal2-html-container',
+            confirmButton: 'swal2-confirm'
+        },
+    });
+
+    location.reload();
+}
+
     </script>
     <style>
         .swal2-popup {
