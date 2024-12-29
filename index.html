@@ -22,42 +22,45 @@
  /* تصميم النافذة المنبثقة */
          /* تعديل التعتيم ليقتصر على النافذة فقط */
     .popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    }
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
 
-        .popup-content {
-        position: relative;
-        background: rgba(255, 255, 255, 0.15); /* خلفية شفافة */
-        backdrop-filter: blur(10px); /* تأثير الضبابية */
-        webkit-backdrop-filter:- bulr(15px);
-        border-radius: 20px;
-        padding: 30px;
-        text-align: center;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        max-width: 400px;
-        width: 90%;
-        z-index: 10000; /* أعلى من الخلفية */
-    }
+
+       .popup-content {
+    position: relative;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(240, 240, 240, 0.9)); /* خلفية متدرجة */
+    backdrop-filter: blur(20px); /* زيادة الضبابية */
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3); /* تحسين الظلال */
+    max-width: 400px;
+    width: 90%;
+    z-index: 10000;
+    animation: fadeIn 0.6s ease-in-out; /* حركة دخول */
+}
+
 
 /* إضافة تعتيم للخلفية بالقرب من النافذة */
-    .popup-overlay::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: none;
-        z-index: 9998;
-    }
+   .popup-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: none; /* إزالة التعتيم عن الخلفية */
+    z-index: 9998;
+}
+
 
 
         
@@ -92,25 +95,24 @@
         }
 
         /* زر الإغلاق */
-        .popup-close-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 30px;
-            height: 30px;
-            background: #ff4d4d;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-
+      .popup-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: linear-gradient(135deg, #ff4d4d, #ff6b6b); /* تحسين تدرج اللون */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: transform 0.3s ease, background 0.3s ease;
+}
         .popup-close-btn:hover {
             transform: scale(1.1);
             background: #ff6666;
