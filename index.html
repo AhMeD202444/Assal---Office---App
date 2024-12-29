@@ -785,29 +785,53 @@ footer {
         const showPopup = true; // استخدم false إذا أردت تعطيل النافذة.
 
     // رسالة الترحيب
-        window.onload = () => {
-            const showPopup = !sessionStorage.getItem('hasUpdated');
-            if (showPopup) {
-                setTimeout(() => {
-                    Swal.fire({
-                        html: `
-                            <div style="text-align: center;">
-                                <img src="images/default.png" alt="Welcome" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px;">
-                                <h2 style="color: white; margin-bottom: 10px;">مرحبًا بكم!</h2>
-                                <p style="color: #dcdcdc; font-size: 16px;">شكرًا لاستخدامكم تطبيق مكتب عسل. نحن هنا لخدمتكم.</p >
-                            </div>
-                        `,
-                        showCloseButton: true,
-                        showConfirmButton: false,
-                        backdrop: 'rgba(0, 0, 0, 0.7)',
-                        customClass: {
-                            popup: 'swal2-popup',
-                             backdrop: false, // تثبيت الواجهة
-                        },
-                    });
-                }, 2000);
-            }
-        };
+       async function refreshData() {
+    // نافذة التحديث
+    Swal.fire({
+        title: 'جارِ التحديث...',
+        html: '<div class="swal2-loader"></div><p>يرجى الانتظار...</p >',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        backdrop: `
+            rgba(0, 0, 0, 0.8)
+        `,
+        customClass: {
+            popup: 'swal2-popup',
+            title: 'swal2-title',
+            htmlContainer: 'swal2-html-container',
+        },
+        didOpen: () => {
+            Swal.showLoading();
+        },
+    });
+
+    try {
+        // استدعاء دالة تحميل البيانات
+        await loadExcelFiles();
+
+        // عرض نافذة نجاح التحديث
+        Swal.fire({
+            icon: 'success',
+            title: 'تم التحديث بنجاح!',
+            text: 'تم تحميل البيانات الجديدة.',
+            confirmButtonText: 'موافق',
+            customClass: {
+                confirmButton: 'swal2-confirm',
+            },
+        });
+    } catch (error) {
+        // عرض نافذة خطأ إذا حدثت مشكلة
+        Swal.fire({
+            icon: 'error',
+            title: 'فشل التحديث!',
+            text: 'حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.',
+            confirmButtonText: 'موافق',
+            customClass: {
+                confirmButton: 'swal2-confirm',
+            },
+        });
+    }
+}
 
         
         const dropboxMainFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file1" + "?t=" + new Date().getTime();
@@ -1102,55 +1126,59 @@ async function confirmExit() {
 
 
 // دالة تحديث البيانات
-      async function refreshData() {
-    // نافذة التحديث
+        async function refreshData() {
+    // نافذة التحميل
     Swal.fire({
-        title: 'جارِ التحديث...',
-        html: '<div class="swal2-loader"></div><p>يرجى الانتظار...</p >',
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        backdrop: `
-            rgba(0, 0, 0, 0.8)
+        html: `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div class="loading-circle"></div>
+                <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جارِ التحديث... يرجى الانتظار</p >
+            </div>
         `,
-        customClass: {
-            popup: 'swal2-popup',
-            title: 'swal2-title',
-            htmlContainer: 'swal2-html-container',
-        },
-        didOpen: () => {
-            Swal.showLoading();
-        },
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        backdrop: 'rgba(0, 0, 0, 0.8)', // تثبيت الواجهة مع تعتيم الخلفية
     });
 
     try {
-        // استدعاء دالة تحميل البيانات
+        // استدعاء تحديث البيانات
         await loadExcelFiles();
 
-        // عرض نافذة نجاح التحديث
+        // نافذة نجاح التحديث
         Swal.fire({
-            icon: 'success',
             title: 'تم التحديث بنجاح!',
-            text: 'تم تحميل البيانات الجديدة.',
+            html: '<p style="color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
+            iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
+            showConfirmButton: true,
+            backdrop: 'rgba(0, 0, 0, 0.8)', // تثبيت الواجهة مع تعتيم الخلفية
             confirmButtonText: 'موافق',
             customClass: {
+                popup: 'swal2-popup',
+                title: 'swal2-title',
+                htmlContainer: 'swal2-html-container',
                 confirmButton: 'swal2-confirm',
             },
+        }).then(() => {
+            sessionStorage.setItem('hasUpdated', true); // تحديث الحالة
         });
     } catch (error) {
-        // عرض نافذة خطأ إذا حدثت مشكلة
+        // نافذة خطأ في حال فشل التحديث
         Swal.fire({
-            icon: 'error',
-            title: 'فشل التحديث!',
-            text: 'حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.',
+            title: 'فشل التحديث',
+            html: '<p style="color: #dcdcdc;">حدث خطأ أثناء تحديث البيانات. يرجى المحاولة مرة أخرى.</p >',
+            iconHtml: '<i class="fas fa-exclamation-circle" style="font-size: 50px; color: #FF416C;"></i>',
+            showConfirmButton: true,
             confirmButtonText: 'موافق',
+            backdrop: 'rgba(0, 0, 0, 0.8)', // تثبيت الواجهة مع تعتيم الخلفية
             customClass: {
+                popup: 'swal2-popup',
+                title: 'swal2-title',
+                htmlContainer: 'swal2-html-container',
                 confirmButton: 'swal2-confirm',
             },
         });
     }
-          loadExcelFiles();
 }
-        
         loadExcelFiles();
     </script>
     <style>
