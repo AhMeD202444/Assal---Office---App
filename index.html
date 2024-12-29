@@ -97,24 +97,17 @@
         }
 
         /* زر الإغلاق */
-      .popup-close-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: linear-gradient(135deg, #ff4d4d, #ff6b6b); /* تحسين تدرج اللون */
-    color: white;
-    border: none;
-    border-radius: 50%;
+   .popup-close-btn {
+    position: relative;
+    overflow: hidden; /* يمنع التأثير من الخروج */
     width: 40px;
     height: 40px;
-    font-size: 18px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    transition: transform all 0.3s;
-    overflow : hidden;
+    background: #ff4d4d;
+    color: white;
+    border-radius: 50%; /* دائري */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ظل خفيف */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 }
         .popup-close-btn:hover {
             transform: scale(1.1);
@@ -221,15 +214,15 @@ h1 {
 
 
 .category-btn {
+    position: relative;
+    overflow: hidden; /* يمنع التأثير من الخروج */
     padding: 10px 20px;
-    border-radius: 50px;
-    border: none;
+    border-radius: 50px; /* زوايا مستديرة */
     background: rgba(0, 0, 0, 0.3);
     color: white;
-    cursor: pointer;
     font-size: 16px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
-     overflow : hidden;
 }
 
 .category-btn:hover {
@@ -314,51 +307,32 @@ h1 {
         }
 
         /* تصميم الأزرار */
-    .refresh-btn,
-    .exit-btn {
-    width: 180px;
-    height: 40px;
-    font-size: 16px;
-    border-radius: 30px;
-    color: white;
-    cursor: pointer;
-    background: linear-gradient(135deg, #004D40, #00796B);
-    position: relative; /* لتحديد حدود التأثير */
-    overflow: hidden; /* منع التأثير من الخروج */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-
+        .refresh-btn,
+        .exit-btn {
+            width: 180px; /* عرض موحد لكلا الزرين */
+            height: 40px; /* ارتفاع موحد لكلا الزرين */
+            font-size: 16px;
+            border-radius: 30px; /* زوايا مستديرة */
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* تأثير الظل */
         }
 
         /* ألوان زر "تحديث البيانات" */
-       
-.refresh-btn:hover {
-    transform: scale(1.05);
-    background: linear-gradient(135deg, #00695C, #004D40);
-}
+        .refresh-btn {
+            background: linear-gradient(135deg, #004D40, #00796B);
+        }
 
-.refresh-btn:active {
-    transform: scale(0.95);
-}
+        .refresh-btn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #00695C, #004D40);
+        }
 
-.refresh-btn::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 200px;
-    height: 200px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    transition: transform 0.4s ease-out, opacity 0.4s ease-out;
-    opacity: 0;
-}
-
-.refresh-btn:active::after {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-}
+        .refresh-btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, #003F36, #00584F);
+        }
 
         /* ألوان زر "الخروج" */
         .exit-btn {
