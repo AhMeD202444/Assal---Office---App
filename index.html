@@ -19,6 +19,51 @@
     <style>
 
 
+@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-circle {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(255, 255, 255, 0.2);
+            border-top: 8px solid #43cea2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .swal2-popup {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .swal2-title {
+            font-size: 24px;
+            color: white;
+        }
+
+        .swal2-html-container {
+            color: #dcdcdc;
+            font-size: 16px;
+        }
+
+        .swal2-confirm {
+            background: linear-gradient(45deg, #43cea2, #185a9d);
+            border-radius: 30px;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+
+
+
+        
+
  /* تصميم النافذة المنبثقة */
          /* تعديل التعتيم ليقتصر على النافذة فقط */
     .popup-overlay {
@@ -658,11 +703,6 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
 
 
 
- @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
 
 footer {
     background-color: rgba(0, 0, 0, 0.5);
@@ -744,37 +784,29 @@ footer {
  // إعداد خيار إظهار النافذة
         const showPopup = true; // استخدم false إذا أردت تعطيل النافذة.
 
-     window.onload = () => {
+    // رسالة الترحيب
+        window.onload = () => {
             const showPopup = !sessionStorage.getItem('hasUpdated');
             if (showPopup) {
                 setTimeout(() => {
                     Swal.fire({
-                        title: 'مرحبًا بكم!',
-                        html: '<p style="font-size: 16px; color: #dcdcdc;">شكرًا لاستخدامكم تطبيق مكتب عسل. نحن هنا لخدمتكم.</p >',
+                        html: `
+                            <div style="text-align: center;">
+                                < img src="images/default.png" alt="Welcome" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px;">
+                                <h2 style="color: white; margin-bottom: 10px;">مرحبًا بكم!</h2>
+                                <p style="color: #dcdcdc; font-size: 16px;">شكرًا لاستخدامكم تطبيق مكتب عسل. نحن هنا لخدمتكم.</p >
+                            </div>
+                        `,
+                        showCloseButton: true,
+                        showConfirmButton: false,
                         backdrop: 'rgba(0, 0, 0, 0.7)',
-                        confirmButtonText: 'موافق',
                         customClass: {
                             popup: 'swal2-popup',
-                            title: 'swal2-title',
-                            htmlContainer: 'swal2-html-container',
-                            confirmButton: 'swal2-confirm'
                         },
                     });
                 }, 2000);
             }
         };
-
-
-        // إغلاق النافذة
-       function closePopup() {
-        const popup = document.getElementById('popup');
-        popup.classList.add('animate__fadeOutUp'); // حركة خروج
-        setTimeout(() => {
-            popup.style.display = 'none';
-            popup.classList.remove('animate__fadeOutUp', 'animate__fadeInDown'); // إعادة تعيين الحركات
-        }, 1000); // مدة الحركة
-    }
-
 
         
         const dropboxMainFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file1" + "?t=" + new Date().getTime();
@@ -1068,47 +1100,44 @@ async function confirmExit() {
 
 
 
- async function refreshData() {
+// دالة تحديث البيانات
+        async function refreshData() {
+            // نافذة التحميل
             Swal.fire({
                 html: `
                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                        <div style="width: 100px; height: 100px; border: 8px solid rgba(255, 255, 255, 0.2); border-top: 8px solid #43cea2; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <div class="loading-circle"></div>
                         <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جارِ التحديث... يرجى الانتظار</p >
                     </div>
                 `,
                 showConfirmButton: false,
                 allowOutsideClick: false,
                 backdrop: 'rgba(0, 0, 0, 0.8)',
-                customClass: {
-                    popup: 'swal2-popup',
-                    htmlContainer: 'swal2-html-container'
-                },
             });
 
-            await loadExcelFiles();
+            // محاكاة تحميل البيانات
+            await new Promise(resolve => setTimeout(resolve, 2000));
 
+            // نافذة نجاح التحديث
             Swal.fire({
-                title: '<h3 style="font-size: 24px; color: #fff;">تم التحديث بنجاح!</h3>',
-                html: '<p style="font-size: 16px; color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
+                title: 'تم التحديث بنجاح!',
+                html: '<p style="color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
                 iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
+                showConfirmButton: true,
                 backdrop: 'rgba(0, 0, 0, 0.7)',
                 confirmButtonText: 'موافق',
                 customClass: {
                     popup: 'swal2-popup',
                     title: 'swal2-title',
                     htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
+                    confirmButton: 'swal2-confirm',
                 },
             }).then(() => {
                 sessionStorage.setItem('hasUpdated', true);
-                location.reload();
             });
         }
-
-        async function loadExcelFiles() {
-            // شيفرة تحميل البيانات من الإكسل
-        }
-
+        
+        loadExcelFiles();
     </script>
     <style>
         .swal2-popup {
