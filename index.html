@@ -1065,6 +1065,67 @@ async function confirmExit() {
 
         
         loadExcelFiles();
+
+
+// Function to show an elegant popup when offline
+    function checkInternetConnection() {
+        if (!navigator.onLine) {
+            Swal.fire({
+                title: '💔 انقطاع الإنترنت',
+                html: `
+                    <div style="text-align: center;">
+                        <p style="font-size: 16px; color: #f1f1f1;">
+                            يبدو أنك غير متصل بالإنترنت. يرجى التحقق من اتصالك والمحاولة مرة أخرى.
+                        </p >
+                        <div style="margin: 20px auto; text-align: center;">
+                            <i class="fas fa-wifi-slash" style="font-size: 60px; color: #ff4d4d; margin-bottom: 10px;"></i>
+                        </div>
+                    </div>
+                `,
+                background: 'rgba(25, 25, 25, 0.9)',
+                backdrop: `
+                    rgba(0, 0, 0, 0.7)
+                    url("https://media.giphy.com/media/3o6ZsYm5PFHRbMsTDi/giphy.gif")
+                    center top
+                    no-repeat
+                `,
+                showConfirmButton: true,
+                confirmButtonText: 'إعادة المحاولة',
+                confirmButtonColor: '#43cea2',
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm',
+                },
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    location.reload(); // Reload the page to check the connection again
+                }
+            });
+        }
+    }
+
+    // Listen for changes in the network status
+    window.addEventListener('offline', checkInternetConnection);
+
+    // Check on page load
+    window.onload = () => {
+        checkInternetConnection();
+    };
+
+
+
+        
     </script>
     <style>
         .swal2-popup {
