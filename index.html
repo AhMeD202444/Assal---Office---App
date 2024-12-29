@@ -1101,41 +1101,53 @@ async function confirmExit() {
 
 
 // دالة تحديث البيانات
-        async function refreshData() {
-            // نافذة التحميل
-            Swal.fire({
-                html: `
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                        <div class="loading-circle"></div>
-                        <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جارِ التحديث... يرجى الانتظار</p >
-                    </div>
-                `,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                backdrop: 'rgba(0, 0, 0, 0.8)',
-            });
+      async function refreshData() {
+    // نافذة التحديث
+    Swal.fire({
+        title: 'جارِ التحديث...',
+        html: '<div class="swal2-loader"></div><p>يرجى الانتظار...</p >',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        backdrop: `
+            rgba(0, 0, 0, 0.8)
+        `,
+        customClass: {
+            popup: 'swal2-popup',
+            title: 'swal2-title',
+            htmlContainer: 'swal2-html-container',
+        },
+        didOpen: () => {
+            Swal.showLoading();
+        },
+    });
 
-            // محاكاة تحميل البيانات
-            await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+        // استدعاء دالة تحميل البيانات
+        await loadExcelFiles();
 
-            // نافذة نجاح التحديث
-            Swal.fire({
-                title: 'تم التحديث بنجاح!',
-                html: '<p style="color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
-                iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
-                showConfirmButton: true,
-                backdrop: 'rgba(0, 0, 0, 0.7)',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm',
-                },
-            }).then(() => {
-                sessionStorage.setItem('hasUpdated', true);
-            });
-        }
+        // عرض نافذة نجاح التحديث
+        Swal.fire({
+            icon: 'success',
+            title: 'تم التحديث بنجاح!',
+            text: 'تم تحميل البيانات الجديدة.',
+            confirmButtonText: 'موافق',
+            customClass: {
+                confirmButton: 'swal2-confirm',
+            },
+        });
+    } catch (error) {
+        // عرض نافذة خطأ إذا حدثت مشكلة
+        Swal.fire({
+            icon: 'error',
+            title: 'فشل التحديث!',
+            text: 'حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.',
+            confirmButtonText: 'موافق',
+            customClass: {
+                confirmButton: 'swal2-confirm',
+            },
+        });
+    }
+}
         
         loadExcelFiles();
     </script>
