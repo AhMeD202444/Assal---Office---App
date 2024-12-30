@@ -1115,9 +1115,14 @@ async function refreshData() {
                 htmlContainer: 'swal2-html-container',
                 confirmButton: 'swal2-confirm',
             },
-        }).then(() => {
-            sessionStorage.setItem('hasUpdated', true);
-             Swal.close();
+            
+       }).then((result) => {
+            if (result.isConfirmed) {
+                // عند الضغط على زر موافق
+                Swal.close();
+                // تحديث الحالة في sessionStorage
+                sessionStorage.setItem('hasUpdated', true);
+            }
         });
 
     } catch (error) {
