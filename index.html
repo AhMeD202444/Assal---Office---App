@@ -1095,7 +1095,6 @@ async function refreshData() {
     // محاكاة لمدة 3 ثوانٍ مع تحميل الملفات
     const loadingPromise = new Promise(resolve => setTimeout(resolve, 3000));
     const loadFilesPromise = loadExcelFiles();
-   const loadFilesPromise = location.reload();
 
     try {
         // انتظر انتهاء المحاكاة وتحميل الملفات معًا
@@ -1153,6 +1152,12 @@ async function refreshData() {
             
         });
     }
+
+loadExcelFiles().then(() => {
+                location.reload();
+            });
+
+    
 }
         
         loadExcelFiles();
