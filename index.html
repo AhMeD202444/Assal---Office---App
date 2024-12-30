@@ -739,26 +739,27 @@ footer {
  // إعداد خيار إظهار النافذة
         const showPopup = true; // استخدم false إذا أردت تعطيل النافذة.
 
-     window.onload = () => {
-        if (showPopup) {
-            setTimeout(() => {
-                const popup = document.getElementById('popup');
-                popup.style.display = 'flex';
-                popup.classList.add('animate__animated', 'animate__fadeInDown'); // حركة دخول
-            }, 1000); // تظهر بعد 3 ثوانٍ
-        }
-    };
-
-        // إغلاق النافذة
-       function closePopup() {
+ 
+// نافذة الترحيب تظهر فقط عند تشغيل التطبيق
+window.onload = () => {
+    const hasUpdated = sessionStorage.getItem('hasUpdated');
+    if (!hasUpdated) {
+        sessionStorage.setItem('hasUpdated', true); // منع ظهور النافذة مجددًا خلال نفس الجلسة
         const popup = document.getElementById('popup');
-        popup.classList.add('animate__fadeOutUp'); // حركة خروج
-        setTimeout(() => {
-            popup.style.display = 'none';
-            popup.classList.remove('animate__fadeOutUp', 'animate__fadeInDown'); // إعادة تعيين الحركات
-        }, 1000); // مدة الحركة
+        popup.style.display = 'flex';
+        popup.classList.add('animate__animated', 'animate__fadeInDown'); // حركة دخول
     }
+};
 
+// إغلاق نافذة الترحيب
+function closePopup() {
+    const popup = document.getElementById('popup');
+    popup.classList.add('animate__fadeOutUp'); // حركة خروج
+    setTimeout(() => {
+        popup.style.display = 'none';
+        popup.classList.remove('animate__fadeOutUp', 'animate__fadeInDown'); // إعادة تعيين الحركات
+    }, 1000); // مدة الحركة
+}
 
         
         const dropboxMainFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file1" + "?t=" + new Date().getTime();
@@ -1052,13 +1053,68 @@ async function confirmExit() {
 
 
 
- function refreshData() {
-            loadExcelFiles().then(() => {
-                location.reload();
-            });
-        }
 
+async function refreshData() {
+    // نافذة التحميل
+    Swal.fire({
+        html: `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <div class="loading-circle"></div>
+                <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جارِ التحديث... يرجى الانتظار</p >
+            </div>
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        backdrop: 'rgba(0, 0, 0, 0.8)',
+        customClass: {
+            popup: 'swal2-popup animate__animated animate__fadeInDown', // حركة دخول
+        },
+    });
 
+    // محاكاة لمدة 3 ثوانٍ مع تحميل الملفات
+    const loadingPromise = new Promise(resolve => setTimeout(resolve, 3000));
+    const loadFilesPromise = loadExcelFiles();
+
+    try {
+        // انتظر انتهاء المحاكاة وتحميل الملفات معًا
+        await Promise.all([loadingPromise, loadFilesPromise]);
+
+        // نافذة نجاح التحديث
+        Swal.fire({
+            title: 'تم التحديث بنجاح!',
+            html: '<p style="color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
+            iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
+            showConfirmButton: true,
+            backdrop: 'rgba(0, 0, 0, 0.7)',
+            confirmButtonText: 'موافق',
+            customClass: {
+                popup: 'swal2-popup animate__animated animate__fadeInDown', // حركة دخول
+                title: 'swal2-title',
+                htmlContainer: 'swal2-html-container',
+                confirmButton: 'swal2-confirm',
+            },
+        }).then(() => {
+            sessionStorage.setItem('hasUpdated', true);
+        });
+
+    } catch (error) {
+        // نافذة خطأ في حالة حدوث مشكلة أثناء التحميل
+        Swal.fire({
+            title: 'خطأ',
+            html: '<p style="color: #ff4d4d;">حدث خطأ أثناء تحديث البيانات. يرجى المحاولة لاحقًا.</p >',
+            iconHtml: '<i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #ff4d4d;"></i>',
+            showConfirmButton: true,
+            backdrop: 'rgba(0, 0, 0, 0.7)',
+            confirmButtonText: 'موافق',
+            customClass: {
+                popup: 'swal2-popup animate__animated animate__shakeX', // حركة اهتزاز عند الخطأ
+                title: 'swal2-title',
+                htmlContainer: 'swal2-html-container',
+                confirmButton: 'swal2-confirm',
+            },
+        });
+    }
+}
         
         loadExcelFiles();
     </script>
