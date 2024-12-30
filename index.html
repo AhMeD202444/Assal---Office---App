@@ -18,6 +18,19 @@
 
     <style>
 
+ @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-circle {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(255, 255, 255, 0.2);
+            border-top: 8px solid #43cea2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
 
  /* تصميم النافذة المنبثقة */
          /* تعديل التعتيم ليقتصر على النافذة فقط */
@@ -722,6 +735,8 @@ footer {
     <button class="exit-btn" onclick="confirmExit()">خروج</button>
 </div>
 
+    <div class="loading-circle"></div>
+
 </div>
 
 
@@ -1055,11 +1070,18 @@ async function confirmExit() {
 
 
 async function refreshData() {
-    // نافذة التحميل
+    // نافذة التحميل مع دائرة التحميل الأنيقة
     Swal.fire({
         html: `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <div class="loading-circle"></div>
+                <div class="loading-circle" style="
+                    width: 80px;
+                    height: 80px;
+                    border: 8px solid rgba(255, 255, 255, 0.2);
+                    border-top: 8px solid #43cea2;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;">
+                </div>
                 <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جارِ التحديث... يرجى الانتظار</p >
             </div>
         `,
@@ -1079,14 +1101,14 @@ async function refreshData() {
         // انتظر انتهاء المحاكاة وتحميل الملفات معًا
         await Promise.all([loadingPromise, loadFilesPromise]);
 
-        // نافذة نجاح التحديث
+        // نافذة نجاح التحديث مع زر موافق
         Swal.fire({
             title: 'تم التحديث بنجاح!',
             html: '<p style="color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
             iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
-            showConfirmButton: true,
-            backdrop: 'rgba(0, 0, 0, 0.7)',
+            showConfirmButton: true, // عرض زر موافق
             confirmButtonText: 'موافق',
+            backdrop: 'rgba(0, 0, 0, 0.7)',
             customClass: {
                 popup: 'swal2-popup animate__animated animate__fadeInDown', // حركة دخول
                 title: 'swal2-title',
