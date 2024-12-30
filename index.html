@@ -1117,6 +1117,12 @@ async function refreshData() {
             sessionStorage.setItem('hasUpdated', true);
         });
 
+         }).then(() => {
+            // يتم الخروج من النافذة عند الضغط على موافق
+            Swal.close();
+        });
+
+
     } catch (error) {
         // نافذة خطأ في حالة حدوث مشكلة أثناء التحميل
         Swal.fire({
@@ -1132,10 +1138,6 @@ async function refreshData() {
                 htmlContainer: 'swal2-html-container',
                 confirmButton: 'swal2-confirm',
             },
-            
-         }).then(() => {
-    // يتم الخروج من النافذة عند الضغط على موافق
-    Swal.close();
             
         });
     }
