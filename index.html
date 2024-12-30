@@ -1116,14 +1116,13 @@ async function refreshData() {
                 confirmButton: 'swal2-confirm',
             },
 
-            }).then(() => {
-           swal.close();
+      }).then((result) => {
+            if (result.isConfirmed) {
+                sessionStorage.setItem('hasUpdated', true);
+                Swal.close(); // إغلاق النافذة
+                console.log('Data updated and session state saved successfully.');
+            }
         });
-            
-       }).then(() => {
-            sessionStorage.setItem('hasUpdated', true); // تسجيل الحالة
-        });
-
     } catch (error) {
         // نافذة خطأ في حالة حدوث مشكلة أثناء التحميل
         Swal.fire({
