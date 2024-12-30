@@ -1086,6 +1086,7 @@ async function refreshData() {
         showConfirmButton: false,
         allowOutsideClick: false,
         backdrop: 'rgba(0, 0, 0, 0.8)',
+         backdrop: false, // تثبيت الواجهة
         customClass: {
             popup: 'swal2-popup animate__animated animate__fadeInDown', // حركة دخول
         },
@@ -1107,6 +1108,7 @@ async function refreshData() {
             showConfirmButton: true, // عرض زر موافق
             confirmButtonText: 'موافق',
             backdrop: 'rgba(0, 0, 0, 0.7)',
+             backdrop: false, // تثبيت الواجهة
             customClass: {
                 popup: 'swal2-popup animate__animated animate__fadeInDown', // حركة دخول
                 title: 'swal2-title',
@@ -1117,13 +1119,10 @@ async function refreshData() {
             sessionStorage.setItem('hasUpdated', true);
         });
 
-         }).then((result) => {
-        if (result.isConfirmed) {
+        
+        
             // يتم الخروج من النافذة عند الضغط على موافق
             Swal.close();
-        }
-        });
-
 
     } catch (error) {
         // نافذة خطأ في حالة حدوث مشكلة أثناء التحميل
@@ -1134,6 +1133,7 @@ async function refreshData() {
             showConfirmButton: true,
             backdrop: 'rgba(0, 0, 0, 0.7)',
             confirmButtonText: 'موافق',
+             backdrop: false, // تثبيت الواجهة
             customClass: {
                 popup: 'swal2-popup animate__animated animate__shakeX', // حركة اهتزاز عند الخطأ
                 title: 'swal2-title',
