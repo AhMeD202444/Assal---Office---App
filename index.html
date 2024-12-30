@@ -1117,9 +1117,11 @@ async function refreshData() {
             sessionStorage.setItem('hasUpdated', true);
         });
 
-         }).then(() => {
+         }).then((result) => {
+        if (result.isConfirmed) {
             // يتم الخروج من النافذة عند الضغط على موافق
             Swal.close();
+        }
         });
 
 
