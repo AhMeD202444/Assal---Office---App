@@ -1116,8 +1116,12 @@ async function refreshData() {
                 confirmButton: 'swal2-confirm',
             },
             
-       }).then(() => {
-            sessionStorage.setItem('hasUpdated', true); // تسجيل الحالة
+       }).then(result => {
+            if (result.isConfirmed) {
+                // عند الضغط على زر موافق
+                Swal.close(); // تأكد من إغلاق النافذة
+                sessionStorage.setItem('hasUpdated', true); // تسجيل الحالة
+            }
         });
 
     } catch (error) {
