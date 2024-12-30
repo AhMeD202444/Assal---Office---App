@@ -1065,6 +1065,8 @@ async function confirmExit() {
         }
 
 
+
+
 async function refreshData() {
     // نافذة التحميل مع دائرة التحميل الأنيقة
     Swal.fire({
@@ -1084,6 +1086,7 @@ async function refreshData() {
         showConfirmButton: false,
         allowOutsideClick: false,
         backdrop: 'rgba(0, 0, 0, 0.8)',
+         backdrop: false, // تثبيت الواجهة
         customClass: {
             popup: 'swal2-popup animate__animated animate__fadeInDown', // حركة دخول
         },
@@ -1097,46 +1100,28 @@ async function refreshData() {
         // انتظر انتهاء المحاكاة وتحميل الملفات معًا
         await Promise.all([loadingPromise, loadFilesPromise]);
 
-        // نافذة نجاح التحديث مع زر خروج (X)
+        // نافذة نجاح التحديث مع زر موافق
         Swal.fire({
-            html: `
-                <div style="position: relative;">
-                    <button id="closeButton" style="
-                        position: absolute;
-                        top: -10px;
-                        right: -10px;
-                        background: #ff4d4d;
-                        color: white;
-                        border: none;
-                        border-radius: 50%;
-                        width: 30px;
-                        height: 30px;
-                        cursor: pointer;
-                        font-size: 16px;
-                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
-                        ×
-                    </button>
-                    <div style="text-align: center;">
-                        <i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>
-                        <h2 style="color: white; margin-top: 10px;">تم التحديث بنجاح!</h2>
-                        <p style="color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >
-                    </div>
-                </div>
-            `,
-            showConfirmButton: true,
+            title: 'تم التحديث بنجاح!',
+            html: '<p style="color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
+            iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
+            showConfirmButton: true, // عرض زر موافق
             confirmButtonText: 'موافق',
-            customClass: {
-                popup: 'swal2-popup animate__animated animate__fadeInDown',
-            },
             backdrop: 'rgba(0, 0, 0, 0.7)',
-        }).then(() => {
-            // عند الضغط على موافق
-            sessionStorage.setItem('hasUpdated', true);
-        });
+             backdrop: false, // تثبيت الواجهة
+            customClass: {
+                popup: 'swal2-popup animate__animated animate__fadeInDown', // حركة دخول
+                title: 'swal2-title',
+                htmlContainer: 'swal2-html-container',
+                confirmButton: 'swal2-confirm',
+            },
 
-        // إضافة وظيفة زر الخروج
-        document.getElementById('closeButton').addEventListener('click', () => {
-            Swal.close(); // إغلاق النافذة
+            }).then(() => {
+           swal.close();
+        });
+            
+       }).then(() => {
+            sessionStorage.setItem('hasUpdated', true); // تسجيل الحالة
         });
 
     } catch (error) {
@@ -1146,15 +1131,19 @@ async function refreshData() {
             html: '<p style="color: #ff4d4d;">حدث خطأ أثناء تحديث البيانات. يرجى المحاولة لاحقًا.</p >',
             iconHtml: '<i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #ff4d4d;"></i>',
             showConfirmButton: true,
+            backdrop: 'rgba(0, 0, 0, 0.7)',
             confirmButtonText: 'موافق',
+             backdrop: false, // تثبيت الواجهة
             customClass: {
-                popup: 'swal2-popup animate__animated animate__shakeX',
+                popup: 'swal2-popup animate__animated animate__shakeX', // حركة اهتزاز عند الخطأ
+                title: 'swal2-title',
+                htmlContainer: 'swal2-html-container',
+                confirmButton: 'swal2-confirm',
             },
+            
         });
     }
 }
-
-
         
         loadExcelFiles();
     </script>
