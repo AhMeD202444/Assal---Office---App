@@ -384,11 +384,11 @@ h1 {
 }
 
 .results-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    max-height: 700px;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column; /* ترتيب عمودي للنتائج */
+    gap: 10px; /* مسافة بين النتائج */
+    max-height: 600px; /* زيادة الحد الأقصى للارتفاع */
+    overflow-y: auto; /* السماح بالتمرير العمودي */
     scroll-behavior: smooth;
     border-radius: 10px;
     padding: 10px;
@@ -399,8 +399,8 @@ h1 {
 .result-card {
     text-align: center;
     background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    padding: 10px;
+    border-radius: 10px; /* تقليل نصف القطر */
+    padding: 10px; /* تقليل الحشوة */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -425,32 +425,26 @@ h1 {
     user-select: none; /* يمنع النسخ عند الضغط */
 }
 
-
-
 .result-card img {
-    width: 80px; /* عرض الصورة داخل الكارد */
-    height: 80px; /* ارتفاع الصورة داخل الكارد */
+    width: 60px; /* تقليل عرض الصورة داخل الكارد */
+    height: 60px; /* تقليل ارتفاع الصورة داخل الكارد */
     border-radius: 50%; /* جعل الصورة دائرية */
-    margin-bottom: 10px; /* مسافة أسفل الصورة */
+    margin-bottom: 5px; /* تقليل المسافة أسفل الصورة */
     object-fit: cover; /* ضبط الصورة داخل الحاوية */
 }
 
 .result-card h4 {
-    font-size: 16px; /* حجم النص */
+    font-size: 14px; /* تقليل حجم النص */
     font-weight: bold; /* سمك النص */
     color: white; /* لون النص */
     margin: 5px 0; /* مسافة أعلى وأسفل النص */
 }
 
 .result-card p {
-    font-size: 19px; /* حجم النص للسعر */
+    font-size: 14px; /* تقليل حجم النص للسعر */
     color: #f1f1f1; /* لون النص */
     margin: 5px 0; /* مسافة أعلى وأسفل السعر */
 }
-
-
-
-
 
 
 
@@ -1017,7 +1011,7 @@ function searchItems() {
     Swal.fire({
         title: `نتائج البحث (${results.length})`,
         html: htmlContent,
-        width: '80%',
+        width: '90%',
         backdrop: 'rgba(0, 0, 0, 0.7)', // تعتيم أنيق للخلفية
         backdrop: false, // تثبيت الواجهة
         customClass: {
