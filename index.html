@@ -1119,26 +1119,6 @@ async function refreshData() {
        }).then(() => {
             sessionStorage.setItem('hasUpdated', true); // تسجيل الحالة
         });
-
-    } catch (error) {
-        // نافذة خطأ في حالة حدوث مشكلة أثناء التحميل
-        Swal.fire({
-            title: 'خطأ',
-            html: '<p style="color: #ff4d4d;">حدث خطأ أثناء تحديث البيانات. يرجى المحاولة لاحقًا.</p >',
-            iconHtml: '<i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #ff4d4d;"></i>',
-            showConfirmButton: true,
-            backdrop: 'rgba(0, 0, 0, 0.7)',
-            confirmButtonText: 'موافق',
-             backdrop: false, // تثبيت الواجهة
-            customClass: {
-                popup: 'swal2-popup animate__animated animate__shakeX', // حركة اهتزاز عند الخطأ
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                confirmButton: 'swal2-confirm',
-            },
-            
-        });
-    }
 }
         
         loadExcelFiles();
