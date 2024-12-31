@@ -970,7 +970,7 @@ function searchItems() {
 
 function displayResults(results) {
     let htmlContent = `
-        <div class="results-container" style="max-height: 400px; overflow-y: auto; display: grid; gap: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 15px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+        <div class="results-container" style="max-height: 400px; overflow-y: auto; display: grid; gap: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); background-color: #fff;">
     `;
 
     results.forEach(item => {
@@ -982,10 +982,10 @@ function displayResults(results) {
             <div class="result-card" style="
                 display: flex;
                 align-items: center;
-                background: rgba(0, 0, 0, 0.3);
+                background: rgba(0, 0, 0, 0.05);
                 border-radius: 12px;
-                padding: 15px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                padding: 10px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
                 cursor: pointer;
             ">
@@ -993,8 +993,8 @@ function displayResults(results) {
                      alt="Item Image" 
                      style="width: 60px; height: 60px; border-radius: 50%; margin-right: 15px;">
                 <div style="flex-grow: 1;">
-                    <h4 style="margin: 0; font-size: 16px; color: #fff;">${item["Item Name"] || item["Item"]}</h4>
-                    ${item["Price"] ? `<p style="margin: 5px 0 0; font-size: 14px; color: #f1f1f1;">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</p>` : ''}
+                    <h4 style="margin: 0; font-size: 16px; color: #333;">${item["Item Name"] || item["Item"]}</h4>
+                    ${item["Price"] ? `<p style="margin: 5px 0 0; font-size: 14px; color: #555;">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</p>` : ''}
                 </div>
             </div>
         `;
