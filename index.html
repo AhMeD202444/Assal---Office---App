@@ -969,7 +969,7 @@ function searchItems() {
 }
 
 
-  function displayResults(results) {
+    function displayResults(results) {
     let htmlContent = `
         <div class="results-container" style="max-height: 400px; overflow-y: auto; display: grid; gap: 15px; padding: 10px;">
     `;
@@ -1006,81 +1006,12 @@ function searchItems() {
     htmlContent += `
         </div>
         <button class="back-btn" onclick="Swal.close()">رجوع</button>
-        <button class="show-all-btn" onclick="showAllResults()">عرض الكل</button>
     `;
 
     Swal.fire({
         title: `نتائج البحث (${results.length})`,
         html: htmlContent,
-        width: '75%', // توسيع عرض النافذة إلى 75%
-        backdrop: 'rgba(0, 0, 0, 0.7)', // تعتيم أنيق للخلفية
-        customClass: {
-            popup: 'swal2-popup',
-            title: 'swal2-title',
-            htmlContainer: 'swal2-html-container',
-        },
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        stopKeydownPropagation: false, // السماح بالتفاعل الكامل مع العناصر الداخلية
-        didOpen: () => {
-            // التأكد من ربط الأحداث عند فتح النافذة
-            document.body.style.overflow = 'hidden';
-        },
-        willClose: () => {
-            document.body.style.overflow = ''; 
-        },
-        showClass: {
-            popup: 'animate__animated animate__fadeIn'
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOut'
-        }
-    });
-}
-
-function showAllResults() {
-    let htmlContent = `
-        <div class="results-container" style="max-height: 80vh; overflow-y: auto; display: grid; gap: 15px; padding: 10px;">
-    `;
-
-    database[currentCategory].forEach(item => {
-        const imgSrc = currentCategory === "SIMILARITES" 
-            ? 'images/default.png'
-            : `images/${currentCategory.toLowerCase()}.png`;
-
-        htmlContent += `
-            <div class="result-card" style="
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                background: rgba(0, 0, 0, 0.3);
-                border-radius: 12px;
-                padding: 15px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-                cursor: pointer;
-            ">
-                <img src="${imgSrc}" 
-                     alt="Item Image" 
-                     style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px;">
-                <div style="text-align: center; color: #fff;">
-                    <h4 style="margin: 5px 0; font-size: 18px;">${item["Item Name"] || item["Item"]}</h4>
-                    ${item["Price"] ? `<p style="margin: 5px 0; font-size: 16px;">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</p>` : ''}
-                </div>
-            </div>
-        `;
-    });
-
-    htmlContent += `
-        </div>
-        <button class="back-btn" onclick="Swal.close()">رجوع</button>
-    `;
-
-    Swal.fire({
-        title: `جميع النتائج`,
-        html: htmlContent,
-        width: '75%', // توسيع عرض النافذة إلى 75%
+        width: '70%', // توسيع عرض النافذة إلى 70%
         backdrop: 'rgba(0, 0, 0, 0.7)', // تعتيم أنيق للخلفية
         customClass: {
             popup: 'swal2-popup',
