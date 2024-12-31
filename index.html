@@ -757,6 +757,12 @@ footer {
 
 
 
+ window.addEventListener('resize', () => {
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+                document.activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+
  // إعداد خيار إظهار النافذة
         const showPopup = true; // استخدم false إذا أردت تعطيل النافذة.
 
