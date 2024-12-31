@@ -972,21 +972,36 @@ const voiceSearchBtn = document.getElementById('voiceSearchBtn');
 const searchInput = document.getElementById('searchInput');
 
 voiceSearchBtn.addEventListener('click', () => {
+    // تحقق من دعم المتصفح لميزة التعرف على الصوت
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert('ميزة البحث الصوتي غير مدعومة في هذا المتصفح.');
+        return;
+    }
+
+    // استخدم SpeechRecognition أو webkitSpeechRecognition بناءً على المتاح
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.lang = 'ar';
 
+    // عند الحصول على نتيجة التعرف على الصوت
     recognition.onresult = async (event) => {
         const arabicText = event.results[0][0].transcript;
         const englishText = await translateText(arabicText, 'ar', 'en');
         searchInput.value = englishText;
-        searchItems(); // Call the search function
+        searchItems(); // قم باستدعاء دالة البحث
     };
 
+    // معالجة الأخطاء
+    recognition.onerror = (event) => {
+        console.error('خطأ في التعرف على الصوت:', event.error);
+        alert('حدث خطأ أثناء محاولة التعرف على الصوت. يرجى المحاولة مرة أخرى.');
+    };
+
+    // بدء التعرف على الصوت
     recognition.start();
 });
 
 async function translateText(text, sourceLang, targetLang) {
-    const apiKey = 'YOUR_GOOGLE_TRANSLATE_API_KEY'; // Replace with your Google Translate API key
+    const apiKey = 'YOUR_GOOGLE_TRANSLATE_API_KEY'; // استبدل بمفتاح API الخاص بك
     const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
 
     const response = await fetch(url, {
