@@ -6,23 +6,14 @@
     <title>Phone Parts Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
- 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
     <style>
-
- @keyframes spin {
+        @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
         .loading-circle {
             width: 80px;
             height: 80px;
@@ -31,70 +22,55 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-
- /* تصميم النافذة المنبثقة */
-         /* تعديل التعتيم ليقتصر على النافذة فقط */
-    .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px); /* زيادة الضبابية */
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-
-       .popup-content {
-    position: relative;
-    background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(20px); /* زيادة الضبابية */
-    border-radius: 20px;
-    padding: 30px;
-    text-align: center;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); /* تحسين الظلال */
-    max-width: 400px;
-    width: 90%;
-    z-index: 10000;
-    animation: fadeIn 0.6s ease-in-out; /* حركة دخول */
-}
-
-
-/* إضافة تعتيم للخلفية بالقرب من النافذة */
-   .popup-overlay::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9998;
-}
-
-
-
-        
-        .popup-content img {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%; /* صورة دائرية */
-        margin-bottom: 20px;
-        border: 3px solid rgba(255, 255, 255, 0.6);
-        transition: transform 0.3s ease; /* تأثير التحرك عند الضغط */
-            overflow : hidden;
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
-
+        .popup-content {
+            position: relative;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 90%;
+            z-index: 10000;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        .popup-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9998;
+        }
+        .popup-content img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
         .popup-content img:active {
-        transform: scale(1.1); /* تأثير التكبير عند النقر */
+            transform: scale(1.1);
             box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
-    }
-
-
+        }
         .popup-content h1 {
             font-size: 24px;
             font-weight: 600;
@@ -102,68 +78,54 @@
             color: #fff;
             text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
         }
-
         .popup-content p {
             font-size: 16px;
             line-height: 1.5;
             color: #f1f1f1;
         }
-
-        /* زر الإغلاق */
-   .popup-close-btn {
-    position: absolute;
-    overflow: hidden; /* يمنع التأثير من الخروج */
-    top: 10px;
-    right: 10px;
-    width: 40px;
-    height: 40px;
-    background: #ff4d4d;
-    color: white;
-    border-radius: 50%; /* دائري */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ظل خفيف */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-}
+        .popup-close-btn {
+            position: absolute;
+            overflow: hidden;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: #ff4d4d;
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
         .popup-close-btn:hover {
             transform: scale(1.1);
             background: #ff6666;
         }
-
         .popup-close-btn:active {
             transform: scale(0.9);
         }
-
-
-
-
-        
-        /* Reset and basics */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #3A6073, #16222A); /* اللون الرئيسي للواجهة عند بداية التشغيل */
+            background: linear-gradient(135deg, #3A6073, #16222A);
             color: #fff;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column; /* تعديل التوجيه العمودي */
+            flex-direction: column;
             height: 100vh;
             overflow: hidden;
             background-size: 400% 400%;
             animation: gradientAnimation 10s ease infinite;
         }
-
         @keyframes gradientAnimation {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
         .container {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
@@ -173,92 +135,68 @@
             width: 90%;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
-            margin-bottom: 20px; /* إضافة مسافة لزر الخروج */
+            margin-bottom: 20px;
         }
-
-
-/* الشعار (Logo) */
-
-
-.logo-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    margin: 0 auto; /* يجعل الحاوية في منتصف العرض */
-}
-
-.logo-container img {
-    width: 100%;
-    height: 100%;
-    transition: transform 0.3s ease;
-    cursor: pointer;
-}
-
-.logo-container img:active {
-    transform: scale(1.1);
-}
-
-
-        
-h1 {
-    font-size: 36px;
-    margin-bottom: 20px;
-    color: white;
-    text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
-    margin-top: 10px; /* أضف هذه الخاصية لتحديد المسافة من الشعار */
-}
-
-
-
-
-.categories {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* صفان يحتويان على عمودين */
-    column-gap: 11px; /* المسافة الأفقية بين الأعمدة */
-    row-gap: 8px; /* المسافة العمودية بين الصفوف */
-    margin-bottom: 20px;
-}
-
-
-
-
-.category-btn {
-    position: relative;
-    overflow: hidden; /* يمنع التأثير من الخروج */
-    padding: 10px 20px;
-    border-radius: 50px; /* زوايا مستديرة */
-    background: rgba(0, 0, 0, 0.3);
-    color: white;
-    font-size: 16px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-}
-
-.category-btn:hover {
-    transform: scale(1.1);
-    background: linear-gradient(45deg, #43cea2, #185a9d);
-}
-
-
-.category-btn.active {
-    background: linear-gradient(45deg, #43cea2, #185a9d); /* نفس لون الضغط */
-    transform: scale(1.1); /* تكبير طفيف */
-    box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5); /* تأثير الظل */
-}
-
-
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin: 0 auto;
+        }
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        .logo-container img:active {
+            transform: scale(1.1);
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
+            margin-top: 10px;
+        }
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            column-gap: 11px;
+            row-gap: 8px;
+            margin-bottom: 20px;
+        }
+        .category-btn {
+            position: relative;
+            overflow: hidden;
+            padding: 10px 20px;
+            border-radius: 50px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        .category-btn:hover {
+            transform: scale(1.1);
+            background: linear-gradient(45deg, #43cea2, #185a9d);
+        }
+        .category-btn.active {
+            background: linear-gradient(45deg, #43cea2, #185a9d);
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
+        }
         .search-container {
             position: relative;
             width: 100%;
             margin-bottom: 20px;
         }
-
         .search-container input {
             width: 100%;
             padding: 15px 50px 15px 20px;
@@ -270,340 +208,252 @@ h1 {
             outline: none;
             transition: all 0.3s ease;
         }
-
         .search-container input:focus {
             background: rgba(0, 0, 0, 0.5);
         }
-
-
-
-.search-container button {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: linear-gradient(45deg, #43cea2, #185a9d);
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.search-container button:active {
-    transform: scale(0.9); /* تأثير الضغط */
-}
-
-
+        .search-container button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(45deg, #43cea2, #185a9d);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .search-container button:active {
+            transform: scale(0.9);
+        }
         .search-container button:hover {
             transform: scale(1.1);
         }
-
-        .search-container button:active {
-            transform: scale(0.95); /* تعديل التأثير ليبقى داخل الشريط */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-
-
-
-
-        
-
-
- /* تصميم الحاوية للأزرار */
         .button-container {
             display: flex;
-            flex-direction: column; /* ترتيب عمودي للأزرار */
-            align-items: center; /* توسيط الأزرار أفقياً */
-            gap: 10px; /* مسافة متساوية بين الأزرار */
-            margin-top: 20px; /* مسافة بين الزرين وأزرار الألوان */
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
         }
-
-        /* تصميم الأزرار */
-    .refresh-btn,
-    .exit-btn {
-    position: relative;
-    overflow: hidden; /* يمنع التأثير من الخروج */
-    width: 320px;
-    height: 40px;
-    font-size: 16px;
-    border-radius: 30px; /* زوايا مستديرة */
-    color: white;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-        /* ألوان زر "تحديث البيانات" */
+        .refresh-btn,
+        .exit-btn {
+            position: relative;
+            overflow: hidden;
+            width: 320px;
+            height: 40px;
+            font-size: 16px;
+            border-radius: 30px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
         .refresh-btn {
             background: linear-gradient(135deg, #004D40, #00796B);
         }
-
         .refresh-btn:hover {
             transform: scale(1.05);
             background: linear-gradient(135deg, #00695C, #004D40);
         }
-
         .refresh-btn:active {
             transform: scale(0.95);
             background: linear-gradient(135deg, #003F36, #00584F);
         }
-
-        /* ألوان زر "الخروج" */
         .exit-btn {
             background: linear-gradient(135deg, #8B0000, #B22222);
         }
-
         .exit-btn:hover {
             transform: scale(1.05);
             background: linear-gradient(135deg, #B22222, #FF6347);
         }
-
         .exit-btn:active {
             transform: scale(0.95);
             background: linear-gradient(135deg, #6B0000, #8B0000);
         }
-
-
-
-        
-.results {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-    max-height: 500px !important;
-    overflow-y: auto;
-    scroll-behavior: smooth;
-    border-radius: 10px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.results-container {
-    display: flex;
-    flex-direction: column; /* ترتيب عمودي للنتائج */
-    gap: 10px; /* مسافة بين النتائج */
-    max-height: 600px; /* زيادة الحد الأقصى للارتفاع */
-    overflow-y: auto; /* السماح بالتمرير العمودي */
-    scroll-behavior: smooth;
-    border-radius: 10px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.result-card {
-    text-align: center;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px; /* تقليل نصف القطر */
-    padding: 10px; /* تقليل الحشوة */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-    cursor: pointer;
-    user-select: none; /* منع النص من التحديد */
-}
-
-        
-
-.result-card:hover {
-    transform: translateY(-10px);
-    scale(1.05);
-    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
-}
-
-.result-card:active {
-    transform: scale(0.95);
-    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.5);
-    background: linear-gradient(135deg, rgba(0, 123, 255, 0.3), rgba(255, 255, 255, 0.1));
-    filter: brightness(1.2);
-    user-select: none; /* يمنع النسخ عند الضغط */
-}
-
-.result-card img {
-    width: 60px; /* تقليل عرض الصورة داخل الكارد */
-    height: 60px; /* تقليل ارتفاع الصورة داخل الكارد */
-    border-radius: 50%; /* جعل الصورة دائرية */
-    margin-bottom: 5px; /* تقليل المسافة أسفل الصورة */
-    object-fit: cover; /* ضبط الصورة داخل الحاوية */
-}
-
-.result-card h4 {
-    font-size: 14px; /* تقليل حجم النص */
-    font-weight: bold; /* سمك النص */
-    color: white; /* لون النص */
-    margin: 5px 0; /* مسافة أعلى وأسفل النص */
-}
-
-.result-card p {
-    font-size: 14px; /* تقليل حجم النص للسعر */
-    color: #f1f1f1; /* لون النص */
-    margin: 5px 0; /* مسافة أعلى وأسفل السعر */
-}
-
-
-
-.no-results {
-    color: #ffffff; /* لون النص */
-    background: rgba(255, 255, 255, 0.1); /* خلفية شفافة تناسب الواجهة */
-    padding: 10px 15px; /* حشوة بسيطة */
-    border-radius: 10px; /* حواف بيضوية خفيفة */
-    text-align: center; /* محاذاة النص في المنتصف */
-    font-size: 16px; /* حجم النص */
-    font-weight: 500; /* سمك النص */
-    margin-top: 10px; /* مسافة من الأعلى */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15); /* ظل خفيف */
-    width: 80%; /* عرض مناسب */
-    margin-left: auto;
-    margin-right: auto; /* جعل المستطيل مركزيًا */
-    animation: fadeIn 0.3s ease-in-out; /* تأثير ظهور بسيط */
-    cursor: pointer; /* مؤشر يدوي عند التمرير */
-    transition: transform 0.2s ease, box-shadow 0.2s ease; /* تأثير انتقال */
-}
-
-/* تأثير ظهور تدريجي */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* تأثير عند الضغط */
-.no-results:active {
-    transform: scale(0.95); /* تصغير بسيط */
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2); /* زيادة ظل عند الضغط */
-    background: rgba(255, 255, 255, 0.2); /* خلفية أفتح */
-}
-    
-
-
-
-
-
-.back-btn {
-    position: relative;
-    margin-top: 95px; /* المسافة من الأعلى */
-    padding: 8px 20px; /* زيادة الطول والعرض */
-    background: linear-gradient(135deg, #8B0000, #B22222); /* لون الزر */
-    color: white;
-    border: none;
-    font-size: 18px; /* حجم النص */
-    border-radius: 30px; /* زوايا مستديرة */
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* تأثير الظل */
-    width: 90%; /* عرض الزر */
-    display: block;
-    margin-left: auto;
-    margin-right: auto; /* جعله في المنتصف */
-}
-
-.back-btn:hover {
-    background: linear-gradient(135deg, #FF6347, #CD5C5C); /* تغيير اللون عند التمرير */
-    box-shadow: 0 6px 15px rgba(255, 255, 255, 0.3); /* زيادة الظل */
-}
-
-.back-btn:active {
-    transform: scale(0.95); /* تصغير الزر قليلاً عند الضغط */
-    background: linear-gradient(135deg, #FF4500, #A52A2A); /* لون مختلف عند الضغط */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* تقليل الظل عند الضغط */
-}
-
-
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            border-radius: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 600px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            border-radius: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        .result-card {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        .result-card:hover {
+            transform: translateY(-10px);
+            scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+        }
+        .result-card:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.5);
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.3), rgba(255, 255, 255, 0.1));
+            filter: brightness(1.2);
+            user-select: none;
+        }
+        .result-card img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-bottom: 5px;
+            object-fit: cover;
+        }
+        .result-card h4 {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            margin: 5px 0;
+        }
+        .result-card p {
+            font-size: 14px;
+            color: #f1f1f1;
+            margin: 5px 0;
+        }
+        .no-results {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+            margin-top: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeIn 0.3s ease-in-out;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .no-results:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .back-btn {
+            position: relative;
+            margin-top: 95px;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #8B0000, #B22222);
+            color: white;
+            border: none;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .back-btn:hover {
+            background: linear-gradient(135deg, #FF6347, #CD5C5C);
+            box-shadow: 0 6px 15px rgba(255, 255, 255, 0.3);
+        }
+        .back-btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, #FF4500, #A52A2A);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
         .color-buttons {
             display: flex;
             justify-content: center;
             margin-bottom: 10px;
         }
-
-   .color-btn {
-    position: relative; /* لإضافة التأثيرات داخلياً */
-    overflow: hidden; /* لمنع التأثيرات من الخروج عن حدود الزر */
-    width: 40px;
-    height: 40px;
-    border-radius: 50%; /* شكل دائري بالكامل */
-    border: none; /* إزالة الحدود */
-    background: rgba(0, 0, 0, 0.3); /* نفس الخلفية */
-    color: white; /* لون النص */
-    font-size: 16px; /* حجم الخط */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ظل خفيف */
-    transition: all 0.3s ease; /* تأثير سلس */
-    margin: 0 5px; /* مسافة بين الأزرار */
-}
-
-
-        /* تعديل ألوان الأزرار إلى الألوان المطلوبة */
-        .color-btn:nth-child(1) {
-            
-background: linear-gradient(135deg, #4A154B, #6A1B9A, #8E24AA);
-
-
+        .color-btn {
+            position: relative;
+            overflow: hidden;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            margin: 0 5px;
         }
-
+        .color-btn:nth-child(1) {
+            background: linear-gradient(135deg, #4A154B, #6A1B9A, #8E24AA);
+        }
         .color-btn:nth-child(2) {
             background: linear-gradient(135deg, #3A6073, #16222A);
         }
-
         .color-btn:nth-child(3) {
             background: linear-gradient(135deg, #134E5E, #71B280);
         }
-
         .color-btn:nth-child(4) {
             background: linear-gradient(135deg, #2A5298, #6F86D6);
         }
-
         .color-btn:nth-child(5) {
-            
-background: linear-gradient(135deg, #004D40, #00796B, #009688);
-
+            background: linear-gradient(135deg, #004D40, #00796B, #009688);
         }
-
-        /* تأثير التمرير */
-.color-btn:hover {
-    transform: scale(1.1); /* تكبير الزر قليلاً عند التمرير */
-    background: rgba(255, 255, 255, 0.2); /* خلفية أفتح */
-}
-
-
-       /* تأثير الضغط */
-.color-btn:active {
-    transform: scale(0.9); /* تصغير الزر عند الضغط */
-    box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3); /* ظل داخلي فقط */
-}
-
-
-        /* تعديل حجم النوافذ المنبثقة */
-        .
-/* تصميم جديد لواجهة SweetAlert */
-
-
-@keyframes shake {
-    0%, 100% {
-        transform: translateX(0);
-    }
-    25% {
-        transform: translateX(-10px);
-    }
-    50% {
-        transform: translateX(10px);
-    }
-    75% {
-        transform: translateX(-10px);
-    }
-}
-
-
-
-.swal2-popup {
+        .color-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .color-btn:active {
+            transform: scale(0.9);
+            box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-10px);
+            }
+            50% {
+                transform: translateX(10px);
+            }
+            75% {
+                transform: translateX(-10px);
+            }
+        }
+        .swal2-popup {
     background: linear-gradient(135deg, #1a2a3a, #243b55); /* خلفية متدرجة حديثة */
     border-radius: 20px; /* زوايا مستديرة */
     color: #ffffff; /* لون النص */
@@ -696,26 +546,24 @@ footer {
 
 
 
-    </style>
+  </style>
 </head>
 <body>
 
-       <div class="popup-overlay" id="popup" style="display: none;">
+<div class="popup-overlay" id="popup" style="display: none;">
         <div class="popup-content animate__animated">
             <button class="popup-close-btn" onclick="closePopup()">X</button>
             <img src="images/default.png" alt="Welcome Image">
             <h1>مرحبًا بكم!</h1>
-            <p>شكرًا لاستخدامكم تطبيق مكتب عسل. نحن هنا لخدمتكم.</p >
+            <p>شكرًا لاستخدامكم تطبيق مكتب عسل. نحن هنا لخدمتكم.</p>
         </div>
     </div>
     
     <div class="container">
-    <!-- شعار دائري -->
-    <div class="logo-container">
-        <img src="images/logo.png" alt="Logo">
-    </div>
-    <h1>Phone Parts Pro</h1>
-
+        <div class="logo-container">
+            <img src="images/logo.png" alt="Logo">
+        </div>
+        <h1>Phone Parts Pro</h1>
         <div class="categories">
             <button class="category-btn" onclick="filterCategory('LCD', this)">LCD</button>
             <button class="category-btn" onclick="filterCategory('BATTERY', this)">BATTERY</button>
@@ -724,12 +572,12 @@ footer {
         </div>
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search for items...">
+            <button id="voiceSearchBtn"><i class="fas fa-microphone"></i></button>
             <button onclick="searchItems()"><i class="fas fa-search"></i></button>
         </div>
         <div id="results" class="results"></div>
-
-        
     </div>
+    
     <div class="color-buttons">
         <button class="color-btn" onclick="changeBackgroundColor('#4A154B')"></button>
         <button class="color-btn" onclick="changeBackgroundColor('#3A6073')"></button>
@@ -738,51 +586,40 @@ footer {
         <button class="color-btn" onclick="changeBackgroundColor('#004D40')"></button>
     </div>
 
-<div class="button-container">
-    <button class="refresh-btn" onclick="refreshData()">تحديث البيانات</button>
-    <button class="exit-btn" onclick="confirmExit()">خروج</button>
-</div>
+    <div class="button-container">
+        <button class="refresh-btn" onclick="refreshData()">تحديث البيانات</button>
+        <button class="exit-btn" onclick="confirmExit()">خروج</button>
+    </div>
 
-</div>
-
-
-<footer>
-    <p>&copy; 2025 Assal Office. All rights reserved.</p>
-</footer>
-
-
-
+    <footer>
+        <p>&copy; 2025 Assal Office. All rights reserved.</p>
+    </footer>
 
     <script>
-
-
-
- // إعداد خيار إظهار النافذة
+        // إعداد خيار إظهار النافذة
         const showPopup = true; // استخدم false إذا أردت تعطيل النافذة.
-
- 
-// نافذة الترحيب تظهر فقط عند تشغيل التطبيق
-window.onload = () => {
-    const hasUpdated = sessionStorage.getItem('hasUpdated');
-    if (!hasUpdated) {
-        sessionStorage.setItem('hasUpdated', true); // منع ظهور النافذة مجددًا خلال نفس الجلسة
-        const popup = document.getElementById('popup');
-        popup.style.display = 'flex';
-        popup.classList.add('animate__animated', 'animate__fadeInDown'); // حركة دخول
-    }
-};
-
-// إغلاق نافذة الترحيب
-function closePopup() {
-    const popup = document.getElementById('popup');
-    popup.classList.add('animate__fadeOutUp'); // حركة خروج
-    setTimeout(() => {
-        popup.style.display = 'none';
-        popup.classList.remove('animate__fadeOutUp', 'animate__fadeInDown'); // إعادة تعيين الحركات
-    }, 1000); // مدة الحركة
-}
-
         
+        // نافذة الترحيب تظهر فقط عند تشغيل التطبيق
+        window.onload = () => {
+            const hasUpdated = sessionStorage.getItem('hasUpdated');
+            if (!hasUpdated) {
+                sessionStorage.setItem('hasUpdated', true); // منع ظهور النافذة مجددًا خلال نفس الجلسة
+                const popup = document.getElementById('popup');
+                popup.style.display = 'flex';
+                popup.classList.add('animate__animated', 'animate__fadeInDown'); // حركة دخول
+            }
+        };
+
+        // إغلاق نافذة الترحيب
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            popup.classList.add('animate__fadeOutUp'); // حركة خروج
+            setTimeout(() => {
+                popup.style.display = 'none';
+                popup.classList.remove('animate__fadeOutUp', 'animate__fadeInDown'); // إعادة تعيين الحركات
+            }, 1000); // مدة الحركة
+        }
+
         const dropboxMainFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file1" + "?t=" + new Date().getTime();
         const dropboxSimilaritesFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file2" + "?t=" + new Date().getTime();
         let database = {};
@@ -804,382 +641,373 @@ function closePopup() {
             }));
         }
 
-        
-function filterCategory(category, button) {
-    currentCategory = category;
-
-    // إزالة الفئة "active" من جميع الأزرار
-    document.querySelectorAll(".category-btn").forEach(btn => btn.classList.remove("active"));
-
-    // إضافة الفئة "active" للزر المحدد
-    button.classList.add("active");
-}
-
-
-
-async function openSimilarites(button) {
-    if (localStorage.getItem("similaritesAccess") === "granted") {
-        filterCategory("SIMILARITES", button);
-    } else {
-        const { value: password } = await Swal.fire({
-    title: 'دخول محمي',
-    html: '<p style="color: #dcdcdc;">يرجى إدخال كلمة المرور للوصول إلى هذا القسم</p>',
-    iconHtml: '<i class="fas fa-lock"></i>',
-    input: 'password',
-    inputPlaceholder: 'أدخل كلمة المرور هنا',
-    showCancelButton: true,
-    confirmButtonText: 'تأكيد',
-    cancelButtonText: 'إلغاء',
-    backdrop: 'rgba(0, 0, 0, 0.5)', // تعتيم الخلفية
-    allowOutsideClick: false, // منع الإغلاق بالنقر خارج النافذة
-    allowEscapeKey: true, // السماح بالإغلاق بزر ESC
-    allowEnterKey: false, // تعطيل زر Enter لتأكيد المدخل
-backdrop: false, // تثبيت الواجهة
-
-    customClass: {
-        popup: 'swal2-popup',
-        title: 'swal2-title',
-        input: 'swal2-input',
-        confirmButton: 'swal2-confirm',
-        cancelButton: 'swal2-cancel'
-    },
-    showClass: {
-        popup: 'animate__animated animate__fadeInUp'
-    },
-    hideClass: {
-        popup: 'animate__animated animate__fadeOutDown'
-    },
-    didOpen: () => {
-        // إزالة التركيز التلقائي على الحقل
-        const inputField = Swal.getInput();
-        if (inputField) {
-            inputField.blur(); // إزالة التركيز
+        function filterCategory(category, button) {
+            currentCategory = category;
+            document.querySelectorAll(".category-btn").forEach(btn => btn.classList.remove("active"));
+            button.classList.add("active");
         }
-    },
-    inputValidator: (value) => {
-        if (!value) {
-            return 'يرجى إدخال كلمة المرور';
-        }
-    }
-});
-        if (password === "1990") {
-            localStorage.setItem("similaritesAccess", "granted");
-            filterCategory("SIMILARITES", button);
-        } else if (password) {
-            // تطبيق تأثير الاهتزاز
-            const swalPopup = document.querySelector('.swal2-popup');
-            swalPopup.style.animation = 'shake 0.5s';
-            swalPopup.addEventListener('animationend', () => {
-                swalPopup.style.animation = ''; // إزالة الأنيميشن بعد اكتماله
-            });
-            await Swal.fire({
-                icon: 'error',
-                title: 'خطأ',
-                text: 'كلمة المرور خاطئة!',
-backdrop: false, // تثبيت الواجهة
 
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    confirmButton: 'swal2-confirm'
+        async function openSimilarites(button) {
+            if (localStorage.getItem("similaritesAccess") === "granted") {
+                filterCategory("SIMILARITES", button);
+            } else {
+                const { value: password } = await Swal.fire({
+                    title: 'دخول محمي',
+                    html: '<p style="color: #dcdcdc;">يرجى إدخال كلمة المرور للوصول إلى هذا القسم</p>',
+                    iconHtml: '<i class="fas fa-lock"></i>',
+                    input: 'password',
+                    inputPlaceholder: 'أدخل كلمة المرور هنا',
+                    showCancelButton: true,
+                    confirmButtonText: 'تأكيد',
+                    cancelButtonText: 'إلغاء',
+                    backdrop: 'rgba(0, 0, 0, 0.5)',
+                    allowOutsideClick: false,
+                    allowEscapeKey: true,
+                    customClass: {
+                        popup: 'swal2-popup',
+                        title: 'swal2-title',
+                        input: 'swal2-input',
+                        confirmButton: 'swal2-confirm',
+                        cancelButton: 'swal2-cancel'
+                    },
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInUp'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutDown'
+                    },
+                    didOpen: () => {
+                        const inputField = Swal.getInput();
+                        if (inputField) {
+                            inputField.blur();
+                        }
+                    },
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'يرجى إدخال كلمة المرور';
+                        }
+                    }
+                });
+                if (password === "1990") {
+                    localStorage.setItem("similaritesAccess", "granted");
+                    filterCategory("SIMILARITES", button);
+                } else if (password) {
+                    const swalPopup = document.querySelector('.swal2-popup');
+                    swalPopup.style.animation = 'shake 0.5s';
+                    swalPopup.addEventListener('animationend', () => {
+                        swalPopup.style.animation = '';
+                    });
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ',
+                        text: 'كلمة المرور خاطئة!',
+                        backdrop: 'rgba(0, 0, 0, 0.5)',
+                        customClass: {
+                            popup: 'swal2-popup',
+                            title: 'swal2-title',
+                            confirmButton: 'swal2-confirm'
+                        }
+                    });
                 }
-            });
+            }
         }
-    }
-}
-
 
         function normalizeString(str) {
             return str.replace(/\s+/g, '').toLowerCase();
         }
 
-        
-function searchItems() {
-    const searchInput = document.getElementById("searchInput").value.trim();
-    const resultsContainer = document.getElementById("results");
+        async function searchItems() {
+            const searchInput = document.getElementById("searchInput").value.trim();
+            const resultsContainer = document.getElementById("results");
 
-    // إعادة تعيين محتوى صندوق النتائج
-    resultsContainer.innerHTML = '';
+            resultsContainer.innerHTML = '';
 
-    if (!searchInput) {
-        Swal.fire({
-    title: 'حقل فارغ',
-    html: '<p style="color: #dcdcdc;">يرجى كتابة اسم العنصر قبل المتابعة</p>',
-    iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-    confirmButtonText: 'موافق',
-    backdrop: false, // تثبيت الواجهة
-    customClass: {
-        popup: 'swal2-popup',
-        title: 'swal2-title',
-        htmlContainer: 'swal2-html-container',
-        confirmButton: 'swal2-confirm'
-    },
-    showClass: {
-        popup: 'animate__animated animate__zoomIn'
-    },
-    hideClass: {
-        popup: 'animate__animated animate__zoomOut'
-    }
-});
-        return;
-    }
-
-    if (!currentCategory) {
-        Swal.fire({
-            title: 'الصنف غير محدد',
-            text: 'يرجى اختيار صنف من القائمة قبل البدء في البحث.',
-            iconHtml: '<i class="fas fa-info-circle"></i>',
-            confirmButtonText: 'موافق',
-            backdrop: false, // تثبيت الواجهة
-
-            customClass: {
-                popup: 'swal2-popup',
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                confirmButton: 'swal2-confirm'
-            },
-            showClass: {
-                popup: 'animate__animated animate__fadeIn'
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOut'
+            if (!searchInput) {
+                Swal.fire({
+                    title: 'حقل فارغ',
+                    html: '<p style="color: #dcdcdc;">يرجى كتابة اسم العنصر قبل المتابعة</p>',
+                    iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+                    confirmButtonText: 'موافق',
+                    backdrop: false,
+                    customClass: {
+                        popup: 'swal2-popup',
+                        title: 'swal2-title',
+                        htmlContainer: 'swal2-html-container',
+                        confirmButton: 'swal2-confirm'
+                    },
+                    showClass: {
+                        popup: 'animate__animated animate__zoomIn'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__zoomOut'
+                    }
+                });
+                return;
             }
-        });
-        return;
-    }
 
-    const query = normalizeString(searchInput);
-    const results = database[currentCategory]?.filter(item =>
-        normalizeString(item["Item Name"] || item["Item"]).includes(query)
-    ) || [];
+            if (!currentCategory) {
+                Swal.fire({
+                    title: 'الصنف غير محدد',
+                    text: 'يرجى اختيار صنف من القائمة قبل البدء في البحث.',
+                    iconHtml: '<i class="fas fa-info-circle"></i>',
+                    confirmButtonText: 'موافق',
+                    backdrop: false,
+                    customClass: {
+                        popup: 'swal2-popup',
+                        title: 'swal2-title',
+                        htmlContainer: 'swal2-html-container',
+                        confirmButton: 'swal2-confirm'
+                    },
+                    showClass: {
+                        popup: 'animate__animated animate__fadeIn'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOut'
+                    }
+                });
+                return;
+            }
 
-    if (results.length === 0) {
-        // إذا لم يتم العثور على العناصر، أضف الرسالة إلى صندوق النتائج
-        resultsContainer.innerHTML = `
-            <div class="no-results">
-                هذا العنصر غير متوفر في الوقت الحالي
+            const query = normalizeString(searchInput);
+            const results = database[currentCategory]?.filter(item =>
+                normalizeString(item["Item Name"] || item["Item"]).includes(query)
+            ) || [];
 
+            if (results.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="no-results">
+                        هذا العنصر غير متوفر في الوقت الحالي
+                    </div>
+                `;
+                return;
+            }
 
-            </div>
-        `;
-        return;
-    }
+            displayResults(results);
+        }
 
-    displayResults(results);
-}
+        function displayResults(results) {
+            let htmlContent = `
+                <div class="results-container" style="max-height: 500px; overflow-y: auto; display: grid; gap: 15px; padding: 10px;">
+            `;
 
-function displayResults(results) {
-    let htmlContent = `
-        <div class="results-container" style="max-height: 500px; overflow-y: auto; display: grid; gap: 15px; padding: 10px;">
-    `;
+            results.forEach(item => {
+                const imgSrc = currentCategory === "SIMILARITES" 
+                    ? 'images/default.png'
+                    : `images/${currentCategory.toLowerCase()}.png`;
 
-    results.forEach(item => {
-        const imgSrc = currentCategory === "SIMILARITES" 
-            ? 'images/default.png'
-            : `images/${currentCategory.toLowerCase()}.png`;
+                htmlContent += `
+                    <div class="result-card" style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        background: rgba(0, 0, 0, 0.3);
+                        border-radius: 12px;
+                        padding: 15px;
+                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                        transition: transform 0.2s ease, box-shadow 0.2s ease;
+                        cursor: pointer;
+                    ">
+                        <img src="${imgSrc}" 
+                             alt="Item Image" 
+                             style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px;">
+                        <div style="text-align: center; color: #fff;">
+                            <h4 style="margin: 5px 0; font-size: 18px;">${item["Item Name"] || item["Item"]}</h4>
+                            ${item["Price"] ? `<p style="margin: 5px 0; font-size: 16px;">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
 
-        htmlContent += `
-            <div class="result-card" style="
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                background: rgba(0, 0, 0, 0.3);
-                border-radius: 12px;
-                padding: 15px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-                cursor: pointer;
-            ">
-                <img src="${imgSrc}" 
-                     alt="Item Image" 
-                     style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px;">
-                <div style="text-align: center; color: #fff;">
-                    <h4 style="margin: 5px 0; font-size: 18px;">${item["Item Name"] || item["Item"]}</h4>
-                    ${item["Price"] ? `<p style="margin: 5px 0; font-size: 16px;">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</p>` : ''}
+            htmlContent += `
                 </div>
-            </div>
-        `;
-    });
+                <button class="back-btn" onclick="Swal.close()" style="margin-top: 30px;">رجوع</button>
+            `;
 
-    htmlContent += `
-        </div>
-        <button class="back-btn" onclick="Swal.close()" style="margin-top: 30px;">رجوع</button>
-    `;
-
-    Swal.fire({
-        title: `نتائج البحث (${results.length})`,
-        html: htmlContent,
-        width: '75%', // توسيع عرض النافذة إلى 75%
-        backdrop: false, // تثبيت الواجهة
-        backdrop: 'rgba(0, 0, 0, 0.7)', // تعتيم أنيق للخلفية
-        customClass: {
-            popup: 'swal2-popup',
-            title: 'swal2-title',
-            htmlContainer: 'swal2-html-container',
-        },
-         backdrop: false, // تثبيت الواجهة
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        stopKeydownPropagation: false, // السماح بالتفاعل الكامل مع العناصر الداخلية
-        didOpen: () => {
-            // التأكد من ربط الأحداث عند فتح النافذة
-            document.body.style.overflow = 'hidden';
-        },
-        willClose: () => {
-            document.body.style.overflow = ''; 
-        },
-        showClass: {
-            popup: 'animate__animated animate__fadeIn'
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOut'
+            Swal.fire({
+                title: `نتائج البحث (${results.length})`,
+                html: htmlContent,
+                width: '75%',
+                backdrop: 'rgba(0, 0, 0, 0.7)',
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                },
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                stopKeydownPropagation: false,
+                didOpen: () => {
+                    document.body.style.overflow = 'hidden';
+                },
+                willClose: () => {
+                    document.body.style.overflow = ''; 
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeIn'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut'
+                }
+            });
         }
-    });
-}
-async function confirmExit() {
-    const result = await Swal.fire({
-        title: 'تأكيد الخروج',
-        html: '<p style="color: #dcdcdc;">هل أنت متأكد أنك تريد الخروج؟</p>',
-        iconHtml: '<i class="fas fa-sign-out-alt"></i>',
-        showCancelButton: true,
-        confirmButtonText: 'نعم، خروج',
-        cancelButtonText: 'لا، إلغاء',
-        backdrop: false, // تثبيت الواجهة
 
-        customClass: {
-            popup: 'swal2-popup',
-            title: 'swal2-title',
-            htmlContainer: 'swal2-html-container',
-            confirmButton: 'swal2-confirm',
-            cancelButton: 'swal2-cancel'
-        },
-        showClass: {
-            popup: 'animate__animated animate__fadeInDown'
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOutUp'
+        async function confirmExit() {
+            const result = await Swal.fire({
+                title: 'تأكيد الخروج',
+                html: '<p style="color: #dcdcdc;">هل أنت متأكد أنك تريد الخروج؟</p>',
+                iconHtml: '<i class="fas fa-sign-out-alt"></i>',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، خروج',
+                cancelButtonText: 'لا، إلغاء',
+                backdrop: 'rgba(0, 0, 0, 0.5)',
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            });
+
+            if (result.isConfirmed) {
+                window.location.href = 'index.html';
+            }
         }
-    });
-
-    if (result.isConfirmed) {
-        // إغلاق التطبيق
-        window.close();
-    }
-}
 
         function changeBackgroundColor(color) {
             document.body.style.background = color;
         }
 
+        async function refreshData() {
+            Swal.fire({
+                html: `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div class="loading-circle" style="
+                            width: 80px;
+                            height: 80px;
+                            border: 8px solid rgba(255, 255, 255, 0.2);
+                            border-top: 8px solid #43cea2;
+                            border-radius: 50%;
+                            animation: spin 1s linear infinite;">
+                        </div>
+                        <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جارِ التحديث... يرجى الانتظار</p >
+                    </div>
+                `,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                backdrop: 'rgba(0, 0, 0, 0.8)',
+                customClass: {
+                    popup: 'swal2-popup animate__animated animate__fadeInDown',
+                },
+            });
 
+            const loadingPromise = new Promise(resolve => setTimeout(resolve, 3000));
+            const loadFilesPromise = loadExcelFiles();
 
+            try {
+                await Promise.all([loadingPromise, loadFilesPromise]);
 
-async function refreshData() {
-    // نافذة التحميل مع دائرة التحميل الأنيقة
-    Swal.fire({
-        html: `
-            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <div class="loading-circle" style="
-                    width: 80px;
-                    height: 80px;
-                    border: 8px solid rgba(255, 255, 255, 0.2);
-                    border-top: 8px solid #43cea2;
-                    border-radius: 50%;
-                    animation: spin 1s linear infinite;">
-                </div>
-                <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جارِ التحديث... يرجى الانتظار</p >
-            </div>
-        `,
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        backdrop: 'rgba(0, 0, 0, 0.8)',
-         backdrop: false, // تثبيت الواجهة
-        customClass: {
-            popup: 'swal2-popup animate__animated animate__fadeInDown', // حركة دخول
-        },
-    });
-
-    // محاكاة لمدة 3 ثوانٍ مع تحميل الملفات
-    const loadingPromise = new Promise(resolve => setTimeout(resolve, 3000));
-    const loadFilesPromise = loadExcelFiles();
-
-    try {
-        // انتظر انتهاء المحاكاة وتحميل الملفات معًا
-        await Promise.all([loadingPromise, loadFilesPromise]);
-
-        // نافذة نجاح التحديث مع زر موافق
-        Swal.fire({
-            title: 'تم التحديث بنجاح!',
-            html: '<p style="color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
-            iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
-            showConfirmButton: false, // عرض زر موافق
-            confirmButtonText: 'موافق',
-            backdrop: 'rgba(0, 0, 0, 0.7)',
-             backdrop: false, // تثبيت الواجهة
-            customClass: {
-                popup: 'swal2-popup animate__animated animate__fadeInDown', // حركة دخول
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                confirmButton: 'swal2-confirm',
-            },
-
-     }).then((result) => {
-            if (result.isConfirmed) {
-                sessionStorage.setItem('hasUpdated', true);
-                console.log('Data updated and session state saved successfully.');
-                // إغلاق النافذة بشكل صريح
                 Swal.fire({
                     title: 'تم التحديث بنجاح!',
-                    text: 'تم إغلاق النافذة بنجاح.',
+                    html: '<p style="color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
+                    iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
                     showConfirmButton: false,
-                    timer: 1500
-                }).then(() => {
-                    Swal.close();
+                    confirmButtonText: 'موافق',
+                    backdrop: 'rgba(0, 0, 0, 0.7)',
+                    customClass: {
+                        popup: 'swal2-popup animate__animated animate__fadeInDown',
+                        title: 'swal2-title',
+                        htmlContainer: 'swal2-html-container',
+                        confirmButton: 'swal2-confirm',
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        sessionStorage.setItem('hasUpdated', true);
+                        console.log('Data updated and session state saved successfully.');
+                        Swal.fire({
+                            title: 'تم التحديث بنجاح!',
+                            text: 'تم إغلاق النافذة بنجاح.',
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(() => {
+                            Swal.close();
+                        });
+                    }
+                });
+            } catch (error) {
+                Swal.fire({
+                    title: 'خطأ',
+                    html: '<p style="color: #ff4d4d;">حدث خطأ أثناء تحديث البيانات. يرجى المحاولة لاحقًا.</p >',
+                    iconHtml: '<i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #ff4d4d;"></i>',
+                    showConfirmButton: true,
+                    backdrop: 'rgba(0, 0, 0, 0.7)',
+                    confirmButtonText: 'موافق',
+                    customClass: {
+                        popup: 'swal2-popup animate__animated animate__shakeX',
+                        title: 'swal2-title',
+                        htmlContainer: 'swal2-html-container',
+                        confirmButton: 'swal2-confirm',
+                    },
                 });
             }
-        });
 
-        
-    } catch (error) {
-        // نافذة خطأ في حالة حدوث مشكلة أثناء التحميل
-        Swal.fire({
-            title: 'خطأ',
-            html: '<p style="color: #ff4d4d;">حدث خطأ أثناء تحديث البيانات. يرجى المحاولة لاحقًا.</p >',
-            iconHtml: '<i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #ff4d4d;"></i>',
-            showConfirmButton: true,
-            backdrop: 'rgba(0, 0, 0, 0.7)',
-            confirmButtonText: 'موافق',
-             backdrop: false, // تثبيت الواجهة
-            customClass: {
-                popup: 'swal2-popup animate__animated animate__shakeX', // حركة اهتزاز عند الخطأ
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                confirmButton: 'swal2-confirm',
-            },
-            
-        });
-    }
-
-loadExcelFiles().then(() => {
-    setTimeout(() => {
-        location.reload();
-    }, 1000); // تأخير لمدة 3 ثواني (3000 مللي ثانية)
-});
-    
-}
-        
-        loadExcelFiles();
-    </script>
-    <style>
-        .swal2-popup {
-            background: rgba(255, 255, 255, 0.1); /* لون شفاف */
-            border-radius: 15px;
-            color: #fff;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            width: 300px; /* تقليل حجم النافذة */
+            loadExcelFiles().then(() => {
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            });
         }
-        .swal2-title {
-            color: white;
-            text-shadow: 0 4
+
+        loadExcelFiles();
+
+
+        const voiceSearchBtn = document.getElementById('voiceSearchBtn');
+        const searchInput = document.getElementById('searchInput');
+
+        voiceSearchBtn.addEventListener('click', () => {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'ar';
+
+            recognition.onresult = async (event) => {
+                const arabicText = event.results[0][0].transcript;
+                const englishText = await translateText(arabicText, 'ar', 'en');
+                searchInput.value = englishText;
+                searchItems(); // Call the search function
+            };
+
+            recognition.start();
+        });
+
+        async function translateText(text, sourceLang, targetLang) {
+            const apiKey = 'YOUR_GOOGLE_TRANSLATE_API_KEY'; // Replace with your Google Translate API key
+            const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    q: text,
+                    source: sourceLang,
+                    target: targetLang,
+                    format: 'text'
+                })
+            });
+
+            const data = await response.json();
+            return data.data.translations[0].translatedText;
+        }
+    </script>
+</body>
+</html>
+
+
+    
