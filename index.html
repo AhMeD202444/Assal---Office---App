@@ -970,7 +970,7 @@ function searchItems() {
 
 function displayResults(results) {
     let htmlContent = `
-        <div class="results-container" style="max-height: 400px; overflow-y: auto; display: grid; gap: 15px; padding: 10px;">
+        <div class="results-container" style="max-height: 400px; overflow-y: auto; display: grid; gap: 15px; padding: 10px; border: 2px solid #ccc; border-radius: 12px;">
     `;
 
     results.forEach(item => {
@@ -988,7 +988,6 @@ function displayResults(results) {
                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
                 cursor: pointer;
-                max-width: 100%;
             ">
                 <img src="${imgSrc}" 
                      alt="Item Image" 
@@ -1003,7 +1002,7 @@ function displayResults(results) {
 
     htmlContent += `
         </div>
-        <button class="back-btn" onclick="Swal.close()" style="margin-top: 20px;">رجوع</button>
+        <button class="back-btn" onclick="Swal.close()" style="margin-top: 20px; padding: 10px 20px; border: none; background-color: #007bff; color: white; border-radius: 5px; cursor: pointer;">رجوع</button>
     `;
 
     Swal.fire({
