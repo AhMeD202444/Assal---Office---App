@@ -970,7 +970,7 @@ function searchItems() {
 
 function displayResults(results) {
     let htmlContent = `
-        <div class="results-container" style="max-height: 500px; overflow-y: auto; display: grid; gap: 15px; padding: 10px;">
+        <div class="results-container" style="max-height: 400px; overflow-y: auto; display: grid; gap: 15px; padding: 10px;">
     `;
 
     results.forEach(item => {
@@ -981,22 +981,21 @@ function displayResults(results) {
         htmlContent += `
             <div class="result-card" style="
                 display: flex;
-                flex-direction: column;
                 align-items: center;
-                justify-content: center;
                 background: rgba(0, 0, 0, 0.3);
                 border-radius: 12px;
                 padding: 15px;
                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
                 cursor: pointer;
+                max-width: 100%;
             ">
                 <img src="${imgSrc}" 
                      alt="Item Image" 
-                     style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px;">
-                <div style="text-align: center; color: #fff;">
-                    <h4 style="margin: 5px 0; font-size: 18px;">${item["Item Name"] || item["Item"]}</h4>
-                    ${item["Price"] ? `<p style="margin: 5px 0; font-size: 16px;">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</p>` : ''}
+                     style="width: 60px; height: 60px; border-radius: 50%; margin-right: 15px;">
+                <div style="flex-grow: 1;">
+                    <h4 style="margin: 0; font-size: 16px; color: #fff;">${item["Item Name"] || item["Item"]}</h4>
+                    ${item["Price"] ? `<p style="margin: 5px 0 0; font-size: 14px; color: #f1f1f1;">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</p>` : ''}
                 </div>
             </div>
         `;
@@ -1004,21 +1003,19 @@ function displayResults(results) {
 
     htmlContent += `
         </div>
-        <button class="back-btn" onclick="Swal.close()" style="margin-top: 30px;">رجوع</button>
+        <button class="back-btn" onclick="Swal.close()" style="margin-top: 20px;">رجوع</button>
     `;
 
     Swal.fire({
         title: `نتائج البحث (${results.length})`,
         html: htmlContent,
-        width: '75%', // توسيع عرض النافذة إلى 75%
-         backdrop: true,
+        width: '65%', // تقليل عرض النافذة إلى 65%
         backdrop: 'rgba(0, 0, 0, 0.7)', // تعتيم أنيق للخلفية
         customClass: {
             popup: 'swal2-popup',
             title: 'swal2-title',
             htmlContainer: 'swal2-html-container',
         },
-         backdrop: true,
         showConfirmButton: false,
         allowOutsideClick: false,
         stopKeydownPropagation: false, // السماح بالتفاعل الكامل مع العناصر الداخلية
