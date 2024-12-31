@@ -968,43 +968,43 @@ footer {
         loadExcelFiles();
 
 
-        const voiceSearchBtn = document.getElementById('voiceSearchBtn');
-        const searchInput = document.getElementById('searchInput');
+      const voiceSearchBtn = document.getElementById('voiceSearchBtn');
+const searchInput = document.getElementById('searchInput');
 
-        voiceSearchBtn.addEventListener('click', () => {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'ar';
+voiceSearchBtn.addEventListener('click', () => {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'ar';
 
-            recognition.onresult = async (event) => {
-                const arabicText = event.results[0][0].transcript;
-                const englishText = await translateText(arabicText, 'ar', 'en');
-                searchInput.value = englishText;
-                searchItems(); // Call the search function
-            };
+    recognition.onresult = async (event) => {
+        const arabicText = event.results[0][0].transcript;
+        const englishText = await translateText(arabicText, 'ar', 'en');
+        searchInput.value = englishText;
+        searchItems(); // Call the search function
+    };
 
-            recognition.start();
-        });
+    recognition.start();
+});
 
-        async function translateText(text, sourceLang, targetLang) {
-            const apiKey = 'YOUR_GOOGLE_TRANSLATE_API_KEY'; // Replace with your Google Translate API key
-            const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+async function translateText(text, sourceLang, targetLang) {
+    const apiKey = 'YOUR_GOOGLE_TRANSLATE_API_KEY'; // Replace with your Google Translate API key
+    const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
 
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    q: text,
-                    source: sourceLang,
-                    target: targetLang,
-                    format: 'text'
-                })
-            });
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            q: text,
+            source: sourceLang,
+            target: targetLang,
+            format: 'text'
+        })
+    });
 
-            const data = await response.json();
-            return data.data.translations[0].translatedText;
-        }
+    const data = await response.json();
+    return data.data.translations[0].translatedText;
+}
     </script>
 </body>
 </html>
