@@ -188,23 +188,23 @@
 
 .news-ticker {
     width: 100%;
-    background: linear-gradient(135deg, #3A6073, #16222A);
+    background: linear-gradient(135deg, #3A6073, #16222A); /* تدرج لوني يتماشى مع الألوان الرئيسية */
     color: #fff;
     font-size: 18px;
     font-weight: bold;
     padding: 10px 0;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* تحسين الظلال */
-    border-radius: 10px; /* حواف دائرية لجعل الشريط أكثر نعومة */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* إضافة ظل خفيف يتناسب مع التصميم */
 }
 
+/* النص داخل الشريط */
 .news-ticker p {
-    color: #43cea2; /* لون أخضر فاتح يتناسب مع تصميمك */
-    font-size: 18px;
-    font-weight: bold;
-    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* إضافة ظل للنص */
+    position: absolute;
+    white-space: nowrap;
+    animation: scrollNews 20s linear infinite, fadeInOut 2s ease-in-out infinite;
 }
+
 
 .news-ticker p:active {
     transform: scale(1.05); /* تكبير النص عند النقر */
@@ -217,18 +217,25 @@
 }
 
         
-@keyframes fadeInOut {
-    0%, 100% {
-        opacity: 0;
+@keyframes scrollNews {
+    0% {
+        transform: translateX(100%); /* بدء النص من خارج الشريط من الجهة اليمنى */
     }
-    50% {
-        opacity: 1;
-        transform: scale(1.05); /* تأثير تكبير بسيط وسط التلاشي */
+    100% {
+        transform: translateX(-100%); /* نهاية النص عند الخروج من الجهة اليسرى */
     }
 }
 
+/* تأثير التلاشي والإضاءة */
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0; /* اختفاء النص في البداية والنهاية */
+    }
+    50% {
+        opacity: 1; /* ظهور النص في منتصف الحركة */
+    }
+}
 
-        
 
 /* الشعار (Logo) */
 
@@ -768,6 +775,7 @@ footer {
     <p id="news-text">🚨 تحديث جديد: نقدم لكم تخفيضات خاصة على قطع الغيار! | 📢 مرحباً بكم في تطبيقنا الجديد! | 🔔 تم تحديث البيانات بنجاح.</p>
 </div>
 
+
     
     <div class="container">
     <!-- شعار دائري -->
@@ -1133,6 +1141,35 @@ async function confirmExit() {
         }
 
 
+
+// قائمة الإشعارات
+let notifications = [
+    "🚨 تحديث جديد: نقدم لكم تخفيضات خاصة على قطع الغيار!",
+    "📢 مرحباً بكم في تطبيقنا الجديد!",
+    "🔔 تم تحديث البيانات بنجاح.",
+    "🛍️ عرض خاص على قطع الغيار هذا الأسبوع!",
+    "💡 منتج جديد وصل حديثاً: شاشة LCD بتقنية 4K!",
+    "🔔 تم إضافة طرق دفع جديدة لتسهيل عملية الشراء!"
+];
+
+// عنصر النص في الشريط
+let newsTextElement = document.getElementById("news-text");
+
+// وظيفة لتغيير النص في الشريط كل فترة زمنية
+function changeNotification() {
+    let randomIndex = Math.floor(Math.random() * notifications.length);
+    newsTextElement.textContent = notifications[randomIndex];
+}
+
+// تغيير الإشعار كل 5 ثوانٍ
+setInterval(changeNotification, 5000);
+
+// تفعيل النص الأول عند تحميل الصفحة
+window.onload = changeNotification;
+
+
+
+        
 
 
 async function refreshData() {
