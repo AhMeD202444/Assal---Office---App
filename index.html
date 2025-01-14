@@ -592,6 +592,21 @@
         }
 
         let database = {
+            LCD: [
+                { "Item": "LCD 1", "Price": 50000, "Image URL": "images/lcd1.png" },
+                { "Item": "LCD 2", "Price": 75000, "Image URL": "images/lcd2.png" },
+                { "Item": "LCD 3", "Price": 100000, "Image URL": "images/lcd3.png" }
+            ],
+            BATTERY: [
+                { "Item": "Battery 1", "Price": 20000, "Image URL": "images/battery1.png" },
+                { "Item": "Battery 2", "Price": 25000, "Image URL": "images/battery2.png" },
+                { "Item": "Battery 3", "Price": 30000, "Image URL": "images/battery3.png" }
+            ],
+            HOUSING: [
+                { "Item": "Housing 1", "Price": 15000, "Image URL": "images/housing1.png" },
+                { "Item": "Housing 2", "Price": 18000, "Image URL": "images/housing2.png" },
+                { "Item": "Housing 3", "Price": 22000, "Image URL": "images/housing3.png" }
+            ],
             TOOLS: [
                 { "Item": "Tool 1", "Price": 10000, "Image URL": "images/tool1.png" },
                 { "Item": "Tool 2", "Price": 15000, "Image URL": "images/tool2.png" },
@@ -604,9 +619,7 @@
             currentCategory = category;
             document.querySelectorAll(".category-btn").forEach(btn => btn.classList.remove("active"));
             button.classList.add("active");
-            if (category === 'TOOLS') {
-                openToolsPopup();
-            }
+            displayResults(database[category]);
         }
 
         function normalizeString(str) {
@@ -661,7 +674,7 @@
             }
             const query = normalizeString(searchInput);
             const results = database[currentCategory]?.filter(item =>
-                normalizeString(item["Item Name"] || item["Item"]).includes(query)
+                normalizeString(item["Item"]).includes(query)
             ) || [];
             if (results.length === 0) {
                 resultsContainer.innerHTML = `
@@ -679,9 +692,7 @@
                 <div class="results-container" style="max-height: 300px; overflow-y: auto; display: grid; gap: 15px; padding: 10px;">
             `;
             results.forEach(item => {
-                const imgSrc = currentCategory === "SIMILARITES" 
-                    ? 'images/default.png'
-                    : `images/${currentCategory.toLowerCase()}.png`;
+                const imgSrc = item["Image URL"] || 'images/default.png';
                 htmlContent += `
                     <div class="result-card" style="
                         display: flex;
@@ -694,12 +705,12 @@
                         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
                         transition: transform 0.2s ease, box-shadow 0.2s ease;
                         cursor: pointer;
-                    ">
+                    " onclick="showToolDetails('${item["Item"]}', '${item["Image URL"]}', ${item["Price"]})">
                         <img src="${imgSrc}" 
                              alt="Item Image" 
-                             style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px;">
+                             style="width: 60px; height: 60px; border-radius: 50%; margin-bottom: 10px;">
                         <div style="text-align: center; color: #fff;">
-                            <h4 style="margin: 5px 0; font-size: 18px;">${item["Item Name"] || item["Item"]}</h4>
+                            <h4 style="margin: 5px 0; font-size: 18px;">${item["Item"]}</h4>
                             ${item["Price"] ? `<p style="margin: 5px 0; font-size: 16px;">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</p>` : ''}
                         </div>
                     </div>
@@ -709,32 +720,8 @@
                 </div>
                 <button class="back-btn" onclick="Swal.close()">رجوع</button>
             `;
-            Swal.fire({
-                title: `نتائج البحث (${results.length})`,
-                html: htmlContent,
-                width: '90%',
-                backdrop: 'rgba(0, 0, 0, 0.7)',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                },
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                stopKeydownPropagation: false,
-                didOpen: () => {
-                    document.body.style.overflow = 'hidden';
-                },
-                willClose: () => {
-                    document.body.style.overflow = ''; 
-                },
-                showClass: {
-                    popup: 'animate__animated animate__fadeIn'
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOut'
-                }
-            });
+            const resultsContainer = document.getElementById("results");
+            resultsContainer.innerHTML = htmlContent;
         }
 
         async function confirmExit() {
@@ -882,20 +869,12 @@
                 didOpen: () => {
                     document.body.style.overflow = 'hidden';
                 },
-                willClose: () => {
+               willClose: () => {
                     document.body.style.overflow = ''; 
                 },
                 showClass: {
                     popup: 'animate__animated animate__fadeIn'
                 },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOut'
-
-
-
-
-
-},
                 hideClass: {
                     popup: 'animate__animated animate__fadeOut'
                 }
