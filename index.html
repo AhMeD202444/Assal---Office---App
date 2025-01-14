@@ -1,3 +1,4 @@
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -191,9 +192,6 @@
             background: linear-gradient(45deg, #43cea2, #185a9d);
             transform: scale(1.1);
             box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
-        }
-        .category-btn.full-width {
-            grid-column: span 2;
         }
         .search-container {
             position: relative;
@@ -450,29 +448,20 @@
             25% {
                 transform: translateX(-10px);
             }
-            50% {
+
+
+50% {
                 transform: translateX(10px);
             }
             75% {
                 transform: translateX(-10px);
             }
         }
+
         .swal2-popup {
             background: linear-gradient(135deg, #1a2a3a, #243b55);
             border-radius: 20px;
-        
-
-
-
-
-
-
-
-
-
-
-
-color: #ffffff;
+            color: #ffffff;
             text-align: center;
             backdrop-filter: blur(15px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
@@ -556,7 +545,7 @@ color: #ffffff;
     </style>
 </head>
 <body>
-    <div class="popup-overlay" id="popup">
+    <div class="popup-overlay" id="popup" style="display: none;">
         <div class="popup-content animate__animated">
             <button class="popup-close-btn" onclick="closePopup()">X</button>
             <img src="images/default.png" alt="Welcome Image">
@@ -575,7 +564,7 @@ color: #ffffff;
             <button class="category-btn" onclick="filterCategory('BATTERY', this)">BATTERY</button>
             <button class="category-btn" onclick="filterCategory('HOUSING', this)">HOUSING</button>
             <button class="category-btn" onclick="openSimilarites(this)">SIMILARITES</button>
-            <button class="category-btn full-width" onclick="filterCategory('TOOLS', this)">TOOLS</button> <!-- زر TOOLS بعرض الصنفين -->
+            <button class="category-btn" onclick="filterCategory('TOOLS', this)">TOOLS</button> <!-- زر TOOLS الجديد -->
         </div>
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search for items...">
@@ -599,14 +588,15 @@ color: #ffffff;
     </footer>
     <script>
         const showPopup = true;
-        let previousScrollPosition = 0;
-        let htmlContent = '';
         window.onload = () => {
-            const popup = document.getElementById('popup');
-            popup.style.display = 'flex';
-            popup.classList.add('animate__animated', 'animate__fadeInDown');
+            const hasUpdated = sessionStorage.getItem('hasUpdated');
+            if (!hasUpdated) {
+                sessionStorage.setItem('hasUpdated', true);
+                const popup = document.getElementById('popup');
+                popup.style.display = 'flex';
+                popup.classList.add('animate__animated', 'animate__fadeInDown');
+            }
         };
-
         function closePopup() {
             const popup = document.getElementById('popup');
             popup.classList.add('animate__fadeOutUp');
@@ -615,16 +605,25 @@ color: #ffffff;
                 popup.classList.remove('animate__fadeOutUp', 'animate__fadeInDown');
             }, 1000);
         }
-
-        let database = {
-            TOOLS: [
-                { "Item": "Tool 1", "Price": 10000, "Image URL": "images/tool1.png" },
-                { "Item": "Tool 2", "Price": 15000, "Image URL": "images/tool2.png" },
-                { "Item": "Tool 3", "Price": 20000, "Image URL": "images/tool3.png" }
-            ]
-        };
+        const dropboxMainFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file1" + "?t=" + new Date().getTime();
+        const dropboxSimilaritesFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file2" + "?t=" + new Date().getTime();
+        let database = {};
         let currentCategory = null;
-
+        async function loadExcelFiles() {
+            const mainResponse = await fetch(dropboxMainFile);
+            const mainBuffer = await mainResponse.arrayBuffer();
+            const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
+            database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {});
+            database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
+            database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
+            database.TOOLS = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["TOOLS"] || {}); // تحميل بيانات TOOLS
+            const similaritesResponse = await fetch(dropboxSimilaritesFile);
+            const similaritesBuffer = await similaritesResponse.arrayBuffer();
+            const similaritesWorkbook = XLSX.read(similaritesBuffer, { type: "array" });
+            database.SIMILARITES = XLSX.utils.sheet_to_json(similaritesWorkbook.Sheets["SIMILARITES"] || {}).map(item => ({
+                Item: item.Item || "Unnamed"
+            }));
+        }
         function filterCategory(category, button) {
             currentCategory = category;
             document.querySelectorAll(".category-btn").forEach(btn => btn.classList.remove("active"));
@@ -633,11 +632,73 @@ color: #ffffff;
                 openToolsPopup();
             }
         }
-
+        async function openSimilarites(button) {
+            if (localStorage.getItem("similaritesAccess") === "granted") {
+                filterCategory("SIMILARITES", button);
+            } else {
+                const { value: password } = await Swal.fire({
+                    title: 'دخول محمي',
+                    html: '<p style="color: #dcdcdc;">يرجى إدخال كلمة المرور للوصول إلى هذا القسم</p>',
+                    iconHtml: '<i class="fas fa-lock"></i>',
+                    input: 'password',
+                    inputPlaceholder: 'أدخل كلمة المرور هنا',
+                    showCancelButton: true,
+                    confirmButtonText: 'تأكيد',
+                    cancelButtonText: 'إلغاء',
+                    backdrop: 'rgba(0, 0, 0, 0.5)',
+                    allowOutsideClick: false,
+                    allowEscapeKey: true,
+                    allowEnterKey: false,
+                    customClass: {
+                        popup: 'swal2-popup',
+                        title: 'swal2-title',
+                        input: 'swal2-input',
+                        confirmButton: 'swal2-confirm',
+                        cancelButton: 'swal2-cancel'
+                    },
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInUp'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutDown'
+                    },
+                    didOpen: () => {
+                        const inputField = Swal.getInput();
+                        if (inputField) {
+                            inputField.blur();
+                        }
+                    },
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'يرجى إدخال كلمة المرور';
+                        }
+                    }
+                });
+                if (password === "1990") {
+                    localStorage.setItem("similaritesAccess", "granted");
+                    filterCategory("SIMILARITES", button);
+                } else if (password) {
+                    const swalPopup = document.querySelector('.swal2-popup');
+                    swalPopup.style.animation = 'shake 0.5s';
+                    swalPopup.addEventListener('animationend', () => {
+                        swalPopup.style.animation = '';
+                    });
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ',
+                        text: 'كلمة المرور خاطئة!',
+                        customClass: {
+                            popup: 'swal2-popup',
+                            title: 'swal2-title',
+                            confirmButton: 'swal2-confirm'
+                        }
+                    });
+                }
+            }
+        }
         function normalizeString(str) {
             return str.replace(/\s+/g, '').toLowerCase();
         }
-
         function searchItems() {
             const searchInput = document.getElementById("searchInput").value.trim();
             const resultsContainer = document.getElementById("results");
@@ -698,7 +759,6 @@ color: #ffffff;
             }
             displayResults(results);
         }
-
         function displayResults(results) {
             let htmlContent = `
                 <div class="results-container" style="max-height: 300px; overflow-y: auto; display: grid; gap: 15px; padding: 10px;">
@@ -761,7 +821,6 @@ color: #ffffff;
                 }
             });
         }
-
         async function confirmExit() {
             const result = await Swal.fire({
                 title: 'تأكيد الخروج',
@@ -788,11 +847,9 @@ color: #ffffff;
                 window.close();
             }
         }
-
         function changeBackgroundColor(color) {
             document.body.style.background = color;
         }
-
         async function refreshData() {
             Swal.fire({
                 html: `
@@ -815,21 +872,24 @@ color: #ffffff;
                     popup: 'swal2-popup animate__animated animate__fadeInDown',
                 },
             });
-
             const loadingPromise = new Promise(resolve => setTimeout(resolve, 3000));
-
+            const loadFilesPromise = loadExcelFiles();
             try {
-                await loadingPromise;
-
+                await Promise.all([loadingPromise, loadFilesPromise]);
                 Swal.fire({
                     title: 'تم التحديث بنجاح!',
                     html: '<p style="color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p>',
-                    iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
+                    
+
+
+
+
+iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
                     showConfirmButton: false,
-                    timer: 3000,
+                    timer: 3000, // النافذة ستغلق تلقائيًا بعد 3 ثواني
                     backdrop: 'rgba(0, 0, 0, 0.7)',
                     customClass: {
-                        popup: 'swal2-popup animate__animated animate__fadeInDown',
+                        popup: 'swal2-popup animate__animated animate__fadeInDown', // حركة دخول
                         title: 'swal2-title',
                         htmlContainer: 'swal2-html-container',
                         confirmButton: 'swal2-confirm',
@@ -837,9 +897,11 @@ color: #ffffff;
                 }).then(() => {
                     sessionStorage.setItem('hasUpdated', true);
                     console.log('Data updated and session state saved successfully.');
+                    // إغلاق النافذة بشكل صريح بعد التأكيد
                     Swal.close();
                 });
             } catch (error) {
+                // نافذة خطأ في حالة حدوث مشكلة أثناء التحميل
                 Swal.fire({
                     title: 'خطأ',
                     html: '<p style="color: #ff4d4d;">حدث خطأ أثناء تحديث البيانات. يرجى المحاولة لاحقًا.</p>',
@@ -848,23 +910,28 @@ color: #ffffff;
                     confirmButtonText: 'موافق',
                     backdrop: 'rgba(0, 0, 0, 0.7)',
                     customClass: {
-                        popup: 'swal2-popup animate__animated animate__shakeX',
+                        popup: 'swal2-popup animate__animated animate__shakeX', // حركة اهتزاز عند الخطأ
                         title: 'swal2-title',
                         htmlContainer: 'swal2-html-container',
                         confirmButton: 'swal2-confirm',
                     },
                 });
             }
+            loadExcelFiles().then(() => {
+                setTimeout(() => {
+                    location.reload();
+                }, 1000); // تأخير لمدة 1 ثانية (1000 مللي ثانية)
+            });
         }
+        loadExcelFiles();
 
+        // وظيفة لعرض نافذة منبثقة عند الضغط على زر TOOLS
         function openToolsPopup() {
-            previousScrollPosition = document.querySelector('.swal2-container') ? document.querySelector('.swal2-container').scrollTop : 0;
             const toolsData = database.TOOLS || [];
-            htmlContent = `
+            let htmlContent = `
                 <div class="results-container" style="max-height: 300px; overflow-y: auto; display: grid; gap: 15px; padding: 10px;">
             `;
             toolsData.forEach(item => {
-                const imgSrc = item["Image URL"] || 'images/default.png';
                 htmlContent += `
                     <div class="result-card" style="
                         display: flex;
@@ -877,12 +944,12 @@ color: #ffffff;
                         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
                         transition: transform 0.2s ease, box-shadow 0.2s ease;
                         cursor: pointer;
-                    " onclick="showToolDetails('${item["Item"]}', '${item["Image URL"]}', ${item["Price"]})">
-                        <img src="${imgSrc}" 
+                    ">
+                        <img src="images/tools.png" 
                              alt="Tool Image" 
-                             style="width: 60px; height: 60px; border-radius: 50%; margin-bottom: 10px;">
+                             style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px;">
                         <div style="text-align: center; color: #fff;">
-                            <h4 style="margin: 5px 0; font-size: 18px;">${item["Item"]}</h4>
+                            <h4 style="margin: 5px 0; font-size: 18px;">${item["Item Name"] || item["Item"]}</h4>
                             ${item["Price"] ? `<p style="margin: 5px 0; font-size: 16px;">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</p>` : ''}
                         </div>
                     </div>
@@ -890,76 +957,10 @@ color: #ffffff;
             });
             htmlContent += `
                 </div>
-                <button class="back-btn" onclick="returnToToolsPopup()">رجوع</button>
+                <button class="back-btn" onclick="Swal.close()">رجوع</button>
             `;
             Swal.fire({
                 title: `أدوات الصيانة (${toolsData.length})`,
-                html: htmlContent,
-                width: '90%',
-                backdrop: 'rgba(0, 0, 0, 0.7)',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                },
-               
-
-
-showConfirmButton: false,
-                allowOutsideClick: false,
-                stopKeydownPropagation: false,
-                didOpen: () => {
-                    document.body.style.overflow = 'hidden';
-                    const container = document.querySelector('.swal2-container');
-                    container.scrollTop = previousScrollPosition;
-                },
-                willClose: () => {
-                    previousScrollPosition = document.querySelector('.swal2-container').scrollTop;
-                    document.body.style.overflow = ''; 
-                },
-                showClass: {
-                    popup: 'animate__animated animate__fadeIn'
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOut'
-                }
-            });
-        }
-
-        function showToolDetails(itemName, imageUrl, price) {
-            Swal.fire({
-                title: itemName,
-                html: `
-                    <img src="${imageUrl}" alt="${itemName}" style="width: 100%; border-radius: 20px; margin-bottom: 20px;">
-                    <p style="font-size: 18px; color: #dcdcdc;">السعر: ${price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</p>
-                `,
-                width: '600px',
-                backdrop: 'rgba(0, 0, 0, 0.7)',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm',
-                },
-                showConfirmButton: true,
-                confirmButtonText: 'رجوع',
-                allowOutsideClick: false,
-                stopKeydownPropagation: false,
-                showClass: {
-                    popup: 'animate__animated animate__fadeIn'
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOut'
-                }
-            }).then(() => {
-                // Return to the tools popup when the confirm button is clicked
-                returnToToolsPopup();
-            });
-        }
-
-        function returnToToolsPopup() {
-            Swal.fire({
-                title: `أدوات الصيانة (${database.TOOLS.length})`,
                 html: htmlContent,
                 width: '90%',
                 backdrop: 'rgba(0, 0, 0, 0.7)',
@@ -973,11 +974,8 @@ showConfirmButton: false,
                 stopKeydownPropagation: false,
                 didOpen: () => {
                     document.body.style.overflow = 'hidden';
-                    const container = document.querySelector('.swal2-container');
-                    container.scrollTop = previousScrollPosition;
                 },
                 willClose: () => {
-                    previousScrollPosition = document.querySelector('.swal2-container').scrollTop;
                     document.body.style.overflow = ''; 
                 },
                 showClass: {
@@ -991,3 +989,5 @@ showConfirmButton: false,
     </script>
 </body>
 </html>
+
+
