@@ -1,0 +1,398 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tools</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #3A6073, #16222A);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            max-width: 800px; /* زيادة العرض */
+            width: 90%;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin: 0 auto; /* يجعل الحاوية في منتصف العرض */
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .logo-container img:active {
+            transform: scale(1.1);
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 0px;
+            color: white;
+            text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
+        }
+
+        .subtitle {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
+        }
+
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* توزيع الأعمدة */
+            grid-template-rows: repeat(3, auto); /* توزيع الصفوف */
+            gap: 10px; /* مسافة بين الأزرار */
+            margin-bottom: 20px;
+        }
+
+        .category-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px; /* زيادة الارتفاع قليلاً */
+            width: 100%;
+            padding: 10px 20px; /* زيادة الحشوة */
+            border-radius: 50px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover {
+            transform: scale(1.1);
+            background: linear-gradient(45deg, #43cea2, #185a9d);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(45deg, #43cea2, #185a9d);
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
+        }
+
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 600px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            border-radius: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-card {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .result-card:hover {
+            transform: translateY(-10px);
+            scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .result-card:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.5);
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.3), rgba(255, 255, 255, 0.1));
+            filter: brightness(1.2);
+            user-select: none;
+        }
+
+        .result-card img {
+            width: 100px; /* زيادة عرض الصورة داخل الكارد */
+            height: 100px; /* زيادة ارتفاع الصورة داخل الكارد */
+            border-radius: 50%; /* جعل الصورة دائرية */
+            margin-bottom: 10px; /* تقليل المسافة أسفل الصورة */
+            object-fit: cover; /* ضبط الصورة داخل الحاوية */
+        }
+
+        .result-card h4 {
+            font-size: 18px; /* زيادة حجم النص */
+            font-weight: bold; /* سمك النص */
+            color: white; /* لون النص */
+            margin: 5px 0; /* مسافة أعلى وأسفل النص */
+        }
+
+        .result-card p {
+            font-size: 16px; /* زيادة حجم النص للسعر */
+            color: #f1f1f1; /* لون النص */
+            margin: 5px 0; /* مسافة أعلى وأسفل السعر */
+        }
+
+        .swal2-popup {
+            background: rgba(255, 255, 255, 0.1); /* لون شفاف */
+            border-radius: 15px;
+            color: #fff;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            width: 80%; /* عرض النافذة */
+            max-width: 700px; /* الحد الأقصى للعرض */
+        }
+
+        .swal2-title {
+            font-size: 24px !important;
+            font-weight: bold !important;
+            color: #f1f1f1 !important;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+        }
+
+        .swal2-html-container {
+            font-size: 16px !important;
+            color: #dcdcdc !important;
+            margin: 15px 0;
+        }
+
+        .swal2-confirm, .swal2-cancel {
+            padding: 12px 30px !important;
+            border-radius: 30px !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+            color: white !important;
+            border: none !important;
+        }
+
+        .swal2-confirm {
+            background: linear-gradient(135deg, #43cea2, #185a9d);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .swal2-cancel {
+            background: linear-gradient(135deg, #FF416C, #FF4B2B);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .swal2-confirm:hover, .swal2-cancel:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.3);
+        }
+
+        .popup-close-btn {
+            position: absolute;
+            overflow: hidden;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: #ff4d4d;
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            z-index: 1000;
+        }
+
+        .popup-close-btn:hover {
+            transform: scale(1.1);
+            background: #ff6666;
+        }
+
+        .popup-close-btn:active {
+            transform: scale(0.9);
+        }
+
+        .back-btn {
+            position: relative;
+            margin-top: 20px;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #8B0000, #B22222);
+            color: white;
+            border: none;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, #FF6347, #CD5C5C);
+            box-shadow: 0 6px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, #FF4500, #A52A2A);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <img src="images/logo.png" alt="Logo">
+        </div>
+        <h1>Phone Parts Pro</h1>
+        <div class="subtitle">All the tools you need in one place</div>
+        <div class="categories">
+            <button class="category-btn" onclick="showItems('Hand Tools')">Hand Tools</button>
+            <button class="category-btn" onclick="showItems('Power Tools')">Power Tools</button>
+            <button class="category-btn" onclick="showItems('Gardening Tools')">Gardening Tools</button>
+            <button class="category-btn" onclick="showItems('Automotive Tools')">Automotive Tools</button>
+            <button class="category-btn" onclick="showItems('Electrical Tools')">Electrical Tools</button>
+            <button class="category-btn" onclick="showItems('Plumbing Tools')">Plumbing Tools</button>
+        </div>
+        <button class="back-btn" onclick="goToHomePage()">القائمة الرئيسية</button>
+    </div>
+
+    <script>
+        const items = {
+            "Hand Tools": [
+                { name: "Hammer", img: "images/hammer.png", details: "High quality hammer for all purposes.", age: "2 years", price: 50000 },
+                { name: "Screwdriver", img: "images/screwdriver.png", details: "Durable screwdriver set with multiple heads.", age: "1 year", price: 30000 }
+            ],
+            "Power Tools": [
+                { name: "Drill", img: "images/drill.png", details: "Cordless drill with high battery life.", age: "3 years", price: 150000 },
+                { name: "Saw", img: "images/saw.png", details: "Electric saw for precision cutting.", age: "4 years", price: 200000 }
+            ],
+            "Gardening Tools": [
+                { name: "Pruner", img: "images/pruner.png", details: "Sharp pruner for efficient trimming.", age: "2 years", price: 40000 },
+                { name: "Shovel", img: "images/shovel.png", details: "Sturdy shovel for digging and planting.", age: "5 years", price: 60000 }
+            ],
+            "Automotive Tools": [
+                { name: "Wrench", img: "images/wrench.png", details: "Adjustable wrench for various sizes.", age: "2 years", price: 35000 },
+                { name: "Jack", img: "images/jack.png", details: "Hydraulic jack for lifting vehicles.", age: "3 years", price: 120000 }
+            ],
+            "Electrical Tools": [
+                { name: "Multimeter", img: "images/multimeter.png", details: "Digital multimeter for measuring voltage, current, and resistance.", age: "1 year", price: 45000 },
+                { name: "Wire Stripper", img: "images/wire_stripper.png", details: "High precision wire stripper for various wire sizes.", age: "2 years", price: 25000 }
+            ],
+            "Plumbing Tools": [
+                { name: "Pipe Wrench", img: "images/pipe_wrench.png", details: "Adjustable pipe wrench for plumbing needs.", age: "3 years", price: 55000 },
+                { name: "Plunger", img: "images/plunger.png", details: "Heavy-duty plunger for unclogging drains.", age: "1 year", price: 15000 }
+            ]
+        };
+
+        function formatPrice(price) {
+            return price.toLocaleString('en-US') + " دينار عراقي";
+        }
+
+        function showItems(category) {
+            const itemsHtml = items[category].map(item => `
+                <div class="result-card" onclick="showItemDetails('${category}', '${item.name}', '${item.img}', '${item.details}', '${item.age}', '${formatPrice(item.price)}')">
+                    <img src="${item.img}" alt="${item.name}">
+                    <h4>${item.name}</h4>
+                    <p>${item.details}</p>
+                    <p>${item.age}</p>
+                    <p>${formatPrice(item.price)}</p>
+                </div>
+            `).join('');
+
+            Swal.fire({
+                title: `${category} Items`,
+                html: `<div class="results-container">${itemsHtml}</div>
+                       <button class="back-btn" onclick="Swal.close()">رجوع</button>`,
+                width: '75%',
+                backdrop: false,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                stopKeydownPropagation: false,
+                didOpen: () => {
+                    document.body.style.overflow = 'hidden';
+                },
+                willClose: () => {
+                    document.body.style.overflow = '';
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeIn'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut'
+                }
+            });
+        }
+
+        function showItemDetails(category, name, img, details, age, price) {
+            Swal.fire({
+                title: name,
+                html: `
+                <button class="popup-close-btn" onclick="showItems('${category}')">X</button>
+                <img src="${img}" alt="${name}" style="width: 100%; max-width: 400px; border-radius: 50%; margin-bottom: 20px;">
+                <p>${details}</p>
+                <p>${age}</p>
+                <p>${price}</p>`,
+                width: '60%',
+                showConfirmButton: false,
+                backdrop: false,
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm'
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeIn'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut'
+                }
+            });
+        }
+
+        function goToHomePage() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
