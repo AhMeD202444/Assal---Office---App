@@ -500,6 +500,39 @@ h1 {
 
 
 
+.tools-btn {
+    width: 100%; /* نفس عرض شريط البحث */
+    padding: 15px; /* نفس حجم زر البحث */
+    font-size: 18px; /* حجم النص مماثل */
+    border-radius: 30px; /* زوايا مستديرة */
+    border: none;
+    background: linear-gradient(135deg, #1E3C72, #2A5298); /* لون الزر */
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px; /* مسافة بينه وبين أزرار الأصناف */
+}
+
+.tools-btn:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #2A5298, #1E3C72);
+}
+
+.tools-btn:active {
+    transform: scale(0.95);
+    background: linear-gradient(135deg, #1A2A4F, #243B55);
+}
+
+
+
+
+
+
+        
+
 
 
 .back-btn {
@@ -733,6 +766,8 @@ footer {
             <button class="category-btn" onclick="filterCategory('BATTERY', this)">BATTERY</button>
             <button class="category-btn" onclick="filterCategory('HOUSING', this)">HOUSING</button>
             <button class="category-btn" onclick="openSimilarites(this)">SIMILARITES</button>
+            <button class="tools-btn" onclick="openTools()">TOOLS</button> <!-- الزر الجديد -->
+
         </div>
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search for items...">
@@ -829,6 +864,15 @@ function filterCategory(category, button) {
 
 
 
+function openTools() {
+    window.location.href = "tools.html"; // يفتح صفحة جديدة tools.html
+}
+
+
+
+
+
+        
 async function openSimilarites(button) {
     if (localStorage.getItem("similaritesAccess") === "granted") {
         filterCategory("SIMILARITES", button);
