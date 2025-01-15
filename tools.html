@@ -6,9 +6,12 @@
     <title>Tools</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <style>
+        /* (نفس تنسيق CSS السابق) */
         body {
             font-family: 'Montserrat', sans-serif;
             background: linear-gradient(135deg, #3A6073, #16222A);
@@ -300,28 +303,28 @@
     <script>
         const items = {
             "Hand Tools": [
-                { name: "Hammer", img: "images/hammer.png", details: "High quality hammer for all purposes.", age: "2 years", price: 50000 },
-                { name: "Screwdriver", img: "images/screwdriver.png", details: "Durable screwdriver set with multiple heads.", age: "1 year", price: 30000 }
+                { name: "Hammer", img: ["images/hammer1.png", "images/hammer2.png", "images/hammer3.png"], details: "High quality hammer for all purposes.", age: "2 years", price: 50000 },
+                { name: "Screwdriver", img: ["images/screwdriver1.png", "images/screwdriver2.png", "images/screwdriver3.png"], details: "Durable screwdriver set with multiple heads.", age: "1 year", price: 30000 }
             ],
             "Power Tools": [
-                { name: "Drill", img: "images/drill.png", details: "Cordless drill with high battery life.", age: "3 years", price: 150000 },
-                { name: "Saw", img: "images/saw.png", details: "Electric saw for precision cutting.", age: "4 years", price: 200000 }
+                { name: "Drill", img: ["images/drill1.png", "images/drill2.png", "images/drill3.png"], details: "Cordless drill with high battery life.", age: "3 years", price: 150000 },
+                { name: "Saw", img: ["images/saw1.png", "images/saw2.png", "images/saw3.png"], details: "Electric saw for precision cutting.", age: "4 years", price: 200000 }
             ],
             "Gardening Tools": [
-                { name: "Pruner", img: "images/pruner.png", details: "Sharp pruner for efficient trimming.", age: "2 years", price: 40000 },
-                { name: "Shovel", img: "images/shovel.png", details: "Sturdy shovel for digging and planting.", age: "5 years", price: 60000 }
+                { name: "Pruner", img: ["images/pruner1.png", "images/pruner2.png", "images/pruner3.png"], details: "Sharp pruner for efficient trimming.", age: "2 years", price: 40000 },
+                { name: "Shovel", img: ["images/shovel1.png", "images/shovel2.png", "images/shovel3.png"], details: "Sturdy shovel for digging and planting.", age: "5 years", price: 60000 }
             ],
             "Automotive Tools": [
-                { name: "Wrench", img: "images/wrench.png", details: "Adjustable wrench for various sizes.", age: "2 years", price: 35000 },
-                { name: "Jack", img: "images/jack.png", details: "Hydraulic jack for lifting vehicles.", age: "3 years", price: 120000 }
+                { name: "Wrench", img: ["images/wrench1.png", "images/wrench2.png", "images/wrench3.png"], details: "Adjustable wrench for various sizes.", age: "2 years", price: 35000 },
+                { name: "Jack", img: ["images/jack1.png", "images/jack2.png", "images/jack3.png"], details: "Hydraulic jack for lifting vehicles.", age: "3 years", price: 120000 }
             ],
             "Electrical Tools": [
-                { name: "Multimeter", img: "images/multimeter.png", details: "Digital multimeter for measuring voltage, current, and resistance.", age: "1 year", price: 45000 },
-                { name: "Wire Stripper", img: "images/wire_stripper.png", details: "High precision wire stripper for various wire sizes.", age: "2 years", price: 25000 }
+                { name: "Multimeter", img: ["images/multimeter1.png", "images/multimeter2.png", "images/multimeter3.png"], details: "Digital multimeter for measuring voltage, current, and resistance.", age: "1 year", price: 45000 },
+                { name: "Wire Stripper", img: ["images/wire_stripper1.png", "images/wire_stripper2.png", "images/wire_stripper3.png"], details: "High precision wire stripper for various wire sizes.", age: "2 years", price: 25000 }
             ],
             "Plumbing Tools": [
-                { name: "Pipe Wrench", img: "images/pipe_wrench.png", details: "Adjustable pipe wrench for plumbing needs.", age: "3 years", price: 55000 },
-                { name: "Plunger", img: "images/plunger.png", details: "Heavy-duty plunger for unclogging drains.", age: "1 year", price: 15000 }
+                { name: "Pipe Wrench", img: ["images/pipe_wrench1.png", "images/pipe_wrench2.png", "images/pipe_wrench3.png"], details: "Adjustable pipe wrench for plumbing needs.", age: "3 years", price: 55000 },
+                { name: "Plunger", img: ["images/plunger1.png", "images/plunger2.png", "images/plunger3.png"], details: "Heavy-duty plunger for unclogging drains.", age: "1 year", price: 15000 }
             ]
         };
 
@@ -331,8 +334,8 @@
 
         function showItems(category) {
             const itemsHtml = items[category].map(item => `
-                <div class="result-card" onclick="showItemDetails('${category}', '${item.name}', '${item.img}', '${item.details}', '${item.age}', '${formatPrice(item.price)}')">
-                    <img src="${item.img}" alt="${item.name}">
+                <div class="result-card" onclick="showItemDetails('${category}', '${item.name}', ${JSON.stringify(item.img)}, '${item.details}', '${item.age}', '${formatPrice(item.price)}')">
+                    <img src="${item.img[0]}" alt="${item.name}">
                     <h4>${item.name}</h4>
                     <p>${item.details}</p>
                     <p>${item.age}</p>
@@ -364,34 +367,53 @@
             });
         }
 
-        function showItemDetails(category, name, img, details, age, price) {
-            Swal.fire({
-                title: name,
-                html: `
-                <button class="popup-close-btn" onclick="showItems('${category}')">X</button>
-                <img src="${img}" alt="${name}" style="width: 100%; max-width: 400px; border-radius: 50%; margin-bottom: 20px;">
-                <p>${details}</p>
-                <p>${age}</p>
-                <p>${price}</p>`,
-                width: '60%',
-                showConfirmButton: false,
-                backdrop: false,
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm',
-                    cancelButton: 'swal2-cancel'
+       
+
+        function showItemDetails(category, name, imgArray, details, age, price) {
+    const imagesHtml = imgArray.map(img => `<div class="swiper-slide"><img src="${img}" alt="${name}" style="width: 100%; border-radius: 10px;"></div>`).join('');
+    
+    Swal.fire({
+        title: name,
+        html: `
+        <button class="popup-close-btn" onclick="showItems('${category}')">X</button>
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper">
+                ${imagesHtml}
+            </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+        <p>${details}</p>
+        <p>${age}</p>
+        <p>${price}</p>`,
+        width: '60%',
+        showConfirmButton: false,
+        backdrop: false,
+        customClass: {
+            popup: 'swal2-popup',
+            title: 'swal2-title',
+            htmlContainer: 'swal2-html-container',
+            confirmButton: 'swal2-confirm',
+            cancelButton: 'swal2-cancel'
+        },
+        showClass: {
+            popup: 'animate__animated animate__fadeIn'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOut'
+        },
+        didOpen: () => {
+            // Initialize Swiper
+            new Swiper('.mySwiper', {
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev'
                 },
-                showClass: {
-                    popup: 'animate__animated animate__fadeIn'
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOut'
-                }
+                loop: true
             });
         }
-
+    });
+}
         function goToHomePage() {
             window.location.href = 'index.html';
         }
