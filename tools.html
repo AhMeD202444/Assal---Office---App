@@ -11,7 +11,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <style>
-        /* (نفس تنسيق CSS السابق) */
         body {
             font-family: 'Montserrat', sans-serif;
             background: linear-gradient(135deg, #3A6073, #16222A);
@@ -37,7 +36,7 @@
             border-radius: 20px;
             padding: 20px;
             text-align: center;
-            max-width: 800px; /* زيادة العرض */
+            max-width: 800px;
             width: 90%;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
@@ -54,7 +53,7 @@
             border-radius: 50%;
             overflow: hidden;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            margin: 0 auto; /* يجعل الحاوية في منتصف العرض */
+            margin: 0 auto;
         }
 
         .logo-container img {
@@ -84,9 +83,9 @@
 
         .categories {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* توزيع الأعمدة */
-            grid-template-rows: repeat(3, auto); /* توزيع الصفوف */
-            gap: 10px; /* مسافة بين الأزرار */
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, auto);
+            gap: 10px;
             margin-bottom: 20px;
         }
 
@@ -94,9 +93,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 40px; /* زيادة الارتفاع قليلاً */
+            height: 40px;
             width: 100%;
-            padding: 10px 20px; /* زيادة الحشوة */
+            padding: 10px 20px;
             border-radius: 50px;
             background: rgba(0, 0, 0, 0.3);
             color: white;
@@ -120,10 +119,10 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            height: 400px; /* تعيين ارتفاع ثابت */
-            width: 100%; /* عرض كامل */
-            max-width: 600px; /* الحد الأقصى للعرض */
-            overflow-y: auto; /* تمكين التمرير العمودي */
+            height: 400px;
+            width: 100%;
+            max-width: 600px;
+            overflow-y: auto;
             scroll-behavior: smooth;
             border-radius: 10px;
             padding: 10px;
@@ -159,34 +158,34 @@
         }
 
         .result-card img {
-            width: 100px; /* زيادة عرض الصورة داخل الكارد */
-            height: 100px; /* زيادة ارتفاع الصورة داخل الكارد */
-            border-radius: 50%; /* جعل الصورة دائرية */
-            margin-bottom: 10px; /* تقليل المسافة أسفل الصورة */
-            object-fit: cover; /* ضبط الصورة داخل الحاوية */
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            object-fit: cover;
         }
 
         .result-card h4 {
-            font-size: 18px; /* زيادة حجم النص */
-            font-weight: bold; /* سمك النص */
-            color: white; /* لون النص */
-            margin: 5px 0; /* مسافة أعلى وأسفل النص */
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            margin: 5px 0;
         }
 
         .result-card p {
-            font-size: 16px; /* زيادة حجم النص للسعر */
-            color: #f1f1f1; /* لون النص */
-            margin: 5px 0; /* مسافة أعلى وأسفل السعر */
+            font-size: 16px;
+            color: #f1f1f1;
+            margin: 5px 0;
         }
 
         .swal2-popup {
-            background: rgba(255, 255, 255, 0.1); /* لون شفاف */
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 15px;
             color: #fff;
             text-align: center;
             backdrop-filter: blur(10px);
-            width: 80%; /* عرض النافذة */
-            max-width: 700px; /* الحد الأقصى للعرض */
+            width: 80%;
+            max-width: 700px;
         }
 
         .swal2-title {
@@ -367,53 +366,51 @@
             });
         }
 
-       
-
         function showItemDetails(category, name, imgArray, details, age, price) {
-    const imagesHtml = imgArray.map(img => `<div class="swiper-slide"><img src="${img}" alt="${name}" style="width: 100%; border-radius: 10px;"></div>`).join('');
-    
-    Swal.fire({
-        title: name,
-        html: `
-        <button class="popup-close-btn" onclick="showItems('${category}')">X</button>
-        <div class="swiper mySwiper">
-            <div class="swiper-wrapper">
-                ${imagesHtml}
-            </div>
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
-        </div>
-        <p>${details}</p>
-        <p>${age}</p>
-        <p>${price}</p>`,
-        width: '60%',
-        showConfirmButton: false,
-        backdrop: false,
-        customClass: {
-            popup: 'swal2-popup',
-            title: 'swal2-title',
-            htmlContainer: 'swal2-html-container',
-            confirmButton: 'swal2-confirm',
-            cancelButton: 'swal2-cancel'
-        },
-        showClass: {
-            popup: 'animate__animated animate__fadeIn'
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOut'
-        },
-        didOpen: () => {
-            // Initialize Swiper
-            new Swiper('.mySwiper', {
-                navigation: {
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev'
+            const imagesHtml = imgArray.map(img => `<div class="swiper-slide"><img src="${img}" alt="${name}" style="width: 100%; border-radius: 10px;"></div>`).join('');
+            
+            Swal.fire({
+                title: name,
+                html: `
+                <button class="popup-close-btn" onclick="showItems('${category}')">X</button>
+                <div class="swiper mySwiper">
+                    <div class="swiper-wrapper">
+                        ${imagesHtml}
+                    </div>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                </div>
+                <p>${details}</p>
+                <p>${age}</p>
+                <p>${price}</p>`,
+                width: '60%',
+                showConfirmButton: false,
+                backdrop: false,
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
                 },
-                loop: true
+                showClass: {
+                    popup: 'animate__animated animate__fadeIn'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut'
+                },
+                didOpen: () => {
+                    new Swiper('.mySwiper', {
+                        navigation: {
+                            nextEl: '.swiper-button-next',
+                            prevEl: '.swiper-button-prev'
+                        },
+                        loop: true
+                    });
+                }
             });
         }
-    });
-}
+
         function goToHomePage() {
             window.location.href = 'index.html';
         }
