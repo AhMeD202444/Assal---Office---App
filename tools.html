@@ -333,12 +333,9 @@
 
         function showItems(category) {
             const itemsHtml = items[category].map(item => `
-                <div class="result-card" onclick="showItemDetails('${category}', '${item.name}', ${JSON.stringify(item.img)}, '${item.details}', '${item.age}', '${formatPrice(item.price)}')">
+                <div class="result-card" onclick="showItemDetails('${category}', '${item.name}', ${JSON.stringify(item.img)})">
                     <img src="${item.img[0]}" alt="${item.name}">
                     <h4>${item.name}</h4>
-                    <p>${item.details}</p>
-                    <p>${item.age}</p>
-                    <p>${formatPrice(item.price)}</p>
                 </div>
             `).join('');
 
@@ -366,7 +363,7 @@
             });
         }
 
-        function showItemDetails(category, name, imgArray, details, age, price) {
+        function showItemDetails(category, name, imgArray) {
             const imagesHtml = imgArray.map(img => `<div class="swiper-slide"><img src="${img}" alt="${name}" style="width: 100%; border-radius: 10px;"></div>`).join('');
             
             Swal.fire({
@@ -379,10 +376,7 @@
                     </div>
                     <div class="swiper-button-next"></div>
                     <div class="swiper-button-prev"></div>
-                </div>
-                <p>${details}</p>
-                <p>${age}</p>
-                <p>${price}</p>`,
+                </div>`,
                 width: '60%',
                 showConfirmButton: false,
                 backdrop: false,
