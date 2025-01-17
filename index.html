@@ -263,6 +263,36 @@ h1 {
     .tools-btn {
         grid-column: span 2; /* يجعل الزر يمتد على عمودين */
     }
+    
+    
+    .new-category-btn {
+            grid-column: span 2; /* يجعل الزر يمتد على عمودين */
+            position: relative;
+            overflow: hidden;
+            padding: 10px 20px;
+            border-radius: 50px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .new-category-btn:hover {
+            transform: scale(1.1);
+            background: linear-gradient(45deg, #43cea2, #185a9d);
+        }
+
+        .new-category-btn:active {
+            background: linear-gradient(45deg, #43cea2, #185a9d);
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
+        }
+    
+    
+    
+    
 
         .search-container {
             position: relative;
@@ -732,7 +762,9 @@ footer {
             <button class="category-btn" onclick="filterCategory('BATTERY', this)">BATTERY</button>
             <button class="category-btn" onclick="filterCategory('HOUSING', this)">HOUSING</button>
             <button class="category-btn" onclick="openSimilarites(this)">SIMILARITES</button>
-            <button class="category-btn tools-btn" onclick="openToolsPage()">TOOLS</button> <!-- زر TOOLS الجديد -->
+            <button class="category-btn tools-btn" onclick="openToolsPage()">TOOLS</button>
+            <!-- زر الصنف الجديد -->
+            <button class="new-category-btn" onclick="openLCDPage()">LCD PAGE</button>
         </div>
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search for items...">
@@ -1090,6 +1122,14 @@ async function confirmExit() {
 function openToolsPage() {
     window.location.href = 'tools.html'; // استبدل 'tools.html' بالرابط إلى الصفحة الجديدة
 }
+
+
+ // دالة لتحويل المستخدم إلى صفحة lcd.html
+        function openLCDPage() {
+            window.location.href = 'lcd.html';
+        }
+
+
 
 async function refreshData() {
     // نافذة التحميل مع دائرة التحميل الأنيقة
