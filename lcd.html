@@ -346,12 +346,13 @@ async function loadLCDItems(categoryNumber, categoryName) {
                 background: rgba(44, 62, 80, 0.95);
                 color: #ecf0f1;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                padding: 15px;
+                padding: 20px;
                 border-radius: 10px;
                 margin-bottom: 10px;
                 display: flex;
+                flex-direction: column;
                 align-items: center;
-                justify-content: space-between;
+                justify-content: center;
                 transition: transform 0.3s, box-shadow 0.3s;
                 width: 100%;
                 margin-left: auto;
@@ -367,19 +368,23 @@ async function loadLCDItems(categoryNumber, categoryName) {
                     justify-content: center;
                     border-radius: 50%;
                     font-weight: bold;
-                    margin-right: 15px;
+                    margin-bottom: 10px;
                 ">${index + 1}</div>
-                <div class="item-details" style="flex: 1; display: flex; justify-content: space-between; align-items: center;">
-                    <div class="item-name" style="font-size: 16px; font-weight: bold;">${item["Item Name"]}</div>
-                    <div class="price" style="
-                        background: #2980b9;
-                        padding: 5px 15px;
-                        border-radius: 8px;
-                        color: #fff;
-                        font-weight: bold;
-                        font-size: 14px;
-                    ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
-                </div>
+                <div class="item-name" style="
+                    font-size: 18px;
+                    font-weight: bold;
+                    text-align: center;
+                    margin-bottom: 10px;
+                ">${item["Item Name"]}</div>
+                <div class="price" style="
+                    background: #2980b9;
+                    padding: 8px 20px;
+                    border-radius: 8px;
+                    color: #fff;
+                    font-weight: bold;
+                    font-size: 16px;
+                    text-align: center;
+                ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
             </div>
         `;
     });
