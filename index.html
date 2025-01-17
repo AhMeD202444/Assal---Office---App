@@ -137,32 +137,37 @@
         }
 
         body {
-    font-family: 'Montserrat', sans-serif;
-    background: linear-gradient(135deg, #3A6073, #16222A); /* اللون الرئيسي للواجهة عند بداية التشغيل */
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column; /* تعديل التوجيه العمودي */
-    height: 100vh;
-    overflow: hidden;
-    background-size: 400% 400%;
-    animation: gradientAnimation 10s ease infinite;
-    padding-top: 40px; /* زيادة المسافة في الأعلى */
-    padding-bottom: 20px; /* إضافة مسافة في الأسفل */
-}
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #3A6073, #16222A); /* اللون الرئيسي للواجهة عند بداية التشغيل */
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* تعديل التوجيه العمودي */
+            height: 100vh;
+            overflow: hidden;
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+        }
 
-.container {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 20px;
-    text-align: center;
-    max-width: 700px;
-    width: 90%;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    margin-bottom: 10px; /* تقليل المسافة أسفل الحاوية */
-}
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            max-width: 700px;
+            width: 90%;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px; /* إضافة مسافة لزر الخروج */
+        }
+
 
 .actions-container {
     background: rgba(255, 255, 255, 0.1);
@@ -173,18 +178,14 @@
     width: 90%;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
-    margin-top: 5px; /* تقليل المسافة أعلى الحاوية */
-    margin-bottom: 10px; /* تقليل المسافة أسفل الحاوية */
+    margin-top: -10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
 }
-@keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+
+
         
 
 
@@ -757,13 +758,13 @@ footer {
     <h1>Phone Parts Pro</h1>
 
         <div class="categories">
-            <button class="category-btn" onclick="filterCategory('LCD', this)">LCD</button>
-            <button class="category-btn" onclick="filterCategory('BATTERY', this)">BATTERY</button>
-            <button class="category-btn" onclick="filterCategory('HOUSING', this)">HOUSING</button>
-            <button class="category-btn" onclick="openSimilarites(this)">SIMILARITES</button>
-            <button class="category-btn tools-btn" onclick="openToolsPage()">TOOLS</button>
+            <button class="category-btn" onclick="filterCategory('LCD', this)">شاشات</button>
+            <button class="category-btn" onclick="filterCategory('BATTERY', this)">بطاريات</button>
+            <button class="category-btn" onclick="filterCategory('HOUSING', this)">شواصي</button>
+            <button class="category-btn" onclick="openSimilarites(this)">توافقات</button>
+            <button class="category-btn tools-btn" onclick="openToolsPage()">عدد الصيانة</button>
             <!-- زر الصنف الجديد -->
-            <button class="new-category-btn" onclick="openLCDPage()">LCD PAGE</button>
+            <button class="new-category-btn" onclick="openLCDPage()">اسعار بنمط الكروب</button>
         </div>
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search for items...">
