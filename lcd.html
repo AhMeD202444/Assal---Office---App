@@ -441,47 +441,107 @@ async function loadLCDItems(categoryNumber, categoryName) {
         }
 
         async function loadHousingItems() {
-            const resultsContainer = document.getElementById("results");
-            resultsContainer.innerHTML = '';
+    const resultsContainer = document.getElementById("results");
+    resultsContainer.innerHTML = '';
 
-            if (database.HOUSING.length === 0) {
-                resultsContainer.innerHTML = `<div class="no-results">لا توجد شواصي حالياً</div>`;
-                return;
-            }
+    if (database.HOUSING.length === 0) {
+        resultsContainer.innerHTML = `<div class="no-results">لا توجد شواصي حالياً</div>`;
+        return;
+    }
 
-            let htmlContent = '<div class="results-container">';
-            database.HOUSING.forEach((item, index) => {
-                htmlContent += `
-                    <div class="result-card">
-                        <div class="circle">${index + 1}</div>
-                        <div class="item-name">${item["Item Name"]}</div>
-                        <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</div>
-                    </div>
-                `;
-            });
-            htmlContent += '</div>';
+    let htmlContent = '<div class="results-container">';
+    database.HOUSING.forEach((item, index) => {
+        htmlContent += `
+            <div class="result-card" style="
+                background: rgba(44, 62, 80, 0.95);
+                color: #ecf0f1;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 10px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.3s, box-shadow 0.3s;
+                width: 100%;
+                margin-left: auto;
+                margin-right: auto;
+            " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
+                <div class="circle" style="
+                    background: linear-gradient(135deg, #1abc9c, #16a085);
+                    color: #fff;
+                    width: 50px;
+                    height: 50px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                ">${index + 1}</div>
+                <div class="item-name" style="
+                    font-size: 18px;
+                    font-weight: bold;
+                    text-align: center;
+                    margin-bottom: 10px;
+                ">${item["Item Name"]}</div>
+                <div class="price" style="
+                    background: #2980b9;
+                    padding: 8px 20px;
+                    border-radius: 8px;
+                    color: #fff;
+                    font-weight: bold;
+                    font-size: 16px;
+                    text-align: center;
+                ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
+            </div>
+        `;
+    });
+    htmlContent += '</div>';
 
-            Swal.fire({
-                title: `شواصي - ${database.HOUSING.length} شواصي`,
-                html: htmlContent,
-                showConfirmButton: false,
-                width: '100%',
-                backdrop: `
-                    rgba(0, 0, 0, 0.7)
-                `,
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                },
-                didOpen: () => {
-                    document.body.style.overflow = 'hidden';
-                },
-                willClose: () => {
-                    document.body.style.overflow = '';
-                }
-            });
+    Swal.fire({
+        title: `شواصي - ${database.HOUSING.length} شواصي`,
+        html: htmlContent + `
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                <button class="swal2-confirm swal2-styled" style="
+                    background: linear-gradient(135deg, #8e44ad, #9b59b6);
+                    border-radius: 12px;
+                    padding: 12px 25px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+                <button class="swal2-cancel swal2-styled" style="
+                    background: linear-gradient(135deg, #e74c3c, #c0392b);
+                    border-radius: 12px;
+                    padding: 12px 25px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    color: white;" onclick="Swal.close()">رجوع</button>
+            </div>
+        `,
+        showConfirmButton: false,
+        width: '100%',
+        backdrop: `
+            rgba(0, 0, 0, 0.7)
+        `,
+        customClass: {
+            popup: 'swal2-popup',
+            title: 'swal2-title',
+            htmlContainer: 'swal2-html-container',
+        },
+        didOpen: () => {
+            document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
+            document.querySelector('.swal2-popup').style.color = '#ecf0f1';
+            document.querySelector('.swal2-popup').style.borderRadius = '15px';
+            document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
+            document.body.style.overflow = 'hidden';
+        },
+        willClose: () => {
+            document.body.style.overflow = '';
         }
+    });
+}
 
        async function loadBatteryItems() {
     const resultsContainer = document.getElementById("results");
@@ -495,10 +555,49 @@ async function loadLCDItems(categoryNumber, categoryName) {
     let htmlContent = '<div class="results-container">';
     database.BATTERY.forEach((item, index) => {
         htmlContent += `
-            <div class="result-card">
-                <div class="circle">${index + 1}</div>
-                <div class="item-name">${item["Item Name"]}</div>
-                <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</div>
+            <div class="result-card" style="
+                background: rgba(44, 62, 80, 0.95);
+                color: #ecf0f1;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 10px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.3s, box-shadow 0.3s;
+                width: 100%;
+                margin-left: auto;
+                margin-right: auto;
+            " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
+                <div class="circle" style="
+                    background: linear-gradient(135deg, #1abc9c, #16a085);
+                    color: #fff;
+                    width: 50px;
+                    height: 50px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                ">${index + 1}</div>
+                <div class="item-name" style="
+                    font-size: 18px;
+                    font-weight: bold;
+                    text-align: center;
+                    margin-bottom: 10px;
+                ">${item["Item Name"]}</div>
+                <div class="price" style="
+                    background: #2980b9;
+                    padding: 8px 20px;
+                    border-radius: 8px;
+                    color: #fff;
+                    font-weight: bold;
+                    font-size: 16px;
+                    text-align: center;
+                ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
             </div>
         `;
     });
@@ -506,7 +605,24 @@ async function loadLCDItems(categoryNumber, categoryName) {
 
     Swal.fire({
         title: `بطاريات - ${database.BATTERY.length} بطاريات`,
-        html: htmlContent,
+        html: htmlContent + `
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                <button class="swal2-confirm swal2-styled" style="
+                    background: linear-gradient(135deg, #8e44ad, #9b59b6);
+                    border-radius: 12px;
+                    padding: 12px 25px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+                <button class="swal2-cancel swal2-styled" style="
+                    background: linear-gradient(135deg, #e74c3c, #c0392b);
+                    border-radius: 12px;
+                    padding: 12px 25px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    color: white;" onclick="Swal.close()">رجوع</button>
+            </div>
+        `,
         showConfirmButton: false,
         width: '100%',
         backdrop: `
@@ -518,6 +634,10 @@ async function loadLCDItems(categoryNumber, categoryName) {
             htmlContainer: 'swal2-html-container',
         },
         didOpen: () => {
+            document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
+            document.querySelector('.swal2-popup').style.color = '#ecf0f1';
+            document.querySelector('.swal2-popup').style.borderRadius = '15px';
+            document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
             document.body.style.overflow = 'hidden';
         },
         willClose: () => {
@@ -525,7 +645,6 @@ async function loadLCDItems(categoryNumber, categoryName) {
         }
     });
 }
-
 function filterLCDCategory(categoryNumber, categoryName) {
     loadLCDItems(categoryNumber, categoryName);
 }
