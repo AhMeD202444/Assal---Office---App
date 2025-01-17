@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCD Categories</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-circle {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(255, 255, 255, 0.2);
+            border-top: 8px solid #43cea2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .popup-content {
+            position: relative;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 1200px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #3A6073, #16222A);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            max-width: 800px;
+            width: 95%;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin: 0 auto;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .logo-container img:active {
+            transform: scale(1.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: white;
+            text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
+            margin-top: 5px;
+        }
+
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            column-gap: 10px;
+            row-gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .category-btn {
+            position: relative;
+            overflow: hidden;
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover {
+            transform: scale(1.1);
+            background: linear-gradient(45deg, #43cea2, #185a9d);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(45deg, #43cea2, #185a9d);
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
+        }
+
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 600px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            border-radius: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-card {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .result-card:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.5);
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.3), rgba(255, 255, 255, 0.1));
+            filter: brightness(1.2);
+        }
+
+        .result-card .circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #43cea2, #185a9d);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            margin-right: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-card .item-name {
+            flex: 1;
+            text-align: left;
+            font-size: 14px;
+            color: #f1f1f1;
+            margin-right: 10px;
+        }
+
+        .result-card .price {
+            background: #185a9d;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .no-results {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+            margin-top: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            animation: fadeIn 0.3s ease-in-out;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .no-results:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn {
+            position: relative;
+            margin-top: 10px;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #8B0000, #B22222);
+            color: white;
+            border: none;
+            font-size: 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(135deg, #FF6347, #CD5C5C);
+            box-shadow: 0 6px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, #FF4500, #A52A2A);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <img src="images/logo.png" alt="Logo">
+        </div>
+        <h1>LCD Categories</h1>
+
+        <div class="categories">
+            <button class="category-btn" onclick="filterLCDCategory(1, 'سامسونك')">سامسونك</button>
+            <button class="category-btn" onclick="filterLCDCategory(2, 'هواوي')">هواوي</button>
+            <button class="category-btn" onclick="filterLCDCategory(3, 'ايفون')">ايفون</button>
+            <button class="category-btn" onclick="filterLCDCategory(4, 'نوكيا')">نوكيا</button>
+            <button class="category-btn" onclick="filterLCDCategory(5, 'شاومي')">شاومي</button>
+            <button class="category-btn" onclick="filterLCDCategory(6, 'انفنكس')">انفنكس</button>
+            <button class="category-btn" onclick="filterLCDCategory(7, 'ريلمي')">ريلمي</button>
+            <button class="category-btn" onclick="filterLCDCategory(8, 'تكنو')">تكنو</button>
+            <button class="category-btn" onclick="filterLCDCategory(9, 'اوبو')">اوبو</button>
+            <button class="category-btn" onclick="filterLCDCategory(10, 'فيفو')">فيفو</button>
+            <button class="category-btn" onclick="filterLCDCategory(11, 'ايتل')">ايتل</button>
+            <button class="category-btn" onclick="filterLCDCategory(12, 'TCL')">TCL</button>
+            <button class="category-btn" onclick="filterLCDCategory(13, 'لينوفو')">لينوفو</button>
+            <button class="category-btn" onclick="filterLCDCategory(14, 'بلاك فيو')">بلاك فيو</button>
+            <button class="category-btn" onclick="filterLCDCategory(15, 'هايسنس')">هايسنس</button>
+            <button class="category-btn" onclick="filterLCDCategory(16, 'موتورلا')">موتورلا</button>
+            <button class="category-btn" onclick="filterLCDCategory(17, 'ZTE')">ZTE</button>
+            <button class="category-btn" onclick="filterLCDCategory(18, 'ALCATEL')">ALCATEL</button>
+            <button class="category-btn" onclick="filterHousingCategory()">شواصي</button>
+            <button class="category-btn" onclick="filterBatteryCategory()">بطاريات</button>
+            <button class="category-btn" onclick="filterBatteryCategory()">اخرى</button>
+
+        </div>
+    </div>
+
+    <div id="results" class="results"></div>
+    <button class="back-btn" onclick="goBack()">رجوع</button>
+
+    <script>
+        const dropboxMainFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file1" + "?t=" + new Date().getTime();
+        let database = {};
+
+        async function loadExcelFiles() {
+            const mainResponse = await fetch(dropboxMainFile);
+            const mainBuffer = await mainResponse.arrayBuffer();
+            const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
+            database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {});
+            database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
+            database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
+        }
+
+        async function loadLCDItems(categoryNumber, categoryName) {
+            const resultsContainer = document.getElementById("results");
+            resultsContainer.innerHTML = ''; 
+
+            const filteredItems = database.LCD.filter(item => item["الصنف"] == categoryNumber);
+
+            if (filteredItems.length === 0) {
+                resultsContainer.innerHTML = `<div class="no-results">لا توجد شاشات لهذا الصنف حالياً</div>`;
+                return;
+            }
+
+            let htmlContent = '<div class="results-container">';
+            filteredItems.forEach((item, index) => {
+                htmlContent += `
+                    <div class="result-card">
+                        <div class="circle">${index + 1}</div>
+                        <div class="item-name">${item["Item Name"]}</div>
+                        <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</div>
+                    </div>
+                `;
+            });
+            htmlContent += '</div>';
+
+            Swal.fire({
+                title: `${categoryName} - ${filteredItems.length} شاشات`,
+                html: htmlContent,
+                showConfirmButton: false,
+                width: '100%',
+                backdrop: `
+                    rgba(0, 0, 0, 0.7)
+                `,
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                },
+                didOpen: () => {
+                    document.body.style.overflow = 'hidden';
+                },
+                willClose: () => {
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
+        async function filterHousingCategory() {
+            await loadHousingItems();
+        }
+
+        async function filterBatteryCategory() {
+            await loadBatteryItems();
+        }
+
+        async function loadHousingItems() {
+            const resultsContainer = document.getElementById("results");
+            resultsContainer.innerHTML = '';
+
+            if (database.HOUSING.length === 0) {
+                resultsContainer.innerHTML = `<div class="no-results">لا توجد شواصي حالياً</div>`;
+                return;
+            }
+
+            let htmlContent = '<div class="results-container">';
+            database.HOUSING.forEach((item, index) => {
+                htmlContent += `
+                    <div class="result-card">
+                        <div class="circle">${index + 1}</div>
+                        <div class="item-name">${item["Item Name"]}</div>
+                        <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</div>
+                    </div>
+                `;
+            });
+            htmlContent += '</div>';
+
+            Swal.fire({
+                title: `شواصي - ${database.HOUSING.length} شواصي`,
+                html: htmlContent,
+                showConfirmButton: false,
+                width: '100%',
+                backdrop: `
+                    rgba(0, 0, 0, 0.7)
+                `,
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                },
+                didOpen: () => {
+                    document.body.style.overflow = 'hidden';
+                },
+                willClose: () => {
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+
+       async function loadBatteryItems() {
+    const resultsContainer = document.getElementById("results");
+    resultsContainer.innerHTML = '';
+
+    if (database.BATTERY.length === 0) {
+        resultsContainer.innerHTML = `<div class="no-results">لا توجد بطاريات حالياً</div>`;
+        return;
+    }
+
+    let htmlContent = '<div class="results-container">';
+    database.BATTERY.forEach((item, index) => {
+        htmlContent += `
+            <div class="result-card">
+                <div class="circle">${index + 1}</div>
+                <div class="item-name">${item["Item Name"]}</div>
+                <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</div>
+            </div>
+        `;
+    });
+    htmlContent += '</div>';
+
+    Swal.fire({
+        title: `بطاريات - ${database.BATTERY.length} بطاريات`,
+        html: htmlContent,
+        showConfirmButton: false,
+        width: '100%',
+        backdrop: `
+            rgba(0, 0, 0, 0.7)
+        `,
+        customClass: {
+            popup: 'swal2-popup',
+            title: 'swal2-title',
+            htmlContainer: 'swal2-html-container',
+        },
+        didOpen: () => {
+            document.body.style.overflow = 'hidden';
+        },
+        willClose: () => {
+            document.body.style.overflow = '';
+        }
+    });
+}
+
+function filterLCDCategory(categoryNumber, categoryName) {
+    loadLCDItems(categoryNumber, categoryName);
+}
+
+loadExcelFiles().then(() => {
+    console.log("Excel files loaded successfully");
+});
+
+// Function to go back to the previous page or reset the view
+function goBack() {
+    window.location.href = 'index.html';
+}
+
+ loadExcelFiles();
+    </script>
+</body>
+</html>
