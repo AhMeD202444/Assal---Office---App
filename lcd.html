@@ -340,15 +340,15 @@ async function loadLCDItems(categoryNumber, categoryName) {
     }
 
     let htmlContent = '<div class="results-container">';
-    filteredItems.forEach((item, index) => {
+    filteredItems.forEach((item) => {
         htmlContent += `
             <div class="result-card" style="
                 background: rgba(44, 62, 80, 0.95);
                 color: #ecf0f1;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                padding: 20px;
-                border-radius: 10px;
-                margin-bottom: 10px;
+                padding: 10px;
+                border-radius: 8px;
+                margin-bottom: 8px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -358,31 +358,19 @@ async function loadLCDItems(categoryNumber, categoryName) {
                 margin-left: auto;
                 margin-right: auto;
             " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
-                <div class="circle" style="
-                    background: linear-gradient(135deg, #1abc9c, #16a085);
-                    color: #fff;
-                    width: 50px;
-                    height: 50px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 50%;
-                    font-weight: bold;
-                    margin-bottom: 10px;
-                ">${index + 1}</div>
                 <div class="item-name" style="
-                    font-size: 18px;
+                    font-size: 16px;
                     font-weight: bold;
                     text-align: center;
-                    margin-bottom: 10px;
+                    margin-bottom: 8px;
                 ">${item["Item Name"]}</div>
                 <div class="price" style="
                     background: #2980b9;
-                    padding: 8px 20px;
-                    border-radius: 8px;
+                    padding: 6px 15px;
+                    border-radius: 6px;
                     color: #fff;
                     font-weight: bold;
-                    font-size: 16px;
+                    font-size: 14px;
                     text-align: center;
                 ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
             </div>
@@ -440,7 +428,7 @@ async function loadLCDItems(categoryNumber, categoryName) {
             await loadBatteryItems();
         }
 
-        async function loadHousingItems() {
+       async function loadHousingItems() {
     const resultsContainer = document.getElementById("results");
     resultsContainer.innerHTML = '';
 
@@ -450,15 +438,15 @@ async function loadLCDItems(categoryNumber, categoryName) {
     }
 
     let htmlContent = '<div class="results-container">';
-    database.HOUSING.forEach((item, index) => {
+    database.HOUSING.forEach((item) => {
         htmlContent += `
             <div class="result-card" style="
                 background: rgba(44, 62, 80, 0.95);
                 color: #ecf0f1;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                padding: 20px;
-                border-radius: 10px;
-                margin-bottom: 10px;
+                padding: 10px;
+                border-radius: 8px;
+                margin-bottom: 8px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -468,31 +456,19 @@ async function loadLCDItems(categoryNumber, categoryName) {
                 margin-left: auto;
                 margin-right: auto;
             " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
-                <div class="circle" style="
-                    background: linear-gradient(135deg, #1abc9c, #16a085);
-                    color: #fff;
-                    width: 50px;
-                    height: 50px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 50%;
-                    font-weight: bold;
-                    margin-bottom: 10px;
-                ">${index + 1}</div>
                 <div class="item-name" style="
-                    font-size: 18px;
+                    font-size: 16px;
                     font-weight: bold;
                     text-align: center;
-                    margin-bottom: 10px;
+                    margin-bottom: 8px;
                 ">${item["Item Name"]}</div>
                 <div class="price" style="
                     background: #2980b9;
-                    padding: 8px 20px;
-                    border-radius: 8px;
+                    padding: 6px 15px;
+                    border-radius: 6px;
                     color: #fff;
                     font-weight: bold;
-                    font-size: 16px;
+                    font-size: 14px;
                     text-align: center;
                 ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
             </div>
@@ -543,6 +519,7 @@ async function loadLCDItems(categoryNumber, categoryName) {
     });
 }
 
+
        async function loadBatteryItems() {
     const resultsContainer = document.getElementById("results");
     resultsContainer.innerHTML = '';
@@ -553,15 +530,15 @@ async function loadLCDItems(categoryNumber, categoryName) {
     }
 
     let htmlContent = '<div class="results-container">';
-    database.BATTERY.forEach((item, index) => {
+    database.BATTERY.forEach((item) => {
         htmlContent += `
             <div class="result-card" style="
                 background: rgba(44, 62, 80, 0.95);
                 color: #ecf0f1;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                padding: 20px;
-                border-radius: 10px;
-                margin-bottom: 10px;
+                padding: 10px;
+                border-radius: 8px;
+                margin-bottom: 8px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -571,31 +548,19 @@ async function loadLCDItems(categoryNumber, categoryName) {
                 margin-left: auto;
                 margin-right: auto;
             " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
-                <div class="circle" style="
-                    background: linear-gradient(135deg, #1abc9c, #16a085);
-                    color: #fff;
-                    width: 50px;
-                    height: 50px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 50%;
-                    font-weight: bold;
-                    margin-bottom: 10px;
-                ">${index + 1}</div>
                 <div class="item-name" style="
-                    font-size: 18px;
+                    font-size: 16px;
                     font-weight: bold;
                     text-align: center;
-                    margin-bottom: 10px;
+                    margin-bottom: 8px;
                 ">${item["Item Name"]}</div>
                 <div class="price" style="
                     background: #2980b9;
-                    padding: 8px 20px;
-                    border-radius: 8px;
+                    padding: 6px 15px;
+                    border-radius: 6px;
                     color: #fff;
                     font-weight: bold;
-                    font-size: 16px;
+                    font-size: 14px;
                     text-align: center;
                 ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
             </div>
