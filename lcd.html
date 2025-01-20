@@ -440,44 +440,45 @@
             htmlContent += '</div>';
 
             Swal.fire({
-                title: `${categoryName} - ${filteredItems.length} شاشات`,
-                html: htmlContent + `
-                    <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-                        <button class="swal2-confirm swal2-styled" style="
-                            background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                            border-radius: 25px;
-                            padding: 12px 25px;
-                            font-size: 14px;
-                            font-weight: bold;
-                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                            transition: transform 0.2s ease, box-shadow 0.2s ease;
-                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-                        <button class="popup-close" onclick="Swal.close()"></button>
-                    </div>
-                `,
-                showConfirmButton: false,
-                width: '100%',
-                backdrop: `
-                    rgba(0, 0, 0, 0.7)
-                `,
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                },
-                didOpen: () => {
-                    document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
-                    document.querySelector('.swal2-popup').style.color = '#ecf0f1';
-                    document.querySelector('.swal2-popup').style.borderRadius = '15px';
-                    document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
-                    document.body.style.overflow = 'hidden';
-                    preventScroll();
-                },
-                willClose: () => {
-                    document.body.style.overflow = '';
-                    allowScroll();
-                }
-            });
+    title: `${categoryName} - ${filteredItems.length} شاشات`,
+    html: `
+        <div class="popup-close" onclick="Swal.close()"></div>
+        ${htmlContent}
+        <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+            <button class="swal2-confirm swal2-styled" style="
+                background: linear-gradient(135deg, #8e44ad, #9b59b6);
+                border-radius: 25px;
+                padding: 12px 25px;
+                font-size: 14px;
+                font-weight: bold;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+        </div>
+    `,
+    showConfirmButton: false,
+    width: '100%',
+    backdrop: `
+        rgba(0, 0, 0, 0.7)
+    `,
+    customClass: {
+        popup: 'swal2-popup',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container',
+    },
+    didOpen: () => {
+        document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
+        document.querySelector('.swal2-popup').style.color = '#ecf0f1';
+        document.querySelector('.swal2-popup').style.borderRadius = '15px';
+        document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
+        document.body.style.overflow = 'hidden';
+        preventScroll();
+    },
+    willClose: () => {
+        document.body.style.overflow = '';
+        allowScroll();
+    }
+});
         }
 
         function filterLCDCategory(categoryNumber, categoryName) {
@@ -543,42 +544,43 @@
             Swal.fire({
                 title: `شواصي - ${database.HOUSING.length} شواصي`,
                 html: htmlContent + `
-                    <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-                        <button class="swal2-confirm swal2-styled" style="
-                            background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                            border-radius: 25px;
-                            padding: 12px 25px;
-                            font-size: 14px;
-                            font-weight: bold;
-                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                            transition: transform 0.2s ease, box-shadow 0.2s ease;
-                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-                        <button class="popup-close" onclick="Swal.close()"></button>
-                    </div>
-                `,
-                showConfirmButton: false,
-                width: '100%',
-                backdrop: `
-                    rgba(0, 0, 0, 0.7)
-                `,
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                },
-                didOpen: () => {
-                    document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
-                    document.querySelector('.swal2-popup').style.color = '#ecf0f1';
-                    document.querySelector('.swal2-popup').style.borderRadius = '15px';
-                    document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
-                    document.body.style.overflow = 'hidden';
-                    preventScroll();
-                },
-                willClose: () => {
-                    document.body.style.overflow = '';
-                    allowScroll();
-                }
-            });
+                    <div class="popup-close" onclick="Swal.close()"></div>
+        ${htmlContent}
+        <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+            <button class="swal2-confirm swal2-styled" style="
+                background: linear-gradient(135deg, #8e44ad, #9b59b6);
+                border-radius: 25px;
+                padding: 12px 25px;
+                font-size: 14px;
+                font-weight: bold;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+        </div>
+    `,
+    showConfirmButton: false,
+    width: '100%',
+    backdrop: `
+        rgba(0, 0, 0, 0.7)
+    `,
+    customClass: {
+        popup: 'swal2-popup',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container',
+    },
+    didOpen: () => {
+        document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
+        document.querySelector('.swal2-popup').style.color = '#ecf0f1';
+        document.querySelector('.swal2-popup').style.borderRadius = '15px';
+        document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
+        document.body.style.overflow = 'hidden';
+        preventScroll();
+    },
+    willClose: () => {
+        document.body.style.overflow = '';
+        allowScroll();
+    }
+});
         }
 
         async function loadBatteryItems() {
@@ -632,42 +634,43 @@
             Swal.fire({
                 title: `بطاريات - ${database.BATTERY.length} بطاريات`,
                 html: htmlContent + `
-                    <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-                        <button class="swal2-confirm swal2-styled" style="
-                            background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                            border-radius: 25px;
-                            padding: 12px 25px;
-                            font-size: 14px;
-                            font-weight: bold;
-                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                            transition: transform 0.2s ease, box-shadow 0.2s ease;
-                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-                        <button class="popup-close" onclick="Swal.close()"></button>
-                    </div>
-                `,
-                showConfirmButton: false,
-                width: '100%',
-                backdrop: `
-                    rgba(0, 0, 0, 0.7)
-                `,
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                },
-                didOpen: () => {
-                    document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
-                    document.querySelector('.swal2-popup').style.color = '#ecf0f1';
-                    document.querySelector('.swal2-popup').style.borderRadius = '15px';
-                    document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
-                    document.body.style.overflow = 'hidden';
-                    preventScroll();
-                },
-                willClose: () => {
-                    document.body.style.overflow = '';
-                    allowScroll();
-                }
-            });
+                    <div class="popup-close" onclick="Swal.close()"></div>
+        ${htmlContent}
+        <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+            <button class="swal2-confirm swal2-styled" style="
+                background: linear-gradient(135deg, #8e44ad, #9b59b6);
+                border-radius: 25px;
+                padding: 12px 25px;
+                font-size: 14px;
+                font-weight: bold;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+                color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+        </div>
+    `,
+    showConfirmButton: false,
+    width: '100%',
+    backdrop: `
+        rgba(0, 0, 0, 0.7)
+    `,
+    customClass: {
+        popup: 'swal2-popup',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container',
+    },
+    didOpen: () => {
+        document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
+        document.querySelector('.swal2-popup').style.color = '#ecf0f1';
+        document.querySelector('.swal2-popup').style.borderRadius = '15px';
+        document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
+        document.body.style.overflow = 'hidden';
+        preventScroll();
+    },
+    willClose: () => {
+        document.body.style.overflow = '';
+        allowScroll();
+    }
+});
         }
 
         function goBack() {
