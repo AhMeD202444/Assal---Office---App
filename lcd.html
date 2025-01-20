@@ -429,27 +429,28 @@ async function loadLCDItems(categoryNumber, categoryName) {
     `,
     showConfirmButton: false,
     width: '100%',
-   backdrop: false, // تثبيت الواجهة
+    backdrop: false, // تثبيت الواجهة
     backdrop: `rgba(0, 0, 0, 0.7)`,
     customClass: {
         popup: 'swal2-popup',
         title: 'swal2-title',
         htmlContainer: 'swal2-html-container',
     },
-   showClass: {
+    showClass: {
         popup: 'animate__animated animate__zoomIn'
     },
     hideClass: {
         popup: 'animate__animated animate__zoomOut'
     },
-
     didOpen: () => {
         document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
         document.querySelector('.swal2-popup').style.color = '#ecf0f1';
         document.querySelector('.swal2-popup').style.borderRadius = '15px';
         document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
+        Swal.getPopup().style.overflow = 'hidden'; // تثبيت الواجهة
     },
     willClose: () => {
+        document.body.style.overflow = '';
     }
 });
 }
