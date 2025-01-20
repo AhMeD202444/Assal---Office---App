@@ -314,6 +314,50 @@
         font-size: 14px;
         box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
     }
+    
+    
+    .swal2-popup {
+    background: rgba(255, 255, 255, 0.2) !important; /* خلفية شفافة */
+    backdrop-filter: blur(10px); /* تأثير ضبابي */
+    border-radius: 15px; /* زوايا دائرية */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); /* ظل */
+    color: #ffffff !important; /* نص أبيض */
+}
+
+.swal2-title {
+    color: #ffffff !important; /* لون العنوان */
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* ظل للنص */
+}
+
+.swal2-html-container {
+    color: #dcdcdc !important; /* لون النص الداخلي */
+}
+
+.swal2-confirm {
+    background: linear-gradient(135deg, #43cea2, #185a9d) !important; /* لون زر التأكيد */
+    border: none !important;
+    border-radius: 25px !important;
+    color: #ffffff !important;
+    padding: 10px 20px !important;
+    font-size: 14px !important;
+    font-weight: bold !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.swal2-confirm:hover {
+    background: linear-gradient(135deg, #5de3b5, #1a69b3) !important;
+    box-shadow: 0 6px 15px rgba(255, 255, 255, 0.3) !important;
+}
+
+.swal2-confirm:active {
+    transform: scale(0.95) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+    
+    
+    
+    
 
     </style>
 </head>
@@ -394,42 +438,42 @@
             htmlContent += '</div>';
 
             Swal.fire({
-                title: `${categoryName} - ${filteredItems.length} شاشات`,
-                html: `
-                    <div class="popup-close" onclick="Swal.close()"></div>
-                    ${htmlContent}
-                    <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-                        <button class="swal2-confirm swal2-styled" style="
-                            background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                            border-radius: 25px;
-                            padding: 12px 25px;
-                            font-size: 14px;
-                            font-weight: bold;
-                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                            transition: transform 0.2s ease, box-shadow 0.2s ease;
-                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-                    </div>
-                `,
-                showConfirmButton: false,
-                width: '100%',
-                backdrop: `rgba(0, 0, 0, 0.7)`,
-                backdrop: false,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                stopKeydownPropagation: false,
-                didOpen: () => {
-                    document.body.style.overflow = 'hidden';
-                },
-                willClose: () => {
-                    document.body.style.overflow = '';
-                },
-                showClass: {
-                    popup: 'animate__animated animate__fadeIn'
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOut'
-                }
-            });
+    title: `${categoryName} - ${filteredItems.length} شاشات`,
+    html: `
+        <div class="popup-close" onclick="Swal.close()"></div>
+        ${htmlContent}
+        <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+            <button class="swal2-confirm swal2-styled" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+        </div>
+    `,
+    
+    showConfirmButton: false,
+    width: '100%',
+    backdrop: `rgba(0, 0, 0, 0.7)`,
+    backdrop: false,
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    stopKeydownPropagation: false,
+    
+    customClass: {
+        popup: 'swal2-popup', /* هنا يتم إضافة تصميم النافذة */
+        title: 'swal2-title', /* هنا يتم تصميم العنوان */
+        htmlContainer: 'swal2-html-container', /* هنا يتم تصميم النصوص */
+        confirmButton: 'swal2-confirm' /* هنا يتم تصميم الزر */
+    },
+    showClass: {
+        popup: 'animate__animated animate__fadeIn'
+    },
+    hideClass: {
+        popup: 'animate__animated animate__fadeOut'
+    },
+    didOpen: () => {
+        document.body.style.overflow = 'hidden';
+    },
+    willClose: () => {
+        document.body.style.overflow = '';
+    }
+});
         }
 
         function filterLCDCategory(categoryNumber, categoryName) {
@@ -467,40 +511,40 @@
             htmlContent += '</div>';
 
             Swal.fire({
-                title: `شواصي - ${database.HOUSING.length} شواصي`,
-                html: htmlContent + `
-                    <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-                        <button class="swal2-confirm swal2-styled" style="
-                            background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                            border-radius: 25px;
-                            padding: 12px 25px;
-                            font-size: 14px;
-                            font-weight: bold;
-                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                            transition: transform 0.2s ease, box-shadow 0.2s ease;
-                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-                    </div>
-                `,
-                showConfirmButton: false,
-                width: '100%',
-                backdrop: `rgba(0, 0, 0, 0.7)`,
-               backdrop: false,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                stopKeydownPropagation: false,
-                didOpen: () => {
-                    document.body.style.overflow = 'hidden';
-                },
-                willClose: () => {
-                    document.body.style.overflow = '';
-                },
-                showClass: {
-                    popup: 'animate__animated animate__fadeIn'
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOut'
-                }
-            });
+    title: `شواصي - ${database.HOUSING.length} شواصي`,
+    html: `
+        <div class="popup-close" onclick="Swal.close()"></div>
+        ${htmlContent}
+        <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+            <button class="swal2-confirm swal2-styled" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+        </div>
+    `,
+    showConfirmButton: false,
+    width: '100%',
+    backdrop: `rgba(0, 0, 0, 0.7)`,
+    backdrop: false,
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    stopKeydownPropagation: false,
+    customClass: {
+        popup: 'swal2-popup',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container',
+        confirmButton: 'swal2-confirm'
+    },
+    showClass: {
+        popup: 'animate__animated animate__fadeIn'
+    },
+    hideClass: {
+        popup: 'animate__animated animate__fadeOut'
+    },
+    didOpen: () => {
+        document.body.style.overflow = 'hidden';
+    },
+    willClose: () => {
+        document.body.style.overflow = '';
+    }
+});
         }
 
         async function loadBatteryItems() {
@@ -526,40 +570,40 @@
             htmlContent += '</div>';
 
             Swal.fire({
-                title: `بطاريات - ${database.BATTERY.length} بطاريات`,
-                html: htmlContent + `
-                    <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-                        <button class="swal2-confirm swal2-styled" style="
-                            background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                            border-radius: 25px;
-                            padding: 12px 25px;
-                            font-size: 14px;
-                            font-weight: bold;
-                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                            transition: transform 0.2s ease, box-shadow 0.2s ease;
-                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-                    </div>
-                `,
-                showConfirmButton: false,
-                width: '100%',
-                backdrop: `rgba(0, 0, 0, 0.7)`,
-               backdrop: false,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                stopKeydownPropagation: false,
-                didOpen: () => {
-                    document.body.style.overflow = 'hidden';
-                },
-                willClose: () => {
-                    document.body.style.overflow = '';
-                },
-                showClass: {
-                    popup: 'animate__animated animate__fadeIn'
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOut'
-                }
-            });
+    title: `بطاريات - ${database.BATTERY.length} بطاريات`,
+    html: `
+        <div class="popup-close" onclick="Swal.close()"></div>
+        ${htmlContent}
+        <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+            <button class="swal2-confirm swal2-styled" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+        </div>
+    `,
+    showConfirmButton: false,
+    width: '100%',
+    backdrop: `rgba(0, 0, 0, 0.7)`,
+    backdrop: false,
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    stopKeydownPropagation: false,
+    customClass: {
+        popup: 'swal2-popup',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container',
+        confirmButton: 'swal2-confirm'
+    },
+    showClass: {
+        popup: 'animate__animated animate__fadeIn'
+    },
+    hideClass: {
+        popup: 'animate__animated animate__fadeOut'
+    },
+    didOpen: () => {
+        document.body.style.overflow = 'hidden';
+    },
+    willClose: () => {
+        document.body.style.overflow = '';
+    }
+});
         }
 
         function goBack() {
