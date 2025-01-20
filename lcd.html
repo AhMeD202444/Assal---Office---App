@@ -60,6 +60,37 @@
         animation: fadeIn 0.6s ease-in-out; /* حركة دخول */
     }
 
+    .popup-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        background: #e74c3c;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .popup-close::before, .popup-close::after {
+        content: '';
+        position: absolute;
+        width: 2px;
+        height: 16px;
+        background: white;
+    }
+
+    .popup-close::before {
+        transform: rotate(45deg);
+    }
+
+    .popup-close::after {
+        transform: rotate(-45deg);
+    }
+
     @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -261,16 +292,15 @@
 
     .back-btn {
         position: relative;
-    overflow: hidden; /* يمنع التأثير من الخروج */
-    background: linear-gradient(135deg, #8B0000, #B22222);
-    width: 280px;
-    height: 40px;
-    font-size: 16px;
-    border-radius: 30px; /* زوايا مستديرة */
-    color: white;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-
+        overflow: hidden; /* يمنع التأثير من الخروج */
+        background: linear-gradient(135deg, #8B0000, #B22222);
+        width: 280px;
+        height: 40px;
+        font-size: 16px;
+        border-radius: 30px; /* زوايا مستديرة */
+        color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .back-btn:hover {
@@ -409,13 +439,11 @@
             });
             htmlContent += '</div>';
 
-Swal.fire({
+            Swal.fire({
                 title: `${categoryName} - ${filteredItems.length} شاشات`,
                 html: htmlContent + `
-                    <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                    <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
                         <button class="swal2-confirm swal2-styled" style="
-                            position: relative;
-                            overflow: hidden; /* يمنع التأثير من الخروج */
                             background: linear-gradient(135deg, #8e44ad, #9b59b6);
                             border-radius: 25px;
                             padding: 12px 25px;
@@ -424,17 +452,7 @@ Swal.fire({
                             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
                             transition: transform 0.2s ease, box-shadow 0.2s ease;
                             color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-                        <button class="swal2-cancel swal2-styled" style="
-                            position: relative;
-                            overflow: hidden; /* يمنع التأثير من الخروج */
-                            background: linear-gradient(135deg, #e74c3c, #c0392b);
-                            border-radius: 12px;
-                            padding: 12px 25px;
-                            font-size: 14px;
-                            font-weight: bold;
-                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                            transition: transform 0.2s ease, box-shadow 0.2s ease;
-                            color: white;" onclick="Swal.close()">رجوع</button>
+                        <button class="popup-close" onclick="Swal.close()"></button>
                     </div>
                 `,
                 showConfirmButton: false,
@@ -525,29 +543,17 @@ Swal.fire({
             Swal.fire({
                 title: `شواصي - ${database.HOUSING.length} شواصي`,
                 html: htmlContent + `
-                    <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                    <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
                         <button class="swal2-confirm swal2-styled" style="
-                            position: relative;
-                            overflow: hidden; /* يمنع التأثير من الخروج */
                             background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                            border-radius: 25px;
-                            padding: 12px 25px;
-                            font-size: 14px;
-                            font-weight: bold;
-                             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                            transition: transform 0.2s ease, box-shadow 0.2s ease;
-                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-                        <button class="swal2-cancel swal2-styled" style="
-                            position: relative;
-                            overflow: hidden; /* يمنع التأثير من الخروج */
-                            background: linear-gradient(135deg, #e74c3c, #c0392b);
                             border-radius: 25px;
                             padding: 12px 25px;
                             font-size: 14px;
                             font-weight: bold;
                             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
                             transition: transform 0.2s ease, box-shadow 0.2s ease;
-                            color: white;" onclick="Swal.close()">رجوع</button>
+                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+                        <button class="popup-close" onclick="Swal.close()"></button>
                     </div>
                 `,
                 showConfirmButton: false,
@@ -626,10 +632,8 @@ Swal.fire({
             Swal.fire({
                 title: `بطاريات - ${database.BATTERY.length} بطاريات`,
                 html: htmlContent + `
-                    <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                    <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
                         <button class="swal2-confirm swal2-styled" style="
-                            position: relative;
-                            overflow: hidden; /* يمنع التأثير من الخروج */
                             background: linear-gradient(135deg, #8e44ad, #9b59b6);
                             border-radius: 25px;
                             padding: 12px 25px;
@@ -638,17 +642,7 @@ Swal.fire({
                             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
                             transition: transform 0.2s ease, box-shadow 0.2s ease;
                             color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-                        <button class="swal2-cancel swal2-styled" style="
-                            position: relative;
-                            overflow: hidden; /* يمنع التأثير من الخروج */
-                            background: linear-gradient(135deg, #e74c3c, #c0392b);
-                            border-radius: 25px;
-                            padding: 12px 25px;
-                            font-size: 14px;
-                            font-weight: bold;
-                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                            transition: transform 0.2s ease, box-shadow 0.2s ease;
-                            color: white;" onclick="Swal.close()">رجوع</button>
+                        <button class="popup-close" onclick="Swal.close()"></button>
                     </div>
                 `,
                 showConfirmButton: false,
