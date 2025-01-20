@@ -240,11 +240,14 @@ h1 {
     .category-btn {
         position: relative;
         overflow: hidden;
-        padding: 10px 20px;
-        border-radius: 50px;
+        height: 35px; /* تقليل ارتفاع الزر 
+        padding-top: 4px; /* رفع النص قليلاً للأعلى */*/
+        padding: 8px 16px;
+        border-radius: 25px;
         background: rgba(0, 0, 0, 0.3);
         color: white;
-        font-size: 16px;
+        line-height: 35px; /* نفس ارتفاع الزر لتوسيط النص عموديًا */
+        font-size: 14px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         transition: all 0.3s ease;
     }
@@ -269,10 +272,13 @@ h1 {
             grid-column: span 2; /* يجعل الزر يمتد على عمودين */
             position: relative;
             overflow: hidden;
-            padding: 10px 20px;
-            border-radius: 50px;
+            height: 35px; /* تقليل ارتفاع الزر 
+            padding-top: 20px; /* رفع النص قليلاً للأعلى */*/
+            padding: 10px 16px;
+            border-radius: 25px;
             background: rgba(0, 0, 0, 0.3);
             color: white;
+            line-height: 35px; /* نفس ارتفاع الزر لتوسيط النص عموديًا */
             font-size: 16px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
@@ -291,6 +297,14 @@ h1 {
         }
     
     
+       .category-btn,
+       .new-category-btn {
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       margin-top: -2px; /* رفع النص قليلاً */
+}
+
     
     
 
@@ -369,9 +383,11 @@ h1 {
     position: relative;
     overflow: hidden; /* يمنع التأثير من الخروج */
     width: 320px;
-    height: 40px;
-    font-size: 16px;
-    border-radius: 30px; /* زوايا مستديرة */
+    height: 35px;
+    padding: 8px 16px; /* تعديل المسافات الداخلية للزر */
+    font-size: 14px;
+    line-height: 35px; /* نفس ارتفاع الزر لتوسيط النص عموديًا */
+    border-radius: 25px; /* زوايا مستديرة */
     color: white;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -569,8 +585,8 @@ h1 {
    .color-btn {
     position: relative; /* لإضافة التأثيرات داخلياً */
     overflow: hidden; /* لمنع التأثيرات من الخروج عن حدود الزر */
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%; /* شكل دائري بالكامل */
     border: none; /* إزالة الحدود */
     background: rgba(0, 0, 0, 0.3); /* نفس الخلفية */
@@ -758,13 +774,14 @@ footer {
     <h1>Phone Parts Pro</h1>
 
         <div class="categories">
+            <button class="new-category-btn" onclick="openLCDPage()">اسعار بنمط الكروب</button>
             <button class="category-btn" onclick="filterCategory('LCD', this)">شاشات</button>
             <button class="category-btn" onclick="filterCategory('BATTERY', this)">بطاريات</button>
             <button class="category-btn" onclick="filterCategory('HOUSING', this)">شواصي</button>
             <button class="category-btn" onclick="openSimilarites(this)">توافقات</button>
             <button class="category-btn tools-btn" onclick="openToolsPage()">عدد الصيانة</button>
             <!-- زر الصنف الجديد -->
-            <button class="new-category-btn" onclick="openLCDPage()">اسعار بنمط الكروب</button>
+  
         </div>
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search for items...">
