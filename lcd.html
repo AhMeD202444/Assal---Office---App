@@ -11,293 +11,295 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
 
-        .loading-circle {
-            width: 80px;
-            height: 80px;
-            border: 8px solid rgba(255, 255, 255, 0.2);
-            border-top: 8px solid #43cea2;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+    html.noscroll {
+        position: fixed;
+        width: 100%;
+        overflow: hidden;
+    }
 
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 
-        .popup-content {
-            position: relative;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
-            width: 90%;
-            max-width: 1200px;
-            max-height: 80vh;
-            overflow-y: auto;
-            animation: fadeIn 0.6s ease-in-out;
-        }
+    .loading-circle {
+        width: 80px;
+        height: 80px;
+        border: 8px solid rgba(255, 255, 255, 0.2);
+        border-top: 8px solid #43cea2;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px); /* زيادة الضبابية */
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    .popup-content {
+        position: relative;
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(20px); /* زيادة الضبابية */
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); /* تحسين الظلال */
+        max-width: 400px;
+        width: 90%;
+        z-index: 10000;
+        animation: fadeIn 0.6s ease-in-out; /* حركة دخول */
+    }
 
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(135deg, #3A6073, #16222A);
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            background-size: 400% 400%;
-            animation: gradientAnimation 10s ease infinite;
-        }
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
 
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            max-width: 800px;
-            width: 95%;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            margin-bottom: 20px;
-        }
+    body {
+        font-family: 'Montserrat', sans-serif;
+        background: linear-gradient(135deg, #3A6073, #16222A);
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+        background-size: 400% 400%;
+        animation: gradientAnimation 10s ease infinite;
+    }
 
-        .logo-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 10px;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            margin: 0 auto;
-        }
+    @keyframes gradientAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
 
-        .logo-container img {
-            width: 100%;
-            height: 100%;
-            transition: transform 0.3s ease;
-            cursor: pointer;
-        }
+    .container {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 20px;
+        text-align: center;
+        max-width: 800px;
+        width: 95%;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        margin-bottom: 20px;
+    }
 
-        .logo-container img:active {
-            transform: scale(1.1);
-        }
+    .logo-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 10px;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        margin: 0 auto;
+    }
 
-        h1 {
-            font-size: 28px;
-            margin-bottom: 15px;
-            color: white;
-            text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
-            margin-top: 5px;
-        }
+    .logo-container img {
+        width: 100%;
+        height: 100%;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
 
-        .categories {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            column-gap: 10px;
-            row-gap: 10px;
-            margin-bottom: 20px;
-        }
+    .logo-container img:active {
+        transform: scale(1.1);
+    }
 
-        .category-btn {
-            position: relative;
-            overflow: hidden;
-            padding: 8px 12px;
-            border-radius: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            color: white;
-            font-size: 14px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
+    h1 {
+        font-size: 28px;
+        margin-bottom: 15px;
+        color: white;
+        text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
+        margin-top: 5px;
+    }
 
-        .category-btn:hover {
-            transform: scale(1.1);
-            background: linear-gradient(45deg, #43cea2, #185a9d);
-        }
+    .categories {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        column-gap: 10px;
+        row-gap: 10px;
+        margin-bottom: 20px;
+    }
 
-        .category-btn.active {
-            background: linear-gradient(45deg, #43cea2, #185a9d);
-            transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
-        }
+    .category-btn {
+        position: relative;
+        overflow: hidden;
+        padding: 8px 12px;
+        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        color: white;
+        font-size: 14px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+    }
 
-        .results-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 600px;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-            border-radius: 10px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
+    .category-btn:hover {
+        transform: scale(1.1);
+        background: linear-gradient(45deg, #43cea2, #185a9d);
+    }
 
-        .result-card {
-            display: flex;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            padding: 10px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-            cursor: pointer;
-            user-select: none;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
+    .category-btn.active {
+        background: linear-gradient(45deg, #43cea2, #185a9d);
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
+    }
 
-        .result-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
-        }
+    .results-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 600px;
+        overflow-y: auto;
+        scroll-behavior: smooth;
+        border-radius: 10px;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
 
-        .result-card:active {
-            transform: scale(0.95);
-            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.5);
-            background: linear-gradient(135deg, rgba(0, 123, 255, 0.3), rgba(255, 255, 255, 0.1));
-            filter: brightness(1.2);
-        }
+    .result-card {
+        display: flex;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        padding: 10px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        cursor: pointer;
+        user-select: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
 
-        .result-card .circle {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #43cea2, #185a9d);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: bold;
-            margin-right: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
+    .result-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+    }
 
-        .result-card .item-name {
-            flex: 1;
-            text-align: left;
-            font-size: 14px;
-            color: #f1f1f1;
-            margin-right: 10px;
-        }
+    .result-card:active {
+        transform: scale(0.95);
+        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.5);
+        background: linear-gradient(135deg, rgba(0, 123, 255, 0.3), rgba(255, 255, 255, 0.1));
+        filter: brightness(1.2);
+    }
 
-        .result-card .price {
-            background: #185a9d;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 14px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
+    .result-card .circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #43cea2, #185a9d);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+        margin-right: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
 
-        .no-results {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 15px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: 500;
-            margin-top: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-            width: 80%;
-            margin-left: auto;
-            margin-right: auto;
-            animation: fadeIn 0.3s ease-in-out;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+    .result-card .item-name {
+        flex: 1;
+        text-align: left;
+        font-size: 14px;
+        color: #f1f1f1;
+        margin-right: 10px;
+    }
 
-        .no-results:active {
-            transform: scale(0.95);
-            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.2);
-        }
+    .result-card .price {
+        background: #185a9d;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
 
-        .back-btn {
-            position: relative;
-            margin-top: 10px;
-            padding: 8px 20px;
-            background: linear-gradient(135deg, #8B0000, #B22222);
-            color: white;
-            border: none;
-            font-size: 16px;
-            border-radius: 25px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
+    .no-results {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 10px 15px;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        margin-top: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+        animation: fadeIn 0.3s ease-in-out;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
 
-        .back-btn:hover {
-            background: linear-gradient(135deg, #FF6347, #CD5C5C);
-            box-shadow: 0 6px 15px rgba(255, 255, 255, 0.3);
-        }
+    .no-results:active {
+        transform: scale(0.95);
+        box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.2);
+    }
 
-        .back-btn:active {
-            transform: scale(0.95);
-            background: linear-gradient(135deg, #FF4500, #A52A2A);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
+    .back-btn {
+        position: relative;
+        margin-top: 10px;
+        padding: 8px 20px;
+        background: linear-gradient(135deg, #8B0000, #B22222);
+        color: white;
+        border: none;
+        font-size: 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
 
+    .back-btn:hover {
+        background: linear-gradient(135deg, #FF6347, #CD5C5C);
+        box-shadow: 0 6px 15px rgba(255, 255, 255, 0.3);
+    }
 
+    .back-btn:active {
+        transform: scale(0.95);
+        background: linear-gradient(135deg, #FF4500, #A52A2A);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
 
-footer {
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    text-align: center;
-    padding: 10px 0;
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 14px;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-}
+    footer {
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        text-align: center;
+        padding: 10px 0;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 14px;
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+    }
 
-
-
-
-        
     </style>
 </head>
 <body>
@@ -329,20 +331,15 @@ footer {
             <button class="category-btn" onclick="filterHousingCategory()">شواصي</button>
             <button class="category-btn" onclick="filterBatteryCategory()">بطاريات</button>
             <button class="category-btn" onclick="filterBatteryCategory()">اخرى</button>
-
         </div>
     </div>
 
     <div id="results" class="results"></div>
     <button class="back-btn" onclick="goBack()">رجوع</button>
 
-
-<footer>
-    <p>&copy; 2025 Assal Office. All rights reserved.</p>
-</footer>
-
-
-    
+    <footer>
+        <p>&copy; 2025 Assal Office. All rights reserved.</p>
+    </footer>
 
     <script>
         const dropboxMainFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file1" + "?t=" + new Date().getTime();
@@ -356,104 +353,114 @@ footer {
             database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
             database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
         }
-async function loadLCDItems(categoryNumber, categoryName) {
-    const resultsContainer = document.getElementById("results");
-    resultsContainer.innerHTML = '';
 
-    const filteredItems = database.LCD.filter(item => item["الصنف"] == categoryNumber);
+        function preventScroll() {
+            document.documentElement.classList.add('noscroll');
+        }
 
-    if (filteredItems.length === 0) {
-        resultsContainer.innerHTML = `<div class="no-results">لا توجد شاشات لهذا الصنف حالياً</div>`;
-        return;
-    }
+        function allowScroll() {
+            document.documentElement.classList.remove('noscroll');
+        }
 
-    let htmlContent = '<div class="results-container">';
-    filteredItems.forEach((item) => {
-        htmlContent += `
-            <div class="result-card" style="
-                background: rgba(44, 62, 80, 0.95);
-                color: #ecf0f1;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                padding: 10px;
-                border-radius: 8px;
-                margin-bottom: 8px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                transition: transform 0.3s, box-shadow 0.3s;
-                width: 100%;
-                margin-left: auto;
-                margin-right: auto;
-            " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
-                <div class="item-name" style="
-                    font-size: 16px;
-                    font-weight: bold;
-                    text-align: center;
-                    margin-bottom: 8px;
-                ">${item["Item Name"]}</div>
-                <div class="price" style="
-                    background: #2980b9;
-                    padding: 6px 15px;
-                    border-radius: 6px;
-                    color: #fff;
-                    font-weight: bold;
-                    font-size: 14px;
-                    text-align: center;
-                ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
-            </div>
-        `;
-    });
-    htmlContent += '</div>';
+        async function loadLCDItems(categoryNumber, categoryName) {
+            const resultsContainer = document.getElementById("results");
+            resultsContainer.innerHTML = '';
 
-    Swal.fire({
-    title: `${categoryName} - ${filteredItems.length} شاشات`,
-    html: htmlContent + `
-        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="swal2-confirm swal2-styled" style="
-                background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                border-radius: 25px;
-                padding: 12px 25px;
-                font-size: 14px;
-                font-weight: bold;
-                color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-            <button class="swal2-cancel swal2-styled" style="
-                background: linear-gradient(135deg, #e74c3c, #c0392b);
-                border-radius: 25px;
-                backdrop: false, // تثبيت الواجهة
-                padding: 12px 25px;
-                font-size: 14px;
-                font-weight: bold;
-                color: white;" onclick="Swal.close()">رجوع</button>
-        </div>
-    `,
-    showConfirmButton: false,
-    width: '100%',
-    backdrop: false, // تثبيت الواجهة
-    backdrop: `rgba(0, 0, 0, 0.7)`,
-    customClass: {
-        popup: 'swal2-popup',
-        title: 'swal2-title',
-        htmlContainer: 'swal2-html-container',
-    },
-    showClass: {
-        popup: 'animate__animated animate__zoomIn'
-    },
-    hideClass: {
-        popup: 'animate__animated animate__zoomOut'
-    },
-    didOpen: () => {
-        document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
-        document.querySelector('.swal2-popup').style.color = '#ecf0f1';
-        document.querySelector('.swal2-popup').style.borderRadius = '15px';
-        document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
-        Swal.getPopup().style.overflow = 'hidden'; // تثبيت الواجهة
-    },
-    willClose: () => {
-        document.body.style.overflow = '';
-    }
-});
-}
+            const filteredItems = database.LCD.filter(item => item["الصنف"] == categoryNumber);
+
+            if (filteredItems.length === 0) {
+                resultsContainer.innerHTML = `<div class="no-results">لا توجد شاشات لهذا الصنف حالياً</div>`;
+                return;
+            }
+
+            let htmlContent = '<div class="results-container">';
+            filteredItems.forEach((item) => {
+                htmlContent += `
+                    <div class="result-card" style="
+                        background: rgba(44, 62, 80, 0.95);
+                        color: #ecf0f1;
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                        padding: 10px;
+                        border-radius: 8px;
+                        margin-bottom: 8px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        transition: transform 0.3s, box-shadow 0.3s;
+                        width: 100%;
+                        margin-left: auto;
+                        margin-right: auto;
+                    " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
+                        <div class="item-name" style="
+                            font-size: 16px;
+                            font-weight: bold;
+                            text-align: center;
+                            margin-bottom: 8px;
+                        ">${item["Item Name"]}</div>
+                        <div class="price" style="
+                            background: #2980b9;
+                            padding: 6px 15px;
+                            border-radius: 6px;
+                            color: #fff;
+                            font-weight: bold;
+                            font-size: 14px;
+                            text-align: center;
+                        ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
+                    </div>
+                `;
+            });
+            htmlContent += '</div>';
+
+Swal.fire({
+                title: `${categoryName} - ${filteredItems.length} شاشات`,
+                html: htmlContent + `
+                    <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                        <button class="swal2-confirm swal2-styled" style="
+                            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+                            border-radius: 12px;
+                            padding: 12px 25px;
+                            font-size: 14px;
+                            font-weight: bold;
+                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+                        <button class="swal2-cancel swal2-styled" style="
+                            background: linear-gradient(135deg, #e74c3c, #c0392b);
+                            border-radius: 12px;
+                            padding: 12px 25px;
+                            font-size: 14px;
+                            font-weight: bold;
+                            color: white;" onclick="Swal.close()">رجوع</button>
+                    </div>
+                `,
+                showConfirmButton: false,
+                width: '100%',
+                backdrop: `
+                    rgba(0, 0, 0, 0.7)
+                `,
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                },
+                didOpen: () => {
+                    document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
+                    document.querySelector('.swal2-popup').style.color = '#ecf0f1';
+                    document.querySelector('.swal2-popup').style.borderRadius = '15px';
+                    document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
+                    document.body.style.overflow = 'hidden';
+                    preventScroll();
+                },
+                willClose: () => {
+                    document.body.style.overflow = '';
+                    allowScroll();
+                }
+            });
+        }
+
+        function filterLCDCategory(categoryNumber, categoryName) {
+            loadLCDItems(categoryNumber, categoryName);
+        }
+
         async function filterHousingCategory() {
             await loadHousingItems();
         }
@@ -462,216 +469,199 @@ async function loadLCDItems(categoryNumber, categoryName) {
             await loadBatteryItems();
         }
 
-       async function loadHousingItems() {
-    const resultsContainer = document.getElementById("results");
-    resultsContainer.innerHTML = '';
+        async function loadHousingItems() {
+            const resultsContainer = document.getElementById("results");
+            resultsContainer.innerHTML = '';
 
-    if (database.HOUSING.length === 0) {
-        resultsContainer.innerHTML = `<div class="no-results">لا توجد شواصي حالياً</div>`;
-        return;
-    }
+            if (database.HOUSING.length === 0) {
+                resultsContainer.innerHTML = `<div class="no-results">لا توجد شواصي حالياً</div>`;
+                return;
+            }
 
-    let htmlContent = '<div class="results-container">';
-    database.HOUSING.forEach((item) => {
-        htmlContent += `
-            <div class="result-card" style="
-                background: rgba(44, 62, 80, 0.95);
-                color: #ecf0f1;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                padding: 10px;
-                border-radius: 8px;
-                margin-bottom: 8px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                transition: transform 0.3s, box-shadow 0.3s;
-                width: 100%;
-                margin-left: auto;
-                margin-right: auto;
-            " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
-                <div class="item-name" style="
-                    font-size: 16px;
-                    font-weight: bold;
-                    text-align: center;
-                    margin-bottom: 8px;
-                ">${item["Item Name"]}</div>
-                <div class="price" style="
-                    background: #2980b9;
-                    padding: 6px 15px;
-                    border-radius: 6px;
-                    color: #fff;
-                    font-weight: bold;
-                    font-size: 14px;
-                    text-align: center;
-                ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
-            </div>
-        `;
-    });
-    htmlContent += '</div>';
+            let htmlContent = '<div class="results-container">';
+            database.HOUSING.forEach((item) => {
+                htmlContent += `
+                    <div class="result-card" style="
+                        background: rgba(44, 62, 80, 0.95);
+                        color: #ecf0f1;
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                        padding: 10px;
+                        border-radius: 8px;
+                        margin-bottom: 8px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        transition: transform 0.3s, box-shadow 0.3s;
+                        width: 100%;
+                        margin-left: auto;
+                        margin-right: auto;
+                    " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
+                        <div class="item-name" style="
+                            font-size: 16px;
+                            font-weight: bold;
+                            text-align: center;
+                            margin-bottom: 8px;
+                        ">${item["Item Name"]}</div>
+                        <div class="price" style="
+                            background: #2980b9;
+                            padding: 6px 15px;
+                            border-radius: 6px;
+                            color: #fff;
+                            font-weight: bold;
+                            font-size: 14px;
+                            text-align: center;
+                        ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
+                    </div>
+                `;
+            });
+            htmlContent += '</div>';
 
-   Swal.fire({
-    title: `شواصي - ${database.HOUSING.length} شواصي`,
-    html: htmlContent + `
-        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="swal2-confirm swal2-styled" style="
-                background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                border-radius: 25px;
-                padding: 12px 25px;
-                font-size: 14px;
-                font-weight: bold;
-                color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-            <button class="swal2-cancel swal2-styled" style="
-                background: linear-gradient(135deg, #e74c3c, #c0392b);
-                border-radius: 25px;
-                backdrop: false, // تثبيت الواجهة
-                padding: 12px 25px;
-                font-size: 14px;
-                font-weight: bold;
-                color: white;" onclick="Swal.close()">رجوع</button>
-        </div>
-    `,
-    showConfirmButton: false,
-    width: '100%',
-    backdrop: false, // تثبيت الواجهة
-    backdrop: `rgba(0, 0, 0, 0.7)`,
-    customClass: {
-        popup: 'swal2-popup',
-        title: 'swal2-title',
-        htmlContainer: 'swal2-html-container',
-    },
-   showClass: {
-        popup: 'animate__animated animate__zoomIn'
-    },
-    hideClass: {
-        popup: 'animate__animated animate__zoomOut'
-    },
-    didOpen: () => {
-        document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
-        document.querySelector('.swal2-popup').style.color = '#ecf0f1';
-        document.querySelector('.swal2-popup').style.borderRadius = '15px';
-        document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
-        document.body.style.overflow = 'hidden';
-    },
-    willClose: () => {
-        document.body.style.overflow = '';
-    }
-});
-}
+            Swal.fire({
+                title: `شواصي - ${database.HOUSING.length} شواصي`,
+                html: htmlContent + `
+                    <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                        <button class="swal2-confirm swal2-styled" style="
+                            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+                            border-radius: 12px;
+                            padding: 12px 25px;
+                            font-size: 14px;
+                            font-weight: bold;
+                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+                        <button class="swal2-cancel swal2-styled" style="
+                            background: linear-gradient(135deg, #e74c3c, #c0392b);
+                            border-radius: 12px;
+                            padding: 12px 25px;
+                            font-size: 14px;
+                            font-weight: bold;
+                            color: white;" onclick="Swal.close()">رجوع</button>
+                    </div>
+                `,
+                showConfirmButton: false,
+                width: '100%',
+                backdrop: `
+                    rgba(0, 0, 0, 0.7)
+                `,
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                },
+                didOpen: () => {
+                    document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
+                    document.querySelector('.swal2-popup').style.color = '#ecf0f1';
+                    document.querySelector('.swal2-popup').style.borderRadius = '15px';
+                    document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
+                    document.body.style.overflow = 'hidden';
+                    preventScroll();
+                },
+                willClose: () => {
+                    document.body.style.overflow = '';
+                    allowScroll();
+                }
+            });
+        }
 
+        async function loadBatteryItems() {
+            const resultsContainer = document.getElementById("results");
+            resultsContainer.innerHTML = '';
 
-       async function loadBatteryItems() {
-    const resultsContainer = document.getElementById("results");
-    resultsContainer.innerHTML = '';
+            if (database.BATTERY.length === 0) {
+                resultsContainer.innerHTML = `<div class="no-results">لا توجد بطاريات حالياً</div>`;
+                return;
+            }
 
-    if (database.BATTERY.length === 0) {
-        resultsContainer.innerHTML = `<div class="no-results">لا توجد بطاريات حالياً</div>`;
-        return;
-    }
+            let htmlContent = '<div class="results-container">';
+            database.BATTERY.forEach((item) => {
+                htmlContent += `
+                    <div class="result-card" style="
+                        background: rgba(44, 62, 80, 0.95);
+                        color: #ecf0f1;
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+                        padding: 10px;
+                        border-radius: 8px;
+                        margin-bottom: 8px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        transition: transform 0.3s, box-shadow 0.3s;
+                        width: 100%;
+                        margin-left: auto;
+                        margin-right: auto;
+                    " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
+                        <div class="item-name" style="
+                            font-size: 16px;
+                            font-weight: bold;
+                            text-align: center;
+                            margin-bottom: 8px;
+                        ">${item["Item Name"]}</div>
+                        <div class="price" style="
+                            background: #2980b9;
+                            padding: 6px 15px;
+                            border-radius: 6px;
+                            color: #fff;
+                            font-weight: bold;
+                            font-size: 14px;
+                            text-align: center;
+                        ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
+                    </div>
+                `;
+            });
+            htmlContent += '</div>';
 
-    let htmlContent = '<div class="results-container">';
-    database.BATTERY.forEach((item) => {
-        htmlContent += `
-            <div class="result-card" style="
-                background: rgba(44, 62, 80, 0.95);
-                color: #ecf0f1;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                padding: 10px;
-                border-radius: 8px;
-                margin-bottom: 8px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                transition: transform 0.3s, box-shadow 0.3s;
-                width: 100%;
-                margin-left: auto;
-                margin-right: auto;
-            " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
-                <div class="item-name" style="
-                    font-size: 16px;
-                    font-weight: bold;
-                    text-align: center;
-                    margin-bottom: 8px;
-                ">${item["Item Name"]}</div>
-                <div class="price" style="
-                    background: #2980b9;
-                    padding: 6px 15px;
-                    border-radius: 6px;
-                    color: #fff;
-                    font-weight: bold;
-                    font-size: 14px;
-                    text-align: center;
-                ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
-            </div>
-        `;
-    });
-    htmlContent += '</div>';
+            Swal.fire({
+                title: `بطاريات - ${database.BATTERY.length} بطاريات`,
+                html: htmlContent + `
+                    <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                        <button class="swal2-confirm swal2-styled" style="
+                            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+                            border-radius: 12px;
+                            padding: 12px 25px;
+                            font-size: 14px;
+                            font-weight: bold;
+                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+                        <button class="swal2-cancel swal2-styled" style="
+                            background: linear-gradient(135deg, #e74c3c, #c0392b);
+                            border-radius: 12px;
+                            padding: 12px 25px;
+                            font-size: 14px;
+                            font-weight: bold;
+                            color: white;" onclick="Swal.close()">رجوع</button>
+                    </div>
+                `,
+                showConfirmButton: false,
+                width: '100%',
+                backdrop: `
+                    rgba(0, 0, 0, 0.7)
+                `,
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                },
+                didOpen: () => {
+                    document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
+                    document.querySelector('.swal2-popup').style.color = '#ecf0f1';
+                    document.querySelector('.swal2-popup').style.borderRadius = '15px';
+                    document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
+                    document.body.style.overflow = 'hidden';
+                    preventScroll();
+                },
+                willClose: () => {
+                    document.body.style.overflow = '';
+                    allowScroll();
+                }
+            });
+        }
 
-    Swal.fire({
-    title: `بطاريات - ${database.BATTERY.length} بطاريات`,
-    html: htmlContent + `
-        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="swal2-confirm swal2-styled" style="
-                background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                border-radius: 25px;
-                padding: 12px 25px;
-                font-size: 14px;
-                font-weight: bold;
-                color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-            <button class="swal2-cancel swal2-styled" style="
-                background: linear-gradient(135deg, #e74c3c, #c0392b);
-                border-radius: 25px;
-                 backdrop: false, // تثبيت الواجهة
-                padding: 12px 25px;
-                font-size: 14px;
-                font-weight: bold;
-                color: white;" onclick="Swal.close()">رجوع</button>
-        </div>
-    `,
-    showConfirmButton: false,
-    width: '100%',
-         backdrop: false, // تثبيت الواجهة
+        function goBack() {
+            window.location.href = 'index.html';
+        }
 
-    backdrop: `rgba(0, 0, 0, 0.7)`,
-    customClass: {
-        popup: 'swal2-popup',
-        title: 'swal2-title',
-        htmlContainer: 'swal2-html-container',
-    },
-    showClass: {
-        popup: 'animate__animated animate__zoomIn'
-    },
-    hideClass: {
-        popup: 'animate__animated animate__zoomOut'
-    },
-
-    didOpen: () => {
-        document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
-        document.querySelector('.swal2-popup').style.color = '#ecf0f1';
-        document.querySelector('.swal2-popup').style.borderRadius = '15px';
-        document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
-        document.body.style.overflow = 'hidden';
-    },
-    willClose: () => {
-        document.body.style.overflow = '';
-    }
-});
-}
-function filterLCDCategory(categoryNumber, categoryName) {
-    loadLCDItems(categoryNumber, categoryName);
-}
-
-loadExcelFiles().then(() => {
-    console.log("Excel files loaded successfully");
-});
-
-// Function to go back to the previous page or reset the view
-function goBack() {
-    window.location.href = 'index.html';
-}
-
- loadExcelFiles();
+        loadExcelFiles().then(() => {
+            console.log("Excel files loaded successfully");
+        });
     </script>
 </body>
 </html>
