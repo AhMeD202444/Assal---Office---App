@@ -205,10 +205,11 @@
 
     .result-card {
         display: flex;
+        flex-direction: column;
         align-items: center;
         background: rgba(0, 0, 0, 0.5);
         border-radius: 10px;
-        padding: 10px;
+        padding: 20px;
         transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
         cursor: pointer;
         user-select: none;
@@ -227,36 +228,30 @@
         filter: brightness(1.2);
     }
 
-    .result-card .circle {
-        width: 30px;
-        height: 30px;
+    .result-card img {
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #43cea2, #185a9d);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        font-weight: bold;
-        margin-right: 15px;
+        margin-bottom: 10px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .result-card .item-name {
-        flex: 1;
-        text-align: left;
-        font-size: 14px;
+        font-size: 16px;
         color: #f1f1f1;
-        margin-right: 10px;
+        margin-bottom: 8px;
+        text-align: center;
     }
 
     .result-card .price {
         background: #185a9d;
         color: white;
-        padding: 5px 10px;
-        border-radius: 5px;
+        padding: 6px 15px;
+        border-radius: 6px;
         font-size: 14px;
+        font-weight: bold;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        text-align: center;
     }
 
     .no-results {
@@ -387,8 +382,10 @@
 
             let htmlContent = '<div class="results-container">';
             filteredItems.forEach((item) => {
+                const imageName = item["Item Name"].toLowerCase().replace(/\s/g, '-') + '.jpg';
                 htmlContent += `
                     <div class="result-card">
+                        <img src="images/lcd.png" alt="Image">
                         <div class="item-name">${item["Item Name"]}</div>
                         <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
                     </div>
@@ -458,8 +455,10 @@
 
             let htmlContent = '<div class="results-container">';
             database.HOUSING.forEach((item) => {
+                const imageName = item["Item Name"].toLowerCase().replace(/\s/g, '-') + '.jpg';
                 htmlContent += `
                     <div class="result-card">
+                        <img src="images/lcd.png" alt="Image">
                         <div class="item-name">${item["Item Name"]}</div>
                         <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
                     </div>
@@ -470,7 +469,6 @@
             Swal.fire({
                 title: `شواصي - ${database.HOUSING.length} شواصي`,
                 html: htmlContent + `
-                    <div class="popup-close" onclick="Swal.close()"></div>
                     <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
                         <button class="swal2-confirm swal2-styled" style="
                             background: linear-gradient(135deg, #8e44ad, #9b59b6);
@@ -516,8 +514,10 @@
 
             let htmlContent = '<div class="results-container">';
             database.BATTERY.forEach((item) => {
+                const imageName = item["Item Name"].toLowerCase().replace(/\s/g, '-') + '.jpg';
                 htmlContent += `
                     <div class="result-card">
+                        <img src="images/lcd.png" alt="Image">
                         <div class="item-name">${item["Item Name"]}</div>
                         <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
                     </div>
@@ -528,7 +528,6 @@
             Swal.fire({
                 title: `بطاريات - ${database.BATTERY.length} بطاريات`,
                 html: htmlContent + `
-                    <div class="popup-close" onclick="Swal.close()"></div>
                     <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
                         <button class="swal2-confirm swal2-styled" style="
                             background: linear-gradient(135deg, #8e44ad, #9b59b6);
@@ -572,4 +571,4 @@
         });
     </script>
 </body>
-</html>                   
+</html>
