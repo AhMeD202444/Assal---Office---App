@@ -11,13 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-
-    html.noscroll {
-        position: fixed;
-        width: 100%;
-        overflow: hidden;
-    }
-
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
@@ -381,14 +374,6 @@
             database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
         }
 
-        function preventScroll() {
-            document.documentElement.classList.add('noscroll');
-        }
-
-        function allowScroll() {
-            document.documentElement.classList.remove('noscroll');
-        }
-
         async function loadLCDItems(categoryNumber, categoryName) {
             const resultsContainer = document.getElementById("results");
             resultsContainer.innerHTML = '';
@@ -403,82 +388,51 @@
             let htmlContent = '<div class="results-container">';
             filteredItems.forEach((item) => {
                 htmlContent += `
-                    <div class="result-card" style="
-                        background: rgba(44, 62, 80, 0.95);
-                        color: #ecf0f1;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                        padding: 10px;
-                        border-radius: 8px;
-                        margin-bottom: 8px;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        transition: transform 0.3s, box-shadow 0.3s;
-                        width: 100%;
-                        margin-left: auto;
-                        margin-right: auto;
-                    " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
-                        <div class="item-name" style="
-                            font-size: 16px;
-                            font-weight: bold;
-                            text-align: center;
-                            margin-bottom: 8px;
-                        ">${item["Item Name"]}</div>
-                        <div class="price" style="
-                            background: #2980b9;
-                            padding: 6px 15px;
-                            border-radius: 6px;
-                            color: #fff;
-                            font-weight: bold;
-                            font-size: 14px;
-                            text-align: center;
-                        ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
+                    <div class="result-card">
+                        <div class="item-name">${item["Item Name"]}</div>
+                        <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
                     </div>
                 `;
             });
             htmlContent += '</div>';
 
             Swal.fire({
-    title: `${categoryName} - ${filteredItems.length} شاشات`,
-    html: `
-        <div class="popup-close" onclick="Swal.close()"></div>
-        ${htmlContent}
-        <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="swal2-confirm swal2-styled" style="
-                background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                border-radius: 25px;
-                padding: 12px 25px;
-                font-size: 14px;
-                font-weight: bold;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-                color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-        </div>
-    `,
-    showConfirmButton: false,
-    width: '100%',
-    backdrop: `
-        rgba(0, 0, 0, 0.7)
-    `,
-    customClass: {
-        popup: 'swal2-popup',
-        title: 'swal2-title',
-        htmlContainer: 'swal2-html-container',
-    },
-    didOpen: () => {
-        document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
-        document.querySelector('.swal2-popup').style.color = '#ecf0f1';
-        document.querySelector('.swal2-popup').style.borderRadius = '15px';
-        document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
-        document.body.style.overflow = 'hidden';
-        preventScroll();
-    },
-    willClose: () => {
-        document.body.style.overflow = '';
-        allowScroll();
-    }
-});
+                title: `${categoryName} - ${filteredItems.length} شاشات`,
+                html: `
+                    <div class="popup-close" onclick="Swal.close()"></div>
+                    ${htmlContent}
+                    <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                        <button class="swal2-confirm swal2-styled" style="
+                            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+                            border-radius: 25px;
+                            padding: 12px 25px;
+                            font-size: 14px;
+                            font-weight: bold;
+                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                            transition: transform 0.2s ease, box-shadow 0.2s ease;
+                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+                    </div>
+                `,
+                showConfirmButton: false,
+                width: '100%',
+                backdrop: `rgba(0, 0, 0, 0.7)`,
+               backdrop: false,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                stopKeydownPropagation: false,
+                didOpen: () => {
+                    document.body.style.overflow = 'hidden';
+                },
+                willClose: () => {
+                    document.body.style.overflow = '';
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeIn'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut'
+                }
+            });
         }
 
         function filterLCDCategory(categoryNumber, categoryName) {
@@ -505,37 +459,9 @@
             let htmlContent = '<div class="results-container">';
             database.HOUSING.forEach((item) => {
                 htmlContent += `
-                    <div class="result-card" style="
-                        background: rgba(44, 62, 80, 0.95);
-                        color: #ecf0f1;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                        padding: 10px;
-                        border-radius: 8px;
-                        margin-bottom: 8px;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        transition: transform 0.3s, box-shadow 0.3s;
-                        width: 100%;
-                        margin-left: auto;
-                        margin-right: auto;
-                    " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
-                        <div class="item-name" style="
-                            font-size: 16px;
-                            font-weight: bold;
-                            text-align: center;
-                            margin-bottom: 8px;
-                        ">${item["Item Name"]}</div>
-                        <div class="price" style="
-                            background: #2980b9;
-                            padding: 6px 15px;
-                            border-radius: 6px;
-                            color: #fff;
-                            font-weight: bold;
-                            font-size: 14px;
-                            text-align: center;
-                        ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
+                    <div class="result-card">
+                        <div class="item-name">${item["Item Name"]}</div>
+                        <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
                     </div>
                 `;
             });
@@ -545,42 +471,38 @@
                 title: `شواصي - ${database.HOUSING.length} شواصي`,
                 html: htmlContent + `
                     <div class="popup-close" onclick="Swal.close()"></div>
-        ${htmlContent}
-        <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="swal2-confirm swal2-styled" style="
-                background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                border-radius: 25px;
-                padding: 12px 25px;
-                font-size: 14px;
-                font-weight: bold;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-                color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-        </div>
-    `,
-    showConfirmButton: false,
-    width: '100%',
-    backdrop: `
-        rgba(0, 0, 0, 0.7)
-    `,
-    customClass: {
-        popup: 'swal2-popup',
-        title: 'swal2-title',
-        htmlContainer: 'swal2-html-container',
-    },
-    didOpen: () => {
-        document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
-        document.querySelector('.swal2-popup').style.color = '#ecf0f1';
-        document.querySelector('.swal2-popup').style.borderRadius = '15px';
-        document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
-        document.body.style.overflow = 'hidden';
-        preventScroll();
-    },
-    willClose: () => {
-        document.body.style.overflow = '';
-        allowScroll();
-    }
-});
+                    <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                        <button class="swal2-confirm swal2-styled" style="
+                            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+                            border-radius: 25px;
+                            padding: 12px 25px;
+                            font-size: 14px;
+                            font-weight: bold;
+                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                            transition: transform 0.2s ease, box-shadow 0.2s ease;
+                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+                    </div>
+                `,
+                showConfirmButton: false,
+                width: '100%',
+                backdrop: `rgba(0, 0, 0, 0.7)`,
+               backdrop: false,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                stopKeydownPropagation: false,
+                didOpen: () => {
+                    document.body.style.overflow = 'hidden';
+                },
+                willClose: () => {
+                    document.body.style.overflow = '';
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeIn'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut'
+                }
+            });
         }
 
         async function loadBatteryItems() {
@@ -595,37 +517,9 @@
             let htmlContent = '<div class="results-container">';
             database.BATTERY.forEach((item) => {
                 htmlContent += `
-                    <div class="result-card" style="
-                        background: rgba(44, 62, 80, 0.95);
-                        color: #ecf0f1;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                        padding: 10px;
-                        border-radius: 8px;
-                        margin-bottom: 8px;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        transition: transform 0.3s, box-shadow 0.3s;
-                        width: 100%;
-                        margin-left: auto;
-                        margin-right: auto;
-                    " onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 6px 20px rgba(0, 0, 0, 0.5)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.3)';">
-                        <div class="item-name" style="
-                            font-size: 16px;
-                            font-weight: bold;
-                            text-align: center;
-                            margin-bottom: 8px;
-                        ">${item["Item Name"]}</div>
-                        <div class="price" style="
-                            background: #2980b9;
-                            padding: 6px 15px;
-                            border-radius: 6px;
-                            color: #fff;
-                            font-weight: bold;
-                            font-size: 14px;
-                            text-align: center;
-                        ">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
+                    <div class="result-card">
+                        <div class="item-name">${item["Item Name"]}</div>
+                        <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
                     </div>
                 `;
             });
@@ -635,42 +529,38 @@
                 title: `بطاريات - ${database.BATTERY.length} بطاريات`,
                 html: htmlContent + `
                     <div class="popup-close" onclick="Swal.close()"></div>
-        ${htmlContent}
-        <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="swal2-confirm swal2-styled" style="
-                background: linear-gradient(135deg, #8e44ad, #9b59b6);
-                border-radius: 25px;
-                padding: 12px 25px;
-                font-size: 14px;
-                font-weight: bold;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-                color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-        </div>
-    `,
-    showConfirmButton: false,
-    width: '100%',
-    backdrop: `
-        rgba(0, 0, 0, 0.7)
-    `,
-    customClass: {
-        popup: 'swal2-popup',
-        title: 'swal2-title',
-        htmlContainer: 'swal2-html-container',
-    },
-    didOpen: () => {
-        document.querySelector('.swal2-popup').style.background = 'rgba(44, 62, 80, 0.95)';
-        document.querySelector('.swal2-popup').style.color = '#ecf0f1';
-        document.querySelector('.swal2-popup').style.borderRadius = '15px';
-        document.querySelector('.swal2-popup').style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.6)';
-        document.body.style.overflow = 'hidden';
-        preventScroll();
-    },
-    willClose: () => {
-        document.body.style.overflow = '';
-        allowScroll();
-    }
-});
+                    <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                        <button class="swal2-confirm swal2-styled" style="
+                            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+                            border-radius: 25px;
+                            padding: 12px 25px;
+                            font-size: 14px;
+                            font-weight: bold;
+                            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                            transition: transform 0.2s ease, box-shadow 0.2s ease;
+                            color: white;" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
+                    </div>
+                `,
+                showConfirmButton: false,
+                width: '100%',
+                backdrop: `rgba(0, 0, 0, 0.7)`,
+               backdrop: false,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                stopKeydownPropagation: false,
+                didOpen: () => {
+                    document.body.style.overflow = 'hidden';
+                },
+                willClose: () => {
+                    document.body.style.overflow = '';
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeIn'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut'
+                }
+            });
         }
 
         function goBack() {
@@ -682,4 +572,4 @@
         });
     </script>
 </body>
-</html>
+</html>                   
