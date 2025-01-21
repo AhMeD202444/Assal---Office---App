@@ -184,28 +184,31 @@
     .category-btn {
     position: relative;
     overflow: hidden;
-    padding: 8px 12px; /* حشوة داخلية للأزرار */
-    border-radius: 20px;
+    width: 100%; /* جعل جميع الأزرار تأخذ نفس العرض */
+    height: 50px; /* ارتفاع ثابت للأزرار */
+    border-radius: 20px; /* زوايا مستديرة */
     background: rgba(0, 0, 0, 0.3);
     color: white;
-    font-size: 14px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-    width: 100%; /* اجعل العرض مرنًا */
-    max-width: 120px; /* الحد الأقصى للعرض */
-    text-align: center; /* توسيط النص داخل الأزرار */
+    font-size: 14px; /* حجم النص */
+    display: flex; /* تفعيل الـ flexbox */
+    justify-content: center; /* محاذاة النص أفقيًا */
+    align-items: center; /* محاذاة النص رأسيًا */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* إضافة ظل */
+    transition: all 0.3s ease; /* تأثير الانتقال */
 }
 
 .category-btn:hover {
-    transform: scale(1.1);
+    transform: scale(1.1); /* تأثير التكبير عند التمرير */
     background: linear-gradient(45deg, #43cea2, #185a9d);
 }
 
-.category-btn.active {
-    background: linear-gradient(45deg, #43cea2, #185a9d);
-    transform: scale(1.1);
-    box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
+.categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* شبكة مرنة */
+    column-gap: 10px; /* مسافة بين الأعمدة */
+    row-gap: 10px; /* مسافة بين الصفوف */
 }
+
 
     .results-container {
         display: flex;
