@@ -109,21 +109,18 @@
             box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
         }
 
-     .results-container {
+      .results-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* أعمدة متجاوبة */
+    gap: 10px; /* تقليل الفراغ بين العناصر */
     width: 100%;
     max-width: 1000px;
-    max-height: 400px; /* تحديد ارتفاع النافذة */
-    overflow-y: auto; /* تمكين التمرير العمودي */
     margin: 0 auto;
     border-radius: 10px;
     padding: 10px;
     background: rgba(0, 0, 0, 0.2);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
-
         .result-card {
             text-align: center;
             background: rgba(0, 0, 0, 0.3);
@@ -244,37 +241,32 @@
             transform: scale(0.9);
         }
 
-       .back-btn {
-    position: relative;
-    display: flex; /* استخدام Flexbox لتوسيط المحتوى */
-    align-items: center; /* محاذاة عمودية */
-    justify-content: center; /* محاذاة أفقية */
-    overflow: hidden;
-    background: linear-gradient(135deg, #8B0000, #B22222);
-    width: 80%; /* عرض الزر كنسبي من عرض الشاشة */
-    max-width: 330px; /* الحد الأقصى للعرض */
-    height: 45px; /* ارتفاع الزر */
-    margin-top: 20px;
-    font-size: 1rem; /* حجم النص */
-    border-radius: 30px; /* زوايا مستديرة */
-    color: white;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    text-align: center;
-    text-decoration: none; /* إزالة الخط السفلي إذا كان رابطًا */
-    font-weight: bold; /* تحسين وضوح النص */
-}
+        .back-btn {
+        position: relative;
+        overflow: hidden; /* يمنع التأثير من الخروج */
+        background: linear-gradient(135deg, #8B0000, #B22222);
+        width: 330px;
+        height: 45px;
+        margin-top: 20px;
+        font-size: 16px;
+        border-radius: 30px; /* زوايا مستديرة */
+        color: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
 
-.back-btn:hover {
-    background: linear-gradient(135deg, #FF6347, #CD5C5C);
-    box-shadow: 0 6px 15px rgba(255, 255, 255, 0.3);
-}
+    .back-btn:hover {
+        background: linear-gradient(135deg, #FF6347, #CD5C5C);
+        box-shadow: 0 6px 15px rgba(255, 255, 255, 0.3);
+    }
 
-.back-btn:active {
-    transform: scale(0.95);
-    background: linear-gradient(135deg, #FF4500, #A52A2A);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
+    .back-btn:active {
+        transform: scale(0.95);
+        background: linear-gradient(135deg, #FF4500, #A52A2A);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+
 
 
 
@@ -382,38 +374,39 @@ footer {
         }
 
         function showItems(category) {
-    const itemsHtml = items[category].map(item => `
-        <div class="result-card" onclick="showItemDetails('${category}', '${item.name}', '${item.img}', '${item.details}', '${formatPrice(item.price)}')">
-            <img src="${item.img}" alt="${item.name}">
-            <h4>${item.name}</h4>
-            <p>${item.details}</p>
-            <p>${formatPrice(item.price)}</p>
-        </div>
-    `).join('');
+            const itemsHtml = items[category].map(item => `
+                <div class="result-card" onclick="showItemDetails('${category}', '${item.name}', '${item.img}', '${item.details}', '${formatPrice(item.price)}')">
+                    <img src="${item.img}" alt="${item.name}">
+                    <h4>${item.name}</h4>
+                    <p>${item.details}</p>
+                    <p>${item.age}</p>
+                    <p>${formatPrice(item.price)}</p>
+                </div>
+            `).join('');
 
-    Swal.fire({
-        title: `${category} Items`,
-        html: `<div class="results-container">${itemsHtml}</div>
-               <button class="back-btn" onclick="Swal.close()">رجوع</button>`,
-        width: '100%',
-        heightAuto: false, /* تعطيل ضبط الارتفاع التلقائي */
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        stopKeydownPropagation: false,
-        didOpen: () => {
-            document.body.style.overflow = 'hidden';
-        },
-        willClose: () => {
-            document.body.style.overflow = '';
-        },
-        showClass: {
-            popup: 'animate__animated animate__fadeIn'
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOut'
+            Swal.fire({
+                title: `${category} Items`,
+                html: `<div class="results-container">${itemsHtml}</div>
+                       <button class="back-btn" onclick="Swal.close()">رجوع</button>`,
+                width: '100%',
+                backdrop: false,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                stopKeydownPropagation: false,
+                didOpen: () => {
+                    document.body.style.overflow = 'hidden';
+                },
+                willClose: () => {
+                    document.body.style.overflow = '';
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeIn'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOut'
+                }
+            });
         }
-    });
-}
 
         function showItemDetails(category, name, img, details, price) {
             Swal.fire({
