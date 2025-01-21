@@ -157,26 +157,27 @@
             100% { background-position: 0% 50%; }
         }
 
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            max-width: 700px;
-            width: 90%;
-            margin-top: -10px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
+       .container {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    max-width: 100%; /* اجعلها مرنة بالكامل */
+    width: 90%;
+    margin: 0 auto; /* توسيط الحاوية */
+    margin-top: -10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+}
 
 .actions-container {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 15px;
     text-align: center;
-    max-width: 700px;
+    max-width: 100%; /* جعل الحاوية مرنة */
     width: 90%;
+    margin: 0 auto; /* توسيط الحاوية */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
     margin-top: 10px;
@@ -447,17 +448,19 @@ h1 {
 
 .results-container {
     display: flex;
-    flex-direction: column; /* ترتيب عمودي للنتائج */
-    gap: 10px; /* مسافة بين النتائج */
-    max-height: 600px; /* زيادة الحد الأقصى للارتفاع */
-    overflow-y: auto; /* السماح بالتمرير العمودي */
+    flex-direction: column;
+    gap: 10px;
+    max-height: 600px;
+    overflow-y: auto;
     scroll-behavior: smooth;
     border-radius: 10px;
     padding: 10px;
     background: rgba(0, 0, 0, 0.2);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    max-width: 100%; /* عرض مرن */
+    width: 90%; /* عرض مرن لشاشات أصغر */
+    margin: 0 auto; /* توسيط */
 }
-
 .result-card {
     text-align: center;
     background: rgba(0, 0, 0, 0.3);
@@ -666,6 +669,33 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
 }
 
 
+@media (max-width: 768px) {
+    .container,
+    .actions-container,
+    .results-container {
+        padding: 10px; /* تقليل الحشوة للشاشات الصغيرة */
+    }
+}
+
+@media (max-width: 480px) {
+    .container,
+    .actions-container,
+    .results-container {
+        width: 100%; /* استخدام العرض الكامل */
+        padding: 5px; /* تقليل الحشوة بشكل إضافي */
+    }
+
+    .button-container button {
+        width: 100%; /* جعل الأزرار تمتد بعرض الشاشة */
+        font-size: 14px; /* تقليل حجم النص للأزرار */
+    }
+}
+
+
+
+
+
+        
 
 .swal2-popup {
     background: linear-gradient(135deg, #1a2a3a, #243b55); /* خلفية متدرجة حديثة */
