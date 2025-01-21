@@ -115,19 +115,17 @@
         100% { background-position: 0% 50%; }
     }
 
-   .container {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 20px;
-    text-align: center;
-    max-width: 100%; /* جعل العرض مرنًا بالكامل */
-    width: 95%;
-    margin: 0 auto; /* توسيط الحاوية */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    margin-bottom: 20px;
-}
-
+    .container {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 20px;
+        text-align: center;
+        max-width: 800px;
+        width: 95%;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        margin-bottom: 20px;
+    }
 
     .logo-container {
         display: flex;
@@ -163,48 +161,64 @@
 
    .categories {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* توزيع الأصناف على 3 أعمدة ثابتة */
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* توزيع الأزرار بشكل متجاوب */
     justify-items: center; /* توسيط الأزرار داخل الأعمدة */
     column-gap: 10px; /* المسافة الأفقية بين الأعمدة */
-    row-gap: 15px; /* المسافة العمودية بين الصفوف */
+    row-gap: 10px; /* المسافة العمودية بين الصفوف */
     margin-bottom: 20px;
 }
 
-    .category-btn {
-    padding: 10px 20px; /* زيادة المسافات الداخلية */
-    font-size: 14px; /* حجم النص */
-    border-radius: 10px; /* زوايا مستديرة */
-    text-align: center; /* توسيط النصوص */
-    width: 100%; /* اجعل عرض الأزرار مرنًا */
-    max-width: 120px; /* الحد الأقصى للعرض */
-    min-width: 100px; /* الحد الأدنى للعرض */
+@media (max-width: 768px) {
+    .categories {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* تقليل حجم الأعمدة للشاشات الصغيرة */
+        gap: 8px; /* تقليل المسافات */
+    }
 }
-    .category-btn:hover {
-        transform: scale(1.1);
-        background: linear-gradient(45deg, #43cea2, #185a9d);
-    }
 
-    .category-btn.active {
-        background: linear-gradient(45deg, #43cea2, #185a9d);
-        transform: scale(1.1);
-        box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
+@media (max-width: 480px) {
+    .categories {
+        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); /* تقليل حجم الأعمدة أكثر للشاشات الصغيرة جدًا */
+        gap: 6px; /* تقليل المسافات أكثر */
     }
+}
+    .category-btn {
+    position: relative;
+    overflow: hidden;
+    padding: 8px 12px; /* حشوة داخلية للأزرار */
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    font-size: 14px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    width: 100%; /* اجعل العرض مرنًا */
+    max-width: 120px; /* الحد الأقصى للعرض */
+    text-align: center; /* توسيط النص داخل الأزرار */
+}
+
+.category-btn:hover {
+    transform: scale(1.1);
+    background: linear-gradient(45deg, #43cea2, #185a9d);
+}
+
+.category-btn.active {
+    background: linear-gradient(45deg, #43cea2, #185a9d);
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
+}
 
     .results-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 67vh;
-    overflow-y: auto;
-    scroll-behavior: smooth;
-    border-radius: 10px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    max-width: 100%; /* ضمان عرض مرن */
-    width: 95%;
-    margin: 0 auto; /* توسيط الحاوية */
-}
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 67vh;
+        overflow-y: auto;
+        scroll-behavior: smooth;
+        border-radius: 10px;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
 
     .result-card {
     display: flex;
@@ -304,67 +318,6 @@
         background: linear-gradient(135deg, #FF4500, #A52A2A);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
-
-
-/* تحسين التوافق مع الشاشات الصغيرة */
-@media (max-width: 768px) {
-    .container,
-    .results-container {
-        padding: 15px; /* تقليل الحشوة للشاشات الصغيرة */
-    }
-
-    .categories {
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* تقليل حجم الأعمدة */
-    }
-
-    .result-card img {
-        width: 60px; /* تقليل حجم الصور */
-        height: 60px;
-    }
-
-    .result-card .item-name {
-        font-size: 14px; /* تصغير النص */
-    }
-
-    .result-card .price {
-        font-size: 13px; /* تقليل حجم النص */
-    }
-}
-
-/* تحسين التوافق مع الشاشات الصغيرة جدًا */
-@media (max-width: 480px) {
-    .container,
-    .results-container {
-        padding: 10px; /* تقليل الحشوة */
-        width: 100%; /* استخدام العرض الكامل */
-    }
-
-    .categories {
-        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); /* تصغير الأعمدة */
-    }
-
-    .result-card img {
-        width: 50px; /* تصغير حجم الصور أكثر */
-        height: 50px;
-    }
-
-    .result-card .item-name {
-        font-size: 12px; /* تقليل حجم النص */
-    }
-
-    .result-card .price {
-        font-size: 12px; /* تصغير النص */
-    }
-}
-
-
-
-
-
-
-
-
-        
 
     footer {
         background-color: rgba(0, 0, 0, 0.5);
