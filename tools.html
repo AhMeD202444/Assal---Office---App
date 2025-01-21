@@ -109,18 +109,21 @@
             box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
         }
 
-      .results-container {
+     .results-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* أعمدة متجاوبة */
-    gap: 10px; /* تقليل الفراغ بين العناصر */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 10px;
     width: 100%;
     max-width: 1000px;
+    max-height: 400px; /* تحديد ارتفاع النافذة */
+    overflow-y: auto; /* تمكين التمرير العمودي */
     margin: 0 auto;
     border-radius: 10px;
     padding: 10px;
     background: rgba(0, 0, 0, 0.2);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
+
         .result-card {
             text-align: center;
             background: rgba(0, 0, 0, 0.3);
@@ -374,39 +377,38 @@ footer {
         }
 
         function showItems(category) {
-            const itemsHtml = items[category].map(item => `
-                <div class="result-card" onclick="showItemDetails('${category}', '${item.name}', '${item.img}', '${item.details}', '${formatPrice(item.price)}')">
-                    <img src="${item.img}" alt="${item.name}">
-                    <h4>${item.name}</h4>
-                    <p>${item.details}</p>
-                    <p>${item.age}</p>
-                    <p>${formatPrice(item.price)}</p>
-                </div>
-            `).join('');
+    const itemsHtml = items[category].map(item => `
+        <div class="result-card" onclick="showItemDetails('${category}', '${item.name}', '${item.img}', '${item.details}', '${formatPrice(item.price)}')">
+            <img src="${item.img}" alt="${item.name}">
+            <h4>${item.name}</h4>
+            <p>${item.details}</p>
+            <p>${formatPrice(item.price)}</p>
+        </div>
+    `).join('');
 
-            Swal.fire({
-                title: `${category} Items`,
-                html: `<div class="results-container">${itemsHtml}</div>
-                       <button class="back-btn" onclick="Swal.close()">رجوع</button>`,
-                width: '100%',
-                backdrop: false,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                stopKeydownPropagation: false,
-                didOpen: () => {
-                    document.body.style.overflow = 'hidden';
-                },
-                willClose: () => {
-                    document.body.style.overflow = '';
-                },
-                showClass: {
-                    popup: 'animate__animated animate__fadeIn'
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOut'
-                }
-            });
+    Swal.fire({
+        title: `${category} Items`,
+        html: `<div class="results-container">${itemsHtml}</div>
+               <button class="back-btn" onclick="Swal.close()">رجوع</button>`,
+        width: '100%',
+        heightAuto: false, /* تعطيل ضبط الارتفاع التلقائي */
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        stopKeydownPropagation: false,
+        didOpen: () => {
+            document.body.style.overflow = 'hidden';
+        },
+        willClose: () => {
+            document.body.style.overflow = '';
+        },
+        showClass: {
+            popup: 'animate__animated animate__fadeIn'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOut'
         }
+    });
+}
 
         function showItemDetails(category, name, img, details, price) {
             Swal.fire({
