@@ -115,17 +115,18 @@
         100% { background-position: 0% 50%; }
     }
 
-    .container {
+   .container {
         background: rgba(255, 255, 255, 0.1);
         border-radius: 20px;
         padding: 20px;
         text-align: center;
         max-width: 800px;
-        width: 95%;
+        width: 90%; /* تعديل العرض ليكون مناسبًا للأجهزة المختلفة */
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
         backdrop-filter: blur(10px);
-        margin-bottom: 20px;
+        margin: 20px auto; /* جعل الحاوية تتوسط الشاشة */
     }
+
 
     .logo-container {
         display: flex;
@@ -159,68 +160,36 @@
         margin-top: 5px;
     }
 
-   .categories {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* جعل الأعمدة مرنة */
-    column-gap: 10px; /* مسافة أفقية بين الأزرار */
-    row-gap: 10px; /* مسافة عمودية بين الأزرار */
-    justify-items: center; /* توسيط الأزرار داخل الشبكة */
-    align-items: center;
-    width: 100%; /* عرض كامل للحاوية */
-    margin: 0 auto; /* توسيط الحاوية */
-}
-
-.category-btn {
-    position: relative;
-    overflow: hidden;
-    width: 100%; /* السماح بعرض مرن */
-    max-width: 120px; /* الحد الأقصى لعرض الأزرار */
-    height: 45px; /* ارتفاع ثابت للأزرار */
-    border-radius: 20px; /* زوايا مستديرة */
-    background: rgba(0, 0, 0, 0.3);
-    color: white;
-    font-size: 14px;
-    display: flex;
-    justify-content: center; /* توسيط النص أفقيًا */
-    align-items: center; /* توسيط النص رأسيًا */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ظل خفيف */
-    transition: all 0.3s ease;
-}
-
-.category-btn:hover {
-    transform: scale(1.05); /* تأثير التكبير */
-    background: linear-gradient(45deg, #43cea2, #185a9d);
-}
-
-.category-btn:active {
-    transform: scale(0.95); /* تأثير الضغط */
-}
-
-/* تحسين التوافق مع الشاشات الصغيرة */
-@media (max-width: 768px) {
     .categories {
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* أعمدة أصغر للشاشات الصغيرة */
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* تعديل التصميم ليكون مرنًا */
+        column-gap: 10px;
+        row-gap: 10px;
+        margin-bottom: 20px;
     }
 
     .category-btn {
-        max-width: 100px; /* تقليل الحد الأقصى لعرض الأزرار */
-        height: 40px; /* تقليل الارتفاع */
-        font-size: 12px; /* تصغير حجم النص */
+        position: relative;
+        overflow: hidden;
+        padding: 8px 12px;
+        border-radius: 20px;
+        background: rgba(0, 0, 0, 0.3);
+        color: white;
+        font-size: 14px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
     }
-}
 
-/* تحسين التوافق مع الشاشات الأصغر جدًا */
-@media (max-width: 480px) {
-    .categories {
-        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); /* أعمدة أصغر لتناسب الشاشات الصغيرة جدًا */
+    .category-btn:hover {
+        transform: scale(1.1);
+        background: linear-gradient(45deg, #43cea2, #185a9d);
     }
 
-    .category-btn {
-        max-width: 80px; /* تقليل الحد الأقصى لعرض الأزرار */
-        height: 35px; /* تقليل الارتفاع */
-        font-size: 11px; /* تصغير النص */
+    .category-btn.active {
+        background: linear-gradient(45deg, #43cea2, #185a9d);
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
     }
-}
 
     .results-container {
         display: flex;
@@ -233,21 +202,24 @@
         padding: 10px;
         background: rgba(0, 0, 0, 0.2);
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        width: 90%; /* عرض متجاوب */
+        margin: 0 auto; /* توسيط الحاوية */
     }
-
     .result-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 10px;
-    padding: 10px; /* تقليل padding */
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-    cursor: pointer;
-    user-select: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        padding: 10px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        cursor: pointer;
+        user-select: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        width: 100%; /* ضمان ملء العرض المتاح */
+        max-width: 300px; /* عرض أقصى مناسب */
+        margin: 0 auto; /* توسيط العناصر داخل الشبكة */
+    }
     .result-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
