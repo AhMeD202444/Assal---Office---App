@@ -161,54 +161,66 @@
 
    .categories {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* توزيع الأزرار بشكل متجاوب */
-    justify-items: center; /* توسيط الأزرار داخل الأعمدة */
-    column-gap: 10px; /* المسافة الأفقية بين الأعمدة */
-    row-gap: 10px; /* المسافة العمودية بين الصفوف */
-    margin-bottom: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* جعل الأعمدة مرنة */
+    column-gap: 10px; /* مسافة أفقية بين الأزرار */
+    row-gap: 10px; /* مسافة عمودية بين الأزرار */
+    justify-items: center; /* توسيط الأزرار داخل الشبكة */
+    align-items: center;
+    width: 100%; /* عرض كامل للحاوية */
+    margin: 0 auto; /* توسيط الحاوية */
 }
 
-@media (max-width: 768px) {
-    .categories {
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* تقليل حجم الأعمدة للشاشات الصغيرة */
-        gap: 8px; /* تقليل المسافات */
-    }
-}
-
-@media (max-width: 480px) {
-    .categories {
-        grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); /* تقليل حجم الأعمدة أكثر للشاشات الصغيرة جدًا */
-        gap: 6px; /* تقليل المسافات أكثر */
-    }
-}
-    .category-btn {
+.category-btn {
     position: relative;
     overflow: hidden;
-    width: 100%; /* جعل جميع الأزرار تأخذ نفس العرض */
-    height: 50px; /* ارتفاع ثابت للأزرار */
+    width: 100%; /* السماح بعرض مرن */
+    max-width: 120px; /* الحد الأقصى لعرض الأزرار */
+    height: 45px; /* ارتفاع ثابت للأزرار */
     border-radius: 20px; /* زوايا مستديرة */
     background: rgba(0, 0, 0, 0.3);
     color: white;
-    font-size: 14px; /* حجم النص */
-    display: flex; /* تفعيل الـ flexbox */
-    justify-content: center; /* محاذاة النص أفقيًا */
-    align-items: center; /* محاذاة النص رأسيًا */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* إضافة ظل */
-    transition: all 0.3s ease; /* تأثير الانتقال */
+    font-size: 14px;
+    display: flex;
+    justify-content: center; /* توسيط النص أفقيًا */
+    align-items: center; /* توسيط النص رأسيًا */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ظل خفيف */
+    transition: all 0.3s ease;
 }
 
 .category-btn:hover {
-    transform: scale(1.1); /* تأثير التكبير عند التمرير */
+    transform: scale(1.05); /* تأثير التكبير */
     background: linear-gradient(45deg, #43cea2, #185a9d);
 }
 
-.categories {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* شبكة مرنة */
-    column-gap: 10px; /* مسافة بين الأعمدة */
-    row-gap: 10px; /* مسافة بين الصفوف */
+.category-btn:active {
+    transform: scale(0.95); /* تأثير الضغط */
 }
 
+/* تحسين التوافق مع الشاشات الصغيرة */
+@media (max-width: 768px) {
+    .categories {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* أعمدة أصغر للشاشات الصغيرة */
+    }
+
+    .category-btn {
+        max-width: 100px; /* تقليل الحد الأقصى لعرض الأزرار */
+        height: 40px; /* تقليل الارتفاع */
+        font-size: 12px; /* تصغير حجم النص */
+    }
+}
+
+/* تحسين التوافق مع الشاشات الأصغر جدًا */
+@media (max-width: 480px) {
+    .categories {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); /* أعمدة أصغر لتناسب الشاشات الصغيرة جدًا */
+    }
+
+    .category-btn {
+        max-width: 80px; /* تقليل الحد الأقصى لعرض الأزرار */
+        height: 35px; /* تقليل الارتفاع */
+        font-size: 11px; /* تصغير النص */
+    }
+}
 
     .results-container {
         display: flex;
