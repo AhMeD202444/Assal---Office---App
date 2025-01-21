@@ -162,12 +162,56 @@
     border-radius: 20px;
     padding: 20px;
     text-align: center;
-    max-width: 100%; /* اجعلها مرنة بالكامل */
+    max-width: 700px;
     width: 90%;
-    margin: 0 auto; /* توسيط الحاوية */
     margin-top: -10px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
+}
+
+/* إضافة التعديلات لجعلها متجاوبة */
+@media (max-width: 768px) {
+    .container {
+        max-width: 95%; /* تقليل العرض لتناسب الشاشات الأصغر */
+        padding: 15px; /* تقليل الحشوة */
+    }
+
+    .results-container {
+        max-width: 95%; /* ضبط العرض */
+        padding: 8px; /* تقليل الحشوة */
+        gap: 10px; /* تقليل المسافة بين العناصر */
+    }
+
+    .result-card {
+        padding: 10px; /* تقليل الحشوة الداخلية */
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        max-width: 100%; /* استخدام العرض الكامل للشاشات الصغيرة */
+        padding: 10px; /* تقليل الحشوة أكثر */
+    }
+
+    .categories {
+        grid-template-columns: 1fr; /* تحويل الأعمدة إلى صف واحد */
+        gap: 5px; /* تقليل المسافة بين الأزرار */
+    }
+
+    .result-card img {
+        width: 50px; /* تقليل حجم الصور */
+        height: 50px;
+    }
+
+    .search-container input {
+        padding: 10px 40px 10px 10px; /* تعديل الحشوة لتناسب الشاشات الصغيرة */
+    }
+
+    .search-container button {
+        width: 35px; /* تقليل حجم زر البحث */
+        height: 35px;
+        font-size: 14px;
+    }
 }
 
 .actions-container {
@@ -175,9 +219,8 @@
     border-radius: 20px;
     padding: 15px;
     text-align: center;
-    max-width: 100%; /* جعل الحاوية مرنة */
+    max-width: 700px;
     width: 90%;
-    margin: 0 auto; /* توسيط الحاوية */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
     margin-top: 10px;
@@ -448,19 +491,17 @@ h1 {
 
 .results-container {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 600px;
-    overflow-y: auto;
+    flex-direction: column; /* ترتيب عمودي للنتائج */
+    gap: 10px; /* مسافة بين النتائج */
+    max-height: 600px; /* زيادة الحد الأقصى للارتفاع */
+    overflow-y: auto; /* السماح بالتمرير العمودي */
     scroll-behavior: smooth;
     border-radius: 10px;
     padding: 10px;
     background: rgba(0, 0, 0, 0.2);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    max-width: 100%; /* عرض مرن */
-    width: 90%; /* عرض مرن لشاشات أصغر */
-    margin: 0 auto; /* توسيط */
 }
+
 .result-card {
     text-align: center;
     background: rgba(0, 0, 0, 0.3);
@@ -669,33 +710,6 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
 }
 
 
-@media (max-width: 768px) {
-    .container,
-    .actions-container,
-    .results-container {
-        padding: 10px; /* تقليل الحشوة للشاشات الصغيرة */
-    }
-}
-
-@media (max-width: 480px) {
-    .container,
-    .actions-container,
-    .results-container {
-        width: 100%; /* استخدام العرض الكامل */
-        padding: 5px; /* تقليل الحشوة بشكل إضافي */
-    }
-
-    .button-container button {
-        width: 100%; /* جعل الأزرار تمتد بعرض الشاشة */
-        font-size: 14px; /* تقليل حجم النص للأزرار */
-    }
-}
-
-
-
-
-
-        
 
 .swal2-popup {
     background: linear-gradient(135deg, #1a2a3a, #243b55); /* خلفية متدرجة حديثة */
