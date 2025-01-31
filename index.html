@@ -1447,6 +1447,42 @@ loadExcelFiles().then(() => {
 
     fetchTechNews();
     setInterval(fetchTechNews, 60000); // تحديث الأخبار كل دقيقة
+
+        function restartNewsTicker() {
+    const ticker = document.querySelector(".news-ticker");
+    if (ticker) {
+        ticker.style.animation = "none"; // إيقاف الأنيميشن مؤقتًا
+        void ticker.offsetWidth; // إجبار إعادة التدفق (reflow)
+        ticker.style.animation = "scrollText 60s linear infinite"; // إعادة تشغيل الأنيميشن
+    }
+}
+
+// تحديث الأخبار وإعادة ضبط الشريط عند أي حدث مهم
+function refreshNewsTicker() {
+    fetchTechNews(); // جلب الأخبار من جديد
+    restartNewsTicker(); // إعادة تشغيل الحركة
+}
+
+// **1️⃣ حل مشكلة النوافذ المنبثقة فقط دون التأثير على الصفحة**
+document.addEventListener("click", function(event) {
+    // التحقق إذا كان النقر على نافذة منبثقة فقط
+    if (event.target.closest(".swal2-popup") || event.target.classList.contains("swal2-close") || 
+        event.target.classList.contains("swal2-confirm") || event.target.classList.contains("swal2-cancel")) {
+        setTimeout(refreshNewsTicker, 500); // تحديث الأخبار بعد إغلاق النافذة
+    }
+});
+
+// **2️⃣ حل مشكلة التنقل بين الصفحات (مثل أسعار بنمط الكروب)**
+window.addEventListener("pageshow", function() {
+    refreshNewsTicker(); // إعادة تشغيل الأخبار بعد العودة
+});
+
+// **3️⃣ عند تحميل الصفحة لأول مرة**
+window.addEventListener("load", function () {
+    refreshNewsTicker();
+});
+
+
         
     </script>
     <style>
