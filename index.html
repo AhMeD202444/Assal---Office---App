@@ -1447,21 +1447,6 @@ loadExcelFiles().then(() => {
 
     fetchTechNews();
     setInterval(fetchTechNews, 60000); // تحديث الأخبار كل دقيقة
-    
-    function restartNewsTicker() {
-    const ticker = document.querySelector(".news-ticker");
-    if (ticker) {
-        ticker.style.animation = "none"; // تعطيل الأنيميشن مؤقتًا
-        void ticker.offsetWidth; // إعادة التدفق (reflow) لإعادة تشغيل الأنيميشن
-        ticker.style.animation = "scrollText 60s linear infinite"; // إعادة تشغيل الأنيميشن
-    }
-}
-
-// عند إغلاق أي نافذة منبثقة، يتم إعادة تشغيل شريط الأخبار
-document.addEventListener("click", function () {
-    restartNewsTicker();
-});
-
         
     </script>
     <style>
