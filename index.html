@@ -754,7 +754,7 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
     100% { transform: scale(1.1); opacity: 0.9; }
 }
 
-/* حركة الأخبار من اليسار إلى اليمين */
+/* تحسين حاوية الأخبار لجعلها بدون لون إضافي */
 .news-ticker-container {
     flex: 1;
     height: 28px;
@@ -762,25 +762,25 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
     position: relative;
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: transparent !important; /* ✅ اجعل الخلفية شفافة */
     border-radius: 15px;
     padding: 4px 8px; /* ✅ ضبط الحواف لتكون متساوية */
 }
 
-
-/* تحسين شريط الأخبار لضبط التداخل بين العربي والإنجليزي */
+/* تحسين شريط الأخبار ليكون متناسقًا بدون خلفية منفصلة */
 .news-ticker {
     display: flex;
     align-items: center;
     white-space: nowrap;
     position: absolute;
-    animation: scrollText 60s linear infinite;
+    animation: scrollText 90s linear infinite;
     color: white;
     font-weight: bold;
     font-size: 14px;
     gap: 25px;
-    direction: rtl; /* ✅ اجعل النص يقرأ من اليمين إلى اليسار */
-    unicode-bidi: plaintext; /* ✅ يضمن أن النصوص المختلطة لا تتغير */
+    direction: rtl;
+    unicode-bidi: plaintext;
+    background: transparent !important; /* ✅ إزالة لون الخلفية */
 }
 
 
