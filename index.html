@@ -768,7 +768,7 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
 }
 
 
-/* شريط الأخبار المتحرك */
+/* تحسين شريط الأخبار لضبط التداخل بين العربي والإنجليزي */
 .news-ticker {
     display: flex;
     align-items: center;
@@ -779,27 +779,35 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
     font-weight: bold;
     font-size: 14px;
     gap: 25px;
+    direction: rtl; /* ✅ اجعل النص يقرأ من اليمين إلى اليسار */
+    unicode-bidi: plaintext; /* ✅ يضمن أن النصوص المختلطة لا تتغير */
 }
 
 
+/* ضبط كل جزء من الخبر لمنع تغيير ترتيب النصوص المختلطة */
 .news-ticker span {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-right: 20px;
+    direction: rtl; /* ✅ التأكد أن النصوص المختلطة تبقى متناسقة */
+    unicode-bidi: embed; /* ✅ يضمن بقاء النصوص الإنجليزية ضمن مكانها الصحيح */
 }
 
+    
+/* تحسين مظهر الأيقونة مع النص */
 .news-ticker img {
     width: 16px;
     height: 16px;
+    flex-shrink: 0; /* ✅ منع الأيقونات من التمدد أو التقلص */
 }
 
-/* تحسين الروابط */
+/* تحسين الروابط داخل الأخبار */
 .news-ticker a {
     color: white !important;
     text-decoration: none !important;
+    direction: rtl; /* ✅ إجبار النص على البقاء في الاتجاه الصحيح */
 }
-
 .news-ticker a:hover {
     text-decoration: underline;
 }
