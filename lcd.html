@@ -319,8 +319,8 @@
         font-size: 14px;
         box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
     }
-
-
+    
+    
     .swal2-popup {
     background: rgba(255, 255, 255, 0.2) !important; /* خلفية شفافة */
     backdrop-filter: blur(10px); /* تأثير ضبابي */
@@ -329,7 +329,7 @@
     color: #ffffff !important; /* نص أبيض */
     max-height: 95%;
 
-
+        
 }
 
 .swal2-title {
@@ -362,10 +362,10 @@
     transform: scale(0.95) !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
 }
-
-
-
-
+    
+    
+    
+    
 
     </style>
 </head>
@@ -428,54 +428,159 @@
             const filteredItems = database.LCD.filter(item => item["الصنف"] == categoryNumber);
 
             if (filteredItems.length === 0) {
-                resultsContainer.innerHTML = `<div class="no-results">لا توجد شاشات لهذا الصنف حالياً</div>`;
+                resultsContainer.innerHTML = <div class="no-results">لا توجد شاشات لهذا الصنف حالياً</div>;
                 return;
             }
 
             let htmlContent = '<div class="results-container">';
             filteredItems.forEach((item) => {
                 const imageName = item["Item Name"].toLowerCase().replace(/\s/g, '-') + '.jpg';
-                htmlContent += `
+                htmlContent += 
                     <div class="result-card">
                         <img src="images/lcd.png" alt="Image">
                         <div class="item-name">${item["Item Name"]}</div>
                         <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
                     </div>
-                `;
+                ;
             });
             htmlContent += '</div>';
 
             Swal.fire({
-    title: `${categoryName} - ${filteredItems.length} شاشات`,
-    html: `
+    title: ${categoryName} - ${filteredItems.length} شاشات,
+    html: 
         <div class="popup-close" onclick="Swal.close()"></div>
         ${htmlContent}
-        <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="swal2-confirm swal2-styled" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-        </div>
-    `,
+    
+    ,
+    
+    showConfirmButton: false,
+    width: '100%',
+    backdrop: rgba(0, 0, 0, 0.7),
+    backdrop: false,
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    stopKeydownPropagation: false,
+    
+    customClass: {
+        popup: 'swal2-popup', /* هنا يتم إضافة تصميم النافذة */
+        title: 'swal2-title', /* هنا يتم تصميم العنوان */
+        htmlContainer: 'swal2-html-container', /* هنا يتم تصميم النصوص */
+        confirmButton: 'swal2-confirm' /* هنا يتم تصميم الزر */
+    },
+    showClass: {
+        popup: 'animate__animated animate__fadeIn'
+    },
+    hideClass: {
+        popup: 'animate__animated animate__fadeOut'
+    },
+    didOpen: () => {
+        document.body.style.overflow = 'hidden';
+    },
+    willClose: () => {
+        document.body.style.overflow = '';
+    }
+});
+        }
 
-    showConfirmButton: false,
-    html: `
+        function filterLCDCategory(categoryNumber, categoryName) {
+            loadLCDItems(categoryNumber, categoryName);
+        }
+
+        async function filterHousingCategory() {
+            await loadHousingItems();
+        }
+
+        async function filterBatteryCategory() {
+            await loadBatteryItems();
+        }
+
+        async function loadHousingItems() {
+            const resultsContainer = document.getElementById("results");
+            resultsContainer.innerHTML = '';
+
+            if (database.HOUSING.length === 0) {
+                resultsContainer.innerHTML = <div class="no-results">لا توجد شواصي حالياً</div>;
+                return;
+            }
+
+            let htmlContent = '<div class="results-container">';
+            database.HOUSING.forEach((item) => {
+                const imageName = item["Item Name"].toLowerCase().replace(/\s/g, '-') + '.jpg';
+                htmlContent += 
+                    <div class="result-card">
+                        <img src="images/lcd.png" alt="Image">
+                        <div class="item-name">${item["Item Name"]}</div>
+                        <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
+                    </div>
+                ;
+            });
+            htmlContent += '</div>';
+
+            Swal.fire({
+    title: شواصي - ${database.HOUSING.length} شواصي,
+    html: 
         <div class="popup-close" onclick="Swal.close()"></div>
         ${htmlContent}
-        <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="swal2-confirm swal2-styled" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-        </div>
-      
-    `,
+    ,
     showConfirmButton: false,
     width: '100%',
-    html: `
+    backdrop: rgba(0, 0, 0, 0.7),
+    backdrop: false,
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    stopKeydownPropagation: false,
+    customClass: {
+        popup: 'swal2-popup',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container',
+        confirmButton: 'swal2-confirm'
+    },
+    showClass: {
+        popup: 'animate__animated animate__fadeIn'
+    },
+    hideClass: {
+        popup: 'animate__animated animate__fadeOut'
+    },
+    didOpen: () => {
+        document.body.style.overflow = 'hidden';
+    },
+    willClose: () => {
+        document.body.style.overflow = '';
+    }
+});
+        }
+
+        async function loadBatteryItems() {
+            const resultsContainer = document.getElementById("results");
+            resultsContainer.innerHTML = '';
+
+            if (database.BATTERY.length === 0) {
+                resultsContainer.innerHTML = <div class="no-results">لا توجد بطاريات حالياً</div>;
+                return;
+            }
+
+            let htmlContent = '<div class="results-container">';
+            database.BATTERY.forEach((item) => {
+                const imageName = item["Item Name"].toLowerCase().replace(/\s/g, '-') + '.jpg';
+                htmlContent += 
+                    <div class="result-card">
+                        <img src="images/lcd.png" alt="Image">
+                        <div class="item-name">${item["Item Name"]}</div>
+                        <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
+                    </div>
+                ;
+            });
+            htmlContent += '</div>';
+
+            Swal.fire({
+    title: بطاريات - ${database.BATTERY.length} بطاريات,
+    html: 
         <div class="popup-close" onclick="Swal.close()"></div>
         ${htmlContent}
-        <div style="position: relative; overflow: hidden; margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-            <button class="swal2-confirm swal2-styled" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
-        </div>
-    `,
+    ,
     showConfirmButton: false,
     width: '100%',
-    backdrop: `rgba(0, 0, 0, 0.7)`,
+    backdrop: rgba(0, 0, 0, 0.7),
     backdrop: false,
     showConfirmButton: false,
     allowOutsideClick: false,
