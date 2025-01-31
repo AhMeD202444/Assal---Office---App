@@ -710,6 +710,103 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
 }
 
 
+/* شريط الأخبار مطابق تمامًا لزر "أسعار بنمط الكروب" */
+.news-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* يجعل زر "عاجل" في اليمين */
+    background: rgba(0, 0, 0, 0.3);
+    padding: 8px 16px;
+    border-radius: 25px;
+    width: 100%;
+    max-width: 320px; /* نفس عرض زر أسعار بنمط الكروب */
+    height: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+
+/* زر "عاجل" في اليمين */
+.breaking-news {
+    background: linear-gradient(135deg, #0082B5, #0070A0);
+    color: white;
+    font-weight: bold;
+    padding: 6px 14px;
+    border-radius: 20px;
+    text-align: center;
+    font-size: 14px;
+    animation: pulse 1.5s infinite alternate;
+    box-shadow: 0px 0px 10px rgba(0, 130, 181, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    margin-right: 10px; /* يدفعه إلى أقصى اليمين */
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.1); opacity: 0.9; }
+}
+
+/* حركة الأخبار من اليسار إلى اليمين */
+.news-ticker-container {
+    flex: 1;
+    height: 28px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 4px;
+}
+
+
+/* شريط الأخبار المتحرك */
+.news-ticker {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    position: absolute;
+    animation: scrollText 70s linear infinite;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    gap: 25px;
+}
+
+
+.news-ticker span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 20px;
+}
+
+.news-ticker img {
+    width: 16px;
+    height: 16px;
+}
+
+/* تحسين الروابط */
+.news-ticker a {
+    color: white !important;
+    text-decoration: none !important;
+}
+
+.news-ticker a:hover {
+    text-decoration: underline;
+}
+
+@keyframes scrollText {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+}
+        
+
 
 .swal2-popup {
     background: linear-gradient(135deg, #1a2a3a, #243b55); /* خلفية متدرجة حديثة */
@@ -823,6 +920,18 @@ footer {
         <img src="images/logo.png" alt="Logo">
     </div>
     <h1>Phone Parts Pro</h1>
+
+
+<!-- شريط الأخبار -->
+<div class="news-bar">
+    <div class="breaking-news">🔥 عاجل</div>
+    <div class="news-ticker-container">
+        <div class="news-ticker" id="newsTicker">جاري تحميل الأخبار...</div>
+    </div>
+</div>
+
+
+        
 
         <div class="categories">
             <button class="new-category-btn" onclick="openLCDPage()">اسعار بنمط الكروب</button>
@@ -1294,6 +1403,39 @@ loadExcelFiles().then(() => {
 }
         
         loadExcelFiles();
+
+ async function fetchTechNews() {
+        const rssToJsonUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://aitnews.com/feed/";
+
+        try {
+            const response = await fetch(rssToJsonUrl);
+            const data = await response.json();
+            let newsItems = [];
+
+            if (data.items) {
+                data.items.forEach(item => { // جلب جميع الأخبار
+                    let title = item.title;
+                    let link = item.link;
+                    let icon = "https://cdn-icons-png.flaticon.com/16/1041/1041916.png";
+                    newsItems.push(`<span><img src="${icon}" alt="📢"><a href="${link}" target="_blank">${title}</a></span>`);
+                });
+            }
+
+            if (newsItems.length > 0) {
+                document.getElementById("newsTicker").innerHTML = newsItems.join(" | ");
+            } else {
+                document.getElementById("newsTicker").textContent = "⚠️ لا توجد أخبار متاحة الآن";
+            }
+        } catch (error) {
+            console.error("Error fetching news:", error);
+            document.getElementById("newsTicker").textContent = "⚠️ تعذر تحميل الأخبار";
+        }
+    }
+
+    fetchTechNews();
+    setInterval(fetchTechNews, 60000); // تحديث الأخبار كل دقيقة
+
+        
     </script>
     <style>
         .swal2-popup {
