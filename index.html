@@ -992,17 +992,19 @@ footer {
 
 
  // إعداد خيار إظهار النافذة
-        const showPopup = false; // استخدم false إذا أردت تعطيل النافذة.
+       const showPopup = false; // استخدم false إذا أردت تعطيل النافذة.
 
- 
 // نافذة الترحيب تظهر فقط عند تشغيل التطبيق
 window.onload = () => {
-    const hasUpdated = sessionStorage.getItem('hasUpdated');
-    if (!hasUpdated) {
-        sessionStorage.setItem('hasUpdated', true); // منع ظهور النافذة مجددًا خلال نفس الجلسة
-        const popup = document.getElementById('popup');
-        popup.style.display = 'flex';
-        popup.classList.add('animate__animated', 'animate__fadeInDown'); // حركة دخول
+    // تحقق من قيمة showPopup قبل إظهار النافذة
+    if (showPopup) {
+        const hasUpdated = sessionStorage.getItem('hasUpdated');
+        if (!hasUpdated) {
+            sessionStorage.setItem('hasUpdated', true); // منع ظهور النافذة مجددًا خلال نفس الجلسة
+            const popup = document.getElementById('popup');
+            popup.style.display = 'flex';
+            popup.classList.add('animate__animated', 'animate__fadeInDown'); // حركة دخول
+        }
     }
 };
 
@@ -1015,7 +1017,6 @@ function closePopup() {
         popup.classList.remove('animate__fadeOutUp', 'animate__fadeInDown'); // إعادة تعيين الحركات
     }, 1000); // مدة الحركة
 }
-
         
         const dropboxMainFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file1" + "?t=" + new Date().getTime();
         const dropboxSimilaritesFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file2" + "?t=" + new Date().getTime();
