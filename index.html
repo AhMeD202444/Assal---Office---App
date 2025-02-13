@@ -275,14 +275,15 @@ h1 {
 
 
 
- .categories {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); /* صفان يحتويان على عمودين */
-        column-gap: 11px; /* المسافة الأفقية بين الأعمدة */
-        row-gap: 8px; /* المسافة العمودية بين الصفوف */
-        margin-bottom: 15px;
-    }
-
+ 
+/* توحيد المسافات بين جميع الأزرار */
+.categories {
+    display: flex;
+    flex-direction: column; /* ترتيب عمودي */
+    gap: 10px; /* مسافة موحدة بين جميع الأزرار */
+    align-items: center;
+    width: 100%;
+}
     .category-btn {
         position: relative;
         overflow: hidden;
@@ -309,9 +310,13 @@ h1 {
         box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
     }
 
-    .tools-btn {
-        grid-column: span 2; /* يجعل الزر يمتد على عمودين */
-    }
+   .new-category-btn, 
+.category-btn, 
+.tools-btn, 
+.dropbtn {
+    width: 100%; /* جعل العرض موحد */
+    max-width: 330px; /* نفس عرض زر أسعار بنمط الكروب */
+}
     
     
     .new-category-btn {
@@ -351,39 +356,176 @@ h1 {
        margin-top: -2px; /* رفع النص قليلاً */
 }
 
-    
-    
+
+/* توحيد عرض القائمة المنسدلة مع زر أسعار بنمط الكروب */
+.dropdown {
+    width: 100%;
+    max-width: 330px; /* نفس عرض زر أسعار بنمط الكروب */
+    position: relative; /* تثبيت داخل الحاوية */
+}
+
+/* ✅ زر القائمة المنسدلة بنفس تصميم الأزرار الأخرى */
+.dropbtn {
+     background: rgba(0, 0, 0, 0.3); /* نفس لون زر "أسعار بنمط الكروب" */
+    color: white;
+    padding: 12px 16px;
+    font-size: 16px;
+    border-radius: 25px;
+    text-align: center;
+    width: 100%;
+    max-width: 330px;
+    height: 40px;
+    border: 2px solid white; /* ✅ خط أبيض واضح حول الزر */
+    box-shadow: none; /* ❌ إزالة أي ظلال */
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    gap: 8px; /* ✅ يضيف مسافة بين النص والسهم */
+    z-index: 99999; /* ✅ يضمن بقاء الزر فوق جميع العناصر */
+}
+
+/* ✅ القائمة المنسدلة ستظهر فوق الجميع */
+.dropdown-content {
+   position: absolute;
+    top: 105%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 330px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 25px;
+    padding: 5px 0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    z-index: 9999999;
+
+    /* ✅✅ إضافة التمرير عند تجاوز 5 أصناف ✅✅ */
+    max-height: 250px; /* ارتفاع القائمة قبل ظهور التمرير */
+    overflow-y: auto; /* تمكين التمرير العمودي عند الحاجة */
+}
+
+/* ✅ تأثير عند تمرير الماوس */
+.dropbtn:hover {
+     transform: scale(1.05);
+    background: linear-gradient(45deg, #43cea2, #185a9d);
+    border: 2px solid rgba(255, 255, 255, 0.7); /* ✅ تفتيح الخط الأبيض عند التحريك */
+}
+
+
+
+/* ✅ تأثير عند الضغط */
+.dropbtn:active {
+     transform: scale(0.95);
+    background: linear-gradient(45deg, #43cea2, #185a9d);
+    border: 2px solid rgba(255, 255, 255, 1); /* ✅ يبقى الخط أبيض وواضح عند الضغط */
+}
+
+
+
+/* ✅ حل مشكلة الاختفاء خلف الحاويات الأخرى */
+.container {
+    position: relative;
+    z-index: 1;
+    overflow: visible; /* ✅ التأكد من أن كل شيء يظهر بالكامل */
+}
+
+/* ✅ ظهور القائمة بالكامل */
+.dropdown.show .dropdown-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(5px);
+}
+
+/* ✅ أصناف القائمة بنفس تصميم الأزرار */
+.dropdown-content button {
+    background: none;
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+    position: relative;
+}
+
+/* ✅ إضافة خط فاصل بين الأصناف */
+.dropdown-content button:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 80%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ✅ تأثير التمرير */
+.dropdown-content button:hover {
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+}
+
+/* ✅ القائمة تظهر بالكامل عند فتحها */
+.dropdown.show .dropdown-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(5px);
+}
+
+/* ✅ عند فتح القائمة، تدوير السهم */
+.dropdown.show .arrow {
+    transform: rotate(180deg);
+}
+
+
 
         .search-container {
             position: relative;
             width: 100%;
             margin-bottom: 20px;
-            margin-top: -5px;
+            margin-top: 10px;
             
         }
 
         .search-container input {
             width: 100%;
-            padding: 15px 50px 15px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 50px;
-            background: rgba(0, 0, 0, 0.3);
-            color: white;
-            outline: none;
-            transition: all 0.3s ease;
+    height: 40px; /* نفس ارتفاع شريط الأخبار */
+    padding: 8px 16px;
+    font-size: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3); /* ✅ إضافة الحواف البيضاء */
+    border-radius: 25px; /* ✅ جعل الحواف دائرية مثل شريط الأخبار */
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ✅ إضافة الظل مثل شريط الأخبار */
         }
 
         .search-container input:focus {
-            background: rgba(0, 0, 0, 0.5);
+             background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.5); /* ✅ تفتيح الحدود عند النقر */
+    box-shadow: 0 6px 15px rgba(255, 255, 255, 0.3); /* ✅ زيادة التأثير عند التركيز */
         }
 
 
+@keyframes pulseEffect {
+    0% { transform: scale(1); box-shadow: 0 0 5px rgba(67, 206, 162, 0.5); }
+    50% { transform: scale(1.1); box-shadow: 0 0 15px rgba(67, 206, 162, 0.7); }
+    100% { transform: scale(1); box-shadow: 0 0 5px rgba(67, 206, 162, 0.5); }
+}
 
 .search-container button {
     position: absolute;
-    right: 10px;
-    top: 50%;
+    right: 10px; /* ✅ تأكد أن الزر يبقى في أقصى اليمين */
+    top: 0%;
     transform: translateY(-50%);
     background: linear-gradient(45deg, #43cea2, #185a9d);
     border: none;
@@ -394,6 +536,7 @@ h1 {
     font-size: 18px;
     cursor: pointer;
     transition: all 0.3s ease;
+    animation: pulseEffect 1.5s infinite alternate; /* ✅ إضافة تأثير النبض */
 }
 
 .search-container button:active {
@@ -721,7 +864,6 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
     padding: 8px 16px;
     border-radius: 25px;
     width: 100%;
-    max-width: 330px; /* نفس عرض زر أسعار بنمط الكروب */
     height: 40px;
     border: 2px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -946,16 +1088,30 @@ footer {
 
         
 
-        <div class="categories">
-            <button class="new-category-btn" onclick="openLCDPage()">اسعار بنمط الكروب</button>
-            <button class="category-btn" onclick="filterCategory('LCD', this)">شاشات</button>
-            <button class="category-btn" onclick="filterCategory('BATTERY', this)">بطاريات</button>
-            <button class="category-btn" onclick="filterCategory('HOUSING', this)">شواصي</button>
-            <button class="category-btn" onclick="openSimilarites(this)">توافقات</button>
-            <button class="category-btn tools-btn" onclick="openToolsPage()">عدد الصيانة</button>
-            <!-- زر الصنف الجديد -->
-  
+      <div class="categories">
+    <!-- زر أسعار بنمط الكروب -->
+    <button class="new-category-btn" onclick="openLCDPage()">اسعار بنمط الكروب</button>
+
+    <!-- زر عدد الصيانة -->
+    <button class="category-btn tools-btn" onclick="openToolsPage()">عدد الصيانة</button>
+
+    <!-- زر توافقات -->
+    <button class="category-btn" onclick="openSimilarites(this)">توافقات</button>
+
+    <!-- القائمة المنسدلة -->
+    <div class="dropdown">
+        <button class="dropbtn"><span class="arrow">⌄</span> اضغط هنا لاختيار صنف</button>
+        <div class="dropdown-content">
+            <button onclick="filterCategory('LCD', this)">شاشات</button>
+            <button onclick="filterCategory('BATTERY', this)">بطاريات</button>
+            <button onclick="filterCategory('HOUSING', this)">شواصي</button>
+            <button onclick="filterCategory('BACK', this)">اظهر</button>
+            <button onclick="filterCategory('BACK', this)">كاميرا خلفية</button>
+            
         </div>
+    </div>
+</div>
+
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search for items...">
             <button onclick="searchItems()"><i class="fas fa-search"></i></button>
@@ -1030,6 +1186,8 @@ function closePopup() {
             database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {});
             database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
             database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
+            database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BACK"] || {}); // ✅ تحميل البيانات من شيت "BACK"
+           database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BIG CAMERA"] || {}); // ✅ تحميل البيانات من شيت "BA
 
             const similaritesResponse = await fetch(dropboxSimilaritesFile);
             const similaritesBuffer = await similaritesResponse.arrayBuffer();
@@ -1038,6 +1196,38 @@ function closePopup() {
                 Item: item.Item || "Unnamed"
             }));
         }
+
+
+
+const dropdown = document.querySelector(".dropdown");
+const dropbtn = document.querySelector(".dropbtn");
+const dropdownContent = document.querySelector(".dropdown-content");
+
+// ✅ فتح وإغلاق القائمة عند النقر على الزر
+dropbtn.addEventListener("click", function () {
+    dropdown.classList.toggle("show");
+});
+
+// ✅ عند اختيار صنف، يتم تحديث النص داخل الزر وإغلاق القائمة
+function selectCategory(category) {
+    dropbtn.innerHTML = category + ' <span class="arrow">⌄</span>';
+    dropdown.classList.remove("show");
+}
+
+// ✅ إغلاق القائمة عند النقر خارجها
+window.addEventListener("click", function (event) {
+    if (!event.target.closest('.dropdown')) {
+        dropdown.classList.remove("show");
+    }
+});
+
+// ✅ ربط الأصناف بوظيفة الاختيار
+document.querySelectorAll(".dropdown-content button").forEach(button => {
+    button.addEventListener("click", function () {
+        selectCategory(this.textContent.trim());
+    });
+});
+
 
         
 function filterCategory(category, button) {
