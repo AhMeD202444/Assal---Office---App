@@ -1196,7 +1196,15 @@ function closePopup() {
                 Item: item.Item || "Unnamed"
             }));
         }
-
+        
+        
+        
+        document.getElementById("searchInput").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault(); // 🔴 منع إعادة تحميل الصفحة
+        searchItems(); // ✅ استدعاء البحث
+    }
+});
 
 
 const dropdown = document.querySelector(".dropdown");
