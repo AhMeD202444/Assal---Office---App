@@ -397,6 +397,9 @@
             <button class="category-btn" onclick="filterLCDCategory(18, 'ALCATEL')">ALCATEL</button>
             <button class="category-btn" onclick="filterHousingCategory()">شواصي</button>
             <button class="category-btn" onclick="filterBatteryCategory()">بطاريات</button>
+            <button class="category-btn" onclick="filterBackCategory()">اظهر</button>
+            <button class="category-btn" onclick="filterCameraCategory()">كاميرات</button>
+            <button class="category-btn" onclick="filterChargingCategory()">بورد شحن</button>
             <button class="category-btn" onclick="filterBatteryCategory()">اخرى</button>
         </div>
     </div>
@@ -419,6 +422,9 @@
             database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {});
             database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
             database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
+            database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BACK"] || {}); 
+            database.CAMERA = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CAMERA"] || {}); 
+            database.CHARGING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CHARGING"] || {}); 
         }
 
         async function loadLCDItems(categoryNumber, categoryName) {
@@ -492,6 +498,127 @@
         async function filterBatteryCategory() {
             await loadBatteryItems();
         }
+        
+       
+        async function filterBackCategory() {
+    await loadBackItems();
+}
+
+async function filterCameraCategory() {
+    await loadCameraItems();
+}
+
+async function filterChargingCategory() {
+    await loadChargingItems();
+}
+
+
+
+async function loadBackItems() {
+    const resultsContainer = document.getElementById("results");
+    resultsContainer.innerHTML = '';
+
+    if (!database.BACK || database.BACK.length === 0) {
+        resultsContainer.innerHTML = `<div class="no-results">لا توجد بيانات لهذا الصنف حالياً</div>`;
+        return;
+    }
+
+    let htmlContent = '<div class="results-container">';
+    database.BACK.forEach((item) => {
+        htmlContent += `
+            <div class="result-card">
+                <img src="images/back.png" alt="Image">
+                <div class="item-name">${item["Item Name"]}</div>
+                <div class="price">${item["Price"] ? `${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار` : 'غير متوفر'}</div>
+            </div>
+        `;
+    });
+    htmlContent += '</div>';
+
+    Swal.fire({
+        title: `اظهر - ${database.BACK.length} عناصر`,
+        html: `<div class="popup-close" onclick="Swal.close()"></div>${htmlContent}`,
+        showConfirmButton: false,
+        width: '100%',
+        backdrop: false,
+        customClass: { popup: 'swal2-popup', title: 'swal2-title', htmlContainer: 'swal2-html-container', confirmButton: 'swal2-confirm' },
+        showClass: { popup: 'animate__animated animate__fadeIn' },
+        hideClass: { popup: 'animate__animated animate__fadeOut' },
+        didOpen: () => { document.body.style.overflow = 'hidden'; },
+        willClose: () => { document.body.style.overflow = ''; }
+    });
+}
+
+async function loadCameraItems() {
+    const resultsContainer = document.getElementById("results");
+    resultsContainer.innerHTML = '';
+
+    if (!database.CAMERA || database.CAMERA.length === 0) {
+        resultsContainer.innerHTML = `<div class="no-results">لا توجد كاميرات حالياً</div>`;
+        return;
+    }
+
+    let htmlContent = '<div class="results-container">';
+    database.CAMERA.forEach((item) => {
+        htmlContent += `
+            <div class="result-card">
+                <img src="images/camera.png" alt="Image">
+                <div class="item-name">${item["Item Name"]}</div>
+                <div class="price">${item["Price"] ? `${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار` : 'غير متوفر'}</div>
+            </div>
+        `;
+    });
+    htmlContent += '</div>';
+
+    Swal.fire({
+        title: `كاميرات - ${database.CAMERA.length} كاميرات`,
+        html: `<div class="popup-close" onclick="Swal.close()"></div>${htmlContent}`,
+        showConfirmButton: false,
+        width: '100%',
+        backdrop: false,
+        customClass: { popup: 'swal2-popup', title: 'swal2-title', htmlContainer: 'swal2-html-container', confirmButton: 'swal2-confirm' },
+        showClass: { popup: 'animate__animated animate__fadeIn' },
+        hideClass: { popup: 'animate__animated animate__fadeOut' },
+        didOpen: () => { document.body.style.overflow = 'hidden'; },
+        willClose: () => { document.body.style.overflow = ''; }
+    });
+}
+
+async function loadChargingItems() {
+    const resultsContainer = document.getElementById("results");
+    resultsContainer.innerHTML = '';
+
+    if (!database.CHARGING || database.CHARGING.length === 0) {
+        resultsContainer.innerHTML = `<div class="no-results">لا توجد بوردات شحن حالياً</div>`;
+        return;
+    }
+
+    let htmlContent = '<div class="results-container">';
+    database.CHARGING.forEach((item) => {
+        htmlContent += `
+            <div class="result-card">
+                <img src="images/charging.png" alt="Image">
+                <div class="item-name">${item["Item Name"]}</div>
+                <div class="price">${item["Price"] ? `${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار` : 'غير متوفر'}</div>
+            </div>
+        `;
+    });
+    htmlContent += '</div>';
+
+    Swal.fire({
+        title: `بوردات الشحن - ${database.CHARGING.length} بورد`,
+        html: `<div class="popup-close" onclick="Swal.close()"></div>${htmlContent}`,
+        showConfirmButton: false,
+        width: '100%',
+        backdrop: false,
+        customClass: { popup: 'swal2-popup', title: 'swal2-title', htmlContainer: 'swal2-html-container', confirmButton: 'swal2-confirm' },
+        showClass: { popup: 'animate__animated animate__fadeIn' },
+        hideClass: { popup: 'animate__animated animate__fadeOut' },
+        didOpen: () => { document.body.style.overflow = 'hidden'; },
+        willClose: () => { document.body.style.overflow = ''; }
+    });
+}
+        
 
         async function loadHousingItems() {
             const resultsContainer = document.getElementById("results");
