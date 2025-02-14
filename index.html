@@ -1106,7 +1106,7 @@ footer {
             <button onclick="filterCategory('BATTERY', this)">بطاريات</button>
             <button onclick="filterCategory('HOUSING', this)">شواصي</button>
             <button onclick="filterCategory('BACK', this)">اظهر</button>
-            <button onclick="filterCategory('BIG CAMERA', this)">كاميرا خلفية</button>
+            <button onclick="filterCategory('BACK', this)">كاميرا خلفية</button>
             
         </div>
     </div>
@@ -1187,8 +1187,8 @@ function closePopup() {
             database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
             database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
             database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BACK"] || {}); // ✅ تحميل البيانات من شيت "BACK"
-            database.BIG CAMERA = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BIG CAMERA"] || {}); 
-            
+           database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BIG CAMERA"] || {}); // ✅ تحميل البيانات من شيت "BA
+
             const similaritesResponse = await fetch(dropboxSimilaritesFile);
             const similaritesBuffer = await similaritesResponse.arrayBuffer();
             const similaritesWorkbook = XLSX.read(similaritesBuffer, { type: "array" });
