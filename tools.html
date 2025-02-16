@@ -411,31 +411,25 @@ footer {
     });
 }
         function showItemDetails(category, name, img, details, price) {
-            Swal.fire({
-                title: name,
-                html: `
-                <button class="popup-close-btn" onclick="showItems('${category}')">X</button>
-                <img src="${img}" alt="${name}" style="width: 100%; max-width: 400px; border-radius: 50%; margin-bottom: 20px;">
-                <p>${details}</p>
-                <p>${price}</p>`,
-                width: '100%',
-                showConfirmButton: false,
-                backdrop: false,
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm',
-                    cancelButton: 'swal2-cancel'
-                },
-                showClass: {
-                    popup: 'animate__animated animate__fadeIn'
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOut'
-                }
-            });
+    Swal.fire({
+        html: `
+            <button class="popup-close-btn" onclick="showItems('${category}')">X</button>
+            <img src="${img}" alt="${name}" style="width: 100%; max-width: 400px; height: auto; border-radius: 0; margin-bottom: 20px;">
+        `,
+        width: '100%',
+        showConfirmButton: false,
+        backdrop: false,
+        customClass: {
+            popup: 'swal2-popup'
+        },
+        showClass: {
+            popup: 'animate__animated animate__fadeIn'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOut'
         }
+    });
+}
 
         function goToHomePage() {
             window.location.href = 'index.html';
