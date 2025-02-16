@@ -40,6 +40,26 @@
     backdrop-filter: blur(10px);
     margin: 20px auto; /* محاذاة وسطية مع تباعد */
 }
+
+        .popup-image {
+    width: 80%; /* تصغير حجم الصورة */
+    max-width: 300px; /* أقصى عرض */
+    height: auto;
+    border-radius: 15px; /* حواف بيضوية */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: block;
+    margin: 20px auto; /* توسيط الصورة */
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2); /* ظل خفيف */
+    cursor: pointer;
+}
+
+.popup-image:active {
+    transform: scale(0.95); /* تصغير عند الضغط */
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.5);
+}
+
+
+        
         .logo-container {
             display: flex;
             justify-content: center;
@@ -410,13 +430,13 @@ footer {
         }
     });
 }
-        function showItemDetails(category, name, img, details, price) {
+       function showItemDetails(category, name, img, details, price) {
     Swal.fire({
         html: `
             <button class="popup-close-btn" onclick="showItems('${category}')">X</button>
-            <img src="${img}" alt="${name}" style="width: 100%; max-width: 400px; height: auto; border-radius: 0; margin-bottom: 20px;">
+            <img src="${img}" alt="${name}" class="popup-image">
         `,
-        width: '100%',
+        width: '90%',
         showConfirmButton: false,
         backdrop: false,
         customClass: {
