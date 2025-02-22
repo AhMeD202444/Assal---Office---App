@@ -2030,7 +2030,12 @@ footer {
         }
     });
 }
+
+        let scrollPosition = 0;
        function showItemDetails(category, name, img, details, price) {
+        scrollPosition = document.querySelector('.results-container').scrollTop; // حفظ موضع القائمة
+
+           
     Swal.fire({
         html: `
             <button class="popup-close-btn" onclick="showItems('${category}')">X</button>
@@ -2050,6 +2055,14 @@ footer {
         }
     });
 }
+
+        function restoreScroll(category) {
+    showItems(category);
+    setTimeout(() => {
+        document.querySelector('.results-container').scrollTop = scrollPosition; // استعادة موضع القائمة
+    }, 100);
+}
+
 
         function goToHomePage() {
             window.location.href = 'index.html';
