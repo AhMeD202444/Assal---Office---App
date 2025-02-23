@@ -305,6 +305,7 @@ h1 {
         font-size: 16px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         transition: all 0.3s ease;
+         gap: 10px; /* مسافة بين الأيقونة والنص */
     }
 
     .category-btn:hover {
@@ -342,6 +343,7 @@ h1 {
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
             text-align: center;
+             gap: 10px; /* مسافة بين الأيقونة والنص */
         }
 
         .new-category-btn:hover {
@@ -489,6 +491,11 @@ h1 {
 .dropdown.show .arrow {
     transform: rotate(180deg);
 }
+
+.dropbtn .arrow {
+    display: none !important;
+}
+
 
 
 
@@ -1095,23 +1102,17 @@ footer {
 
       <div class="categories">
     <!-- زر أسعار بنمط الكروب -->
-    <button class="new-category-btn" onclick="openLCDPage()">اسعار بنمط الكروب</button>
-
-    <!-- زر عدد الصيانة -->
-    <button class="category-btn tools-btn" onclick="openToolsPage()">عدد الصيانة</button>
-
-    <!-- زر توافقات -->
-    <button class="category-btn" onclick="openSimilarites(this)">توافقات</button>
-
-    <!-- القائمة المنسدلة -->
-    <div class="dropdown">
-        <button class="dropbtn"><span class="arrow">⌄</span> اضغط هنا لاختيار صنف</button>
-        <div class="dropdown-content">
-            <button onclick="filterCategory('LCD', this)">شاشات</button>
-            <button onclick="filterCategory('BATTERY', this)">بطاريات</button>
-            <button onclick="filterCategory('HOUSING', this)">شواصي</button>
-            <button onclick="filterCategory('BACK', this)">اظهر</button>
-            <button onclick="filterCategory('CAMERA', this)">كاميرا خلفية</button>
+     <button class="new-category-btn" onclick="openLCDPage()"><i class="fas fa-list"></i> أسعار بنمط الكروب</button>
+            <button class="category-btn tools-btn" onclick="openToolsPage()"><i class="fas fa-tools"></i> عدد الصيانة</button>
+            <button class="category-btn" onclick="openSimilarites(this)"><i class="fas fa-sync"></i> توافقات</button>
+            <div class="dropdown">
+                <button class="dropbtn"><i class="fas fa-list"></i> اضغط هنا لاختيار صنف <span class="arrow">⌄</span></button>
+                <div class="dropdown-content">
+                     <button onclick="filterCategory('LCD')"><i class="fas fa-tv"></i> شاشات</button>
+                     <button onclick="filterCategory('BATTERY')"><i class="fas fa-battery-full"></i> بطاريات</button>
+                     <button onclick="filterCategory('HOUSING')"><i class="fas fa-mobile-alt"></i> شواصي</button>
+                     <button onclick="filterCategory('BACK')"><i class="fas fa-tablet-alt"></i> اظهر</button>
+                     <button onclick="filterCategory('CAMERA')"><i class="fas fa-camera"></i> كاميرا خلفية</button>
             
         </div>
     </div>
