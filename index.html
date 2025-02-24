@@ -373,16 +373,13 @@ h1 {
     width: 90%;
     max-width: 600px;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.3); /* ✅ نفس لون زر أسعار بنمط الكروب */
-    padding: 8px;
-    border-radius: 25px; /* ✅ حواف دائرية مثل الزر */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ✅ نفس الظل */
+    background: rgba(255, 255, 255, 0.1);
+    padding: 5px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
-    transition: all 0.3s ease-in-out;
 }
-
-
 
 .slider {
     display: flex;
@@ -584,49 +581,65 @@ h1 {
         
 
 
-.button-container {
+ /* تصميم الحاوية للأزرار */
+        .button-container {
+            display: flex;
+            flex-direction: column; /* ترتيب عمودي للأزرار */
+            align-items: center; /* توسيط الأزرار أفقياً */
+            gap: 5px; /* مسافة متساوية بين الأزرار */
+            margin-top: -10px; /* مسافة بين الزرين وأزرار الألوان */
+        }
+
+        /* تصميم الأزرار */
+    .refresh-btn,
+    .exit-btn {
+    position: relative;
+    overflow: hidden; /* يمنع التأثير من الخروج */
+    width: 320px;
+    height: 40px;
+    padding: 8px 16px; /* تعديل المسافات الداخلية للزر */
+    font-size: 16px;
+    line-height: 40px; /* نفس ارتفاع الزر لتوسيط النص عموديًا */
+    border-radius: 25px; /* زوايا مستديرة */
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
-    justify-content: space-between; /* توزيع الأزرار بجانب بعض */
-    align-items: center;
-    width: 90%; /* عرض متناسب */
-    max-width: 320px; /* الحد الأقصى للعرض */
-    margin: 8px auto; /* 🔹 تقليل المسافة من الأعلى والأسفل */
-    padding: 5px 0; /* 🔹 تقليل المسافة داخل الحاوية */
+    align-items: center; /* توسيط النص عموديًا */
+    justify-content: center; /* توسيط النص أفقيًا */
 }
 
-.refresh-btn, .exit-btn {
-    width: 48%; /* تقسيم العرض بالتساوي */
-    height: 36px; /* 🔹 تصغير الزر قليلاً */
-    font-size: 14px;
-    padding: 6px 10px; /* 🔹 ضبط المسافة داخل الزر */
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 🔹 ظل خفيف */
-    color: white !important; /* 🔹 جعل النص أبيض */
-    font-weight: bold;
-    gap: 6px; /* 🔹 تقليل المسافة بين الأيقونة والنص */
-    transition: all 0.3s ease;
-}
+        /* ألوان زر "تحديث البيانات" */
+        .refresh-btn {
+            background: linear-gradient(135deg, #004D40, #00796B);
+        }
 
-/* 🔹 تحسين لون زر تحديث البيانات */
-.refresh-btn {
-    background: linear-gradient(135deg, #00796B, #004D40);
-}
+        .refresh-btn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #00695C, #004D40);
+        }
 
-.refresh-btn:hover {
-    background: linear-gradient(135deg, #00584F, #003F36);
-}
+        .refresh-btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, #003F36, #00584F);
+        }
 
-/* 🔹 تحسين لون زر الخروج */
-.exit-btn {
-    background: linear-gradient(135deg, #B22222, #8B0000);
-}
+        /* ألوان زر "الخروج" */
+        .exit-btn {
+            background: linear-gradient(135deg, #8B0000, #B22222);
+        }
 
-.exit-btn:hover {
-    background: linear-gradient(135deg, #FF6347, #B22222);
-}
+        .exit-btn:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #B22222, #FF6347);
+        }
+
+        .exit-btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, #6B0000, #8B0000);
+        }
+
+
 
         
 .results {
@@ -779,7 +792,74 @@ h1 {
 }
 
 
-        
+        .color-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+            gap: 5px; /* تقليل المسافة بين الأزرار الدائرية */
+        }
+
+   .color-btn {
+    position: relative; /* لإضافة التأثيرات داخلياً */
+    overflow: hidden; /* لمنع التأثيرات من الخروج عن حدود الزر */
+    width: 35px;
+    height: 35px;
+    border-radius: 50%; /* شكل دائري بالكامل */
+    border: none; /* إزالة الحدود */
+    background: rgba(0, 0, 0, 0.3); /* نفس الخلفية */
+    color: white; /* لون النص */
+    font-size: 16px; /* حجم الخط */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ظل خفيف */
+    transition: all 0.3s ease; /* تأثير سلس */
+    margin: 0 5px; /* مسافة بين الأزرار */
+
+}
+
+
+        /* تعديل ألوان الأزرار إلى الألوان المطلوبة */
+        .color-btn:nth-child(1) {
+            
+background: linear-gradient(135deg, #4A154B, #6A1B9A, #8E24AA);
+
+
+        }
+
+        .color-btn:nth-child(2) {
+            background: linear-gradient(135deg, #3A6073, #16222A);
+        }
+
+        .color-btn:nth-child(3) {
+            background: linear-gradient(135deg, #134E5E, #71B280);
+        }
+
+        .color-btn:nth-child(4) {
+            background: linear-gradient(135deg, #2A5298, #6F86D6);
+        }
+
+        .color-btn:nth-child(5) {
+            
+background: linear-gradient(135deg, #004D40, #00796B, #009688);
+
+        }
+
+        /* تأثير التمرير */
+.color-btn:hover {
+    transform: scale(1.1); /* تكبير الزر قليلاً عند التمرير */
+    background: rgba(255, 255, 255, 0.2); /* خلفية أفتح */
+}
+
+
+       /* تأثير الضغط */
+.color-btn:active {
+    transform: scale(0.9); /* تصغير الزر عند الضغط */
+    box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3); /* ظل داخلي فقط */
+}
+
+
+        /* تعديل حجم النوافذ المنبثقة */
+        .
+/* تصميم جديد لواجهة SweetAlert */
+
 
 @keyframes shake {
     0%, 100% {
@@ -1084,10 +1164,17 @@ footer {
     </div>
     
     <div class="actions-container">
-   
+    <div class="color-buttons">
+        <button class="color-btn" onclick="changeBackgroundColor('#4A154B')"></button>
+        <button class="color-btn" onclick="changeBackgroundColor('#3A6073')"></button>
+        <button class="color-btn" onclick="changeBackgroundColor('#134E5E')"></button>
+        <button class="color-btn" onclick="changeBackgroundColor('#2A5298')"></button>
+        <button class="color-btn" onclick="changeBackgroundColor('#004D40')"></button>
+    </div>
+
 <div class="button-container">
-    <button class="exit-btn"><i class="fas fa-sign-out-alt"></i> خروج</button>
-    <button class="refresh-btn"><i class="fas fa-sync-alt"></i> تحديث</button>
+    <button class="refresh-btn" onclick="refreshData()">تحديث البيانات</button>
+    <button class="exit-btn" onclick="confirmExit()">خروج</button>
 </div>
 
 </div>
@@ -1451,15 +1538,16 @@ async function confirmExit() {
     }
 }
 
-    
+        function changeBackgroundColor(color) {
+            document.body.style.background = color;
+        }
+
+
 
 
 function openToolsPage() {
     window.location.href = 'tools.html'; // استبدل 'tools.html' بالرابط إلى الصفحة الجديدة
 }
-
-
-
 
 
  // دالة لتحويل المستخدم إلى صفحة lcd.html
