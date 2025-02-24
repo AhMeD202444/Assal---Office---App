@@ -582,63 +582,47 @@ h1 {
 
 
  /* تصميم الحاوية للأزرار */
-        .button-container {
-            display: flex;
-            flex-direction: column; /* ترتيب عمودي للأزرار */
-            align-items: center; /* توسيط الأزرار أفقياً */
-            gap: 5px; /* مسافة متساوية بين الأزرار */
-            margin-top: -10px; /* مسافة بين الزرين وأزرار الألوان */
-        }
-
-        /* تصميم الأزرار */
-    .refresh-btn,
-    .exit-btn {
-    position: relative;
-    overflow: hidden; /* يمنع التأثير من الخروج */
-    width: 320px;
-    height: 40px;
-    padding: 8px 16px; /* تعديل المسافات الداخلية للزر */
-    font-size: 16px;
-    line-height: 40px; /* نفس ارتفاع الزر لتوسيط النص عموديًا */
-    border-radius: 25px; /* زوايا مستديرة */
-    color: white;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+       .button-container {
     display: flex;
-    align-items: center; /* توسيط النص عموديًا */
-    justify-content: center; /* توسيط النص أفقيًا */
+    justify-content: center; /* ✅ وضع الأزرار في المنتصف */
+    align-items: center;
+    gap: 8px; /* ✅ تقليل المسافة بين الأزرار */
+    margin-top: 10px; /* ✅ تحسين المسافة من الأعلى */
 }
 
-        /* ألوان زر "تحديث البيانات" */
-        .refresh-btn {
-            background: linear-gradient(135deg, #004D40, #00796B);
-        }
+.refresh-btn, .exit-btn {
+    width: 140px; /* ✅ تقليل العرض ليصبح أكثر أناقة */
+    height: 36px; /* ✅ تقليل الارتفاع */
+    font-size: 14px; /* ✅ تصغير حجم الخط */
+    padding: 6px 10px; /* ✅ تقليل الحشوة الداخلية */
+    border-radius: 20px; /* ✅ حواف دائرية */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* ✅ تحسين الظل */
+    color: white !important; /* ✅ جعل النص أبيض */
+    font-weight: bold;
+    gap: 6px; /* ✅ تقليل المسافة بين الأيقونة والنص */
+    transition: all 0.3s ease;
+}
 
-        .refresh-btn:hover {
-            transform: scale(1.05);
-            background: linear-gradient(135deg, #00695C, #004D40);
-        }
+/* ✅ تحسين لون زر تحديث البيانات */
+.refresh-btn {
+    background: linear-gradient(135deg, #00796B, #004D40);
+}
 
-        .refresh-btn:active {
-            transform: scale(0.95);
-            background: linear-gradient(135deg, #003F36, #00584F);
-        }
+.refresh-btn:hover {
+    background: linear-gradient(135deg, #00584F, #003F36);
+}
 
-        /* ألوان زر "الخروج" */
-        .exit-btn {
-            background: linear-gradient(135deg, #8B0000, #B22222);
-        }
+/* ✅ تحسين لون زر الخروج */
+.exit-btn {
+    background: linear-gradient(135deg, #B22222, #8B0000);
+}
 
-        .exit-btn:hover {
-            transform: scale(1.05);
-            background: linear-gradient(135deg, #B22222, #FF6347);
-        }
-
-        .exit-btn:active {
-            transform: scale(0.95);
-            background: linear-gradient(135deg, #6B0000, #8B0000);
-        }
-
+.exit-btn:hover {
+    background: linear-gradient(135deg, #FF6347, #B22222);
+}
 
 
         
@@ -1173,9 +1157,15 @@ footer {
     </div>
 
 <div class="button-container">
-    <button class="refresh-btn" onclick="refreshData()">تحديث البيانات</button>
-    <button class="exit-btn" onclick="confirmExit()">خروج</button>
+    <button class="refresh-btn" onclick="refreshData()">
+        <i class="fas fa-sync-alt"></i> تحديث
+    </button>
+    <button class="exit-btn" onclick="confirmExit()">
+        <i class="fas fa-sign-out-alt"></i> خروج
+    </button>
 </div>
+
+
 
 </div>
 
