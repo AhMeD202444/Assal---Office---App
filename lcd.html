@@ -427,65 +427,61 @@
             database.CHARGING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CHARGING"] || {}); 
         }
 
-        async function loadLCDItems(categoryNumber, categoryName) {
-            const resultsContainer = document.getElementById("results");
-            resultsContainer.innerHTML = '';
+        
+async function loadLCDItems(categoryNumber, categoryName) {
+    const filteredItems = database.LCD.filter(item => item["الصنف"] == categoryNumber);
 
-            const filteredItems = database.LCD.filter(item => item["الصنف"] == categoryNumber);
-
-            if (filteredItems.length === 0) {
-                resultsContainer.innerHTML = `<div class="no-results">لا توجد شاشات لهذا الصنف حالياً</div>`;
-                return;
-            }
-
-            let htmlContent = '<div class="results-container">';
-            filteredItems.forEach((item) => {
-                const imageName = item["Item Name"].toLowerCase().replace(/\s/g, '-') + '.jpg';
-                htmlContent += `
-                    <div class="result-card">
-                        <img src="images/lcd.png" alt="Image">
-                        <div class="item-name">${item["Item Name"]}</div>
-                        <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
-                    </div>
-                `;
-            });
-            htmlContent += '</div>';
-
-            Swal.fire({
-    title: `${categoryName} - ${filteredItems.length} شاشات`,
-    html: `
-        <div class="popup-close" onclick="Swal.close()"></div>
-        ${htmlContent}
-    `,
-    
-    showConfirmButton: false,
-    width: '100%',
-    backdrop: `rgba(0, 0, 0, 0.7)`,
-    backdrop: false,
-    showConfirmButton: false,
-    allowOutsideClick: false,
-    stopKeydownPropagation: false,
-    
-    customClass: {
-        popup: 'swal2-popup', /* هنا يتم إضافة تصميم النافذة */
-        title: 'swal2-title', /* هنا يتم تصميم العنوان */
-        htmlContainer: 'swal2-html-container', /* هنا يتم تصميم النصوص */
-        confirmButton: 'swal2-confirm' /* هنا يتم تصميم الزر */
-    },
-    showClass: {
-        popup: 'animate__animated animate__fadeIn'
-    },
-    hideClass: {
-        popup: 'animate__animated animate__fadeOut'
-    },
-    didOpen: () => {
-        document.body.style.overflow = 'hidden';
-    },
-    willClose: () => {
-        document.body.style.overflow = '';
+    if (filteredItems.length === 0) {
+        return; // ⭕ لا تظهر رسالة إذا لم يكن هناك بيانات
     }
-});
+
+    // ✅ الخطوة 1: فرز العناصر أبجديًا حسب الاسم
+    filteredItems.sort((a, b) => {
+        return (a["Item Name"] || a["Item"]).localeCompare(b["Item Name"] || b["Item"], 'en');
+    });
+
+    // ✅ الخطوة 2: فرز العناصر المتشابهة حسب السعر (من الأعلى إلى الأدنى)
+    filteredItems.sort((a, b) => {
+        const baseNameA = (a["Item Name"] || a["Item"]).split('(')[0].trim(); // استخراج الاسم الأساسي بدون الأقواس
+        const baseNameB = (b["Item Name"] || b["Item"]).split('(')[0].trim();
+        const priceA = parseFloat(a["Price"]) || 0;
+        const priceB = parseFloat(b["Price"]) || 0;
+
+        if (baseNameA === baseNameB) {
+            return priceB - priceA; // ⬆️ فرز الأسعار تنازليًا داخل نفس الاسم الأساسي
         }
+        return 0; // ✅ الاحتفاظ بالترتيب الأبجدي إذا لم تكن الأسماء متشابهة
+    });
+
+    let htmlContent = '<div class="results-container">';
+    filteredItems.forEach((item) => {
+        htmlContent += `
+            <div class="result-card">
+                <img src="images/lcd.png" alt="Image">
+                <div class="item-name">${item["Item Name"]}</div>
+                <div class="price">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار</div>
+            </div>
+        `;
+    });
+    htmlContent += '</div>';
+
+    Swal.fire({
+        title: `${categoryName} - ${filteredItems.length} شاشات`,
+        html: `<div class="popup-close" onclick="Swal.close()"></div>${htmlContent}`,
+        showConfirmButton: false,
+        width: '100%',
+        backdrop: false,
+        customClass: { popup: 'swal2-popup', title: 'swal2-title', htmlContainer: 'swal2-html-container' },
+        showClass: { popup: 'animate__animated animate__fadeIn' },
+        hideClass: { popup: 'animate__animated animate__fadeOut' },
+        didOpen: () => { document.body.style.overflow = 'hidden'; },
+        willClose: () => { document.body.style.overflow = ''; }
+    });
+}
+
+
+
+
 
         function filterLCDCategory(categoryNumber, categoryName) {
             loadLCDItems(categoryNumber, categoryName);
