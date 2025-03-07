@@ -58,13 +58,14 @@
 }
 
 #promoImage {
-    width: 100%; /* يجعل الصورة تأخذ عرض النافذة */
-    max-width: 100%; /* يمنع خروجها عن الحدود */
-    border-radius: 20px; /* حواف بيضوية */
-    transition: transform 0.2s ease, box-shadow 0.2s ease; /* تحسين التأثير */
+    width: 100%;
+    max-width: 300px; /* ✅ لا تتعدى حجم معين */
+    border-radius: 20px; /* ✅ يجعل الحواف بيضوية */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
-     overflow: hidden; /* ✅ يمنع أي تجاوز */
+    overflow: hidden; /* ✅ يمنع أي تجاوز */
 }
+        
 /* تأثير عند تمرير الماوس */
 #promoImage:hover {
     transform: scale(1.05);
@@ -74,11 +75,10 @@
 
 /* تأثير عند الضغط */
 #promoImage:active {
-    transform: scale(0.95); /* 🔥 تأثير الضغط بنفس تأثير زر تحديث */
-    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(0.95);
+    box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3);
 }
-
-
+        
 .popup-title {
     font-size: 36px;
     font-weight: bold;
@@ -101,14 +101,15 @@ p {
     color: white;
     background: linear-gradient(135deg, #ff0066, #ffcc00);
     border: none;
-    border-radius: 30px;
+    border-radius: 30px; /* ✅ يجعل الحواف دائرية */
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     animation: pulseEffect 2s infinite alternate;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-     overflow: hidden; /* ✅ يمنع أي تجاوز */
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
+    position: relative; /* ✅ يسمح بتطبيق التأثير بشكل صحيح */
+    overflow: hidden; /* ✅ يمنع التأثير من الخروج خارج الزر */
 }
-
+        
 @keyframes pulseEffect {
     0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 0, 255, 0.6); }
     50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255, 0, 255, 1); }
@@ -121,9 +122,10 @@ p {
 }
 
  
- #closeBtn:active {
-    transform: scale(0.95); /* 🔥 تأثير الضغط لا يتعدى الزر */
-    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.3);
+#closeBtn:active {
+    transform: scale(0.9); /* ✅ تأثير ضغط سلس */
+    box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3); /* ✅ يضيف تأثير داخلي عند الضغط */
+    background: linear-gradient(135deg, #ff4500, #ffcc00); /* ✅ تأثير لوني عند الضغط */
 }
  
 
