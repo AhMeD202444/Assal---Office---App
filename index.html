@@ -106,8 +106,22 @@ p {
     transition: all 0.3s ease;
     animation: pulseEffect 2s infinite alternate;
     box-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
-    position: relative; /* ✅ يسمح بتطبيق التأثير بشكل صحيح */
-    overflow: hidden; /* ✅ يمنع التأثير من الخروج خارج الزر */
+    position: relative;
+    overflow: hidden;
+}
+
+/* 🎨 تأثير عند تمرير الماوس */
+#closeBtn:hover {
+    transform: scale(1.1);
+    background: linear-gradient(135deg, #ff4500, #ffcc00);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
+/* 🎯 تأثير الضغط عند النقر */
+#closeBtn:active {
+    transform: scale(0.9); /* ✅ ضغط الزر عند النقر */
+    box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3); /* ✅ تأثير ضغط داخلي */
+    background: linear-gradient(135deg, #ff0066, #ffcc00);
 }
         
 @keyframes pulseEffect {
@@ -116,18 +130,6 @@ p {
     100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 0, 255, 0.6); }
 }
 
-#closeBtn:hover {
-    transform: scale(1.15);
-    box-shadow: 0 0 60px rgba(255, 0, 255, 1);
-}
-
- 
-#closeBtn:active {
-    transform: scale(0.9); /* ✅ تأثير ضغط سلس */
-    box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3); /* ✅ يضيف تأثير داخلي عند الضغط */
-    background: linear-gradient(135deg, #ff4500, #ffcc00); /* ✅ تأثير لوني عند الضغط */
-}
- 
 
 
         
