@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+
 
     <style>
 
@@ -26,114 +28,82 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-
- /* تصميم النافذة المنبثقة */
-         /* تعديل التعتيم ليقتصر على النافذة فقط */
-    .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px); /* زيادة الضبابية */
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-
-       .popup-content {
-    position: relative;
-    background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(20px); /* زيادة الضبابية */
-    border-radius: 20px;
-    padding: 30px;
-    text-align: center;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); /* تحسين الظلال */
-    max-width: 400px;
-    width: 90%;
-    z-index: 10000;
-    animation: fadeIn 0.6s ease-in-out; /* حركة دخول */
-}
-
-
-/* إضافة تعتيم للخلفية بالقرب من النافذة */
-   .popup-overlay::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9998;
-}
         
-        .popup-content img {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%; /* صورة دائرية */
-        margin-bottom: 20px;
-        border: 3px solid rgba(255, 255, 255, 0.6);
-        transition: transform 0.3s ease; /* تأثير التحرك عند الضغط */
-            overflow : hidden;
-        }
+        h1.main-title {
+    color: white !important; /* ✅ يجبر اللون الأبيض */
+    text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4); /* ✅ إضافة تأثير ظل أنيق */
+}
 
-        .popup-content img:active {
-        transform: scale(1.1); /* تأثير التكبير عند النقر */
-            box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
-    }
-
-
-        .popup-content h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #fff;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-        }
-
-        .popup-content p {
-            font-size: 16px;
-            line-height: 1.5;
-            color: #f1f1f1;
-             text-align: center; /* ✅ يجعل النص في منتصف النافذة */
-             width: 100%; /* ✅ يمنع تمدد النص */
-             display: flex;
-             justify-content: center;
-             align-items: center;
-            word-wrap: break-word; /* ✅ يمنع خروج الكلمات عن الحاوية */
-            direction: rtl; /* ✅ إذا كان النص باللغة العربية */
-            unicode-bidi: embed;
-        }
-
-        /* زر الإغلاق */
-   .popup-close-btn {
-    position: absolute;
-    overflow: hidden; /* يمنع التأثير من الخروج */
-    top: 10px;
-    right: 10px;
-    width: 40px;
-    height: 40px;
-    background: #ff4d4d;
+ 
+#promoPopup {
+    position: fixed; /* ✅ يجعل النافذة دائمًا فوق المحتوى */
+    top: 5%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 85%;
+    max-width: 600px;
+    height: 80vh;
+   background: rgba(0, 0, 0, 0.85); /* 🔥 خلفية سوداء مع شفافية خفيفة */
+    backdrop-filter: blur(25px);
+    padding: 40px;
+    border-radius: 25px;
+    text-align: center;
     color: white;
-    border-radius: 50%; /* دائري */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ظل خفيف */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 0 50px rgba(0, 255, 255, 0.7);
+    animation: slideDown 1s ease-out, glowEffect 1.5s infinite alternate;
+    display: none; /* ✅ ستظهر فقط عند الحاجة */
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 9999; /* ✅ يرفع النافذة فوق جميع العناصر */
 }
+
+#promoImage:hover {
+    transform: scale(1.1);
 }
-        .popup-close-btn:hover {
-            transform: scale(1.1);
-            background: #ff6666;
-        }
 
-        .popup-close-btn:active {
-            transform: scale(0.9);
-        }
+.popup-title {
+    font-size: 36px;
+    font-weight: bold;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+    background: linear-gradient(135deg, #ffcc00, #ff0066);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
+p {
+    font-size: 22px;
+    margin-bottom: 20px;
+}
 
+/* زر الإغلاق الفخم */
+#closeBtn {
+    padding: 15px 40px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(135deg, #ff0066, #ffcc00);
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: pulseEffect 2s infinite alternate;
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
+}
+
+@keyframes pulseEffect {
+    0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 0, 255, 0.6); }
+    50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255, 0, 255, 1); }
+    100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 0, 255, 0.6); }
+}
+
+#closeBtn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 60px rgba(255, 0, 255, 1);
+}
+
+ 
+ 
+ 
 
 
         
@@ -145,7 +115,7 @@
         }
 
         body {
-            font-family: 'Montserrat', sans-serif;
+           font-family: 'Tajawal', sans-serif;
             background: linear-gradient(135deg, #3A6073, #16222A); /* اللون الرئيسي للواجهة عند بداية التشغيل */
             color: #fff;
             display: flex;
@@ -1068,21 +1038,19 @@ footer {
 </head>
 <body>
 
-       <div class="popup-overlay" id="popup" style="display: none;">
-        <div class="popup-content animate__animated">
-            <button class="popup-close-btn" onclick="closePopup()">X</button>
-            <img src="images/market.png" alt="Welcome Image">
-            <h1>مرحبًا بكم!</h1>
-            <p>زبائن مكتب عسل الكرام تم الانتهاء من عمل متجر عدد الصيانة وتدللون علينا</p>
-        </div>
-    </div>
+       <div id="promoPopup">
+    <img id="promoImage" src="images/market.png" alt="Promo Image">
+    <h1 class="popup-title">🔥 عروض وخصومات لا تفوت! 🔥</h1>
+    <p>احصل على أفضل العروض الآن! متاحة لفترة محدودة فقط! ⏳</p>
+    <button id="closeBtn" onclick="closePopup()">إغلاق</button>
+</div>
     
     <div class="container">
     <!-- شعار دائري -->
     <div class="logo-container">
         <img src="images/logo.png" alt="Logo">
     </div>
-    <h1>Phone Parts Pro</h1>
+   <h1 class="main-title">ASSAL OFFICE</h1>
 
 
 <!-- شريط الأخبار -->
@@ -1181,35 +1149,21 @@ footer {
 
     <script>
 
+let showPromoPopup = true; // 🔥 غيّر إلى false لإخفاء النافذة
 
-
- // إعداد خيار إظهار النافذة
-       const showPopup = true; // استخدم false إذا أردت تعطيل النافذة.
-
-// نافذة الترحيب تظهر فقط عند تشغيل التطبيق
-window.onload = () => {
-    // تحقق من قيمة showPopup قبل إظهار النافذة
-    if (showPopup) {
-        const hasUpdated = sessionStorage.getItem('hasUpdated');
-        if (!hasUpdated) {
-            sessionStorage.setItem('hasUpdated', true); // منع ظهور النافذة مجددًا خلال نفس الجلسة
-            const popup = document.getElementById('popup');
-            popup.style.display = 'flex';
-            popup.classList.add('animate__animated', 'animate__fadeInDown'); // حركة دخول
-        }
+window.onload = function() {
+    if (showPromoPopup) {
+        document.getElementById('promoPopup').style.display = 'flex';
     }
 };
 
-// إغلاق نافذة الترحيب
 function closePopup() {
-    const popup = document.getElementById('popup');
-    popup.classList.add('animate__fadeOutUp'); // حركة خروج
-    setTimeout(() => {
-        popup.style.display = 'none';
-        popup.classList.remove('animate__fadeOutUp', 'animate__fadeInDown'); // إعادة تعيين الحركات
-    }, 1000); // مدة الحركة
+    document.getElementById('promoPopup').style.opacity = '0';
+    setTimeout(() => { document.getElementById('promoPopup').style.display = 'none'; }, 500);
 }
 
+
+ 
 
 const slider = document.getElementById('slider');
 const prevBtn = document.querySelector('.prev-btn');
