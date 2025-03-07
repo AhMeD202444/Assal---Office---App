@@ -68,14 +68,14 @@
         
 /* تأثير عند تمرير الماوس */
 #promoImage:hover {
-    transform: scale(1.05);
+    transform: scale(1.1);
     box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6),
                 inset 0 -6px 8px rgba(255, 255, 255, 0.3);
 }
 
 /* تأثير عند الضغط */
 #promoImage:active {
-    transform: scale(0.95);
+    transform: scale(1.1);
     box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3);
 }
         
@@ -119,7 +119,7 @@ p {
 
 /* 🎯 تأثير الضغط عند النقر */
 #closeBtn:active {
-    transform: scale(0.9); /* ✅ ضغط الزر عند النقر */
+    transform: scale(1.1); /* ✅ ضغط الزر عند النقر */
     box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3); /* ✅ تأثير ضغط داخلي */
     background: linear-gradient(135deg, #ff0066, #ffcc00);
 }
@@ -1188,8 +1188,9 @@ footer {
 let showPromoPopup = true; // 🔥 غيّر إلى false لإخفاء النافذة
 
 window.onload = function() {
-    if (showPromoPopup) {
+    if (!localStorage.getItem("promoPopupDisplayed")) { 
         document.getElementById('promoPopup').style.display = 'flex';
+        localStorage.setItem("promoPopupDisplayed", "true"); // تخزين أن النافذة قد ظهرت
     }
 };
 
@@ -1197,7 +1198,6 @@ function closePopup() {
     document.getElementById('promoPopup').style.opacity = '0';
     setTimeout(() => { document.getElementById('promoPopup').style.display = 'none'; }, 500);
 }
-
 
  
 
