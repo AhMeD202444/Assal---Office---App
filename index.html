@@ -31,18 +31,30 @@
 
 
 /* ✅ طبقة الضبابية */
+/* ✅ حل مشكلة عدم التفاعل مع الصفحة عند ظهور النافذة */
 #blurBackground {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* ✅ لون داكن مع شفافية */
-    backdrop-filter: blur(10px); /* ✅ تأثير الضبابية */
-    z-index: 9998; /* ✅ أقل بقليل من النافذة */
-    display: none; /* ✅ إخفاؤه افتراضيًا */
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    z-index: 9998;
+    display: none;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none; /* ✅ السماح بالنقر بعد الإغلاق */
 }
 
+body.show-popup {
+    overflow: hidden;
+    pointer-events: none; /* ✅ تعطيل التفاعل أثناء فتح النافذة */
+}
+
+/* ✅ عند إغلاق النافذة، يتم استعادة التحكم في الصفحة */
+body:not(.show-popup) {
+    pointer-events: auto;
+}
 
         
         
@@ -1276,18 +1288,27 @@ let showPromoPopup = true; // 🔥 إذا كان true، ستظهر النافذ�
 window.onload = function() {
     if (!sessionStorage.getItem("promoPopupDisplayed")) { 
         document.getElementById('promoPopup').style.display = 'flex';
-        document.getElementById('promoImage').style.animation = "imageEntrance 1s ease-out forwards, rotate3D 5s infinite alternate ease-in-out"; // ✅ تفعيل الأنيميشن
-        document.getElementById('blurBackground').style.display = 'block'; 
+        document.getElementById('blurBackground').style.display = 'block';
+        
+        // ✅ تعطيل التفاعل مع الصفحة أثناء عرض النافذة
+        document.body.classList.add("show-popup");
+
         sessionStorage.setItem("promoPopupDisplayed", "true");
     }
 };
-
 function closePopup() {
+    // ✅ جعل النافذة والضبابية تتلاشى تدريجياً
     document.getElementById('promoPopup').style.opacity = '0';
-    document.getElementById('blurBackground').style.opacity = '0'; // ✅ إخفاء الضبابية
+    document.getElementById('blurBackground').style.opacity = '0';
+
+    // ✅ بعد انتهاء الحركة، إخفاء العناصر نهائياً وإعادة التفاعل مع الصفحة
     setTimeout(() => { 
         document.getElementById('promoPopup').style.display = 'none';
-        document.getElementById('blurBackground').style.display = 'none'; // ✅ إزالة الضبابية نهائيًا
+        document.getElementById('blurBackground').style.display = 'none';
+
+        // ✅ إعادة السماح بالتمرير والتفاعل مع باقي الصفحة
+        document.body.style.overflow = 'auto'; 
+        document.body.style.pointerEvents = 'auto';
     }, 500);
 }
  
