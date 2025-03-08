@@ -84,27 +84,26 @@
 }
         
 
- 
-#promoPopup {
-    position: fixed; /* ✅ يجعل النافذة دائمًا فوق المحتوى */
+ #promoPopup {
+    position: fixed; 
     top: 5%;
     left: 50%;
     transform: translate(-50%, 0);
     width: 95%;
     max-width: 700px;
     height: 89vh;
-   background: rgba(0, 0, 0, 0.85); /* 🔥 خلفية سوداء مع شفافية خفيفة */
+    background: rgba(0, 0, 0, 0.85); /* ✅ لون غامق لتحسين التباين */
     backdrop-filter: blur(25px);
     padding: 40px;
     border-radius: 25px;
     text-align: center;
     color: white;
     box-shadow: 0 0 50px rgba(0, 255, 255, 0.7);
-    animation: slideDown 1s ease-out, glowEffect 1.5s infinite alternate;
-    display: none; /* ✅ ستظهر فقط عند الحاجة */
+    display: none; 
     flex-direction: column;
-    justify-content: space-between;
-    z-index: 9999; /* ✅ يرفع النافذة فوق جميع العناصر */
+    justify-content: center; /* ✅ توسيط المحتوى بشكل عمودي */
+    align-items: center; /* ✅ توسيط المحتوى أفقيًا */
+    z-index: 9999;
 }
 
 
@@ -122,26 +121,50 @@ body.show-popup::before {
         
 
 /* تحسين تأثير الضغط على الصورة */
-#promoImage {
-    width: 100%;
-    max-width: 250px;
-    border-radius: 20px;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    transform-style: preserve-3d;
-    animation: rotate3D 4s infinite alternate ease-in-out;
-    cursor: pointer; /* لجعل المستخدم يعرف أنه يمكن الضغط على الصورة */
+/* ✅ تكبير الصورة وجعلها تتوسط */
+/* ✅ حركة دخول الصورة */
+@keyframes imageEntrance {
+    0% { 
+        opacity: 0;
+        transform: scale(0.5) rotateY(-30deg) translateY(-50px);
+    }
+    100% { 
+        opacity: 1;
+        transform: scale(1) rotateY(0deg) translateY(0);
+    }
 }
 
-/* عند الضغط على الصورة، تصبح أصغر قليلاً بدون تجاوز الحواف */
-#promoImage:active {
-    transform: scale(0.95);
-    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.3);
+/* ✅ تطبيق الحركة عند ظهور النافذة */
+#promoImage {
+    width: 70%;
+    max-width: 300px;
+    display: block;
+    margin: 0 auto;
+    border-radius: 20px;
+    transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
+    transform-style: preserve-3d;
+    animation: imageEntrance 1s ease-out forwards, rotate3D 5s infinite alternate ease-in-out;
+    cursor: pointer;
 }
+
+/* ✅ تحسين الحركة الدائمة للصورة */
 @keyframes rotate3D {
-    0% { transform: rotateY(-10deg) translateY(0); }
-    50% { transform: rotateY(10deg) translateY(-5px); }
-    100% { transform: rotateY(-10deg) translateY(0); }
+    0% { transform: rotateY(-10deg) rotateX(5deg); }
+    50% { transform: rotateY(10deg) rotateX(-5deg); }
+    100% { transform: rotateY(-10deg) rotateX(5deg); }
+}
+/* ✅ إضافة ظلال ثلاثية الأبعاد للصورة */
+#promoImage {
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.6), /* ✅ ظل أساسي */
+        0 5px 15px rgba(255, 255, 255, 0.3) inset, /* ✅ ظل داخلي */
+        0 0 20px rgba(0, 255, 255, 0.7); /* ✅ وهج خفيف */
+}
+
+/* ✅ تحسين تأثير الضغط على الصورة */
+#promoImage:active {
+    transform: scale(0.95) rotateY(0deg) rotateX(0deg); /* ✅ تصغير طفيف مع تقليل الدوران */
+    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.3);
 }
         
 .popup-title {
@@ -1251,10 +1274,11 @@ footer {
 let showPromoPopup = true; // 🔥 إذا كان true، ستظهر النافذة عند تشغيل التطبيق
 
 window.onload = function() {
-    if (showPromoPopup && !sessionStorage.getItem("promoPopupDisplayed")) { 
+    if (!sessionStorage.getItem("promoPopupDisplayed")) { 
         document.getElementById('promoPopup').style.display = 'flex';
-        document.getElementById('blurBackground').style.display = 'block'; // ✅ تفعيل الضبابية
-        sessionStorage.setItem("promoPopupDisplayed", "true"); // ✅ تخزين أن النافذة قد ظهرت
+        document.getElementById('promoImage').style.animation = "imageEntrance 1s ease-out forwards, rotate3D 5s infinite alternate ease-in-out"; // ✅ تفعيل الأنيميشن
+        document.getElementById('blurBackground').style.display = 'block'; 
+        sessionStorage.setItem("promoPopupDisplayed", "true");
     }
 };
 
