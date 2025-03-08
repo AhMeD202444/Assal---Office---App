@@ -34,6 +34,91 @@
     text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4); /* ✅ إضافة تأثير ظل أنيق */
 }
 
+
+/* ✅ حركة النافذة المنبثقة (تدخل من الأسفل مع تلاشي تدريجي) */
+@keyframes slideUpFade {
+    0% {
+        transform: translate(-50%, 50px);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+/* ✅ حركة الصورة (تكبير تدريجي من المنتصف) */
+@keyframes zoomIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ✅ حركة العنوان (يظهر كأنه يُكتب حرفًا حرفًا) */
+@keyframes typewriter {
+    0% { width: 0; }
+    100% { width: 100%; }
+}
+
+/* ✅ حركة النص (يدخل من اليسار) */
+@keyframes fadeInLeft {
+    0% {
+        transform: translateX(-30px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ✅ حركة زر الإغلاق (قفزة مع دوران خفيف) */
+@keyframes bounceRotate {
+    0% {
+        transform: translateY(-20px) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(5px) rotate(10deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+}
+
+/* 🔥 تطبيق الحركات على عناصر النافذة */
+#promoPopup {
+    animation: slideUpFade 1.2s ease-out;
+}
+
+#promoImage {
+    animation: zoomIn 1.5s ease-out;
+}
+
+.popup-title {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    animation: typewriter 2s steps(40, end) forwards;
+}
+
+p {
+    animation: fadeInLeft 1.5s ease-out;
+}
+
+#closeBtn {
+    animation: bounceRotate 1.2s ease-out;
+}
+
+        
+
  
 #promoPopup {
     position: fixed; /* ✅ يجعل النافذة دائمًا فوق المحتوى */
@@ -1205,9 +1290,21 @@ footer {
 let showPromoPopup = true; // 🔥 غيّر إلى false لإخفاء النافذة
 
 window.onload = function() {
-    if (!sessionStorage.getItem("promoPopupDisplayed")) { 
-        document.getElementById('promoPopup').style.display = 'flex';
-        sessionStorage.setItem("promoPopupDisplayed", "true"); // تخزين أن النافذة قد ظهرت
+    if (!sessionStorage.getItem("promoPopupDisplayed")) {
+        let popup = document.getElementById('promoPopup');
+        let image = document.getElementById('promoImage');
+        let title = document.querySelector('.popup-title');
+        let text = document.querySelector('#promoPopup p');
+        let closeBtn = document.getElementById('closeBtn');
+
+        // ✅ عرض النافذة بتأخير بسيط لكل عنصر
+        popup.style.display = 'flex';
+        setTimeout(() => { image.style.opacity = '1'; }, 200);
+        setTimeout(() => { title.style.opacity = '1'; }, 400);
+        setTimeout(() => { text.style.opacity = '1'; }, 600);
+        setTimeout(() => { closeBtn.style.opacity = '1'; }, 800);
+
+        sessionStorage.setItem("promoPopupDisplayed", "true");
     }
 };
 
