@@ -34,23 +34,22 @@
     text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4); /* ✅ إضافة تأثير ظل أنيق */
 }
 
-
-/* ✅ حركة النافذة المنبثقة (تدخل من الأسفل مع تلاشي تدريجي) */
-@keyframes slideUpFade {
+/* ✅ حركة نزول ناعمة للهيدر */
+@keyframes smoothSlideDown {
     0% {
-        transform: translate(-50%, 50px);
+        transform: translateY(-40px); /* يبدأ من أعلى */
         opacity: 0;
     }
     100% {
-        transform: translate(-50%, 0);
+        transform: translateY(0);
         opacity: 1;
     }
 }
 
-/* ✅ حركة الصورة (تكبير تدريجي من المنتصف) */
-@keyframes zoomIn {
+/* ✅ حركة دخول للصورة بتكبير خفيف */
+@keyframes fadeInZoom {
     0% {
-        transform: scale(0.5);
+        transform: scale(0.8); /* يبدأ بحجم أصغر */
         opacity: 0;
     }
     100% {
@@ -59,16 +58,10 @@
     }
 }
 
-/* ✅ حركة العنوان (يظهر كأنه يُكتب حرفًا حرفًا) */
-@keyframes typewriter {
-    0% { width: 0; }
-    100% { width: 100%; }
-}
-
-/* ✅ حركة النص (يدخل من اليسار) */
-@keyframes fadeInLeft {
+/* ✅ حركة دخول المضمون (Text) بانزلاق من اليمين */
+@keyframes slideInRight {
     0% {
-        transform: translateX(-30px);
+        transform: translateX(40px); /* يبدأ من اليمين */
         opacity: 0;
     }
     100% {
@@ -77,46 +70,38 @@
     }
 }
 
-/* ✅ حركة زر الإغلاق (قفزة مع دوران خفيف) */
-@keyframes bounceRotate {
+/* ✅ حركة زر الإغلاق بانزلاق من الأسفل */
+@keyframes slideUp {
     0% {
-        transform: translateY(-20px) rotate(0deg);
+        transform: translateY(40px); /* يبدأ من الأسفل */
         opacity: 0;
     }
-    50% {
-        transform: translateY(5px) rotate(10deg);
-        opacity: 1;
-    }
     100% {
-        transform: translateY(0) rotate(0deg);
+        transform: translateY(0);
+        opacity: 1;
     }
 }
 
-/* 🔥 تطبيق الحركات على عناصر النافذة */
-#promoPopup {
-    animation: slideUpFade 1.2s ease-out;
+/* ✅ تطبيق الحركات على العناصر */
+h1.main-title {
+    opacity: 0;
+    animation: smoothSlideDown 1.8s ease-out forwards;
 }
 
 #promoImage {
-    animation: zoomIn 1.5s ease-out;
+    opacity: 0;
+    animation: fadeInZoom 2s ease-out forwards;
 }
 
-.popup-title {
-    display: inline-block;
-    overflow: hidden;
-    white-space: nowrap;
-    width: 0;
-    animation: typewriter 2s steps(40, end) forwards;
-}
-
-p {
-    animation: fadeInLeft 1.5s ease-out;
+.popup-title, p {
+    opacity: 0;
+    animation: slideInRight 2s ease-out forwards;
 }
 
 #closeBtn {
-    animation: bounceRotate 1.2s ease-out;
+    opacity: 0;
+    animation: slideUp 2s ease-out forwards;
 }
-
         
 
  
@@ -1297,22 +1282,46 @@ window.onload = function() {
         let text = document.querySelector('#promoPopup p');
         let closeBtn = document.getElementById('closeBtn');
 
-        // ✅ عرض النافذة بتأخير بسيط لكل عنصر
+        // ✅ عرض النافذة أولاً
         popup.style.display = 'flex';
-        setTimeout(() => { image.style.opacity = '1'; }, 200);
-        setTimeout(() => { title.style.opacity = '1'; }, 400);
-        setTimeout(() => { text.style.opacity = '1'; }, 600);
-        setTimeout(() => { closeBtn.style.opacity = '1'; }, 800);
 
+        // ✅ تحريك الصورة بدخول من الأعلى
+        setTimeout(() => { 
+            image.style.opacity = '1'; 
+            image.style.transform = 'translateY(0)'; 
+        }, 200);
+
+        // ✅ تحريك العنوان بدخول من اليمين
+        setTimeout(() => { 
+            title.style.opacity = '1'; 
+            title.style.transform = 'translateX(0)'; 
+        }, 400);
+
+        // ✅ تحريك النص بدخول تدريجي من الأسفل
+        setTimeout(() => { 
+            text.style.opacity = '1'; 
+            text.style.transform = 'translateY(0)'; 
+        }, 600);
+
+        // ✅ تحريك زر الإغلاق مع نبضة خفيفة
+        setTimeout(() => { 
+            closeBtn.style.opacity = '1'; 
+            closeBtn.style.transform = 'scale(1)'; 
+        }, 800);
+
+        // ✅ حفظ حالة الظهور حتى لا تتكرر النافذة عند التحديث
         sessionStorage.setItem("promoPopupDisplayed", "true");
     }
 };
 
+// ✅ عند إغلاق النافذة، نخفيها بسلاسة
 function closePopup() {
-    document.getElementById('promoPopup').style.opacity = '0';
-    setTimeout(() => { document.getElementById('promoPopup').style.display = 'none'; }, 500);
+    let popup = document.getElementById('promoPopup');
+    popup.style.opacity = '0';
+    setTimeout(() => {
+        popup.style.display = 'none';
+    }, 500);
 }
- 
 
 const slider = document.getElementById('slider');
 const prevBtn = document.querySelector('.prev-btn');
