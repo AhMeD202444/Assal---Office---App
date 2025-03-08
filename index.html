@@ -28,130 +28,55 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-
-
-
-        
         
         h1.main-title {
     color: white !important; /* ✅ يجبر اللون الأبيض */
     text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4); /* ✅ إضافة تأثير ظل أنيق */
 }
 
-
-@keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-50px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeLeft {
-    from { opacity: 0; transform: translateX(-50px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(50px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-#promoImage {
-    animation: rotate3D 1.5s ease-in-out;
-}
-
-.popup-title {
-    animation: fadeDown 1s ease-out;
-}
-
-#promoPopup p {
-    animation: fadeLeft 1.2s ease-out;
-}
-
-#closeBtn {
-    animation: fadeUp 1.3s ease-out;
-}
-        
-
- #promoPopup {
-    position: fixed; 
+ 
+#promoPopup {
+    position: fixed; /* ✅ يجعل النافذة دائمًا فوق المحتوى */
     top: 5%;
     left: 50%;
     transform: translate(-50%, 0);
-    width: 95%;
-    max-width: 700px;
+    width: 85%;
+    max-width: 600px;
     height: 89vh;
-    background: rgba(0, 0, 0, 0.85); /* ✅ لون غامق لتحسين التباين */
+   background: rgba(0, 0, 0, 0.85); /* 🔥 خلفية سوداء مع شفافية خفيفة */
     backdrop-filter: blur(25px);
     padding: 40px;
     border-radius: 25px;
     text-align: center;
     color: white;
     box-shadow: 0 0 50px rgba(0, 255, 255, 0.7);
-    display: none; 
+    animation: slideDown 1s ease-out, glowEffect 1.5s infinite alternate;
+    display: none; /* ✅ ستظهر فقط عند الحاجة */
     flex-direction: column;
-    justify-content: center; /* ✅ توسيط المحتوى بشكل عمودي */
-    align-items: center; /* ✅ توسيط المحتوى أفقيًا */
-    z-index: 9999;
+    justify-content: space-between;
+    z-index: 9999; /* ✅ يرفع النافذة فوق جميع العناصر */
 }
 
-
-body.show-popup::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0;
+#promoImage {
     width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* إضافة تعتيم */
-    backdrop-filter: blur(10px); /* تأثير الضبابية */
-    z-index: 9998;
-}
-
-        
-
-/* تحسين تأثير الضغط على الصورة */
-/* ✅ تكبير الصورة وجعلها تتوسط */
-/* ✅ حركة دخول الصورة */
-@keyframes imageEntrance {
-    0% { 
-        opacity: 0;
-        transform: scale(0.5) rotateY(-30deg) translateY(-50px);
-    }
-    100% { 
-        opacity: 1;
-        transform: scale(1) rotateY(0deg) translateY(0);
-    }
-}
-
-/* ✅ تطبيق الحركة عند ظهور النافذة */
-#promoImage {
-    width: 70%;
-    max-width: 300px;
-    display: block;
-    margin: 0 auto;
-    border-radius: 20px;
-    transition: transform 0.5s ease-in-out, box-shadow 0.5s ease-in-out;
-    transform-style: preserve-3d;
-    animation: imageEntrance 1s ease-out forwards, rotate3D 5s infinite alternate ease-in-out;
+    max-width: 300px; /* ✅ لا تتعدى حجم معين */
+    border-radius: 20px; /* ✅ يجعل الحواف بيضوية */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
+    overflow: hidden; /* ✅ يمنع أي تجاوز */
+}
+        
+/* تأثير عند تمرير الماوس */
+#promoImage:hover {
+    transform: scale(1.1);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6),
+                inset 0 -6px 8px rgba(255, 255, 255, 0.3);
 }
 
-/* ✅ تحسين الحركة الدائمة للصورة */
-@keyframes rotate3D {
-    0% { transform: rotateY(-10deg) rotateX(5deg); }
-    50% { transform: rotateY(10deg) rotateX(-5deg); }
-    100% { transform: rotateY(-10deg) rotateX(5deg); }
-}
-/* ✅ إضافة ظلال ثلاثية الأبعاد للصورة */
-#promoImage {
-    box-shadow: 
-        0 10px 30px rgba(0, 0, 0, 0.6), /* ✅ ظل أساسي */
-        0 5px 15px rgba(255, 255, 255, 0.3) inset, /* ✅ ظل داخلي */
-        0 0 20px rgba(0, 255, 255, 0.7); /* ✅ وهج خفيف */
-}
-
-/* ✅ تحسين تأثير الضغط على الصورة */
+/* تأثير عند الضغط */
 #promoImage:active {
-    transform: scale(0.95) rotateY(0deg) rotateX(0deg); /* ✅ تصغير طفيف مع تقليل الدوران */
-    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+    box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3);
 }
         
 .popup-title {
@@ -169,6 +94,21 @@ p {
 }
 
 
+
+.new-category-btn:hover {
+            transform: scale(1.1);
+            background: linear-gradient(45deg, #43cea2, #185a9d);
+        }
+
+        .new-category-btn:active {
+            background: linear-gradient(45deg, #43cea2, #185a9d);
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
+        }
+    
+
+
+
         
 
 /* زر الإغلاق الفخم */
@@ -179,31 +119,35 @@ p {
     color: white;
     background: linear-gradient(135deg, #ff0066, #ffcc00);
     border: none;
-    border-radius: 30px; /* ✅ جعل الحواف مستديرة */
+    border-radius: 30px; /* ✅ يجعل الحواف دائرية */
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    animation: pulseEffect 2s infinite alternate; /* ✅ تأثير النبض */
-    box-shadow: 0 0 20px rgba(255, 0, 255, 0.7); /* ✅ إضافة ظل */
+    transition: all 0.3s ease;
+    animation: pulseEffect 2s infinite alternate;
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
+    position: relative;
+    overflow: hidden;
 }
 
-/* ✅ تحسين تأثير التمرير */
+/* 🎨 تأثير عند تمرير الماوس */
 #closeBtn:hover {
-    transform: scale(1.1); /* ✅ تكبير خفيف عند التمرير */
-    box-shadow: 0 0 40px rgba(255, 0, 255, 1);
+    transform: scale(1.1);
+            background: linear-gradient(45deg, #43cea2, #185a9d);
 }
 
-/* ✅ تحسين تأثير الضغط */
+/* 🎯 تأثير الضغط عند النقر */
 #closeBtn:active {
-    transform: scale(0.95); /* ✅ تصغير طفيف عند النقر */
-    box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.3); /* ✅ تأثير ضغط داخلي */
+    background: linear-gradient(45deg, #43cea2, #185a9d);
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
 }
-
-/* ✅ تأثير نبض */
+        
 @keyframes pulseEffect {
     0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 0, 255, 0.6); }
     50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255, 0, 255, 1); }
     100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 0, 255, 0.6); }
 }
+
+
 
         
         /* Reset and basics */
@@ -1258,33 +1202,18 @@ footer {
 
     <script>
 
-let showPromoPopup = true; // 🔥 إذا كان true، ستظهر النافذة عند تشغيل التطبيق
+let showPromoPopup = true; // 🔥 غيّر إلى false لإخفاء النافذة
 
 window.onload = function() {
     if (!sessionStorage.getItem("promoPopupDisplayed")) { 
         document.getElementById('promoPopup').style.display = 'flex';
-        document.getElementById('blurBackground').style.display = 'block';
-        
-        // ✅ تعطيل التفاعل مع الصفحة أثناء عرض النافذة
-        document.body.classList.add("show-popup");
-
-        sessionStorage.setItem("promoPopupDisplayed", "true");
+        sessionStorage.setItem("promoPopupDisplayed", "true"); // تخزين أن النافذة قد ظهرت
     }
 };
+
 function closePopup() {
-    // ✅ جعل النافذة والضبابية تتلاشى تدريجياً
     document.getElementById('promoPopup').style.opacity = '0';
-    document.getElementById('blurBackground').style.opacity = '0';
-
-    // ✅ بعد انتهاء الحركة، إخفاء العناصر نهائياً وإعادة التفاعل مع الصفحة
-    setTimeout(() => { 
-        document.getElementById('promoPopup').style.display = 'none';
-        document.getElementById('blurBackground').style.display = 'none';
-
-        // ✅ إعادة السماح بالتمرير والتفاعل مع باقي الصفحة
-        document.body.style.overflow = 'auto'; 
-        document.body.style.pointerEvents = 'auto';
-    }, 500);
+    setTimeout(() => { document.getElementById('promoPopup').style.display = 'none'; }, 500);
 }
  
 
