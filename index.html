@@ -106,51 +106,35 @@ h1.main-title {
 
  
 #promoPopup {
-    position: fixed; /* تثبيت النافذة وسط الشاشة */
-    top: 50%;
+    position: fixed; /* ✅ يجعل النافذة دائمًا فوق المحتوى */
+    top: 5%;
     left: 50%;
-    transform: translate(-50%, -50%); /* يضمن أنها تبقى دائمًا وسط الشاشة */
-    
-    width: 90vw; /* العرض النسبي للشاشة */
-    max-width: 400px; /* الحد الأقصى للعرض */
-    height: auto; /* السماح بتكيف الارتفاع */
-    max-height: 90vh; /* الحد الأقصى للارتفاع لتجنب الخروج عن الشاشة */
-    
-    background: rgba(0, 0, 0, 0.85); /* خلفية داكنة مع شفافية */
-    padding: 20px; /* تقليل الحشوة لتناسب الأجهزة الصغيرة */
-    border-radius: 15px;
+    transform: translate(-50%, 0);
+    width: 85%;
+    max-width: 600px;
+    height: 89vh;
+   background: rgba(0, 0, 0, 0.85); /* 🔥 خلفية سوداء مع شفافية خفيفة */
+    backdrop-filter: blur(25px);
+    padding: 40px;
+    border-radius: 25px;
     text-align: center;
     color: white;
-    box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
-    display: none; /* النافذة تظهر فقط عند الحاجة */
+    box-shadow: 0 0 50px rgba(0, 255, 255, 0.7);
+    animation: slideDown 1s ease-out, glowEffect 1.5s infinite alternate;
+    display: none; /* ✅ ستظهر فقط عند الحاجة */
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    overflow: auto; /* السماح بالتمرير إذا لزم الأمر */
-    z-index: 9999;
+    justify-content: space-between;
+    z-index: 9999; /* ✅ يرفع النافذة فوق جميع العناصر */
 }
 
-
-#promoPopup .promo-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 5%;
-}
-
-
-
-/* تحسين الصورة داخل النافذة */
 #promoImage {
     width: 100%;
-    max-width: 250px; /* لا تتجاوز هذا الحجم */
-    height: auto; /* الحفاظ على نسبة الأبعاد */
-    border-radius: 15px;
-    margin-bottom: 15px;
+    max-width: 300px; /* ✅ لا تتعدى حجم معين */
+    border-radius: 20px; /* ✅ يجعل الحواف بيضوية */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    overflow: hidden; /* ✅ يمنع أي تجاوز */
 }
-
         
 /* تأثير عند تمرير الماوس */
 #promoImage:hover {
@@ -165,26 +149,19 @@ h1.main-title {
     box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3);
 }
         
-/* تحسين العنوان داخل النافذة */
 .popup-title {
-    font-size: 1.5rem;
+    font-size: 36px;
     font-weight: bold;
-    margin-bottom: 10px;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+    background: linear-gradient(135deg, #ffcc00, #ff0066);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
-
 
 p {
-    font-size: 1rem;
-    margin-bottom: 15px;
+    font-size: 22px;
+    margin-bottom: 20px;
 }
-
-/* تحسين النص */
-.promo-text {
-    font-size: 1rem;
-    margin-bottom: 15px;
-}
-
-
 
 
 
@@ -204,17 +181,21 @@ p {
 
         
 
-/* تحسين زر الإغلاق */
+/* زر الإغلاق الفخم */
 #closeBtn {
-    padding: 12px 25px;
-    font-size: 1rem;
-    border-radius: 20px;
-    border: none;
-    background: linear-gradient(135deg, #ff0066, #ffcc00);
+    padding: 15px 40px;
+    font-size: 20px;
+    font-weight: bold;
     color: white;
+    background: linear-gradient(135deg, #ff0066, #ffcc00);
+    border: none;
+    border-radius: 30px; /* ✅ يجعل الحواف دائرية */
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 0 15px rgba(255, 0, 255, 0.6);
+    animation: pulseEffect 2s infinite alternate;
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
+    position: relative;
+    overflow: hidden;
 }
 
 /* 🎨 تأثير عند تمرير الماوس */
@@ -238,40 +219,54 @@ p {
 
 
 
-
-button {
-    font-size: 1rem; /* مناسب لجميع الأجهزة */
-    padding: 10px 15px;
-    border-radius: 10px;
-}
-
-@media (max-width: 480px) {
-    button {
-        font-size: 0.9rem; /* تصغير الأزرار قليلاً للهواتف */
-        padding: 8px 12px;
-    }
-}
-
-
-/* تحسين استجابة النافذة للأجهزة الصغيرة */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     #promoPopup {
-        width: 95vw;
-        max-width: 350px;
-        padding: 15px;
+        width: 90%; /* تقليل العرض للشاشات الصغيرة */
+        max-width: 450px; /* تحديد أقصى عرض */
+        height: auto; /* السماح للارتفاع بالتكيف تلقائيًا */
+        padding: 20px; /* تقليل الحشوة الداخلية */
+    }
+
+    #promoImage {
+        max-width: 80%; /* تقليل حجم الصورة */
+        height: auto;
     }
 
     .popup-title {
-        font-size: 1.2rem;
+        font-size: 28px; /* تصغير العنوان قليلاً */
     }
 
     .promo-text {
-        font-size: 0.9rem;
+        font-size: 18px; /* تقليل حجم النص مع الحفاظ على الوضوح */
     }
 
     #closeBtn {
-        font-size: 0.9rem;
-        padding: 10px 20px;
+        padding: 12px 30px; /* تعديل حجم الزر */
+        font-size: 18px; /* تصغير النص داخل الزر */
+    }
+}
+
+@media (max-width: 480px) {
+    #promoPopup {
+        width: 95%; /* استخدام عرض أكبر على الهواتف */
+        padding: 15px; /* تقليل الحشوة */
+    }
+
+    #promoImage {
+        max-width: 70%;
+    }
+
+    .popup-title {
+        font-size: 24px; /* تصغير العنوان بشكل متناسب */
+    }
+
+    .promo-text {
+        font-size: 16px; /* تصغير النص أكثر */
+    }
+
+    #closeBtn {
+        padding: 10px 25px;
+        font-size: 16px;
     }
 }
 
@@ -525,11 +520,12 @@ h1 {
 }
 
 .slider {
-   display: flex;
-    gap: 10px;
+    display: flex;
+    gap: 8px;
     overflow-x: auto;
     scroll-behavior: smooth;
     padding: 5px;
+    flex-grow: 1;
 }
 
 .slider::-webkit-scrollbar {
@@ -537,9 +533,9 @@ h1 {
 }
 
 .category {
-    flex: 0 0 auto;
-    width: 80px;
-    height: 80px;
+     flex: 0 0 auto;
+    width: 85px;
+    height: 70px;
     background: rgba(0, 0, 0, 0.3); /* ✅ نفس تأثير زر الكروب */
     border-radius: 25px; /* ✅ تعديل الحواف */
     display: flex;
@@ -555,7 +551,6 @@ h1 {
     overflow: hidden; /* ✅ لمنع خروج التأثيرات */
     font-weight: bold;
     color: white;
-    font-size: 1rem;
 }
 
 /* ✅ تعديل أيقونة الفئات */
@@ -610,17 +605,6 @@ h1 {
 
 
 
-@media (max-width: 480px) {
-    .category {
-        width: 70px;
-        height: 70px;
-        font-size: 0.9rem;
-    }
-}
-
-
-
-
 
 .slider-btn {
     position: absolute;
@@ -665,16 +649,16 @@ h1 {
 
         .search-container {
             position: relative;
+            width: 100%;
             margin-bottom: 20px;
             margin-top: 10px;
-            width: 90%; /* تأكد من عدم تجاوز العرض */
-            max-width: 500px; /* الحد الأقصى */
             
         }
 
         .search-container input {
             width: 100%;
     height: 40px; /* نفس ارتفاع شريط الأخبار */
+    padding: 8px 16px;
     font-size: 16px;
     border: 2px solid rgba(255, 255, 255, 0.3); /* ✅ إضافة الحواف البيضاء */
     border-radius: 25px; /* ✅ جعل الحواف دائرية مثل شريط الأخبار */
@@ -683,11 +667,6 @@ h1 {
     outline: none;
     transition: all 0.3s ease;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ✅ إضافة الظل مثل شريط الأخبار */
-     font-size: 1rem;
-    padding: 10px;
-    
-    
-    
         }
 
         .search-container input:focus {
@@ -748,17 +727,6 @@ h1 {
     gap: 8px; /* ✅ تقليل المسافة بين الأزرار */
     margin-top: -10px; /* ✅ تحسين المسافة من الأعلى */
 }
-
-
-@media (max-width: 480px) {
-    .search-container input {
-        font-size: 0.9rem; /* تصغير حجم النص */
-        padding: 8px;
-    }
-}
-
-
-
 
 .refresh-btn, .exit-btn {
     width: 140px; /* ✅ تقليل العرض ليصبح أكثر أناقة */
@@ -1093,26 +1061,17 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
 .news-ticker {
     display: flex;
     align-items: center;
+    white-space: nowrap;
     position: absolute;
     animation: scrollText 180s linear infinite;
     color: white;
     font-weight: bold;
+    font-size: 14px;
     gap: 25px;
     direction: rtl;
     unicode-bidi: plaintext;
     background: transparent !important; /* ✅ إزالة لون الخلفية */
-    font-size: 1rem;
-    white-space: nowrap;
-    overflow: hidden;
 }
-
-
-@media (max-width: 480px) {
-    .news-ticker {
-        font-size: 0.8rem; /* تصغير الخط للهواتف */
-    }
-}
-
 
 
 /* ضبط كل جزء من الخبر لمنع تغيير ترتيب النصوص المختلطة */
@@ -1381,41 +1340,8 @@ window.onload = function() {
         let popup = document.getElementById('promoPopup');
         let image = document.getElementById('promoImage');
         let title = document.querySelector('.popup-title');
-        let text = document.querySelector('.promo-text'); // ✅ تأكد من وجود العنصر
+        let text = document.querySelector('#promoPopup p');
         let closeBtn = document.getElementById('closeBtn');
-
-        // ✅ ضبط حجم النافذة بناءً على حجم الجهاز
-        let screenWidth = window.innerWidth;
-        let screenHeight = window.innerHeight;
-
-        if (screenWidth < 480) { // 📱 للهواتف الصغيرة
-            popup.style.width = "90vw";
-            popup.style.height = "80vh";
-            popup.style.padding = "20px";
-            image.style.maxWidth = "250px";
-            title.style.fontSize = "22px";
-            text.style.fontSize = "16px";
-            closeBtn.style.padding = "10px 20px";
-            closeBtn.style.fontSize = "16px";
-        } else if (screenWidth < 768) { // 📲 للأجهزة اللوحية
-            popup.style.width = "80vw";
-            popup.style.height = "75vh";
-            popup.style.padding = "30px";
-            image.style.maxWidth = "280px";
-            title.style.fontSize = "26px";
-            text.style.fontSize = "18px";
-            closeBtn.style.padding = "12px 25px";
-            closeBtn.style.fontSize = "18px";
-        } else { // 🖥️ لأجهزة الكمبيوتر
-            popup.style.width = "50vw";
-            popup.style.height = "60vh";
-            popup.style.padding = "40px";
-            image.style.maxWidth = "300px";
-            title.style.fontSize = "30px";
-            text.style.fontSize = "20px";
-            closeBtn.style.padding = "15px 30px";
-            closeBtn.style.fontSize = "20px";
-        }
 
         // ✅ عرض النافذة أولاً
         popup.style.display = 'flex';
@@ -1434,10 +1360,8 @@ window.onload = function() {
 
         // ✅ تحريك النص بدخول تدريجي من الأسفل
         setTimeout(() => { 
-            if (text) { // ✅ تأكد أن العنصر موجود قبل تطبيق الحركة
-                text.style.opacity = '1'; 
-                text.style.transform = 'translateY(0)'; 
-            }
+            text.style.opacity = '1'; 
+            text.style.transform = 'translateY(0)'; 
         }, 600);
 
         // ✅ تحريك زر الإغلاق مع نبضة خفيفة
