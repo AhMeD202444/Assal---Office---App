@@ -123,33 +123,44 @@ h1.main-title {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); /* ✅ توسيط النافذة */
     width: 85%;
     max-width: 500px;
     height: auto;
-    background: rgba(0, 0, 0, 0.85); /* 🔥 خلفية سوداء مع شفافية */
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(25px);
     padding: 30px;
     border-radius: 20px;
     text-align: center;
     color: white;
     box-shadow: 0 0 50px rgba(0, 255, 255, 0.7);
-    animation: slideDown 0.8s ease-out forwards;
-    display: none; /* ✅ مخفي افتراضيًا */
-    z-index: 1000; /* ✅ أعلى من الطبقة الضبابية */
+    display: none;
+    z-index: 1000;
+    transform: scale(0) translate(-50%, -50%); /* ✅ يبدأ صغيرًا */
+    opacity: 0;
 }
 
-/* ✅ حركة دخول النافذة من الأعلى */
-@keyframes slideDown {
+
+
+@keyframes zoomIn {
     0% {
-        transform: translate(-50%, -70%);
+        transform: scale(0) translate(-50%, -50%);
         opacity: 0;
     }
     100% {
-        transform: translate(-50%, -50%);
+        transform: scale(1) translate(-50%, -50%);
         opacity: 1;
     }
 }
+
+#promoPopup {
+    animation: zoomIn 0.5s ease-out forwards; /* ✅ تطبيق الأنيميشن الجديدة */
+}
+
+
+
+
+
+
 
 /* ✅ تحسين زر الإغلاق */
 #closeBtn {
@@ -175,6 +186,17 @@ h1.main-title {
 #closeBtn:active {
     transform: scale(0.95);
     box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+
+
+@keyframes pulseEffect {
+    0% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 0, 255, 0.6); }
+    50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(255, 0, 255, 1); }
+    100% { transform: scale(1); box-shadow: 0 0 10px rgba(255, 0, 255, 0.6); }
+}
+
+#closeBtn {
+    animation: pulseEffect 1.5s infinite alternate; /* ✅ إضافة تأثير النبض */
 }
 
 
@@ -1380,7 +1402,9 @@ window.onload = function() {
         popup.style.display = 'flex';
 
         // ✅ تحريك النافذة بدخول سلس من الأعلى
-        popup.style.animation = "slideDown 0.8s ease-out forwards";
+      popup.style.display = 'flex';
+popup.style.animation = "zoomIn 0.5s ease-out forwards";
+
 
         // ✅ تحريك الصورة بدخول من الأعلى
         setTimeout(() => { 
