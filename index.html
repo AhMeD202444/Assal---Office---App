@@ -105,27 +105,78 @@ h1.main-title {
         
 
  
+/* ✅ طبقة ضبابية تغطي الخلفية */
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* 🔥 تعتيم خفيف للخلفية */
+    backdrop-filter: blur(10px); /* ✅ تأثير الضبابية */
+    z-index: 999; /* ✅ فوق كل شيء */
+    display: none; /* مخفي افتراضيًا */
+}
+
+/* ✅ تعديل مكان النافذة ليكون في منتصف الشاشة */
 #promoPopup {
-    position: fixed; /* ✅ يجعل النافذة دائمًا فوق المحتوى */
-    top: 5%;
+    position: fixed;
+    top: 50%;
     left: 50%;
-    transform: translate(-50%, 0);
+    transform: translate(-50%, -50%); /* ✅ توسيط النافذة */
     width: 85%;
-    max-width: 600px;
-    height: 89vh;
-   background: rgba(0, 0, 0, 0.85); /* 🔥 خلفية سوداء مع شفافية خفيفة */
+    max-width: 500px;
+    height: auto;
+    background: rgba(0, 0, 0, 0.85); /* 🔥 خلفية سوداء مع شفافية */
     backdrop-filter: blur(25px);
-    padding: 40px;
-    border-radius: 25px;
+    padding: 30px;
+    border-radius: 20px;
     text-align: center;
     color: white;
     box-shadow: 0 0 50px rgba(0, 255, 255, 0.7);
-    animation: slideDown 1s ease-out, glowEffect 1.5s infinite alternate;
-    display: none; /* ✅ ستظهر فقط عند الحاجة */
-    flex-direction: column;
-    justify-content: space-between;
-    z-index: 9999; /* ✅ يرفع النافذة فوق جميع العناصر */
+    animation: slideDown 0.8s ease-out forwards;
+    display: none; /* ✅ مخفي افتراضيًا */
+    z-index: 1000; /* ✅ أعلى من الطبقة الضبابية */
 }
+
+/* ✅ حركة دخول النافذة من الأعلى */
+@keyframes slideDown {
+    0% {
+        transform: translate(-50%, -70%);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+}
+
+/* ✅ تحسين زر الإغلاق */
+#closeBtn {
+    padding: 12px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(135deg, #ff0066, #ffcc00);
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.7);
+}
+
+/* 🎨 تأثير عند تمرير الماوس */
+#closeBtn:hover {
+    transform: scale(1.1);
+    background: linear-gradient(45deg, #43cea2, #185a9d);
+}
+
+/* 🎯 تأثير الضغط عند النقر */
+#closeBtn:active {
+    transform: scale(0.95);
+    box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+
 
 #promoImage {
     width: 100%;
@@ -181,35 +232,7 @@ p {
 
         
 
-/* زر الإغلاق الفخم */
-#closeBtn {
-    padding: 15px 40px;
-    font-size: 20px;
-    font-weight: bold;
-    color: white;
-    background: linear-gradient(135deg, #ff0066, #ffcc00);
-    border: none;
-    border-radius: 30px; /* ✅ يجعل الحواف دائرية */
-    cursor: pointer;
-    transition: all 0.3s ease;
-    animation: pulseEffect 2s infinite alternate;
-    box-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
-    position: relative;
-    overflow: hidden;
-}
 
-/* 🎨 تأثير عند تمرير الماوس */
-#closeBtn:hover {
-    transform: scale(1.1);
-            background: linear-gradient(45deg, #43cea2, #185a9d);
-}
-
-/* 🎯 تأثير الضغط عند النقر */
-#closeBtn:active {
-    background: linear-gradient(45deg, #43cea2, #185a9d);
-            transform: scale(1.1);
-            box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
-}
         
 @keyframes pulseEffect {
     0% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 0, 255, 0.6); }
@@ -1215,6 +1238,8 @@ footer {
     </style>
 </head>
 <body>
+  
+       <div id="overlay"></div>
 
        <div id="promoPopup">
     <div class="promo-content">
@@ -1338,13 +1363,24 @@ let showPromoPopup = true; // 🔥 غيّر إلى false لإخفاء الناف
 window.onload = function() {
     if (!sessionStorage.getItem("promoPopupDisplayed")) {
         let popup = document.getElementById('promoPopup');
+        let overlay = document.getElementById('overlay'); // ✅ استدعاء الطبقة الضبابية
         let image = document.getElementById('promoImage');
         let title = document.querySelector('.popup-title');
         let text = document.querySelector('#promoPopup p');
         let closeBtn = document.getElementById('closeBtn');
 
+        // ✅ عرض الطبقة الضبابية
+        overlay.style.display = 'block';
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+        }, 100);
+
         // ✅ عرض النافذة أولاً
         popup.style.display = 'flex';
+
+        // ✅ تحريك النافذة بدخول سلس من الأعلى
+        popup.style.animation = "slideDown 0.8s ease-out forwards";
 
         // ✅ تحريك الصورة بدخول من الأعلى
         setTimeout(() => { 
@@ -1370,7 +1406,7 @@ window.onload = function() {
             closeBtn.style.transform = 'scale(1)'; 
         }, 800);
 
-        // ✅ حفظ حالة الظهور حتى لا تتكرر النافذة عند التحديث
+        // ✅ منع النافذة من الظهور مرة أخرى عند إعادة تحميل الصفحة
         sessionStorage.setItem("promoPopupDisplayed", "true");
     }
 };
@@ -1378,11 +1414,18 @@ window.onload = function() {
 // ✅ عند إغلاق النافذة، نخفيها بسلاسة
 function closePopup() {
     let popup = document.getElementById('promoPopup');
+    let overlay = document.getElementById('overlay'); // ✅ استدعاء الطبقة الضبابية
+
+    // ✅ إخفاء الضبابية تدريجيًا
+    overlay.style.opacity = '0';
     popup.style.opacity = '0';
+
     setTimeout(() => {
         popup.style.display = 'none';
+        overlay.style.display = 'none';
     }, 500);
 }
+
 
 const slider = document.getElementById('slider');
 const prevBtn = document.querySelector('.prev-btn');
