@@ -1214,14 +1214,11 @@ footer {
 
 // ✅ تشغيل Overlay عند تحميل الصفحة مع حركة دخول
 window.onload = function() {
-    if (!localStorage.getItem("promoPopupDisplayed")) { 
+    if (!sessionStorage.getItem("promoPopupDisplayed")) { 
         document.getElementById('overlay').style.display = 'block';
         let popup = document.getElementById('promoPopup');
         popup.style.display = 'flex';
         popup.style.animation = 'slideDown 0.6s ease-out forwards';
-
-        // 🔥 حفظ القيمة في localStorage حتى لا تظهر مرة أخرى
-        localStorage.setItem("promoPopupDisplayed", "true");
     }
 };
 
@@ -1235,7 +1232,6 @@ function closePopup() {
         document.getElementById('overlay').style.display = 'none';
     }, 600); // نفس مدة الأنيميشن
 }
-
 
 const slider = document.getElementById('slider');
 const prevBtn = document.querySelector('.prev-btn');
