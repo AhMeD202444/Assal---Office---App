@@ -50,44 +50,33 @@
 }
 
 
-@keyframes swalZoomIn {
+@keyframes slideDown {
     0% {
-        transform: scale(0.7);
         opacity: 0;
-    }
-    45% {
-        transform: scale(1.05);
-        opacity: 1;
-    }
-    80% {
-        transform: scale(0.95);
+        transform: translate(-50%, -100%);
     }
     100% {
-        transform: scale(1);
+        opacity: 1;
+        transform: translate(-50%, -50%);
     }
 }
 
-/* ✅ حركة خروج مطابقة لحركة SweetAlert */
-@keyframes swalZoomOut {
+@keyframes slideUp {
     0% {
-        transform: scale(1);
         opacity: 1;
-    }
-    50% {
-        transform: scale(0.7);
-        opacity: 0.5;
+        transform: translate(-50%, -50%);
     }
     100% {
-        transform: scale(0.5);
         opacity: 0;
+        transform: translate(-50%, -100%);
     }
 }
-/* ✅ نافذة الترحيب مع تأثير الدخول */
+
 #promoPopup {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -100%);
     width: 90%;
     max-width: 450px;
     background: rgba(0, 0, 0, 0.85);
@@ -101,8 +90,8 @@
     flex-direction: column;
     justify-content: space-between;
     z-index: 9999;
-    animation: zoomIn 0.5s ease-out;
 }
+
 
 /* ✅ تحسين صورة النافذة */
 #promoImage {
@@ -1229,21 +1218,19 @@ window.onload = function() {
         document.getElementById('overlay').style.display = 'block';
         let popup = document.getElementById('promoPopup');
         popup.style.display = 'flex';
-        popup.style.animation = 'zoomIn 0.5s ease-out'; // حركة الدخول
-        sessionStorage.setItem("promoPopupDisplayed", "true");
+        popup.style.animation = 'slideDown 0.6s ease-out forwards';
     }
 };
 
-// ✅ إغلاق Overlay والنافذة مع حركة خروج
+// ✅ تعديل حركة الخروج بحيث تكون بنفس مسار الدخول تمامًا
 function closePopup() {
     let popup = document.getElementById('promoPopup');
-    popup.style.animation = 'zoomOut 0.3s ease-in'; // حركة الخروج
-    document.getElementById('overlay').style.opacity = '0';
+    popup.style.animation = 'slideUp 0.6s ease-in forwards'; // حركة الصعود للخروج
 
-    setTimeout(() => { 
+    setTimeout(() => {
         popup.style.display = 'none';
         document.getElementById('overlay').style.display = 'none';
-    }, 300);
+    }, 600); // نفس مدة الأنيميشن
 }
 
 const slider = document.getElementById('slider');
