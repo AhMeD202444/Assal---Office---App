@@ -52,23 +52,23 @@
 
 @keyframes slideDown {
     0% {
-        opacity: 0;
         transform: translate(-50%, -100%);
+        opacity: 0;
     }
     100% {
-        opacity: 1;
         transform: translate(-50%, -50%);
+        opacity: 1;
     }
 }
 
 @keyframes slideUp {
     0% {
-        opacity: 1;
         transform: translate(-50%, -50%);
+        opacity: 1;
     }
     100% {
+        transform: translate(-50%, -120%);
         opacity: 0;
-        transform: translate(-50%, -100%);
     }
 }
 
@@ -1213,24 +1213,24 @@ footer {
   let showPromoPopup = true; // 🔥 غيّر إلى false لإخفاء النافذة
 
 // ✅ تشغيل Overlay عند تحميل الصفحة مع حركة دخول
-window.onload = function() {
-    if (!sessionStorage.getItem("promoPopupDisplayed")) { 
+window.onload = function() { 
+    setTimeout(() => { // ⏳ تأخير بسيط لضمان تحميل الصفحة أولًا
         document.getElementById('overlay').style.display = 'block';
         let popup = document.getElementById('promoPopup');
         popup.style.display = 'flex';
         popup.style.animation = 'slideDown 0.6s ease-out forwards';
-    }
+    }, 500); // ⏳ تأخير نصف ثانية قبل العرض
 };
 
-// ✅ تعديل حركة الخروج بحيث تكون بنفس مسار الدخول تمامًا
+// ✅ حركة الخروج بنفس مسار النزول (لأعلى)
 function closePopup() {
     let popup = document.getElementById('promoPopup');
-    popup.style.animation = 'slideUp 0.6s ease-in forwards'; // حركة الصعود للخروج
+    popup.style.animation = 'slideUp 0.6s ease-in forwards';
 
     setTimeout(() => {
         popup.style.display = 'none';
         document.getElementById('overlay').style.display = 'none';
-    }, 600); // نفس مدة الأنيميشن
+    }, 600); // ⏳ وقت متزامن مع الأنيميشن لضمان خروج سلس
 }
 
 const slider = document.getElementById('slider');
