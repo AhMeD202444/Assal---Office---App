@@ -19,22 +19,18 @@
     
     
     
-    @keyframes shake {
+     @keyframes shake {
     0%, 100% { transform: translate(0, 0); }
-    20% { transform: translate(-2px, 2px) rotate(-2deg); }
-    40% { transform: translate(2px, -2px) rotate(2deg); }
-    60% { transform: translate(-2px, 2px) rotate(-2deg); }
-    80% { transform: translate(2px, -2px) rotate(2deg); }
+    25% { transform: translate(-4px, 4px) rotate(-3deg); }
+    50% { transform: translate(4px, -4px) rotate(3deg); }
+    75% { transform: translate(-4px, 4px) rotate(-3deg); }
 }
-
 
 @keyframes explode {
     0% { transform: scale(1); opacity: 1; }
-    30% { transform: scale(1.3); opacity: 0.9; filter: blur(2px); }
-    60% { transform: scale(1.6); opacity: 0.7; filter: blur(4px); }
-    100% { transform: scale(2); opacity: 0; filter: blur(8px); }
+    50% { transform: scale(1.6); opacity: 0.7; filter: blur(3px); }
+    100% { transform: scale(2); opacity: 0; filter: blur(6px); }
 }
-
 
 @keyframes screenPop {
     0% { transform: scale(0) rotate(0deg); opacity: 0; box-shadow: none; }
@@ -1387,34 +1383,32 @@ function triggerAnimation() {
         notification.classList.add("show");
     }, 1300);
 
-   setTimeout(() => {
-    gsap.to(notification, {
-        opacity: 0,  // 👈 بدل ما يختفي فجأة، يصير تدريجيًا
-        scale: 0.8,  // 👈 يصغر أثناء التلاشي
-        duration: 1.5, // ⏳ مدة أطول لتعطي تأثير ناعم
-        ease: "power2.out", // 🎭 جعل التلاشي تدريجي أكثر
-        onComplete: () => {
-            notification.style.transform = "scale(0)";
-            notification.classList.remove("show"); // 🔄 إزالة الـ class بعد التلاشي
-        }
-    });
-}, 5000);
-
+    setTimeout(() => {
+        notification.classList.remove("show");
+        gsap.to(notification, {
+            scale: 0.8,
+            opacity: 0,
+            rotation: 180,
+            duration: 0.8,
+            ease: "power2.inOut",
+            onComplete: () => {
+                notification.style.transform = "scale(0)";
+            }
+        });
+    }, 5000);
 
     setTimeout(() => {
-    gsap.set(logo, { scale: 0, opacity: 0, rotation: 0 });
-    gsap.to(logo, {
-        scale: 1,
-        opacity: 1,
-        rotation: 720,
-        duration: 2.5, // ⏳ زيادة المدة لجعل الدوران أبطأ
-        ease: "power2.out" // 🌀 جعل الدوران يبدأ سريعًا ثم يبطأ تدريجيًا
-    });
-}, 5800);
+        gsap.set(logo, { scale: 0, opacity: 0, rotation: 0 });
+        gsap.to(logo, {
+            scale: 1,
+            opacity: 1,
+            rotation: 720,
+            duration: 1.2,
+            ease: "bounce.out"
+        });
+    }, 5800);
 
-
-    setTimeout(triggerAnimation, 9000); // ⏳ زيادة المهلة قليلاً
-
+    setTimeout(triggerAnimation, 8000);
 }
       
       
