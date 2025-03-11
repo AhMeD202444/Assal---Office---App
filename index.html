@@ -53,7 +53,7 @@
     position: relative;
     width: 140px;
     height: 140px;
-    margin: 0 auto 20px; /* توسيط ومسافة من الأسفل */
+    margin: 0 auto 20px; /* مسافة سفلية ثابتة */
 }
 
 .logo-container {
@@ -149,11 +149,11 @@
             animation: spin 1s linear infinite;
         }
         
-        h1.main-title {
-    color: white !important; /* ✅ يجبر اللون الأبيض */
-    text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4); /* ✅ إضافة تأثير ظل أنيق */
+       h1.main-title {
+    color: white !important;
+    text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
+    margin: 10px 0 15px; /* مسافة علوية وسفلية موحدة */
 }
-
  
 /* ✅ طبقة الـ Overlay مع تأثير شفافية */
 #overlay {
@@ -274,20 +274,20 @@
             box-sizing: border-box;
         }
 
-        body {
-           font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(135deg, #3A6073, #16222A); /* اللون الرئيسي للواجهة عند بداية التشغيل */
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column; /* تعديل التوجيه العمودي */
-            height: 100vh;
-            margin-top: -10px;
-            overflow: hidden;
-            background-size: 400% 400%;
-            animation: gradientAnimation 10s ease infinite;
-        }
+       body {
+    font-family: 'Tajawal', sans-serif;
+    background: linear-gradient(135deg, #3A6073, #16222A);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh; /* تغيير من height إلى min-height */
+    padding: 20px 0; /* إضافة مسافة علوية وسفلية */
+    margin: 0; /* إزالة margin-top: -10px وجعلها متسقة */
+    background-size: 400% 400%;
+    animation: gradientAnimation 10s ease infinite;
+}
 
         @keyframes gradientAnimation {
             0% { background-position: 0% 50%; }
@@ -300,20 +300,21 @@
     border-radius: 20px;
     padding: 20px;
     text-align: center;
-    max-width: 700px;
-    width: 90%;
-    margin-top: -10px;
+    width: 90%; /* عرض نسبي */
+    max-width: 800px; /* زيادة الحد الأقصى قليلاً للشاشات الكبيرة */
+    margin: 20px auto; /* مسافة علوية وسفلية موحدة وتوسيط */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
 }
 
-/* إضافة التعديلات لجعلها متجاوبة */
+
 @media (max-width: 768px) {
     .container {
-        max-width: 95%; /* تقليل العرض لتناسب الشاشات الأصغر */
+        width: 95%; /* زيادة العرض للشاشات المتوسطة */
         padding: 15px; /* تقليل الحشوة */
+        margin: 15px auto; /* تقليل المسافة العلوية والسفلية */
     }
-
+}
     .results-container {
         max-width: 95%; /* ضبط العرض */
         padding: 8px; /* تقليل الحشوة */
@@ -325,12 +326,14 @@
     }
 }
 
+/* شاشات صغيرة (أقل من 480px) */
 @media (max-width: 480px) {
     .container {
-        max-width: 100%; /* استخدام العرض الكامل للشاشات الصغيرة */
+        width: 100%; /* استخدام كامل العرض */
         padding: 10px; /* تقليل الحشوة أكثر */
+        margin: 10px auto; /* تقليل المسافة أكثر */
     }
-
+}
     .categories {
         grid-template-columns: 1fr; /* تحويل الأعمدة إلى صف واحد */
         gap: 5px; /* تقليل المسافة بين الأزرار */
@@ -357,19 +360,16 @@
     border-radius: 20px;
     padding: 15px;
     text-align: center;
-    max-width: 700px;
     width: 90%;
+    max-width: 700px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
-    margin-top: 10px;
+    margin: 20px auto; /* مسافة علوية وسفلية موحدة */
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 15px; /* زيادة المسافة بين العناصر */
 }
-
-
-        
 
 
 /* الشعار (Logo) */
@@ -417,8 +417,8 @@ h1 {
 /* توحيد المسافات بين جميع الأزرار */
 .categories {
     display: flex;
-    flex-direction: column; /* ترتيب عمودي */
-    gap: 10px; /* مسافة موحدة بين جميع الأزرار */
+    flex-direction: column;
+    gap: 15px; /* زيادة المسافة بين الأزرار */
     align-items: center;
     width: 100%;
 }
@@ -640,13 +640,11 @@ h1 {
 
 
 
-        .search-container {
-            position: relative;
-            width: 100%;
-            margin-bottom: 20px;
-            margin-top: 10px;
-            
-        }
+       .search-container {
+    position: relative;
+    width: 100%;
+    margin: 20px 0; /* توحيد المسافة العلوية والسفلية */
+}
 
         .search-container input {
             width: 100%;
@@ -1103,18 +1101,18 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
 
 
 .swal2-popup {
-    background: linear-gradient(135deg, #1a2a3a, #243b55); /* خلفية متدرجة حديثة */
-    border-radius: 20px; /* زوايا مستديرة */
-    color: #ffffff; /* لون النص */
+    background: linear-gradient(135deg, #1a2a3a, #243b55);
+    border-radius: 20px;
+    color: #ffffff;
     text-align: center;
-    backdrop-filter: blur(15px); /* تأثير الضبابية */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); /* ظل خفيف */
-    font-family: 'Montserrat', sans-serif; /* خط عصري */
-    padding: 25px; /* مساحة داخلية أكبر */
-    width: auto !important; /* عرض تلقائي */
-    max-width: 400px; /* الحد الأقصى للعرض */
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    font-family: 'Montserrat', sans-serif;
+    padding: 20px;
+    width: 90%; /* عرض نسبي */
+    max-width: 450px; /* حد أقصى */
+    min-width: 280px; /* حد أدنى */
 }
-
 .swal2-title {
     font-size: 24px !important; /* تكبير حجم الخط */
     font-weight: bold !important; /* خط عريض */
@@ -1194,14 +1192,13 @@ footer {
     color: white;
     text-align: center;
     padding: 10px 0;
-    position: absolute;
-    bottom: 0;
     width: 100%;
     font-family: 'Montserrat', sans-serif;
     font-size: 14px;
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+    margin-top: 20px; /* إضافة مسافة علوية */
+    position: relative; /* تغيير من absolute إلى relative لتجنب التداخل */
 }
-
 
 
 
