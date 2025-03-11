@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Phone Parts Pro</title>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -14,6 +16,124 @@
 
 
     <style>
+    
+    
+    
+     @keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-4px, 4px) rotate(-3deg); }
+    50% { transform: translate(4px, -4px) rotate(3deg); }
+    75% { transform: translate(-4px, 4px) rotate(-3deg); }
+}
+
+@keyframes explode {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.6); opacity: 0.7; filter: blur(3px); }
+    100% { transform: scale(2); opacity: 0; filter: blur(6px); }
+}
+
+@keyframes screenPop {
+    0% { transform: scale(0) rotate(0deg); opacity: 0; box-shadow: none; }
+    50% { transform: scale(1.1) rotate(360deg); opacity: 1; box-shadow: 0 0 20px rgba(70, 130, 180, 0.8), 0 0 40px rgba(70, 130, 180, 0.4); }
+    100% { transform: scale(1) rotate(720deg); opacity: 1; box-shadow: 0 0 15px rgba(70, 130, 180, 0.6); }
+}
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 15px rgba(70, 130, 180, 0.6); }
+    50% { box-shadow: 0 0 25px rgba(70, 130, 180, 1), 0 0 40px rgba(70, 130, 180, 0.5); }
+    100% { box-shadow: 0 0 15px rgba(70, 130, 180, 0.6); }
+}
+
+@keyframes textFadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.notification-container {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 20px; /* توسيط ومسافة من الأسفل */
+}
+
+.logo-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: url('images/logo.png') no-repeat center/cover;
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    z-index: 1;
+    opacity: 1;
+}
+
+.notification {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 140px;
+    height: 140px;
+    background: linear-gradient(45deg, #4682B4, #20B2AA);
+    border: 3px solid #4682B4;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transform: scale(0);
+    z-index: 2;
+}
+
+.notification.show {
+    animation: screenPop 0.7s ease-out forwards, pulseGlow 1.5s infinite;
+}
+
+.notification-text {
+    font-family: 'Tajawal', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    text-align: center;
+    max-width: 120px;
+    opacity: 0;
+    letter-spacing: 1px;
+}
+
+.notification.show .notification-text {
+    animation: textFadeIn 0.5s ease-out forwards;
+    animation-delay: 0.7s;
+}
+
+.notification::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: linear-gradient(45deg, #4682B4, #20B2AA);
+    filter: blur(10px);
+    opacity: 0.7;
+    z-index: -1;
+    border-radius: 50%;
+}
+
+
+
+
+
+
+    
+    
+    
+    
+    
+    
 
  @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -1108,10 +1228,21 @@ footer {
     
     
     <div class="container">
+      
+      
+      
     <!-- شعار دائري -->
-    <div class="logo-container">
-        <img src="images/logo.png" alt="Logo">
+   <div class="notification-container">
+    <div class="logo-container" id="logo"> 
+     <img src="images/logo.png" alt="Logo">
     </div>
+    <div class="notification" id="notification">
+        <div class="notification-text" id="notification-text"></div>
+    </div>
+</div>
+    
+    
+    
    <h1 class="main-title">ASSAL OFFICE</h1>
 
 
@@ -1210,17 +1341,96 @@ footer {
 
     <script>
       
+      
+      
+      
+    const notifications = [
+    "شاشة آيفون بجودة استثنائية!",
+    "خصم مميز على بطارية سامسونج!",
+    "كاميرا شاومي بدقة مذهلة!",
+    "عرض خاص على شاشة هواوي!",
+    "بطارية قوية بسعر مغرٍ!",
+    "شواصي أوبو بتصميم راقٍ!",
+    "كاميرات فيفو بعرض نادر!",
+    "شاشات بمتانة فائقة",
+    "كل شاشات الهواتف متوفرة",
+    "شاشة آيفون بأحدث التقنيات!"
+];
+
+function triggerAnimation() {
+    const logo = document.getElementById("logo");
+    const notification = document.getElementById("notification");
+    const notificationText = document.getElementById("notification-text");
+
+    if (!logo || !notification || !notificationText) {
+        console.error("One or more elements not found!");
+        return;
+    }
+
+    logo.style.animation = "shake 0.5s ease-in-out";
+    setTimeout(() => {
+        logo.style.animation = "none";
+    }, 500);
+
+    setTimeout(() => {
+        logo.style.animation = "explode 0.5s ease-out";
+        logo.style.opacity = "0";
+    }, 800);
+
+    setTimeout(() => {
+        const randomNotification = notifications[Math.floor(Math.random() * notifications.length)];
+        notificationText.textContent = randomNotification;
+        notification.classList.add("show");
+    }, 1300);
+
+    setTimeout(() => {
+        notification.classList.remove("show");
+        gsap.to(notification, {
+            scale: 0.8,
+            opacity: 0,
+            rotation: 180,
+            duration: 0.8,
+            ease: "power2.inOut",
+            onComplete: () => {
+                notification.style.transform = "scale(0)";
+            }
+        });
+    }, 5000);
+
+    setTimeout(() => {
+        gsap.set(logo, { scale: 0, opacity: 0, rotation: 0 });
+        gsap.to(logo, {
+            scale: 1,
+            opacity: 1,
+            rotation: 720,
+            duration: 1.2,
+            ease: "bounce.out"
+        });
+    }, 5800);
+
+    setTimeout(triggerAnimation, 8000);
+}
+      
+      
+      
+      
+      
+      
+      
+      
   let showPromoPopup = true; // 🔥 غيّر إلى false لإخفاء النافذة
 
 // ✅ تشغيل Overlay عند تحميل الصفحة مع حركة دخول
 window.onload = function() { 
-    setTimeout(() => { // ⏳ تأخير بسيط لضمان تحميل الصفحة أولًا
+    setTimeout(() => {
         document.getElementById('overlay').style.display = 'block';
         let popup = document.getElementById('promoPopup');
         popup.style.display = 'flex';
         popup.style.animation = 'slideDown 0.6s ease-out forwards';
-    }, 500); // ⏳ تأخير نصف ثانية قبل العرض
+    }, 500);
+    triggerAnimation(); // تشغيل الإشعارات
 };
+
 
 // ✅ حركة الخروج بنفس مسار النزول (لأعلى)
 function closePopup() {
