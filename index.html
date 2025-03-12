@@ -49,12 +49,14 @@
     100% { opacity: 1; transform: translateY(0); }
 }
 
+/* تعديل المسافات بين الشعار والهيدر وشريط الأخبار */
 .notification-container {
     position: relative;
     width: 140px;
     height: 140px;
-    margin: 0 auto 20px; /* مسافة سفلية ثابتة */
+    margin: 0 auto 4px; /* تقليل المسافة السفلية من 8px إلى 4px */
 }
+
 
 .logo-container {
     position: absolute;
@@ -149,12 +151,13 @@
             animation: spin 1s linear infinite;
         }
         
-       h1.main-title {
+    h1.main-title {
     color: white !important;
     text-shadow: 0 4px 10px rgba(255, 255, 255, 0.4);
-    margin: 10px 0 15px; /* مسافة علوية وسفلية موحدة */
+    margin: 2px 0 4px; /* تقليل المسافة العلوية من 4px إلى 2px والسفلية من 8px إلى 4px */
 }
- 
+
+
 /* ✅ طبقة الـ Overlay مع تأثير شفافية */
 #overlay {
     position: fixed;
@@ -295,18 +298,21 @@
             100% { background-position: 0% 50%; }
         }
 
-       .container {
+     /* تعديل المسافات داخل container */
+.container {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
-    padding: 20px;
+    padding: 15px; /* تقليل الحشوة من 20px إلى 15px */
     text-align: center;
-    width: 90%; /* عرض نسبي */
-    max-width: 800px; /* زيادة الحد الأقصى قليلاً للشاشات الكبيرة */
-    margin: 20px auto; /* مسافة علوية وسفلية موحدة وتوسيط */
+    width: 90%;
+    max-width: 800px;
+    margin: 15px auto; /* تقليل المسافة الخارجية من 20px إلى 15px */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* تقليل المسافة بين العناصر من 15px إلى 10px */
 }
-
 
 @media (max-width: 768px) {
     .container {
@@ -355,21 +361,6 @@
     }
 }
 
-.actions-container {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 15px;
-    text-align: center;
-    width: 90%;
-    max-width: 700px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    margin: 20px auto; /* مسافة علوية وسفلية موحدة */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px; /* زيادة المسافة بين العناصر */
-}
 
 
 /* الشعار (Logo) */
@@ -413,12 +404,11 @@ h1 {
 
 
 
- 
-/* توحيد المسافات بين جميع الأزرار */
+/* تقليل المسافة بين أزرار الفئات (أسعار بنمط الكروب، عدد الصيانة، التوافقات) */
 .categories {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* زيادة المسافة بين الأزرار */
+    gap: 10px; /* تقليل المسافة من 15px إلى 10px لتقريب الأزرار */
     align-items: center;
     width: 100%;
 }
@@ -510,6 +500,7 @@ h1 {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
+     gap: 8px; /* تقليل المسافة بين الأزرار والسلايدر */
 }
 
 .slider {
@@ -640,10 +631,10 @@ h1 {
 
 
 
-       .search-container {
+     .search-container {
     position: relative;
     width: 100%;
-    margin: 20px 0; /* توحيد المسافة العلوية والسفلية */
+   margin: 10px 0; /* العلوية 10px، السفلية 10px */
 }
 
         .search-container input {
@@ -705,18 +696,16 @@ h1 {
         }
 
 
-
-
         
 
 
- /* تصميم الحاوية للأزرار */
-       .button-container {
+/* تعديل المسافات في أزرار التحديث والخروج */
+.button-container {
     display: flex;
-    justify-content: center; /* ✅ وضع الأزرار في المنتصف */
+    justify-content: center;
     align-items: center;
-    gap: 8px; /* ✅ تقليل المسافة بين الأزرار */
-    margin-top: -10px; /* ✅ تحسين المسافة من الأعلى */
+    gap: 8px;
+    margin: 0 0 8px 0; /* تقليل العلوية إلى 0px لتقريبها من أزرار الألوان */
 }
 
 .refresh-btn, .exit-btn {
@@ -758,8 +747,8 @@ h1 {
 .results {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+    gap: 10px;
+   margin-top: 10px; /* المسافة العلوية 10px */
     max-height: 500px !important;
     overflow-y: auto;
     scroll-behavior: smooth;
@@ -905,12 +894,14 @@ h1 {
 }
 
 
-        .color-buttons {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
-            gap: 5px; /* تقليل المسافة بين الأزرار الدائرية */
-        }
+      /* تعديل المسافات في أزرار الألوان */
+.color-buttons {
+    display: flex;
+    justify-content: center;
+    margin: 12px 0 2px 0; /* زيادة العلوية إلى 12px لتنزيلها، تقليل السفلية إلى 2px لتقريبها */
+    gap: 6px; /* الحفاظ على المسافة بين أزرار الألوان */
+}
+
 
    .color-btn {
     position: relative; /* لإضافة التأثيرات داخلياً */
@@ -992,11 +983,10 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
 }
 
 
-/* شريط الأخبار مطابق تمامًا لزر "أسعار بنمط الكروب" */
 .news-bar {
     display: flex;
     align-items: center;
-    justify-content: row-reverse; /* يجعل زر "عاجل" في اليمين */
+    justify-content: row-reverse;
     background: rgba(0, 0, 0, 0.3);
     padding: 8px 16px;
     border-radius: 25px;
@@ -1005,10 +995,9 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
     border: 2px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
-    margin-bottom: 10px;
-    box-sizing: border-box; /* ✅ يضمن عدم تأثير الحواف والحدود على العرض */
+    margin-bottom: 4px; /* تقليل المسافة السفلية من 8px إلى 4px */
+    box-sizing: border-box;
 }
-
 
 /* زر "عاجل" في اليمين */
 .breaking-news {
@@ -1191,12 +1180,12 @@ footer {
     background-color: rgba(0, 0, 0, 0.5);
     color: white;
     text-align: center;
-    padding: 10px 0;
+    padding: 8px 0;
     width: 100%;
     font-family: 'Montserrat', sans-serif;
     font-size: 14px;
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-    margin-top: 20px; /* إضافة مسافة علوية */
+    margin-top: 15px; /* إضافة مسافة علوية */
     position: relative; /* تغيير من absolute إلى relative لتجنب التداخل */
 }
 
@@ -1305,9 +1294,9 @@ footer {
             <button onclick="searchItems()"><i class="fas fa-search"></i></button>
         </div>
         <div id="results" class="results"></div>
-    </div>
     
-    <div class="actions-container">
+    
+   
     <div class="color-buttons">
         <button class="color-btn" onclick="changeBackgroundColor('#4A154B')"></button>
         <button class="color-btn" onclick="changeBackgroundColor('#3A6073')"></button>
@@ -1328,6 +1317,8 @@ footer {
 
 
 </div>
+
+
 
 
 <footer>
