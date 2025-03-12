@@ -1099,7 +1099,7 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
     font-family: 'Montserrat', sans-serif;
     padding: 20px;
     width: 90%; /* عرض نسبي */
-    max-width: 900px; /* حد أقصى */
+    max-width: 450px; /* حد أقصى */
     min-width: 280px; /* حد أدنى */
 }
 .swal2-title {
@@ -1692,10 +1692,9 @@ function displayResults(results) {
     Swal.fire({
         title: `نتائج البحث (${results.length})`,
         html: htmlContent,
-        width: '90%', // توسيع عرض النافذة إلى 75%
-        maxWidth: '900px', // حد أقصى للعرض
+        width: '75%', // توسيع عرض النافذة إلى 75%
         backdrop: false, // تثبيت الواجهة
-        backdrop: 'rgba(0, 0, 0, 0)', // تعتيم أنيق للخلفية
+        backdrop: 'rgba(0, 0, 0, 0.7)', // تعتيم أنيق للخلفية
         customClass: {
             popup: 'swal2-popup',
             title: 'swal2-title',
@@ -1709,9 +1708,8 @@ function displayResults(results) {
             // التأكد من ربط الأحداث عند فتح النافذة
             document.body.style.overflow = 'hidden';
         },
-       willClose: () => {
-            document.getElementById('overlay').style.display = 'none'; // إخفاء الـ overlay عند الإغلاق
-            document.body.style.overflow = ''; // إعادة التمرير
+        willClose: () => {
+            document.body.style.overflow = ''; 
         },
         showClass: {
             popup: 'animate__animated animate__fadeIn'
