@@ -240,13 +240,13 @@
         }
 
         .main-container {
-            max-width: 1400px;
-            margin: 120px auto 0;
-            padding: 0 40px;
-            display: flex;
-            gap: 40px;
-            position: relative;
-        }
+    max-width: 1400px;
+    margin: 120px auto 0;
+    padding: 0 40px;
+    display: flex;
+    gap: 40px;
+    position: relative;
+}
 
         .filters {
             width: 300px;
@@ -437,74 +437,94 @@
             box-shadow: 0 0 15px rgba(255, 20, 147, 0.5);
         }
 
-        .cart-drawer {
-            position: fixed;
-            top: 0;
-            right: -400px;
-            width: 400px;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            padding: 40px;
-            transition: right 0.4s ease;
-            z-index: 2000;
-            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
-        }
+       .cart-drawer {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    padding: 40px 20px;
+    transition: right 0.4s ease;
+    z-index: 2000;
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+    overflow-y: auto; /* تفعيل التمرير العمودي */
+    direction: rtl;
+}
 
-        .cart-drawer.active {
-            right: 0;
-        }
+.cart-drawer.active {
+    right: 0;
+}
 
-        .cart-drawer h3 {
-            font-size: 26px;
-            margin-bottom: 30px;
-            color: #00CED1;
-            text-shadow: 0 0 10px rgba(0, 206, 209, 0.5);
-        }
+.cart-drawer h3 {
+    font-size: 26px;
+    margin-bottom: 30px;
+    color: #00CED1;
+    text-shadow: 0 0 10px rgba(0, 206, 209, 0.5);
+    text-align: center;
+}
 
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            border: 1px solid #00CED1;
-            transition: all 0.3s ease;
-        }
+.cart-items-container {
+    max-height: 60vh; /* تحديد ارتفاع الحاوية للتمرير */
+    overflow-y: auto; /* تفعيل التمرير داخل قائمة المنتجات */
+    margin-bottom: 20px;
+}
 
-        .cart-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #FF1493;
-        }
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid #00CED1;
+    transition: all 0.3s ease;
+}
 
-        .cart-item span {
-            font-size: 16px;
-            color: #e0e0e0;
-        }
+.cart-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #FF1493;
+}
 
-        .cart-drawer .total {
-            font-size: 20px;
-            font-weight: 700;
-            margin-top: 30px;
-            color: #FF1493;
-            text-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
-        }
+.cart-item span {
+    font-size: 14px;
+    color: #e0e0e0;
+    flex: 1;
+    text-align: right;
+}
 
-        .cart-drawer .close-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 28px;
-            color: #00CED1;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
+.cart-item button {
+    padding: 8px 15px;
+    border-radius: 20px;
+    background: linear-gradient(45deg, #FF1493, #FF69B4);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
+}
 
-        .cart-drawer .close-btn:hover {
-            transform: rotate(180deg);
-            color: #FF1493;
-        }
+.cart-item button:hover {
+    background: linear-gradient(45deg, #FF69B4, #FF1493);
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.7);
+}
+
+.cart-total-section {
+    border-top: 2px dashed #00CED1;
+    padding-top: 20px;
+    text-align: center;
+}
+
+.cart-total-section .total {
+    font-size: 20px;
+    font-weight: 700;
+    color: #FF1493;
+    text-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
+}
 
         footer {
             text-align: center;
@@ -2311,13 +2331,14 @@
 </div>
 </div>
 
-    <div class="cart-drawer" id="cartDrawer">
-        <i class="fas fa-times close-btn" onclick="toggleCart()"></i>
-        <h3>سلة التسوق</h3>
-        <div id="cartItems"></div>
+   <div class="cart-drawer" id="cartDrawer">
+    <i class="fas fa-times close-btn" onclick="toggleCart()"></i>
+    <h3>فاتورة التسوق</h3>
+    <div class="cart-items-container" id="cartItems"></div>
+    <div class="cart-total-section">
         <div class="total" id="cartTotal">المجموع: ٠ د.ع</div>
     </div>
-
+</div>
     <footer>
         <p>© ٢٠٢٥ متجر عسل - جميع الحقوق محفوظة</p>
     </footer>
@@ -2336,27 +2357,27 @@
             updateCart();
         }
 
-        function updateCart() {
-            const cartItems = document.getElementById('cartItems');
-            const cartCount = document.getElementById('cartCount');
-            const cartTotal = document.getElementById('cartTotal');
-            cartItems.innerHTML = '';
-            let total = 0;
+       function updateCart() {
+    const cartItems = document.getElementById('cartItems');
+    const cartCount = document.getElementById('cartCount');
+    const cartTotal = document.getElementById('cartTotal');
+    cartItems.innerHTML = '';
+    let total = 0;
 
-            cart.forEach((item, index) => {
-                total += item.price;
-                const cartItem = document.createElement('div');
-                cartItem.classList.add('cart-item');
-                cartItem.innerHTML = `
-                    <span>${item.name} - ${item.price.toLocaleString()} د.ع</span>
-                    <button onclick="removeFromCart(${index})">إزالة</button>
-                `;
-                cartItems.appendChild(cartItem);
-            });
+    cart.forEach((item, index) => {
+        total += item.price;
+        const cartItem = document.createElement('div');
+        cartItem.classList.add('cart-item');
+        cartItem.innerHTML = `
+            <span>${item.name} - ${item.price.toLocaleString()} د.ع</span>
+            <button onclick="removeFromCart(${index})">إزالة</button>
+        `;
+        cartItems.appendChild(cartItem);
+    });
 
-            cartCount.textContent = cart.length;
-            cartTotal.textContent = `المجموع: ${total.toLocaleString()} د.ع`;
-        }
+    cartCount.textContent = cart.length;
+    cartTotal.textContent = `المجموع: ${total.toLocaleString()} د.ع`;
+}
 
         function removeFromCart(index) {
             cart.splice(index, 1);
