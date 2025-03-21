@@ -430,6 +430,7 @@ h1 {
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         transition: all 0.3s ease;
          gap: 10px; /* مسافة بين الأيقونة والنص */
+     
     }
 
     .category-btn:hover {
@@ -1250,8 +1251,8 @@ footer {
       <div class="categories">
     <!-- زر أسعار بنمط الكروب -->
      <button class="new-category-btn" onclick="openLCDPage()"><i class="fas fa-list"></i> أسعار بنمط الكروب</button>
-            <button class="category-btn tools-btn" onclick="openToolsPage()"><i class="fas fa-tools"></i> عدد الصيانة</button>
-            <button class="category-btn" onclick="openSimilarites(this)"><i class="fas fa-sync"></i> توافقات</button>
+          <button class="category-btn tools-btn" onclick="openToolsPage()"><i class="fas fa-shopping-cart"></i> متجر عسل </button>
+      <button class="category-btn" onclick="window.location.href='similarites.html'"><i class="fas fa-sync"></i> توافقات قطع الغيار  </button>
            <div class="slider-container">
     <button class="slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
     <div class="slider" id="slider">
@@ -1460,7 +1461,6 @@ function filterCategory(category) {
 
         
         const dropboxMainFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file1" + "?t=" + new Date().getTime();
-        const dropboxSimilaritesFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file2" + "?t=" + new Date().getTime();
         let database = {};
         let currentCategory = null;
 
@@ -1474,12 +1474,6 @@ function filterCategory(category) {
             database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BACK"] || {}); // ✅ تحميل البيانات من شيت "BACK"
            database.CAMERA = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CAMERA"] || {}); // ✅ تحميل البيانات من شيت "BA
 
-            const similaritesResponse = await fetch(dropboxSimilaritesFile);
-            const similaritesBuffer = await similaritesResponse.arrayBuffer();
-            const similaritesWorkbook = XLSX.read(similaritesBuffer, { type: "array" });
-            database.SIMILARITES = XLSX.utils.sheet_to_json(similaritesWorkbook.Sheets["SIMILARITES"] || {}).map(item => ({
-                Item: item.Item || "Unnamed"
-            }));
         }
         
         
@@ -1510,76 +1504,6 @@ function filterCategory(category) {
 
 
 
-async function openSimilarites(button) {
-    if (localStorage.getItem("similaritesAccess") === "granted") {
-        filterCategory("SIMILARITES", button);
-    } else {
-        const { value: password } = await Swal.fire({
-    title: 'دخول محمي',
-    html: '<p style="color: #dcdcdc;">يرجى إدخال كلمة المرور للوصول إلى هذا القسم</p>',
-    iconHtml: '<i class="fas fa-lock"></i>',
-    input: 'password',
-    inputPlaceholder: 'أدخل كلمة المرور هنا',
-    showCancelButton: true,
-    confirmButtonText: 'تأكيد',
-    cancelButtonText: 'إلغاء',
-    backdrop: 'rgba(0, 0, 0, 0.5)', // تعتيم الخلفية
-    allowOutsideClick: false, // منع الإغلاق بالنقر خارج النافذة
-    allowEscapeKey: true, // السماح بالإغلاق بزر ESC
-    allowEnterKey: false, // تعطيل زر Enter لتأكيد المدخل
-backdrop: false, // تثبيت الواجهة
-
-    customClass: {
-        popup: 'swal2-popup',
-        title: 'swal2-title',
-        input: 'swal2-input',
-        confirmButton: 'swal2-confirm',
-        cancelButton: 'swal2-cancel'
-    },
-    showClass: {
-        popup: 'animate__animated animate__fadeInUp'
-    },
-    hideClass: {
-        popup: 'animate__animated animate__fadeOutDown'
-    },
-    didOpen: () => {
-        // إزالة التركيز التلقائي على الحقل
-        const inputField = Swal.getInput();
-        if (inputField) {
-            inputField.blur(); // إزالة التركيز
-        }
-    },
-    inputValidator: (value) => {
-        if (!value) {
-            return 'يرجى إدخال كلمة المرور';
-        }
-    }
-});
-        if (password === "1990") {
-            localStorage.setItem("similaritesAccess", "granted");
-            filterCategory("SIMILARITES", button);
-        } else if (password) {
-            // تطبيق تأثير الاهتزاز
-            const swalPopup = document.querySelector('.swal2-popup');
-            swalPopup.style.animation = 'shake 0.5s';
-            swalPopup.addEventListener('animationend', () => {
-                swalPopup.style.animation = ''; // إزالة الأنيميشن بعد اكتماله
-            });
-            await Swal.fire({
-                icon: 'error',
-                title: 'خطأ',
-                text: 'كلمة المرور خاطئة!',
-backdrop: false, // تثبيت الواجهة
-
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-        }
-    }
-}
 
 
         function normalizeString(str) {
