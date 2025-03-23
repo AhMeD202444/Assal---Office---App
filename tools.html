@@ -578,19 +578,29 @@
     text-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
 }
 
-        footer {
-            text-align: center;
-            padding: 40px;
-            background: rgba(0, 0, 0, 0.9);
-            margin-top: 80px;
-            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.5);
-        }
+       footer {
+    position: fixed; /* تثبيت الفوتر أسفل الصفحة */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    padding: 20px; /* تقليل الحجم */
+    background: rgba(0, 0, 0, 0.95); /* جعل الخلفية أكثر وضوحًا */
+    box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.7); /* زيادة التباين */
+    z-index: 9999; /* جعله فوق جميع العناصر */
+}
 
-        footer p {
-            font-size: 16px;
-            color: #4A8296;
-            text-shadow: 0 0 10px rgba(0, 206, 209, 0.3);
-        }
+footer p {
+    font-size: 14px; /* تقليل الخط ليبدو أنيقًا */
+    color: #5fc3e4; /* لون أزرق أكثر وضوحًا */
+    font-weight: bold; /* جعله أكثر وضوحًا */
+    text-shadow: 0 0 8px rgba(0, 206, 209, 0.5); /* تحسين التأثير */
+}
+
+/* التأكد من عدم تغطية المحتوى بسبب الفوتر المثبت */
+body {
+    padding-bottom: 60px; /* يضمن عدم اختفاء المحتوى خلف الفوتر */
+}
 
         @media (max-width: 1024px) {
             .main-container {
