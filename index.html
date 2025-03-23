@@ -1418,18 +1418,23 @@ function triggerAnimation() {
       
       
       
-  let showPromoPopup = true; // 🔥 غيّر إلى false لإخفاء النافذة
+  let showPromoPopup = true; // 🔥 غيّر إلى false إذا لا تريد إظهار النافذة نهائيًا
+let promoAlreadyShown = sessionStorage.getItem('promoShown') === 'true';
 
-// ✅ تشغيل Overlay عند تحميل الصفحة مع حركة دخول
 window.onload = function() { 
-    setTimeout(() => {
-        document.getElementById('overlay').style.display = 'block';
-        let popup = document.getElementById('promoPopup');
-        popup.style.display = 'flex';
-        popup.style.animation = 'slideDown 0.6s ease-out forwards';
-    }, 500);
-    triggerAnimation(); // تشغيل الإشعارات
+    if (showPromoPopup && !promoAlreadyShown) { // ✅ شرط التحكم في الظهور
+        setTimeout(() => {
+            document.getElementById('overlay').style.display = 'block';
+            let popup = document.getElementById('promoPopup');
+            popup.style.display = 'flex';
+            popup.style.animation = 'slideDown 0.6s ease-out forwards';
+        }, 500);
+        triggerAnimation(); // تشغيل الإشعارات
+
+        sessionStorage.setItem('promoShown', 'true'); // تخزين الحالة لمنع الظهور المتكرر
+    }
 };
+
 
 
 // ✅ حركة الخروج بنفس مسار النزول (لأعلى)
