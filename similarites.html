@@ -9,7 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -22,22 +22,120 @@
             font-family: 'Cairo', sans-serif;
             background: linear-gradient(135deg, #1E2A44, #0F172A);
             color: #E2E8F0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
             min-height: 100vh;
-            padding: 2vh 0;
             background-size: 400% 400%;
             animation: gradientAnimation 10s ease infinite;
-            direction: rtl;
             overflow-x: hidden;
+            position: relative;
+            direction: rtl;
         }
 
         @keyframes gradientAnimation {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
+        }
+
+        .navbar {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px 15px;
+            border-radius: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 80%;
+            max-width: 800px;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .navbar .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #4A8296;
+            text-shadow: 0 0 8px rgba(0, 206, 209, 0.5);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .navbar .nav-buttons {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+        }
+
+        .navbar .notes-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: rgba(58, 96, 115, 0.1);
+            border: 2px solid #4A8296;
+            color: #e0e0e0;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 8px rgba(0, 206, 209, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .navbar .notes-btn i {
+            font-size: 16px;
+            margin-right: 5px;
+        }
+
+        .navbar .notes-btn span {
+            position: absolute;
+            top: -8px;
+            right: -12px;
+            background: #FF1493;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 0 8px rgba(255, 20, 147, 0.5);
+        }
+
+        .navbar .notes-btn:hover {
+            background: linear-gradient(45deg, #4A8296, #FF1493);
+            border: none;
+            transform: scale(1.05);
+            box-shadow: 0 0 12px rgba(255, 20, 147, 0.5);
+        }
+
+        .navbar .main-menu-btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #4A8296, #FF1493);
+            border: none;
+            color: #fff;
+            font-size: 14px;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 8px rgba(0, 206, 209, 0.3);
+        }
+
+        .navbar .main-menu-btn:hover {
+            background: linear-gradient(45deg, #FF1493, #4A8296);
+            transform: scale(1.05);
+            box-shadow: 0 0 12px rgba(255, 20, 147, 0.5);
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 120px auto 0;
+            padding: 0 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            min-height: 800px;
         }
 
         .container {
@@ -47,7 +145,6 @@
             text-align: center;
             width: 90vw;
             max-width: 800px;
-            margin: 1.5vh auto;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
@@ -58,7 +155,6 @@
             font-size: clamp(24px, 5vw, 36px);
             color: #D4AF37;
             text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-            margin-bottom: 1vh;
             font-family: 'Tajawal', sans-serif;
         }
 
@@ -123,27 +219,171 @@
             box-shadow: 0 0 15px rgba(163, 191, 250, 0.5);
         }
 
-        .home-btn {
-            padding: 12px 30px;
-            border-radius: 25px;
-            background: linear-gradient(45deg, #D4AF37, #A3BFFA);
+        .results-container {
+            background: rgba(30, 42, 68, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90vw;
+            max-width: 800px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 300px;
+            margin-top: 10px;
+        }
+
+        .products-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            gap: 20px;
+        }
+
+        .result-card {
+            background: #1A202C;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            width: clamp(300px, 40vw, 450px);
+            min-height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            transform: perspective(600px) rotateY(0deg) translateZ(10px);
+        }
+
+        .result-card:hover {
+            transform: perspective(600px) rotateY(-5deg) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .result-card img {
+            width: clamp(100px, 18vw, 120px);
+            height: clamp(100px, 18vw, 120px);
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 3px solid #D4AF37;
+            transition: transform 0.3s ease;
+        }
+
+        .result-card:hover img {
+            transform: scale(1.15);
+        }
+
+        .result-card h4 {
+            font-size: clamp(18px, 3vw, 22px);
+            margin: 10px 0;
+            color: #E2E8F0;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .result-card button {
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #D4AF37, #A3BFFA); /* لون زر البحث */
             color: #fff;
             border: none;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
+            width: auto;
+            white-space: nowrap;
             transition: all 0.3s ease;
-            margin-top: 2vh;
-            font-family: 'Tajawal', sans-serif;
         }
 
-        .home-btn:hover {
+        .result-card button:hover {
             background: linear-gradient(45deg, #A3BFFA, #D4AF37);
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(163, 191, 250, 0.5);
         }
 
-        /* تصميم النافذة المنبثقة */
+        .notes-drawer {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px 20px;
+            transition: right 0.4s ease;
+            z-index: 2000;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+            direction: rtl;
+        }
+
+        .notes-drawer.active {
+            right: 0;
+        }
+
+        .notes-drawer h3 {
+            font-size: 26px;
+            margin-bottom: 30px;
+            color: #4A8296;
+            text-shadow: 0 0 10px rgba(0, 206, 209, 0.5);
+            text-align: center;
+        }
+
+        .notes-items-container {
+            max-height: 60vh;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .notes-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid #4A8296;
+            transition: all 0.3s ease;
+        }
+
+        .notes-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #FF1493;
+        }
+
+        .notes-item span {
+            font-size: 14px;
+            color: #e0e0e0;
+            flex: 1;
+            text-align: right;
+        }
+
+        .notes-item button {
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #D4AF37, #A3BFFA); /* لون زر البحث */
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(163, 191, 250, 0.5);
+        }
+
+        .notes-item button:hover {
+            background: linear-gradient(45deg, #A3BFFA, #D4AF37);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(163, 191, 250, 0.7);
+        }
+
         .swal2-popup {
             background: linear-gradient(135deg, #1E2A44, #2D3E66);
             border-radius: 20px;
@@ -197,93 +437,36 @@
             color: #fff;
         }
 
-        /* تخصيص نافذة النتائج */
-        .swal2-results {
-            width: 95vw !important;
-            height: 90vh !important;
-            position: relative;
-        }
-
-        .results-content {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding: 2vw;
-            height: calc(100% - 60px);
-            overflow-y: auto;
-        }
-
-        .result-card {
-            background: linear-gradient(135deg, #2D3E66, #4A5E8C);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            width: clamp(250px, 35vw, 400px);
-            height: clamp(280px, 40vw, 350px);
-            margin: 1.5vw;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s ease;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); /* ظل أساسي للبروز */
-            transform: perspective(600px) rotateY(0deg) translateZ(10px); /* بروز خفيف */
-        }
-
-        .result-card:hover {
-            transform: perspective(600px) rotateY(-5deg) scale(1.05); /* تأثير الضغط من الكود الأول */
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5); /* ظل أعمق عند التمرير */
-        }
-
-        .result-card img {
-            width: clamp(100px, 18vw, 120px);
-            height: clamp(100px, 18vw, 120px);
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 3px solid #D4AF37;
-            transition: transform 0.3s ease;
-        }
-
-        .result-card:hover img {
-            transform: scale(1.15); /* تكبير الصورة عند التمرير كما في الكود الأول */
-        }
-
-        .result-card h4 {
-            font-size: clamp(18px, 3vw, 22px);
-            margin: 0;
-            color: #E2E8F0;
-            font-family: 'Tajawal', sans-serif;
-            font-weight: 700;
-        }
-
-        /* تصميم زر X الأنيق */
-        .swal2-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 30px;
-            height: 30px;
-            background: #E53E3E;
-            border-radius: 50%;
+        /* زر الرجوع إلى أعلى القائمة */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 70px; /* فوق الفوتر */
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+         background: linear-gradient(45deg, #9B2C2C, #E53E3E);
             color: #fff;
-            font-size: 18px;
-            line-height: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
             border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(163, 191, 250, 0.5);
+            display: none; /* مخفي افتراضيًا */
+            z-index: 1000;
         }
 
-        .swal2-close:hover {
-            background: #9B2C2C;
+        .scroll-to-top:hover {
+           background: linear-gradient(45deg, #E53E3E, #9B2C2C);
             transform: scale(1.1);
-            box-shadow: 0 0 10px rgba(229, 62, 62, 0.5);
+            box-shadow: 0 0 15px rgba(163, 191, 250, 0.7);
         }
 
-        /* تصميم الفوتر */
+        .scroll-to-top.visible {
+            display: block;
+        }
+
         footer {
             position: fixed;
             bottom: 10px;
@@ -297,8 +480,17 @@
             border-top: 1px solid rgba(212, 175, 55, 0.3);
         }
 
-        @media (max-width: 600px) {
-            .container {
+        @media (max-width: 768px) {
+            .navbar {
+                width: 95%;
+            }
+
+            .main-container {
+                margin-top: 100px;
+                padding: 0 20px;
+            }
+
+            .container, .results-container {
                 width: 95vw;
                 padding: 15px;
             }
@@ -312,57 +504,65 @@
                 width: 180px;
             }
 
-            .search-container input:focus {
-                width: 200px;
-            }
-
-            .swal2-popup {
-                width: 90vw !important;
-            }
-
-            .swal2-results {
-                width: 95vw !important;
-                height: 85vh !important;
-            }
-
-            .swal2-input {
-                width: 250px;
+            .notes-drawer {
+                width: 100%;
+                right: -100%;
             }
 
             .result-card {
-                width: clamp(200px, 45vw, 300px);
-                height: clamp(250px, 55vw, 300px);
+                width: clamp(250px, 80vw, 350px);
             }
 
-            .result-card img {
-                width: clamp(80px, 20vw, 100px);
-                height: clamp(80px, 20vw, 100px);
-            }
-
-            footer {
+            .scroll-to-top {
+                right: 10px;
+                padding: 8px 15px;
                 font-size: 12px;
-                padding: 8px 0;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>توافقات</h1>
-        <div class="search-container">
-            <div class="search-inner">
-                <input type="text" id="searchInput" placeholder="ابحث عن توافقات...">
-                <button onclick="searchItems()"><i class="fas fa-search"></i> بحث</button>
+    <div class="navbar">
+        <div class="logo">توافقات</div>
+        <div class="nav-buttons">
+            <div class="main-menu-btn" onclick="toggleMainMenu()">القائمة الرئيسية</div>
+            <div class="notes-btn" onclick="toggleNotes()">
+                <i class="fas fa-sticky-note"></i>
+                <span id="notesCount">0</span>
             </div>
         </div>
-        <div id="results" class="results-container"></div>
-        <button class="home-btn" onclick="window.location.href='index.html'">القائمة الرئيسية</button>
     </div>
+
+    <div class="main-container">
+        <div class="container">
+            <h1>توافقات</h1>
+            <div class="search-container">
+                <div class="search-inner">
+                    <input type="text" id="searchInput" placeholder="ابحث عن توافقات...">
+                    <button onclick="searchItems()"><i class="fas fa-search"></i> بحث</button>
+                </div>
+            </div>
+        </div>
+        <div class="results-container">
+            <div class="products-grid" id="results"></div>
+        </div>
+    </div>
+
+    <div class="notes-drawer" id="notesDrawer">
+        <i class="fas fa-times close-btn" onclick="toggleNotes()"></i>
+        <h3>سلة الملاحظات</h3>
+        <div class="notes-items-container" id="notesItems"></div>
+    </div>
+
+    <!-- زر الرجوع إلى أعلى القائمة -->
+    <button class="scroll-to-top" onclick="scrollToTop()">الرجوع إلى أعلى القائمة</button>
+
     <footer>جميع الحقوق محفوظة - مكتب عسل</footer>
 
     <script>
         const dropboxSimilaritesFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file2" + "?t=" + new Date().getTime();
         let database = {};
+        let notes = [];
 
         async function loadSimilaritesData() {
             const response = await fetch(dropboxSimilaritesFile);
@@ -455,21 +655,66 @@
                 return;
             }
 
-            const resultsHtml = results.map(item => `
+            const resultsContainer = document.getElementById("results");
+            resultsContainer.innerHTML = results.map(item => `
                 <div class="result-card">
                     <img src="images/default.png" alt="Item Image">
                     <h4>${item["Item"]}</h4>
+                    <button onclick="addToNotes('${item["Item"]}')">أضف إلى الملاحظات</button>
                 </div>
             `).join('');
 
-            Swal.fire({
-                title: 'التوافقات',
-                html: `<div class="results-content">${resultsHtml}</div>`,
-                showConfirmButton: false,
-                showCloseButton: true,
-                customClass: {
-                    popup: 'swal2-results'
-                }
+            // إظهار زر "الرجوع إلى أعلى" إذا كانت النتائج كثيرة
+            const scrollButton = document.querySelector('.scroll-to-top');
+            if (results.length > 5) { // يظهر إذا كانت النتائج أكثر من 5 على سبيل المثال
+                scrollButton.classList.add('visible');
+            } else {
+                scrollButton.classList.remove('visible');
+            }
+        }
+
+        function toggleNotes() {
+            const notesDrawer = document.getElementById('notesDrawer');
+            notesDrawer.classList.toggle('active');
+        }
+
+        function addToNotes(itemName) {
+            notes.push({ name: itemName });
+            updateNotes();
+        }
+
+        function updateNotes() {
+            const notesItems = document.getElementById('notesItems');
+            const notesCount = document.getElementById('notesCount');
+            notesItems.innerHTML = '';
+
+            notes.forEach((item, index) => {
+                const notesItem = document.createElement('div');
+                notesItem.classList.add('notes-item');
+                notesItem.innerHTML = `
+                    <span>${item.name}</span>
+                    <button onclick="removeFromNotes(${index})">إزالة</button>
+                `;
+                notesItems.appendChild(notesItem);
+            });
+
+            notesCount.textContent = notes.length;
+        }
+
+        function removeFromNotes(index) {
+            notes.splice(index, 1);
+            updateNotes();
+        }
+
+        function toggleMainMenu() {
+            window.location.href = "index.html";
+        }
+
+        // دالة الرجوع إلى أعلى الواجهة
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
             });
         }
     </script>
