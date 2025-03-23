@@ -341,49 +341,66 @@
             margin-bottom: 20px;
         }
 
-        .notes-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            border: 1px solid #4A8296;
-            transition: all 0.3s ease;
-        }
+   .notes-item {
+    display: flex;
+    justify-content: space-between; /* توزيع العناصر */
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid #4A8296;
+    transition: all 0.3s ease;
+    width: 100%; /* لضمان شغل العرض الكامل */
+}
 
-        .notes-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #FF1493;
-        }
+.notes-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #FF1493;
+}
 
-        .notes-item span {
-            font-size: 14px;
-            color: #e0e0e0;
-            flex: 1;
-            text-align: right;
-        }
+.notes-item span {
+    font-size: 14px;
+    color: #e0e0e0;
+    text-align: center; /* توسيط النص */
+    flex: 1; /* شغل المساحة المتبقية */
+    padding: 0 10px; /* مسافة جانبية */
+}
 
-        .notes-item button {
-            padding: 8px 15px;
-            border-radius: 20px;
-            background: linear-gradient(45deg, #D4AF37, #A3BFFA); /* لون زر البحث */
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(163, 191, 250, 0.5);
-        }
+.notes-item button {
+    padding: 8px 15px;
+    border-radius: 10px; /* شكل مربع */
+    background: linear-gradient(45deg, #8B0000, #DC143C); /* أحمر غامق */
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
+}
 
-        .notes-item button:hover {
-            background: linear-gradient(45deg, #A3BFFA, #D4AF37);
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(163, 191, 250, 0.7);
-        }
+.notes-item button:hover {
+    background: linear-gradient(45deg, #DC143C, #8B0000);
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(220, 20, 60, 0.7);
+}
 
+/* توافق الشاشات الصغيرة */
+@media (max-width: 768px) {
+    .notes-item {
+        padding: 10px;
+    }
+
+    .notes-item button {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+
+    .notes-item span {
+        font-size: 13px;
+    }
+}
         .swal2-popup {
             background: linear-gradient(135deg, #1E2A44, #2D3E66);
             border-radius: 20px;
