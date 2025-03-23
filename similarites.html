@@ -6,6 +6,15 @@
     <title>توافقات - Assal Office</title>
 
     <!-- المكتبات المطلوبة -->
+    
+    <!-- إضافة Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<!-- إضافة jQuery (مطلوب لـ Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- إضافة Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -158,60 +167,73 @@
             font-family: 'Tajawal', sans-serif;
         }
 
-        .category-container {
-            width: 100%;
-            max-width: 450px;
-            margin: 0 auto 25px; /* تمركز أفقي مع مسافة سفلية */
-            position: relative;
-            text-align: center;
-        }
+      .category-container {
+    width: 100%;
+    max-width: 600px; /* زيادة العرض ليصبح أكبر من 450px */
+    margin: 0 auto 25px;
+    position: relative;
+    text-align: center;
+}
 
-        .category-container select#categorySelect {
-            width: 100%;
-            padding: 14px 20px;
-            border-radius: 30px;
-            background: linear-gradient(45deg, rgba(30, 42, 68, 0.95), rgba(58, 96, 115, 0.3));
-            border: 2px solid #D4AF37;
-            color: #E2E8F0;
-            font-size: 16px;
-            font-family: 'Tajawal', sans-serif; /* خط أنيق للقائمة */
-            font-weight: 600;
-            outline: none;
-            transition: all 0.3s ease;
-            appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg fill="%23D4AF37" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-            background-repeat: no-repeat;
-            background-position: left 15px center;
-            padding-left: 45px;
-            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
-            cursor: pointer;
-        }
+.category-container select#categorySelect {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 30px;
+    background: linear-gradient(45deg, rgba(30, 42, 68, 0.95), rgba(58, 96, 115, 0.3));
+    border: 2px solid #D4AF37;
+    color: #E2E8F0;
+    font-size: 16px;
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 600;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
+    cursor: pointer;
+}
 
-        .category-container select#categorySelect:hover {
-            border-color: #A3BFFA;
-            box-shadow: 0 5px 20px rgba(163, 191, 250, 0.4);
-        }
+/* تحسين مظهر Select2 */
+.select2-container .select2-selection--single {
+    height: 50px;
+    padding: 10px;
+    border-radius: 30px;
+    background: linear-gradient(45deg, rgba(30, 42, 68, 0.95), rgba(58, 96, 115, 0.3));
+    border: 2px solid #D4AF37;
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
+}
 
-        .category-container select#categorySelect:focus {
-            border-color: #A3BFFA;
-            box-shadow: 0 5px 20px rgba(163, 191, 250, 0.6);
-            transform: scale(1.02);
-        }
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #E2E8F0;
+    font-size: 16px;
+    font-family: 'Tajawal', sans-serif;
+    line-height: 30px;
+    text-align: right;
+}
 
-        .category-container select#categorySelect option {
-            background: #1E2A44;
-            color: #E2E8F0;
-            padding: 12px 20px;
-            font-family: 'Cairo', sans-serif; /* خط أنيق للخيارات */
-            font-size: 15px;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.3); /* خط فاصل أنيق */
-            transition: background 0.3s ease;
-        }
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 50px;
+    width: 30px;
+    left: 10px; /* لأن النص من اليمين إلى اليسار (rtl) */
+}
 
-        .category-container select#categorySelect option:hover {
-            background: linear-gradient(45deg, #4A8296, #D4AF37);
-        }
+.select2-dropdown {
+    background: #1E2A44;
+    border: 2px solid #D4AF37;
+    border-radius: 15px;
+    font-family: 'Cairo', sans-serif;
+    color: #E2E8F0;
+}
 
+.select2-results__option {
+    padding: 12px 20px;
+    font-size: 15px;
+    text-align: right;
+    transition: background 0.3s ease;
+}
+
+.select2-results__option--highlighted {
+    background: linear-gradient(45deg, #4A8296, #D4AF37);
+    color: #fff;
+}
         .search-container {
             width: 300px;
             height: 300px;
@@ -612,30 +634,30 @@
         <div class="container">
             <h1>توافقات</h1>
             <div class="category-container">
-                <select id="categorySelect" onchange="filterByCategory()">
-                    <option value="" disabled selected>اختر الصنف</option>
-                    <option value="1">توافقات الشاشات</option>
-                    <option value="2">توافقات البطاريات</option>
-                    <option value="3">توافقات جرس النغمات</option>
-                    <option value="4">توافقات سماعة الاتصال</option>
-                    <option value="5">توافقات الكاميرات</option>
-                    <option value="6">توافقات عدسة الكاميرا</option>
-                    <option value="7">توافقات بورد الشحن</option>
-                    <option value="8">توافقات قواعد الشحن</option>
-                    <option value="9">توافقات كونكتر الشاشة</option>
-                    <option value="10">توافقات البصمات</option>
-                    <option value="11">توافقات شريط الهيتفون</option>
-                    <option value="12">توافقات شريط البور والصوت</option>
-                    <option value="13">توافقات الگلاسات</option>
-                    <option value="14">توافقات شريط الهوم</option>
-                    <option value="15">توافقات الآيسيات</option>
-                    <option value="16">توافقات فلاتات الشاشة</option>
-                    <option value="17">توافقات هولدر السيم كارت</option>
-                    <option value="18">توافقات البصمات تحت الشاشة</option>
-                    <option value="19">توافقات كيبلات الإشارة</option>
-                    <option value="20">توافقات منوعة</option>
-                </select>
-            </div>
+    <select id="categorySelect" onchange="filterByCategory()">
+        <option value="" disabled selected>اختر الصنف</option>
+        <option value="1">توافقات الشاشات</option>
+        <option value="2">توافقات البطاريات</option>
+        <option value="3">توافقات جرس النغمات</option>
+        <option value="4">توافقات سماعة الاتصال</option>
+        <option value="5">توافقات الكاميرات</option>
+        <option value="6">توافقات عدسة الكاميرا</option>
+        <option value="7">توافقات بورد الشحن</option>
+        <option value="8">توافقات قواعد الشحن</option>
+        <option value="9">توافقات كونكتر الشاشة</option>
+        <option value="10">توافقات البصمات</option>
+        <option value="11">توافقات شريط الهيتفون</option>
+        <option value="12">توافقات شريط البور والصوت</option>
+        <option value="13">توافقات الگلاسات</option>
+        <option value="14">توافقات شريط الهوم</option>
+        <option value="15">توافقات الآيسيات</option>
+        <option value="16">توافقات فلاتات الشاشة</option>
+        <option value="17">توافقات هولدر السيم كارت</option>
+        <option value="18">توافقات البصمات تحت الشاشة</option>
+        <option value="19">توافقات كيبلات الإشارة</option>
+        <option value="20">توافقات منوعة</option>
+    </select>
+</div>
             <div class="search-container">
                 <div class="search-inner">
                     <input type="text" id="searchInput" placeholder="ابحث عن توافقات...">
@@ -662,6 +684,20 @@
         const dropboxSimilaritesFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file2" + "?t=" + new Date().getTime();
         let database = {};
         let notes = [];
+        
+        
+        
+        $(document).ready(function() {
+    $('#categorySelect').select2({
+        dir: "rtl", // لدعم اللغة العربية
+        placeholder: "اختر الصنف",
+        allowClear: true,
+        width: '100%'
+    });
+});
+        
+        
+        
 
         async function loadSimilaritesData() {
             const response = await fetch(dropboxSimilaritesFile);
