@@ -32,7 +32,6 @@
         }
         
         
-        
      .custom-dropdown.neon-enhanced {
     position: relative;
     width: 100%;
@@ -190,54 +189,106 @@
 }
         
 
-        .navbar {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 15px 30px;
-            border-radius: 50px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 90%;
-            max-width: 1200px;
-            z-index: 1000;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
-        }
+ .navbar {
+    position: fixed;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    padding: 10px 15px;
+    border-radius: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 80%;
+    max-width: 800px;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
 
-        .navbar .logo {
-            font-size: 28px;
-            font-weight: 700;
-            color: #4A8296;
-            text-shadow: 0 0 10px rgba(0, 206, 209, 0.5);
-        }
+.navbar .logo {
+    font-size: 22px;
+    font-weight: 700;
+    color: #4A8296;
+    text-shadow: 0 0 8px rgba(0, 206, 209, 0.5);
+}
 
-        .navbar .cart-icon {
-            font-size: 24px;
-            color: #4A8296;
-            cursor: pointer;
-            position: relative;
-            transition: transform 0.3s ease;
-        }
+.navbar .nav-buttons {
+    display: flex;
+    gap: 18px; /* مسافة صغيرة وأنيقة بين الزرين */
+    align-items: center;
+}
 
-        .navbar .cart-icon:hover {
-            transform: scale(1.2);
-        }
+.navbar .cart-btn {
+    padding: 8px 15px;
+    border-radius: 20px;
+    background: rgba(58, 96, 115, 0.1);
+    border: 2px solid #4A8296;
+    color: #e0e0e0;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 8px rgba(0, 206, 209, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
 
-        .navbar .cart-icon span {
-            position: absolute;
-            top: -10px;
-            right: -15px;
-            background: #FF1493;
-            border-radius: 50%;
-            padding: 5px 10px;
-            font-size: 12px;
-            font-weight: 700;
-            color: #fff;
-            box-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
-        }
+.navbar .cart-btn i {
+    font-size: 16px;
+    margin-right: 5px;
+}
+
+.navbar .cart-btn span {
+    position: absolute;
+    top: -8px;
+    right: -12px;
+    background: #FF1493;
+    border-radius: 50%;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    box-shadow: 0 0 8px rgba(255, 20, 147, 0.5);
+}
+
+.navbar .cart-btn:hover {
+    background: linear-gradient(45deg, #4A8296, #FF1493);
+    border: none;
+    transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(255, 20, 147, 0.5);
+}
+
+.navbar .cart-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.7);
+}
+
+.navbar .main-menu-btn {
+    padding: 8px 15px;
+    border-radius: 20px;
+    background: linear-gradient(45deg, #4A8296, #FF1493);
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Orbitron', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 8px rgba(0, 206, 209, 0.3);
+}
+
+.navbar .main-menu-btn:hover {
+    background: linear-gradient(45deg, #FF1493, #4A8296);
+    transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(255, 20, 147, 0.5);
+}
+
+.navbar .main-menu-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.7);
+}
+
 
         .main-container {
     max-width: 1400px;
@@ -630,13 +681,19 @@
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <div class="logo">متجر عسل</div>
-        <div class="cart-icon" onclick="toggleCart()">
+  
+  
+  <div class="navbar">
+    <div class="logo">متجر عسل</div>
+    <div class="nav-buttons">
+        <div class="main-menu-btn" onclick="toggleMainMenu()">القائمة الرئيسية</div>
+        <div class="cart-btn" onclick="toggleCart()">
             <i class="fas fa-shopping-cart"></i>
             <span id="cartCount">0</span>
         </div>
     </div>
+</div>
+
 
     <div class="main-container">
       
@@ -2438,6 +2495,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 });
 
+
+
+function toggleMainMenu() {
+    window.location.href = "index.html";
+}
         
 function filterProducts(category) {
     currentFilter = category;
