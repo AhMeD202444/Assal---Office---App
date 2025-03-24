@@ -751,7 +751,7 @@ h1 {
 .results {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px; /* زيادة المسافة بين الكروت */
     margin-top: 10px;
     max-height: 500px;
     overflow-y: auto;
@@ -765,43 +765,41 @@ h1 {
 
 .result-card {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column; /* عمودي: صورة، اسم، سعر */
+    align-items: center; /* توسيط العناصر */
+    justify-content: center;
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(50, 50, 50, 0.3));
     border-radius: 15px;
-    padding: 10px;
+    padding: 20px; /* زيادة الحشوة لارتفاع أكبر */
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
     cursor: pointer;
     width: 90%;
-    max-width: 600px;
+    max-width: 450px; /* زيادة العرض الأقصى شوية */
     min-width: 250px;
     margin: 0 auto;
     position: relative;
     overflow: hidden;
+    min-height: 180px; /* ارتفاع أدنى لاستيعاب التفاصيل */
 }
 
 .result-card:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-8px) scale(1.02); /* تأثير التمرير */
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(70, 130, 180, 0.5);
     background: linear-gradient(135deg, rgba(20, 20, 20, 0.6), rgba(70, 130, 180, 0.2));
 }
 
 .result-card:active {
-    transform: scale(0.97);
+    transform: scale(0.97); /* تأثير الضغط */
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(50, 50, 50, 0.4));
 }
 
 .result-card img {
-    width: 15vw;
-    height: 15vw;
-    max-width: 80px;
-    max-height: 80px;
-    min-width: 50px;
-    min-height: 50px;
+    width: clamp(70px, 18vw, 120px); /* زيادة حجم الصورة */
+    height: clamp(70px, 18vw, 120px);
     border-radius: 50%;
-    margin-right: 10px;
+    margin-bottom: 15px; /* زيادة المسافة تحت الصورة */
     object-fit: cover;
     border: 2px solid rgba(255, 255, 255, 0.2);
     transition: transform 0.3s ease;
@@ -812,29 +810,28 @@ h1 {
 }
 
 .result-card h4 {
-    font-size: clamp(14px, 4vw, 18px);
+    font-size: clamp(16px, 4.5vw, 22px); /* زيادة حجم النص للوضوح */
     font-weight: bold;
     color: white;
-    margin: 0;
-    flex-grow: 1;
+    margin: 0 0 15px 0; /* زيادة المسافة تحت الاسم */
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-    text-align: center; /* توسيط النص */
+    text-align: center;
     white-space: normal; /* السماح بالنزول لسطر جديد */
-    word-wrap: break-word; /* تقسيم الكلمات الطويلة إذا لزم */
-    max-width: 60%; /* تحديد عرض أقصى للنص عشان ما يطلع على السعر */
+    word-wrap: break-word;
+    max-width: 90%;
 }
 
 .result-card p {
-    font-size: clamp(12px, 3.5vw, 16px);
+    font-size: clamp(14px, 4vw, 20px); /* زيادة حجم السعر */
     color: #fff;
     margin: 0;
-    padding: 5px 10px;
+    padding: 6px 15px; /* زيادة الحشوة للمستطيل */
     background: linear-gradient(45deg, #4682B4, #20B2AA);
     border-radius: 8px;
     font-weight: 600;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    text-align: center; /* توسيط السعر */
+    text-align: center;
 }
 
 .result-card:hover p {
@@ -843,51 +840,54 @@ h1 {
 }
 
 /* Media Queries */
-@media (max-width: 480px) {
+@media (max-width: 480px) { /* موبايل صغير */
     .result-card {
-        padding: 8px;
+        padding: 15px;
         width: 95%;
+        min-height: 160px; /* ارتفاع أدنى للموبايل */
     }
 
     .result-card img {
-        width: 12vw;
-        height: 12vw;
-        min-width: 40px;
-        min-height: 40px;
+        width: clamp(60px, 15vw, 100px);
+        height: clamp(60px, 15vw, 100px);
+        margin-bottom: 12px;
     }
 
     .result-card h4 {
-        font-size: clamp(12px, 3.5vw, 16px);
-        max-width: 55%; /* تصغير العرض للموبايل */
+        font-size: clamp(14px, 4vw, 20px);
+        margin-bottom: 12px;
     }
 
     .result-card p {
-        padding: 4px 8px;
+        padding: 5px 12px;
     }
 }
 
-@media (min-width: 481px) and (max-width: 768px) {
+@media (min-width: 481px) and (max-width: 768px) { /* تابلت */
     .result-card {
         width: 90%;
+        min-height: 170px;
     }
 
     .result-card img {
-        width: 10vw;
-        height: 10vw;
+        width: clamp(70px, 12vw, 110px);
+        height: clamp(70px, 12vw, 110px);
     }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 769px) { /* كمبيوتر */
     .result-card {
         width: 85%;
-        max-width: 600px;
+        max-width: 450px;
+        min-height: 180px;
     }
 
     .result-card img {
-        width: 60px;
-        height: 60px;
+        width: 100px;
+        height: 100px;
     }
 }
+
 
 .results-container {
     display: flex;
