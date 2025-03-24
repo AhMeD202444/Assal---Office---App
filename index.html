@@ -1261,16 +1261,16 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
 /* تنسيق زر الرجوع لأعلى */
 .scroll-to-top {
     position: fixed; /* تثبيت الزر */
-    bottom: 70px; /* رفع الزر فوق الفوتر (افترضت الفوتر ارتفاعه حوالي 50px، عدل حسب حجمه عندك) */
-    right: 20px; /* مسافة من اليمين */
-    background: linear-gradient(45deg, #8B0000, #DC143C); /* أحمر غامق مع تدرج */
+    bottom: 50px; /* المسافة من الأسفل: ارتفاع الفوتر (50px) + مسافة إضافية أنيقة (10px) */
+    right: 20px; /* المسافة من اليمين */
+    background: linear-gradient(45deg, #8B0000, #DC143C); /* لون الخلفية الحالي */
     color: #fff;
     border: none;
     border-radius: 50px; /* شكل بيضاوي */
     padding: 12px 25px;
     font-size: 16px;
     font-weight: 600;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(139, 0, 0, 0.5); /* ظل متناسق مع الأحمر */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px rgba(139, 0, 0, 0.5);
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
     opacity: 0; /* مخفي افتراضيًا */
@@ -1280,7 +1280,7 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
 
 .scroll-to-top:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(220, 20, 60, 0.7); /* ظل أحمر عند التمرير */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(220, 20, 60, 0.7);
 }
 
 .scroll-to-top:active {
@@ -1293,7 +1293,6 @@ background: linear-gradient(135deg, #004D40, #00796B, #009688);
     opacity: 1;
     visibility: visible;
 }
-
 
 footer p {
     margin: 0; /* إزالة الهوامش */
@@ -1741,19 +1740,21 @@ function scrollToTop() {
     });
 }
 
-// التحكم بظهور الزر بناءً على التمرير
+// التحكم بظهور الزر بناءً على التمرير وعدد النتائج
 function toggleScrollToTopButton() {
     const scrollBtn = document.getElementById("scrollToTopBtn");
     const scrollPosition = window.scrollY; // موقع التمرير الحالي
     const results = document.getElementById("results");
-    const hasResults = results.children.length > 0; // التحقق من وجود نتائج
+    const resultCount = results.children.length; // عدد النتائج
 
-    if (hasResults && scrollPosition > 100) { // يظهر إذا نزلت أكثر من 100px وفي نتائج
+    // الشرط: يظهر الزر فقط إذا كانت النتائج أكثر من 3 وتم التمرير لأسفل أكثر من 100 بكسل
+    if (resultCount > 3 && scrollPosition > 100) {
         scrollBtn.classList.add("show-scroll-btn");
-    } else { // يختفي إذا كنت فوق أو ما في نتائج
+    } else {
         scrollBtn.classList.remove("show-scroll-btn");
     }
 }
+
 
 // تعديل دالة displayResults
 function displayResults(results) {
@@ -1786,8 +1787,9 @@ function displayResults(results) {
     });
 
     resultsContainer.innerHTML = htmlContent;
-    toggleScrollToTopButton(); // تحديث حالة الزر بعد عرض النتائج
+    toggleScrollToTopButton(); // تحديث حالة الزر بناءً على التمرير الحالي
 }
+
 
 // ربط الزر بالنقر
 document.getElementById("scrollToTopBtn").addEventListener("click", scrollToTop);
