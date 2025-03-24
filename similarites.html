@@ -169,11 +169,12 @@
 
       .category-container {
     width: 100%;
-    max-width: 600px; /* زيادة العرض ليصبح أكبر من 450px */
+    max-width: 600px; /* تم الإبقاء على العرض الجديد */
     margin: 0 auto 25px;
     position: relative;
     text-align: center;
 }
+
 
 .category-container select#categorySelect {
     width: 100%;
@@ -191,6 +192,7 @@
     cursor: pointer;
 }
 
+
 /* تحسين مظهر Select2 */
 .select2-container .select2-selection--single {
     height: 50px;
@@ -199,6 +201,7 @@
     background: linear-gradient(45deg, rgba(30, 42, 68, 0.95), rgba(58, 96, 115, 0.3));
     border: 2px solid #D4AF37;
     box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
+    text-align: center;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__rendered {
@@ -206,34 +209,51 @@
     font-size: 16px;
     font-family: 'Tajawal', sans-serif;
     line-height: 30px;
-    text-align: right;
+    text-align: center;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__arrow {
     height: 50px;
     width: 30px;
-    left: 10px; /* لأن النص من اليمين إلى اليسار (rtl) */
+    left: 10px;
 }
 
 .select2-dropdown {
     background: #1E2A44;
     border: 2px solid #D4AF37;
-    border-radius: 15px;
+    border-radius: 30px;
     font-family: 'Cairo', sans-serif;
     color: #E2E8F0;
+    text-align: center;
+}
+
+/* تكبير ارتفاع القائمة المنسدلة لعرض 7 أصناف */
+.select2-results {
+    max-height: 300px; /* ارتفاع كافٍ لعرض 7 أصناف */
+    overflow-y: auto; /* تمرير عمودي للأصناف الزائدة */
 }
 
 .select2-results__option {
     padding: 12px 20px;
     font-size: 15px;
-    text-align: right;
+    text-align: center;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.5);
     transition: background 0.3s ease;
+}
+
+.select2-results__option:last-child {
+    border-bottom: none;
 }
 
 .select2-results__option--highlighted {
     background: linear-gradient(45deg, #4A8296, #D4AF37);
     color: #fff;
 }
+
+.select2-search--dropdown {
+    display: none;
+}
+
         .search-container {
             width: 300px;
             height: 300px;
@@ -686,16 +706,15 @@
         let notes = [];
         
         
-        
-        $(document).ready(function() {
+       $(document).ready(function() {
     $('#categorySelect').select2({
         dir: "rtl", // لدعم اللغة العربية
         placeholder: "اختر الصنف",
         allowClear: true,
-        width: '100%'
+        width: '100%',
+        minimumResultsForSearch: Infinity // إخفاء البحث داخل القائمة
     });
 });
-        
         
         
 
