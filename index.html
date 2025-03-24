@@ -748,20 +748,106 @@ h1 {
 }
 
 
-        
 .results {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px;
-   margin-top: 10px; /* المسافة العلوية 10px */
-    max-height: 500px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+    max-height: 500px;
     overflow-y: auto;
     scroll-behavior: smooth;
-    border-radius: 10px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
+
+.result-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(50, 50, 50, 0.3)); /* تدرج لوني أنيق */
+    border-radius: 15px;
+    padding: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.1); /* ظل بارز */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    cursor: pointer;
+    width: 100%;
+    max-width: 450px; /* زيادة العرض شوية لأناقة أكثر */
+    margin: 0 auto;
+    position: relative; /* لإضافة تأثيرات إضافية */
+    overflow: hidden; /* لمنع التأثيرات من التجاوز */
+}
+
+/* تأثير عند التمرير */
+.result-card:hover {
+    transform: translateY(-8px) scale(1.02); /* حركة للأعلى مع تكبير خفيف */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(70, 130, 180, 0.5); /* ظل ملون */
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.6), rgba(70, 130, 180, 0.2)); /* تغيير خلفية */
+}
+
+/* تأثير عند الضغط */
+.result-card:active {
+    transform: scale(0.97); /* تصغير خفيف */
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(50, 50, 50, 0.4));
+}
+
+/* الصورة */
+.result-card img {
+    width: 60px; /* حجم مناسب */
+    height: 60px;
+    border-radius: 50%;
+    margin-right: 15px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.2); /* إطار خفيف */
+    transition: transform 0.3s ease;
+}
+
+.result-card:hover img {
+    transform: rotate(10deg) scale(1.1); /* دوران وتكبير للصورة */
+}
+
+/* اسم العنصر */
+.result-card h4 {
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    margin: 0;
+    flex-grow: 1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* ظل خفيف للنص */
+}
+
+/* السعر داخل مستطيل */
+.result-card p {
+    font-size: 14px;
+    color: #fff;
+    margin: 0;
+    padding: 5px 12px;
+    background: linear-gradient(45deg, #4682B4, #20B2AA); /* مستطيل أزرق مع تدرج */
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.result-card:hover p {
+    transform: scale(1.05); /* تكبير خفيف للمستطيل */
+    box-shadow: 0 4px 10px rgba(70, 130, 180, 0.6); /* ظل ملون */
+}
+
+/* تأثير نبض خفيف */
+@keyframes subtlePulse {
+    0% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4); }
+    50% { box-shadow: 0 5px 20px rgba(70, 130, 180, 0.5); }
+    100% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4); }
+}
+
+.result-card {
+    animation: subtlePulse 2s infinite ease-in-out; /* نبض خفيف مستمر */
+}
+
 
 .results-container {
     display: flex;
@@ -775,57 +861,6 @@ h1 {
     background: rgba(0, 0, 0, 0.2);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
-
-.result-card {
-    text-align: center;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px; /* تقليل نصف القطر */
-    padding: 10px; /* تقليل الحشوة */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-    cursor: pointer;
-    user-select: none; /* منع النص من التحديد */
-}
-
-        
-
-.result-card:hover {
-    transform: translateY(-10px);
-    scale(1.05);
-    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
-}
-
-.result-card:active {
-    transform: scale(0.95);
-    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.5);
-    background: linear-gradient(135deg, rgba(0, 123, 255, 0.3), rgba(255, 255, 255, 0.1));
-    filter: brightness(1.2);
-    user-select: none; /* يمنع النسخ عند الضغط */
-}
-
-.result-card img {
-    width: 60px; /* تقليل عرض الصورة داخل الكارد */
-    height: 60px; /* تقليل ارتفاع الصورة داخل الكارد */
-    border-radius: 50%; /* جعل الصورة دائرية */
-    margin-bottom: 5px; /* تقليل المسافة أسفل الصورة */
-    object-fit: cover; /* ضبط الصورة داخل الحاوية */
-}
-
-.result-card h4 {
-    font-size: 14px; /* تقليل حجم النص */
-    font-weight: bold; /* سمك النص */
-    color: white; /* لون النص */
-    margin: 5px 0; /* مسافة أعلى وأسفل النص */
-}
-
-.result-card p {
-    font-size: 14px; /* تقليل حجم النص للسعر */
-    color: #f1f1f1; /* لون النص */
-    margin: 5px 0; /* مسافة أعلى وأسفل السعر */
-}
-
 
 
 .no-results {
@@ -1533,24 +1568,17 @@ function searchItems() {
 
     if (!searchInput) {
         Swal.fire({
-    title: 'حقل فارغ',
-    html: '<p style="color: #dcdcdc;">يرجى كتابة اسم العنصر قبل المتابعة</p>',
-    iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-    confirmButtonText: 'موافق',
-    backdrop: false, // تثبيت الواجهة
-    customClass: {
-        popup: 'swal2-popup',
-        title: 'swal2-title',
-        htmlContainer: 'swal2-html-container',
-        confirmButton: 'swal2-confirm'
-    },
-    showClass: {
-        popup: 'animate__animated animate__zoomIn'
-    },
-    hideClass: {
-        popup: 'animate__animated animate__zoomOut'
-    }
-});
+            title: 'حقل فارغ',
+            html: '<p style="color: #dcdcdc;">يرجى كتابة اسم العنصر قبل المتابعة</p>',
+            iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+            confirmButtonText: 'موافق',
+            customClass: {
+                popup: 'swal2-popup',
+                title: 'swal2-title',
+                htmlContainer: 'swal2-html-container',
+                confirmButton: 'swal2-confirm'
+            }
+        });
         return;
     }
 
@@ -1560,19 +1588,11 @@ function searchItems() {
             text: 'يرجى اختيار صنف من القائمة قبل البدء في البحث.',
             iconHtml: '<i class="fas fa-info-circle"></i>',
             confirmButtonText: 'موافق',
-            backdrop: false, // تثبيت الواجهة
-
             customClass: {
                 popup: 'swal2-popup',
                 title: 'swal2-title',
                 htmlContainer: 'swal2-html-container',
                 confirmButton: 'swal2-confirm'
-            },
-            showClass: {
-                popup: 'animate__animated animate__fadeIn'
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOut'
             }
         });
         return;
@@ -1583,92 +1603,43 @@ function searchItems() {
         normalizeString(item["Item Name"] || item["Item"]).includes(query)
     ) || [];
 
+    displayResults(results); // استدعاء العرض مباشرة
+}
+
+
+
+function displayResults(results) {
+    const resultsContainer = document.getElementById("results");
+    resultsContainer.innerHTML = ''; // تفريغ النتائج السابقة
+
     if (results.length === 0) {
-        // إذا لم يتم العثور على العناصر، أضف الرسالة إلى صندوق النتائج
         resultsContainer.innerHTML = `
             <div class="no-results">
                 هذا العنصر غير متوفر في الوقت الحالي
-
-
             </div>
         `;
         return;
     }
 
-    displayResults(results);
-}
-
-function displayResults(results) {
-    let htmlContent = `
-        <div class="results-container" style="max-height: 500px; overflow-y: auto; display: grid; gap: 15px; padding: 10px;">
-    `;
-
+    // عرض النتائج بشكل عمودي
+    let htmlContent = '';
     results.forEach(item => {
         const imgSrc = currentCategory === "SIMILARITES" 
             ? 'images/default.png'
             : `images/${currentCategory.toLowerCase()}.png`;
 
         htmlContent += `
-            <div class="result-card" style="
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                background: rgba(0, 0, 0, 0.3);
-                border-radius: 12px;
-                padding: 15px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-                transition: transform 0.2s ease, box-shadow 0.2s ease;
-                cursor: pointer;
-            ">
-                <img src="${imgSrc}" 
-                     alt="Item Image" 
-                     style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px;">
-                <div style="text-align: center; color: #fff;">
-                    <h4 style="margin: 5px 0; font-size: 18px;">${item["Item Name"] || item["Item"]}</h4>
-                    ${item["Price"] ? `<p style="margin: 5px 0; font-size: 16px;">${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دينار عراقي</p>` : ''}
-                </div>
+            <div class="result-card">
+                <img src="${imgSrc}" alt="Item Image">
+                <h4>${item["Item Name"] || item["Item"]}</h4>
+                ${item["Price"] ? `<p>${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ع</p>` : '<p>غير متوفر</p>'}
             </div>
         `;
     });
 
-    htmlContent += `
-        </div>
-        <button class="back-btn" onclick="Swal.close()" style="margin-top: 30px;">رجوع</button>
-    `;
-
-    Swal.fire({
-        title: `نتائج البحث (${results.length})`,
-        html: htmlContent,
-        width: '90%', // توسيع عرض النافذة إلى 75%
-        maxWidth: '900px', // حد أقصى للعرض
-        backdrop: false, // تثبيت الواجهة
-        backdrop: 'rgba(0, 0, 0, 0)', // تعتيم أنيق للخلفية
-        customClass: {
-            popup: 'swal2-popup',
-            title: 'swal2-title',
-            htmlContainer: 'swal2-html-container',
-        },
-         backdrop: false, // تثبيت الواجهة
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        stopKeydownPropagation: false, // السماح بالتفاعل الكامل مع العناصر الداخلية
-        didOpen: () => {
-            // التأكد من ربط الأحداث عند فتح النافذة
-            document.body.style.overflow = 'hidden';
-        },
-       willClose: () => {
-            document.getElementById('overlay').style.display = 'none'; // إخفاء الـ overlay عند الإغلاق
-            document.body.style.overflow = ''; // إعادة التمرير
-        },
-        showClass: {
-            popup: 'animate__animated animate__fadeIn'
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOut'
-        }
-    });
+    resultsContainer.innerHTML = htmlContent;
 }
+
 async function confirmExit() {
     const result = await Swal.fire({
         title: 'تأكيد الخروج',
