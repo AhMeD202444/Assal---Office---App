@@ -579,13 +579,11 @@ h1 {
 
 /* ✅ تأثير عند اختيار الصنف */
 .category.active {
-    background: linear-gradient(135deg, #004D40, #00796B); /* ✅ لون مميز عند الاختيار */
+    background: linear-gradient(135deg, #004D40, #00796B);
     color: white;
-    transform: scale(1.15); /* ✅ تكبير خفيف */
+    transform: scale(1.15);
     box-shadow: 0 6px 18px rgba(67, 206, 162, 0.7);
-    animation: pulseEffect 1.5s infinite alternate; /* ✅ تأثير نبض */
 }
-
 
 /* ✅ تأثير نبض عند التحديد */
 @keyframes pulseEffect {
@@ -638,70 +636,53 @@ h1 {
 
 
 
-
-     .search-container {
+.search-container {
     position: relative;
     width: 100%;
-   margin: 10px 0; /* العلوية 10px، السفلية 10px */
+    margin: 10px 0; /* العلوية 10px، السفلية 10px */
 }
 
-        .search-container input {
-            width: 100%;
-    height: 40px; /* نفس ارتفاع شريط الأخبار */
+.search-container input {
+    width: 100%;
+    height: 40px; /* ارتفاع الشريط */
     padding: 8px 16px;
     font-size: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3); /* ✅ إضافة الحواف البيضاء */
-    border-radius: 25px; /* ✅ جعل الحواف دائرية مثل شريط الأخبار */
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
     background: rgba(0, 0, 0, 0.3);
     color: white;
     outline: none;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* ✅ إضافة الظل مثل شريط الأخبار */
-        }
-
-        .search-container input:focus {
-             background: rgba(0, 0, 0, 0.5);
-    border-color: rgba(255, 255, 255, 0.5); /* ✅ تفتيح الحدود عند النقر */
-    box-shadow: 0 6px 15px rgba(255, 255, 255, 0.3); /* ✅ زيادة التأثير عند التركيز */
-        }
-
-
-@keyframes pulseEffect {
-    0% { transform: scale(1); box-shadow: 0 0 5px rgba(67, 206, 162, 0.5); }
-    50% { transform: scale(1.1); box-shadow: 0 0 15px rgba(67, 206, 162, 0.7); }
-    100% { transform: scale(1); box-shadow: 0 0 5px rgba(67, 206, 162, 0.5); }
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .search-container button {
     position: absolute;
-    right: 10px; /* ✅ تأكد أن الزر يبقى في أقصى اليمين */
-    top: 0%;
-    transform: translateY(-50%);
+    right: 10px; /* المسافة من اليمين */
+    top: 50%; /* بدل 0% لتوسيطه رأسيًا */
+    transform: translateY(-50%); /* توسيط رأسي */
     background: linear-gradient(45deg, #43cea2, #185a9d);
     border: none;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 30px; /* تقليل العرض ليتناسب مع الشريط */
+    height: 30px; /* تقليل الارتفاع ليتناسب مع الشريط */
     color: white;
-    font-size: 18px;
+    font-size: 16px; /* تقليل حجم الأيقونة */
     cursor: pointer;
     transition: all 0.3s ease;
-    animation: pulseEffect 1.5s infinite alternate; /* ✅ إضافة تأثير النبض */
+    display: flex; /* لتوسيط الأيقونة داخل الزر */
+    align-items: center;
+    justify-content: center;
+}
+
+.search-container button:hover {
+    transform: translateY(-50%) scale(1.1); /* تعديل التأثير مع الحفاظ على التوسيط */
 }
 
 .search-container button:active {
-    transform: scale(0.9); /* تأثير الضغط */
+    transform: translateY(-50%) scale(0.95); /* تعديل التأثير مع الحفاظ على التوسيط */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
-
-
-        .search-container button:hover {
-            transform: scale(1.1);
-        }
-
-        .search-container button:active {
-            transform: scale(0.95); /* تعديل التأثير ليبقى داخل الشريط */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
 
 
         /* تصميم الهيدر المستقيم */
@@ -1040,15 +1021,14 @@ h1 {
     border-radius: 20px;
     text-align: center;
     font-size: 14px;
-    animation: pulse 1.5s infinite alternate;
     box-shadow: 0px 0px 10px rgba(0, 130, 181, 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
     height: 28px;
-    margin-left: auto; /* ✅ يضمن دفعه لأقصى اليمين */
-     order: 2; /* ✅ يضمن ظهوره في أقصى اليمين */
-    
+    margin-left: auto;
+    order: 2;
+    /* animation: none; */ /* أو احذف السطر ده نهائي */
 }
 
 @keyframes pulse {
