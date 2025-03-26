@@ -13,17 +13,19 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Orbitron', sans-serif;
-            background: linear-gradient(135deg, #3A6073, #16222A);
-            color: #e0e0e0;
-            min-height: 100vh;
-            background-size: 400% 400%;
-            animation: gradientAnimation 10s ease infinite;
-            overflow-x: hidden;
-            position: relative;
-            direction: rtl;
-        }
+      body {
+    font-family: 'Orbitron', sans-serif;
+    background: linear-gradient(135deg, #3A6073, #16222A);
+    color: #e0e0e0;
+    min-height: 100vh;
+    background-size: 400% 400%;
+    animation: gradientAnimation 10s ease infinite;
+    overflow-x: hidden;
+    position: relative;
+    direction: rtl;
+    padding-top: 30px; /* مسافة مناسبة للهيدر الصغير */
+    padding-bottom: 40px; /* مسافة للفوتر */
+}
 
         @keyframes gradientAnimation {
             0% { background-position: 0% 50%; }
@@ -187,23 +189,30 @@
 .filter-group select option:hover {
     background: linear-gradient(45deg, #4A8296, #FF1493);
 }
-        
 
- .navbar {
+
+.navbar {
     position: fixed;
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.9);
-    padding: 10px 15px;
-    border-radius: 40px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.95), rgba(22, 34, 42, 0.9));
+    padding: 5px 20px;
+    border-radius: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 80%;
-    max-width: 800px;
     z-index: 1000;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 5px 20px rgba(0, 206, 209, 0.3);
+    border-bottom: 2px solid rgba(0, 206, 209, 0.6);
+    height: 40px; /* تحديد ارتفاع ثابت */
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 5px 20px; /* نفس الارتفاع الصغير */
+        width: 100%; /* يغطي كامل العرض حتى في الشاشات الصغيرة */
+    }
 }
 
 .navbar .logo {
@@ -299,18 +308,20 @@
     min-height: 800px;
 }
 
-        .filters {
-            width: 300px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            position: sticky;
-            top: 100px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
+       
+/* تعديل حاوية الفلاتر (التي تحتوي على شريط البحث والأصناف) */
+.filters {
+    width: 300px;
+    background: linear-gradient(135deg, rgba(58, 96, 115, 0.85), rgba(22, 34, 42, 0.85));
+    padding: 25px;
+    border-radius: 25px; /* نفس قيمة الكروت */
+    box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
+    position: sticky;
+    top: 100px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 1px solid rgba(0, 206, 209, 0.5);
+}
         .filters h3 {
             font-size: 24px;
             margin-bottom: 25px;
@@ -415,17 +426,20 @@
             margin-top: 30px;
         }
 
-        .product-card {
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 25px;
-            padding: 30px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transform: perspective(600px) rotateY(0deg);
-        }
+       /* تعديل لون الكروت (المنتجات) */
+.product-card {
+    background: linear-gradient(135deg, rgba(58, 96, 115, 0.85), rgba(22, 34, 42, 0.85)); /* نفس لون الحاوية */
+    border-radius: 25px;
+    padding: 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4); /* ظل مشابه للحاوية */
+    transform: perspective(600px) rotateY(0deg);
+    border: 1px solid rgba(0, 206, 209, 0.5); /* حدود خفيفة للإبراز */
+}
+
 
         .product-card:hover {
             transform: perspective(600px) rotateY(-10deg);
@@ -578,28 +592,69 @@
     text-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
 }
 
-       footer {
-    position: fixed; /* تثبيت الفوتر أسفل الصفحة */
+
+
+.scroll-to-top {
+    position: fixed;
+    bottom: 60px; /* مسافة أنيقة فوق الفوتر (ارتفاع الفوتر 40px + 20px إضافية) */
+    right: 20px; /* مسافة من اليمين */
+    width: 50px; /* عرض الدائرة */
+    height: 50px; /* ارتفاع الدائرة */
+    background-color: #8B0000; /* لون أحمر غامق */
+    border: none;
+    border-radius: 50%; /* لجعل الزر دائريًا */
+    color: #fff; /* لون السهم أبيض */
+    font-size: 24px; /* حجم السهم */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* ظل خفيف للإبراز */
+    z-index: 10000; /* ليكون فوق كل العناصر بما في ذلك الفوتر */
+    transition: all 0.3s ease; /* تأثير ناعم عند التفاعل */
+}
+
+.scroll-to-top:hover {
+    background-color: #A00000; /* لون أحمر غامق أفتح قليلاً عند التمرير */
+    transform: translateY(-5px); /* ارتفاع طفيف عند التمرير */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); /* ظل أقوى */
+}
+
+.scroll-to-top:active {
+    transform: scale(0.95); /* تصغير طفيف عند النقر */
+}
+
+
+
+
+
+
+     /* تعديل الفوتر */
+footer {
+    position: fixed;
     bottom: 0;
     left: 0;
     width: 100%;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.95), rgba(22, 34, 42, 0.9));
+    padding: 5px 20px;
+    box-shadow: 0 -5px 20px rgba(0, 206, 209, 0.3);
+    z-index: 9999;
+    border-radius: 0;
+    border-top: 2px solid rgba(0, 206, 209, 0.6);
     text-align: center;
-    padding: 20px; /* تقليل الحجم */
-    background: rgba(0, 0, 0, 0.95); /* جعل الخلفية أكثر وضوحًا */
-    box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.7); /* زيادة التباين */
-    z-index: 9999; /* جعله فوق جميع العناصر */
+    height: 40px; /* نفس ارتفاع الهيدر */
+    display: flex; /* لتوسيط النص عموديًا */
+    align-items: center; /* توسيط النص عموديًا */
+    justify-content: center; /* توسيط النص أفقيًا */
 }
 
 footer p {
-    font-size: 14px; /* تقليل الخط ليبدو أنيقًا */
-    color: #5fc3e4; /* لون أزرق أكثر وضوحًا */
-    font-weight: bold; /* جعله أكثر وضوحًا */
-    text-shadow: 0 0 8px rgba(0, 206, 209, 0.5); /* تحسين التأثير */
-}
-
-/* التأكد من عدم تغطية المحتوى بسبب الفوتر المثبت */
-body {
-    padding-bottom: 60px; /* يضمن عدم اختفاء المحتوى خلف الفوتر */
+    font-size: 14px;
+    color: #5fc3e4;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(0, 206, 209, 0.5);
+    margin: 0;
+    line-height: 1;
 }
 
         @media (max-width: 1024px) {
@@ -618,11 +673,7 @@ body {
         }
 
         @media (max-width: 768px) {
-            .navbar {
-                padding: 15px 20px;
-                width: 95%;
-            }
-
+            
             .navbar .logo {
                 font-size: 22px;
             }
@@ -691,6 +742,11 @@ body {
     </style>
 </head>
 <body>
+  
+  
+  <button class="scroll-to-top" onclick="scrollToTop()">
+    <i class="fas fa-arrow-up"></i>
+</button>
   
   
   <div class="navbar">
@@ -2553,6 +2609,17 @@ function searchProducts() {
         }
     });
 }
+
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth' // تمرير سلس إلى الأعلى
+    });
+}
+
+
+
 
 
         document.getElementById('searchInput').addEventListener('input', searchProducts);
