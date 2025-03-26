@@ -133,8 +133,8 @@
 
         .categories {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
-            gap: 0.75rem;
+            grid-template-columns: repeat(4, 1fr); /* 4 أعمدة فقط */
+            gap: 1rem; /* زيادة المسافة بين الأزرار */
         }
 
         .category-btn {
@@ -142,23 +142,23 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 55px;
-            height: 55px;
+            width: 100px; /* زيادة عرض الزر */
+            height: 100px; /* زيادة ارتفاع الزر */
             background: linear-gradient(45deg, #3A6073, #1A2F3A);
             border-radius: 50%;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
             transition: all 0.3s ease;
             cursor: pointer;
             color: #fff;
-            font-size: clamp(0.6rem, 1.5vw, 0.8rem);
+            font-size: 1rem; /* زيادة حجم النص */
             text-align: center;
             position: relative;
             overflow: hidden;
         }
 
         .category-btn i {
-            font-size: clamp(0.9rem, 2vw, 1rem);
-            margin-bottom: 0.2rem;
+            font-size: 1.5rem; /* زيادة حجم الأيقونة */
+            margin-bottom: 0.5rem; /* زيادة المسافة بين الأيقونة والنص */
         }
 
         .category-btn::before {
@@ -283,16 +283,16 @@
         }
 
         .scroll-to-top {
-           position: fixed;
+            position: fixed;
             bottom: 50px;
             right: 20px;
             width: 40px;
             height: 40px;
             background: #8B0000;
             border-radius: 50%;
-            display: none;
-            justify-content: center;
-            align-items: center;
+            display: flex; /* توسيط المحتوى */
+            justify-content: center; /* توسيط أفقي */
+            align-items: center; /* توسيط عمودي */
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
             transition: all 0.3s ease;
@@ -501,8 +501,8 @@
         }
 
         async function refreshData() {
-    await loadExcelFiles(); // تحميل البيانات فقط بدون أي تنبيهات
-}
+            await loadExcelFiles();
+        }
 
         function goBack() {
             document.getElementById('results').style.display = 'none';
