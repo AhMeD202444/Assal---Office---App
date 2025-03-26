@@ -105,9 +105,9 @@
         }
 
         .logo-container {
-            width: clamp(80px, 15vw, 120px); /* حجم أنيق ومناسب */
+            width: clamp(80px, 15vw, 120px);
             height: clamp(80px, 15vw, 120px);
-            margin: 0 auto 1rem; /* زيادة المسافة السفلية */
+            margin: 0 auto 1rem;
             border-radius: 50%;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -133,8 +133,9 @@
 
         .categories {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 أزرار في كل صف */
-            gap: 0.75rem; /* مسافة صغيرة أنيقة */
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            justify-items: center;
         }
 
         .category-btn {
@@ -142,7 +143,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 70px; /* حجم صغير أنيق */
+            width: 70px;
             height: 70px;
             background: linear-gradient(45deg, #3A6073, #1A2F3A);
             border-radius: 50%;
@@ -150,15 +151,15 @@
             transition: all 0.3s ease;
             cursor: pointer;
             color: #fff;
-            font-size: 0.8rem; /* نص صغير أنيق */
+            font-size: 0.8rem;
             text-align: center;
             position: relative;
             overflow: hidden;
         }
 
         .category-btn i {
-            font-size: 1.2rem; /* أيقونة صغيرة أنيقة */
-            margin-bottom: 0.3rem;
+            font-size: 1.2rem;
+            margin-bottom: 0.2rem;
         }
 
         .category-btn::before {
@@ -323,9 +324,17 @@
             backdrop-filter: blur(5px);
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 400px) {
             .categories {
-                grid-template-columns: repeat(2, 1fr); /* صفين فقط على الشاشات الصغيرة */
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .category-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 0.7rem;
+            }
+            .category-btn i {
+                font-size: 1rem;
             }
         }
     </style>
@@ -519,7 +528,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // التحكم في ظهور/إخفاء زر الصعود بناءً على التمرير
         window.addEventListener('scroll', () => {
             const scrollToTopBtn = document.getElementById('scrollToTop');
             const resultsContainer = document.getElementById('results');
