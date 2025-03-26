@@ -133,8 +133,8 @@
 
         .categories {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 أعمدة فقط */
-            gap: 1rem; /* زيادة المسافة بين الأزرار */
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* متجاوب مع الحد الأدنى 100px */
+            gap: 1rem; /* مسافة بين الأزرار */
         }
 
         .category-btn {
@@ -142,23 +142,25 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 100px; /* زيادة عرض الزر */
-            height: 100px; /* زيادة ارتفاع الزر */
+            width: 100%; /* يأخذ كامل العرض المتاح في العمود */
+            aspect-ratio: 1 / 1; /* نسبة العرض إلى الارتفاع 1:1 */
+            min-width: 80px; /* الحد الأدنى للعرض */
+            min-height: 80px; /* الحد الأدنى للارتفاع */
             background: linear-gradient(45deg, #3A6073, #1A2F3A);
             border-radius: 50%;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
             transition: all 0.3s ease;
             cursor: pointer;
             color: #fff;
-            font-size: 1rem; /* زيادة حجم النص */
+            font-size: clamp(0.9rem, 2vw, 1.2rem); /* نص متجاوب */
             text-align: center;
             position: relative;
             overflow: hidden;
         }
 
         .category-btn i {
-            font-size: 1.5rem; /* زيادة حجم الأيقونة */
-            margin-bottom: 0.5rem; /* زيادة المسافة بين الأيقونة والنص */
+            font-size: clamp(1.2rem, 3vw, 1.8rem); /* أيقونات متجاوبة */
+            margin-bottom: 0.5rem;
         }
 
         .category-btn::before {
@@ -290,9 +292,9 @@
             height: 40px;
             background: #8B0000;
             border-radius: 50%;
-            display: flex; /* توسيط المحتوى */
-            justify-content: center; /* توسيط أفقي */
-            align-items: center; /* توسيط عمودي */
+            display: none; /* مخفي افتراضيًا */
+            justify-content: center;
+            align-items: center;
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
             transition: all 0.3s ease;
@@ -307,6 +309,7 @@
         .scroll-to-top i {
             font-size: 1rem;
             color: #fff;
+            line-height: 40px; /* لضمان التوسيط العمودي */
         }
 
         footer {
@@ -409,6 +412,7 @@
             const resultsContainer = document.getElementById('results');
             const scrollToTopBtn = document.getElementById('scrollToTop');
             resultsContainer.innerHTML = '';
+            scrollToTopBtn.style.display = 'none'; // إخفاء الزر قبل عرض النتائج
 
             if (items.length === 0) {
                 resultsContainer.innerHTML = `<div class="no-results">لا توجد بيانات لـ ${title} حالياً</div>`;
@@ -446,7 +450,7 @@
 
             resultsContainer.innerHTML = htmlContent;
             resultsContainer.style.display = 'block';
-            scrollToTopBtn.style.display = 'block';
+            scrollToTopBtn.style.display = 'block'; // إظهار الزر بعد عرض النتائج
 
             setTimeout(() => {
                 resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
