@@ -106,7 +106,7 @@
         }
 
         .logo-container {
-            width: clamp(100px, 15vw, 150px); /* تكبير اللوجو */
+            width: clamp(100px, 15vw, 150px);
             height: clamp(100px, 15vw, 150px);
             margin: 0 auto 1.5rem;
             border-radius: 50%;
@@ -169,7 +169,6 @@
         }
 
         .results-container {
-            display: none;
             width: 90%;
             max-width: 1200px;
             margin: 0 auto;
@@ -193,7 +192,7 @@
             border-radius: 15px;
             padding: 1.5rem;
             width: 100%;
-            min-height: 220px; /* تكبير الكارت */
+            min-height: 220px;
             transition: all 0.3s ease;
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -210,7 +209,7 @@
         }
 
         .result-card img {
-            width: clamp(80px, 12vw, 120px); /* تكبير الصورة */
+            width: clamp(80px, 12vw, 120px);
             height: clamp(80px, 12vw, 120px);
             border-radius: 50%;
             margin-bottom: 1rem;
@@ -246,57 +245,40 @@
             width: 100%;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
+        
+        
 
-        .back-btn {
-            width: clamp(80px, 20vw, 120px);
-            height: clamp(40px, 10vw, 50px);
-            background: linear-gradient(135deg, #4A7888, #3A6073);
-            border-radius: 15px;
-            color: #fff;
-            font-size: clamp(0.9rem, 2vw, 1rem);
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(58, 96, 115, 0.4);
-            transition: all 0.3s ease;
-            margin: 1.5rem auto;
-            display: block;
-            font-family: 'Cairo', sans-serif;
-        }
+.scroll-to-top {
+    position: fixed;
+    bottom: 50px;
+    right: 20px;
+    width: clamp(40px, 10vw, 50px);
+    height: clamp(40px, 10vw, 50px);
+    background: #8B0000;
+    border-radius: 50%;
+    display: flex; /* دائماً flex للتوسيط */
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    z-index: 11;
+    display: none; /* مخفي افتراضياً */
+}
 
-        .back-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 20px rgba(58, 96, 115, 0.6);
-        }
+.scroll-to-top:hover {
+    transform: scale(1.1);
+    background: #A00000;
+}
 
-        .scroll-to-top {
-            position: fixed;
-            bottom: 50px;
-            right: 20px;
-            width: clamp(40px, 10vw, 50px); /* تكبير دائرة الصعود */
-            height: clamp(40px, 10vw, 50px);
-            background: #8B0000;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-            transition: all 0.3s ease;
-            z-index: 11;
-        }
+.scroll-to-top i {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: #fff;
+    line-height: 1; /* يضمن التوسيط العمودي */
+    display: block; /* للتأكد من أن الأيقونة تأخذ مكانها */
+}
 
-        .scroll-to-top:hover {
-            transform: scale(1.1);
-            background: #A00000;
-        }
 
-        .scroll-to-top i {
-            font-size: clamp(1rem, 2.5vw, 1.5rem); /* تكبير السهم */
-            color: #fff;
-            position: relative;
-            top: 0; /* ضبط الموقع للتوسيط */
-            line-height: 1; /* ضمان التوسيط العمودي */
-        }
 
         footer {
             font-size: clamp(1rem, 2vw, 1.2rem);
@@ -312,7 +294,6 @@
             backdrop-filter: blur(5px);
         }
 
-        /* Media Queries للتجاوب */
         @media (max-width: 900px) {
             .categories {
                 grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -343,7 +324,7 @@
     <header>
         <div class="header-buttons">
             <button class="header-btn refresh-btn" onclick="refreshData()">تحديث</button>
-            <button class="header-btn exit-btn" onclick="window.close()">خروج</button>
+            <button class="header-btn exit-btn" onclick="goBack()">رجوع</button>
         </div>
         <div class="header-title">مكتب عسل</div>
     </header>
@@ -380,14 +361,16 @@
                 <div class="category-btn" onclick="filterChargingCategory()"><i class="fas fa-charging-station"></i>بورد شحن</div>
                 <div class="category-btn" onclick="filterBatteryCategory()"><i class="fas fa-ellipsis-h"></i>اخرى</div>
             </div>
-            <button class="back-btn" onclick="goBack()">رجوع</button>
         </div>
     </div>
 
-    <div id="results" class="results-container"></div>
-    <div id="scrollToTop" class="scroll-to-top" onclick="scrollToTop()">
-        <i class="fas fa-arrow-up"></i>
-    </div>
+    <div id="results" class="results-container" style="display: none;"></div>
+    
+    
+ <div id="scrollToTop" class="scroll-to-top" onclick="scrollToTop()">
+    <i class="fas fa-arrow-up"></i>
+</div>
+
 
     <footer>
         <p>© 2025 Assal Office. All rights reserved.</p>
@@ -519,25 +502,30 @@
             await loadExcelFiles();
         }
 
-        function goBack() {
-            document.getElementById('results').style.display = 'none';
-            document.getElementById('scrollToTop').style.display = 'none';
-            window.location.href = 'index.html';
-        }
+      function goBack() {
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('scrollToTop').style.display = 'none';
+}
 
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+     function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
-        window.addEventListener('scroll', () => {
-            const scrollToTopBtn = document.getElementById('scrollToTop');
-            const resultsContainer = document.getElementById('results');
-            if (resultsContainer.style.display === 'grid' && window.scrollY > 100) {
-                scrollToTopBtn.style.display = 'block';
-            } else {
-                scrollToTopBtn.style.display = 'none';
-            }
-        });
+       window.addEventListener('scroll', () => {
+    const scrollToTopBtn = document.getElementById('scrollToTop');
+    const resultsContainer = document.getElementById('results');
+    if (resultsContainer.style.display === 'grid' && window.scrollY > 100) {
+        scrollToTopBtn.style.display = 'flex';
+    } else {
+        scrollToTopBtn.style.display = 'none';
+    }
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('scrollToTop').style.display = 'none';
+});
+
 
         loadExcelFiles();
     </script>
