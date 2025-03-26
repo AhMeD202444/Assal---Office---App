@@ -502,16 +502,17 @@
             await loadExcelFiles();
         }
 
-      function goBack() {
-    document.getElementById('results').style.display = 'none';
-    document.getElementById('scrollToTop').style.display = 'none';
+     function goBack() {
+    window.location.href = 'index.html'; // إعادة توجيه إلى صفحة index.html
 }
 
-     function scrollToTop() {
+    // دالة الصعود
+function scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-       window.addEventListener('scroll', () => {
+// التحكم في الظهور والإخفاء بناءً على التمرير
+window.addEventListener('scroll', () => {
     const scrollToTopBtn = document.getElementById('scrollToTop');
     const resultsContainer = document.getElementById('results');
     if (resultsContainer.style.display === 'grid' && window.scrollY > 100) {
@@ -519,11 +520,6 @@
     } else {
         scrollToTopBtn.style.display = 'none';
     }
-});
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('scrollToTop').style.display = 'none';
 });
 
 
