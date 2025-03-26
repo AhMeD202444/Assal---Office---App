@@ -6,15 +6,9 @@
     <title>توافقات - Assal Office</title>
 
     <!-- المكتبات المطلوبة -->
-    
-    <!-- إضافة Select2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<!-- إضافة jQuery (مطلوب لـ Select2) -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- إضافة Select2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    
-    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -37,6 +31,8 @@
             overflow-x: hidden;
             position: relative;
             direction: rtl;
+            padding-top: 50px;
+            padding-bottom: 50px;
         }
 
         @keyframes gradientAnimation {
@@ -45,106 +41,125 @@
             100% { background-position: 0% 50%; }
         }
 
-        .navbar {
+        /* تصميم الهيدر */
+        .header {
             position: fixed;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 10px 15px;
-            border-radius: 40px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 80%;
-            max-width: 800px;
-            z-index: 1000;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            padding: 0 12px;
+            z-index: 2000;
         }
 
-        .navbar .logo {
-            font-size: 22px;
+        .header-title {
+            font-family: 'Cairo', sans-serif;
+            font-size: 18px;
             font-weight: 700;
-            color: #4A8296;
-            text-shadow: 0 0 8px rgba(0, 206, 209, 0.5);
-            font-family: 'Orbitron', sans-serif;
+            color: #A3BFFA;
+            text-shadow: 0 1px 2px rgba(163, 191, 250, 0.4);
+            letter-spacing: 0.5px;
+            order: 1; /* على اليمين */
         }
 
-        .navbar .nav-buttons {
+        .header-buttons {
             display: flex;
-            gap: 18px;
-            align-items: center;
-        }
-
-        .navbar .notes-btn {
-            padding: 8px 15px;
-            border-radius: 20px;
-            background: rgba(58, 96, 115, 0.1);
-            border: 2px solid #4A8296;
-            color: #e0e0e0;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 8px rgba(0, 206, 209, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            gap: 6px;
+            order: 0; /* على اليسار */
             position: relative;
         }
 
-        .navbar .notes-btn i {
-            font-size: 16px;
-            margin-right: 5px;
-        }
-
-        .navbar .notes-btn span {
-            position: absolute;
-            top: -8px;
-            right: -12px;
-            background: #FF1493;
-            border-radius: 50%;
-            padding: 4px 8px;
-            font-size: 10px;
-            font-weight: 700;
-            color: #fff;
-            box-shadow: 0 0 8px rgba(255, 20, 147, 0.5);
-        }
-
-        .navbar .notes-btn:hover {
-            background: linear-gradient(45deg, #4A8296, #FF1493);
+        .header-btn {
+            padding: 3px 10px;
+            border-radius: 8px;
             border: none;
-            transform: scale(1.05);
-            box-shadow: 0 0 12px rgba(255, 20, 147, 0.5);
-        }
-
-        .navbar .main-menu-btn {
-            padding: 8px 15px;
-            border-radius: 20px;
-            background: linear-gradient(45deg, #4A8296, #FF1493);
-            border: none;
+            background: linear-gradient(135deg, #5A6388, #4A5275);
             color: #fff;
-            font-size: 14px;
-            font-family: 'Orbitron', sans-serif;
+            font-family: 'Cairo', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 0 8px rgba(0, 206, 209, 0.3);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            position: relative;
         }
 
-        .navbar .main-menu-btn:hover {
-            background: linear-gradient(45deg, #FF1493, #4A8296);
-            transform: scale(1.05);
-            box-shadow: 0 0 12px rgba(255, 20, 147, 0.5);
+        .header-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
         }
 
+        .header-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #6B7280, #4B5563);
+        }
+
+        .refresh-btn:hover {
+            background: linear-gradient(135deg, #9CA3AF, #6B7280);
+        }
+
+        .exit-btn {
+            background: linear-gradient(135deg, #8B0000, #B22222);
+        }
+
+        .exit-btn:hover {
+            background: linear-gradient(135deg, #CD5C5C, #8B0000);
+        }
+
+        .notes-btn {
+            background: linear-gradient(135deg, #4682B4, #20B2AA);
+        }
+
+        .notes-btn:hover {
+            background: linear-gradient(135deg, #20B2AA, #4682B4);
+        }
+
+        /* عداد الملاحظات */
+        .notes-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #DC143C;
+            color: #fff;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .notes-count.visible {
+            display: flex;
+        }
+
+        /* الحاوية الرئيسية */
         .main-container {
             max-width: 1400px;
-            margin: 120px auto 0;
+            margin: 20px auto 0;
             padding: 0 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 20px;
-            min-height: 800px;
+            min-height: calc(100vh - 90px);
         }
 
         .container {
@@ -167,93 +182,98 @@
             font-family: 'Tajawal', sans-serif;
         }
 
-      .category-container {
-    width: 100%;
-    max-width: 600px; /* تم الإبقاء على العرض الجديد */
-    margin: 0 auto 25px;
-    position: relative;
-    text-align: center;
-}
+        /* القائمة المنسدلة */
+        .category-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 25px;
+            position: relative;
+            text-align: center;
+        }
 
+        .category-container select#categorySelect {
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 30px;
+            background: linear-gradient(45deg, rgba(30, 42, 68, 0.95), rgba(58, 96, 115, 0.3));
+            border: 2px solid #D4AF37;
+            color: #E2E8F0;
+            font-size: 16px;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
+            cursor: pointer;
+        }
 
-.category-container select#categorySelect {
-    width: 100%;
-    padding: 14px 20px;
-    border-radius: 30px;
-    background: linear-gradient(45deg, rgba(30, 42, 68, 0.95), rgba(58, 96, 115, 0.3));
-    border: 2px solid #D4AF37;
-    color: #E2E8F0;
-    font-size: 16px;
-    font-family: 'Tajawal', sans-serif;
-    font-weight: 600;
-    outline: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
-    cursor: pointer;
-}
+        .select2-container .select2-selection--single {
+            height: 50px;
+            padding: 10px;
+            border-radius: 30px;
+            background: linear-gradient(45deg, rgba(30, 42, 68, 0.95), rgba(58, 96, 115, 0.3));
+            border: 2px solid #D4AF37;
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
+            text-align: center;
+        }
 
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #E2E8F0;
+            font-size: 16px;
+            font-family: 'Tajawal', sans-serif;
+            line-height: 30px;
+            text-align: center;
+        }
 
-/* تحسين مظهر Select2 */
-.select2-container .select2-selection--single {
-    height: 50px;
-    padding: 10px;
-    border-radius: 30px;
-    background: linear-gradient(45deg, rgba(30, 42, 68, 0.95), rgba(58, 96, 115, 0.3));
-    border: 2px solid #D4AF37;
-    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
-    text-align: center;
-}
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 50px;
+            width: 30px;
+            left: 10px;
+        }
 
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-    color: #E2E8F0;
-    font-size: 16px;
-    font-family: 'Tajawal', sans-serif;
-    line-height: 30px;
-    text-align: center;
-}
+        .select2-dropdown {
+            background: #1E2A44;
+            border: 2px solid #D4AF37;
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            color: #E2E8F0;
+            text-align: center;
+        }
 
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 50px;
-    width: 30px;
-    left: 10px;
-}
+        .select2-results {
+            max-height: 400px; /* لعرض 9-10 أصناف (كل خيار ~40px) */
+            overflow-y: auto;
+        }
 
-.select2-dropdown {
-    background: #1E2A44;
-    border: 2px solid #D4AF37;
-    border-radius: 30px;
-    font-family: 'Cairo', sans-serif;
-    color: #E2E8F0;
-    text-align: center;
-}
+        .select2-results__options {
+            padding: 0;
+            margin: 0;
+        }
 
-/* تكبير ارتفاع القائمة المنسدلة لعرض 7 أصناف */
-.select2-results {
-    max-height: 300px; /* ارتفاع كافٍ لعرض 7 أصناف */
-    overflow-y: auto; /* تمرير عمودي للأصناف الزائدة */
-}
+        .select2-results__option {
+            padding: 12px 20px;
+            font-size: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.5);
+            transition: background 0.3s ease;
+            min-height: 40px; /* ارتفاع ثابت لكل خيار */
+            line-height: 16px;
+        }
 
-.select2-results__option {
-    padding: 12px 20px;
-    font-size: 15px;
-    text-align: center;
-    border-bottom: 1px solid rgba(212, 175, 55, 0.5);
-    transition: background 0.3s ease;
-}
+        .select2-results__option:last-child {
+            border-bottom: none;
+        }
 
-.select2-results__option:last-child {
-    border-bottom: none;
-}
+        .select2-results__option--highlighted {
+            background: linear-gradient(45deg, #4A8296, #D4AF37);
+            color: #fff;
+        }
 
-.select2-results__option--highlighted {
-    background: linear-gradient(45deg, #4A8296, #D4AF37);
-    color: #fff;
-}
+        .select2-search--dropdown {
+            display: none;
+        }
 
-.select2-search--dropdown {
-    display: none;
-}
-
+        /* حاوية البحث */
         .search-container {
             width: 300px;
             height: 300px;
@@ -319,6 +339,7 @@
             box-shadow: 0 0 15px rgba(163, 191, 250, 0.5);
         }
 
+        /* حاوية النتائج */
         .results-container {
             background: rgba(30, 42, 68, 0.95);
             border-radius: 20px;
@@ -326,11 +347,15 @@
             width: 90vw;
             max-width: 800px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            display: flex;
+            display: none;
             flex-direction: column;
             align-items: center;
             min-height: 300px;
             margin-top: 10px;
+        }
+
+        .results-container.visible {
+            display: flex;
         }
 
         .products-grid {
@@ -408,6 +433,7 @@
             box-shadow: 0 0 15px rgba(163, 191, 250, 0.5);
         }
 
+        /* سلة الملاحظات */
         .notes-drawer {
             position: fixed;
             top: 0;
@@ -486,6 +512,61 @@
             box-shadow: 0 0 15px rgba(220, 20, 60, 0.7);
         }
 
+        /* زر الرجوع إلى الأعلى */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 60px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #9B2C2C, #E53E3E);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(163, 191, 250, 0.5);
+            display: none;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scroll-to-top:hover {
+            background: linear-gradient(45deg, #E53E3E, #9B2C2C);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(163, 191, 250, 0.7);
+        }
+
+        .scroll-to-top.visible {
+            display: flex;
+        }
+
+        /* الفوتر (عاد إلى الشكل الأصلي) */
+        footer {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            padding: 0;
+            width: 100%;
+            height: 40px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.4);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* استجابة الشاشة */
         @media (max-width: 768px) {
             .notes-item {
                 padding: 10px;
@@ -500,12 +581,8 @@
                 font-size: 13px;
             }
 
-            .navbar {
-                width: 95%;
-            }
-
             .main-container {
-                margin-top: 100px;
+                margin-top: 60px;
                 padding: 0 20px;
             }
 
@@ -542,6 +619,7 @@
             }
         }
 
+        /* تنسيق SweetAlert2 */
         .swal2-popup {
             background: linear-gradient(135deg, #1E2A44, #2D3E66);
             border-radius: 20px;
@@ -594,90 +672,47 @@
             background: linear-gradient(45deg, #E53E3E, #9B2C2C);
             color: #fff;
         }
-
-        .scroll-to-top {
-            position: fixed;
-            bottom: 70px;
-            right: 20px;
-            padding: 10px 20px;
-            border-radius: 25px;
-            background: linear-gradient(45deg, #9B2C2C, #E53E3E);
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 700;
-            font-family: 'Tajawal', sans-serif;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(163, 191, 250, 0.5);
-            display: none;
-            z-index: 1000;
-        }
-
-        .scroll-to-top:hover {
-            background: linear-gradient(45deg, #E53E3E, #9B2C2C);
-            transform: scale(1.1);
-            box-shadow: 0 0 15px rgba(163, 191, 250, 0.7);
-        }
-
-        .scroll-to-top.visible {
-            display: block;
-        }
-
-        footer {
-            position: fixed;
-            bottom: 10px;
-            width: 100%;
-            text-align: center;
-            padding: 10px 0;
-            color: #D4AF37;
-            font-family: 'Cairo', sans-serif;
-            font-size: 14px;
-            background: rgba(30, 42, 68, 0.8);
-            border-top: 1px solid rgba(212, 175, 55, 0.3);
-        }
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <div class="logo">توافقات</div>
-        <div class="nav-buttons">
-            <div class="main-menu-btn" onclick="toggleMainMenu()">القائمة الرئيسية</div>
-            <div class="notes-btn" onclick="toggleNotes()">
-                <i class="fas fa-sticky-note"></i>
-                <span id="notesCount">0</span>
-            </div>
+    <!-- الهيدر -->
+    <header class="header">
+        <div class="header-title">مكتب عسل</div>
+        <div class="header-buttons">
+            <button class="header-btn exit-btn" onclick="confirmExit()" title="خروج"><i class="fas fa-sign-out-alt"></i> خروج</button>
+            <button class="header-btn refresh-btn" onclick="refreshData()" title="تحديث البيانات"><i class="fas fa-sync"></i> تحديث</button>
+            <button class="header-btn notes-btn" onclick="toggleNotes()" title="عرض الملاحظات"><i class="fas fa-sticky-note"></i> ملاحظات <span class="notes-count" id="headerNotesCount">0</span></button>
         </div>
-    </div>
+    </header>
 
     <div class="main-container">
         <div class="container">
             <h1>توافقات</h1>
             <div class="category-container">
-    <select id="categorySelect" onchange="filterByCategory()">
-        <option value="" disabled selected>اختر الصنف</option>
-        <option value="1">توافقات الشاشات</option>
-        <option value="2">توافقات البطاريات</option>
-        <option value="3">توافقات جرس النغمات</option>
-        <option value="4">توافقات سماعة الاتصال</option>
-        <option value="5">توافقات الكاميرات</option>
-        <option value="6">توافقات عدسة الكاميرا</option>
-        <option value="7">توافقات بورد الشحن</option>
-        <option value="8">توافقات قواعد الشحن</option>
-        <option value="9">توافقات كونكتر الشاشة</option>
-        <option value="10">توافقات البصمات</option>
-        <option value="11">توافقات شريط الهيتفون</option>
-        <option value="12">توافقات شريط البور والصوت</option>
-        <option value="13">توافقات الگلاسات</option>
-        <option value="14">توافقات شريط الهوم</option>
-        <option value="15">توافقات الآيسيات</option>
-        <option value="16">توافقات فلاتات الشاشة</option>
-        <option value="17">توافقات هولدر السيم كارت</option>
-        <option value="18">توافقات البصمات تحت الشاشة</option>
-        <option value="19">توافقات كيبلات الإشارة</option>
-        <option value="20">توافقات منوعة</option>
-    </select>
-</div>
+                <select id="categorySelect" onchange="filterByCategory()">
+                    <option value="" disabled selected>اختر الصنف</option>
+                    <option value="1">توافقات الشاشات</option>
+                    <option value="2">توافقات البطاريات</option>
+                    <option value="3">توافقات جرس النغمات</option>
+                    <option value="4">توافقات سماعة الاتصال</option>
+                    <option value="5">توافقات الكاميرات</option>
+                    <option value="6">توافقات عدسة الكاميرا</option>
+                    <option value="7">توافقات بورد الشحن</option>
+                    <option value="8">توافقات قواعد الشحن</option>
+                    <option value="9">توافقات كونكتر الشاشة</option>
+                    <option value="10">توافقات البصمات</option>
+                    <option value="11">توافقات شريط الهيتفون</option>
+                    <option value="12">توافقات شريط البور والصوت</option>
+                    <option value="13">توافقات الگلاسات</option>
+                    <option value="14">توافقات شريط الهوم</option>
+                    <option value="15">توافقات الآيسيات</option>
+                    <option value="16">توافقات فلاتات الشاشة</option>
+                    <option value="17">توافقات هولدر السيم كارت</option>
+                    <option value="18">توافقات البصمات تحت الشاشة</option>
+                    <option value="19">توافقات كيبلات الإشارة</option>
+                    <option value="20">توافقات منوعة</option>
+                </select>
+            </div>
             <div class="search-container">
                 <div class="search-inner">
                     <input type="text" id="searchInput" placeholder="ابحث عن توافقات...">
@@ -685,7 +720,7 @@
                 </div>
             </div>
         </div>
-        <div class="results-container">
+        <div class="results-container" id="resultsContainer">
             <div class="products-grid" id="results"></div>
         </div>
     </div>
@@ -696,27 +731,30 @@
         <div class="notes-items-container" id="notesItems"></div>
     </div>
 
-    <button class="scroll-to-top" onclick="scrollToTop()">الرجوع إلى أعلى القائمة</button>
+    <button class="scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i></button>
 
-    <footer>جميع الحقوق محفوظة - مكتب عسل</footer>
+    <!-- الفوتر (رجع للشكل الأصلي) -->
+    <footer>
+        <p>جميع الحقوق محفوظة - متجر عسل</p>
+    </footer>
 
     <script>
         const dropboxSimilaritesFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file2" + "?t=" + new Date().getTime();
         let database = {};
-        let notes = [];
-        
-        
-       $(document).ready(function() {
-    $('#categorySelect').select2({
-        dir: "rtl", // لدعم اللغة العربية
-        placeholder: "اختر الصنف",
-        allowClear: true,
-        width: '100%',
-        minimumResultsForSearch: Infinity // إخفاء البحث داخل القائمة
-    });
-});
-        
-        
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+
+        $(document).ready(function() {
+            $('#categorySelect').select2({
+                dir: "rtl",
+                placeholder: "اختر الصنف",
+                allowClear: true,
+                width: '100%',
+                minimumResultsForSearch: Infinity,
+                dropdownAutoWidth: true, // السماح للقائمة بالتوسع حسب المحتوى
+                dropdownCss: { 'max-height': '400px' } // ارتفاع مخصص مباشرة
+            });
+            updateNotes();
+        });
 
         async function loadSimilaritesData() {
             const response = await fetch(dropboxSimilaritesFile);
@@ -724,7 +762,7 @@
             const workbook = XLSX.read(buffer, { type: "array" });
             database.SIMILARITES = XLSX.utils.sheet_to_json(workbook.Sheets["SIMILARITES"] || {}).map(item => ({
                 Item: item.Item || "غير مسمى",
-                Category: item.Category || 20 // افتراضيًا "توافقات منوعة"
+                Category: item.Category || 20
             }));
         }
 
@@ -744,6 +782,7 @@
                 if (password === "1990") {
                     localStorage.setItem("similaritesAccess", "granted");
                     await loadSimilaritesData();
+                    updateNotes();
                 } else if (password) {
                     Swal.fire({
                         icon: 'error',
@@ -762,6 +801,7 @@
                 }
             } else {
                 await loadSimilaritesData();
+                updateNotes();
             }
         };
 
@@ -782,11 +822,13 @@
 
             const results = database.SIMILARITES.filter(item => String(item.Category) === category);
             displayResults(results);
+            scrollToResults();
         }
 
         function searchItems() {
             const searchInput = document.getElementById("searchInput").value.trim();
             const category = document.getElementById("categorySelect").value;
+            const resultsContainer = document.getElementById("resultsContainer");
 
             if (!searchInput && !category) {
                 Swal.fire({
@@ -798,6 +840,7 @@
                     showCancelButton: true,
                     cancelButtonText: 'إغلاق'
                 });
+                resultsContainer.classList.remove('visible');
                 return;
             }
 
@@ -820,15 +863,18 @@
                     showCancelButton: true,
                     cancelButtonText: 'إغلاق'
                 });
+                resultsContainer.classList.remove('visible');
                 return;
             }
 
             displayResults(results);
+            scrollToResults();
         }
 
         function displayResults(results) {
-            const resultsContainer = document.getElementById("results");
-            resultsContainer.innerHTML = results.map(item => `
+            const resultsContainer = document.getElementById("resultsContainer");
+            const productsGrid = document.getElementById("results");
+            productsGrid.innerHTML = results.map(item => `
                 <div class="result-card">
                     <img src="images/default.png" alt="Item Image">
                     <h4>${item["Item"]}</h4>
@@ -836,11 +882,24 @@
                 </div>
             `).join('');
 
+            if (results.length > 0) {
+                resultsContainer.classList.add('visible');
+            } else {
+                resultsContainer.classList.remove('visible');
+            }
+
             const scrollButton = document.querySelector('.scroll-to-top');
             if (results.length > 5) {
                 scrollButton.classList.add('visible');
             } else {
                 scrollButton.classList.remove('visible');
+            }
+        }
+
+        function scrollToResults() {
+            const resultsContainer = document.getElementById("resultsContainer");
+            if (resultsContainer.classList.contains('visible')) {
+                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
 
@@ -851,12 +910,13 @@
 
         function addToNotes(itemName) {
             notes.push({ name: itemName });
+            localStorage.setItem('notes', JSON.stringify(notes));
             updateNotes();
         }
 
         function updateNotes() {
             const notesItems = document.getElementById('notesItems');
-            const notesCount = document.getElementById('notesCount');
+            const headerNotesCount = document.getElementById('headerNotesCount');
             notesItems.innerHTML = '';
 
             notes.forEach((item, index) => {
@@ -869,11 +929,17 @@
                 notesItems.appendChild(notesItem);
             });
 
-            notesCount.textContent = notes.length;
+            headerNotesCount.textContent = notes.length;
+            if (notes.length > 0) {
+                headerNotesCount.classList.add('visible');
+            } else {
+                headerNotesCount.classList.remove('visible');
+            }
         }
 
         function removeFromNotes(index) {
             notes.splice(index, 1);
+            localStorage.setItem('notes', JSON.stringify(notes));
             updateNotes();
         }
 
@@ -886,6 +952,49 @@
                 top: 0,
                 behavior: 'smooth'
             });
+        }
+
+        async function refreshData() {
+            Swal.fire({
+                title: 'جاري التحديث',
+                text: 'يرجى الانتظار...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                await loadSimilaritesData();
+                Swal.fire({
+                    title: 'تم التحديث',
+                    text: 'تم تحديث البيانات بنجاح',
+                    icon: 'success',
+                    confirmButtonText: 'موافق'
+                });
+            } catch (error) {
+                Swal.fire({
+                    title: 'خطأ',
+                    text: 'حدث خطأ أثناء التحديث',
+                    icon: 'error',
+                    confirmButtonText: 'موافق'
+                });
+            }
+        }
+
+        async function confirmExit() {
+            const result = await Swal.fire({
+                title: 'تأكيد الخروج',
+                text: 'هل أنت متأكد أنك تريد الخروج؟',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'نعم، خروج',
+                cancelButtonText: 'لا، إلغاء'
+            });
+
+            if (result.isConfirmed) {
+                window.close();
+            }
         }
     </script>
 </body>
