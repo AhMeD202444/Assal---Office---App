@@ -112,11 +112,11 @@
             background: linear-gradient(135deg, #9CA3AF, #6B7280);
         }
 
-        .exit-btn {
+        .back-btn {
             background: linear-gradient(135deg, #8B0000, #B22222);
         }
 
-        .exit-btn:hover {
+        .back-btn:hover {
             background: linear-gradient(135deg, #CD5C5C, #8B0000);
         }
 
@@ -165,14 +165,15 @@
         .container {
             background: rgba(30, 42, 68, 0.9);
             border-radius: 20px;
-            padding: 25px;
+            padding: 35px; /* زيادة الحشوة لتكبير الحاوية */
             text-align: center;
             width: 90vw;
             max-width: 800px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 30px; /* زيادة المسافة بين العناصر */
+            min-height: 450px; /* ارتفاع أكبر للحاوية */
         }
 
         h1 {
@@ -238,10 +239,12 @@
             font-family: 'Cairo', sans-serif;
             color: #E2E8F0;
             text-align: center;
+            margin-top: 10px; /* مسافة أنيقة أسفل القائمة */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .select2-results {
-            max-height: 400px; /* لعرض 9-10 أصناف (كل خيار ~40px) */
+            max-height: 400px; /* لعرض 9-10 أصناف */
             overflow-y: auto;
         }
 
@@ -256,7 +259,7 @@
             text-align: center;
             border-bottom: 1px solid rgba(212, 175, 55, 0.5);
             transition: background 0.3s ease;
-            min-height: 40px; /* ارتفاع ثابت لكل خيار */
+            min-height: 40px;
             line-height: 16px;
         }
 
@@ -546,7 +549,7 @@
             display: flex;
         }
 
-        /* الفوتر (عاد إلى الشكل الأصلي) */
+        /* الفوتر */
         footer {
             background-color: rgba(0, 0, 0, 0.8);
             color: white;
@@ -675,11 +678,11 @@
     </style>
 </head>
 <body>
-    <!-- الهيدر -->
+    <!-- الهيدر مع زر "رجوع" -->
     <header class="header">
-        <div class="header-title">مكتب عسل</div>
+        <div class="header-title">متكتب عسل</div>
         <div class="header-buttons">
-            <button class="header-btn exit-btn" onclick="confirmExit()" title="خروج"><i class="fas fa-sign-out-alt"></i> خروج</button>
+            <button class="header-btn back-btn" onclick="goBack()" title="رجوع"><i class="fas fa-arrow-right"></i> رجوع</button>
             <button class="header-btn refresh-btn" onclick="refreshData()" title="تحديث البيانات"><i class="fas fa-sync"></i> تحديث</button>
             <button class="header-btn notes-btn" onclick="toggleNotes()" title="عرض الملاحظات"><i class="fas fa-sticky-note"></i> ملاحظات <span class="notes-count" id="headerNotesCount">0</span></button>
         </div>
@@ -733,9 +736,9 @@
 
     <button class="scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i></button>
 
-    <!-- الفوتر (رجع للشكل الأصلي) -->
+    <!-- الفوتر -->
     <footer>
-        <p>جميع الحقوق محفوظة - متجر عسل</p>
+        <p>جميع الحقوق محفوظة - مكتب عسل</p>
     </footer>
 
     <script>
@@ -750,8 +753,9 @@
                 allowClear: true,
                 width: '100%',
                 minimumResultsForSearch: Infinity,
-                dropdownAutoWidth: true, // السماح للقائمة بالتوسع حسب المحتوى
-                dropdownCss: { 'max-height': '400px' } // ارتفاع مخصص مباشرة
+                dropdownAutoWidth: true,
+                dropdownCss: { 'max-height': '400px' },
+                dropdownParent: $('.category-container') // ربط القائمة بالحاوية لتحديد الموضع
             });
             updateNotes();
         });
@@ -943,7 +947,7 @@
             updateNotes();
         }
 
-        function toggleMainMenu() {
+        function goBack() {
             window.location.href = "index.html";
         }
 
@@ -979,21 +983,6 @@
                     icon: 'error',
                     confirmButtonText: 'موافق'
                 });
-            }
-        }
-
-        async function confirmExit() {
-            const result = await Swal.fire({
-                title: 'تأكيد الخروج',
-                text: 'هل أنت متأكد أنك تريد الخروج؟',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'نعم، خروج',
-                cancelButtonText: 'لا، إلغاء'
-            });
-
-            if (result.isConfirmed) {
-                window.close();
             }
         }
     </script>
