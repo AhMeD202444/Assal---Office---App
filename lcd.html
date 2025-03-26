@@ -105,9 +105,9 @@
         }
 
         .logo-container {
-            width: clamp(50px, 10vw, 100px);
-            height: clamp(50px, 10vw, 100px);
-            margin: 0 auto 0.5rem;
+            width: clamp(80px, 15vw, 120px); /* حجم أنيق ومناسب */
+            height: clamp(80px, 15vw, 120px);
+            margin: 0 auto 1rem; /* زيادة المسافة السفلية */
             border-radius: 50%;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -133,8 +133,8 @@
 
         .categories {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* متجاوب مع الحد الأدنى 100px */
-            gap: 1rem; /* مسافة بين الأزرار */
+            grid-template-columns: repeat(4, 1fr); /* 4 أزرار في كل صف */
+            gap: 0.75rem; /* مسافة صغيرة أنيقة */
         }
 
         .category-btn {
@@ -142,25 +142,23 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 100%; /* يأخذ كامل العرض المتاح في العمود */
-            aspect-ratio: 1 / 1; /* نسبة العرض إلى الارتفاع 1:1 */
-            min-width: 80px; /* الحد الأدنى للعرض */
-            min-height: 80px; /* الحد الأدنى للارتفاع */
+            width: 70px; /* حجم صغير أنيق */
+            height: 70px;
             background: linear-gradient(45deg, #3A6073, #1A2F3A);
             border-radius: 50%;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
             transition: all 0.3s ease;
             cursor: pointer;
             color: #fff;
-            font-size: clamp(0.9rem, 2vw, 1.2rem); /* نص متجاوب */
+            font-size: 0.8rem; /* نص صغير أنيق */
             text-align: center;
             position: relative;
             overflow: hidden;
         }
 
         .category-btn i {
-            font-size: clamp(1.2rem, 3vw, 1.8rem); /* أيقونات متجاوبة */
-            margin-bottom: 0.5rem;
+            font-size: 1.2rem; /* أيقونة صغيرة أنيقة */
+            margin-bottom: 0.3rem;
         }
 
         .category-btn::before {
@@ -292,7 +290,7 @@
             height: 40px;
             background: #8B0000;
             border-radius: 50%;
-            display: none; /* مخفي افتراضيًا */
+            display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
@@ -309,7 +307,6 @@
         .scroll-to-top i {
             font-size: 1rem;
             color: #fff;
-            line-height: 40px; /* لضمان التوسيط العمودي */
         }
 
         footer {
@@ -324,6 +321,12 @@
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
             z-index: 10;
             backdrop-filter: blur(5px);
+        }
+
+        @media (max-width: 600px) {
+            .categories {
+                grid-template-columns: repeat(2, 1fr); /* صفين فقط على الشاشات الصغيرة */
+            }
         }
     </style>
 </head>
@@ -412,7 +415,6 @@
             const resultsContainer = document.getElementById('results');
             const scrollToTopBtn = document.getElementById('scrollToTop');
             resultsContainer.innerHTML = '';
-            scrollToTopBtn.style.display = 'none'; // إخفاء الزر قبل عرض النتائج
 
             if (items.length === 0) {
                 resultsContainer.innerHTML = `<div class="no-results">لا توجد بيانات لـ ${title} حالياً</div>`;
@@ -450,7 +452,6 @@
 
             resultsContainer.innerHTML = htmlContent;
             resultsContainer.style.display = 'block';
-            scrollToTopBtn.style.display = 'block'; // إظهار الزر بعد عرض النتائج
 
             setTimeout(() => {
                 resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -517,6 +518,17 @@
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        // التحكم في ظهور/إخفاء زر الصعود بناءً على التمرير
+        window.addEventListener('scroll', () => {
+            const scrollToTopBtn = document.getElementById('scrollToTop');
+            const resultsContainer = document.getElementById('results');
+            if (resultsContainer.style.display === 'block' && window.scrollY > 100) {
+                scrollToTopBtn.style.display = 'block';
+            } else {
+                scrollToTopBtn.style.display = 'none';
+            }
+        });
 
         loadExcelFiles();
     </script>
