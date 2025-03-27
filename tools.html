@@ -9,13 +9,27 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
+    
+    
+    .swal-custom-zindex {
+    z-index: 3000 !important;
+}
+    
+  
+    @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+    
+    
+    
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-   body {
+body {
     font-family: 'Orbitron', sans-serif;
     background: linear-gradient(135deg, #3A6073, #16222A);
     color: #e0e0e0;
@@ -25,27 +39,28 @@
     overflow-x: hidden;
     position: relative;
     direction: rtl;
-    padding-top: 42px; /* 40px هيدر + 2px مسافة */
-    padding-bottom: 45px; /* نتركها زي ما هي حالياً */
+    padding-top: 45px; /* كان 42px، زدناه لـ 45px لتناسق */
+    padding-bottom: 45px; /* متساوية مع الأعلى */
 }
 
 .main-container {
     max-width: 1400px;
-    margin: 45px auto 10px; /* 45px من فوق بدل 50px */
+    margin: 10px auto; /* تقليل المسافة من 45px إلى 10px من فوق وتحت */
     padding: 0 40px;
     display: flex;
     gap: 20px;
     min-height: 800px;
 }
 
+
 .filters {
-    width: 350px;
+    width: 650px; /* أعرض من القائمة المنسدلة، زيادة من 350px */
     background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
-    padding: 50px;
+    padding: 20px;
     border-radius: 25px;
     box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
     position: sticky;
-    top: 42px; /* 40px هيدر + 2px مسافة */
+    top: 45px;
     bottom: 45px;
     border: 1px solid rgba(0, 206, 209, 0.5);
     display: flex;
@@ -54,6 +69,7 @@
     align-items: center;
     min-height: 600px;
 }
+
         @keyframes gradientAnimation {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -61,12 +77,12 @@
         }
         
         
-    .custom-dropdown.neon-enhanced {
+ .custom-dropdown.neon-enhanced {
     position: relative;
-    width: 100%; /* تأخذ كامل عرض الحاوية */
-    max-width: 320px; /* حد أقصى أعرض من قبل (كان 300px) */
+    width: 100%;
+    max-width: 600px !important;
     perspective: 1000px;
-    z-index: 2000;
+    z-index: 3000; /* زيادة من 1000 إلى 3000 */
 }
 
 .dropdown-selected {
@@ -93,7 +109,7 @@
     position: absolute;
     top: 110%;
     left: 0;
-    width: 100%; /* تأخذ كامل عرض القائمة الأم */
+    width: 100%;
     max-height: 250px;
     overflow-y: auto;
     background: rgba(0, 0, 0, 0.85);
@@ -102,13 +118,12 @@
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 206, 209, 0.5);
     backdrop-filter: blur(10px);
     display: none;
-    z-index: 2002;
+    z-index: 3001; /* زيادة من 2002 إلى 3001 */
     transform-origin: top;
     transform: scaleY(0) rotateX(-15deg);
     transition: transform 0.4s ease, opacity 0.3s ease;
     opacity: 0;
 }
-
 
 .dropdown-selected:hover {
     border-color: #FF1493;
@@ -275,13 +290,13 @@
 }
 
 .header-btn:hover {
-    transform: scale(1.1) rotate(5deg);
+    transform: none;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
 }
 
 .header-btn:active {
-    transform: scale(0.95);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transform: none; /* إلغاء التغيير في الحجم أو الدوران */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* ظل خفيف فقط بدون تغيير كبير */
 }
 
 .refresh-btn {
@@ -441,32 +456,15 @@
 }
 
 .main-container {
-    max-width: 1400px;
-    margin: 45px auto 10px; /* 45px من فوق بدل 50px */
+    max-width: 1400px; /* أو زودها لـ 1600px لو تريد مساحة أكبر */
+    margin: 10px auto;
     padding: 0 40px;
     display: flex;
     gap: 20px;
     min-height: 800px;
+    flex-wrap: nowrap; /* منع الالتفاف */
 }
        
-/* تعديل حاوية الفلاتر (التي تحتوي على شريط البحث والأصناف) */
-.filters {
-    width: 350px;
-    background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
-    padding: 50px;
-    border-radius: 25px;
-    box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
-    position: sticky;
-    top: 42px; /* 40px هيدر + 2px مسافة */
-    bottom: 45px;
-    border: 1px solid rgba(0, 206, 209, 0.5);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 600px;
-}
-
 
         .filter-group .filter-options {
             display: flex;
@@ -911,10 +909,10 @@ footer p {
     <div class="filters">
     <div class="filter-group">
         <div class="custom-dropdown neon-enhanced">
-            <div class="dropdown-selected" onclick="toggleDropdown()">
-                <span id="selectedCategory">جميع الأدوات</span>
-                <i class="fas fa-chevron-down"></i>
-            </div>
+           <div class="dropdown-selected" onclick="toggleDropdown()">
+    <span id="selectedCategory">اختر صنف</span>
+    <i class="fas fa-chevron-down"></i>
+</div>
             <div class="dropdown-options" id="dropdownOptions">
                 <div class="option" data-value="all" onclick="selectOption('all', 'جميع الأدوات')">جميع الأدوات</div>
                 <div class="option" data-value="درنفيسات" onclick="selectOption('درنفيسات', 'درنفيسات')">درنفيسات</div>
@@ -2621,17 +2619,40 @@ footer p {
         window.location.href = "index.html";
     }
 
-    function refreshWithMessage() {
-        const refreshText = document.getElementById('refreshText');
-        refreshText.textContent = 'تحديث';
-        setTimeout(() => {
-            refreshText.textContent = 'اكتمال التحديث';
+  function refreshWithMessage() {
+    const dropdownOptions = document.getElementById('dropdownOptions');
+    dropdownOptions.classList.remove('active'); // إغلاق القائمة
+    Swal.fire({
+        title: 'جاري التحديث...',
+        html: '<div style="width: 50px; height: 50px; border: 4px solid #4A8296; border-top: 4px solid #FF1493; border-radius: 50%; animation: spin 1s linear infinite;"></div>',
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        background: 'rgba(0, 0, 0, 0.9)',
+        color: '#e0e0e0',
+       
+        customClass: {
+            popup: 'swal-custom-zindex'
+        },
+        didOpen: () => {
             setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        }, 500);
-    }
-
+                Swal.fire({
+                    title: 'تم التحديث!',
+                    icon: 'success',
+                    confirmButtonText: 'موافق',
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    color: '#e0e0e0',
+                    confirmButtonColor: '#4A8296',
+                    customClass: {
+                        popup: 'swal-custom-zindex'
+                       
+                    },
+                }).then(() => {
+                    window.location.reload();
+                });
+            }, 1500);
+        }
+    });
+}
     function toggleCart() {
         const cartDrawer = document.getElementById('cartDrawer');
         cartDrawer.classList.toggle('active');
@@ -2684,7 +2705,7 @@ footer p {
 
   function scrollToFirstResult() {
     setTimeout(() => {
-        const firstVisibleProduct = document.querySelector('.product-card[style="display: block"]');
+        const firstVisibleProduct = document.querySelector('.product-card:not([style*="display: none"])');
         if (firstVisibleProduct) {
             firstVisibleProduct.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
