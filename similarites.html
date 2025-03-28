@@ -152,30 +152,30 @@
 
         /* الحاوية الرئيسية */
         .main-container {
-            max-width: 1400px;
-            margin: 20px auto 0;
-            padding: 0 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            min-height: calc(100vh - 90px);
-        }
-
-        .container {
-           width: 600px;
-    background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
-    padding: 10px 40px; /* ارتفاع كبير */
-    min-height: 600px; /* ارتفاع أدنى */
-    border-radius: 25px;
-    box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
-    border: 1px solid rgba(0, 206, 209, 0.5);
-    margin: 50px 20px;
+    max-width: 1400px;
+    margin: 0 auto; /* إزالة الهامش العلوي 20px لأن الهيدر ثابت */
+    padding: 0 40px;
     display: flex;
     flex-direction: column;
     justify-content: center; /* توسيط عمودي */
-    align-items: center; /* توسيط أفقي */
-    gap: 20px; /* المسافة بين القائمة ودائرة البحث */
+    align-items: center;
+    gap: 20px;
+    min-height: calc(100vh - 40px); /* ارتفاع الهيدر الثابت فقط */
+}
+       .container {
+    width: 600px;
+    background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
+    padding: 10px 40px;
+    min-height: 600px;
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
+    border: 1px solid rgba(0, 206, 209, 0.5);
+    margin: 0 20px; /* إزالة الهامش العلوي والسفلي الثابت */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
 }
         h1 {
             font-size: clamp(24px, 5vw, 36px);
@@ -959,33 +959,36 @@
             });
         }
 
-        async function refreshData() {
-            Swal.fire({
-                title: 'جاري التحديث',
-                text: 'يرجى الانتظار...',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            try {
-                await loadSimilaritesData();
-                Swal.fire({
-                    title: 'تم التحديث',
-                    text: 'تم تحديث البيانات بنجاح',
-                    icon: 'success',
-                    confirmButtonText: 'موافق'
-                });
-            } catch (error) {
-                Swal.fire({
-                    title: 'خطأ',
-                    text: 'حدث خطأ أثناء التحديث',
-                    icon: 'error',
-                    confirmButtonText: 'موافق'
-                });
-            }
+       async function refreshData() {
+    Swal.fire({
+        title: 'جاري التحديث',
+        text: 'يرجى الانتظار...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
         }
+    });
+
+    try {
+        // إضافة تأخير بسيط (مثلاً 1000 مللي ثانية = 1 ثانية)
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await loadSimilaritesData();
+
+        Swal.fire({
+            title: 'تم التحديث',
+            text: 'تم تحديث البيانات بنجاح',
+            icon: 'success',
+            confirmButtonText: 'موافق'
+        });
+    } catch (error) {
+        Swal.fire({
+            title: 'خطأ',
+            text: 'حدث خطأ أثناء التحديث',
+            icon: 'error',
+            confirmButtonText: 'موافق'
+        });
+    }
+}
     </script>
 </body>
 </html>
