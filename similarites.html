@@ -152,30 +152,30 @@
 
         /* الحاوية الرئيسية */
         .main-container {
-            max-width: 1400px;
-            margin: 20px auto 0;
-            padding: 0 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            min-height: calc(100vh - 90px);
-        }
-
-        .container {
-           width: 600px;
-    background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
-    padding: 10px 40px; /* ارتفاع كبير */
-    min-height: 600px; /* ارتفاع أدنى */
-    border-radius: 25px;
-    box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
-    border: 1px solid rgba(0, 206, 209, 0.5);
-    margin: 50px 20px;
+    max-width: 1400px;
+    margin: 0 auto; /* حذف margin-top لأنه لم يعد ضروريًا */
+    padding: 0 40px;
     display: flex;
     flex-direction: column;
     justify-content: center; /* توسيط عمودي */
     align-items: center; /* توسيط أفقي */
-    gap: 20px; /* المسافة بين القائمة ودائرة البحث */
+    min-height: calc(100vh - 80px); /* الـ 80px هو مجموع ارتفاع الهيدر والفوتر (40px + 40px) */
+    gap: 20px;
+}
+        .container {
+    width: 600px;
+    background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
+    padding: 10px 40px;
+    min-height: 550px;
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
+    border: 1px solid rgba(0, 206, 209, 0.5);
+    margin: 0 20px; /* حذف الـ 50px العلوي والسفلي */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
 }
         h1 {
             font-size: clamp(24px, 5vw, 36px);
@@ -370,24 +370,24 @@
             gap: 20px;
         }
 
-        .result-card {
-            background: #1A202C;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            width: clamp(300px, 40vw, 450px);
-            min-height: auto;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s ease;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-            transform: perspective(600px) rotateY(0deg) translateZ(10px);
-        }
-
+      .result-card {
+    background: linear-gradient(135deg, #2A3A5A, #1A2638); /* تدرج أفتح قليلاً */
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    width: clamp(300px, 40vw, 450px);
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6); /* ظل أقوى للبروز */
+    border: 1px solid rgba(212, 175, 55, 0.3); /* حدود ذهبية خفيفة */
+    transform: perspective(600px) rotateY(0deg) translateZ(10px);
+}
         .result-card:hover {
             transform: perspective(600px) rotateY(-5deg) scale(1.05);
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
