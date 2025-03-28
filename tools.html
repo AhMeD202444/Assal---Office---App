@@ -316,21 +316,24 @@
         .cart-total-section .total { font-size: 20px; color: #FF1493; font-weight: 700; }
 
         /* زر الرجوع للأعلى */
-        .scroll-to-top {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: #8B0000;
-            border: none;
-            border-radius: 50%;
-            color: #fff;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .scroll-to-top:hover { background: #A00000; transform: translateY(-5px); }
+      .scroll-to-top {
+    position: fixed;
+    bottom: 50px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: #8B0000;
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: none; /* مخفي افتراضيًا */
+}
+.scroll-to-top.visible { display: block; }
+.scroll-to-top:hover { background: #A00000; transform: translateY(-5px); }
+
 
         /* الفوتر */
         footer {
@@ -2097,106 +2100,138 @@
     </footer>
 
     <script>
-        let cart = [];
-        let currentFilter = 'all';
+       let cart = [];
+let currentFilter = 'all';
 
-        function toggleCart() { document.getElementById('cartDrawer').classList.toggle('active'); }
+function toggleCart() { document.getElementById('cartDrawer').classList.toggle('active'); }
 
-        function addToCart(productName, price) {
-            cart.push({ name: productName, price: price });
-            updateCart();
+function addToCart(productName, price) {
+    cart.push({ name: productName, price: price });
+    updateCart();
+}
+
+function updateCart() {
+    const cartItems = document.getElementById('cartItems');
+    const cartCount = document.getElementById('cartCount');
+    const cartTotal = document.getElementById('cartTotal');
+    cartItems.innerHTML = '';
+    let total = 0;
+
+    cart.forEach((item, index) => {
+        total += item.price;
+        cartItems.innerHTML += `
+            <div class="cart-item">
+                <span>${item.name} - ${item.price.toLocaleString()} د.ع</span>
+                <button onclick="removeFromCart(${index})">إزالة</button>
+            </div>
+        `;
+    });
+
+    cartCount.textContent = cart.length;
+    cartCount.classList.toggle('visible', cart.length > 0);
+    cartTotal.textContent = `المجموع: ${total.toLocaleString()} د.ع`;
+}
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCart();
+}
+
+function toggleDropdown() {
+    document.getElementById('dropdownOptions').classList.toggle('active');
+}
+
+function selectOption(value, text) {
+    document.getElementById('selectedCategory').textContent = text;
+    filterProducts(value);
+    toggleDropdown();
+}
+
+function filterProducts(category) {
+    currentFilter = category;
+    const products = document.querySelectorAll('.product-card');
+    const productsGrid = document.getElementById('productsGrid');
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const scrollToTopBtn = document.querySelector('.scroll-to-top');
+
+    productsGrid.classList.add('visible');
+    let hasVisibleProducts = false;
+
+    products.forEach(product => {
+        const matchesCategory = category === 'all' || product.dataset.category === category;
+        const matchesSearch = searchInput ? product.querySelector('h4').textContent.toLowerCase().includes(searchInput) : true;
+        product.style.display = (matchesCategory && matchesSearch) ? 'block' : 'none';
+        if (matchesCategory && matchesSearch) {
+            hasVisibleProducts = true;
         }
+    });
 
-        function updateCart() {
-            const cartItems = document.getElementById('cartItems');
-            const cartCount = document.getElementById('cartCount');
-            const cartTotal = document.getElementById('cartTotal');
-            cartItems.innerHTML = '';
-            let total = 0;
+    // تحديث ظهور الزر بناءً على النتايج وموقع التمرير
+    updateScrollToTopButton(hasVisibleProducts);
+    scrollToFirstResult();
+}
 
-            cart.forEach((item, index) => {
-                total += item.price;
-                cartItems.innerHTML += `
-                    <div class="cart-item">
-                        <span>${item.name} - ${item.price.toLocaleString()} د.ع</span>
-                        <button onclick="removeFromCart(${index})">إزالة</button>
-                    </div>
-                `;
-            });
+function searchProducts() { filterProducts(currentFilter); }
 
-            cartCount.textContent = cart.length;
-            cartCount.classList.toggle('visible', cart.length > 0);
-            cartTotal.textContent = `المجموع: ${total.toLocaleString()} د.ع`;
-        }
+function scrollToFirstResult() {
+    setTimeout(() => {
+        const firstVisible = document.querySelector('.product-card:not([style*="display: none"])');
+        if (firstVisible) firstVisible.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+}
 
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCart();
-        }
-
-        function toggleDropdown() {
-            document.getElementById('dropdownOptions').classList.toggle('active');
-        }
-
-        function selectOption(value, text) {
-            document.getElementById('selectedCategory').textContent = text;
-            filterProducts(value);
-            toggleDropdown();
-        }
-
-        function filterProducts(category) {
-            currentFilter = category;
-            const products = document.querySelectorAll('.product-card');
-            const productsGrid = document.getElementById('productsGrid');
-            const searchInput = document.getElementById('searchInput').value.toLowerCase();
-
-            productsGrid.classList.add('visible');
-            products.forEach(product => {
-                const matchesCategory = category === 'all' || product.dataset.category === category;
-                const matchesSearch = searchInput ? product.querySelector('h4').textContent.toLowerCase().includes(searchInput) : true;
-                product.style.display = (matchesCategory && matchesSearch) ? 'block' : 'none';
-            });
-            scrollToFirstResult();
-        }
-
-        function searchProducts() { filterProducts(currentFilter); }
-
-        function scrollToFirstResult() {
+function refreshWithMessage() {
+    document.getElementById('dropdownOptions').classList.remove('active');
+    Swal.fire({
+        title: 'جاري التحديث...',
+        html: '<div style="width: 50px; height: 50px; border: 4px solid #4A8296; border-top: 4px solid #FF1493; border-radius: 50%; animation: spin 1s linear infinite;"></div>',
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        background: 'rgba(0, 0, 0, 0.9)',
+        color: '#e0e0e0',
+        customClass: { popup: 'swal-custom-zindex' },
+        didOpen: () => {
             setTimeout(() => {
-                const firstVisible = document.querySelector('.product-card:not([style*="display: none"])');
-                if (firstVisible) firstVisible.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
+                Swal.fire({
+                    title: 'تم التحديث!',
+                    icon: 'success',
+                    confirmButtonText: 'موافق',
+                    background: 'rgba(0, 0, 0, 0.9)',
+                    color: '#e0e0e0',
+                    confirmButtonColor: '#4A8296',
+                    customClass: { popup: 'swal-custom-zindex' }
+                }).then(() => window.location.reload());
+            }, 1500);
         }
+    });
+}
 
-        function refreshWithMessage() {
-            document.getElementById('dropdownOptions').classList.remove('active');
-            Swal.fire({
-                title: 'جاري التحديث...',
-                html: '<div style="width: 50px; height: 50px; border: 4px solid #4A8296; border-top: 4px solid #FF1493; border-radius: 50%; animation: spin 1s linear infinite;"></div>',
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                background: 'rgba(0, 0, 0, 0.9)',
-                color: '#e0e0e0',
-                customClass: { popup: 'swal-custom-zindex' },
-                didOpen: () => {
-                    setTimeout(() => {
-                        Swal.fire({
-                            title: 'تم التحديث!',
-                            icon: 'success',
-                            confirmButtonText: 'موافق',
-                            background: 'rgba(0, 0, 0, 0.9)',
-                            color: '#e0e0e0',
-                            confirmButtonColor: '#4A8296',
-                            customClass: { popup: 'swal-custom-zindex' }
-                        }).then(() => window.location.reload());
-                    }, 1500);
-                }
-            });
-        }
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const scrollToTopBtn = document.querySelector('.scroll-to-top');
+    scrollToTopBtn.classList.remove('visible'); // إخفاء الزر بعد الصعود
+}
 
-        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+// دالة جديدة لتحديث حالة الزر بناءً على النتايج وموقع التمرير
+function updateScrollToTopButton(hasVisibleProducts) {
+    const scrollToTopBtn = document.querySelector('.scroll-to-top');
+    const scrollPosition = window.scrollY;
 
-        document.getElementById('searchInput').addEventListener('input', searchProducts);
+    // الزر يظهر فقط إذا في نتايج ظاهرة وموقع التمرير أكبر من 100px
+    if (hasVisibleProducts && scrollPosition > 100) {
+        scrollToTopBtn.classList.add('visible');
+    } else {
+        scrollToTopBtn.classList.remove('visible');
+    }
+}
+
+// حدث التمرير لتحديث الزر ديناميكيًا
+window.addEventListener('scroll', () => {
+    const hasVisibleProducts = document.querySelectorAll('.product-card:not([style*="display: none"])').length > 0;
+    updateScrollToTopButton(hasVisibleProducts);
+});
+
+document.getElementById('searchInput').addEventListener('input', searchProducts);
     </script>
 </body>
 </html>
