@@ -14,19 +14,18 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
 
-       body {
-    font-family: 'Orbitron', sans-serif;
-    background: linear-gradient(135deg, #3A6073, #16222A);
-    color: #e0e0e0;
-    min-height: 100vh; /* لضمان تغطية الشاشة كاملة */
-    animation: gradientAnimation 10s ease infinite;
-    background-size: 400% 400%;
-    direction: rtl;
-    padding: 0; /* نزيل البادينغ لأن التوسيط المطلق ما يحتاجه */
-}
-
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, #3A6073, #16222A);
+            color: #e0e0e0;
+            min-height: 100vh;
+            animation: gradientAnimation 10s ease infinite;
+            background-size: 400% 400%;
+            direction: rtl;
+            padding-top: 50px;
+            padding-bottom: 50px;
+        }
 
         @keyframes gradientAnimation {
             0% { background-position: 0% 50%; }
@@ -84,37 +83,32 @@
         }
         .purchases-count.visible { display: flex; }
 
-       .main-container {
-    max-width: 1400px;
-    margin: 0 auto; /* نتركها للعناصر الأخرى مثل المنتجات */
-    padding: 0 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    min-height: 100vh; /* لضمان إن الحاوية تملأ الشاشة */
-    position: relative; /* للتعامل مع العناصر الداخلية */
-}
+        .main-container {
+            max-width: 1400px;
+            margin: 10px auto;
+            padding: 0 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
         /* حاوية الفلتر */
-      .filters {
+       .filters {
     width: 600px;
     background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
-    padding: 40px 20px;
-    min-height: 500px; /* الارتفاع اللي كبرناه */
+    padding: 40px 20px; /* ارتفاع كبير */
+    min-height: 550px; /* ارتفاع أدنى */
     border-radius: 25px;
     box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
     border: 1px solid rgba(0, 206, 209, 0.5);
-    position: fixed; /* توسيط مطلق */
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* توسيط أفقي وعامودي */
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* توسيط العناصر الداخلية عموديًا */
-    align-items: center; /* توسيط العناصر الداخلية أفقيًا */
-    gap: 20px;
-    z-index: 1000; /* لضمان ظهورها فوق العناصر الأخرى */
+    justify-content: center; /* توسيط عمودي */
+    align-items: center; /* توسيط أفقي */
+    gap: 20px; /* المسافة بين القائمة ودائرة البحث */
 }
+
         /* القائمة المنسدلة */
         .custom-dropdown {
             width: 500px; /* أقل من عرض حاوية الفلتر */
