@@ -21,22 +21,19 @@
             box-sizing: border-box;
         }
 
-       body {
-    font-family: 'Cairo', sans-serif;
-    background: linear-gradient(135deg, #1E2A44, #0F172A);
-    color: #E2E8F0;
-    min-height: 100vh;
-    background-size: 400% 400%;
-    animation: gradientAnimation 10s ease infinite;
-    overflow-x: hidden;
-    position: relative;
-    direction: rtl;
-    margin: 0; /* إزالة أي هوامش افتراضية */
-    padding: 0; /* إزالة padding للسماح بالتحكم الكامل في التوسيط */
-    display: flex; /* تحويل body إلى flex container */
-    flex-direction: column; /* ترتيب العناصر عموديًا */
-}
-
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #1E2A44, #0F172A);
+            color: #E2E8F0;
+            min-height: 100vh;
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+            overflow-x: hidden;
+            position: relative;
+            direction: rtl;
+            padding-top: 50px;
+            padding-bottom: 50px;
+        }
 
         @keyframes gradientAnimation {
             0% { background-position: 0% 50%; }
@@ -46,20 +43,21 @@
 
         /* تصميم الهيدر */
         .header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 40px;
-    background: rgba(0, 0, 0, 0.8);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 12px;
-    z-index: 2000;
-}
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px;
+            z-index: 2000;
+        }
+
         .header-title {
             font-family: 'Cairo', sans-serif;
             font-size: 18px;
@@ -154,30 +152,30 @@
 
         /* الحاوية الرئيسية */
         .main-container {
-    max-width: 1400px;
-    margin: 40px auto 0; /* 40px لتجنب التداخل مع الهيدر الثابت */
-    padding: 0 40px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* توسيط عمودي */
-    align-items: center;
-    flex-grow: 1; /* للسماح لـ main-container بملء المساحة المتبقية */
-}
+            max-width: 1400px;
+            margin: 20px auto 0;
+            padding: 0 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            min-height: calc(100vh - 90px);
+        }
 
-.container {
-    width: 600px;
+        .container {
+           width: 600px;
     background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
-    padding: 10px 40px;
-    min-height: 600px;
+    padding: 10px 40px; /* ارتفاع كبير */
+    min-height: 600px; /* ارتفاع أدنى */
     border-radius: 25px;
     box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
     border: 1px solid rgba(0, 206, 209, 0.5);
-    margin: 0 20px; /* إزالة الهامش العلوي والسفلي */
+    margin: 50px 20px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
+    justify-content: center; /* توسيط عمودي */
+    align-items: center; /* توسيط أفقي */
+    gap: 20px; /* المسافة بين القائمة ودائرة البحث */
 }
         h1 {
             font-size: clamp(24px, 5vw, 36px);
@@ -553,25 +551,24 @@
         }
 
         /* الفوتر */
-       footer {
-    background-color: rgba(0, 0, 0, 0.8);
-    color: #E2E8F0; /* لون متناسق مع لون النص في body */
-    text-align: center;
-    padding: 10px 0; /* إضافة padding عمودي لتحسين المظهر */
-    width: 100%;
-    height: 40px; /* الارتفاع الكلي سيكون 40px + padding */
-    font-family: 'Cairo', sans-serif;
-    font-size: 14px;
-    box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.4);
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.1); /* إضافة حد علوي للتناسق مع الهيدر */
-}
+        footer {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            padding: 0;
+            width: 100%;
+            height: 40px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.4);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         /* استجابة الشاشة */
         @media (max-width: 768px) {
@@ -973,9 +970,9 @@
     });
 
     try {
-        // إضافة تأخير بسيط (مثلاً 1000 مللي ثانية = 1 ثانية)
-        await new Promise(resolve => setTimeout(resolve, 1000));
         await loadSimilaritesData();
+        // تأخير إضافي بعد انتهاء التحميل
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         Swal.fire({
             title: 'تم التحديث',
