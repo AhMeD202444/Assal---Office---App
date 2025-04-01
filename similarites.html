@@ -70,7 +70,7 @@
 
         .header-buttons {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             order: 0; /* على اليسار */
             position: relative;
         }
@@ -129,34 +129,40 @@
 
 .notes-btn {
     background: linear-gradient(135deg, #4682B4, #20B2AA);
+    position: relative;
+    padding-right: 26px; /* زيادة المسافة على اليمين لتوسيع الزر وإبعاد العداد */
+    padding-left: 12px; /* زيادة المسافة على اليسار للتوازن */
 }
+
 .notes-btn:hover {
     background: linear-gradient(135deg, #20B2AA, #4682B4);
 }
-.notes-btn:active {
-    background: linear-gradient(135deg, #20B2AA, #4682B4) !important; /* لون أغمق */
-}
-        /* عداد الملاحظات */
-        .notes-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #DC143C;
-            color: #fff;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-            display: none;
-        }
 
-        .notes-count.visible {
-            display: flex;
-        }
+.notes-btn:active {
+    background: linear-gradient(135deg, #20B2AA, #4682B4) !important;
+}
+
+.notes-count {
+    position: absolute;
+    top: 50%;
+    right: 4px; /* تقليل المسافة لإبعاد العداد عن النص */
+    transform: translateY(-50%);
+    background: #DC143C;
+    color: #fff;
+    border-radius: 50%;
+    width: 16px; /* زيادة الحجم من 14px إلى 16px */
+    height: 16px;
+    font-size: 9px; /* زيادة حجم الخط من 8px إلى 9px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    display: none;
+}
+
+.notes-count.visible {
+    display: flex;
+}
 
         /* الحاوية الرئيسية */
         .main-container {
