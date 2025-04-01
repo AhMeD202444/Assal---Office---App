@@ -58,19 +58,6 @@
     margin: 0 auto 4px;
 }
 
-.logo-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 160px; /* زيادة العرض */
-    height: 160px; /* زيادة الارتفاع */
-    border-radius: 50%;
-    overflow: hidden;
-    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
-    cursor: pointer;
-    z-index: 1;
-    opacity: 1;
-}
 
 
 .notification {
@@ -383,9 +370,9 @@
     cursor: pointer;
     z-index: 1;
     opacity: 1;
+    transition: transform 0.3s ease;
 }
 
-/* الصورة داخل الشعار */
 .logo-container img {
     width: 100%;
     height: 100%;
@@ -394,11 +381,14 @@
     border-radius: 50%;
 }
 
-.logo-container img:active {
-    transform: scale(1.1);
+.logo-container:active {
+    transform: scale(0.95) !important;
+    box-shadow: inset 0 8px 16px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي فقط */
 }
 
-
+.logo-container img:active {
+    transform: scale(1) !important; /* منع الصورة من التأثر */
+}
         
 h1 {
     font-size: 36px;
@@ -675,32 +665,32 @@ h1 {
 
 .search-container button {
     position: absolute;
-    right: 10px; /* المسافة من اليمين */
-    top: 50%; /* بدل 0% لتوسيطه رأسيًا */
-    transform: translateY(-50%); /* توسيط رأسي */
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     background: linear-gradient(45deg, #43cea2, #185a9d);
     border: none;
     border-radius: 50%;
-    width: 30px; /* تقليل العرض ليتناسب مع الشريط */
-    height: 30px; /* تقليل الارتفاع ليتناسب مع الشريط */
+    width: 30px;
+    height: 30px;
     color: white;
-    font-size: 16px; /* تقليل حجم الأيقونة */
+    font-size: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
-    display: flex; /* لتوسيط الأيقونة داخل الزر */
+    display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden !important; /* قص التأثيرات */
 }
 
 .search-container button:hover {
-    transform: translateY(-50%) scale(1.1); /* تعديل التأثير مع الحفاظ على التوسيط */
+    transform: translateY(-50%) scale(1.1);
 }
 
 .search-container button:active {
-    transform: translateY(-50%) scale(0.95); /* تعديل التأثير مع الحفاظ على التوسيط */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transform: translateY(-50%) scale(0.95) !important;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي فقط */
 }
-
 
         /* تصميم الهيدر المستقيم */
 /* تصميم الهيدر المستقيم */
@@ -803,7 +793,7 @@ h1 {
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(50, 50, 50, 0.3));
-    border-radius: 15px;
+    border-radius: 15px; /* الحفاظ على الشكل الأصلي */
     padding: 20px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
@@ -813,8 +803,8 @@ h1 {
     min-width: 250px;
     margin: 0 auto;
     position: relative;
-    overflow: hidden;
-    min-height: 200px; /* زيادة الارتفاع الأدنى لاستيعاب الأحجام الجديدة */
+    overflow: hidden !important; /* قص التأثيرات */
+    min-height: 200px;
 }
 
 .result-card:hover {
@@ -824,9 +814,9 @@ h1 {
 }
 
 .result-card:active {
-    transform: scale(0.97);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(50, 50, 50, 0.4));
+    transform: scale(0.97) !important;
+    box-shadow: inset 0 6px 12px rgba(0, 0, 0, 0.6) !important; /* ظل داخلي فقط */
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(50, 50, 50, 0.4)) !important;
 }
 
 .result-card img {
@@ -954,22 +944,30 @@ h1 {
 
 
 .no-results {
-    color: #ffffff; /* لون النص */
-    background: rgba(255, 255, 255, 0.1); /* خلفية شفافة تناسب الواجهة */
-    padding: 10px 15px; /* حشوة بسيطة */
-    border-radius: 10px; /* حواف بيضوية خفيفة */
-    text-align: center; /* محاذاة النص في المنتصف */
-    font-size: 16px; /* حجم النص */
-    font-weight: 500; /* سمك النص */
-    margin-top: 10px; /* مسافة من الأعلى */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15); /* ظل خفيف */
-    width: 80%; /* عرض مناسب */
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 15px;
+    border-radius: 10px; /* الحفاظ على الشكل الأصلي */
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    width: 80%;
     margin-left: auto;
-    margin-right: auto; /* جعل المستطيل مركزيًا */
-    animation: fadeIn 0.3s ease-in-out; /* تأثير ظهور بسيط */
-    cursor: pointer; /* مؤشر يدوي عند التمرير */
-    transition: transform 0.2s ease, box-shadow 0.2s ease; /* تأثير انتقال */
+    margin-right: auto;
+    animation: fadeIn 0.3s ease-in-out;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    overflow: hidden !important; /* قص التأثيرات */
 }
+
+.no-results:active {
+    transform: scale(0.95) !important;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي فقط */
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
 
 /* تأثير ظهور تدريجي */
 @keyframes fadeIn {
@@ -983,19 +981,7 @@ h1 {
     }
 }
 
-/* تأثير عند الضغط */
-.no-results:active {
-    transform: scale(0.95); /* تصغير بسيط */
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2); /* زيادة ظل عند الضغط */
-    background: rgba(255, 255, 255, 0.2); /* خلفية أفتح */
-}
-    
-
      
-
-        /* تعديل حجم النوافذ المنبثقة */
-        .
-/* تصميم جديد لواجهة SweetAlert */
 
 
 @keyframes shake {
