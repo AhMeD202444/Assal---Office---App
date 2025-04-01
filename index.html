@@ -526,12 +526,14 @@ h1 {
     display: none;
 }
 
+
+
 .category {
-     flex: 0 0 auto;
-    width: 85px;
+    flex: 0 0 auto;
+    width: 70px; /* جعل العرض يساوي الارتفاع لتصبح دائرية */
     height: 70px;
-    background: rgba(0, 0, 0, 0.3); /* ✅ نفس تأثير زر الكروب */
-    border-radius: 25px; /* ✅ تعديل الحواف */
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 50%; /* دائري بدلًا من بيضوي */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -540,52 +542,57 @@ h1 {
     transition: all 0.3s ease;
     text-align: center;
     padding: 6px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* ✅ تحسين الظلال */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     position: relative;
-    overflow: hidden; /* ✅ لمنع خروج التأثيرات */
+    overflow: hidden !important; /* قص التأثيرات */
+    clip-path: circle(35px at center) !important; /* قص دائري يطابق نصف القطر */
     font-weight: bold;
     color: white;
 }
 
-/* ✅ تعديل أيقونة الفئات */
+/* تأثير الأيقونة */
 .category i {
     font-size: 24px;
     margin-bottom: 5px;
     transition: transform 0.3s ease;
 }
 
-/* ✅ تأثير الأيقونة عند التمرير */
+/* تأثير الأيقونة عند التمرير */
 .category:hover i {
     transform: rotate(10deg) scale(1.2);
 }
 
-
-/* ✅ تحسين النص */
+/* النص داخل الزر */
 .category span {
-    font-size: 14px;
+    font-size: 12px; /* تقليل حجم النص ليناسب الدائرة */
     white-space: nowrap;
     font-weight: bold;
 }
 
+/* تأثير عند التمرير */
 .category:hover {
     transform: scale(1.1);
-    background: linear-gradient(45deg, #43cea2, #185a9d); /* ✅ نفس تأثير زر أسعار بنمط الكروب */
+    background: linear-gradient(45deg, #43cea2, #185a9d);
     box-shadow: 0 4px 15px rgba(67, 206, 162, 0.5);
 }
-/* ✅ تأثير عند الضغط */
+
+/* تأثير عند الضغط */
 .category:active {
-    transform: scale(0.95);
-    background: linear-gradient(45deg, #43cea2, #185a9d);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transform: scale(0.95) !important;
+    background: linear-gradient(45deg, #43cea2, #185a9d) !important;
+    box-shadow: inset 0 6px 12px rgba(0, 0, 0, 0.7) !important; /* ظل داخلي فقط */
+    clip-path: circle(35px at center) !important; /* قص دائري */
 }
 
-/* ✅ تأثير عند اختيار الصنف */
+/* تأثير عند التحديد */
 .category.active {
     background: linear-gradient(135deg, #004D40, #00796B);
     color: white;
     transform: scale(1.15);
     box-shadow: 0 6px 18px rgba(67, 206, 162, 0.7);
 }
+
+
 
 /* ✅ تأثير نبض عند التحديد */
 @keyframes pulseEffect {
