@@ -55,38 +55,48 @@
             gap: 0.5rem;
         }
 
-        .header-btn {
-            width: clamp(50px, 15vw, 60px);
-            height: 30px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            color: #fff;
-            font-size: clamp(0.8rem, 2vw, 0.9rem);
-            font-family: 'Cairo', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
+       .header-btn {
+    width: clamp(50px, 15vw, 60px);
+    height: 30px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+    font-family: 'Cairo', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    overflow: hidden !important;
+    clip-path: inset(0 0 0 0 round 5px) !important; /* قص يطابق border-radius */
+}
 
-        .exit-btn {
-            background: #8B0000;
-        }
+.exit-btn {
+    background: #8B0000;
+}
+.exit-btn:hover {
+    background: #A00000;
+    transform: scale(1.05);
+}
+.exit-btn:active {
+    transform: scale(0.95) !important;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي */
+    clip-path: inset(0 0 0 0 round 5px) !important; /* قص صارم */
+}
 
-        .exit-btn:hover {
-            background: #A00000;
-            transform: scale(1.05);
-        }
-
-        .refresh-btn {
-            background: #3A6073;
-        }
-
-        .refresh-btn:hover {
-            background: #4A7888;
-            transform: scale(1.05);
-        }
+.refresh-btn {
+    background: #3A6073;
+}
+.refresh-btn:hover {
+    background: #4A7888;
+    transform: scale(1.05);
+}
+.refresh-btn:active {
+    transform: scale(0.95) !important;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي */
+    clip-path: inset(0 0 0 0 round 5px) !important; /* قص صارم */
+}
 
         .container {
             width: 90%;
@@ -139,35 +149,42 @@
             justify-items: center;
         }
 
-        .category-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: clamp(80px, 15vw, 120px);
-            height: clamp(70px, 12vw, 90px);
-            background: linear-gradient(45deg, #3A6073, #1A2F3A);
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            color: #fff;
-            font-size: clamp(0.8rem, 2vw, 0.9rem);
-            text-align: center;
-            padding: 0.5rem;
-        }
+       .category-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: clamp(90px, 15vw, 120px); /* جعل العرض أقرب للدائرة */
+    height: clamp(90px, 15vw, 120px); /* العرض = الطول ليكون دائري */
+    background: linear-gradient(45deg, #3A6073, #1A2F3A);
+    border-radius: 50%; /* شكل دائري كامل */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    color: #fff;
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+    text-align: center;
+    padding: 0.5rem;
+    overflow: hidden !important;
+    clip-path: circle(50%) !important; /* قص دائري */
+}
 
-        .category-btn i {
-            font-size: clamp(1rem, 2.5vw, 1.2rem);
-            margin-bottom: 0.5rem;
-        }
+.category-btn i {
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    margin-bottom: 0.5rem;
+}
 
-        .category-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(58, 96, 115, 0.5);
-            background: linear-gradient(45deg, #4A7888, #2A3F4A);
-        }
+.category-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(58, 96, 115, 0.5);
+    background: linear-gradient(45deg, #4A7888, #2A3F4A);
+}
 
+.category-btn:active {
+    transform: scale(0.95) !important;
+    box-shadow: inset 0 6px 12px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي */
+    clip-path: circle(50%) !important; /* قص صارم */
+}
         .results-container {
             width: 90%;
             max-width: 1200px;
@@ -187,26 +204,32 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .result-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.2));
-            border-radius: 15px;
-            padding: 1.5rem;
-            width: 100%;
-            min-height: 220px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+      .no-results {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    margin: 1.5rem auto;
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease; /* لتفعيل التأثير */
+    cursor: pointer; /* للإشارة أنه قابل للنقر */
+    overflow: hidden !important;
+    clip-path: inset(0 0 0 0 round 10px) !important; /* قص يطابق border-radius */
+}
 
-        .result-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.2);
-        }
+.no-results:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 10px rgba(255, 255, 255, 0.2);
+}
+
+.no-results:active {
+    transform: scale(0.95) !important;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي */
+    clip-path: inset(0 0 0 0 round 10px) !important; /* قص صارم */
+}
 
         .result-card img {
             width: clamp(80px, 12vw, 120px);
@@ -256,19 +279,26 @@
     height: clamp(40px, 10vw, 50px);
     background: #8B0000;
     border-radius: 50%;
-    display: flex; /* دائماً flex للتوسيط */
+    display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
     transition: all 0.3s ease;
     z-index: 11;
-    display: none; /* مخفي افتراضياً */
+    display: none;
+    overflow: hidden !important;
+    clip-path: circle(50%) !important; /* قص دائري */
 }
 
 .scroll-to-top:hover {
     transform: scale(1.1);
     background: #A00000;
+}
+.scroll-to-top:active {
+    transform: scale(0.95) !important;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي */
+    clip-path: circle(50%) !important; /* قص صارم */
 }
 
 .scroll-to-top i {
