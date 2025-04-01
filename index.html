@@ -433,6 +433,7 @@ h1 {
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         transition: all 0.3s ease;
          gap: 10px; /* مسافة بين الأيقونة والنص */
+         font-family: 'Cairo', sans-serif !important;
      
     }
 
@@ -453,6 +454,7 @@ h1 {
 .dropbtn {
     width: 85%; /* جعل العرض موحد */
     max-width: 250px; /* نفس عرض زر أسعار بنمط الكروب
+
     
 }
     
@@ -473,6 +475,7 @@ h1 {
             transition: all 0.3s ease;
             text-align: center;
              gap: 10px; /* مسافة بين الأيقونة والنص */
+             font-family: 'Cairo', sans-serif !important;
         }
 
         .new-category-btn:hover {
@@ -1113,18 +1116,21 @@ h1 {
     width: 90%; /* عرض نسبي */
     max-width: 900px; /* حد أقصى */
     min-width: 280px; /* حد أدنى */
+    font-family: 'Cairo', sans-serif !important;
 }
 .swal2-title {
     font-size: 24px !important; /* تكبير حجم الخط */
     font-weight: bold !important; /* خط عريض */
     color: #f1f1f1 !important; /* لون حديث للعنوان */
     text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7); /* ظل خفيف */
+    font-family: 'Cairo', sans-serif !important;
 }
 
 .swal2-html-container {
     font-size: 16px !important; /* حجم النص الداخلي */
     color: #dcdcdc !important; /* لون مريح للقراءة */
     margin: 15px 0;
+    font-family: 'Cairo', sans-serif !important;
 }
 
 .swal2-confirm, .swal2-cancel {
@@ -1135,16 +1141,19 @@ h1 {
     transition: all 0.3s ease !important; /* تأثير الانتقال */
     color: white !important; /* لون النص */
     border: none !important; /* بدون حدود */
+    font-family: 'Cairo', sans-serif !important;
 }
 
 .swal2-confirm {
     background: linear-gradient(135deg, #43cea2, #185a9d); /* لون زر التأكيد */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* ظل للأزرار */
+    font-family: 'Cairo', sans-serif !important;
 }
 
 .swal2-cancel {
     background: linear-gradient(135deg, #FF416C, #FF4B2B); /* لون زر الإلغاء */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    font-family: 'Cairo', sans-serif !important;
 }
 
 .swal2-confirm:hover, .swal2-cancel:hover {
@@ -1167,6 +1176,7 @@ h1 {
     transition: all 0.3s ease;
     margin: 10px auto;
     display: block;
+    font-family: 'Cairo', sans-serif !important;
 }
 
 .swal2-input:focus {
@@ -1572,8 +1582,8 @@ function displayResults(results) {
                 هذا العنصر غير متوفر في الوقت الحالي
             </div>
         `;
-        resultsContainer.style.display = 'flex'; // إظهار الحاوية
-        toggleScrollToTopButton(); // تحديث حالة الزر
+        resultsContainer.style.display = 'flex';
+        toggleScrollToTopButton();
         return;
     }
 
@@ -1593,8 +1603,14 @@ function displayResults(results) {
     });
 
     resultsContainer.innerHTML = htmlContent;
-    resultsContainer.style.display = 'flex'; // إظهار الحاوية
-    toggleScrollToTopButton(); // تحديث حالة الزر بناءً على التمرير الحالي
+    resultsContainer.style.display = 'flex';
+
+    // التمرير السلس إلى أول نتيجة
+    setTimeout(() => {
+        resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100); // تأخير بسيط لضمان اكتمال التحميل
+
+    toggleScrollToTopButton();
 }
 
 // إخفاء الحاوية عند تفريغ حقل البحث
@@ -1659,8 +1675,8 @@ function toggleScrollToTopButton() {
     const results = document.getElementById("results");
     const resultCount = results.children.length; // عدد النتائج
 
-    // الشرط: يظهر الزر فقط إذا كانت النتائج أكثر من 3 وتم التمرير لأسفل أكثر من 100 بكسل
-    if (resultCount > 3 && scrollPosition > 100) {
+    // الشرط: يظهر الزر إذا كانت هناك نتائج (حتى لو واحدة) وتم التمرير لأسفل أكثر من 100 بكسل
+    if (resultCount > 0 && scrollPosition > 100) {
         scrollBtn.classList.add("show-scroll-btn");
     } else {
         scrollBtn.classList.remove("show-scroll-btn");
