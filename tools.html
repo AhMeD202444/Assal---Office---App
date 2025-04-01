@@ -50,7 +50,7 @@
             font-family: 'Cairo', sans-serif;
         }
 
-       .header-title { 
+   .header-title { 
     font-size: 18px; 
     font-weight: 700; 
     color: #fff; 
@@ -71,20 +71,20 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: 'Cairo', sans-serif;
-    /* نضيف هذا عشان نتأكد إن التأثيرات ما تطلع برا */
     position: relative;
-    overflow: hidden;
+    overflow: hidden !important;
+    clip-path: inset(0 0 0 0 round 8px) !important; /* نفس الـ border-radius */
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3); /* نفس الظل الخارجي */
 }
 
 .header-btn:hover { 
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5); 
+    transform: scale(1.05); /* نفس تأثير الـ hover */
 }
 
-/* تأثير الضغط للزر العام */
 .header-btn:active {
-    filter: brightness(85%); /* تقليل السطوع عشان يعطي إحساس بالضغط */
-    transform: scale(0.98); /* تصغير خفيف للزر لكن داخل الحدود */
-    box-shadow: none; /* إزالة الظل عند الضغط */
+    transform: scale(0.95) !important; /* نفس تأثير الضغط */
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي */
+    clip-path: inset(0 0 0 0 round 8px) !important;
 }
 
 /* زر التحديث */
@@ -94,12 +94,13 @@
 
 .refresh-btn:hover { 
     background: linear-gradient(135deg, #9CA3AF, #6B7280); 
+    transform: scale(1.05); /* نفس تأثير الـ hover */
 }
 
 .refresh-btn:active {
-    filter: brightness(85%);
-    transform: scale(0.98);
-    box-shadow: none;
+    transform: scale(0.95) !important;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+    clip-path: inset(0 0 0 0 round 8px) !important;
 }
 
 /* زر الرجوع */
@@ -109,12 +110,13 @@
 
 .back-btn:hover { 
     background: linear-gradient(135deg, #CD5C5C, #8B0000); 
+    transform: scale(1.05); /* نفس تأثير الـ hover */
 }
 
 .back-btn:active {
-    filter: brightness(85%);
-    transform: scale(0.98);
-    box-shadow: none;
+    transform: scale(0.95) !important;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+    clip-path: inset(0 0 0 0 round 8px) !important;
 }
 
 /* زر المشتريات */
@@ -125,12 +127,13 @@
 
 .purchases-btn:hover { 
     background: linear-gradient(135deg, #20B2AA, #4682B4); 
+    transform: scale(1.05); /* نفس تأثير الـ hover */
 }
 
 .purchases-btn:active {
-    filter: brightness(85%);
-    transform: scale(0.98);
-    box-shadow: none;
+    transform: scale(0.95) !important;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+    clip-path: inset(0 0 0 0 round 8px) !important;
 }
 
 .purchases-count {
@@ -273,7 +276,7 @@
             box-shadow: 0 0 15px rgba(255, 20, 147, 0.5);
         }
 
-        .search-orbit button {
+       .search-orbit button {
     padding: 10px 20px;
     border-radius: 25px;
     background: linear-gradient(45deg, #4A8296, #FF1493);
@@ -281,22 +284,21 @@
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
-    /* نضيف هذا عشان نتأكد إن التأثيرات ما تطلع برا */
     position: relative;
-    overflow: hidden;
+    overflow: hidden !important;
+    clip-path: inset(0 0 0 0 round 25px) !important; /* نفس الـ border-radius */
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3); /* نفس الظل الخارجي */
 }
 
 .search-orbit button:hover {
     background: linear-gradient(45deg, #FF1493, #4A8296);
-    filter: brightness(110%); /* زيادة سطوع بدل التكبير */
+    transform: scale(1.05); /* نفس تأثير الـ hover */
 }
 
-/* تأثير الضغط */
 .search-orbit button:active {
-    filter: brightness(85%); /* تقليل السطوع لإحساس الضغط */
-    transform: scale(0.98); /* تصغير خفيف داخل الحدود */
-    /* بنلغي أي تأثير خارجي */
-    box-shadow: none;
+    transform: scale(0.95) !important; /* نفس تأثير الضغط */
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي */
+    clip-path: inset(0 0 0 0 round 25px) !important;
 }
 
         /* شبكة المنتجات */
@@ -348,24 +350,22 @@
     cursor: pointer;
     transition: all 0.3s ease;
     width: 100%;
-    /* نضيف هذا عشان نتأكد إن التأثيرات ما تطلع برا */
     position: relative;
-    overflow: hidden;
+    overflow: hidden !important;
+    clip-path: inset(0 0 0 0 round 25px) !important; /* نفس الـ border-radius */
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3); /* نفس الظل الخارجي */
 }
 
 .product-card button:hover {
     background: linear-gradient(45deg, #FF1493, #4A8296);
-    filter: brightness(110%); /* زيادة سطوع بدل التكبير */
+    transform: scale(1.05); /* نفس تأثير الـ hover */
 }
 
-/* تأثير الضغط */
 .product-card button:active {
-    filter: brightness(85%); /* تقليل السطوع لإحساس الضغط */
-    transform: scale(0.98); /* تصغير خفيف داخل الحدود */
-    /* بنلغي أي تأثير خارجي */
-    box-shadow: none;
+    transform: scale(0.95) !important; /* نفس تأثير الضغط */
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي */
+    clip-path: inset(0 0 0 0 round 25px) !important;
 }
-
         /* السلة */
         .cart-drawer {
             position: fixed;
