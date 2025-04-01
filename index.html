@@ -1114,63 +1114,73 @@ h1 {
         
 
 
-.swal2-popup {
-    background: linear-gradient(135deg, #1a2a3a, #243b55);
-    border-radius: 20px;
-    color: #ffffff;
+swal2-popup {
+    background: rgba(255, 255, 255, 0.1); /* لون شفاف */
+    border-radius: 15px;
+    color: #fff;
     text-align: center;
-    backdrop-filter: blur(15px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    font-family: 'Montserrat', sans-serif;
+    backdrop-filter: blur(10px);
+    width: 300px; /* تقليل حجم النافذة */
     padding: 20px;
-    width: 90%; /* عرض نسبي */
-    max-width: 900px; /* حد أقصى */
-    min-width: 280px; /* حد أدنى */
     font-family: 'Cairo', sans-serif !important;
 }
+
 .swal2-title {
-    font-size: 24px !important; /* تكبير حجم الخط */
-    font-weight: bold !important; /* خط عريض */
-    color: #f1f1f1 !important; /* لون حديث للعنوان */
-    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7); /* ظل خفيف */
-    font-family: 'Cairo', sans-serif !important;
+    color: white;
+    font-size: 24px !important;
+    font-weight: bold !important;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+    margin-bottom: 15px;
 }
 
 .swal2-html-container {
-    font-size: 16px !important; /* حجم النص الداخلي */
-    color: #dcdcdc !important; /* لون مريح للقراءة */
-    margin: 15px 0;
-    font-family: 'Cairo', sans-serif !important;
+    font-size: 16px !important;
+    color: #dcdcdc !important;
+    margin: 10px 0;
 }
 
+.swal2-actions {
+    display: flex !important;
+    flex-direction: row !important; /* جعل الأزرار جنب بعض */
+    justify-content: center !important;
+    gap: 10px !important; /* مسافة بين الأزرار */
+    margin-top: 15px;
+}
+
+
 .swal2-confirm, .swal2-cancel {
-    padding: 12px 30px !important; /* حشوة مريحة للأزرار */
-    border-radius: 30px !important; /* زوايا مستديرة */
-    font-size: 16px !important; /* حجم نص الأزرار */
-    font-weight: 600 !important; /* خط بارز */
-    transition: all 0.3s ease !important; /* تأثير الانتقال */
-    color: white !important; /* لون النص */
-    border: none !important; /* بدون حدود */
-    font-family: 'Cairo', sans-serif !important;
+    padding: 6px 16px !important; /* تقليل الحشوة لتصغير الأزرار */
+    font-size: 14px !important; /* تقليل حجم النص */
+    border-radius: 20px !important; /* زوايا مستديرة */
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    color: white !important;
+    border: none !important;
+    min-width: 60px !important; /* عرض أدنى للأزرار */
+    overflow: hidden !important; /* قص التأثيرات */
+    clip-path: inset(0 0 0 0 round 20px) !important; /* قص يطابق border-radius */
 }
 
 .swal2-confirm {
-    background: linear-gradient(135deg, #43cea2, #185a9d); /* لون زر التأكيد */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* ظل للأزرار */
-    font-family: 'Cairo', sans-serif !important;
+    background: linear-gradient(135deg, #43cea2, #185a9d) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .swal2-cancel {
-    background: linear-gradient(135deg, #FF416C, #FF4B2B); /* لون زر الإلغاء */
+    background: linear-gradient(135deg, #FF416C, #FF4B2B) !important;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    font-family: 'Cairo', sans-serif !important;
 }
 
 .swal2-confirm:hover, .swal2-cancel:hover {
-    transform: scale(1.1); /* تكبير خفيف عند التمرير */
-    box-shadow: 0 8px 16px rgba(255, 255, 255, 0.3); /* تأثير ظل إضافي */
+    transform: scale(1.1);
+    box-shadow: 0 8px 16px rgba(255, 255, 255, 0.3);
 }
 
+.swal2-confirm:active, .swal2-cancel:active {
+    transform: scale(0.95) !important;
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي فقط */
+    clip-path: inset(0 0 0 0 round 20px) !important; /* قص صارم */
+}
 
 
 .swal2-input {
@@ -1714,10 +1724,9 @@ async function confirmExit() {
         html: '<p style="color: #dcdcdc;">هل أنت متأكد أنك تريد الخروج؟</p>',
         iconHtml: '<i class="fas fa-sign-out-alt"></i>',
         showCancelButton: true,
-        confirmButtonText: 'نعم، خروج',
-        cancelButtonText: 'لا، إلغاء',
+        confirmButtonText: 'نعم', // نص مختصر
+        cancelButtonText: 'لا', // نص مختصر
         backdrop: false, // تثبيت الواجهة
-
         customClass: {
             popup: 'swal2-popup',
             title: 'swal2-title',
@@ -1738,7 +1747,6 @@ async function confirmExit() {
         window.close();
     }
 }
-
 
 
 function openToolsPage() {
@@ -1918,6 +1926,8 @@ window.addEventListener("load", function () {
         
     </script>
     <style>
+    
+    
         .swal2-popup {
             background: rgba(255, 255, 255, 0.1); /* لون شفاف */
             border-radius: 15px;
