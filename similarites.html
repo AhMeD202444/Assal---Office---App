@@ -21,20 +21,21 @@
             box-sizing: border-box;
         }
 
-       body {
+     
+body {
     font-family: 'Cairo', sans-serif;
     background: linear-gradient(135deg, #1E2A44, #0F172A);
     color: #E2E8F0;
-    min-height: 100vh;
+    height: 100vh; /* ارتفاع الشاشة بالكامل */
     background-size: 400% 400%;
     animation: gradientAnimation 10s ease infinite;
-    overflow-x: hidden;
+    overflow: hidden; /* إلغاء التمرير */
     position: relative;
     direction: rtl;
-    padding-top: 20px; /* تغيير من 50px إلى 20px */
+    padding-top: 20px;
     padding-bottom: 50px;
+    margin: 0; /* التأكد من عدم وجود هوامش زائدة */
 }
-
         @keyframes gradientAnimation {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -165,31 +166,34 @@
 }
 
         /* الحاوية الرئيسية */
-        .main-container {
+       .main-container {
     max-width: 1400px;
-    margin: 0 auto; /* حذف margin-top لأنه لم يعد ضروريًا */
+    margin: 0 auto;
     padding: 0 40px;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* توسيط عمودي */
-    align-items: center; /* توسيط أفقي */
-    min-height: calc(100vh - 80px); /* الـ 80px هو مجموع ارتفاع الهيدر والفوتر (40px + 40px) */
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 80px); /* ارتفاع الشاشة مطروحاً ارتفاع الهيدر والفوتر */
     gap: 20px;
+    overflow: hidden; /* منع التمرير داخل الحاوية */
 }
-        .container {
+
+.container {
     width: 600px;
     background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
     padding: 10px 40px;
-    min-height: 550px;
     border-radius: 25px;
     box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
     border: 1px solid rgba(0, 206, 209, 0.5);
-    margin: 0 20px; /* حذف الـ 50px العلوي والسفلي */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 20px;
+    height: 100%; /* يأخذ كامل الارتفاع المتاح داخل main-container */
+    max-height: 100%; /* لا يتجاوز الارتفاع المتاح */
+    overflow: hidden; /* منع التمرير داخل الحاوية */
 }
         h1 {
             font-size: clamp(24px, 5vw, 36px);
@@ -380,18 +384,17 @@
 
 
         /* حاوية النتائج */
-       .results-container {
+      .results-container {
     background: rgba(30, 42, 68, 0.95);
     border-radius: 20px;
     padding: 25px;
     width: 90vw;
     max-width: 800px;
-    box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4); /* نفس ظل .container */
-    border: 1px solid rgba(0, 206, 209, 0.5); /* نفس الحدود المضيئة */
-    display: none;
+    box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
+    border: 1px solid rgba(0, 206, 209, 0.5);
+    display: none; /* مخفية في البداية */
     flex-direction: column;
     align-items: center;
-    min-height: 300px;
     margin-top: 10px;
 }
 
