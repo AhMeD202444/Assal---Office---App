@@ -545,9 +545,45 @@
             })), 'بورد شحن');
         }
 
-        async function refreshData() {
-            await loadExcelFiles();
-        }
+      async function refreshData() {
+    try {
+        // عرض رسالة التحميل
+        Swal.fire({
+            title: 'جاري التحديث',
+            text: 'يرجى الانتظار...',
+            allowOutsideClick: false,
+            background: 'linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9))',
+            color: '#fff', // لون النص أبيض ليظهر بوضوح على الخلفية الداكنة
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // انتظار ثانية واحدة
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // عرض رسالة النجاح لمدة 1.5 ثانية ثم تختفي تلقائيًا
+        Swal.fire({
+            title: 'تم التحديث',
+            text: 'تم تحديث البيانات بنجاح',
+            icon: 'success',
+            background: 'linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9))',
+            color: '#fff',
+            showConfirmButton: false, // إخفاء زر موافق
+            timer: 1500 // النافذة تختفي بعد 1.5 ثانية
+        });
+    } catch (error) {
+        // عرض رسالة الخطأ
+        Swal.fire({
+            title: 'خطأ',
+            text: 'حدث خطأ أثناء التحديث',
+            icon: 'error',
+            background: 'linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9))',
+            color: '#fff',
+            confirmButtonText: 'موافق'
+        });
+    }
+}
 
      function goBack() {
     window.location.href = 'index.html'; // إعادة توجيه إلى صفحة index.html
