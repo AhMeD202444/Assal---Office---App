@@ -483,7 +483,7 @@
             <button class="header-btn back-btn" onclick="window.location.href='index.html'">
                 <i class="fas fa-arrow-right"></i> رجوع
             </button>
-            <button class="header-btn refresh-btn" onclick="refreshWithMessage()">
+            <button class="header-btn refresh-btn" onclick="refreshData()">
                 <i class="fas fa-sync-alt"></i> تحديث
             </button>
             <button class="header-btn purchases-btn" onclick="toggleCart()">
@@ -2273,30 +2273,44 @@ function scrollToFirstResult() {
     }, 100);
 }
 
-function refreshWithMessage() {
-    document.getElementById('dropdownOptions').classList.remove('active');
-    Swal.fire({
-        title: 'جاري التحديث...',
-        html: '<div style="width: 50px; height: 50px; border: 4px solid #4A8296; border-top: 4px solid #FF1493; border-radius: 50%; animation: spin 1s linear infinite;"></div>',
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        background: 'rgba(0, 0, 0, 0.9)',
-        color: '#e0e0e0',
-        customClass: { popup: 'swal-custom-zindex' },
-        didOpen: () => {
-            setTimeout(() => {
-                Swal.fire({
-                    title: 'تم التحديث!',
-                    icon: 'success',
-                    confirmButtonText: 'موافق',
-                    background: 'rgba(0, 0, 0, 0.9)',
-                    color: '#e0e0e0',
-                    confirmButtonColor: '#4A8296',
-                    customClass: { popup: 'swal-custom-zindex' }
-                }).then(() => window.location.reload());
-            }, 1500);
-        }
-    });
+async function refreshData() {
+    try {
+        // عرض رسالة التحميل
+        Swal.fire({
+            title: 'جاري التحديث',
+            text: 'يرجى الانتظار...',
+            allowOutsideClick: false,
+            background: 'linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9))',
+            color: '#fff', // لون النص أبيض ليظهر بوضوح على الخلفية الداكنة
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // انتظار ثانية واحدة
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // عرض رسالة النجاح لمدة 1.5 ثانية ثم تختفي تلقائيًا
+        Swal.fire({
+            title: 'تم التحديث',
+            text: 'تم تحديث البيانات بنجاح',
+            icon: 'success',
+            background: 'linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9))',
+            color: '#fff',
+            showConfirmButton: false, // إخفاء زر موافق
+            timer: 1500 // النافذة تختفي بعد 1.5 ثانية
+        });
+    } catch (error) {
+        // عرض رسالة الخطأ
+        Swal.fire({
+            title: 'خطأ',
+            text: 'حدث خطأ أثناء التحديث',
+            icon: 'error',
+            background: 'linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9))',
+            color: '#fff',
+            confirmButtonText: 'موافق'
+        });
+    }
 }
 
 function scrollToTop() {
