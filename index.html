@@ -29,7 +29,8 @@
 
 @keyframes explode {
     0% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(2); opacity: 0; } /* إزالة filter: blur إذا كان موجودًا */
+    50% { transform: scale(1.6); opacity: 0.7; filter: blur(3px); }
+    100% { transform: scale(2); opacity: 0; filter: blur(6px); }
 }
 
 @keyframes screenPop {
@@ -364,14 +365,13 @@
     width: 160px;
     height: 160px;
     border-radius: 50%;
-    overflow: hidden;
+    overflow: hidden !important; /* قص التأثيرات */
     box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
     cursor: pointer;
     z-index: 1;
     opacity: 1;
     transition: transform 0.3s ease;
-    clip-path: circle(80px at center);
-    will-change: transform, opacity; /* عزل التأثيرات */
+    clip-path: circle(80px at center) !important; /* قص دائري يطابق نصف القطر */
 }
 
 .logo-container img {
@@ -380,9 +380,7 @@
     object-fit: cover;
     transition: transform 0.3s ease;
     border-radius: 50%;
-    will-change: transform; /* عزل حركة الصورة */
 }
-
 
 .logo-container:active {
     transform: scale(0.95) !important;
@@ -830,15 +828,15 @@ h1 {
     border-radius: 15px;
     padding: 20px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.1);
-    transition: transform 0.3s ease; /* نركز فقط على transform لتجنب الرمشة */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
     cursor: pointer;
     width: 90%;
     max-width: 450px;
     min-width: 250px;
     margin: 0 auto;
     position: relative;
-    overflow: hidden;
-    clip-path: inset(0 0 0 0 round 15px);
+    overflow: hidden !important; /* قص التأثيرات */
+    clip-path: inset(0 0 0 0 round 15px) !important; /* قص يطابق border-radius */
     min-height: 200px;
 }
 
@@ -849,11 +847,11 @@ h1 {
 }
 
 .result-card:active {
-    transform: scale(0.95); /* تأثير ضغط بسيط بدون تغيير لون أو ظل داخلي */
-    /* إزالة أي box-shadow أو background لتجنب الرمشة */
+    transform: scale(0.97) !important;
+    box-shadow: inset 0 6px 12px rgba(0, 0, 0, 0.6) !important; /* ظل داخلي فقط */
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(50, 50, 50, 0.4)) !important;
+    clip-path: inset(0 0 0 0 round 15px) !important; /* قص صارم عند الضغط */
 }
-
-
 
 .result-card img {
     width: clamp(80px, 20vw, 140px); /* زيادة حجم الصورة */
@@ -1450,50 +1448,48 @@ function triggerAnimation() {
         return;
     }
 
-    requestAnimationFrame(() => {
-        logo.style.animation = "shake 0.5s ease-in-out";
-        setTimeout(() => {
-            logo.style.animation = "none";
-        }, 500);
+    logo.style.animation = "shake 0.5s ease-in-out";
+    setTimeout(() => {
+        logo.style.animation = "none";
+    }, 500);
 
-        setTimeout(() => {
-            logo.style.animation = "explode 0.5s ease-out";
-            logo.style.opacity = "0";
-        }, 800);
+    setTimeout(() => {
+        logo.style.animation = "explode 0.5s ease-out";
+        logo.style.opacity = "0";
+    }, 800);
 
-        setTimeout(() => {
-            const randomNotification = notifications[Math.floor(Math.random() * notifications.length)];
-            notificationText.textContent = randomNotification;
-            notification.classList.add("show");
-        }, 1300);
+    setTimeout(() => {
+        const randomNotification = notifications[Math.floor(Math.random() * notifications.length)];
+        notificationText.textContent = randomNotification;
+        notification.classList.add("show");
+    }, 1300);
 
-        setTimeout(() => {
-            notification.classList.remove("show");
-            gsap.to(notification, {
-                scale: 0.8,
-                opacity: 0,
-                rotation: 180,
-                duration: 0.8,
-                ease: "power2.inOut",
-                onComplete: () => {
-                    notification.style.transform = "scale(0)";
-                }
-            });
-        }, 5000);
+    setTimeout(() => {
+        notification.classList.remove("show");
+        gsap.to(notification, {
+            scale: 0.8,
+            opacity: 0,
+            rotation: 180,
+            duration: 0.8,
+            ease: "power2.inOut",
+            onComplete: () => {
+                notification.style.transform = "scale(0)";
+            }
+        });
+    }, 5000);
 
-        setTimeout(() => {
-            gsap.set(logo, { scale: 0, opacity: 0, rotation: 0 });
-            gsap.to(logo, {
-                scale: 1,
-                opacity: 1,
-                rotation: 720,
-                duration: 1.2,
-                ease: "bounce.out"
-            });
-        }, 5800);
-    });
+    setTimeout(() => {
+        gsap.set(logo, { scale: 0, opacity: 0, rotation: 0 });
+        gsap.to(logo, {
+            scale: 1,
+            opacity: 1,
+            rotation: 720,
+            duration: 1.2,
+            ease: "bounce.out"
+        });
+    }, 5800);
 
-    setTimeout(triggerAnimation, 8000); // كما كان
+    setTimeout(triggerAnimation, 8000);
 }
       
       
@@ -1603,7 +1599,7 @@ function filterCategory(category) {
         
 function displayResults(results) {
     const resultsContainer = document.getElementById("results");
-    resultsContainer.innerHTML = ""; // تفريغ المحتوى
+    resultsContainer.innerHTML = ''; // تفريغ النتائج السابقة
 
     if (results.length === 0) {
         resultsContainer.innerHTML = `
@@ -1611,31 +1607,36 @@ function displayResults(results) {
                 هذا العنصر غير متوفر في الوقت الحالي
             </div>
         `;
-    } else {
-        let htmlContent = '';
-        results.forEach(item => {
-            const imgSrc = currentCategory === "SIMILARITES" 
-                ? 'images/default.png'
-                : `images/${currentCategory.toLowerCase()}.png`;
-
-            htmlContent += `
-                <div class="result-card">
-                    <img src="${imgSrc}" alt="Item Image">
-                    <h4>${item["Item Name"] || item["Item"]}</h4>
-                    ${item["Price"] ? `<p>${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ع</p>` : '<p>غير متوفر</p>'}
-                </div>
-            `;
-        });
-        resultsContainer.innerHTML = htmlContent;
+        resultsContainer.style.display = 'flex';
+        toggleScrollToTopButton();
+        return;
     }
 
-    requestAnimationFrame(() => {
-        resultsContainer.style.display = "flex";
-        resultsContainer.scrollIntoView({ behavior: "smooth", block: "start" });
-        toggleScrollToTopButton();
-    });
-}
+    let htmlContent = '';
+    results.forEach(item => {
+        const imgSrc = currentCategory === "SIMILARITES" 
+            ? 'images/default.png'
+            : `images/${currentCategory.toLowerCase()}.png`;
 
+        htmlContent += `
+            <div class="result-card">
+                <img src="${imgSrc}" alt="Item Image">
+                <h4>${item["Item Name"] || item["Item"]}</h4>
+                ${item["Price"] ? `<p>${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ع</p>` : '<p>غير متوفر</p>'}
+            </div>
+        `;
+    });
+
+    resultsContainer.innerHTML = htmlContent;
+    resultsContainer.style.display = 'flex';
+
+    // التمرير السلس إلى أول نتيجة
+    setTimeout(() => {
+        resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100); // تأخير بسيط لضمان اكتمال التحميل
+
+    toggleScrollToTopButton();
+}
 
 // إخفاء الحاوية عند تفريغ حقل البحث
 function searchItems() {
