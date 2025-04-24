@@ -406,7 +406,7 @@
                 <div class="category-btn" onclick="filterBackCategory()"><i class="fas fa-camera"></i>اظهر</div>
                 <div class="category-btn" onclick="filterCameraCategory()"><i class="fas fa-camera"></i>كاميرات</div>
                 <div class="category-btn" onclick="filterChargingCategory()"><i class="fas fa-charging-station"></i>بورد شحن</div>
-                <div class="category-btn" onclick="filterBatteryCategory()"><i class="fas fa-ellipsis-h"></i>اخرى</div>
+                <div class="category-btn" onclick="filterBuzzerCategory()"><i class="fas fa-bell"></i>جرس</div>
             </div>
         </div>
     </div>
@@ -439,6 +439,8 @@
                 database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BACK"] || {});
                 database.CAMERA = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CAMERA"] || {});
                 database.CHARGING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CHARGING"] || {});
+                 database.BUZZER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BUZZER"] || {});
+                
                 console.log("Excel files loaded successfully");
             } catch (error) {
                 console.error("Error loading Excel files:", error);
@@ -544,6 +546,16 @@
                 "Price": item["Price"] ? item["Price"] : 'غير متوفر'
             })), 'بورد شحن');
         }
+        
+        
+        async function filterBuzzerCategory() {
+            if (!database.BUZZER) return;
+            await displayResults(database.BUZZER.map(item => ({
+                "Item Name": item["Item Name"],
+                "Price": item["Price"] ? item["Price"] : 'غير متوفر'
+            })), 'جرس');
+        }
+        
 
       async function refreshData() {
     try {
