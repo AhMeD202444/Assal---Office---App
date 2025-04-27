@@ -407,6 +407,11 @@
                 <div class="category-btn" onclick="filterCameraCategory()"><i class="fas fa-camera"></i>كاميرات</div>
                 <div class="category-btn" onclick="filterChargingCategory()"><i class="fas fa-charging-station"></i>بورد شحن</div>
                 <div class="category-btn" onclick="filterBuzzerCategory()"><i class="fas fa-bell"></i>جرس</div>
+                 <div class="category-btn" onclick="filterFingerCategory()"><i class="fas fa-fingerprint"></i>بصمة</div>
+                 <div class="category-btn" onclick="filterFingerCategory()"><i class="fas fa-volume-up"></i>سماعة</div>
+                 <div class="category-btn" onclick="filterFingerCategory()"><i class="fas fa-bars"></i>اخرى</div>
+
+                
             </div>
         </div>
     </div>
@@ -439,7 +444,9 @@
                 database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BACK"] || {});
                 database.CAMERA = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CAMERA"] || {});
                 database.CHARGING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CHARGING"] || {});
-                 database.BUZZER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BUZZER"] || {});
+                database.BUZZER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BUZZER"] || {});
+                database.FINGER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["FINGER"] || {});
+                
                 
                 console.log("Excel files loaded successfully");
             } catch (error) {
@@ -554,6 +561,14 @@
                 "Item Name": item["Item Name"],
                 "Price": item["Price"] ? item["Price"] : 'غير متوفر'
             })), 'جرس');
+        }
+
+         async function filterFingerCategory() {
+            if (!database.FINGER) return;
+            await displayResults(database.FINGER.map(item => ({
+                "Item Name": item["Item Name"],
+                "Price": item["Price"] ? item["Price"] : 'غير متوفر'
+            })), 'بصمة');
         }
         
 
