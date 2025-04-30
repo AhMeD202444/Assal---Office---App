@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,6 +20,144 @@
     <style>
     
     
+    
+    
+    /* تخصيص نافذة التفعيل */
+/* تخصيص نافذة التفعيل */
+.swal2-popup.activation-popup {
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(20px);
+    border-radius: clamp(15px, 3vw, 25px);
+    width: clamp(80%, 90vw, 90%);
+    max-width: 600px;
+    padding: clamp(20px, 5vw, 40px);
+    box-shadow: 0 0 60px rgba(70, 130, 180, 0.8), 0 0 20px rgba(255, 255, 255, 0.3);
+    font-family: 'Cairo', sans-serif !important;
+    color: #fff;
+    text-align: center;
+    z-index: 10000 !important;
+    position: relative;
+    animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 20px rgba(70, 130, 180, 0.6), 0 0 40px rgba(255, 255, 255, 0.2); }
+    100% { box-shadow: 0 0 30px rgba(70, 130, 180, 1), 0 0 60px rgba(255, 255, 255, 0.4); }
+}
+
+.swal2-popup.activation-popup .swal2-title {
+    font-size: clamp(24px, 6vw, 32px);
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+    margin-bottom: clamp(10px, 3vw, 20px);
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.swal2-popup.activation-popup .swal2-html-container {
+    font-size: clamp(16px, 4vw, 20px);
+    color: #dcdcdc;
+    line-height: 1.6;
+    margin: clamp(10px, 3vw, 20px) 0;
+}
+
+.swal2-popup.activation-popup .swal2-input {
+    width: clamp(75%, 85vw, 85%);
+    padding: clamp(10px, 3vw, 15px) clamp(15px, 4vw, 20px);
+    font-size: clamp(14px, 4vw, 18px);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: clamp(8px, 2vw, 12px);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+    margin: clamp(10px, 3vw, 20px) auto;
+    font-family: 'Cairo', sans-serif !important;
+    transition: all 0.3s ease;
+}
+
+.swal2-popup.activation-popup .swal2-input:focus {
+    border: 2px solid #43cea2;
+    box-shadow: 0 0 12px #43cea2;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.swal2-popup.activation-popup .swal2-confirm {
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+    padding: clamp(8px, 2vw, 12px) clamp(20px, 5vw, 30px);
+    font-size: clamp(14px, 4vw, 18px);
+    border-radius: clamp(15px, 3vw, 25px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+.swal2-popup.activation-popup .swal2-cancel {
+    background: linear-gradient(135deg, #FF416C, #FF4B2B);
+    padding: clamp(8px, 2vw, 12px) clamp(20px, 5vw, 30px);
+    font-size: clamp(14px, 4vw, 18px);
+    border-radius: clamp(15px, 3vw, 25px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+.swal2-popup.activation-popup .swal2-confirm:hover,
+.swal2-popup.activation-popup .swal2-cancel:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.4);
+}
+
+.swal2-popup.activation-popup .swal2-confirm:active,
+.swal2-popup.activation-popup .swal2-cancel:active {
+    transform: scale(0.95);
+    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Media Queries للتوافق مع الأجهزة الصغيرة */
+@media (max-width: 480px) {
+    .swal2-popup.activation-popup {
+        width: 95%;
+        padding: 15px;
+    }
+    .swal2-popup.activation-popup .swal2-title {
+        font-size: 20px;
+    }
+    .swal2-popup.activation-popup .swal2-html-container {
+        font-size: 14px;
+    }
+    .swal2-popup.activation-popup .swal2-input {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    .swal2-popup.activation-popup .swal2-confirm,
+    .swal2-popup.activation-popup .swal2-cancel {
+        padding: 8px 20px;
+        font-size: 14px;
+    }
+}
+
+/* Media Queries للأجهزة المتوسطة (تابلت) */
+@media (min-width: 481px) and (max-width: 768px) {
+    .swal2-popup.activation-popup {
+        width: 90%;
+        padding: 25px;
+    }
+    .swal2-popup.activation-popup .swal2-title {
+        font-size: 26px;
+    }
+    .swal2-popup.activation-popup .swal2-html-container {
+        font-size: 16px;
+    }
+    .swal2-popup.activation-popup .swal2-input {
+        padding: 10px 15px;
+        font-size: 16px;
+    }
+    .swal2-popup.activation-popup .swal2-confirm,
+    .swal2-popup.activation-popup .swal2-cancel {
+        padding: 10px 25px;
+        font-size: 16px;
+    }
+}
     
      @keyframes shake {
     0%, 100% { transform: translate(0, 0); }
@@ -1506,22 +1645,132 @@ function triggerAnimation() {
  let showPromoPopup = true; // 🔥 يتحكم فقط في النافذة المنبثقة، false = تعطيل النافذة
 let promoAlreadyShown = sessionStorage.getItem('promoShown') === 'true';
 
-window.onload = function() { 
-    // التحكم في النافذة المنبثقة فقط
-    if (showPromoPopup && !promoAlreadyShown) {
-        setTimeout(() => {
-            document.getElementById('overlay').style.display = 'block';
-            let popup = document.getElementById('promoPopup');
-            popup.style.display = 'flex';
-            popup.style.animation = 'slideDown 0.6s ease-out forwards';
-        }, 500);
-        sessionStorage.setItem('promoShown', 'true'); // تخزين الحالة لمنع الظهور المتكرر
-    }
+window.onload = function() {
+    // التحقق من حالة التفعيل
+    const isActivated = localStorage.getItem('isActivated') === 'true';
 
-    // تشغيل الإشعارات بغض النظر عن النافذة المنبثقة
-    triggerAnimation();
+    if (!isActivated) {
+        // إظهار نافذة التفعيل
+        showActivationPopup();
+    } else {
+        // تشغيل الإشعارات إذا تم التفعيل
+        triggerAnimation();
+        // إظهار النافذة الترويجية إذا لم تُعرض من قبل
+        if (showPromoPopup && !promoAlreadyShown) {
+            setTimeout(() => {
+                let popup = document.getElementById('promoPopup');
+                popup.style.display = 'flex';
+                popup.style.animation = 'slideDown 0.6s ease-out forwards';
+            }, 500);
+            sessionStorage.setItem('promoShown', 'true');
+        }
+    }
 };
 
+async function showActivationPopup() {
+    const result = await Swal.fire({
+        title: '📢 تنويه هام',
+        html: `
+            <p style="color: #dcdcdc; direction: rtl;">
+                📢 تنويه لزبائن مكتب عسل<br>
+                تم قفل التطبيق بالكامل، والتفعيل صار حصريًا من داخل مكاتبنا فقط.<br>
+                ليش؟ حتى نضمنلكم خصوصية، وأسعار ما توصل لغير أهلها 😉
+            </p>
+        `,
+        input: 'password',
+        inputPlaceholder: 'أدخل كلمة المرور...',
+        inputAttributes: {
+            autocapitalize: 'off',
+            autocorrect: 'off'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'تفعيل',
+        cancelButtonText: 'إلغاء',
+        backdrop: 'rgba(0, 0, 0, 0.8)',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        customClass: {
+            popup: 'swal2-popup activation-popup',
+            title: 'swal2-title',
+            htmlContainer: 'swal2-html-container',
+            input: 'swal2-input',
+            confirmButton: 'swal2-confirm',
+            cancelButton: 'swal2-cancel'
+        },
+        showClass: {
+            popup: 'animate__animated animate__zoomIn'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__zoomOut'
+        },
+        didOpen: () => {
+            document.querySelector('.swal2-popup').style.zIndex = '10000';
+        }
+    });
+
+    if (result.isConfirmed) {
+        const password = result.value;
+        if (password === '112233') {
+            localStorage.setItem('isActivated', 'true');
+            Swal.fire({
+                title: 'تم التفعيل!',
+                html: '<p style="color: #dcdcdc;">تم تفعيل التطبيق بنجاح. مرحبًا بك!</p>',
+                iconHtml: '<i class="fas fa-check-circle"></i>',
+                confirmButtonText: 'موافق',
+                backdrop: 'rgba(0, 0, 0, 0.8)',
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm'
+                },
+                didOpen: () => {
+                    document.querySelector('.swal2-popup').style.zIndex = '10000';
+                }
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                title: 'كلمة مرور خاطئة',
+                html: '<p style="color: #ff4d4d;">يرجى إدخال كلمة المرور الصحيحة.</p>',
+                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+                confirmButtonText: 'حاول مجددًا',
+                backdrop: 'rgba(0, 0, 0, 0.8)',
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm'
+                },
+                didOpen: () => {
+                    document.querySelector('.swal2-popup').style.zIndex = '10000';
+                }
+            }).then(() => {
+                showActivationPopup();
+            });
+        }
+    } else {
+        Swal.fire({
+            title: 'تم الإلغاء',
+            html: '<p style="color: #dcdcdc;">يجب تفعيل التطبيق للمتابعة.</p>',
+            iconHtml: '<i class="fas fa-info-circle"></i>',
+            confirmButtonText: 'حاول مجددًا',
+            backdrop: 'rgba(0, 0, 0, 0.8)',
+            customClass: {
+                popup: 'swal2-popup',
+                title: 'swal2-title',
+                htmlContainer: 'swal2-html-container',
+                confirmButton: 'swal2-confirm'
+            },
+            didOpen: () => {
+                document.querySelector('.swal2-popup').style.zIndex = '10000';
+            }
+        }).then(() => {
+            showActivationPopup();
+        });
+    }
+}
 
 // ✅ حركة الخروج بنفس مسار النزول (لأعلى)
 function closePopup() {
@@ -1974,4 +2223,4 @@ window.addEventListener("load", function() {
         }
         .swal2-title {
             color: white;
-            text-shadow: 0 4
+            text-shadow: 0 4 
