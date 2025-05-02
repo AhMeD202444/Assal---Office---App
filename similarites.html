@@ -904,138 +904,128 @@
     </footer>
 
     <script>
-        const dropboxSimilaritesFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file2" + "?t=" + new Date().getTime();
-        let database = {};
-        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+       const dropboxSimilaritesFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file2" + "?t=" + new Date().getTime();
+let database = {};
+let notes = JSON.parse(localStorage.getItem('notes')) || [];
 
-        $(document).ready(function() {
-            $('#categorySelect').select2({
-                dir: "rtl",
-                placeholder: "اختر الصنف",
-                allowClear: true,
-                width: '100%',
-                minimumResultsForSearch: Infinity,
-                dropdownAutoWidth: true,
-                dropdownCss: { 'max-height': '400px' },
-                dropdownParent: $('.category-container')
+$(document).ready(function() {
+    $('#categorySelect').select2({
+        dir: "rtl",
+        placeholder: "اختر الصنف",
+        allowClear: true,
+        width: '100%',
+        minimumResultsForSearch: Infinity,
+        dropdownAutoWidth: true,
+        dropdownCss: { 'max-height': '400px' },
+        dropdownParent: $('.category-container')
+    });
+});
+
+async function loadSimilaritesData() {
+    const response = await fetch(dropboxSimilaritesFile);
+    const buffer = await response.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: "array" });
+    database.SIMILARITES = XLSX.utils.sheet_to_json(workbook.Sheets["SIMILARITES"] || {}).map(item => ({
+        Item: item.Item || "غير مسمى",
+        Category: item.Category || 20
+    }));
+}
+
+async function getDeviceId() {
+    try {
+        let deviceId = localStorage.getItem('deviceId');
+        if (!deviceId) {
+            const fp = await FingerprintJS.load();
+            const result = await fp.get();
+            deviceId = result.visitorId;
+            localStorage.setItem('deviceId', deviceId);
+        }
+        return deviceId;
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function showPasswordPrompt() {
+    const { value: password } = await Swal.fire({
+        title: 'دخول محمي',
+        text: 'أدخل كلمة المرور للوصول',
+        icon: 'question',
+        input: 'password',
+        inputPlaceholder: 'كلمة المرور',
+        showCancelButton: true,
+        confirmButtonText: 'تأكيد',
+        cancelButtonText: 'إغلاق'
+    });
+    return password;
+}
+
+async function verifyPassword(password, db) {
+    // عرض رسالة "جاري الدخول..."
+    Swal.fire({
+        title: 'جاري الدخول...',
+        text: 'يرجى الانتظار',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    try {
+        const codeRef = db.collection('passwords').doc(password);
+        const doc = await codeRef.get();
+
+        if (!doc.exists) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'كلمة المرور غير صحيحة!',
+                showConfirmButton: true,
+                confirmButtonText: 'حاول مرة أخرى',
+                timer: 3000,
+                timerProgressBar: true
             });
-        });
-
-        async function loadSimilaritesData() {
-            const response = await fetch(dropboxSimilaritesFile);
-            const buffer = await response.arrayBuffer();
-            const workbook = XLSX.read(buffer, { type: "array" });
-            database.SIMILARITES = XLSX.utils.sheet_to_json(workbook.Sheets["SIMILARITES"] || {}).map(item => ({
-                Item: item.Item || "غير مسمى",
-                Category: item.Category || 20
-            }));
+            return false;
         }
 
-        async function getDeviceId() {
-            try {
-                let deviceId = localStorage.getItem('deviceId');
-                if (!deviceId) {
-                    const fp = await FingerprintJS.load();
-                    const result = await fp.get();
-                    deviceId = result.visitorId;
-                    localStorage.setItem('deviceId', deviceId);
-                }
-                return deviceId;
-            } catch (error) {
-                throw error;
-            }
-        }
+        const data = doc.data();
+        const deviceId = await getDeviceId();
 
-        async function showPasswordPrompt() {
-            const { value: password } = await Swal.fire({
-                title: 'دخول محمي',
-                text: 'أدخل كلمة المرور للوصول',
-                icon: 'question',
-                input: 'password',
-                inputPlaceholder: 'كلمة المرور',
-                showCancelButton: true,
-                confirmButtonText: 'تأكيد',
-                cancelButtonText: 'إغلاق'
+        if (!data.used) {
+            // إذا لم تكن كلمة المرور مستخدمة من قبل، قم بتسجيل الجهاز
+            await codeRef.update({
+                deviceId: deviceId,
+                used: true,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
-            return password;
-        }
-
-        async function verifyPassword(password, db) {
-            Swal.fire({
-                title: 'جاري التحقق...',
-                text: 'يرجى الانتظار',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
+            localStorage.setItem("password", password); // تخزين كلمة المرور للتحقق التلقائي
+            await loadSimilaritesData();
+            updateNotes();
+            await Swal.fire({
+                icon: 'success',
+                title: 'تم الدخول بنجاح',
+                text: 'تم تفعيل كلمة المرور بنجاح!',
+                confirmButtonText: 'موافق'
             });
-
-            try {
-                const codeRef = db.collection('passwords').doc(password);
-                const doc = await codeRef.get();
-
-                if (!doc.exists) {
-                    await Swal.fire({
-                        icon: 'error',
-                        title: 'خطأ',
-                        text: 'كلمة المرور غير صحيحة!',
-                        showConfirmButton: true,
-                        confirmButtonText: 'حاول مرة أخرى',
-                        timer: 3000,
-                        timerProgressBar: true
-                    });
-                    return false;
-                }
-
-                const data = doc.data();
-                const deviceId = await getDeviceId();
-
-                if (!data.used) {
-                    await codeRef.update({
-                        deviceId: deviceId,
-                        used: true,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    localStorage.setItem("similaritesAccess", "granted");
-                    await loadSimilaritesData();
-                    updateNotes();
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'تم التفعيل',
-                        text: 'تم تفعيل كلمة المرور بنجاح!',
-                        confirmButtonText: 'موافق'
-                    });
-                    return true;
-                } else {
-                    if (data.deviceId === deviceId) {
-                        localStorage.setItem("similaritesAccess", "granted");
-                        await loadSimilaritesData();
-                        updateNotes();
-                        await Swal.fire({
-                            icon: 'success',
-                            title: 'مرحبًا',
-                            text: 'كلمة المرور صحيحة!',
-                            confirmButtonText: 'موافق'
-                        });
-                        return true;
-                    } else {
-                        await Swal.fire({
-                            icon: 'error',
-                            title: 'خطأ',
-                            text: 'كلمة المرور مستخدمة على جهاز آخر!',
-                            showConfirmButton: true,
-                            confirmButtonText: 'حاول مرة أخرى',
-                            timer: 3000,
-                            timerProgressBar: true
-                        });
-                        return false;
-                    }
-                }
-            } catch (error) {
+            return true;
+        } else {
+            // التحقق من أن الجهاز هو نفسه المسجل مع كلمة المرور
+            if (data.deviceId === deviceId) {
+                localStorage.setItem("password", password); // تحديث كلمة المرور للتحقق التلقائي
+                await loadSimilaritesData();
+                updateNotes();
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'تم الدخول بنجاح',
+                    text: 'كلمة المرور صحيحة!',
+                    confirmButtonText: 'موافق'
+                });
+                return true;
+            } else {
                 await Swal.fire({
                     icon: 'error',
                     title: 'خطأ',
-                    text: error.message.includes('offline') ? 'أنت غير متصل بالإنترنت. يرجى التحقق من الاتصال.' : 'حدث خطأ: ' + error.message,
+                    text: 'كلمة المرور مستخدمة على جهاز آخر!',
                     showConfirmButton: true,
                     confirmButtonText: 'حاول مرة أخرى',
                     timer: 3000,
@@ -1044,51 +1034,84 @@
                 return false;
             }
         }
+    } catch (error) {
+        await Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: error.message.includes('offline') ? 'أنت غير متصل بالإنترنت. يرجى التحقق من الاتصال.' : 'حدث خطأ: ' + error.message,
+            showConfirmButton: true,
+            confirmButtonText: 'حاول مرة أخرى',
+            timer: 3000,
+            timerProgressBar: true
+        });
+        return false;
+    }
+}
 
-        window.onload = async function() {
-            let db;
-            try {
-                const firebaseConfig = {
-                    apiKey: "AIzaSyD_Nqmd2X3UY0mkK31QXKd-6B9KLE3ipYA",
-                    authDomain: "assal-office.firebaseapp.com",
-                    projectId: "assal-office",
-                    storageBucket: "assal-office.firebasestorage.app",
-                    messagingSenderId: "939160864143",
-                    appId: "1:939160864143:web:0900fffc74e4037898b7fa",
-                    measurementId: "G-YXL3KPKLD3"
-                };
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
-            } catch (error) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ',
-                    text: 'فشل في تهيئة قاعدة البيانات: ' + error.message,
-                    confirmButtonText: 'موافق'
-                });
-                window.location.href = 'index.html';
-                return;
-            }
-
-            if (localStorage.getItem("similaritesAccess") !== "granted") {
-                while (true) {
-                    const password = await showPasswordPrompt();
-
-                    if (!password) {
-                        window.location.href = 'index.html';
-                        break;
-                    }
-
-                    const success = await verifyPassword(password, db);
-                    if (success) {
-                        break;
-                    }
-                }
-            } else {
-                await loadSimilaritesData();
-                updateNotes();
-            }
+window.onload = async function() {
+    let db;
+    try {
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_Nqmd2X3UY0mkK31QXKd-6B9KLE3ipYA",
+            authDomain: "assal-office.firebaseapp.com",
+            projectId: "assal-office",
+            storageBucket: "assal-office.firebasestorage.app",
+            messagingSenderId: "939160864143",
+            appId: "1:939160864143:web:0900fffc74e4037898b7fa",
+            measurementId: "G-YXL3KPKLD3"
         };
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+    } catch (error) {
+        await Swal.fire({
+            icon: 'error',
+            title: 'خطأ',
+            text: 'فشل في تهيئة قاعدة البيانات: ' + error.message,
+            confirmButtonText: 'موافق'
+        });
+        window.location.href = 'index.html';
+        return;
+    }
+
+    // التحقق من وجود كلمة مرور محفوظة في localStorage
+    const storedPassword = localStorage.getItem("password");
+
+    if (storedPassword) {
+        // إذا كانت هناك كلمة مرور محفوظة، تحقق منها تلقائيًا
+        const success = await verifyPassword(storedPassword, db);
+        if (!success) {
+            // إذا فشل التحقق، اطلب كلمة مرور جديدة
+            while (true) {
+                const password = await showPasswordPrompt();
+
+                if (!password) {
+                    window.location.href = 'index.html';
+                    break;
+                }
+
+                const success = await verifyPassword(password, db);
+                if (success) {
+                    break;
+                }
+            }
+        }
+    } else {
+        // إذا لم تكن هناك كلمة مرور محفوظة، اطلب كلمة مرور جديدة
+        while (true) {
+            const password = await showPasswordPrompt();
+
+            if (!password) {
+                window.location.href = 'index.html';
+                break;
+            }
+
+            const success = await verifyPassword(password, db);
+            if (success) {
+                break;
+            }
+        }
+    }
+};
 
         document.getElementById("searchInput").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
