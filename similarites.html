@@ -699,9 +699,10 @@
     text-align: center;
     position: fixed;
     top: 50%;
-    transform: translateY(-50%);
+    left: 50%;
+    transform: translate(-50%, -50%);
     height: auto;
-    max-height: 400px;
+    max-height: 700px; /* زيادة الارتفاع من 600px إلى 700px */
     width: 90%;
     max-width: 400px;
     display: flex;
@@ -712,28 +713,38 @@
     margin: 0;
     box-shadow: 0 0 20px rgba(163, 191, 250, 0.7), 0 0 40px rgba(212, 175, 55, 0.5);
     border: 1px solid rgba(212, 175, 55, 0.3);
-    gap: 5px; /* تقليل المسافة العامة لتوفير مساحة */
+    gap: 5px;
 }
 
 /* إضافة تأثير تظليل أنيق للخلفية */
 .swal2-backdrop {
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.7);
 }
 
-/* إعادة حركة الظهور التدريجية */
+/* حركة الظهور التدريجية */
 .swal2-show {
     animation: fadeIn 0.5s ease-in-out;
 }
 
+/* حركة الاختفاء التدريجية */
+.swal2-hide {
+    animation: fadeOut 0.5s ease-in-out;
+}
+
 @keyframes fadeIn {
-    0% { opacity: 0; transform: translateY(-50%) scale(0.9); }
-    100% { opacity: 1; transform: translateY(-50%) scale(1); }
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
 }
 
 .swal2-icon {
-    margin: 0 auto; /* توسيط الأيقونة أفقيًا */
-    margin-bottom: 5px; /* تقليل المسافة بين الأيقونة وحقل الإدخال */
-    margin-top: 5px; /* تقليل المسافة بين الأيقونة والعنوان */
+    margin: 0 auto;
+    margin-bottom: 5px;
+    margin-top: 5px;
 }
 
 .swal2-title {
@@ -770,20 +781,20 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    margin-top: 15px; /* زيادة المسافة بين حقل الإدخال والأزرار */
+    margin-top: 15px;
     gap: 10px;
 }
 
 .swal2-confirm, .swal2-cancel {
-    padding: 8px 16px;
+    padding: 14px 24px; /* زيادة الحشوة من 12px 20px إلى 14px 24px */
     border-radius: 25px;
-    font-size: 14px;
+    font-size: 18px; /* زيادة حجم الخط من 16px إلى 18px */
     font-weight: 700;
     font-family: 'Tajawal', sans-serif;
     border: none;
     cursor: pointer;
     width: auto;
-    min-width: 100px;
+    min-width: 130px; /* زيادة العرض الأدنى من 120px إلى 130px */
     white-space: nowrap;
     margin: 0;
 }
@@ -804,8 +815,8 @@
         width: 95%;
         max-width: 350px;
         padding: 15px;
-        max-height: 350px;
-        gap: 3px; /* تقليل المسافة العامة للشاشات الصغيرة */
+        max-height: 650px; /* زيادة الارتفاع من 550px إلى 650px */
+        gap: 3px;
     }
 
     .swal2-icon {
@@ -821,14 +832,14 @@
     }
 
     .swal2-actions {
-        margin-top: 10px; /* زيادة المسافة للشاشات الصغيرة */
+        margin-top: 10px;
         gap: 8px;
     }
 
     .swal2-confirm, .swal2-cancel {
-        padding: 6px 12px;
-        font-size: 12px;
-        min-width: 90px;
+        padding: 12px 20px; /* زيادة الحشوة من 10px 16px إلى 12px 20px */
+        font-size: 16px; /* زيادة حجم الخط من 14px إلى 16px */
+        min-width: 120px; /* زيادة العرض الأدنى من 110px إلى 120px */
         white-space: nowrap;
     }
 
@@ -955,11 +966,11 @@ async function showPasswordPrompt() {
         inputPlaceholder: 'كلمة المرور',
         showCancelButton: true,
         confirmButtonText: 'تأكيد',
-        cancelButtonText: 'إغلاق'
+        cancelButtonText: 'إغلاق',
+        allowOutsideClick: false // منع التفاعل خارج النافذة
     });
     return password;
 }
-
 async function verifyPassword(password, db) {
     // عرض رسالة "جاري الدخول..."
     Swal.fire({
@@ -983,7 +994,8 @@ async function verifyPassword(password, db) {
                 showConfirmButton: true,
                 confirmButtonText: 'حاول مرة أخرى',
                 timer: 3000,
-                timerProgressBar: true
+                timerProgressBar: true,
+                allowOutsideClick: false // منع التفاعل خارج النافذة
             });
             return false;
         }
@@ -992,44 +1004,45 @@ async function verifyPassword(password, db) {
         const deviceId = await getDeviceId();
 
         if (!data.used) {
-            // إذا لم تكن كلمة المرور مستخدمة من قبل، قم بتسجيل الجهاز
             await codeRef.update({
                 deviceId: deviceId,
                 used: true,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
-            localStorage.setItem("password", password); // تخزين كلمة المرور للتحقق التلقائي
+            localStorage.setItem("password", password);
             await loadSimilaritesData();
             updateNotes();
             await Swal.fire({
                 icon: 'success',
                 title: 'تم الدخول بنجاح',
                 text: 'تم تفعيل كلمة المرور بنجاح!',
-                confirmButtonText: 'موافق'
+                confirmButtonText: 'موافق',
+                allowOutsideClick: false // منع التفاعل خارج النافذة
             });
             return true;
         } else {
-            // التحقق من أن الجهاز هو نفسه المسجل مع كلمة المرور
             if (data.deviceId === deviceId) {
-                localStorage.setItem("password", password); // تحديث كلمة المرور للتحقق التلقائي
+                localStorage.setItem("password", password);
                 await loadSimilaritesData();
                 updateNotes();
                 await Swal.fire({
                     icon: 'success',
                     title: 'تم الدخول بنجاح',
                     text: 'كلمة المرور صحيحة!',
-                    confirmButtonText: 'موافق'
+                    confirmButtonText: 'موافق',
+                    allowOutsideClick: false // منع التفاعل خارج النافذة
                 });
                 return true;
             } else {
                 await Swal.fire({
                     icon: 'error',
                     title: 'خطأ',
-                    text: 'كلمة المرور مستخدمة على جهاز آخر!',
+                    text: 'كلمة المرور مستخدمة على جه functioningاز آخر!',
                     showConfirmButton: true,
                     confirmButtonText: 'حاول مرة أخرى',
                     timer: 3000,
-                    timerProgressBar: true
+                    timerProgressBar: true,
+                    allowOutsideClick: false // منع التفاعل خارج النافذة
                 });
                 return false;
             }
@@ -1042,11 +1055,13 @@ async function verifyPassword(password, db) {
             showConfirmButton: true,
             confirmButtonText: 'حاول مرة أخرى',
             timer: 3000,
-            timerProgressBar: true
+            timerProgressBar: true,
+            allowOutsideClick: false // منع التفاعل خارج النافذة
         });
         return false;
     }
 }
+
 
 window.onload = async function() {
     let db;
@@ -1067,7 +1082,8 @@ window.onload = async function() {
             icon: 'error',
             title: 'خطأ',
             text: 'فشل في تهيئة قاعدة البيانات: ' + error.message,
-            confirmButtonText: 'موافق'
+            confirmButtonText: 'موافق',
+            allowOutsideClick: false // منع التفاعل خارج النافذة
         });
         window.location.href = 'index.html';
         return;
@@ -1077,10 +1093,8 @@ window.onload = async function() {
     const storedPassword = localStorage.getItem("password");
 
     if (storedPassword) {
-        // إذا كانت هناك كلمة مرور محفوظة، تحقق منها تلقائيًا
         const success = await verifyPassword(storedPassword, db);
         if (!success) {
-            // إذا فشل التحقق، اطلب كلمة مرور جديدة
             while (true) {
                 const password = await showPasswordPrompt();
 
@@ -1096,7 +1110,6 @@ window.onload = async function() {
             }
         }
     } else {
-        // إذا لم تكن هناك كلمة مرور محفوظة، اطلب كلمة مرور جديدة
         while (true) {
             const password = await showPasswordPrompt();
 
@@ -1112,7 +1125,6 @@ window.onload = async function() {
         }
     }
 };
-
         document.getElementById("searchInput").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
