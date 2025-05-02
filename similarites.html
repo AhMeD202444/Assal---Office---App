@@ -701,7 +701,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    height: calc(100vh - 80px); /* تغيير من height: auto و max-height إلى height مباشرة */
+    height: calc(100vh - 80px);
     width: 90%;
     max-width: 400px;
     display: flex;
@@ -713,6 +713,22 @@
     box-shadow: 0 0 20px rgba(163, 191, 250, 0.7), 0 0 40px rgba(212, 175, 55, 0.5);
     border: 1px solid rgba(212, 175, 55, 0.3);
     gap: 5px;
+}
+
+/* تنسيق الرسالة المخصصة */
+.swal2-html-container .welcome-message {
+    font-family: 'Tajawal', sans-serif;
+    font-size: clamp(14px, 3vw, 16px);
+    color: #E2E8F0;
+    line-height: 1.6; /* مسافة بين الأسطر لجعل النص أكثر وضوحًا */
+    text-align: center;
+    margin: 10px 0;
+}
+
+/* تنسيق النقاط في الرسالة */
+.welcome-message .highlight {
+    color: #D4AF37; /* لون مميز للنقاط المهمة */
+    font-weight: 700;
 }
 
 /* إضافة تأثير تظليل أنيق للخلفية */
@@ -814,7 +830,7 @@
         width: 95%;
         max-width: 350px;
         padding: 15px;
-        height: calc(100vh - 80px); /* نفس الارتفاع للشاشات الصغيرة */
+        height: calc(100vh - 80px);
         gap: 3px;
     }
 
@@ -844,6 +860,10 @@
 
     .swal2-title {
         font-size: clamp(16px, 3vw, 20px);
+    }
+
+    .swal2-html-container .welcome-message {
+        font-size: clamp(12px, 2.5vw, 14px); /* تصغير حجم الخط للشاشات الصغيرة */
     }
 }
 
@@ -959,17 +979,22 @@ async function getDeviceId() {
 async function showPasswordPrompt() {
     const { value: password } = await Swal.fire({
         title: 'دخول محمي',
-        text: 'أدخل كلمة المرور للوصول',
+        html: `
+            <div class="welcome-message">
+                هلا بيك بخدمتنا <span class="highlight">المميزة</span> .. اذا انت مشترك ويانة ادخل كلمة المرور .. وراها رح تدخل على <span class="highlight">كنز التوافقات</span> .. يعني تعرف شنو يرهم على شنو .. وفر وقتك وخلي شغلك <span class="highlight">نظيف</span> .. هاي الخدمة وفرناها الك اذا انت من اهل <span class="highlight">الشغل الصح</span>
+            </div>
+        `,
         icon: 'question',
         input: 'password',
         inputPlaceholder: 'كلمة المرور',
         showCancelButton: true,
         confirmButtonText: 'تأكيد',
         cancelButtonText: 'إغلاق',
-        allowOutsideClick: false // منع التفاعل خارج النافذة
+        allowOutsideClick: false
     });
     return password;
 }
+
 async function verifyPassword(password, db) {
     // عرض رسالة "جاري الدخول..."
     Swal.fire({
@@ -989,12 +1014,17 @@ async function verifyPassword(password, db) {
             await Swal.fire({
                 icon: 'error',
                 title: 'خطأ',
-                text: 'كلمة المرور غير صحيحة!',
+                html: `
+                    <div class="welcome-message">
+                        كلمة المرور غير صحيحة! <br>
+                        مبين بعدك ما مفعل <span class="highlight">الخدمة</span> !! .. بس صدكني ديضيع عليك هواية .. <span class="highlight">توافقات جاهزة</span> .. <span class="highlight">وقت اقل</span> .. <span class="highlight">شغل ادق</span> ... فعل دخولك وخليك دائما <span class="highlight">مميز</span>
+                    </div>
+                `,
                 showConfirmButton: true,
                 confirmButtonText: 'حاول مرة أخرى',
-                timer: 3000,
+                timer: 5000, // 5 ثوانٍ لإعطاء المستخدم وقتًا لقراءة الرسالة
                 timerProgressBar: true,
-                allowOutsideClick: false // منع التفاعل خارج النافذة
+                allowOutsideClick: false
             });
             return false;
         }
@@ -1016,7 +1046,7 @@ async function verifyPassword(password, db) {
                 title: 'تم الدخول بنجاح',
                 text: 'تم تفعيل كلمة المرور بنجاح!',
                 confirmButtonText: 'موافق',
-                allowOutsideClick: false // منع التفاعل خارج النافذة
+                allowOutsideClick: false
             });
             return true;
         } else {
@@ -1029,19 +1059,19 @@ async function verifyPassword(password, db) {
                     title: 'تم الدخول بنجاح',
                     text: 'كلمة المرور صحيحة!',
                     confirmButtonText: 'موافق',
-                    allowOutsideClick: false // منع التفاعل خارج النافذة
+                    allowOutsideClick: false
                 });
                 return true;
             } else {
                 await Swal.fire({
                     icon: 'error',
                     title: 'خطأ',
-                    text: 'كلمة المرور مستخدمة على جه functioningاز آخر!',
+                    text: 'كلمة المرور مستخدمة على جهاز آخر!',
                     showConfirmButton: true,
                     confirmButtonText: 'حاول مرة أخرى',
                     timer: 3000,
                     timerProgressBar: true,
-                    allowOutsideClick: false // منع التفاعل خارج النافذة
+                    allowOutsideClick: false
                 });
                 return false;
             }
@@ -1055,7 +1085,7 @@ async function verifyPassword(password, db) {
             confirmButtonText: 'حاول مرة أخرى',
             timer: 3000,
             timerProgressBar: true,
-            allowOutsideClick: false // منع التفاعل خارج النافذة
+            allowOutsideClick: false
         });
         return false;
     }
