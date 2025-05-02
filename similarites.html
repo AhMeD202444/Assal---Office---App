@@ -690,8 +690,7 @@
             }
         }
 
-        /* تنسيق SweetAlert2 */
-        /* تنسيق SweetAlert2 */
+/* تنسيق SweetAlert2 */
 .swal2-popup {
     background: linear-gradient(135deg, #1E2A44, #2D3E66);
     border-radius: 20px;
@@ -699,35 +698,62 @@
     font-family: 'Cairo', sans-serif;
     text-align: center;
     position: fixed;
-    top: 40px; /* أسفل الهيدر مباشرة */
-    height: calc(100vh - 80px); /* الارتفاع من أسفل الهيدر إلى أعلى الفوتر */
-    width: 90%; /* عرض النافذة */
-    max-width: 400px; /* الحد الأقصى للعرض */
+    top: 50%;
+    transform: translateY(-50%);
+    height: auto;
+    max-height: 400px;
+    width: 90%;
+    max-width: 400px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
     box-sizing: border-box;
     margin: 0;
+    box-shadow: 0 0 20px rgba(163, 191, 250, 0.7), 0 0 40px rgba(212, 175, 55, 0.5);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    gap: 5px; /* تقليل المسافة العامة لتوفير مساحة */
+}
+
+/* إضافة تأثير تظليل أنيق للخلفية */
+.swal2-backdrop {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+/* إعادة حركة الظهور التدريجية */
+.swal2-show {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(-50%) scale(0.9); }
+    100% { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
+.swal2-icon {
+    margin: 0 auto; /* توسيط الأيقونة أفقيًا */
+    margin-bottom: 5px; /* تقليل المسافة بين الأيقونة وحقل الإدخال */
+    margin-top: 5px; /* تقليل المسافة بين الأيقونة والعنوان */
 }
 
 .swal2-title {
     color: #D4AF37;
     font-family: 'Tajawal', sans-serif;
     font-weight: 700;
-    margin-bottom: 15px;
-    font-size: clamp(18px, 4vw, 24px); /* تجاوب لحجم النص */
+    margin-bottom: 0;
+    font-size: clamp(18px, 4vw, 24px);
 }
 
 .swal2-html-container {
     color: #E2E8F0 !important;
     font-family: 'Cairo', sans-serif;
+    margin-bottom: 0;
 }
 
 .swal2-input {
-    width: 80%; /* عرض متجاوب */
-    max-width: 300px; /* الحد الأقصى للعرض */
-    padding: 14px 20px;
+    width: 80%;
+    max-width: 300px;
+    padding: 10px 16px;
     border-radius: 25px;
     background: rgba(255, 255, 255, 0.1);
     border: 2px solid #D4AF37;
@@ -739,18 +765,27 @@
     text-align: center;
 }
 
+.swal2-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 15px; /* زيادة المسافة بين حقل الإدخال والأزرار */
+    gap: 10px;
+}
+
 .swal2-confirm, .swal2-cancel {
-    padding: 12px 25px;
+    padding: 8px 16px;
     border-radius: 25px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     font-family: 'Tajawal', sans-serif;
     border: none;
     cursor: pointer;
-    width: auto; /* عرض ثابت للأزرار */
-    min-width: 120px; /* الحد الأدنى للعرض لضمان عدم التصغير الزائد */
-        margin: 5px;
-white-space: nowrap; /* منع النص من الانتقال إلى سطر جديد */
+    width: auto;
+    min-width: 100px;
+    white-space: nowrap;
+    margin: 0;
 }
 
 .swal2-confirm {
@@ -766,26 +801,42 @@ white-space: nowrap; /* منع النص من الانتقال إلى سطر جد
 /* تجاوب للشاشات الصغيرة */
 @media (max-width: 768px) {
     .swal2-popup {
-        width: 95%; /* عرض أكبر نسبيًا على الشاشات الصغيرة */
-        max-width: 350px; /* تقليل العرض الأقصى */
-        padding: 15px; /* تقليل الحشوة */
-        top: 40px; /* نفس الموضع أسفل الهيدر */
-        height: calc(100vh - 80px); /* نفس الارتفاع */
+        width: 95%;
+        max-width: 350px;
+        padding: 15px;
+        max-height: 350px;
+        gap: 3px; /* تقليل المسافة العامة للشاشات الصغيرة */
+    }
+
+    .swal2-icon {
+        margin-bottom: 3px;
+        margin-top: 3px;
     }
 
     .swal2-input {
-        width: 90%; /* عرض متجاوب */
-        max-width: 250px; /* تقليل العرض الأقصى */
-        padding: 12px 15px; /* تقليل الحشوة */
-        font-size: 14px; /* تصغير حجم الخط */
+        width: 90%;
+        max-width: 250px;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .swal2-actions {
+        margin-top: 10px; /* زيادة المسافة للشاشات الصغيرة */
+        gap: 8px;
     }
 
     .swal2-confirm, .swal2-cancel {
-        padding: 10px 20px; /* تقليل الحشوة */
-        font-size: 14px; /* تصغير حجم الخط */
-        width: 100px; /* تقليل العرض */
+        padding: 6px 12px;
+        font-size: 12px;
+        min-width: 90px;
+        white-space: nowrap;
+    }
+
+    .swal2-title {
+        font-size: clamp(16px, 3vw, 20px);
     }
 }
+
     </style>
 </head>
 <body>
