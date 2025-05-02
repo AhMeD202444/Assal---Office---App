@@ -38,8 +38,6 @@
             overflow-x: hidden;
             position: relative;
             direction: rtl;
-            padding-top: 20px;
-            padding-bottom: 50px;
         }
 
         @keyframes gradientAnimation {
@@ -72,36 +70,36 @@
             color: #A3BFFA;
             text-shadow: 0 1px 2px rgba(163, 191, 250, 0.4);
             letter-spacing: 0.5px;
-            order: 1; /* على اليمين */
+            order: 1;
         }
 
         .header-buttons {
             display: flex;
             gap: 8px;
-            order: 0; /* على اليسار */
+            order: 0;
             position: relative;
         }
 
         .header-btn {
-    padding: 2px 8px; /* تصغير من 3px 10px إلى 2px 8px */
-    border-radius: 6px; /* تصغير من 8px إلى 6px */
-    border: none;
-    background: linear-gradient(135deg, #5A6388, #4A5275);
-    color: #fff;
-    font-family: 'Cairo', sans-serif;
-    font-size: 10px; /* تصغير من 12px إلى 10px */
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    position: relative;
-    overflow: hidden !important;
-    clip-path: inset(0 0 0 0 round 6px) !important; /* تغيير من 8px إلى 6px ليتطابق مع border-radius */
-}
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: none;
+            background: linear-gradient(135deg, #5A6388, #4A5275);
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            position: relative;
+            overflow: hidden;
+            clip-path: inset(0 0 0 0 round 6px);
+        }
 
         .header-btn:hover {
             transform: scale(1.1) rotate(5deg);
@@ -109,9 +107,9 @@
         }
 
         .header-btn:active {
-            transform: scale(0.95) !important;
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي */
-            clip-path: inset(0 0 0 0 round 8px) !important; /* قص صارم */
+            transform: scale(0.95);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+            clip-path: inset(0 0 0 0 round 8px);
         }
 
         .refresh-btn {
@@ -121,7 +119,7 @@
             background: linear-gradient(135deg, #9CA3AF, #6B7280);
         }
         .refresh-btn:active {
-            background: linear-gradient(135deg, #4B5563, #6B7280) !important; /* لون أغمق */
+            background: linear-gradient(135deg, #4B5563, #6B7280);
         }
 
         .back-btn {
@@ -131,14 +129,14 @@
             background: linear-gradient(135deg, #CD5C5C, #8B0000);
         }
         .back-btn:active {
-            background: linear-gradient(135deg, #B22222, #8B0000) !important; /* لون أغمق */
+            background: linear-gradient(135deg, #B22222, #8B0000);
         }
 
         .notes-btn {
             background: linear-gradient(135deg, #4682B4, #20B2AA);
             position: relative;
-            padding-right: 26px; /* زيادة المسافة على اليمين لتوسيع الزر وإبعاد العداد */
-            padding-left: 12px; /* زيادة المسافة على اليسار للتوازن */
+            padding-right: 26px;
+            padding-left: 12px;
         }
 
         .notes-btn:hover {
@@ -146,20 +144,20 @@
         }
 
         .notes-btn:active {
-            background: linear-gradient(135deg, #20B2AA, #4682B4) !important;
+            background: linear-gradient(135deg, #20B2AA, #4682B4);
         }
 
         .notes-count {
             position: absolute;
             top: 50%;
-            right: 4px; /* تقليل المسافة لإبعاد العداد عن النص */
+            right: 4px;
             transform: translateY(-50%);
             background: #DC143C;
             color: #fff;
             border-radius: 50%;
-            width: 16px; /* زيادة الحجم من 14px إلى 16px */
+            width: 16px;
             height: 16px;
-            font-size: 9px; /* زيادة حجم الخط من 8px إلى 9px */
+            font-size: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -173,31 +171,34 @@
 
         /* الحاوية الرئيسية */
         .main-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 40px;
+            width: 100%;
+            max-width: 95vw;
+            margin: 60px auto;
+            padding: 0 20px;
+            min-height: calc(100vh - 100px);
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
-            min-height: calc(100vh - 80px);
             gap: 20px;
         }
+
         .container {
-            width: 600px;
+            width: 100%;
+            max-width: 600px;
             background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
-            padding: 10px 40px;
+            padding: 20px 40px;
             min-height: 550px;
             border-radius: 25px;
             box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
             border: 1px solid rgba(0, 206, 209, 0.5);
-            margin: 0 20px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             gap: 20px;
         }
+
         h1 {
             font-size: clamp(24px, 5vw, 36px);
             color: #D4AF37;
@@ -285,8 +286,8 @@
             transition: all 0.3s ease;
             min-height: 40px;
             line-height: 16px;
-            overflow: hidden !important;
-            clip-path: inset(0 0 0 0 round 10px) !important;
+            overflow: hidden;
+            clip-path: inset(0 0 0 0 round 10px);
         }
 
         .select2-results__option--highlighted {
@@ -295,11 +296,12 @@
         }
 
         .select2-results__option:active {
-            transform: scale(0.95) !important;
-            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important;
-            background: linear-gradient(45deg, #D4AF37, #4A8296) !important;
-            clip-path: inset(0 0 0 0 round 10px) !important;
+            transform: scale(0.95);
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(45deg, #D4AF37, #4A8296);
+            clip-path: inset(0 0 0 0 round 10px);
         }
+
         .select2-results__option:last-child {
             border-bottom: none;
         }
@@ -366,8 +368,8 @@
             font-weight: 700;
             transition: all 0.3s ease;
             font-family: 'Tajawal', sans-serif;
-            overflow: hidden !important;
-            clip-path: inset(0 0 0 0 round 25px) !important;
+            overflow: hidden;
+            clip-path: inset(0 0 0 0 round 25px);
         }
 
         .search-container button:hover {
@@ -377,27 +379,27 @@
         }
 
         .search-container button:active {
-            transform: scale(0.95) !important;
-            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important;
-            background: linear-gradient(45deg, #A3BFFA, #D4AF37) !important;
-            clip-path: inset(0 0 0 0 round 25px) !important;
+            transform: scale(0.95);
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(45deg, #A3BFFA, #D4AF37);
+            clip-path: inset(0 0 0 0 round 25px);
         }
 
-       /* حاوية النتائج */
-.results-container {
-    background: rgba(30, 42, 68, 0.95);
-    border-radius: 20px;
-    padding: 25px;
-    width: 600px; /* تغيير من 90vw إلى 600px ليتطابق مع .container */
-    max-width: 600px; /* تغيير من 800px إلى 600px ليتطابق مع .container */
-    box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
-    border: 1px solid rgba(0, 206, 209, 0.5);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    min-height: 300px;
-    margin-top: 10px;
-}
+        /* حاوية النتائج */
+        .results-container {
+            background: rgba(30, 42, 68, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
+            border: 1px solid rgba(0, 206, 209, 0.5);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            min-height: 300px;
+            margin-top: 10px;
+        }
 
         .results-container.visible {
             display: flex;
@@ -429,6 +431,7 @@
             border: 1px solid rgba(212, 175, 55, 0.3);
             transform: perspective(600px) rotateY(0deg) translateZ(10px);
         }
+
         .result-card:hover {
             transform: perspective(600px) rotateY(-5deg) scale(1.05);
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
@@ -439,9 +442,10 @@
             height: clamp(100px, 18vw, 120px);
             object-fit: cover;
             border-radius: 10px;
-            margin-bottom: 20px;
+            margin: 0 auto 20px;
             border: 3px solid #D4AF37;
             transition: transform 0.3s ease;
+            display: block;
         }
 
         .result-card:hover img {
@@ -470,8 +474,8 @@
             width: auto;
             white-space: nowrap;
             transition: all 0.3s ease;
-            overflow: hidden !important;
-            clip-path: inset(0 0 0 0 round 20px) !important;
+            overflow: hidden;
+            clip-path: inset(0 0 0 0 round 20px);
         }
 
         .result-card button:hover {
@@ -481,10 +485,10 @@
         }
 
         .result-card button:active {
-            transform: scale(0.95) !important;
-            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important;
-            background: linear-gradient(45deg, #A3BFFA, #D4AF37) !important;
-            clip-path: inset(0 0 0 0 round 20px) !important;
+            transform: scale(0.95);
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(45deg, #A3BFFA, #D4AF37);
+            clip-path: inset(0 0 0 0 round 20px);
         }
 
         /* سلة الملاحظات */
@@ -558,8 +562,8 @@
             font-weight: 700;
             transition: all 0.3s ease;
             box-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
-            overflow: hidden !important;
-            clip-path: inset(0 0 0 0 round 10px) !important;
+            overflow: hidden;
+            clip-path: inset(0 0 0 0 round 10px);
         }
 
         .notes-item button:hover {
@@ -569,10 +573,40 @@
         }
 
         .notes-item button:active {
-            transform: scale(0.95) !important;
-            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important;
-            background: linear-gradient(45deg, #DC143C, #8B0000) !important;
-            clip-path: inset(0 0 0 0 round 10px) !important;
+            transform: scale(0.95);
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(45deg, #DC143C, #8B0000);
+            clip-path: inset(0 0 0 0 round 10px);
+        }
+
+        /* زر إحصائيات الاستخدام */
+        .stats-btn {
+            padding: 8px 15px;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #4682B4, #20B2AA);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            width: auto;
+            overflow: hidden;
+            clip-path: inset(0 0 0 0 round 10px);
+        }
+
+        .stats-btn:hover {
+            background: linear-gradient(45deg, #20B2AA, #4682B4);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(32, 178, 170, 0.7);
+        }
+
+        .stats-btn:active {
+            transform: scale(0.95);
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(45deg, #20B2AA, #4682B4);
+            clip-path: inset(0 0 0 0 round 10px);
         }
 
         /* زر الرجوع إلى الأعلى */
@@ -597,8 +631,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden !important;
-            clip-path: circle(50%) !important;
+            overflow: hidden;
+            clip-path: circle(50%);
         }
 
         .scroll-to-top:hover {
@@ -608,11 +642,12 @@
         }
 
         .scroll-to-top:active {
-            transform: scale(0.95) !important;
-            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important;
-            background: linear-gradient(45deg, #E53E3E, #9B2C2C) !important;
-            clip-path: circle(50%) !important;
+            transform: scale(0.95);
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(45deg, #E53E3E, #9B2C2C);
+            clip-path: circle(50%);
         }
+
         .scroll-to-top.visible {
             display: flex;
         }
@@ -637,7 +672,135 @@
             justify-content: center;
         }
 
-        /* استجابة الشاشة */
+        /* تنسيق SweetAlert2 */
+        .swal2-popup {
+            background: linear-gradient(135deg, #1E2A44, #2D3E66);
+            border-radius: 20px;
+            padding: 15px;
+            font-family: 'Cairo', sans-serif;
+            text-align: center;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 350px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            box-sizing: border-box;
+            box-shadow: 0 0 20px rgba(163, 191, 250, 0.7), 0 0 40px rgba(212, 175, 55, 0.5);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            gap: 5px;
+        }
+
+        .swal2-backdrop {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .swal2-show {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .swal2-hide {
+            animation: fadeOut 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+        }
+
+        .swal2-icon {
+            margin: 0 auto;
+            margin-bottom: 5px;
+            margin-top: 5px;
+        }
+
+        .swal2-title {
+            color: #D4AF37;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            margin-bottom: 0;
+            font-size: clamp(16px, 3.5vw, 20px);
+        }
+
+        .swal2-html-container {
+            color: #E2E8F0 !important;
+            font-family: 'Cairo', sans-serif;
+            margin-bottom: 0;
+        }
+
+        .swal2-html-container .welcome-message {
+            font-family: 'Tajawal', sans-serif;
+            font-size: clamp(18px, 3.5vw, 20px);
+            color: #E2E8F0;
+            line-height: 1.6;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .welcome-message .highlight {
+            color: #D4AF37;
+            font-weight: 700;
+        }
+
+        .swal2-input {
+            width: 80%;
+            max-width: 250px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #D4AF37;
+            color: #E2E8F0;
+            font-size: 14px;
+            font-family: 'Cairo', sans-serif;
+            margin: 10px auto;
+            display: block;
+            text-align: center;
+        }
+
+        .swal2-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-top: 10px;
+            gap: 8px;
+        }
+
+        .swal2-confirm, .swal2-cancel {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Tajawal', sans-serif;
+            border: none;
+            cursor: pointer;
+            width: auto;
+            min-width: 90px;
+            white-space: nowrap;
+            margin: 0;
+        }
+
+        .swal2-confirm {
+            background: linear-gradient(45deg, #D4AF37, #A3BFFA);
+            color: #fff;
+        }
+
+        .swal2-cancel {
+            background: linear-gradient(45deg, #E53E3E, #9B2C2C);
+            color: #fff;
+        }
+
+        /* تجاوب للشاشات الصغيرة */
         @media (max-width: 768px) {
             .notes-item {
                 padding: 10px;
@@ -653,8 +816,7 @@
             }
 
             .main-container {
-                margin-top: 60px;
-                padding: 0 20px;
+                padding: 0 15px;
             }
 
             .container, .results-container {
@@ -688,185 +850,41 @@
             .result-card {
                 width: clamp(250px, 80vw, 350px);
             }
+
+            .swal2-popup {
+                width: 95%;
+                max-width: 320px;
+                min-height: 280px;
+                padding: 12px;
+                gap: 3px;
+            }
+
+            .swal2-input {
+                width: 90%;
+                max-width: 220px;
+                padding: 7px 10px;
+                font-size: 13px;
+            }
+
+            .swal2-actions {
+                margin-top: 8px;
+                gap: 6px;
+            }
+
+            .swal2-confirm, .swal2-cancel {
+                padding: 7px 12px;
+                font-size: 11px;
+                min-width: 80px;
+            }
+
+            .swal2-title {
+                font-size: clamp(14px, 3vw, 18px);
+            }
+
+            .swal2-html-container .welcome-message {
+                font-size: clamp(16px, 3vw, 18px);
+            }
         }
-
-/* تنسيق SweetAlert2 */
-.swal2-popup {
-    background: linear-gradient(135deg, #1E2A44, #2D3E66);
-    border-radius: 20px;
-    padding: 20px;
-    font-family: 'Cairo', sans-serif;
-    text-align: center;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    height: calc(100vh - 80px);
-    width: 90%;
-    max-width: 400px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    box-sizing: border-box;
-    margin: 0;
-    box-shadow: 0 0 20px rgba(163, 191, 250, 0.7), 0 0 40px rgba(212, 175, 55, 0.5);
-    border: 1px solid rgba(212, 175, 55, 0.3);
-    gap: 5px;
-}
-
-/* تنسيق الرسالة المخصصة */
-.swal2-html-container .welcome-message {
-    font-family: 'Tajawal', sans-serif;
-    font-size: clamp(20px, 4vw, 22px); /* تكبير الخط من 16px إلى 20px (الحد الأدنى) */
-    color: #E2E8F0;
-    line-height: 1.6;
-    text-align: center;
-    margin: 10px 0;
-}
-
-/* تنسيق النقاط في الرسالة */
-.welcome-message .highlight {
-    color: #D4AF37;
-    font-weight: 700;
-}
-
-/* إضافة تأثير تظليل أنيق للخلفية */
-.swal2-backdrop {
-    background: rgba(0, 0, 0, 0.7);
-}
-
-/* حركة الظهور التدريجية */
-.swal2-show {
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-/* حركة الاختفاء التدريجية */
-.swal2-hide {
-    animation: fadeOut 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-}
-
-@keyframes fadeOut {
-    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-}
-
-.swal2-icon {
-    margin: 0 auto;
-    margin-bottom: 5px;
-    margin-top: 5px;
-}
-
-.swal2-title {
-    color: #D4AF37;
-    font-family: 'Tajawal', sans-serif;
-    font-weight: 700;
-    margin-bottom: 0;
-    font-size: clamp(18px, 4vw, 24px);
-}
-
-.swal2-html-container {
-    color: #E2E8F0 !important;
-    font-family: 'Cairo', sans-serif;
-    margin-bottom: 0;
-}
-
-.swal2-input {
-    width: 80%;
-    max-width: 300px;
-    padding: 10px 16px;
-    border-radius: 25px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid #D4AF37;
-    color: #E2E8F0;
-    font-size: 16px;
-    font-family: 'Cairo', sans-serif;
-    margin: 0 auto;
-    display: block;
-    text-align: center;
-}
-
-.swal2-actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    margin-top: 15px;
-    gap: 10px;
-}
-
-.swal2-confirm, .swal2-cancel {
-    padding: 10px 18px;
-    border-radius: 25px;
-    font-size: 14px;
-    font-weight: 700;
-    font-family: 'Tajawal', sans-serif;
-    border: none;
-    cursor: pointer;
-    width: auto;
-    min-width: 100px;
-    white-space: nowrap;
-    margin: 0;
-}
-
-.swal2-confirm {
-    background: linear-gradient(45deg, #D4AF37, #A3BFFA);
-    color: #fff;
-}
-
-.swal2-cancel {
-    background: linear-gradient(45deg, #E53E3E, #9B2C2C);
-    color: #fff;
-}
-
-/* تجاوب للشاشات الصغيرة */
-@media (max-width: 768px) {
-    .swal2-popup {
-        width: 95%;
-        max-width: 350px;
-        padding: 15px;
-        height: calc(100vh - 80px);
-        gap: 3px;
-    }
-
-    .swal2-icon {
-        margin-bottom: 3px;
-        margin-top: 3px;
-    }
-
-    .swal2-input {
-        width: 90%;
-        max-width: 250px;
-        padding: 8px 12px;
-        font-size: 14px;
-    }
-
-    .swal2-actions {
-        margin-top: 10px;
-        gap: 8px;
-    }
-
-    .swal2-confirm, .swal2-cancel {
-        padding: 8px 14px;
-        font-size: 12px;
-        min-width: 90px;
-        white-space: nowrap;
-    }
-
-    .swal2-title {
-        font-size: clamp(16px, 3vw, 20px);
-    }
-
-    .swal2-html-container .welcome-message {
-        font-size: clamp(18px, 3.5vw, 20px); /* تكبير الخط من 14px إلى 18px (الحد الأدنى) للشاشات الصغيرة */
-    }
-}
-
     </style>
 </head>
 <body>
@@ -924,6 +942,7 @@
         <i class="fas fa-times close-btn" onclick="toggleNotes()"></i>
         <h3>سلة الملاحظات</h3>
         <div class="notes-items-container" id="notesItems"></div>
+        <button class="stats-btn" onclick="showStats()">إحصائيات الاستخدام</button>
     </div>
 
     <button class="scroll-to-top" onclick="scrollToTop()"><i class="fas fa-arrow-up"></i></button>
@@ -934,139 +953,153 @@
     </footer>
 
     <script>
-       const dropboxSimilaritesFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file2" + "?t=" + new Date().getTime();
-let database = {};
-let notes = JSON.parse(localStorage.getItem('notes')) || [];
+        const dropboxSimilaritesFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file2" + "?t=" + new Date().getTime();
+        let database = {};
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+        let stats = JSON.parse(localStorage.getItem('stats')) || { searches: 0, notesAdded: 0 };
 
-$(document).ready(function() {
-    $('#categorySelect').select2({
-        dir: "rtl",
-        placeholder: "اختر الصنف",
-        allowClear: true,
-        width: '100%',
-        minimumResultsForSearch: Infinity,
-        dropdownAutoWidth: true,
-        dropdownCss: { 'max-height': '400px' },
-        dropdownParent: $('.category-container')
-    });
-});
+        $(document).ready(function() {
+            $('#categorySelect').select2({
+                dir: "rtl",
+                placeholder: "اختر الصنف",
+                allowClear: true,
+                width: '100%',
+                minimumResultsForSearch: Infinity,
+                dropdownAutoWidth: true,
+                dropdownCss: { 'max-height': '400px' },
+                dropdownParent: $('.category-container')
+            });
+        });
 
-async function loadSimilaritesData() {
-    const response = await fetch(dropboxSimilaritesFile);
-    const buffer = await response.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: "array" });
-    database.SIMILARITES = XLSX.utils.sheet_to_json(workbook.Sheets["SIMILARITES"] || {}).map(item => ({
-        Item: item.Item || "غير مسمى",
-        Category: item.Category || 20
-    }));
-}
-
-async function getDeviceId() {
-    try {
-        let deviceId = localStorage.getItem('deviceId');
-        if (!deviceId) {
-            const fp = await FingerprintJS.load();
-            const result = await fp.get();
-            deviceId = result.visitorId;
-            localStorage.setItem('deviceId', deviceId);
+        async function loadSimilaritesData() {
+            const response = await fetch(dropboxSimilaritesFile);
+            const buffer = await response.arrayBuffer();
+            const workbook = XLSX.read(buffer, { type: "array" });
+            database.SIMILARITES = XLSX.utils.sheet_to_json(workbook.Sheets["SIMILARITES"] || {}).map(item => ({
+                Item: item.Item || "غير مسمى",
+                Category: item.Category || 20
+            }));
         }
-        return deviceId;
-    } catch (error) {
-        throw error;
-    }
-}
 
-async function showPasswordPrompt() {
-    const { value: password } = await Swal.fire({
-        title: 'دخول محمي',
-        html: `
-            <div class="welcome-message">
-                هلا بيك بخدمتنا <span class="highlight">المميزة</span> .. اذا انت مشترك ويانة ادخل كلمة المرور .. وراها رح تدخل على <span class="highlight">كنز التوافقات</span> .. يعني تعرف شنو يرهم على شنو .. وفر وقتك وخلي شغلك <span class="highlight">نظيف</span> .. هاي الخدمة وفرناها الك اذا انت من اهل <span class="highlight">الشغل الصح</span>
-            </div>
-        `,
-        icon: 'question',
-        input: 'password',
-        inputPlaceholder: 'كلمة المرور',
-        showCancelButton: true,
-        confirmButtonText: 'تأكيد',
-        cancelButtonText: 'إغلاق',
-        allowOutsideClick: false
-    });
-    return password;
-}
-
-async function verifyPassword(password, db) {
-    // عرض رسالة "جاري الدخول..."
-    Swal.fire({
-        title: 'جاري الدخول...',
-        text: 'يرجى الانتظار',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
+        async function getDeviceId() {
+            try {
+                let deviceId = localStorage.getItem('deviceId');
+                if (!deviceId) {
+                    const fp = await FingerprintJS.load();
+                    const result = await fp.get();
+                    deviceId = result.visitorId;
+                    localStorage.setItem('deviceId', deviceId);
+                }
+                return deviceId;
+            } catch (error) {
+                throw error;
+            }
         }
-    });
 
-    try {
-        const codeRef = db.collection('passwords').doc(password);
-        const doc = await codeRef.get();
-
-        if (!doc.exists) {
-            await Swal.fire({
-                icon: 'error',
-                title: 'خطأ',
+        async function showPasswordPrompt() {
+            const { value: password } = await Swal.fire({
+                title: 'دخول محمي',
                 html: `
                     <div class="welcome-message">
-                        كلمة المرور غير صحيحة! <br>
-                        مبين بعدك ما مفعل <span class="highlight">الخدمة</span> !! .. بس صدكني ديضيع عليك هواية .. <span class="highlight">توافقات جاهزة</span> .. <span class="highlight">وقت اقل</span> .. <span class="highlight">شغل ادق</span> ... فعل دخولك وخليك دائما <span class="highlight">مميز</span>
+                        هلا بيك بخدمتنا <span class="highlight">المميزة</span> .. اذا انت مشترك ويانة ادخل كلمة المرور .. وراها رح تدخل على <span class="highlight">كنز التوافقات</span> .. يعني تعرف شنو يرهم على شنو .. وفر وقتك وخلي شغلك <span class="highlight">نظيف</span> .. هاي الخدمة وفرناها الك اذا انت من اهل <span class="highlight">الشغل الصح</span>
                     </div>
                 `,
-                showConfirmButton: true,
-                confirmButtonText: 'حاول مرة أخرى',
-                timer: 5000, // 5 ثوانٍ لإعطاء المستخدم وقتًا لقراءة الرسالة
-                timerProgressBar: true,
+                icon: 'question',
+                input: 'password',
+                inputPlaceholder: 'كلمة المرور',
+                showCancelButton: true,
+                confirmButtonText: 'تأكيد',
+                cancelButtonText: 'إغلاق',
                 allowOutsideClick: false
             });
-            return false;
+            return password;
         }
 
-        const data = doc.data();
-        const deviceId = await getDeviceId();
+        async function verifyPassword(password, db) {
+            Swal.fire({
+                title: 'جاري الدخول...',
+                text: 'يرجى الانتظار',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-        if (!data.used) {
-            await codeRef.update({
-                deviceId: deviceId,
-                used: true,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            localStorage.setItem("password", password);
-            await loadSimilaritesData();
-            updateNotes();
-            await Swal.fire({
-                icon: 'success',
-                title: 'تم الدخول بنجاح',
-                text: 'تم تفعيل كلمة المرور بنجاح!',
-                confirmButtonText: 'موافق',
-                allowOutsideClick: false
-            });
-            return true;
-        } else {
-            if (data.deviceId === deviceId) {
-                localStorage.setItem("password", password);
-                await loadSimilaritesData();
-                updateNotes();
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'تم الدخول بنجاح',
-                    text: 'كلمة المرور صحيحة!',
-                    confirmButtonText: 'موافق',
-                    allowOutsideClick: false
-                });
-                return true;
-            } else {
+            try {
+                const codeRef = db.collection('passwords').doc(password);
+                const doc = await codeRef.get();
+
+                if (!doc.exists) {
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'خطأ',
+                        html: `
+                            <div class="welcome-message">
+                                كلمة المرور غير صحيحة! <br>
+                                مبين بعدك ما مفعل <span class="highlight">الخدمة</span> !! .. بس صدكني ديضيع عليك هواية .. <span class="highlight">توافقات جاهزة</span> .. <span class="highlight">وقت اقل</span> .. <span class="highlight">شغل ادق</span> ... فعل دخولك وخليك دائما <span class="highlight">مميز</span>
+                            </div>
+                        `,
+                        showConfirmButton: true,
+                        confirmButtonText: 'حاول مرة أخرى',
+                        timer: 5000,
+                        timerProgressBar: true,
+                        allowOutsideClick: false
+                    });
+                    return false;
+                }
+
+                const data = doc.data();
+                const deviceId = await getDeviceId();
+
+                if (!data.used) {
+                    await codeRef.update({
+                        deviceId: deviceId,
+                        used: true,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    localStorage.setItem("password", password);
+                    await loadSimilaritesData();
+                    updateNotes();
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'تم الدخول بنجاح',
+                        text: 'تم تفعيل كلمة المرور بنجاح!',
+                        confirmButtonText: 'موافق',
+                        allowOutsideClick: false
+                    });
+                    return true;
+                } else {
+                    if (data.deviceId === deviceId) {
+                        localStorage.setItem("password", password);
+                        await loadSimilaritesData();
+                        updateNotes();
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'تم الدخول بنجاح',
+                            text: 'كلمة المرور صحيحة!',
+                            confirmButtonText: 'موافق',
+                            allowOutsideClick: false
+                        });
+                        return true;
+                    } else {
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'خطأ',
+                            text: 'كلمة المرور مستخدمة على جهاز آخر!',
+                            showConfirmButton: true,
+                            confirmButtonText: 'حاول مرة أخرى',
+                            timer: 3000,
+                            timerProgressBar: true,
+                            allowOutsideClick: false
+                        });
+                        return false;
+                    }
+                }
+            } catch (error) {
                 await Swal.fire({
                     icon: 'error',
                     title: 'خطأ',
-                    text: 'كلمة المرور مستخدمة على جهاز آخر!',
+                    text: error.message.includes('offline') ? 'أنت غير متصل بالإنترنت. يرجى التحقق من الاتصال.' : 'حدث خطأ: ' + error.message,
                     showConfirmButton: true,
                     confirmButtonText: 'حاول مرة أخرى',
                     timer: 3000,
@@ -1076,84 +1109,60 @@ async function verifyPassword(password, db) {
                 return false;
             }
         }
-    } catch (error) {
-        await Swal.fire({
-            icon: 'error',
-            title: 'خطأ',
-            text: error.message.includes('offline') ? 'أنت غير متصل بالإنترنت. يرجى التحقق من الاتصال.' : 'حدث خطأ: ' + error.message,
-            showConfirmButton: true,
-            confirmButtonText: 'حاول مرة أخرى',
-            timer: 3000,
-            timerProgressBar: true,
-            allowOutsideClick: false
-        });
-        return false;
-    }
-}
 
-
-window.onload = async function() {
-    let db;
-    try {
-        const firebaseConfig = {
-            apiKey: "AIzaSyD_Nqmd2X3UY0mkK31QXKd-6B9KLE3ipYA",
-            authDomain: "assal-office.firebaseapp.com",
-            projectId: "assal-office",
-            storageBucket: "assal-office.firebasestorage.app",
-            messagingSenderId: "939160864143",
-            appId: "1:939160864143:web:0900fffc74e4037898b7fa",
-            measurementId: "G-YXL3KPKLD3"
-        };
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore();
-    } catch (error) {
-        await Swal.fire({
-            icon: 'error',
-            title: 'خطأ',
-            text: 'فشل في تهيئة قاعدة البيانات: ' + error.message,
-            confirmButtonText: 'موافق',
-            allowOutsideClick: false // منع التفاعل خارج النافذة
-        });
-        window.location.href = 'index.html';
-        return;
-    }
-
-    // التحقق من وجود كلمة مرور محفوظة في localStorage
-    const storedPassword = localStorage.getItem("password");
-
-    if (storedPassword) {
-        const success = await verifyPassword(storedPassword, db);
-        if (!success) {
-            while (true) {
-                const password = await showPasswordPrompt();
-
-                if (!password) {
-                    window.location.href = 'index.html';
-                    break;
-                }
-
-                const success = await verifyPassword(password, db);
-                if (success) {
-                    break;
-                }
-            }
-        }
-    } else {
-        while (true) {
-            const password = await showPasswordPrompt();
-
-            if (!password) {
+        window.onload = async function() {
+            let db;
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyD_Nqmd2X3UY0mkK31QXKd-6B9KLE3ipYA",
+                    authDomain: "assal-office.firebaseapp.com",
+                    projectId: "assal-office",
+                    storageBucket: "assal-office.firebasestorage.app",
+                    messagingSenderId: "939160864143",
+                    appId: "1:939160864143:web:0900fffc74e4037898b7fa",
+                    measurementId: "G-YXL3KPKLD3"
+                };
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+            } catch (error) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'خطأ',
+                    text: 'فشل في تهيئة قاعدة البيانات: ' + error.message,
+                    confirmButtonText: 'موافق',
+                    allowOutsideClick: false
+                });
                 window.location.href = 'index.html';
-                break;
+                return;
             }
 
-            const success = await verifyPassword(password, db);
-            if (success) {
-                break;
+            const storedPassword = localStorage.getItem("password");
+            if (storedPassword) {
+                const success = await verifyPassword(storedPassword, db);
+                if (!success) {
+                    while (true) {
+                        const password = await showPasswordPrompt();
+                        if (!password) {
+                            window.location.href = 'index.html';
+                            break;
+                        }
+                        const success = await verifyPassword(password, db);
+                        if (success) break;
+                    }
+                }
+            } else {
+                while (true) {
+                    const password = await showPasswordPrompt();
+                    if (!password) {
+                        window.location.href = 'index.html';
+                        break;
+                    }
+                    const success = await verifyPassword(password, db);
+                    if (success) break;
+                }
             }
-        }
-    }
-};
+        };
+
         document.getElementById("searchInput").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -1172,6 +1181,8 @@ window.onload = async function() {
             const results = database.SIMILARITES.filter(item => String(item.Category) === category);
             displayResults(results);
             scrollToResults();
+            stats.searches++;
+            localStorage.setItem('stats', JSON.stringify(stats));
         }
 
         function searchItems() {
@@ -1216,6 +1227,8 @@ window.onload = async function() {
                 return;
             }
 
+            stats.searches++;
+            localStorage.setItem('stats', JSON.stringify(stats));
             displayResults(results);
             scrollToResults();
         }
@@ -1259,7 +1272,9 @@ window.onload = async function() {
 
         function addToNotes(itemName) {
             notes.push({ name: itemName });
+            stats.notesAdded++;
             localStorage.setItem('notes', JSON.stringify(notes));
+            localStorage.setItem('stats', JSON.stringify(stats));
             updateNotes();
         }
 
@@ -1288,8 +1303,24 @@ window.onload = async function() {
 
         function removeFromNotes(index) {
             notes.splice(index, 1);
+            stats.notesAdded--;
             localStorage.setItem('notes', JSON.stringify(notes));
+            localStorage.setItem('stats', JSON.stringify(stats));
             updateNotes();
+        }
+
+        function showStats() {
+            Swal.fire({
+                title: 'إحصائيات الاستخدام',
+                html: `
+                    <div class="welcome-message">
+                        <p><strong>عدد عمليات البحث:</strong> ${stats.searches}</p>
+                        <p><strong>عدد الملاحظات المحفوظة:</strong> ${stats.notesAdded}</p>
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonText: 'موافق'
+            });
         }
 
         function goBack() {
