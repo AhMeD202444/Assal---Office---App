@@ -319,10 +319,10 @@
             justify-content: center;
             align-items: center;
             gap: 20px;
-            position: fixed;
-            top: 60px;
-            bottom: 60px;
+            position: relative;
+            height: calc(100vh - 80px);
             margin: 20px 0;
+            z-index: 100;
         }
 
         /* القائمة المنسدلة */
@@ -518,7 +518,8 @@
             align-items: center;
             min-height: 300px;
             margin-top: 10px;
-            z-index: 100;
+            z-index: 200;
+            position: relative;
         }
 
         .results-container.visible {
@@ -945,8 +946,7 @@
             }
 
             .container {
-                top: 50px;
-                bottom: 50px;
+                height: calc(100vh - 100px);
                 margin: 10px 0;
             }
 
@@ -1495,7 +1495,13 @@
         function scrollToResults() {
             const resultsContainer = document.getElementById("resultsContainer");
             if (resultsContainer.classList.contains('visible')) {
-                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => {
+                    const rect = resultsContainer.getBoundingClientRect();
+                    window.scrollTo({
+                        top: rect.top + window.scrollY - 20,
+                        behavior: 'smooth'
+                    });
+                }, 100);
             }
         }
 
