@@ -193,13 +193,13 @@
             color: #A3BFFA;
             text-shadow: 0 1px 2px rgba(163, 191, 250, 0.4);
             letter-spacing: 0.5px;
-            order: 0;
+            order: 1;
         }
 
         .header-buttons {
             display: flex;
             gap: 8px;
-            order: 1;
+            order: 0;
             position: relative;
         }
 
@@ -292,39 +292,43 @@
             display: flex;
         }
 
-        /* الحاوية الرئيسية */
-        .main-container {
-            width: 100%;
-            max-width: 95vw;
-            margin: 0 auto;
-            padding: 0 20px;
-            min-height: calc(100vh - 80px);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 20px;
-        }
+   /* الحاوية الرئيسية */
+.main-container {
+    width: 100%;
+    max-width: 95vw;
+    margin: 0 auto;
+    padding: 0 20px;
+    min-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+}
 
-        .container {
-            width: 100%;
-            max-width: 600px;
-            background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
-            padding: 20px 40px;
-            border-radius: 25px;
-            box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
-            border: 1px solid rgba(0, 206, 209, 0.5);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            position: relative;
-            height: calc(100vh - 80px);
-            margin: 20px 0;
-            z-index: 100;
-        }
+.container {
+    width: 100%;
+    max-width: 600px;
+    background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
+    padding: 20px 40px;
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
+    border: 1px solid rgba(0, 206, 209, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    position: fixed; /* رجعنا إلى fixed */
+    top: 60px; /* مسافة من الهيدر */
+    bottom: 60px; /* مسافة من الفوتر */
+    margin: 20px 0; /* مسافات متساوية */
+}
 
+/* عنصر وهمي للسماح بالتمرير */
+.spacer {
+    height: calc(100vh - 40px); /* ارتفاع يسمح بالتمرير */
+}
         /* القائمة المنسدلة */
         .category-container {
             width: 100%;
@@ -518,8 +522,7 @@
             align-items: center;
             min-height: 300px;
             margin-top: 10px;
-            z-index: 200;
-            position: relative;
+            z-index: 100;
         }
 
         .results-container.visible {
@@ -946,7 +949,8 @@
             }
 
             .container {
-                height: calc(100vh - 100px);
+                top: 50px;
+                bottom: 50px;
                 margin: 10px 0;
             }
 
@@ -1093,6 +1097,7 @@
                 </div>
             </div>
         </div>
+<div class="spacer"></div> <!-- أضفنا العنصر الوهمي هنا -->
         <div class="results-container" id="resultsContainer">
             <div class="products-grid" id="results"></div>
         </div>
@@ -1492,19 +1497,19 @@
             }
         }
 
-        function scrollToResults() {
-            const resultsContainer = document.getElementById("resultsContainer");
-            if (resultsContainer.classList.contains('visible')) {
-                setTimeout(() => {
-                    const rect = resultsContainer.getBoundingClientRect();
-                    window.scrollTo({
-                        top: rect.top + window.scrollY - 20,
-                        behavior: 'smooth'
-                    });
-                }, 100);
-            }
-        }
-
+   function scrollToResults() {
+    const resultsContainer = document.getElementById("resultsContainer");
+    if (resultsContainer.classList.contains('visible')) {
+        setTimeout(() => {
+            const rect = resultsContainer.getBoundingClientRect();
+            const offset = window.scrollY + rect.top - 60; // هامش لضبط الموقع تحت الهيدر
+            window.scrollTo({
+                top: offset,
+                behavior: 'smooth'
+            });
+        }, 100);
+    }
+}
         function toggleNotes() {
             const notesDrawer = document.getElementById('notesDrawer');
             notesDrawer.classList.toggle('active');
