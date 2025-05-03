@@ -54,6 +54,7 @@
             width: 160px;
             height: 160px;
             margin: 0 auto;
+            margin-bottom: 20px; /* صعود اللوغو للأعلى قليلاً */
         }
 
         .logo-container {
@@ -63,13 +64,13 @@
             width: 160px;
             height: 160px;
             border-radius: 50%;
-            overflow: hidden;
+            overflow: hidden !important; /* قص التأثيرات */
             box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
             cursor: pointer;
             z-index: 1;
             opacity: 1;
             transition: transform 0.3s ease;
-            clip-path: circle(80px at center);
+            clip-path: circle(80px at center) !important; /* قص دائري يطابق نصف القطر */
         }
 
         .logo-container img {
@@ -81,9 +82,13 @@
         }
 
         .logo-container:active {
-            transform: scale(0.95);
-            box-shadow: inset 0 8px 16px rgba(0, 0, 0, 0.5);
-            clip-path: circle(80px at center);
+            transform: scale(0.95) !important;
+            box-shadow: inset 0 8px 16px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي فقط */
+            clip-path: circle(80px at center) !important; /* قص صارم */
+        }
+
+        .logo-container img:active {
+            transform: scale(1) !important; /* منع الصورة من التأثر */
         }
 
         .notification {
@@ -292,43 +297,44 @@
             display: flex;
         }
 
-   /* الحاوية الرئيسية */
-.main-container {
-    width: 100%;
-    max-width: 95vw;
-    margin: 0 auto;
-    padding: 0 20px;
-    min-height: calc(100vh - 80px);
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 20px;
-}
+        /* الحاوية الرئيسية */
+        .main-container {
+            width: 100%;
+            max-width: 95vw;
+            margin: 0 auto;
+            padding: 0 20px;
+            min-height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 20px;
+        }
 
-.container {
-    width: 100%;
-    max-width: 600px;
-    background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
-    padding: 20px 40px;
-    border-radius: 25px;
-    box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
-    border: 1px solid rgba(0, 206, 209, 0.5);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    position: fixed; /* رجعنا إلى fixed */
-    top: 60px; /* مسافة من الهيدر */
-    bottom: 60px; /* مسافة من الفوتر */
-    margin: 20px 0; /* مسافات متساوية */
-}
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9));
+            padding: 20px 40px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0, 206, 209, 0.4);
+            border: 1px solid rgba(0, 206, 209, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            position: fixed;
+            top: 60px;
+            bottom: 60px;
+            margin: 20px 0;
+        }
 
-/* عنصر وهمي للسماح بالتمرير */
-.spacer {
-    height: calc(100vh - 40px); /* ارتفاع يسمح بالتمرير */
-}
+        /* عنصر وهمي للسماح بالتمرير */
+        .spacer {
+            height: calc(100vh - 40px);
+        }
+
         /* القائمة المنسدلة */
         .category-container {
             width: 100%;
@@ -1097,7 +1103,7 @@
                 </div>
             </div>
         </div>
-<div class="spacer"></div> <!-- أضفنا العنصر الوهمي هنا -->
+        <div class="spacer"></div>
         <div class="results-container" id="resultsContainer">
             <div class="products-grid" id="results"></div>
         </div>
@@ -1497,19 +1503,20 @@
             }
         }
 
-   function scrollToResults() {
-    const resultsContainer = document.getElementById("resultsContainer");
-    if (resultsContainer.classList.contains('visible')) {
-        setTimeout(() => {
-            const rect = resultsContainer.getBoundingClientRect();
-            const offset = window.scrollY + rect.top - 60; // هامش لضبط الموقع تحت الهيدر
-            window.scrollTo({
-                top: offset,
-                behavior: 'smooth'
-            });
-        }, 100);
-    }
-}
+        function scrollToResults() {
+            const resultsContainer = document.getElementById("resultsContainer");
+            if (resultsContainer.classList.contains('visible')) {
+                setTimeout(() => {
+                    const rect = resultsContainer.getBoundingClientRect();
+                    const offset = window.scrollY + rect.top - 60;
+                    window.scrollTo({
+                        top: offset,
+                        behavior: 'smooth'
+                    });
+                }, 100);
+            }
+        }
+
         function toggleNotes() {
             const notesDrawer = document.getElementById('notesDrawer');
             notesDrawer.classList.toggle('active');
