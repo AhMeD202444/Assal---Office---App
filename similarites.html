@@ -1407,6 +1407,32 @@
                 }
             }
         };
+        
+        
+         // إزاحة الواجهة للأعلى عند الضغط على شريط البحث
+        const searchInput = document.getElementById("searchInput");
+        searchInput.addEventListener('focus', function() {
+            setTimeout(() => {
+                const searchContainer = document.querySelector('.search-container');
+                const rect = searchContainer.getBoundingClientRect();
+                const offset = rect.top + window.scrollY - 100; // إزاحة إضافية للأعلى بمقدار 100px
+                window.scrollTo({
+                    top: offset,
+                    behavior: 'smooth'
+                });
+            }, 300); // تأخير بسيط لضمان ظهور الكيبورد
+        });
+
+        // إعادة التمرير عند إغلاق الكيبورد
+        searchInput.addEventListener('blur', function() {
+            setTimeout(() => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }, 300);
+        });
+        
 
         document.getElementById("searchInput").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
