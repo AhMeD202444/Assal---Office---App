@@ -302,7 +302,7 @@
             width: 100%;
             max-width: 95vw;
             margin: 0 auto;
-            padding: 60px 20px; /* تعويض الهيدر والفوتر */
+            padding: 0 20px;
             min-height: calc(100vh - 80px);
             display: flex;
             flex-direction: column;
@@ -324,7 +324,9 @@
             justify-content: center;
             align-items: center;
             gap: 20px;
-            min-height: calc(100vh - 120px); /* ارتفاع ثابت للحاوية */
+            position: fixed;
+            top: 60px;
+            bottom: 60px;
             margin: 20px 0;
         }
 
@@ -439,19 +441,17 @@
 
         /* حاوية البحث */
         .search-container {
-            width: 250px;
-            height: 250px;
-            min-width: 250px; /* الحفاظ على الحجم */
-            min-height: 250px;
-            border-radius: 50%;
-            background: rgba(30, 42, 68, 0.95);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
-            animation: orbitPulse 4s infinite ease-in-out;
-            margin: 0 auto;
-        }
+    width: 200px; /* كان 250px، صغرته إلى 200px */
+    height: 200px; /* كان 250px، صغرته إلى 200px */
+    border-radius: 50%;
+    background: rgba(30, 42, 68, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+    animation: orbitPulse 4s infinite ease-in-out;
+    margin: 0 auto;
+}
 
         @keyframes orbitPulse {
             0%, 100% { transform: scale(1); }
@@ -467,39 +467,38 @@
         }
 
         .search-container input {
-            width: 180px;
-            padding: 10px 18px;
-            border-radius: 25px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid #D4AF37;
-            color: #E2E8F0;
-            font-size: 15px;
-            outline: none;
-            transition: all 0.3s ease;
-            font-family: 'Cairo', sans-serif;
-        }
+    width: 150px; /* كان 180px، صغرته إلى 150px */
+    padding: 8px 14px; /* كان 10px 18px، صغرته ليتناسب */
+    border-radius: 20px; /* صغرته من 25px إلى 20px */
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #D4AF37;
+    color: #E2E8F0;
+    font-size: 14px; /* كان 15px، صغرته إلى 14px */
+    outline: none;
+    transition: all 0.3s ease;
+    font-family: 'Cairo', sans-serif;
+}
 
-        .search-container input:focus {
-            width: 200px;
-            border-color: #A3BFFA;
-            box-shadow: 0 0 15px rgba(163, 191, 250, 0.5);
-        }
-
-        .search-container button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            border-radius: 25px;
-            background: linear-gradient(45deg, #D4AF37, #A3BFFA);
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            font-family: 'Tajawal', sans-serif;
-            overflow: hidden;
-            clip-path: inset(0 0 0 0 round 25px);
-        }
+.search-container input:focus {
+    width: 170px; /* كان 200px، صغرته إلى 170px */
+    border-color: #A3BFFA;
+    box-shadow: 0 0 15px rgba(163, 191, 250, 0.5);
+}
+       .search-container button {
+    margin-top: 10px; /* كان 15px، صغرته إلى 10px */
+    padding: 8px 16px; /* كان 10px 20px، صغرته ليتناسب */
+    border-radius: 20px; /* كان 25px، صغرته إلى 20px */
+    background: linear-gradient(45deg, #D4AF37, #A3BFFA);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 14px; /* كان 15px، صغرته إلى 14px */
+    font-weight: 700;
+    transition: all 0.3s ease;
+    font-family: 'Tajawal', sans-serif;
+    overflow: hidden;
+    clip-path: inset(0 0 0 0 round 20px); /* كان 25px، صغرته إلى 20px */
+}
 
         .search-container button:hover {
             background: linear-gradient(45deg, #A3BFFA, #D4AF37);
@@ -946,7 +945,7 @@
             }
 
             .main-container {
-                padding: 60px 15px; /* تعويض الهيدر والفوتر للشاشات الصغيرة */
+                padding: 0 15px;
             }
 
             .container, .results-container {
@@ -955,7 +954,8 @@
             }
 
             .container {
-                min-height: calc(100vh - 120px); /* ارتفاع ثابت للشاشات الصغيرة */
+                top: 50px;
+                bottom: 50px;
                 margin: 10px 0;
             }
 
@@ -984,26 +984,22 @@
             }
 
             .search-container {
-                width: 220px;
-                height: 220px;
-                min-width: 220px; /* الحفاظ على الحجم للشاشات الصغيرة */
-                min-height: 220px;
-            }
+        width: 180px; /* كان 220px، صغرته إلى 180px */
+        height: 180px; /* كان 220px، صغرته إلى 180px */
+    }
 
-            .search-container input {
-                width: 160px;
-                font-size: 14px;
-                padding: 8px 16px;
-            }
-
-            .search-container input:focus {
-                width: 180px;
-            }
-
+          .search-container input {
+        width: 130px; /* كان 160px، صغرته إلى 130px */
+        font-size: 13px; /* كان 14px، صغرته إلى 13px */
+        padding: 6px 12px; /* كان 8px 16px، صغرته ليتناسب */
+    }
+           .search-container input:focus {
+        width: 150px; /* كان 180px، صغرته إلى 150px */
+    }
             .search-container button {
-                padding: 8px 18px;
-                font-size: 14px;
-            }
+        padding: 6px 14px; /* كان 8px 18px، صغرته ليتناسب */
+        font-size: 13px; /* كان 14px، صغرته إلى 13px */
+    }
 
             .notes-drawer {
                 width: 100%;
@@ -1408,30 +1404,6 @@
                 }
             }
         };
-
-        // إزاحة الواجهة كاملة للأعلى عند الضغط على شريط البحث
-        const searchInput = document.getElementById("searchInput");
-        searchInput.addEventListener('focus', function() {
-            setTimeout(() => {
-                const searchContainer = document.querySelector('.search-container');
-                const rect = searchContainer.getBoundingClientRect();
-                const offset = rect.top + window.scrollY - 100; // إزاحة إضافية للأعلى بمقدار 100px
-                window.scrollTo({
-                    top: offset,
-                    behavior: 'smooth'
-                });
-            }, 300); // تأخير بسيط لضمان ظهور الكيبورد
-        });
-
-        // إعادة التمرير عند إغلاق الكيبورد
-        searchInput.addEventListener('blur', function() {
-            setTimeout(() => {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            }, 300);
-        });
 
         document.getElementById("searchInput").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
