@@ -309,6 +309,7 @@
             justify-content: flex-start;
             align-items: center;
             gap: 20px;
+            padding-top: 60px; /* للتعويض عن الهيدر الثابت */
         }
 
         .container {
@@ -324,9 +325,7 @@
             justify-content: center;
             align-items: center;
             gap: 20px;
-            position: fixed;
-            top: 60px;
-            bottom: 60px;
+            min-height: calc(100vh - 120px); /* ارتفاع ثابت للحاوية */
             margin: 20px 0;
         }
 
@@ -443,6 +442,8 @@
         .search-container {
             width: 250px;
             height: 250px;
+            min-width: 250px; /* الحفاظ على الحجم */
+            min-height: 250px;
             border-radius: 50%;
             background: rgba(30, 42, 68, 0.95);
             display: flex;
@@ -955,8 +956,7 @@
             }
 
             .container {
-                top: 50px;
-                bottom: 50px;
+                min-height: calc(100vh - 120px); /* ارتفاع ثابت للشاشات الصغيرة */
                 margin: 10px 0;
             }
 
@@ -987,6 +987,8 @@
             .search-container {
                 width: 220px;
                 height: 220px;
+                min-width: 220px; /* الحفاظ على الحجم للشاشات الصغيرة */
+                min-height: 220px;
             }
 
             .search-container input {
@@ -1407,9 +1409,8 @@
                 }
             }
         };
-        
-        
-         // إزاحة الواجهة للأعلى عند الضغط على شريط البحث
+
+        // إزاحة الواجهة كاملة للأعلى عند الضغط على شريط البحث
         const searchInput = document.getElementById("searchInput");
         searchInput.addEventListener('focus', function() {
             setTimeout(() => {
@@ -1432,7 +1433,6 @@
                 });
             }, 300);
         });
-        
 
         document.getElementById("searchInput").addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
