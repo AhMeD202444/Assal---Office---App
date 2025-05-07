@@ -61,55 +61,57 @@
         }
 
         .logo-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-            z-index: 1;
-            opacity: 1;
-            transition: transform 0.3s ease;
-            clip-path: circle(80px at center);
-        }
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    overflow: hidden !important; /* قص التأثيرات */
+    box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    z-index: 1;
+    opacity: 1;
+    transition: transform 0.3s ease;
+    clip-path: circle(80px at center) !important; /* قص دائري يطابق نصف القطر */
+}
 
-        .logo-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-            border-radius: 50%;
-        }
+.logo-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+    border-radius: 50%;
+}
 
-        .logo-container:active {
-            transform: scale(0.95);
-            box-shadow: inset 0 8px 16px rgba(0, 0, 0, 0.5);
-            clip-path: circle(80px at center);
-        }
+.logo-container:active {
+    transform: scale(0.95) !important;
+    box-shadow: inset 0 8px 16px rgba(0, 0, 0, 0.5) !important; /* ظل داخلي فقط */
+    clip-path: circle(80px at center) !important; /* قص صارم */
+}
 
-        .logo-container img:active {
-            transform: scale(1);
-        }
+.logo-container img:active {
+    transform: scale(1) !important; /* منع الصورة من التأثر */
+}
 
         .notification {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 160px;
-            height: 160px;
-            background: linear-gradient(45deg, #4682B4, #20B2AA);
-            border: 3px solid #4682B4;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transform: scale(0);
-            z-index: 2;
-        }
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 160px; /* مطابقة حجم الشعار */
+    height: 160px; /* مطابقة حجم الشعار */
+    background: linear-gradient(45deg, #4682B4, #20B2AA);
+    border: 3px solid #4682B4;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transform: scale(0);
+    z-index: 2;
+    overflow: hidden !important; /* قص التأثيرات */
+    clip-path: circle(80px at center) !important; /* قص دائري صارم */
+}
 
         .notification.show {
             animation: screenPop 0.7s ease-out forwards, pulseGlow 1.5s infinite;
@@ -196,7 +198,7 @@
 
         .header-title {
             font-family: 'Cairo', sans-serif;
-            font-size: 18px;
+            font-size: 16px; /* تقليل من 18px إلى 16px */
             font-weight: 700;
             color: #A3BFFA;
             text-shadow: 0 1px 2px rgba(163, 191, 250, 0.4);
@@ -211,13 +213,13 @@
         }
 
         .header-btn {
-            padding: 3px 10px;
+            padding: 3px 8px; /* تقليل الحشوة قليلاً */
             border-radius: 8px;
             border: none;
             background: linear-gradient(135deg, #5A6388, #4A5275);
             color: #fff;
             font-family: 'Cairo', sans-serif;
-            font-size: 12px;
+            font-size: 11px; /* تقليل من 12px إلى 11px */
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -257,8 +259,8 @@
         .notes-btn {
             background: linear-gradient(135deg, #4682B4, #20B2AA);
             position: relative;
-            padding-right: 26px;
-            padding-left: 12px;
+            padding-right: 24px; /* تقليل الحشوة قليلاً */
+            padding-left: 10px;
         }
 
         .notes-btn:hover {
@@ -358,7 +360,7 @@
             align-items: center;
             white-space: nowrap;
             position: absolute;
-            animation: scrollTextRightToLeft 60s linear infinite; /* Reversed animation */
+            animation: scrollTextRightToLeft 30s linear infinite; /* تسريع الحركة من 60s إلى 30s */
             color: white;
             font-weight: bold;
             font-size: 14px;
@@ -491,6 +493,11 @@
             font-size: 9px; /* تصغير حجم النص */
         }
 
+        /* تصغير إضافي للأصناف التي تحتوي على ثلاث كلمات */
+        .category span.three-words {
+            font-size: 8px; /* تصغير من 9px إلى 8px */
+        }
+
         .category:hover {
             transform: scale(1.1);
             background: linear-gradient(45deg, #43cea2, #185a9d);
@@ -620,9 +627,6 @@
             display: none;
             flex-direction: column;
             gap: 10px;
-            max-height: 600px;
-            overflow-y: auto;
-            scroll-behavior: smooth;
             border-radius: 10px;
             padding: 10px;
             background: rgba(0, 0, 0, 0.2);
@@ -631,6 +635,8 @@
             max-width: 800px;
             margin: 10px auto;
             transform: translateZ(0);
+            overflow: visible; /* إزالة التمرير */
+            max-height: none; /* إزالة الحد الأقصى للارتفاع */
         }
 
         .results-container.visible {
@@ -701,10 +707,10 @@
         }
 
         .result-card button {
-            padding: 8px 18px;
+            padding: 6px 16px; /* تقليل الحشوة من 8px 18px إلى 6px 16px */
             background: linear-gradient(45deg, #4682B4, #20B2AA);
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px; /* تقليل حجم الخط من 16px إلى 14px */
             color: #fff;
             border: none;
             cursor: pointer;
@@ -891,6 +897,20 @@
             gap: 5px;
         }
 
+        /* نافذة "توافقات جديدة" بحجم أصغر */
+        .swal2-popup.new-similarities-popup {
+            max-width: 300px; /* تقليل العرض من 350px إلى 300px */
+            min-height: 200px; /* تقليل الارتفاع من 300px إلى 200px */
+        }
+
+        .swal2-popup.new-similarities-popup .swal2-title {
+            font-size: clamp(14px, 3vw, 18px); /* تقليل من 20px إلى 18px */
+        }
+
+        .swal2-popup.new-similarities-popup .swal2-html-container {
+            font-size: 12px; /* تقليل من 16px إلى 12px */
+        }
+
         .swal2-backdrop {
             background: rgba(0, 0, 0, 0.7);
         }
@@ -992,17 +1012,19 @@
         }
 
         .swal2-confirm, .swal2-cancel {
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 10px 20px; /* زيادة الحشوة لتكبير الزر */
+            border-radius: 25px; /* زوايا مستديرة أكثر أناقة */
+            font-size: 14px; /* زيادة حجم الخط من 12px إلى 14px */
             font-weight: 700;
             font-family: 'Tajawal', sans-serif;
             border: none;
             cursor: pointer;
             width: auto;
-            min-width: 90px;
+            min-width: 110px; /* زيادة العرض الأدنى من 90px إلى 110px */
             white-space: nowrap;
             margin: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         .swal2-confirm {
@@ -1013,6 +1035,16 @@
         .swal2-cancel {
             background: linear-gradient(45deg, #E53E3E, #9B2C2C);
             color: #fff;
+        }
+
+        .swal2-confirm:hover, .swal2-cancel:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .swal2-confirm:active, .swal2-cancel:active {
+            transform: scale(0.95);
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
         }
 
         /* Loading Circle */
@@ -1091,6 +1123,11 @@
                 gap: 3px;
             }
 
+            .swal2-popup.new-similarities-popup {
+                max-width: 280px; /* تقليل أكثر للشاشات الصغيرة */
+                min-height: 180px;
+            }
+
             .swal2-input {
                 width: 90%;
                 max-width: 220px;
@@ -1104,9 +1141,9 @@
             }
 
             .swal2-confirm, .swal2-cancel {
-                padding: 7px 12px;
-                font-size: 11px;
-                min-width: 80px;
+                padding: 8px 18px; /* تقليل الحشوة قليلاً للشاشات الصغيرة */
+                font-size: 13px;
+                min-width: 100px;
             }
 
             .swal2-title {
@@ -1134,6 +1171,11 @@
                 width: 90%;
                 max-width: 400px;
                 padding: 20px;
+            }
+
+            .swal2-popup.new-similarities-popup {
+                max-width: 320px;
+                min-height: 200px;
             }
         }
     </style>
@@ -1232,6 +1274,9 @@
     </footer>
 
     <script>
+
+
+             let isAnimating = false; // للتحكم في تكرار الإشعار
         const dropboxSimilaritesFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file2" + "?t=" + new Date().getTime();
         let database = {};
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
@@ -1264,60 +1309,65 @@
             "بورد شحن Xiaomi Mi 11 يناسب Mi 12"
         ];
 
-        function triggerAnimation() {
-            const logo = document.getElementById("logo");
-            const notification = document.getElementById("notification");
-            const notificationText = document.getElementById("notification-text");
-            const resultsContainer = document.getElementById("resultsContainer");
+       function triggerAnimation() {
+    const logo = document.getElementById("logo");
+    const notification = document.getElementById("notification");
+    const notificationText = document.getElementById("notification-text");
+    const resultsContainer = document.getElementById("resultsContainer");
 
-            if (!logo || !notification || !notificationText || resultsContainer.classList.contains('visible')) {
-                setTimeout(triggerAnimation, 100);
-                return;
+    if (!logo || !notification || !notificationText || resultsContainer.classList.contains('visible') || isAnimating) {
+        setTimeout(triggerAnimation, 100);
+        return;
+    }
+
+    isAnimating = true; // منع التكرار
+
+    logo.style.animation = "shake 0.5s ease-in-out";
+    setTimeout(() => {
+        logo.style.animation = "none";
+    }, 500);
+
+    setTimeout(() => {
+        logo.style.animation = "explode 0.5s ease-out";
+        logo.style.opacity = "0";
+    }, 800);
+
+    setTimeout(() => {
+        const randomNotification = notifications[Math.floor(Math.random() * notifications.length)];
+        notificationText.textContent = randomNotification;
+        notification.classList.add("show");
+    }, 1300);
+
+    setTimeout(() => {
+        notification.classList.remove("show");
+        gsap.to(notification, {
+            scale: 0.8,
+            opacity: 0,
+            rotation: 180,
+            duration: 0.8,
+            ease: "power2.inOut",
+            onComplete: () => {
+                notification.style.transform = "scale(0)";
             }
+        });
+    }, 5000);
 
-            logo.style.animation = "shake 0.5s ease-in-out";
-            setTimeout(() => {
-                logo.style.animation = "none";
-            }, 500);
+    setTimeout(() => {
+        gsap.set(logo, { scale: 0, opacity: 0, rotation: 0 });
+        gsap.to(logo, {
+            scale: 1,
+            opacity: 1,
+            rotation: 360, // تقليل الدوران من 720 إلى 360 ليكون أكثر سلاسة
+            duration: 1.5, // زيادة المدة لتكون أطول وأكثر طبيعية
+            ease: "power2.out" // تغيير الـ ease ليكون أكثر سلاسة
+        });
+    }, 6000);
 
-            setTimeout(() => {
-                logo.style.animation = "explode 0.5s ease-out";
-                logo.style.opacity = "0";
-            }, 800);
-
-            setTimeout(() => {
-                const randomNotification = notifications[Math.floor(Math.random() * notifications.length)];
-                notificationText.textContent = randomNotification;
-                notification.classList.add("show");
-            }, 1300);
-
-            setTimeout(() => {
-                notification.classList.remove("show");
-                gsap.to(notification, {
-                    scale: 0.8,
-                    opacity: 0,
-                    rotation: 180,
-                    duration: 0.8,
-                    ease: "power2.inOut",
-                    onComplete: () => {
-                        notification.style.transform = "scale(0)";
-                    }
-                });
-            }, 5000);
-
-            setTimeout(() => {
-                gsap.set(logo, { scale: 0, opacity: 0, rotation: 0 });
-                gsap.to(logo, {
-                    scale: 1,
-                    opacity: 1,
-                    rotation: 720,
-                    duration: 1.2,
-                    ease: "bounce.out"
-                });
-            }, 5800);
-
-            setTimeout(triggerAnimation, 8000);
-        }
+    setTimeout(() => {
+        isAnimating = false; // إعادة السماح بعد انتهاء الدورة
+        triggerAnimation();
+    }, 8500); // زيادة التأخير من 8000 إلى 8500
+}
 
         function displayNewSimilarities() {
             const ticker = document.getElementById("newSimilaritiesTicker");
@@ -1393,7 +1443,7 @@
                 allowOutsideClick: true,
                 allowEscapeKey: true,
                 customClass: {
-                    popup: 'swal2-popup activation-popup',
+                    popup: 'swal2-popup activation-popup new-similarities-popup',
                     title: 'swal2-title',
                     htmlContainer: 'swal2-html-container',
                     confirmButton: 'swal2-confirm'
@@ -1419,12 +1469,15 @@
                 slider.scrollBy({ left: 100, behavior: 'smooth' });
             });
 
-            // تحديد الأصناف التي تحتوي على كلمتين أو أكثر وإضافة كلاس لتصغير النص
+            // تحديد الأصناف التي تحتوي على كلمتين أو أكثر وثلاث كلمات
             document.querySelectorAll('.category span').forEach(span => {
                 const text = span.textContent.trim();
                 const wordCount = text.split(/\s+/).length;
                 if (wordCount >= 2) {
                     span.classList.add('multi-word');
+                }
+                if (wordCount >= 3) {
+                    span.classList.add('three-words');
                 }
             });
         });
@@ -1730,7 +1783,7 @@
                 return;
             }
 
-            stats.searches++;
+           stats.searches++;
             localStorage.setItem('stats', JSON.stringify(stats));
             displayResults(results);
             scrollToResults();
@@ -1754,7 +1807,7 @@
             }
 
             const scrollButton = document.querySelector('.scroll-to-top');
-            if (results.length > 5) {
+            if (results.length > 0) { // تغيير الشرط لإظهار زر الصعود حتى لو كان عدد النتائج أقل من 5
                 scrollButton.classList.add('visible');
             } else {
                 scrollButton.classList.remove('visible');
@@ -1830,7 +1883,7 @@
             });
         }
 
-       async function refreshData() {
+        async function refreshData() {
             Swal.fire({
                 html: `
                     <div style="display: flex; flex-direction: column; align-items: center;">
