@@ -835,192 +835,6 @@ h1 {
     clip-path: circle(15px at center) !important; /* قص صارم */
 }
 
-
-
-
-/* زر مسح البحث */
-/* زر مسح البحث */
-.clear-btn {
-    position: absolute;
-    right: 50px; /* نقل الزر إلى اليسار بمسافة أنيقة من زر البحث */
-    top: 50%;
-    transform: translateY(-50%);
-    background: linear-gradient(135deg, #FF416C, #FF4B2B);
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    color: white;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    overflow: hidden !important;
-    clip-path: circle(15px at center) !important;
-    opacity: 0;
-    visibility: hidden;
-    z-index: 10; /* التأكد من أن الزر فوق العناصر الأخرى */
-}
-
-/* إظهار زر المسح عند وجود نص */
-.clear-btn.show {
-    opacity: 1;
-    visibility: visible;
-}
-
-.clear-btn:hover {
-    transform: translateY(-50%) scale(1.1);
-    background: linear-gradient(135deg, #FF4B2B, #FF416C);
-    box-shadow: 0 4px 10px rgba(255, 65, 108, 0.5);
-}
-
-.clear-btn:active {
-    transform: translateY(-50%) scale(0.95) !important;
-    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5) !important;
-    clip-path: circle(15px at center) !important;
-}
-
-/* ضبط زر البحث ليكون في المكان الصحيح */
-.search-container button:not(.clear-btn) {
-    position: absolute;
-    right: 10px; /* زر البحث يبقى قريبًا من الحافة اليمنى */
-    top: 50%;
-    transform: translateY(-50%);
-    background: linear-gradient(45deg, #43cea2, #185a9d);
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden !important;
-    clip-path: circle(15px at center) !important;
-    z-index: 9; /* أقل من زر المسح لتجنب التداخل */
-}
-
-/* ضبط شريط البحث لاستيعاب الزرين */
-.search-container input {
-    padding-right: 90px; /* إفساح مجال لزر المسح وزر البحث */
-}
-
-/* تحسين التوافق مع الشاشات الصغيرة */
-@media (max-width: 480px) {
-    .clear-btn {
-        right: 45px;
-        width: 28px;
-        height: 28px;
-        font-size: 12px;
-    }
-    .search-container button:not(.clear-btn) {
-        right: 8px;
-        width: 28px;
-        height: 28px;
-        font-size: 14px;
-    }
-    .search-container input {
-        padding-right: 80px;
-    }
-}
-
-
-
-
-/* حاوية الاقتراحات */
-/* حاوية الاقتراحات */
-/* حاوية الاقتراحات */
-.suggestions-container {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    max-height: 180px; /* ارتفاع لعرض 4 اقتراحات فقط (4 × 45px تقريبًا) */
-    overflow-y: auto; /* تفعيل التمرير العمودي */
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-    z-index: 1000;
-    display: none;
-    margin-top: 5px;
-    padding: 0; /* إزالة الحشوة العلوية/السفلية للتحكم الدقيق */
-    scroll-behavior: smooth;
-    direction: rtl;
-}
-
-/* عنصر اقتراح واحد */
-.suggestion-item {
-    padding: 12px 20px;
-    font-size: 16px;
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    height: 45px; /* ارتفاع ثابت لكل اقتراح */
-    box-sizing: border-box;
-}
-
-.suggestion-item:last-child {
-    border-bottom: none; /* إزالة الحد السفلي لآخر اقتراح */
-}
-
-.suggestion-item:hover {
-    background: linear-gradient(45deg, #43cea2, #185a9d);
-    transform: translateX(5px);
-    box-shadow: 0 2px 8px rgba(67, 206, 162, 0.4);
-}
-
-.suggestion-item:active {
-    transform: scale(0.98);
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-/* أيقونة الاقتراح */
-.suggestion-item i {
-    font-size: 14px;
-    color: #43cea2;
-}
-
-/* تحسين شريط التمرير */
-.suggestions-container::-webkit-scrollbar {
-    width: 6px;
-}
-
-.suggestions-container::-webkit-scrollbar-thumb {
-    background: #43cea2;
-    border-radius: 10px;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-}
-
-.suggestions-container::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-}
-
-/* تحسين التوافق مع الشاشات الصغيرة */
-@media (max-width: 480px) {
-    .suggestions-container {
-        max-height: 160px; /* ارتفاع أقل للشاشات الصغيرة */
-    }
-    .suggestion-item {
-        padding: 10px 15px;
-        font-size: 14px;
-        height: 40px; /* ارتفاع أقل للشاشات الصغيرة */
-    }
-}
-
-
         /* تصميم الهيدر المستقيم */
 /* تصميم الهيدر المستقيم */
 .header {
@@ -1727,13 +1541,10 @@ body {
 
 </div>
 
-     <div class="search-container">
-    <input type="text" id="searchInput" placeholder="ابحث عن العناصر...">
-    <button class="clear-btn" id="clearBtn" title="مسح البحث" style="display: none;"><i class="fas fa-times"></i></button>
-    <button onclick="searchItems()"><i class="fas fa-search"></i></button>
-    <div class="suggestions-container" id="suggestionsContainer"></div>
-</div>
-
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search for items...">
+            <button onclick="searchItems()"><i class="fas fa-search"></i></button>
+        </div>
         <div id="results" class="results"></div>
 
 </div>
@@ -1748,35 +1559,6 @@ body {
 
 
     <script>
-
-
-
-
-
-
-
-
-// التحكم في زر المسح
-const searchInput = document.getElementById('searchInput');
-const clearBtn = document.getElementById('clearBtn');
-
-searchInput.addEventListener('input', () => {
-    if (searchInput.value.trim().length > 0) {
-        clearBtn.style.display = 'flex';
-        clearBtn.classList.add('show');
-    } else {
-        clearBtn.style.display = 'none';
-        clearBtn.classList.remove('show');
-    }
-});
-
-clearBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    clearBtn.style.display = 'none';
-    clearBtn.classList.remove('show');
-    document.getElementById('results').style.display = 'none'; // إخفاء النتائج
-    searchInput.focus(); // إعادة التركيز إلى حقل البحث
-});
       
       
       
@@ -2109,81 +1891,12 @@ function displayResults(results) {
 }
 
 // إخفاء الحاوية عند تفريغ حقل البحث
-// دالة لتطبيع النصوص (إزالة الفراغات والتحويل إلى حروف صغيرة)
-function normalizeString(str) {
-    return str.replace(/\s+/g, '').toLowerCase();
-}
-
-// دالة لعرض الاقتراحات
-function showSuggestions(query) {
-    const suggestionsContainer = document.getElementById('suggestionsContainer');
-    suggestionsContainer.innerHTML = '';
-
-    if (!query || !currentCategory) {
-        suggestionsContainer.style.display = 'none';
-        return;
-    }
-
-    const normalizedQuery = normalizeString(query);
-    const suggestions = database[currentCategory]?.filter(item =>
-        normalizeString(item["Item Name"] || item["Item"]).includes(normalizedQuery)
-    ) || []; // جلب كل الاقتراحات المتاحة
-
-    if (suggestions.length > 0) {
-        suggestions.forEach(item => {
-            const suggestionDiv = document.createElement('div');
-            suggestionDiv.classList.add('suggestion-item');
-            suggestionDiv.innerHTML = `
-                <i class="fas fa-search"></i>
-                <span>${item["Item Name"] || item["Item"]}</span>
-            `;
-            suggestionDiv.addEventListener('click', () => {
-                searchInput.value = item["Item Name"] || item["Item"];
-                suggestionsContainer.style.display = 'none';
-                searchItems();
-            });
-            suggestionsContainer.appendChild(suggestionDiv);
-        });
-        suggestionsContainer.style.display = 'block';
-    } else {
-        suggestionsContainer.style.display = 'none';
-    }
-}
-
-// تعديل حدث الإدخال لدعم الاقتراحات
-searchInput.addEventListener('input', () => {
-    const query = searchInput.value.trim();
-    showSuggestions(query);
-
-    // إظهار/إخفاء زر المسح
-    if (query.length > 0) {
-        clearBtn.style.display = 'flex';
-        clearBtn.classList.add('show');
-    } else {
-        clearBtn.style.display = 'none';
-        clearBtn.classList.remove('show');
-        document.getElementById('suggestionsContainer').style.display = 'none';
-    }
-});
-
-// إخفاء الاقتراحات عند النقر خارج الحقل
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.search-container')) {
-        document.getElementById('suggestionsContainer').style.display = 'none';
-    }
-});
-
-// تعديل دالة البحث لتكون أكثر ذكاءً
 function searchItems() {
-    const searchInput = document.getElementById('searchInput').value.trim();
-    const resultsContainer = document.getElementById('results');
-    const suggestionsContainer = document.getElementById('suggestionsContainer');
-
-    // إخفاء الاقتراحات عند البحث
-    suggestionsContainer.style.display = 'none';
+    const searchInput = document.getElementById("searchInput").value.trim();
+    const resultsContainer = document.getElementById("results");
 
     if (!searchInput) {
-        resultsContainer.style.display = 'none';
+        resultsContainer.style.display = 'none'; // إخفاء الحاوية إذا الحقل فارغ
         Swal.fire({
             title: 'حقل فارغ',
             html: '<p style="color: #dcdcdc;">يرجى كتابة اسم العنصر قبل المتابعة</p>',
@@ -2200,7 +1913,7 @@ function searchItems() {
     }
 
     if (!currentCategory) {
-        resultsContainer.style.display = 'none';
+        resultsContainer.style.display = 'none'; // إخفاء الحاوية إذا ما اخترت صنف
         Swal.fire({
             title: 'الصنف غير محدد',
             text: 'يرجى اختيار صنف من القائمة قبل البدء في البحث.',
@@ -2221,8 +1934,9 @@ function searchItems() {
         normalizeString(item["Item Name"] || item["Item"]).includes(query)
     ) || [];
 
-    displayResults(results);
+    displayResults(results); // استدعاء العرض
 }
+
 // دالة الرجوع لأعلى الصفحة
 function scrollToTop() {
     window.scrollTo({
