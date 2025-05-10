@@ -1934,12 +1934,14 @@ document.addEventListener("DOMContentLoaded", toggleClearButton);
 // جعل الدائرة قابلة للسحب
 // جعل الدائرة قابلة للسحب
 // جعل الدائرة قابلة للسحب
+// جعل الدائرة قابلة للسحب
 const floatingBtn = document.getElementById("newItemsFloatingBtn");
 let isDragging = false;
 let isDraggingInitiated = false; // متغير لتتبع ما إذا حدث سحب
 let baseX, baseY; // الموقع الأساسي عند بدء السحب
 let startX, startY;
 const dragThreshold = 5; // عتبة الحركة (بالبكسل)
+let touchStartTime; // لتتبع وقت بدء اللمس
 
 // إعداد الموقع الأولي بناءً على `right` و`bottom`
 floatingBtn.style.right = "20px";
@@ -1964,6 +1966,7 @@ function startDragging(e) {
     if (e.type === "touchstart") {
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
+        touchStartTime = Date.now(); // تسجيل وقت بدء اللمس
     } else {
         startX = e.clientX;
         startY = e.clientY;
@@ -2014,38 +2017,51 @@ function drag(e) {
 document.addEventListener("mouseup", stopDragging);
 document.addEventListener("touchend", stopDragging);
 
-function stopDragging() {
-    isDragging = false;
-    floatingBtn.style.cursor = "pointer";
-    // تحديث الموقع الأساسي بعد انتهاء السحب
-    updateInitialPosition();
-}
+function stopDragging(e) {
+    if (isDragging) {
+        isDragging = false;
+        floatingBtn.style.cursor = "pointer";
+        updateInitialPosition(); // تحديث الموقع الأساسي بعد انتهاء السحب
 
+        // التحقق مما إذا كان النقر باللمس (tap) وليس سحب
+        if (e.type === "touchend" && !isDraggingInitiated) {
+            const touchEndTime = Date.now();
+            const touchDuration = touchEndTime - touchStartTime;
+
+            // إذا كانت مدة اللمس قصيرة (أقل من 300 مللي ثانية)، نعتبرها نقرة
+            if (touchDuration < 300) {
+                openModal();
+            }
+        }
+    }
+}
 
 // متغير لتتبع حالة النافذة
 let isModalOpen = false;
 
-// فتح النافذة عند النقر على الدائرة
-floatingBtn.addEventListener("click", (e) => {
+// فتح النافذة
+function openModal() {
     try {
-        if (isDraggingInitiated) {
-            // إذا كان هناك سحب، لا نفتح النافذة
-            isDraggingInitiated = false;
-            return;
-        }
         if (isModalOpen) return; // إذا كانت النافذة مفتوحة، لا تفعل شيئًا
 
         const modal = document.getElementById("newItemsModal");
-        // التأكد من أن النافذة مغلقة فعليًا
         if (modal.style.display === "none" || !modal.style.display) {
             modal.style.display = "flex";
-            modal.style.animation = "zoomIn 0.5s ease-out forwards"; // إضافة الأنيميشن عند الفتح
+            modal.style.animation = "zoomIn 0.5s ease-out forwards";
             isModalOpen = true;
             loadNewItems();
         }
     } catch (error) {
-        console.error("Error in click handler:", error);
+        console.error("Error in openModal:", error);
     }
+}
+
+// معالج النقر بالماوس
+floatingBtn.addEventListener("click", (e) => {
+    if (!isDraggingInitiated) {
+        openModal();
+    }
+    isDraggingInitiated = false; // إعادة تعيين بعد النقر
 });
 
 // إغلاق النافذة
@@ -2062,6 +2078,8 @@ function closeNewItemsModal() {
         isModalOpen = false; // إعادة تعيين الحالة في حالة حدوث خطأ
     }
 }
+
+
       
  const notifications = [
     "شاشات KBS ضمان بعد الشد",
