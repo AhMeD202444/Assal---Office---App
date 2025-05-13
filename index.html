@@ -24,10 +24,10 @@
 /* تنسيق الدائرة العائمة */
 .floating-new-btn {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    height: 60px;
+    bottom: 50px; /* تقليل الارتفاع ليكون أقرب إلى الفوتر */
+    left: 20px; /* الجهة اليمنى كما هي */
+    width: 50px;
+    height: 50px;
     background: linear-gradient(45deg, #43cea2, #185a9d);
     border-radius: 50%;
     display: flex;
@@ -62,13 +62,15 @@
 }
 
 /* تنسيق النافذة المنبثقة للعناصر الجديدة */
+/* تنسيق النافذة المنبثقة للعناصر الجديدة */
 #newItemsModal {
     position: fixed;
-    top: 50%;
+    top: 50px; /* أسفل الهيدر (40px + 10px مسافة) */
+    bottom: 60px; /* أعلى الفوتر (~50px + 10px مسافة) */
     left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 500px;
+    transform: translateX(-50%);
+    width: calc(100% - 20px); /* عرض الواجهة مع 10px مسافة من اليمين واليسار */
+    max-width: 800px; /* الحد الأقصى للعرض للشاشات الكبيرة */
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(30, 30, 30, 0.8));
     backdrop-filter: blur(15px);
     border-radius: 25px;
@@ -93,7 +95,7 @@
 
 #newItemsModal .modal-content {
     width: 100%;
-    max-height: 450px;
+    height: 100%; /* شغل كل الارتفاع المتاح */
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -123,12 +125,24 @@
     border: 1px solid rgba(67, 206, 162, 0.3);
 }
 
-#newItemsModal .modal-content .new-item-card img {
+/* تنسيق الدائرة التي تحل محل الصورة */
+#newItemsModal .modal-content .new-item-card .category-circle {
     width: 60px;
     height: 60px;
+    background: linear-gradient(45deg, #FFD700, #FFA500); /* نفس لون شارة 'جديد' */
     border-radius: 50%;
-    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border: 2px solid rgba(67, 206, 162, 0.5);
+    font-family: 'Cairo', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    line-height: 1.2;
+    padding: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 #newItemsModal .modal-content .new-item-card .item-details {
@@ -193,7 +207,87 @@
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
-    
+
+/* تأثيرات الدخول والخروج */
+@keyframes slideDownModal {
+    0% {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideUpModal {
+    0% {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+    }
+}
+
+/* Media Queries للتوافق مع الشاشات الصغيرة */
+@media (max-width: 480px) {
+    #newItemsModal {
+        top: 45px; /* تقليل المسافة قليلاً للشاشات الصغيرة */
+        bottom: 55px;
+        width: calc(100% - 10px); /* تقليل المسافات الجانبية */
+        padding: 15px;
+    }
+    #newItemsModal h2 {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+    #newItemsModal .modal-content .new-item-card {
+        padding: 10px;
+        gap: 10px;
+    }
+    #newItemsModal .modal-content .new-item-card .category-circle {
+        width: 50px;
+        height: 50px;
+        font-size: 10px;
+    }
+    #newItemsModal .modal-content .new-item-card .item-details h4 {
+        font-size: 14px;
+    }
+    #newItemsModal .modal-content .new-item-card .item-details p {
+        font-size: 12px;
+        padding: 3px 6px;
+    }
+    #newItemsModal .close-modal-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+}
+
+/* Media Queries للشاشات المتوسطة (تابلت) */
+@media (min-width: 481px) and (max-width: 768px) {
+    #newItemsModal {
+        top: 48px;
+        bottom: 58px;
+        width: calc(100% - 15px);
+        padding: 20px;
+    }
+    #newItemsModal h2 {
+        font-size: 26px;
+        margin-bottom: 20px;
+    }
+    #newItemsModal .modal-content .new-item-card {
+        padding: 11px;
+        gap: 11px;
+    }
+    #newItemsModal .modal-content .new-item-card .category-circle {
+        width: 55px;
+        height: 55px;
+        font-size: 11px;
+    }
+}    
     
     
     /* تخصيص نافذة التفعيل */
@@ -1857,15 +1951,6 @@ document.getElementById("searchInput").addEventListener("input", toggleClearButt
 document.addEventListener("DOMContentLoaded", toggleClearButton);
       
 
-
-
-// جعل الدائرة قابلة للسحب
-// جعل الدائرة قابلة للسحب
-// جعل الدائرة قابلة للسحب
-// جعل الدائرة قابلة للسحب
-// جعل الدائرة قابلة للسحب
-// جعل الدائرة قابلة للسحب
-// جعل الدائرة قابلة للسحب
 // جعل الدائرة قابلة للسحب
 const floatingBtn = document.getElementById("newItemsFloatingBtn");
 let isDragging = false;
@@ -1875,9 +1960,12 @@ let startX, startY;
 const dragThreshold = 5; // عتبة الحركة (بالبكسل)
 let touchStartTime; // لتتبع وقت بدء اللمس
 
-// إعداد الموقع الأولي بناءً على `right` و`bottom`
-floatingBtn.style.right = "20px";
-floatingBtn.style.bottom = "20px";
+
+// إعداد الموقع الأولي بناءً على `left` و`bottom`
+
+floatingBtn.style.left = "20px";
+floatingBtn.style.bottom = "50px";
+
 
 // تحديث القيم الأولية بناءً على الموقع الفعلي
 const updateInitialPosition = () => {
@@ -1885,6 +1973,8 @@ const updateInitialPosition = () => {
     baseX = rect.left; // الموقع الأساسي في بداية السحب
     baseY = rect.top;
 };
+
+
 updateInitialPosition(); // تهيئة القيم عند التحميل
 
 floatingBtn.addEventListener("mousedown", startDragging);
@@ -1979,7 +2069,7 @@ function openModal() {
         const modal = document.getElementById("newItemsModal");
         if (modal.style.display === "none" || !modal.style.display) {
             modal.style.display = "flex";
-            modal.style.animation = "zoomIn 0.5s ease-out forwards";
+            modal.style.animation = "slideDownModal 0.5s ease-out forwards";
             isModalOpen = true;
             loadNewItems();
         }
@@ -1988,6 +2078,22 @@ function openModal() {
     }
 }
 
+// إغلاق النافذة
+function closeNewItemsModal() {
+    try {
+        const modal = document.getElementById("newItemsModal");
+        modal.style.animation = "slideUpModal 0.5s ease-in forwards";
+        setTimeout(() => {
+            modal.style.display = "none";
+            isModalOpen = false; // إعادة تعيين الحالة
+        }, 500); // التأخير يساوي مدة الأنيميشن
+    } catch (error) {
+        console.error("Error in closeNewItemsModal:", error);
+        isModalOpen = false; // إعادة تعيين الحالة في حالة حدوث خطأ
+    }
+}
+
+
 // معالج النقر بالماوس
 floatingBtn.addEventListener("click", (e) => {
     if (!isDraggingInitiated) {
@@ -1995,22 +2101,6 @@ floatingBtn.addEventListener("click", (e) => {
     }
     isDraggingInitiated = false; // إعادة تعيين بعد النقر
 });
-
-// إغلاق النافذة
-function closeNewItemsModal() {
-    try {
-        const modal = document.getElementById("newItemsModal");
-        modal.style.animation = "zoomOut 0.5s ease-in forwards";
-        setTimeout(() => {
-            modal.style.display = "none";
-            isModalOpen = false; // إعادة تعيين الحالة
-        }, 700); // زيادة التأخير لضمان اكتمال الأنيميشن
-    } catch (error) {
-        console.error("Error in closeNewItemsModal:", error);
-        isModalOpen = false; // إعادة تعيين الحالة في حالة حدوث خطأ
-    }
-}
-
 
       
  const notifications = [
@@ -2424,7 +2514,7 @@ async function loadNewItems() {
         card.className = "new-item-card";
         const iconClass = getIconForCategory(item.category);
         card.innerHTML = `
-            <img src="images/${item.category.toLowerCase()}.png" alt="${item["Item Name"] || item["Item"]}" onerror="this.src='images/default.png'">
+            <div class="category-circle">${item.category}</div>
             <div class="item-details">
                 <div class="new-badge">جديد</div>
                 <h4><i class="${iconClass}"></i> ${item["Item Name"] || item["Item"]}</h4>
@@ -2434,7 +2524,6 @@ async function loadNewItems() {
         modalContent.appendChild(card);
     });
 }
-
 
 // دالة لاختيار الأيقونة بناءً على الفئة
 function getIconForCategory(category) {
