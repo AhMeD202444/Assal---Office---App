@@ -18,7 +18,181 @@
 
 
     <style>
-    
+
+
+
+/* تنسيق الدائرة العائمة */
+.floating-new-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, #43cea2, #185a9d);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 1000;
+    user-select: none;
+}
+
+/* شارة عدد العناصر الجديدة */
+.new-items-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #FF416C;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* تنسيق النافذة المنبثقة للعناصر الجديدة */
+#newItemsModal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(30, 30, 30, 0.8));
+    backdrop-filter: blur(15px);
+    border-radius: 25px;
+    padding: 25px;
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+
+#newItemsModal h2 {
+    font-size: 28px;
+    font-family: 'Cairo', sans-serif;
+    color: #fff;
+    background: linear-gradient(45deg, #43cea2, #185a9d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 25px;
+    text-align: center;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+#newItemsModal .modal-content {
+    width: 100%;
+    max-height: 450px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* إخفاء مسطرة السكرول مع السماح بالتمرير */
+#newItemsModal .modal-content::-webkit-scrollbar {
+    display: none; /* إخفاء المسطرة على متصفحات Webkit (مثل Chrome وSafari) */
+}
+
+/* إخفاء المسطرة على متصفحات أخرى (مثل Firefox) */
+#newItemsModal .modal-content {
+    -ms-overflow-style: none; /* لـ Internet Explorer و Edge */
+    scrollbar-width: none; /* لـ Firefox */
+}
+
+#newItemsModal .modal-content .new-item-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.5));
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    border: 1px solid rgba(67, 206, 162, 0.3);
+}
+
+#newItemsModal .modal-content .new-item-card img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(67, 206, 162, 0.5);
+}
+
+#newItemsModal .modal-content .new-item-card .item-details {
+    flex: 1;
+    text-align: left;
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    position: relative;
+}
+
+#newItemsModal .modal-content .new-item-card .item-details .new-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    color: #000;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+#newItemsModal .modal-content .new-item-card .item-details h4 {
+    font-size: 16px;
+    margin: 0 0 6px 0;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#newItemsModal .modal-content .new-item-card .item-details h4 i {
+    font-size: 14px;
+    color: #43cea2;
+}
+
+#newItemsModal .modal-content .new-item-card .item-details p {
+    font-size: 14px;
+    margin: 0;
+    color: #dcdcdc;
+    background: linear-gradient(45deg, #4682B4, #20B2AA);
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+#newItemsModal .close-modal-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: linear-gradient(45deg, #FF416C, #FF4B2B);
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
     
     
     
@@ -1504,7 +1678,21 @@ body {
 </head>
 <body>
   
- <button id="scrollToTopBtn" class="scroll-to-top"><i class="fas fa-arrow-up"></i></button>
+
+<button id="scrollToTopBtn" class="scroll-to-top"><i class="fas fa-arrow-up"></i></button>
+
+<!-- دائرة عائمة للعناصر الجديدة -->
+<div id="newItemsFloatingBtn" class="floating-new-btn">
+    <span>جديد</span>
+    <div class="new-items-count"></div>
+</div>
+
+<!-- النافذة المنبثقة للعناصر الجديدة -->
+<div id="newItemsModal">
+    <button class="close-modal-btn" onclick="closeNewItemsModal()"><i class="fas fa-times"></i></button>
+    <h2>العناصر الجديدة</h2>
+    <div class="modal-content"></div>
+</div>
  
  
  <header class="header">
@@ -1668,7 +1856,162 @@ document.getElementById("searchInput").addEventListener("input", toggleClearButt
 // التأكد من حالة الزر عند تحميل الصفحة
 document.addEventListener("DOMContentLoaded", toggleClearButton);
       
-      
+
+
+
+// جعل الدائرة قابلة للسحب
+// جعل الدائرة قابلة للسحب
+// جعل الدائرة قابلة للسحب
+// جعل الدائرة قابلة للسحب
+// جعل الدائرة قابلة للسحب
+// جعل الدائرة قابلة للسحب
+// جعل الدائرة قابلة للسحب
+// جعل الدائرة قابلة للسحب
+const floatingBtn = document.getElementById("newItemsFloatingBtn");
+let isDragging = false;
+let isDraggingInitiated = false; // متغير لتتبع ما إذا حدث سحب
+let baseX, baseY; // الموقع الأساسي عند بدء السحب
+let startX, startY;
+const dragThreshold = 5; // عتبة الحركة (بالبكسل)
+let touchStartTime; // لتتبع وقت بدء اللمس
+
+// إعداد الموقع الأولي بناءً على `right` و`bottom`
+floatingBtn.style.right = "20px";
+floatingBtn.style.bottom = "20px";
+
+// تحديث القيم الأولية بناءً على الموقع الفعلي
+const updateInitialPosition = () => {
+    const rect = floatingBtn.getBoundingClientRect();
+    baseX = rect.left; // الموقع الأساسي في بداية السحب
+    baseY = rect.top;
+};
+updateInitialPosition(); // تهيئة القيم عند التحميل
+
+floatingBtn.addEventListener("mousedown", startDragging);
+floatingBtn.addEventListener("touchstart", startDragging);
+
+function startDragging(e) {
+    e.preventDefault();
+    isDragging = true;
+    isDraggingInitiated = false;
+    updateInitialPosition(); // إعادة تحديث القيم الأولية عند بدء السحب
+    if (e.type === "touchstart") {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        touchStartTime = Date.now(); // تسجيل وقت بدء اللمس
+    } else {
+        startX = e.clientX;
+        startY = e.clientY;
+    }
+    floatingBtn.style.cursor = "grabbing";
+    floatingBtn.style.transition = "none"; // إزالة أي انتقال (transition) أثناء السحب
+}
+
+document.addEventListener("mousemove", drag);
+document.addEventListener("touchmove", drag);
+
+function drag(e) {
+    if (isDragging) {
+        e.preventDefault();
+        let newX, newY;
+        if (e.type === "touchmove") {
+            newX = e.touches[0].clientX;
+            newY = e.touches[0].clientY;
+        } else {
+            newX = e.clientX;
+            newY = e.clientY;
+        }
+
+        const deltaX = Math.abs(newX - startX);
+        const deltaY = Math.abs(newY - startY);
+        if (deltaX > dragThreshold || deltaY > dragThreshold) {
+            isDraggingInitiated = true;
+
+            // حساب الموقع الجديد بناءً على الفرق النسبي من الموقع الأساسي
+            const offsetX = newX - startX;
+            const offsetY = newY - startY;
+            let currentX = baseX + offsetX;
+            let currentY = baseY + offsetY;
+
+            const maxX = window.innerWidth - floatingBtn.offsetWidth;
+            const maxY = window.innerHeight - floatingBtn.offsetHeight;
+            currentX = Math.max(0, Math.min(currentX, maxX));
+            currentY = Math.max(0, Math.min(currentY, maxY));
+
+            floatingBtn.style.left = currentX + "px";
+            floatingBtn.style.top = currentY + "px";
+            floatingBtn.style.right = "auto";
+            floatingBtn.style.bottom = "auto";
+        }
+    }
+}
+
+document.addEventListener("mouseup", stopDragging);
+document.addEventListener("touchend", stopDragging);
+
+function stopDragging(e) {
+    if (isDragging) {
+        isDragging = false;
+        floatingBtn.style.cursor = "pointer";
+        updateInitialPosition(); // تحديث الموقع الأساسي بعد انتهاء السحب
+
+        // التحقق مما إذا كان النقر باللمس (tap) وليس سحب
+        if (e.type === "touchend" && !isDraggingInitiated) {
+            const touchEndTime = Date.now();
+            const touchDuration = touchEndTime - touchStartTime;
+
+            // إذا كانت مدة اللمس قصيرة (أقل من 300 مللي ثانية)، نعتبرها نقرة
+            if (touchDuration < 300) {
+                openModal();
+            }
+        }
+    }
+}
+
+// متغير لتتبع حالة النافذة
+let isModalOpen = false;
+
+// فتح النافذة
+function openModal() {
+    try {
+        if (isModalOpen) return; // إذا كانت النافذة مفتوحة، لا تفعل شيئًا
+
+        const modal = document.getElementById("newItemsModal");
+        if (modal.style.display === "none" || !modal.style.display) {
+            modal.style.display = "flex";
+            modal.style.animation = "zoomIn 0.5s ease-out forwards";
+            isModalOpen = true;
+            loadNewItems();
+        }
+    } catch (error) {
+        console.error("Error in openModal:", error);
+    }
+}
+
+// معالج النقر بالماوس
+floatingBtn.addEventListener("click", (e) => {
+    if (!isDraggingInitiated) {
+        openModal();
+    }
+    isDraggingInitiated = false; // إعادة تعيين بعد النقر
+});
+
+// إغلاق النافذة
+function closeNewItemsModal() {
+    try {
+        const modal = document.getElementById("newItemsModal");
+        modal.style.animation = "zoomOut 0.5s ease-in forwards";
+        setTimeout(() => {
+            modal.style.display = "none";
+            isModalOpen = false; // إعادة تعيين الحالة
+        }, 700); // زيادة التأخير لضمان اكتمال الأنيميشن
+    } catch (error) {
+        console.error("Error in closeNewItemsModal:", error);
+        isModalOpen = false; // إعادة تعيين الحالة في حالة حدوث خطأ
+    }
+}
+
+
       
  const notifications = [
     "شاشات KBS ضمان بعد الشد",
@@ -1753,16 +2096,12 @@ function triggerAnimation() {
 let promoAlreadyShown = sessionStorage.getItem('promoShown') === 'true';
 
 window.onload = function() {
-    // التحقق من حالة التفعيل
     const isActivated = localStorage.getItem('isActivated') === 'true';
 
     if (!isActivated) {
-        // إظهار نافذة التفعيل
         showActivationPopup();
     } else {
-        // تشغيل الإشعارات إذا تم التفعيل
         triggerAnimation();
-        // إظهار النافذة الترويجية إذا لم تُعرض من قبل
         if (showPromoPopup && !promoAlreadyShown) {
             setTimeout(() => {
                 let popup = document.getElementById('promoPopup');
@@ -1771,8 +2110,17 @@ window.onload = function() {
             }, 500);
             sessionStorage.setItem('promoShown', 'true');
         }
+        loadExcelFiles().then(result => {
+            if (result.success) {
+                console.log("تم تحميل البيانات بنجاح، جارٍ تحميل العناصر الجديدة...");
+                loadNewItems();
+            } else {
+                console.warn("فشل تحميل البيانات:", result.message);
+            }
+        });
     }
 };
+
 
 async function showActivationPopup() {
     const result = await Swal.fire({
@@ -1911,22 +2259,203 @@ function filterCategory(category) {
         let database = {};
         let currentCategory = null;
 
-        async function loadExcelFiles() {
-            const mainResponse = await fetch(dropboxMainFile);
-            const mainBuffer = await mainResponse.arrayBuffer();
-            const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
-            database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {});
-            database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
-            database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
-            database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BACK"] || {}); // ✅ تحميل البيانات من شيت "BACK"
-            database.CAMERA = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CAMERA"] || {}); // ✅ تحميل البيانات من شيت "BA
-            database.CHARGING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CHARGING"] || {});
-            database.BUZZER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BUZZER"] || {});
-            database.FINGER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["FINGER"] || {});
-            
-
+async function loadExcelFiles() {
+    try {
+        if (!dropboxMainFile) {
+            console.error("رابط ملف Excel غير معرف.");
+            Swal.fire({
+                title: 'خطأ',
+                html: '<p style="color: #ff4d4d;">رابط ملف Excel غير معرف. يرجى التحقق من الاتصال.</p>',
+                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+                confirmButtonText: 'موافق',
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            return { success: true, hasData: false, message: "رابط ملف Excel غير معرف." };
         }
-        
+
+        console.log("جارٍ تحميل ملف Excel من:", dropboxMainFile);
+        const mainResponse = await fetch(dropboxMainFile, { cache: 'no-store' });
+        if (!mainResponse.ok) {
+            console.error(`فشل تحميل ملف Excel: ${mainResponse.status} ${mainResponse.statusText}`);
+            Swal.fire({
+                title: 'خطأ في التحميل',
+                html: `<p style="color: #ff4d4d;">فشل تحميل البيانات: ${mainResponse.status} - ${mainResponse.statusText}</p>`,
+                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+                confirmButtonText: 'موافق',
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            return { success: true, hasData: false, message: `فشل تحميل ملف Excel: ${mainResponse.status}` };
+        }
+
+        const mainBuffer = await mainResponse.arrayBuffer();
+        const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
+
+        // تهيئة الكائن database
+        database = {
+            LCD: [],
+            HUAWEI: [],
+            BATTERY: [],
+            HOUSING: [],
+            BACK: [],
+            CAMERA: [],
+            CHARGING: [],
+            BUZZER: [],
+            HEADPHONE: [],
+            FINGER: []
+        };
+
+        // تحميل البيانات من كل ورقة
+        database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {}, { defval: null });
+        database.HUAWEI = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HUAWEI"] || {}, { defval: null });
+        database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {}, { defval: null });
+        database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {}, { defval: null });
+        database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BACK"] || {}, { defval: null });
+        database.CAMERA = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CAMERA"] || {}, { defval: null });
+        database.CHARGING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CHARGING"] || {}, { defval: null });
+        database.BUZZER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BUZZER"] || {}, { defval: null });
+        database.HEADPHONE = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HEADPHONE"] || {}, { defval: null });
+        database.FINGER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["FINGER"] || {}, { defval: null });
+
+        // تصحيح البيانات
+        Object.keys(database).forEach(category => {
+            console.log(`فئة ${category}: ${database[category].length} عنصر`, database[category]);
+            if (database[category].length === 0) {
+                console.warn(`لا توجد بيانات في ورقة ${category}`);
+            } else {
+                database[category].slice(0, 5).forEach(item => {
+                    console.log(`عنصر في ${category}:`, {
+                        name: item["Item Name"] || item["Item"],
+                        price: item["Price"],
+                        new: item["New"],
+                        newType: typeof item["New"],
+                        isNewEmpty: item["New"] === "" || item["New"] === undefined || item["New"] === null
+                    });
+                });
+            }
+        });
+
+        const hasData = Object.values(database).some(items => items.length > 0);
+        if (!hasData) {
+            console.warn("ملف Excel لا يحتوي على بيانات صالحة (جميع الفئات فارغة).");
+            Swal.fire({
+                title: 'خطأ',
+                html: '<p style="color: #ff4d4d;">ملف Excel لا يحتوي على بيانات صالحة.</p>',
+                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+                confirmButtonText: 'موافق',
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            return { success: true, hasData: false, message: "ملف Excel لا يحتوي على بيانات صالحة." };
+        }
+
+        return { success: true, hasData: true };
+    } catch (error) {
+        console.error("خطأ في تحميل ملف Excel:", error.message, error.stack);
+        Swal.fire({
+            title: 'خطأ',
+            html: `<p style="color: #ff4d4d;">حدث خطأ أثناء تحميل البيانات: ${error.message}</p>`,
+            iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+            confirmButtonText: 'موافق',
+            customClass: {
+                popup: 'swal2-popup',
+                title: 'swal2-title',
+                htmlContainer: 'swal2-html-container',
+                confirmButton: 'swal2-confirm'
+            }
+        });
+        return { success: true, hasData: false, message: error.message };
+    }
+}
+
+
+
+async function loadNewItems() {
+    const modal = document.getElementById("newItemsModal");
+    const modalContent = modal.querySelector(".modal-content");
+    const newItemsCount = document.querySelector(".new-items-count");
+
+    modalContent.innerHTML = "";
+    const categories = ["LCD", "HUAWEI", "BATTERY", "HOUSING", "BACK", "CAMERA", "CHARGING", "BUZZER", "HEADPHONE", "FINGER"];
+    let newItems = [];
+
+    categories.forEach(category => {
+        if (database[category]) {
+            const items = database[category].filter(item => {
+                const newField = item["New"] !== undefined ? item["New"] : 
+                                item["new"] !== undefined ? item["new"] : 
+                                item["NEW"] !== undefined ? item["NEW"] : null;
+                const isNew = newField === "" || newField === undefined || newField === null || newField === " " || newField === "  ";
+                const priceValue = item["Price"] ? String(item["Price"]).trim() : "";
+                const hasPrice = priceValue && !isNaN(parseFloat(priceValue)) && !["❎", "xx"].includes(priceValue);
+                return hasPrice && isNew;
+            });
+            items.forEach(item => newItems.push({ ...item, category }));
+        }
+    });
+
+    console.log(`إجمالي العناصر الجديدة: ${newItems.length}`, newItems);
+    newItemsCount.textContent = newItems.length;
+
+    if (newItems.length === 0) {
+        modalContent.innerHTML = `
+            <p style="color: #fff; font-family: 'Cairo', sans-serif; text-align: center;">
+                لا توجد عناصر جديدة حاليًا
+            </p>
+        `;
+        return;
+    }
+
+    newItems.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "new-item-card";
+        const iconClass = getIconForCategory(item.category);
+        card.innerHTML = `
+            <img src="images/${item.category.toLowerCase()}.png" alt="${item["Item Name"] || item["Item"]}" onerror="this.src='images/default.png'">
+            <div class="item-details">
+                <div class="new-badge">جديد</div>
+                <h4><i class="${iconClass}"></i> ${item["Item Name"] || item["Item"]}</h4>
+                <p>${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ع</p>
+            </div>
+        `;
+        modalContent.appendChild(card);
+    });
+}
+
+
+// دالة لاختيار الأيقونة بناءً على الفئة
+function getIconForCategory(category) {
+    const icons = {
+        "LCD": "fas fa-tv",
+        "HUAWEI": "fas fa-mobile-alt",
+        "BATTERY": "fas fa-battery-full",
+        "HOUSING": "fas fa-mobile-alt",
+        "BACK": "fas fa-tablet-alt",
+        "CAMERA": "fas fa-camera",
+        "CHARGING": "fas fa-plug",
+        "BUZZER": "fas fa-bell",
+        "HEADPHONE": "fas fa-volume-up",
+        "FINGER": "fas fa-fingerprint",
+        "UNKNOWN": "fas fa-question-circle"
+    };
+    return icons[category] || icons["UNKNOWN"];
+}
+
+
+
         
         
         document.getElementById("searchInput").addEventListener("keydown", function(event) {
@@ -2003,7 +2532,7 @@ function searchItems() {
     const resultsContainer = document.getElementById("results");
 
     if (!searchInput) {
-        resultsContainer.style.display = 'none'; // إخفاء الحاوية إذا الحقل فارغ
+        resultsContainer.style.display = 'none';
         Swal.fire({
             title: 'حقل فارغ',
             html: '<p style="color: #dcdcdc;">يرجى كتابة اسم العنصر قبل المتابعة</p>',
@@ -2020,7 +2549,7 @@ function searchItems() {
     }
 
     if (!currentCategory) {
-        resultsContainer.style.display = 'none'; // إخفاء الحاوية إذا ما اخترت صنف
+        resultsContainer.style.display = 'none';
         Swal.fire({
             title: 'الصنف غير محدد',
             text: 'يرجى اختيار صنف من القائمة قبل البدء في البحث.',
@@ -2036,13 +2565,42 @@ function searchItems() {
         return;
     }
 
-    const query = normalizeString(searchInput);
-    const results = database[currentCategory]?.filter(item =>
-        normalizeString(item["Item Name"] || item["Item"]).includes(query)
-    ) || [];
+    if (!database || !database[currentCategory] || database[currentCategory].length === 0) {
+        resultsContainer.style.display = 'none';
+        Swal.fire({
+            title: 'لا توجد بيانات',
+            html: `<p style="color: #ff4d4d;">لا توجد بيانات متاحة لفئة ${currentCategory}. يرجى تحديث الصفحة أو التحقق من الاتصال.</p>`,
+            iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+            confirmButtonText: 'موافق',
+            customClass: {
+                popup: 'swal2-popup',
+                title: 'swal2-title',
+                htmlContainer: 'swal2-html-container',
+                confirmButton: 'swal2-confirm'
+            }
+        });
+        return;
+    }
 
-    displayResults(results); // استدعاء العرض
+    const query = normalizeString(searchInput);
+    const results = database[currentCategory]?.filter(item => {
+        const itemName = item["Item Name"] || item["Item"];
+        if (!itemName) {
+            console.warn(`عنصر بدون اسم في فئة ${currentCategory}:`, item);
+            return false;
+        }
+        return normalizeString(itemName).includes(query);
+    }) || [];
+
+    if (results.length === 0) {
+        console.log(`لا توجد نتائج مطابقة في فئة ${currentCategory} للبحث: ${query}`);
+    } else {
+        console.log(`تم العثور على ${results.length} نتيجة في فئة ${currentCategory}:`, results);
+    }
+
+    displayResults(results);
 }
+
 
 // دالة الرجوع لأعلى الصفحة
 function scrollToTop() {
@@ -2121,7 +2679,6 @@ function openToolsPage() {
 
 
 async function refreshData() {
-    // نافذة التحميل مع دائرة التحميل الأنيقة
     Swal.fire({
         html: `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
@@ -2133,85 +2690,50 @@ async function refreshData() {
                     border-radius: 50%;
                     animation: spin 1s linear infinite;">
                 </div>
-                <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جارِ التحديث... يرجى الانتظار</p >
+                <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جارِ التحديث... يرجى الانتظار</p>
             </div>
         `,
         showConfirmButton: false,
         allowOutsideClick: false,
-        backdrop: 'rgba(0, 0, 0, 0.8)',
-         backdrop: false, // تثبيت الواجهة
+        backdrop: false,
         customClass: {
-            popup: 'swal2-popup animate__animated animate__fadeInDown', // حركة دخول
+            popup: 'swal2-popup animate__animated animate__fadeInDown',
         },
     });
 
-    // محاكاة لمدة 3 ثوانٍ مع تحميل الملفات
     const loadingPromise = new Promise(resolve => setTimeout(resolve, 3000));
     const loadFilesPromise = loadExcelFiles();
 
-    try {
-        // انتظر انتهاء المحاكاة وتحميل الملفات معًا
-        await Promise.all([loadingPromise, loadFilesPromise]);
+    const [_, loadResult] = await Promise.all([loadingPromise, loadFilesPromise]);
 
-        // نافذة نجاح التحديث مع زر موافق
-        Swal.fire({
-            title: 'تم التحديث بنجاح!',
-            html: '<p style="color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p >',
-            iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
-            showConfirmButton: false, // عرض زر موافق
-            confirmButtonText: 'موافق',
-            backdrop: 'rgba(0, 0, 0, 0.7)',
-             backdrop: false, // تثبيت الواجهة
-            customClass: {
-                popup: 'swal2-popup animate__animated animate__fadeInDown', // حركة دخول
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                confirmButton: 'swal2-confirm',
-            },
-
-     }).then((result) => {
-            if (result.isConfirmed) {
-                sessionStorage.setItem('hasUpdated', true);
-                console.log('Data updated and session state saved successfully.');
-                // إغلاق النافذة بشكل صريح
-                Swal.fire({
-                    title: 'تم التحديث بنجاح!',
-                    text: 'تم إغلاق النافذة بنجاح.',
-                    showConfirmButton: false,
-                    timer: 1500
-                }).then(() => {
-                    Swal.close();
-                });
-            }
-        });
-
-        
-    } catch (error) {
-        // نافذة خطأ في حالة حدوث مشكلة أثناء التحميل
-        Swal.fire({
-            title: 'خطأ',
-            html: '<p style="color: #ff4d4d;">حدث خطأ أثناء تحديث البيانات. يرجى المحاولة لاحقًا.</p >',
-            iconHtml: '<i class="fas fa-exclamation-triangle" style="font-size: 50px; color: #ff4d4d;"></i>',
-            showConfirmButton: true,
-            backdrop: 'rgba(0, 0, 0, 0.7)',
-            confirmButtonText: 'موافق',
-             backdrop: false, // تثبيت الواجهة
-            customClass: {
-                popup: 'swal2-popup animate__animated animate__shakeX', // حركة اهتزاز عند الخطأ
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                confirmButton: 'swal2-confirm',
-            },
-            
-        });
+    if (!loadResult.hasData) {
+        console.warn("لا توجد بيانات:", loadResult.message);
     }
 
-loadExcelFiles().then(() => {
-    setTimeout(() => {
-        location.reload();
-    }, 1000); // تأخير لمدة 3 ثواني (3000 مللي ثانية)
-});
-    
+    await loadNewItems();
+
+    Swal.close(); // نغلق نافذة التحميل
+
+    Swal.fire({
+        title: 'تم التحديث بنجاح!',
+        html: '<p style="color: #dcdcdc;">تم تحديث البيانات بنجاح. يمكنك المتابعة الآن.</p>',
+        iconHtml: '<i class="fas fa-check-circle" style="font-size: 50px; color: #43cea2;"></i>',
+        showConfirmButton: false, // إزالة زر "موافق"
+        timer: 1500, // اختفاء تلقائي بعد 1.5 ثانية
+        backdrop: false,
+        allowOutsideClick: true,
+        customClass: {
+            popup: 'swal2-popup animate__animated animate__fadeInDown',
+            title: 'swal2-title',
+            htmlContainer: 'swal2-html-container',
+        },
+    }).then(() => {
+        sessionStorage.setItem('hasUpdated', true);
+        console.log('Data updated and session state saved successfully.');
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    });
 }
         
         loadExcelFiles();
