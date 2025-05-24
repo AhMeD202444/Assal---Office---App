@@ -2154,10 +2154,13 @@ function triggerAnimation() {
     const notification = document.getElementById("notification");
     const notificationText = document.getElementById("notification-text");
     const resultsContainer = document.getElementById("results");
+    const searchInput = document.getElementById("searchInput");
 
-    // إذا النتائج معروضة، نؤخر الانفجار
-    if (!logo || !notification || !notificationText || resultsContainer.style.display === "flex") {
-        setTimeout(triggerAnimation, 100); // تأخير بسيط جدًا (غير ملحوظ)
+    // إذا كانت النتائج معروضة أو يوجد نص في حقل البحث، نؤخر الانفجار
+    if (!logo || !notification || !notificationText || 
+        resultsContainer.style.display === "flex" || 
+        searchInput.value.trim().length > 0) {
+        setTimeout(triggerAnimation, 100); // تأخير بسيط جدًا
         return;
     }
 
@@ -2204,7 +2207,6 @@ function triggerAnimation() {
 
     setTimeout(triggerAnimation, 8000);
 }
-      
       
       
       
