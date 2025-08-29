@@ -2165,26 +2165,22 @@ function triggerAnimation() {
         return;
     }
 
-    // اهتزاز اللوغو
     logo.style.animation = "shake 0.5s ease-in-out";
     setTimeout(() => {
         logo.style.animation = "none";
     }, 500);
 
-    // انفجار اللوغو واختفاءه
     setTimeout(() => {
         logo.style.animation = "explode 0.5s ease-out";
         logo.style.opacity = "0";
     }, 800);
 
-    // عرض الإشعار
     setTimeout(() => {
         const randomNotification = notifications[Math.floor(Math.random() * notifications.length)];
         notificationText.textContent = randomNotification;
         notification.classList.add("show");
     }, 1300);
 
-    // اختفاء الإشعار بانيميشن GSAP
     setTimeout(() => {
         notification.classList.remove("show");
         gsap.to(notification, {
@@ -2199,13 +2195,12 @@ function triggerAnimation() {
         });
     }, 5000);
 
-    // إعادة اللوغو مع تعديل الدوران الأخير لتقليل اللمعة
     setTimeout(() => {
         gsap.set(logo, { scale: 0, opacity: 0, rotation: 0 });
         gsap.to(logo, {
             scale: 1,
             opacity: 1,
-            rotation: 180, // بدل 720 لتقليل اللمعة
+            rotation: 720,
             duration: 1.2,
             ease: "bounce.out"
         });
@@ -2213,7 +2208,7 @@ function triggerAnimation() {
 
     setTimeout(triggerAnimation, 8000);
 }
-
+      
       
       
  let showPromoPopup = true; // 🔥 يتحكم فقط في النافذة المنبثقة، false = تعطيل النافذة
