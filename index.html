@@ -17,6 +17,12 @@
 
 
     <style>
+    
+    
+    #logo {
+  will-change: transform, opacity;
+}
+
 
 
 
@@ -1837,7 +1843,7 @@ body {
             الأسعار نزلناها الك،<br>
             إلحق قبل ما يخلص العرض!
         </p>
-        <button id="closeBtn" onclick="closePopup()">👌 يلا خل أشوف</button>
+        <button id="closeBtn" onclick="closePopup()">👌 شوف بنفسك</button>
     </div>
 </div>
 
@@ -2130,24 +2136,26 @@ floatingBtn.addEventListener("click", (e) => {
 
       
  const notifications = [
-    "شاشات KBS ضمان بعد الشد",
-    "شاشات FLYCDI ضمان بعد الشد",
-    "اسعارنا الارخص على مستوى المحافظة",
-    "متانة معتمدة اسعار مميزة",
-    "مكتبنا الاقدم في مجال قطع الغيار",
-    "لسنا الوحيدون لكننا الافضل",
-    "مكتب عسل عنوان قطع الغيار في المحافظة",
-    "شاشات متينة بضمان كامل",
-    "أرخص الأسعار مع الجودة العالية",
-    "مكتب عسل الأول في الثقة",
-    "قطع غيار بأسعار استثنائية",
-    "خبرتنا تضمن رضاكم دائمًا",
-    "شاشات FLYCDI جودة لا تُضاهى",
-    "مكتبنا عنوان التميز بالمحافظة",
-    "أسعار مميزة لكل العملاء",
-    "شاشات KBS الأفضل في السوق",
-    "مكتب عسل الجودة بأقل تكلفة"
+    "شاشات KBS 👌 ضمان بعد الشد",
+    "شاشات FLYCDI 🔥 ضمان بعد الشد",
+    "تره أسعارنا الأرخص بالمحافظة 😉",
+    "متانة وجودة ✨ وسعر يبرد الگلب",
+    "مكتب عسل .. خبرة سنين بالقطع",
+    "مو الوحيدين.. بس إحنا الأفضل 😎",
+    "مكتب عسل اسمچ بالثقة والقطع",
+    "شاشات قوية 💪 وياها ضمان كامل",
+    "أرخص سعر 🔧 وأعلى جودة",
+    "مكتب عسل الأول بالثقة 👍",
+    "قطع غيار بأسعار خوش زباين",
+    "خبرتنا كفيلة ترضيك دومًا ✨",
+    "FLYCDI شاشات ما إلها مثيل 🔥",
+    "مكتبنا عنوان التميّز بالمحافظة",
+    "أسعار تخلي الكل راضي 😍",
+    "KBS الشاشات الأقوى بالسوق",
+    "الجودة موجودة .. والتكلفة قليلة 💰"
 ];
+
+
 
 function triggerAnimation() {
     const logo = document.getElementById("logo");
@@ -2156,58 +2164,57 @@ function triggerAnimation() {
     const resultsContainer = document.getElementById("results");
     const searchInput = document.getElementById("searchInput");
 
-    // إذا كانت النتائج معروضة أو يوجد نص في حقل البحث، نؤخر الانفجار
+    // تحقق إذا نتائج البحث أو نص موجود
     if (!logo || !notification || !notificationText || 
         resultsContainer.style.display === "flex" || 
         searchInput.value.trim().length > 0) {
-        setTimeout(triggerAnimation, 100); // تأخير بسيط جدًا
+        setTimeout(triggerAnimation, 200);
         return;
     }
 
-    logo.style.animation = "shake 0.5s ease-in-out";
-    setTimeout(() => {
-        logo.style.animation = "none";
-    }, 500);
+    // نجهز الـ logo للـ GPU لتحسين الانيميشن
+    logo.style.willChange = "transform, opacity";
+    notification.style.willChange = "transform, opacity";
 
-    setTimeout(() => {
-        logo.style.animation = "explode 0.5s ease-out";
-        logo.style.opacity = "0";
-    }, 800);
+    // نعمل Timeline كامل بالـ GSAP
+    let tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
 
-    setTimeout(() => {
+    // 1️⃣ اهتزاز اللوغو
+    tl.to(logo, { x: 10, duration: 0.1, yoyo: true, repeat: 5, ease: "power1.inOut" });
+
+    // 2️⃣ انفجار واختفاء اللوغو
+    tl.to(logo, { scale: 2, opacity: 0, duration: 0.5, ease: "power2.out" });
+
+    // 3️⃣ عرض الإشعار بعد الانفجار
+    tl.call(() => {
         const randomNotification = notifications[Math.floor(Math.random() * notifications.length)];
         notificationText.textContent = randomNotification;
         notification.classList.add("show");
-    }, 1300);
+        notification.style.transform = "scale(1)";
+        notification.style.opacity = "1";
+    });
 
-    setTimeout(() => {
-        notification.classList.remove("show");
-        gsap.to(notification, {
-            scale: 0.8,
-            opacity: 0,
-            rotation: 180,
-            duration: 0.8,
-            ease: "power2.inOut",
-            onComplete: () => {
-                notification.style.transform = "scale(0)";
-            }
-        });
-    }, 5000);
+    // 4️⃣ الإشعار يظل 3 ثواني ثم يختفي
+    tl.to(notification, {
+        scale: 0.8,
+        opacity: 0,
+        rotation: 180,
+        duration: 0.8,
+        ease: "power2.inOut",
+        onComplete: () => {
+            notification.classList.remove("show");
+            notification.style.transform = "scale(0)";
+        }
+    }, "+=3");
 
-    setTimeout(() => {
-        gsap.set(logo, { scale: 0, opacity: 0, rotation: 0 });
-        gsap.to(logo, {
-            scale: 1,
-            opacity: 1,
-            rotation: 720,
-            duration: 1.2,
-            ease: "bounce.out"
-        });
-    }, 5800);
-
-    setTimeout(triggerAnimation, 8000);
+    // 5️⃣ إعادة اللوغو من جديد بشكل ناعم
+    tl.fromTo(logo,
+        { scale: 0, opacity: 0, rotation: 0 },
+        { scale: 1, opacity: 1, rotation: 720, duration: 1.2, ease: "bounce.out" }
+    );
 }
-      
+
+
       
       
  let showPromoPopup = true; // 🔥 يتحكم فقط في النافذة المنبثقة، false = تعطيل النافذة
