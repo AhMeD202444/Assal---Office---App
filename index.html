@@ -2381,127 +2381,110 @@ function filterCategory(category) {
         const dropboxMainFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file1" + "?t=" + new Date().getTime();
         let database = {};
         let currentCategory = null;
+        
+        
+        
+        
+        // ======== مصادر التحميل ========
+// حالياً بس workers.dev، وتكدر تضيف مرايا بعدين بسهولة.
+const SOURCES = [
+  "https://assap-app-project.ahmed-al-bayatii-90.workers.dev"
+];
+
+// ======== fetch مع مهلة ========
+function fetchWithTimeout(url, options = {}, timeout = 12000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  return fetch(url, { ...options, signal: controller.signal })
+    .finally(() => clearTimeout(id));
+}
+
+// ======== بديل XHR للأجهزة اللي تتعب ويا fetch ========
+function xhrArrayBuffer(url) {
+  return new Promise((resolve, reject) => {
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.responseType = 'arraybuffer';
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) resolve(xhr.response);
+        else reject(new Error('XHR status ' + xhr.status));
+      };
+      xhr.onerror = () => reject(new Error('XHR network error'));
+      xhr.ontimeout = () => reject(new Error('XHR timeout'));
+      xhr.timeout = 12000;
+      xhr.send();
+    } catch (e) { reject(e); }
+  });
+}
+
+// ======== محاولة ذكية: fetch أولاً ثم XHR ========
+async function robustArrayBuffer(url) {
+  try {
+    const r = await fetchWithTimeout(url, { cache: 'no-store', mode: 'cors' }, 10000);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.arrayBuffer();
+  } catch (_) {
+    return await xhrArrayBuffer(url);
+  }
+}
+
+// ======== جرّب المصادر بالتسلسل (مرايا) ========
+async function getBuffer(pathWithQuery) {
+  let lastErr;
+  for (const base of SOURCES) {
+    try {
+      return await robustArrayBuffer(`${base}${pathWithQuery}`);
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error("All mirrors failed");
+}
+
+// (اختياري) لوج أخطاء مفيد
+window.addEventListener('error', e => console.log('[GlobalError]', e.message));
+window.addEventListener('unhandledrejection', e => console.log('[UnhandledRejection]', e.reason));
+        
+        
+        
 
 async function loadExcelFiles() {
-    try {
-        if (!dropboxMainFile) {
-            console.error("رابط ملف Excel غير معرف.");
-            Swal.fire({
-                title: 'خطأ',
-                html: '<p style="color: #ff4d4d;">رابط ملف Excel غير معرف. يرجى التحقق من الاتصال.</p>',
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            return { success: true, hasData: false, message: "رابط ملف Excel غير معرف." };
-        }
+  try {
+    console.log("جارٍ تحميل ملف Excel من Worker...");
+    // الجديد: نحصل البفر مباشرة من مرايا آمنة
+    const mainBuffer = await getBuffer(`/file1?t=${Date.now()}`);
+    const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
 
-        console.log("جارٍ تحميل ملف Excel من:", dropboxMainFile);
-        const mainResponse = await fetch(dropboxMainFile, { cache: 'no-store' });
-        if (!mainResponse.ok) {
-            console.error(`فشل تحميل ملف Excel: ${mainResponse.status} ${mainResponse.statusText}`);
-            Swal.fire({
-                title: 'خطأ في التحميل',
-                html: `<p style="color: #ff4d4d;">فشل تحميل البيانات: ${mainResponse.status} - ${mainResponse.statusText}</p>`,
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            return { success: true, hasData: false, message: `فشل تحميل ملف Excel: ${mainResponse.status}` };
-        }
+    // تهيئة الـ database تبقى نفسها
+    database = { LCD: [], HUAWEI: [], BATTERY: [], HOUSING: [], BACK: [], CAMERA: [], CHARGING: [], BUZZER: [], HEADPHONE: [], FINGER: [] };
 
-        const mainBuffer = await mainResponse.arrayBuffer();
-        const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
+    const sheet = n => XLSX.utils.sheet_to_json(mainWorkbook.Sheets[n] || {}, { defval: null });
+    database.LCD = sheet("LCD");
+    database.HUAWEI = sheet("HUAWEI");
+    database.BATTERY = sheet("BATTERY");
+    database.HOUSING = sheet("HOUSING");
+    database.BACK = sheet("BACK");
+    database.CAMERA = sheet("CAMERA");
+    database.CHARGING = sheet("CHARGING");
+    database.BUZZER = sheet("BUZZER");
+    database.HEADPHONE = sheet("HEADPHONE");
+    database.FINGER = sheet("FINGER");
 
-        // تهيئة الكائن database
-        database = {
-            LCD: [],
-            HUAWEI: [],
-            BATTERY: [],
-            HOUSING: [],
-            BACK: [],
-            CAMERA: [],
-            CHARGING: [],
-            BUZZER: [],
-            HEADPHONE: [],
-            FINGER: []
-        };
-
-        // تحميل البيانات من كل ورقة
-        database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {}, { defval: null });
-        database.HUAWEI = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HUAWEI"] || {}, { defval: null });
-        database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {}, { defval: null });
-        database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {}, { defval: null });
-        database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BACK"] || {}, { defval: null });
-        database.CAMERA = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CAMERA"] || {}, { defval: null });
-        database.CHARGING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CHARGING"] || {}, { defval: null });
-        database.BUZZER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BUZZER"] || {}, { defval: null });
-        database.HEADPHONE = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HEADPHONE"] || {}, { defval: null });
-        database.FINGER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["FINGER"] || {}, { defval: null });
-
-        // تصحيح البيانات
-        Object.keys(database).forEach(category => {
-            console.log(`فئة ${category}: ${database[category].length} عنصر`, database[category]);
-            if (database[category].length === 0) {
-                console.warn(`لا توجد بيانات في ورقة ${category}`);
-            } else {
-                database[category].slice(0, 5).forEach(item => {
-                    console.log(`عنصر في ${category}:`, {
-                        name: item["Item Name"] || item["Item"],
-                        price: item["Price"],
-                        new: item["New"],
-                        newType: typeof item["New"],
-                        isNewEmpty: item["New"] === "" || item["New"] === undefined || item["New"] === null
-                    });
-                });
-            }
-        });
-
-        const hasData = Object.values(database).some(items => items.length > 0);
-        if (!hasData) {
-            console.warn("ملف Excel لا يحتوي على بيانات صالحة (جميع الفئات فارغة).");
-            Swal.fire({
-                title: 'خطأ',
-                html: '<p style="color: #ff4d4d;">ملف Excel لا يحتوي على بيانات صالحة.</p>',
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            return { success: true, hasData: false, message: "ملف Excel لا يحتوي على بيانات صالحة." };
-        }
-
-        return { success: true, hasData: true };
-    } catch (error) {
-        console.error("خطأ في تحميل ملف Excel:", error.message, error.stack);
-        Swal.fire({
-            title: 'خطأ',
-            html: `<p style="color: #ff4d4d;">حدث خطأ أثناء تحميل البيانات: ${error.message}</p>`,
-            iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-            confirmButtonText: 'موافق',
-            customClass: {
-                popup: 'swal2-popup',
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        return { success: true, hasData: false, message: error.message };
+    const hasData = Object.values(database).some(items => items.length > 0);
+    if (!hasData) {
+      throw new Error("ملف Excel لا يحتوي على بيانات صالحة.");
     }
+    return { success: true, hasData: true };
+  } catch (error) {
+    console.error("Excel load error:", error);
+    Swal.fire({
+      title: 'خطأ',
+      html: `<p style="color:#ff4d4d;">حدث خطأ أثناء تحميل البيانات: ${error?.message || error}</p>`,
+      iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+      confirmButtonText: 'موافق',
+      customClass: { popup: 'swal2-popup', title: 'swal2-title', htmlContainer: 'swal2-html-container', confirmButton: 'swal2-confirm' }
+    });
+    return { success: false, hasData: false, message: error.message };
+  }
 }
 
 
