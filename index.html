@@ -2378,7 +2378,8 @@ function filterCategory(category) {
 }
 
         
-        const dropboxMainFile = "https://assap-app-project.ahmed-al-bayatii-90.workers.dev/file1" + "?t=" + new Date().getTime();
+      const dropboxMainFile = `https://dl.dropboxusercontent.com/scl/fi/nl22c9rbj1l7yfn54yrkx/baq_prices_cleaned_updated.xlsx?rlkey=hosnjlsiswyeuxvht1rcp27i2&dl=1&_=${Date.now()}`;
+
         let database = {};
         let currentCategory = null;
         
@@ -2387,98 +2388,138 @@ function filterCategory(category) {
         
         // ======== مصادر التحميل ========
 // حالياً بس workers.dev، وتكدر تضيف مرايا بعدين بسهولة.
-const SOURCES = [
-  "https://assap-app-project.ahmed-al-bayatii-90.workers.dev"
-];
+// ===== دعم-ميّزات بسيط
+const HAS_ABORT = typeof AbortController !== 'undefined';
 
 // ======== fetch مع مهلة ========
-function fetchWithTimeout(url, options = {}, timeout = 12000) {
+async function fetchWithTimeout(url, options = {}, timeout = 25000) { // مهلة أطول
+  if (!HAS_ABORT) {
+    // متصفحات قديمة: بدون AbortController
+    return fetch(url, { ...options, cache: 'no-store', credentials: 'omit' });
+  }
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
-  return fetch(url, { ...options, signal: controller.signal })
-    .finally(() => clearTimeout(id));
+  try {
+    return await fetch(url, { ...options, signal: controller.signal, cache: 'no-store', credentials: 'omit' });
+  } finally {
+    clearTimeout(id);
+  }
 }
 
+
 // ======== بديل XHR للأجهزة اللي تتعب ويا fetch ========
-function xhrArrayBuffer(url) {
+function xhrArrayBuffer(url, timeout = 25000) {
   return new Promise((resolve, reject) => {
     try {
       const xhr = new XMLHttpRequest();
       xhr.open('GET', url, true);
       xhr.responseType = 'arraybuffer';
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) resolve(xhr.response);
-        else reject(new Error('XHR status ' + xhr.status));
-      };
-      xhr.onerror = () => reject(new Error('XHR network error'));
-      xhr.ontimeout = () => reject(new Error('XHR timeout'));
-      xhr.timeout = 12000;
+      xhr.timeout = timeout;
+      xhr.onload = () => (xhr.status >= 200 && xhr.status < 300)
+        ? resolve(xhr.response)
+        : reject(new Error('XHR_HTTP_' + xhr.status));
+      xhr.onerror = () => reject(new Error('XHR_NETWORK_ERROR'));
+      xhr.ontimeout = () => reject(new Error('XHR_TIMEOUT'));
       xhr.send();
     } catch (e) { reject(e); }
   });
 }
 
+
 // ======== محاولة ذكية: fetch أولاً ثم XHR ========
-async function robustArrayBuffer(url) {
-  try {
-    const r = await fetchWithTimeout(url, { cache: 'no-store', mode: 'cors' }, 10000);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return await r.arrayBuffer();
-  } catch (_) {
-    return await xhrArrayBuffer(url);
-  }
-}
+
 
 // ======== جرّب المصادر بالتسلسل (مرايا) ========
-async function getBuffer(pathWithQuery) {
-  let lastErr;
-  for (const base of SOURCES) {
-    try {
-      return await robustArrayBuffer(`${base}${pathWithQuery}`);
-    } catch (e) { lastErr = e; }
+async function robustArrayBuffer(url) {
+  try {
+    const r = await fetchWithTimeout(url, { mode: 'cors' }, 25000);
+    if (!r.ok) throw new Error('HTTP_' + r.status);
+    return await r.arrayBuffer();
+  } catch (e) {
+    return await xhrArrayBuffer(url, 25000);
   }
-  throw lastErr || new Error("All mirrors failed");
 }
 
-// (اختياري) لوج أخطاء مفيد
-window.addEventListener('error', e => console.log('[GlobalError]', e.message));
-window.addEventListener('unhandledrejection', e => console.log('[UnhandledRejection]', e.reason));
+
+
+// ===== مرايا + تكرار بارتداد أسي
+const SOURCES = ["https://assap-app-project.ahmed-al-bayatii-90.workers.dev"];
+async function getBuffer(pathWithQuery, maxAttempts = 3) {
+  let lastErr;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    for (const base of SOURCES) {
+      try {
+        return await robustArrayBuffer(`${base}${pathWithQuery}`);
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    // انتظار قبل المحاولة القادمة (500ms، 1s، 2s)
+    await new Promise(r => setTimeout(r, 500 * Math.pow(2, attempt - 1)));
+  }
+  throw lastErr || new Error("ALL_MIRRORS_FAILED");
+}
+
+// ===== تفسير ودّي للأخطاء (يعرض سبب واضح)
+function explainNetworkError(err) {
+  const msg = String(err && err.message || err || '');
+  if (msg === 'OFFLINE') return 'أنت غير متصل بالإنترنت.';
+  if (msg.startsWith('HTTP_') || msg.startsWith('XHR_HTTP_')) return 'استجابة غير موفقة من الخادم.';
+  if (msg.includes('abort')) return 'انتهت المهلة (الشبكة بطيئة).';
+  if (msg.includes('TIMEOUT')) return 'انتهت المهلة.';
+  if (msg.includes('NETWORK')) return 'انقطاع الشبكة.';
+  if (msg.includes('CORS')) return 'رفض عبر CORS (تأكد من السماح بالمصدر).';
+  if (msg === 'XLSX_PARSE_ERROR') return 'ملف Excel غير مدعوم على هذا الجهاز/المتصفح.';
+  if (msg === 'EMPTY_SHEETS') return 'الملف لا يحتوي بيانات صالحة.';
+  return 'خطأ غير متوقّع.';
+}
+
+        
+        
+        
+        
+        
+        
+  
+        
+        
+        
+        
+        
+        
         
         
         
 
 async function loadExcelFiles() {
   try {
-    console.log("جارٍ تحميل ملف Excel من Worker...");
-    // الجديد: نحصل البفر مباشرة من مرايا آمنة
-    const mainBuffer = await getBuffer(`/file1?t=${Date.now()}`);
-    const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
+    if (!navigator.onLine) throw new Error('OFFLINE');
 
-    // تهيئة الـ database تبقى نفسها
-    database = { LCD: [], HUAWEI: [], BATTERY: [], HOUSING: [], BACK: [], CAMERA: [], CHARGING: [], BUZZER: [], HEADPHONE: [], FINGER: [] };
-
-    const sheet = n => XLSX.utils.sheet_to_json(mainWorkbook.Sheets[n] || {}, { defval: null });
-    database.LCD = sheet("LCD");
-    database.HUAWEI = sheet("HUAWEI");
-    database.BATTERY = sheet("BATTERY");
-    database.HOUSING = sheet("HOUSING");
-    database.BACK = sheet("BACK");
-    database.CAMERA = sheet("CAMERA");
-    database.CHARGING = sheet("CHARGING");
-    database.BUZZER = sheet("BUZZER");
-    database.HEADPHONE = sheet("HEADPHONE");
-    database.FINGER = sheet("FINGER");
-
-    const hasData = Object.values(database).some(items => items.length > 0);
-    if (!hasData) {
-      throw new Error("ملف Excel لا يحتوي على بيانات صالحة.");
+   const mainBuffer = await getBuffer(`/file1`);
+    let mainWorkbook;
+    try {
+      mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
+    } catch {
+      throw new Error('XLSX_PARSE_ERROR');
     }
+
+    database = { LCD: [], HUAWEI: [], BATTERY: [], HOUSING: [], BACK: [], CAMERA: [], CHARGING: [], BUZZER: [], HEADPHONE: [], FINGER: [] };
+    const sheet = n => XLSX.utils.sheet_to_json(mainWorkbook.Sheets[n] || {}, { defval: null });
+
+    const names = ["LCD","HUAWEI","BATTERY","HOUSING","BACK","CAMERA","CHARGING","BUZZER","HEADPHONE","FINGER"];
+    for (const n of names) database[n] = sheet(n);
+
+    const hasData = Object.values(database).some(items => items && items.length > 0);
+    if (!hasData) throw new Error('EMPTY_SHEETS');
+
     return { success: true, hasData: true };
   } catch (error) {
+    const human = explainNetworkError(error);
     console.error("Excel load error:", error);
+
     Swal.fire({
-      title: 'خطأ',
-      html: `<p style="color:#ff4d4d;">حدث خطأ أثناء تحميل البيانات: ${error?.message || error}</p>`,
+      title: 'فشل جلب البيانات',
+      html: `<p style="color:#ffb3b3; direction:rtl;">${human}<br><small style="opacity:.7">(${String(error && error.message || error)})</small></p>`,
       iconHtml: '<i class="fas fa-exclamation-circle"></i>',
       confirmButtonText: 'موافق',
       customClass: { popup: 'swal2-popup', title: 'swal2-title', htmlContainer: 'swal2-html-container', confirmButton: 'swal2-confirm' }
