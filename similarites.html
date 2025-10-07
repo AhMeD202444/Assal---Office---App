@@ -1621,24 +1621,7 @@
 
     <script>
         let isAnimating = false;
-       
-       
-      // 🔄 تعطيل الكاش تماماً + تحميل من Google Sheets مباشرة
-if ('caches' in window) {
-  caches.keys().then(names => names.forEach(name => caches.delete(name)));
-}
-
-// ✅ رابط Google Sheets مع كسر الكاش
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRRZZFGe3dDXCCb9L5HtgpnXoj-H6kvqWeMS_tvYyWAL2VqpJh64rCMqRpoTaMw3v9fdazd5fWB5E2d/pub?output=xlsx";
-
-// ✅ دالة تولد رابط فريد كل مرة (تكسر الكاش)
-function cacheBust(url) {
-  return url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
-}
-
-
-       
-       
+    const dropboxSimilaritesFile = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRRZZFGe3dDXCCb9L5HtgpnXoj-H6kvqWeMS_tvYyWAL2VqpJh64rCMqRpoTaMw3v9fdazd5fWB5E2d/pub?output=xlsx" + "&t=" + new Date().getTime();
         let database = {};
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
         let stats = JSON.parse(localStorage.getItem('stats')) || { searches: 0, notesAdded: 0 };
@@ -1796,100 +1779,90 @@ function cacheBust(url) {
             openModal();
         }
 
-async function loadExcelFiles() {
-    try {
-        if (!SHEET_URL) {
-            console.error("رابط ملف Excel غير معرف.");
-            Swal.fire({
-                title: 'خطأ',
-                html: '<p style="color: #ff4d4d;">رابط ملف Excel غير معرف. يرجى التحقق من الاتصال.</p>',
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
+        async function loadExcelFiles() {
+            try {
+                if (!dropboxSimilaritesFile) {
+                    console.error("رابط ملف Excel غير معرف.");
+                    Swal.fire({
+                        title: 'خطأ',
+                        html: '<p style="color: #ff4d4d;">رابط ملف Excel غير معرف. يرجى التحقق من الاتصال.</p>',
+                        iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+                        confirmButtonText: 'موافق',
+                        customClass: {
+                            popup: 'swal2-popup',
+                            title: 'swal2-title',
+                            htmlContainer: 'swal2-html-container',
+                            confirmButton: 'swal2-confirm'
+                        }
+                    });
+                    return { success: false, hasData: false, message: "رابط ملف Excel غير معرف." };
                 }
-            });
-            return { success: false, hasData: false, message: "رابط ملف Excel غير معرف." };
-        }
 
-        const url = cacheBust(SHEET_URL);
-        console.log("جارٍ تحميل ملف Excel من:", url);
-
-        const response = await fetch(url, {
-            cache: 'no-store',
-            headers: { 'Cache-Control': 'no-cache' }
-        });
-
-        if (!response.ok) {
-            console.error(`فشل تحميل ملف Excel: ${response.status} ${response.statusText}`);
-            Swal.fire({
-                title: 'خطأ في التحميل',
-                html: `<p style="color: #ff4d4d;">فشل تحميل البيانات: ${response.status} - ${response.statusText}</p>`,
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
+                console.log("جارٍ تحميل ملف Excel من:", dropboxSimilaritesFile);
+                const response = await fetch(dropboxSimilaritesFile, { cache: 'no-store' });
+                if (!response.ok) {
+                    console.error(`فشل تحميل ملف Excel: ${response.status} ${response.statusText}`);
+                    Swal.fire({
+                        title: 'خطأ في التحميل',
+                        html: `<p style="color: #ff4d4d;">فشل تحميل البيانات: ${response.status} - ${response.statusText}</p>`,
+                        iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+                        confirmButtonText: 'موافق',
+                        customClass: {
+                            popup: 'swal2-popup',
+                            title: 'swal2-title',
+                            htmlContainer: 'swal2-html-container',
+                            confirmButton: 'swal2-confirm'
+                        }
+                    });
+                    return { success: false, hasData: false, message: `فشل تحميل ملف Excel: ${response.status}` };
                 }
-            });
-            return { success: false, hasData: false, message: `فشل تحميل ملف Excel: ${response.status}` };
-        }
 
-        const buffer = await response.arrayBuffer();
-        const workbook = XLSX.read(buffer, { type: "array" });
+                const buffer = await response.arrayBuffer();
+                const workbook = XLSX.read(buffer, { type: "array" });
 
-        database.SIMILARITES = XLSX.utils
-            .sheet_to_json(workbook.Sheets["SIMILARITES"] || {}, { defval: null })
-            .map(item => ({
-                Item: item.Item || "غير مسمى",
-                Category: item.Category || "UNKNOWN",
-                New: item.New || null
-            }));
+                database.SIMILARITES = XLSX.utils.sheet_to_json(workbook.Sheets["SIMILARITES"] || {}, { defval: null }).map(item => ({
+                    Item: item.Item || "غير مسمى",
+                    Category: item.Category || "UNKNOWN",
+                    New: item.New || null
+                }));
 
-        console.log(`فئة SIMILARITES: ${database.SIMILARITES.length} عنصر`, database.SIMILARITES);
+                console.log(`فئة SIMILARITES: ${database.SIMILARITES.length} عنصر`, database.SIMILARITES);
 
-        if (database.SIMILARITES.length === 0) {
-            console.warn("لا توجد بيانات في ورقة SIMILARITES");
-            Swal.fire({
-                title: 'خطأ',
-                html: '<p style="color: #ff4d4d;">ملف Excel لا يحتوي على بيانات صالحة.</p>',
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            return { success: false, hasData: false, message: "ملف Excel لا يحتوي على بيانات صالحة." };
-        }
-
-        return { success: true, hasData: true };
-
-    } catch (error) {
-        console.error("خطأ في تحميل ملف Excel:", error.message, error.stack);
-        Swal.fire({
-            title: 'خطأ',
-            html: `<p style="color: #ff4d4d;">حدث خطأ أثناء تحميل البيانات: ${error.message}</p>`,
-            iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-            confirmButtonText: 'موافق',
-            customClass: {
-                popup: 'swal2-popup',
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                confirmButton: 'swal2-confirm'
+                if (database.SIMILARITES.length === 0) {
+                   console.warn("لا توجد بيانات في ورقة SIMILARITES");
+                Swal.fire({
+                    title: 'خطأ',
+                    html: '<p style="color: #ff4d4d;">ملف Excel لا يحتوي على بيانات صالحة.</p>',
+                    iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+                    confirmButtonText: 'موافق',
+                    customClass: {
+                        popup: 'swal2-popup',
+                        title: 'swal2-title',
+                        htmlContainer: 'swal2-html-container',
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+                return { success: false, hasData: false, message: "ملف Excel لا يحتوي على بيانات صالحة." };
             }
-        });
-        return { success: false, hasData: false, message: error.message };
-    }
-}
 
+            return { success: true, hasData: true };
+        } catch (error) {
+            console.error("خطأ في تحميل ملف Excel:", error.message, error.stack);
+            Swal.fire({
+                title: 'خطأ',
+                html: `<p style="color: #ff4d4d;">حدث خطأ أثناء تحميل البيانات: ${error.message}</p>`,
+                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+                confirmButtonText: 'موافق',
+                customClass: {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm'
+                }
+            });
+            return { success: false, hasData: false, message: error.message };
+        }
+    }
 
     async function loadNewItems(isTicker = false) {
         const modal = document.getElementById("newItemsModal");
