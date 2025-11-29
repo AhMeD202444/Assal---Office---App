@@ -581,6 +581,7 @@
 }
 
 
+
 @keyframes slideDown {
     0% {
         transform: translate(-50%, -100%);
@@ -603,23 +604,25 @@
     }
 }
 
+/* ✅ نافذة إعلان مودرن */
 #promoPopup {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -100%);
-    width: 90%;
-    max-width: 450px;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(25px);
-    padding: 30px;
-    border-radius: 20px;
+    transform: translate(-50%, -100%); /* مهم حتى يشتغل slideDown/slideUp */
+    width: min(420px, 92vw);
+    background:
+        radial-gradient(circle at top left, rgba(67, 206, 162, 0.15), transparent),
+        rgba(15, 23, 42, 0.97); /* dark glassy */
+    backdrop-filter: blur(18px);
+    padding: 20px 18px 16px;
+    border-radius: 18px;
     text-align: center;
-    color: white;
-    box-shadow: 0 0 50px rgba(0, 255, 255, 0.7);
+    color: #e5e7eb;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
     display: none;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 12px;
     z-index: 9999;
 }
 
@@ -1795,6 +1798,143 @@ body {
 
 
 
+/* ✅ نافذة إعلان مودرن */
+#promoPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%); /* مهم حتى يشتغل slideDown/slideUp */
+    width: min(420px, 92vw);
+    background:
+        radial-gradient(circle at top left, rgba(67, 206, 162, 0.15), transparent),
+        rgba(15, 23, 42, 0.97); /* dark glassy */
+    backdrop-filter: blur(18px);
+    padding: 20px 18px 16px;
+    border-radius: 18px;
+    text-align: center;
+    color: #e5e7eb;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 9999;
+}
+
+/* محتوى البوب أب */
+#promoPopup .promo-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ✅ البادج الصغير فوق العنوان */
+.promo-badge {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.07);
+    border: 1px solid rgba(34, 197, 94, 0.6);
+    color: #bbf7d0;
+}
+
+/* صورة العرض (تصير كرت نظيف) */
+#promoImage {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    object-fit: cover;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.9);
+    transition: transform 0.25s ease;
+    cursor: pointer;
+}
+
+#promoImage:hover {
+    transform: translateY(-2px) scale(1.03);
+}
+
+/* عنوان الإعلان – بدون ألوان فاقعة */
+.popup-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    color: #f9fafb;
+    text-shadow: none;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+}
+
+/* نص الإعلان */
+.promo-text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #cbd5f5;
+}
+
+/* زر الدعوة للفعل (CTA) */
+#closeBtn {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0b1120;
+    background: linear-gradient(135deg, #22c55e, #06b6d4);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(8, 47, 73, 0.7);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    font-family: 'Cairo', sans-serif !important;
+}
+
+#closeBtn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+    box-shadow: 0 14px 28px rgba(8, 47, 73, 0.8);
+}
+
+#closeBtn:active {
+    transform: translateY(1px) scale(0.97);
+    box-shadow: inset 0 4px 8px rgba(15, 23, 42, 0.8);
+}
+
+/* ملاحظة صغيرة تحت الزر (اختيارية، لو ضفت span.promo-hint بالـ HTML) */
+.promo-hint {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 4px;
+}
+
+/* موبايلات – تكبير النص شوي وتخفيف المسافات */
+@media (max-width: 480px) {
+    #promoPopup {
+        padding: 16px 14px 12px;
+        border-radius: 16px;
+    }
+
+    .popup-title {
+        font-size: 18px;
+    }
+
+    .promo-text {
+        font-size: 13px;
+    }
+
+    #promoImage {
+        width: 70px;
+        height: 70px;
+        border-radius: 16px;
+    }
+}
+
+
+
+
 
     </style>
 </head>
@@ -1832,14 +1972,21 @@ body {
 <div id="promoPopup">
     <div class="promo-content">
         <img id="promoImage" src="images/logo.png" alt="Discount Offer">
+
+        <!-- ✅ Badge صغير يطلع فوق العنوان (جديد) -->
+        <span class="promo-badge">عرض محدود لوقت قصير</span>
+
         <h1 class="popup-title">🔥 عرض من مكتب عسل 🔥</h1>
         <p class="promo-text">
             الأسعار نزلناها الك،<br>
             الحك قبل ما يخلص العرض!
         </p>
-        <button id="closeBtn" onclick="closePopup()">👌 شوف بنفسك</button>
+
+        <!-- زر رئيسي (CTA) -->
+        <button id="closeBtn" onclick="closePopup()">👌 شوف الأسعار</button>
     </div>
 </div>
+
 
     <div class="container">
       
@@ -1914,6 +2061,44 @@ body {
     <i class="fas fa-fingerprint"></i>
     <span>بصمة</span>
 </div>
+
+
+
+<div class="category" onclick="filterCategory('FLAT LCD')">
+    <i class="fas fa-film"></i>
+    <span>ش. شاشة</span>
+</div>
+
+
+
+<div class="category" onclick="filterCategory('POWER')">
+    <i class="fas fa-power-off"></i>
+    <span>ف. بور</span>
+</div>
+
+
+<div class="category" onclick="filterCategory('LENS')">
+    <i class="fas fa-bullseye"></i>
+    <span>عدسة</span>
+</div>
+
+
+<div class="category" onclick="filterCategory('VOLUME')">
+    <i class="fas fa-sliders-h"></i>
+    <span>ف. صوت</span>
+</div>
+
+<div class="category" onclick="filterCategory('SPEAKER')">
+    <i class="fas fa-phone-volume"></i>
+    <span>س. اتصال</span>
+</div>
+
+
+<div class="category" onclick="filterCategory('FLAT SPEAKER')">
+    <i class="fas fa-phone-alt"></i>
+    <span>ف. سماعة</span>
+</div>
+
 
     </div>
     <button class="slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
@@ -2215,7 +2400,7 @@ function triggerAnimation() {
       
       
       
- let showPromoPopup = false; // 🔥 يتحكم فقط في النافذة المنبثقة، false = تعطيل النافذة
+ let showPromoPopup = true; // 🔥 يتحكم فقط في النافذة المنبثقة، false = تعطيل النافذة
 let promoAlreadyShown = sessionStorage.getItem('promoShown') === 'true';
 
 window.onload = function() {
@@ -2225,14 +2410,18 @@ window.onload = function() {
         showActivationPopup();
     } else {
         triggerAnimation();
-        if (showPromoPopup && !promoAlreadyShown) {
-            setTimeout(() => {
-                let popup = document.getElementById('promoPopup');
-                popup.style.display = 'flex';
-                popup.style.animation = 'slideDown 0.6s ease-out forwards';
-            }, 500);
-            sessionStorage.setItem('promoShown', 'true');
-        }
+       if (showPromoPopup && !promoAlreadyShown) {
+    setTimeout(() => {
+        let popup = document.getElementById('promoPopup');
+        popup.style.display = 'flex';
+        popup.style.animation = 'slideDown 0.6s ease-out forwards';
+
+        // ✅ خلي الخلفية الضبابية تشتغل
+        document.getElementById('overlay').style.display = 'block';
+    }, 500);
+    sessionStorage.setItem('promoShown', 'true');
+}
+
         loadExcelFiles().then(result => {
             if (result.success) {
                 console.log("تم تحميل البيانات بنجاح، جارٍ تحميل العناصر الجديدة...");
@@ -2435,7 +2624,14 @@ async function loadExcelFiles() {
             CHARGING: [],
             BUZZER: [],
             HEADPHONE: [],
-            FINGER: []
+            FINGER: [],
+            "FLAT LCD": [],
+            POWER: [],
+            LENS: [],
+            VOLUME: [],
+            SPEAKER: [],
+            "FLAT SPEAKER": []
+            
         };
 
         // تحميل البيانات من كل ورقة
@@ -2449,6 +2645,13 @@ async function loadExcelFiles() {
         database.BUZZER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BUZZER"] || {}, { defval: null });
         database.HEADPHONE = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HEADPHONE"] || {}, { defval: null });
         database.FINGER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["FINGER"] || {}, { defval: null });
+        database["FLAT LCD"] = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["FLAT LCD"] || {}, { defval: null });
+        database.POWER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["POWER"] || {}, { defval: null });
+        database.LENS = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LENS"] || {}, { defval: null });
+        database.VOLUME = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["VOLUME"] || {}, { defval: null });
+        database.SPEAKER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["SPEAKER"] || {}, { defval: null });
+        database["FLAT SPEAKER"] = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["FLAT SPEAKER"] || {}, { defval: null });
+
 
         // تصحيح البيانات
         Object.keys(database).forEach(category => {
@@ -2513,7 +2716,7 @@ async function loadNewItems() {
     const newItemsCount = document.querySelector(".new-items-count");
 
     modalContent.innerHTML = "";
-    const categories = ["LCD", "HUAWEI", "BATTERY", "HOUSING", "BACK", "CAMERA", "CHARGING", "BUZZER", "HEADPHONE", "FINGER"];
+    const categories = ["LCD", "HUAWEI", "BATTERY", "HOUSING", "BACK", "CAMERA", "CHARGING", "BUZZER", "HEADPHONE", "FINGER", "FLAT LCD", "POWER", "LNES", "VOLUME", "SPEAKER", "FLAT SPEAKER"];
     let newItems = [];
 
     categories.forEach(category => {
@@ -2572,6 +2775,15 @@ function getIconForCategory(category) {
         "BUZZER": "fas fa-bell",
         "HEADPHONE": "fas fa-volume-up",
         "FINGER": "fas fa-fingerprint",
+        "FLAT LCD": "fas fa-film",
+        "POWER": "fas fa-power-off",
+        "LENS": "fas fa-bullseye",
+        "VOLUME": "fas fa-sliders-h",
+        "SPEAKER": "fas fa-phone-volume",
+        "FLAT SPEAKER": "fas fa-phone-alt",
+        
+        
+        
         "UNKNOWN": "fas fa-question-circle"
     };
     return icons[category] || icons["UNKNOWN"];
