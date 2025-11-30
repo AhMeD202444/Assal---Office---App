@@ -2839,9 +2839,16 @@ function displayResults(results) {
     } else {
         let htmlContent = '';
         results.forEach(item => {
+
+            // 🔽 تعديل جزء الصورة بس
+            const normalizedCategory = currentCategory
+                .toLowerCase()
+                .replace(/\s+/g, '-'); // يحوّل الفراغات إلى -
+
             const imgSrc = currentCategory === "SIMILARITES" 
                 ? 'images/default.png'
-                : `images/${currentCategory.toLowerCase()}.png`;
+                : `images/${normalizedCategory}.png`;
+            // 🔼 نهاية التعديل
 
             htmlContent += `
                 <div class="result-card">
@@ -2860,6 +2867,7 @@ function displayResults(results) {
         toggleScrollToTopButton();
     });
 }
+
 
 // إخفاء الحاوية عند تفريغ حقل البحث
 function searchItems() {
