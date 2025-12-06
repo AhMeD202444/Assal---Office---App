@@ -1933,6 +1933,234 @@ body {
 }
 
 
+/* ===== Alert Popup: قالب إشعار عام ===== */
+
+#promoPopup.alert-shell {
+    /* مهم حتى يشتغل slideDown/slideUp الحالي */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%);
+
+    width: min(420px, 92vw);
+    padding: 16px 18px 14px;
+    border-radius: 18px;
+
+    display: none;               /* تنتحكم بيها من JS مثل قبل */
+    flex-direction: column;
+    gap: 12px;
+
+    z-index: 9999;
+    direction: rtl;
+    text-align: right;
+
+    /* ألوان عامة */
+    background:
+        radial-gradient(circle at top left, var(--alert-color-soft, rgba(34, 197, 94, 0.14)), transparent),
+        rgba(15, 23, 42, 0.98);
+    color: #e5e7eb;
+    backdrop-filter: blur(20px);
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.85),
+        0 0 0 1px rgba(148, 163, 184, 0.35);
+
+    font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* قيم افتراضية (info) – تتغير حسب الكلاس */
+    --alert-color: #22c55e;
+    --alert-color-soft: rgba(34, 197, 94, 0.16);
+    --alert-color-strong: #16a34a;
+}
+
+/* ثيم الخصم / العروض */
+#promoPopup.alert-sale {
+    --alert-color: #fb923c;
+    --alert-color-soft: rgba(251, 146, 60, 0.16);
+    --alert-color-strong: #f97316;
+}
+
+/* ثيم المناسبات / الأحداث */
+#promoPopup.alert-event {
+    --alert-color: #38bdf8;
+    --alert-color-soft: rgba(56, 189, 248, 0.18);
+    --alert-color-strong: #0ea5e9;
+}
+
+/* ثيم التنبيهات العامة */
+#promoPopup.alert-info {
+    --alert-color: #a855f7;
+    --alert-color-soft: rgba(168, 85, 247, 0.18);
+    --alert-color-strong: #7c3aed;
+}
+
+/* ===== البنية الداخلية ===== */
+
+.alert-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(15, 23, 42, 0.96);
+    border: 1px solid var(--alert-color);
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.9);
+}
+
+.alert-icon i {
+    font-size: 18px;
+    color: var(--alert-color-strong);
+}
+
+.alert-head-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.alert-kicker {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #9ca3af;
+}
+
+.alert-title {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.5;
+    font-weight: 700;
+    color: #f9fafb;
+}
+
+/* ===== النص الرئيسي ===== */
+
+.alert-body {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.alert-text {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #d1d5db;
+}
+
+/* شريط معلومات / ميتا */
+.alert-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+}
+
+.alert-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    font-size: 11px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    color: #9ca3af;
+}
+
+.alert-pill i {
+    font-size: 11px;
+    color: var(--alert-color);
+}
+
+/* ===== الفوتر / الأزرار ===== */
+
+.alert-footer {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.alert-secondary,
+.alert-primary {
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease,
+        border-color 0.18s ease;
+    font-family: inherit;
+}
+
+/* زر ثانوي */
+.alert-secondary {
+    background: transparent;
+    color: #e5e7eb;
+    border: 1px solid rgba(148, 163, 184, 0.7);
+}
+
+.alert-secondary:hover {
+    background: rgba(15, 23, 42, 0.96);
+    border-color: rgba(209, 213, 219, 0.9);
+}
+
+/* زر رئيسي */
+.alert-primary {
+    background: linear-gradient(135deg, var(--alert-color), var(--alert-color-strong));
+    color: #0b1120;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
+}
+
+.alert-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.7);
+}
+
+.alert-primary:active {
+    transform: scale(0.97);
+    box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.65);
+}
+
+/* ===== موبايل ===== */
+
+@media (max-width: 480px) {
+    #promoPopup.alert-shell {
+        width: min(100vw, 430px);
+        padding: 14px 12px 12px;
+        border-radius: 16px;
+    }
+
+    .alert-title {
+        font-size: 16px;
+    }
+
+    .alert-text {
+        font-size: 12px;
+    }
+
+    .alert-footer {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+}
+
+
+
     </style>
 </head>
 <body>
@@ -1964,25 +2192,54 @@ body {
  
  
  <!-- ✅ الطبقة الضبابية Overlay -->
+
+
+<!-- يبقى الـ overlay مثل ما هو -->
 <div id="overlay"></div>
 
-<div id="promoPopup">
-    <div class="promo-content">
-        <img id="promoImage" src="images/logo.png" alt="Discount Offer">
+<!-- قالب إشعار عام -->
+<div id="promoPopup" class="alert-shell alert-sale" dir="rtl">
+    <div class="alert-header">
+        <div class="alert-icon">
+            <!-- غيّر الأيقونة حسب نوع الإشعار -->
+            <i class="fas fa-tag"></i>
+        </div>
+        <div class="alert-head-text">
+            <span class="alert-kicker">عرض خاص لزبائنا</span>
+            <h1 class="alert-title">
+                خصم ١٥٪ على شاشات سامسونج الأصلية
+            </h1>
+        </div>
+    </div>
 
-        <!-- ✅ Badge صغير يطلع فوق العنوان (جديد) -->
-        <span class="promo-badge">عرض محدود لوقت قصير</span>
-
-        <h1 class="popup-title">🔥 عرض من مكتب عسل 🔥</h1>
-        <p class="promo-text">
-            الأسعار نزلناها الك،<br>
-            الحك قبل ما يخلص العرض!
+    <div class="alert-body">
+        <p class="alert-text">
+            العرض ساري لفترة محدودة على جميع الشاشات الأصلية
+            المختارة، داخل التطبيق وعبر مكتب عسل حصرا ولكل الشركات.
         </p>
 
-        <!-- زر رئيسي (CTA) -->
-        <button id="closeBtn" onclick="closePopup()">👌 شوف الأسعار</button>
+        <div class="alert-meta">
+            <span class="alert-pill">
+                <i class="fas fa-clock"></i>
+                ينتهي العرض خلال فترة قصيرة
+            </span>
+            <span class="alert-pill">
+                <i class="fas fa-store"></i>
+                جميع الفروع
+            </span>
+        </div>
+    </div>
+
+    <div class="alert-footer">
+        <button class="alert-secondary" onclick="closePopup()">
+            إغلاق
+        </button>
+        <button class="alert-primary" onclick="closePopup()">
+            شوف التفاصيل
+        </button>
     </div>
 </div>
+
 
 
     <div class="container">
