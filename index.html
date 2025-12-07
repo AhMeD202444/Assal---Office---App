@@ -2530,6 +2530,119 @@ body {
     }
 }
 
+/* 🎨 نافذة الخروج – تصميم عالمي مع غلاس وجراديانت */
+
+.swal2-popup.exit-popup {
+    background:
+        radial-gradient(circle at top left, rgba(67, 206, 162, 0.18), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.20), transparent 55%),
+        rgba(15, 23, 42, 0.98);  /* dark glassy مثل الإعلان */
+    border-radius: 22px;
+    width: min(420px, 92vw);
+    padding: 22px 20px 18px;
+    box-shadow: 0 26px 70px rgba(0, 0, 0, 0.9);
+    color: #e5e7eb;
+    font-family: 'Cairo', sans-serif !important;
+    text-align: center;
+}
+
+/* هيكل المحتوى الداخلي */
+.exit-shell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+/* الأيقونة الدائرية في الأعلى */
+.exit-icon {
+    width: 78px;
+    height: 78px;
+    border-radius: 999px;
+    background: radial-gradient(circle at top, #f97316, #b91c1c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+        0 0 24px rgba(248, 113, 113, 0.9),
+        0 0 40px rgba(15, 23, 42, 1);
+}
+
+.exit-icon i {
+    font-size: 34px;
+    color: #fff7ed;
+}
+
+/* العنوان والنص */
+.exit-title {
+    margin: 6px 0 0 0;
+    font-size: 20px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.exit-text {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: #e5e7eb;
+    max-width: 290px;
+    line-height: 1.7;
+}
+
+/* أزرار الخروج / الرجوع */
+.exit-confirm,
+.exit-cancel {
+    border-radius: 999px !important;
+    padding: 8px 24px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.85);
+    border: none !important;
+}
+
+/* زر الخروج */
+.exit-confirm {
+    background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+    color: #fef2f2 !important;
+}
+
+.exit-confirm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(185, 28, 28, 0.9);
+}
+
+/* زر الرجوع */
+.exit-cancel {
+    background: rgba(15, 23, 42, 0.94) !important;
+    color: #e5e7eb !important;
+    border: 1px solid rgba(148, 163, 184, 0.6) !important;
+}
+
+.exit-cancel:hover {
+    background: rgba(30, 41, 59, 0.96) !important;
+}
+
+/* موبايل */
+@media (max-width: 480px) {
+    .swal2-popup.exit-popup {
+        width: min(95vw, 380px);
+        padding: 18px 14px 14px;
+        border-radius: 20px;
+    }
+
+    .exit-title {
+        font-size: 18px;
+    }
+
+    .exit-text {
+        font-size: 12px;
+        max-width: 100%;
+    }
+}
+
+
 
 
 
@@ -3659,33 +3772,45 @@ document.addEventListener("DOMContentLoaded", toggleScrollToTopButton);
 
 async function confirmExit() {
     const result = await Swal.fire({
-        title: 'تأكيد الخروج',
-        html: '<p style="color: #dcdcdc;">هل أنت متأكد أنك تريد الخروج؟</p>',
-        iconHtml: '<i class="fas fa-sign-out-alt"></i>',
+        html: `
+            <div class="exit-shell">
+                <div class="exit-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <h2 class="exit-title">تأكيد الخروج</h2>
+                <p class="exit-text">
+                    مكتب عسل يتمنّى لك يومًا جميلًا.
+هل أنت متأكّد من الخروج؟ 
+                </p>
+            </div>
+        `,
         showCancelButton: true,
-        confirmButtonText: 'نعم', // نص مختصر
-        cancelButtonText: 'لا', // نص مختصر
-        backdrop: false, // تثبيت الواجهة
+        confirmButtonText: 'نعم، خروج',
+        cancelButtonText: 'رجوع',
+        focusCancel: true,
+        backdrop: 'rgba(2, 6, 23, 0.82)',            // ✅ طبقة ظلال ناعمة خلف النافذة
+        allowOutsideClick: false,
+        allowEscapeKey: true,
         customClass: {
-            popup: 'swal2-popup',
-            title: 'swal2-title',
-            htmlContainer: 'swal2-html-container',
-            confirmButton: 'swal2-confirm',
-            cancelButton: 'swal2-cancel'
-        },
-        showClass: {
-            popup: 'animate__animated animate__fadeInDown'
+            popup: 'swal2-popup exit-popup animate__animated animate__zoomIn',
+            confirmButton: 'exit-confirm',
+            cancelButton: 'exit-cancel'
         },
         hideClass: {
-            popup: 'animate__animated animate__fadeOutUp'
+            popup: 'animate__animated animate__zoomOut'
+        },
+        didOpen: () => {
+            const popup = document.querySelector('.swal2-popup.exit-popup');
+            if (popup) popup.style.zIndex = '10000';
         }
     });
 
     if (result.isConfirmed) {
-        // إغلاق التطبيق
+        // إغلاق التطبيق / التبويب
         window.close();
     }
 }
+
 
 
 function openToolsPage() {
