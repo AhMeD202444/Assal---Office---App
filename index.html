@@ -1933,44 +1933,38 @@ body {
 }
 
 
-/* ===== Alert Popup: قالب إشعار عام ===== */
 
+
+/* ===== Alert Popup: قالب إشعار عام (تعديل العرض وتوسيط المحتوى) ===== */
 #promoPopup.alert-shell {
-    /* مهم حتى يشتغل slideDown/slideUp الحالي */
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -100%);
+    transform: translate(-50%, -100%);  /* حتى تشتغل أنيميشن slideDown/slideUp */
 
-    width: min(420px, 92vw);
-    padding: 16px 18px 14px;
+    /* 🔹 عرض أضيق وأرتب */
+    width: min(360px, 90vw);   /* كان 420px, هسه أصغر */
+    padding: 18px 16px 16px;
     border-radius: 18px;
 
-    display: none;               /* تنتحكم بيها من JS مثل قبل */
+    display: none;
     flex-direction: column;
-    gap: 12px;
+    align-items: center;       /* توسيط كل المحتوى أفقياً */
+    gap: 14px;
 
     z-index: 9999;
     direction: rtl;
-    text-align: right;
 
-    /* ألوان عامة */
+    /* نخلي كل النصوص بالنص */
+    text-align: center;
+
     background:
         radial-gradient(circle at top left, var(--alert-color-soft, rgba(34, 197, 94, 0.14)), transparent),
         rgba(15, 23, 42, 0.98);
     color: #e5e7eb;
     backdrop-filter: blur(20px);
-    box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.85),
-        0 0 0 1px rgba(148, 163, 184, 0.35);
-
-    font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-
-    /* قيم افتراضية (info) – تتغير حسب الكلاس */
-    --alert-color: #22c55e;
-    --alert-color-soft: rgba(34, 197, 94, 0.16);
-    --alert-color-strong: #16a34a;
 }
+
 
 /* ثيم الخصم / العروض */
 #promoPopup.alert-sale {
@@ -1995,11 +1989,33 @@ body {
 
 /* ===== البنية الداخلية ===== */
 
+/* الهيدر مال الإعلان */
 .alert-header {
     display: flex;
-    align-items: center;
+    flex-direction: column;   /* كان صف، هسه فوق/جوه */
+    align-items: center;      /* أيقونة + نص بالنص */
     gap: 10px;
 }
+
+/* النص اللي ويا العنوان */
+.alert-head-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    align-items: center;      /* توسيط داخلي */
+    text-align: center;
+}
+
+/* العنوان */
+.alert-title {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.6;
+    font-weight: 700;
+    color: #f9fafb;
+}
+
 
 .alert-icon {
     width: 42px;
@@ -2019,12 +2035,7 @@ body {
     color: var(--alert-color-strong);
 }
 
-.alert-head-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-}
+
 
 .alert-kicker {
     font-size: 11px;
@@ -2033,13 +2044,7 @@ body {
     color: #9ca3af;
 }
 
-.alert-title {
-    margin: 0;
-    font-size: 17px;
-    line-height: 1.5;
-    font-weight: 700;
-    color: #f9fafb;
-}
+
 
 /* ===== النص الرئيسي ===== */
 
@@ -2061,8 +2066,10 @@ body {
 .alert-meta {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;   /* تصير بالنص */
     gap: 6px 8px;
 }
+
 
 .alert-pill {
     display: inline-flex;
@@ -2083,17 +2090,22 @@ body {
 
 /* ===== الفوتر / الأزرار ===== */
 
+
+
 .alert-footer {
-    margin-top: 10px;
+    margin-top: 12px;
     display: flex;
-    justify-content: flex-end;
-    gap: 8px;
+    justify-content: center;   /* كان flex-end */
+    gap: 10px;
+    flex-wrap: wrap;           /* لو زرّين أو ثلاثة يبقون مرتبين */
+    width: 100%;
 }
 
+/* نخلي الأزرار نفس الحجم تقريبا وتكون مرتبة بالنص */
 .alert-secondary,
 .alert-primary {
     border-radius: 999px;
-    padding: 7px 14px;
+    padding: 8px 16px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -2105,7 +2117,11 @@ body {
         background 0.18s ease,
         border-color 0.18s ease;
     font-family: inherit;
+    text-align: center;
+    flex: 1 1 auto;      /* يخلي الزرّين ياخذون مساحة حلوة متساوية */
+    max-width: 140px;    /* حتى ما يطلعن عريضة كلش */
 }
+
 
 /* زر ثانوي */
 .alert-secondary {
@@ -2140,8 +2156,8 @@ body {
 
 @media (max-width: 480px) {
     #promoPopup.alert-shell {
-        width: min(100vw, 430px);
-        padding: 14px 12px 12px;
+        width: min(92vw, 340px);   /* أضيق شوي للموبايل */
+        padding: 14px 14px 12px;
         border-radius: 16px;
     }
 
@@ -2154,8 +2170,7 @@ body {
     }
 
     .alert-footer {
-        flex-direction: row;
-        justify-content: flex-end;
+        justify-content: center;   /* حتى بالموبايل تبقى الأزرار بالنص */
     }
 }
 
