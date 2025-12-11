@@ -1409,6 +1409,22 @@ h1 {
     box-shadow: 0 4px 10px rgba(70, 130, 180, 0.6);
 }
 
+
+/* السعر القديم (ينشطب بالأحمر) */
+.old-price {
+    color: #ffb3b3;
+    text-decoration: line-through;
+    opacity: 0.9;
+    margin-inline-start: 5px;
+}
+
+/* السعر الجديد (عرض خاص) */
+.new-price {
+    font-weight: 700;
+    margin-inline-end: 5px;
+}
+
+
 /* Media Queries */
 @media (max-width: 480px) { /* موبايل صغير */
     .result-card {
@@ -3171,6 +3187,107 @@ body {
 }
 
 
+/* يخلي مستطيل السعر القديم والجديد بصف واحد */
+.price-row {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* مستطيل السعر القديم يستخدم نفس ستايل p تماماً */
+.old-price-pill {
+    margin: 0; /* لا نريد فراغ إضافي */
+}
+
+/* الشطب على السعر القديم – أحمر غامق وبازر */
+.old-price-text {
+    color: #ffe5e5;
+    text-decoration: line-through;
+    text-decoration-color: #8b0000;  /* أحمر غامق قوي */
+    text-decoration-thickness: 3px;  /* سميك */
+    text-underline-offset: 4px;
+}
+
+
+/* مستطيل السعر الجديد – نفس الأبعاد تقريباً لكن أحمر غامق وخط أبيض */
+.new-price-pill {
+    margin: 0;
+    font-size: clamp(16px, 4.5vw, 22px);
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    background-color: #8b0000;  /* أحمر غامق */
+    color: #ffffff;             /* خط أبيض قوي */
+    min-width: 120px;
+    text-align: center;
+
+    position: relative;         /* ضروري للأنيميشن */
+    overflow: hidden;
+}
+
+/* النصين داخل البادج الأحمر ("عرض خاص" / السعر) */
+.new-price-pill .new-price-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    opacity: 0;
+}
+
+/* "عرض خاص" – يرمش أكثر من مرة وبشكل سريع بالبداية */
+.new-price-pill .new-price-label {
+    animation: blinkOffer 3s infinite;
+}
+
+/* السعر – يظهر بعد الرمشات ويبقى باقي الفترة */
+.new-price-pill .new-price-value {
+    animation: showPrice 3s infinite;
+}
+
+/* يرَمّش "عرض خاص" أكثر من مرة بسرعة ثم يختفي */
+@keyframes blinkOffer {
+    0%   { opacity: 1; }
+    10%  { opacity: 0; }
+    20%  { opacity: 1; }
+    30%  { opacity: 0; }
+    40%  { opacity: 1; }
+    50%  { opacity: 0; }  /* نهاية الرمشات السريعة */
+    60%  { opacity: 0; }
+    100% { opacity: 0; }  /* باقي الدورة مخفي */
+}
+
+/* السعر: مخفي بالبداية، يظهر بعد الرمشات ويبقى ظاهر */
+@keyframes showPrice {
+    0%   { opacity: 0; }
+    55%  { opacity: 0; }
+    65%  { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+
+.new-price-pill {
+    margin: 0;
+    font-size: clamp(16px, 4.5vw, 22px);
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+
+    /* هنا التعديل المهم */
+    background: #8b0000 !important;   /* أحمر غامق صريح، يقتل الغراديانت */
+    color: #ffffff;
+
+    min-width: 120px;
+    text-align: center;
+
+    position: relative;
+    overflow: hidden;
+}
 
 
 
@@ -4226,7 +4343,7 @@ function filterCategory(category) {
             return str.replace(/\s+/g, '').toLowerCase();
         }
 
-        
+
 function displayResults(results) {
     const resultsContainer = document.getElementById("results");
     resultsContainer.innerHTML = '';
@@ -4241,24 +4358,58 @@ function displayResults(results) {
         let htmlContent = '';
         results.forEach(item => {
 
-            // 🔽 تعديل جزء الصورة بس
+            // جزء الصورة كما هو
             const normalizedCategory = currentCategory
                 .toLowerCase()
-                .replace(/\s+/g, '-'); // يحوّل الفراغات إلى -
+                .replace(/\s+/g, '-');
 
-            const imgSrc = currentCategory === "SIMILARITES" 
+            const imgSrc = currentCategory === "SIMILARITES"
                 ? 'images/default.png'
                 : `images/${normalizedCategory}.png`;
-            // 🔼 نهاية التعديل
+
+            // منطق الأسعار
+            const originalPriceRaw  = item["Price"];
+            const discountPriceRaw  = item["Discount Price"]; // عمود جديد في ملف الإكسل
+
+            let priceHtml = '<p>غير متوفر</p>';
+
+            if (originalPriceRaw) {
+                const originalFormatted = originalPriceRaw
+                    .toString()
+                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                if (discountPriceRaw) {
+                    const discountFormatted = discountPriceRaw
+                        .toString()
+                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+                    // 👉 عند وجود تخفيض: مستطيل السعر القديم + مستطيل السعر الجديد
+                    priceHtml = `
+                        <div class="price-row">
+                            <p class="old-price-pill">
+                                <span class="old-price-text">${originalFormatted} د.ع</span>
+                            </p>
+                            <p class="new-price-pill">
+                                <span class="new-price-text new-price-label">عرض خاص</span>
+                                <span class="new-price-text new-price-value">${discountFormatted} د.ع</span>
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    // 👉 بدون تخفيض: نفس البادج القديم
+                    priceHtml = `<p>${originalFormatted} د.ع</p>`;
+                }
+            }
 
             htmlContent += `
                 <div class="result-card">
                     <img src="${imgSrc}" alt="Item Image">
                     <h4>${item["Item Name"] || item["Item"]}</h4>
-                    ${item["Price"] ? `<p>${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ع</p>` : '<p>غير متوفر</p>'}
+                    ${priceHtml}
                 </div>
             `;
         });
+
         resultsContainer.innerHTML = htmlContent;
     }
 
@@ -4268,6 +4419,13 @@ function displayResults(results) {
         toggleScrollToTopButton();
     });
 }
+
+
+
+
+
+
+
 
 
 // إخفاء الحاوية عند تفريغ حقل البحث
