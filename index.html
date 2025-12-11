@@ -4450,22 +4450,38 @@ function searchItems() {
         return;
     }
 
-    if (!currentCategory) {
-        resultsContainer.style.display = 'none';
-        Swal.fire({
-            title: 'الصنف غير محدد',
-            text: 'يرجى اختيار صنف من القائمة قبل البدء في البحث.',
-            iconHtml: '<i class="fas fa-info-circle"></i>',
-            confirmButtonText: 'موافق',
-            customClass: {
-                popup: 'swal2-popup',
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        return;
-    }
+if (!currentCategory) {
+    resultsContainer.style.display = 'none';
+
+    Swal.fire({
+        html: `
+            <div class="exit-shell">
+                <div class="exit-icon">
+                    <i class="fas fa-list-alt"></i>
+                </div>
+                <h2 class="exit-title">اختيار الصنف أولًا</h2>
+                <p class="exit-text">
+                    قبل ما نبحث، لازم تختار نوع القطعة من الشريط العلوي
+                    (شاشات، بطاريات، شواصي، ...).
+                </p>
+            </div>
+        `,
+        confirmButtonText: 'تمام، راح أختار الصنف',
+        backdrop: 'rgba(2, 6, 23, 0.82)',
+        allowOutsideClick: true,
+        allowEscapeKey: true,
+        customClass: {
+            popup: 'swal2-popup exit-popup animate__animated animate__zoomIn',
+            confirmButton: 'exit-confirm'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__zoomOut'
+        }
+    });
+
+    return;
+}
+
 
     if (!database || !database[currentCategory] || database[currentCategory].length === 0) {
         resultsContainer.style.display = 'none';
