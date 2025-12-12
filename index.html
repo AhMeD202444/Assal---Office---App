@@ -3352,6 +3352,219 @@ body {
 }
 
 
+/* زر العروض بالهيدر */
+.header-buttons .offers-btn{
+    background: linear-gradient(135deg, rgba(250,204,21,.95), rgba(249,115,22,.95));
+    color:#111827;
+}
+.header-buttons .offers-btn:hover{
+    transform: scale(1.06);
+    filter: brightness(1.05);
+}
+.header-buttons .offers-btn:active{
+    transform: scale(0.95);
+}
+
+/* نافذة العروض */
+#offersModal{
+    position: fixed;
+    top: 50px;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 20px);
+    max-width: 980px;
+    background:
+        radial-gradient(circle at top left, rgba(250,204,21,.12), transparent 45%),
+        radial-gradient(circle at bottom right, rgba(249,115,22,.10), transparent 55%),
+        rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(55, 65, 81, 0.75);
+    border-radius: 18px;
+    padding: 14px;
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.75);
+}
+
+/* زر الإغلاق (نسخة خاصة للعروض) */
+#offersModal .close-modal-btn{
+    position:absolute;
+    top: 10px;
+    inset-inline-end: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: none;
+    background: rgba(17,24,39,.85);
+    color:#e5e7eb;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow: 0 10px 25px rgba(0,0,0,.6);
+    transition: transform .18s ease, background .18s ease;
+}
+#offersModal .close-modal-btn:hover{
+    transform: scale(1.08);
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+#offersModal .close-modal-btn:active{ transform: scale(.92); }
+
+/* رأس النافذة */
+#offersModal .offers-head{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 4px 0;
+}
+#offersModal h2{
+    margin:0;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: .02em;
+    background: linear-gradient(135deg, #facc15, #fb923c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+#offersModal .offers-chip{
+    font-family: 'Cairo', sans-serif;
+    font-size: 12px;
+    color: #111827;
+    background: rgba(250,204,21,.95);
+    padding: 6px 10px;
+    border-radius: 999px;
+    box-shadow: 0 10px 24px rgba(0,0,0,.35);
+    white-space: nowrap;
+}
+
+/* شريط البحث */
+#offersModal .offers-toolbar{
+    position: relative;
+    width: 100%;
+    padding: 0 4px;
+}
+#offersModal .offers-toolbar i{
+    position:absolute;
+    inset-inline-end: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(229,231,235,.7);
+    pointer-events:none;
+}
+#offersSearchInput{
+    width: 100%;
+    padding: 12px 44px 12px 12px;
+    border-radius: 14px;
+    background: rgba(17,24,39,.72);
+    border: 1px solid rgba(55,65,81,.85);
+    color: #fff;
+    outline: none;
+    font-family: 'Cairo', sans-serif;
+    transition: box-shadow .2s ease, border-color .2s ease;
+}
+#offersSearchInput:focus{
+    border-color: rgba(250,204,21,.85);
+    box-shadow: 0 0 0 4px rgba(250,204,21,.12);
+}
+
+/* محتوى العروض (Grid) */
+#offersModal .offers-content{
+    width: 100%;
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px;
+    border-radius: 16px;
+    background: rgba(15,23,42,.55);
+    border: 1px solid rgba(31,41,55,.75);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+#offersModal .offers-content::-webkit-scrollbar{ display:none; }
+
+@media (min-width: 640px){
+    #offersModal .offers-content{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px){
+    #offersModal{ width: min(1200px, 92vw); }
+    #offersModal .offers-content{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* كارت العرض */
+.offer-card{
+    border-radius: 16px;
+    padding: 12px;
+    background:
+        radial-gradient(circle at top left, rgba(96,165,250,.16), rgba(15,23,42,.92));
+    border: 1px solid rgba(55,65,81,.85);
+    box-shadow: 0 14px 34px rgba(0,0,0,.55);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+.offer-card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 18px 44px rgba(0,0,0,.65);
+}
+
+.offer-top{
+    display:flex;
+    align-items:flex-start;
+    gap: 10px;
+}
+.offer-icon{
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: rgba(250,204,21,.08);
+    border: 1px solid rgba(250,204,21,.20);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.offer-icon i{ font-size: 18px; color: #facc15; }
+
+.offer-title{
+    font-size: 15px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.35;
+    margin: 0 0 6px 0;
+}
+.offer-meta{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.offer-tag{
+    font-size: 12px;
+    color: rgba(229,231,235,.9);
+    background: rgba(31,41,55,.75);
+    border: 1px solid rgba(55,65,81,.75);
+    padding: 4px 8px;
+    border-radius: 999px;
+}
+.offer-save{
+    font-size: 12px;
+    color: #111827;
+    background: rgba(250,204,21,.95);
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-weight: 800;
+}
+
+/* جزء الأسعار داخل الكارت (يعتمد على price-row/old-price-pill/new-price-pill الموجودة عندك) */
+.offer-prices{ margin-top: 10px; }
+.offer-prices .price-row{ justify-content: flex-start; }
+
+
+
 
 
     </style>
@@ -3374,12 +3587,32 @@ body {
     <div class="modal-content"></div>
 </div>
 
+<!-- نافذة العروض -->
+<div id="offersModal" dir="rtl">
+    <button class="close-modal-btn" onclick="closeOffersModal()"><i class="fas fa-times"></i></button>
+
+    <div class="offers-head">
+        <h2>العروض الجديدة</h2>
+        <div class="offers-chip" id="offersCountChip">0 عرض</div>
+    </div>
+
+    <div class="offers-toolbar">
+        <i class="fas fa-search"></i>
+        <input id="offersSearchInput" type="text" placeholder="ابحث داخل العروض...">
+    </div>
+
+    <div class="offers-content"></div>
+</div>
+
+
  
  <header class="header">
     <div class="header-title">مكتب عسل</div>
     <div class="header-buttons">
         <button class="header-btn refresh-btn" onclick="refreshData()" title="تحديث البيانات">تحديث</button>
         <button class="header-btn exit-btn" onclick="confirmExit()" title="خروج">خروج</button>
+        <button class="header-btn offers-btn" onclick="openOffersModal()" title="عروض">عروض</button>
+
     </div>
 </header>
  
@@ -3776,6 +4009,176 @@ function closeNewItemsModal() {
         if (overlay) overlay.style.display = "none";
     }
 }
+
+let isOffersModalOpen = false;
+let offersCache = [];
+
+function openOffersModal(){
+    try{
+        if (isOffersModalOpen) return;
+
+        const modal = document.getElementById("offersModal");
+        const overlay = document.getElementById("overlay"); // نفس overlay مالك
+
+        if (overlay) overlay.style.display = "block";
+
+        modal.style.display = "flex";
+        modal.style.animation = "slideDownModal 0.5s ease-out forwards";
+
+        isOffersModalOpen = true;
+        loadOffers();
+    }catch(err){
+        console.error("Error in openOffersModal:", err);
+    }
+}
+
+function closeOffersModal(){
+    try{
+        const modal   = document.getElementById("offersModal");
+        const overlay = document.getElementById("overlay");
+        const promo   = document.getElementById("promoPopup");
+        const newItemsModal = document.getElementById("newItemsModal");
+
+        modal.style.animation = "slideUpModal 0.5s ease-in forwards";
+
+        setTimeout(() => {
+            modal.style.display = "none";
+            isOffersModalOpen = false;
+
+            if (overlay) {
+                const isPromoOpen = promo && promo.style.display === "flex";
+                const isNewOpen = newItemsModal && newItemsModal.style.display === "flex";
+                if (!isPromoOpen && !isNewOpen) overlay.style.display = "none";
+            }
+        }, 500);
+    }catch(err){
+        console.error("Error in closeOffersModal:", err);
+        isOffersModalOpen = false;
+        const overlay = document.getElementById("overlay");
+        if (overlay) overlay.style.display = "none";
+    }
+}
+
+function loadOffers(){
+    const modal = document.getElementById("offersModal");
+    const container = modal.querySelector(".offers-content");
+    const chip = document.getElementById("offersCountChip");
+
+    container.innerHTML = "";
+
+    // نفس فكرة اللستة مالتك (وأضفت LENS + LNES حتى ما نضيع شي)
+    const categories = ["LCD","HUAWEI","BATTERY","HOUSING","BACK","CAMERA","CHARGING","BUZZER","HEADPHONE","FINGER","FLAT LCD","POWER","LENS","LNES","VOLUME","SPEAKER","FLAT SPEAKER"];
+
+    let offers = [];
+
+    categories.forEach(category => {
+        if (!database[category]) return;
+
+        database[category].forEach(item => {
+            const originalPriceRaw = item["Price"];
+            const discountPriceRaw = item["Discount Price"];
+
+            if (!originalPriceRaw || !discountPriceRaw) return;
+
+            const pNum = parseFloat(String(originalPriceRaw).replace(/,/g,'').trim());
+            const dNum = parseFloat(String(discountPriceRaw).replace(/,/g,'').trim());
+            if (isNaN(pNum) || isNaN(dNum)) return;
+
+            const saving = Math.max(0, pNum - dNum);
+            offers.push({ item, category, saving });
+        });
+    });
+
+    // رتب من الأعلى توفيراً
+    offers.sort((a,b) => (b.saving - a.saving));
+
+    offersCache = offers;
+
+    chip.textContent = `${offers.length} عرض`;
+
+    if (offers.length === 0){
+        container.innerHTML = `
+            <div style="padding:18px;text-align:center;color:#e5e7eb;font-family:'Cairo',sans-serif;">
+                حالياً ماكو عروض مضافة 🙃
+            </div>
+        `;
+        return;
+    }
+
+    renderOffers(offers);
+}
+
+function renderOffers(list){
+    const modal = document.getElementById("offersModal");
+    const container = modal.querySelector(".offers-content");
+
+    let html = "";
+
+    list.forEach(({item, category, saving}) => {
+        const name = item["Item Name"] || item["Item"] || "بدون اسم";
+
+        // نفس تنسيق عرض الأسعار عندك بـ displayResults :contentReference[oaicite:4]{index=4}
+        const originalFormatted = item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        const discountFormatted = item["Discount Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+        const savingFormatted = saving.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+        const iconClass = (typeof getCategoryIcon === "function") ? getCategoryIcon(category) : "fas fa-tag";
+
+        const priceHtml = `
+            <div class="price-row">
+                <p class="old-price-pill">
+                    <span class="old-price-text">${originalFormatted} د.ع</span>
+                </p>
+                <p class="new-price-pill">
+                    <span class="new-price-text new-price-label">عرض خاص</span>
+                    <span class="new-price-text new-price-value">${discountFormatted} د.ع</span>
+                </p>
+            </div>
+        `;
+
+        html += `
+            <div class="offer-card">
+                <div class="offer-top">
+                    <div class="offer-icon"><i class="${iconClass}"></i></div>
+                    <div style="flex:1;min-width:0">
+                        <div class="offer-title">${name}</div>
+                        <div class="offer-meta">
+                            <span class="offer-tag">${category}</span>
+                            ${saving > 0 ? `<span class="offer-save">وفر ${savingFormatted} د.ع</span>` : ``}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="offer-prices">
+                    ${priceHtml}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+/* بحث داخل العروض */
+document.addEventListener("DOMContentLoaded", () => {
+    const input = document.getElementById("offersSearchInput");
+    if (!input) return;
+
+    input.addEventListener("input", () => {
+        const q = input.value.trim().toLowerCase();
+        const filtered = offersCache.filter(x => {
+            const name = (x.item["Item Name"] || x.item["Item"] || "").toString().toLowerCase();
+            return name.includes(q);
+        });
+        renderOffers(filtered);
+    });
+
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") e.preventDefault();
+    });
+});
+
 
 
 
