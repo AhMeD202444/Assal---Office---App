@@ -3564,6 +3564,159 @@ body {
 .offer-prices .price-row{ justify-content: flex-start; }
 
 
+/* ✅ مستطيل السعر السابق فقط (بدون أي نص إضافي) */
+.old-price-pill{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px 14px !important;
+  border-radius: 14px !important;
+
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(239,68,68,.22) !important;
+  box-shadow: 0 10px 26px rgba(0,0,0,.30) !important;
+}
+
+/* تخلي الرقم مشطوب بشكل أنيق */
+.old-price-text{
+  font-weight: 1000 !important;
+  color: rgba(255,255,255,.90) !important;
+  text-decoration: line-through !important;
+  text-decoration-color: rgba(239,68,68,.95) !important;
+  text-decoration-thickness: 3px !important;
+  text-underline-offset: 4px !important;
+}
+
+/* ==============================
+   OFFER CARD - NEW CLEAN LAYOUT
+   Desktop + Mobile (Override)
+   Paste at END of CSS
+============================== */
+
+/* الكارت: مسافات وترتيب أوضح */
+.offer-card{
+  padding: 14px !important;
+}
+
+/* الجزء العلوي يصير “صف مرتب”: أيقونة + تفاصيل */
+.offer-top{
+  display: grid !important;
+  grid-template-columns: 52px 1fr !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+/* الأيقونة تثبت */
+.offer-icon{
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 16px !important;
+}
+
+/* العنوان يصير أوضح وما يطوّل */
+.offer-title{
+  margin: 0 0 8px 0 !important;
+  line-height: 1.35 !important;
+
+  /* سطرين كحد أقصى (حتى يبقى الكارت مرتب) */
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+/* سطر الميتا (التصنيف + وفر) ترتيب ثابت */
+.offer-meta{
+  justify-content: flex-start !important;
+  gap: 8px !important;
+}
+.offer-save{
+  margin-inline-start: auto; /* يخلي “وفر” يروح للطرف بدون توسيط */
+}
+
+/* قسم الأسعار يصير مثل Footer داخل الكارت */
+.offer-prices{
+  margin-top: 12px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+}
+
+/* صف السعرين: Grid ثابت */
+.price-row{
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  align-items: stretch !important;
+  justify-content: unset !important;
+}
+
+/* البادجات تاخذ عرضها بالكامل */
+.old-price-pill,
+.new-price-pill{
+  width: 100% !important;
+  min-width: 0 !important; /* يلغي min-width 120px إذا مأثر */
+}
+
+/* بالموبايل: نرتّبها عمودي حتى ما ينخنق المحتوى */
+@media (max-width: 520px){
+  .offer-top{
+    grid-template-columns: 44px 1fr !important;
+    align-items: start !important;
+  }
+  .offer-icon{
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 14px !important;
+  }
+
+  .price-row{
+    grid-template-columns: 1fr !important; /* السعرين تحت بعض */
+    gap: 8px !important;
+  }
+
+  .offer-title{
+    -webkit-line-clamp: 3 !important; /* نخليه 3 أسطر بالموبايل */
+  }
+
+  .offer-save{
+    margin-inline-start: 0; /* لا يروح بعيد بالموبايل */
+  }
+}
+
+
+/* داخل نافذة العروض فقط: نفس أبعاد مستطيل السعرين */
+#offersModal .old-price-pill,
+#offersModal .new-price-pill{
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 12px 14px !important;
+  border-radius: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  min-height: 44px !important; /* نفس الارتفاع دائماً */
+}
+
+/* X داخل نافذة العروض: أعلى اليمين + أحمر غامق */
+#offersModal .close-modal-btn{
+  top: 12px !important;
+  right: 12px !important;
+  left: auto !important;
+
+  inset-inline-end: auto !important;   /* يلغي RTL اللي يوديه يسار */
+  inset-inline-start: auto !important;
+
+  background: #6b0000 !important;
+  color: #fff !important;
+}
+#offersModal .close-modal-btn:hover{
+  background: #8b0000 !important;
+}
+
+
+
+
 
 
 
