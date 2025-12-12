@@ -3304,29 +3304,30 @@ body {
         transform: translateY(2px); /* هم تقدر تخليها 2px */
     }
 
-    /* ⬇️ وهنا الأهم: النتائج اللي بيها سعر واحد فقط (بدون تخفيض) */
-    .result-card > p {
-        position: relative;
-        top: 2px;  /* نفس النغزة لتحت حتى يتوحد الشكل */
+}
+
+
+        /* ✅ ضبط البادج اللي فيها "سعر واحد فقط" (بدون تخفيض) */
+
+/* هذا يمسك أي p جوّه .result-card ومو هو البادج القديم ولا الجديد */
+.result-card p:not(.old-price-pill):not(.new-price-pill) {
+    display: flex !important;
+    align-items: center !important;    /* سنترة عمودي */
+    justify-content: center !important;/* سنترة أفقي */
+    line-height: 1.2 !important;       /* يقلل إحساس إنه طالع لفوك */
+}
+
+/* لو تريده مضبوط أكثر على الموبايل */
+@media (max-width: 768px) {
+    .result-card p:not(.old-price-pill):not(.new-price-pill) {
+        padding-top: 10px !important;
+        padding-bottom: 8px !important;
     }
 }
 
 
-/* ✅ توسيط السعر عمودياً لما يكون سعر واحد داخل البادج */
-.result-card > p {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1.2;        /* يقلل الإحساس إنّه طالع لفوك */
-}
 
-/* 🔍 ضبط أدق للموبايل لأن المشكلة باينة هناك أكثر */
-@media (max-width: 480px) {
-    .result-card > p {
-        padding-top: 3px;    /* ينزل النص شوي بصرياً */
-        padding-bottom: 7px; /* نخلي التوب/بوتم متقاربين */
-    }
-}
+
 
 
 
