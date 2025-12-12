@@ -3290,33 +3290,66 @@ body {
 }
 
 
-/* ✅ توحيد أبعاد كل بادجات السعر (سعر واحد / قديم / جديد) */
-.result-card > p,
+/* تعديل خفيف لمحاذاة السعر عمودياً داخل البادجات على الموبايل فقط */
+@media (max-width: 768px) {
+
+    /* ⬇️ نزّل السعر القديم داخل صف التخفيض */
+    .old-price-text {
+        position: relative;
+        top: 2px;   /* تقدر تخليها 2px إذا بعده عالي */
+    }
+
+    /* ⬇️ نزّل النص داخل البادج الأحمر (عرض خاص / السعر) */
+    .new-price-pill .new-price-text {
+        transform: translateY(2px); /* هم تقدر تخليها 2px */
+    }
+
+}
+
+/* ✅ ضبط البادج اللي فيها "سعر واحد فقط" (بدون تخفيض) */
+
+/* هذا يمسك أي p جوّه .result-card ومو هو البادج القديم ولا الجديد */
+.result-card p:not(.old-price-pill):not(.new-price-pill) {
+    display: flex !important;
+    align-items: center !important;    /* سنترة عمودي */
+    justify-content: center !important;/* سنترة أفقي */
+    line-height: 1.2 !important;       /* يقلل إحساس إنه طالع لفوك */
+}
+
+/* لو تريده مضبوط أكثر على الموبايل */
+@media (max-width: 768px) {
+    .result-card p:not(.old-price-pill):not(.new-price-pill) {
+        padding-top: 10px !important;
+        padding-bottom: 8px !important;
+    }
+}
+
+
+/* 🔁 توحيد أبعاد كل بادجات السعر (سعر واحد / قديم / جديد) */
+.result-card p,
 .price-row .old-price-pill,
 .price-row .new-price-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
+    line-height: 1.2;
 
-    font-size: clamp(16px, 4.5vw, 22px);
+    /* نفس الحشوة ونفس شكل المستطيل للجميع */
     padding: 8px 18px;
     border-radius: 8px;
-    min-height: 42px;  /* إذا تحسها قصيرة شوي خَلّيها 44 */
+    min-height: 40px;
+    box-sizing: border-box;
 }
 
-/* 🎯 تعديل بصري: ننزّل نص السعر في البادج اللي بيها "سعر واحد فقط" */
-.result-card > p {
-    transform: translateY(2px);
-}
-
-/* على الموبايل ننزّله شعرة زيادة لأن المشكلة تطلع هناك أكثر */
-@media (max-width: 768px) {
-    .result-card > p {
-        transform: translateY(3px);
+/* 📴 موبايل – نفس الأبعاد بس مصغّرة للجميع همين */
+@media (max-width: 480px) {
+    .result-card p,
+    .price-row .old-price-pill,
+    .price-row .new-price-pill {
+        padding: 6px 15px;
+        min-height: 36px;
     }
 }
-
 
 
 
