@@ -3306,16 +3306,19 @@ body {
 
 }
 
-
-        /* ✅ ضبط البادج اللي فيها "سعر واحد فقط" (بدون تخفيض) */
-
-/* هذا يمسك أي p جوّه .result-card ومو هو البادج القديم ولا الجديد */
+/* ✅ ضبط البادج اللي فيها "سعر واحد فقط" (بدون تخفيض) */
 .result-card p:not(.old-price-pill):not(.new-price-pill) {
     display: flex !important;
-    align-items: center !important;    /* سنترة عمودي */
-    justify-content: center !important;/* سنترة أفقي */
-    line-height: 1.2 !important;       /* يقلل إحساس إنه طالع لفوك */
+    align-items: center !important;    
+    justify-content: center !important;
+    line-height: 1.2 !important;
+
+    /* 👇 هنا التعديل حتى ينزل لتحت بصرياً */
+    padding-top: 14px !important;   /* نزيد التوب حتى ينزل النص */
+    padding-bottom: 4px !important; /* نقلل البوتم حتى لا يصعد */
+    transform: translateY(1px);     /* وإذا تريد أكثر نزّلها 2px */
 }
+
 
 /* لو تريده مضبوط أكثر على الموبايل */
 @media (max-width: 768px) {
