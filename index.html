@@ -3720,6 +3720,43 @@ body {
 }
 
 
+/* ✅ موبايل: طفي البلور والبلند واللمعة المتحركة */
+@media (hover: none), (pointer: coarse), (max-width: 768px) {
+
+  /* طفي blur لأنه أكثر سبب للومضة */
+  #maintenance-overlay.activation-overlay {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: rgba(0,0,0,0.75) !important; /* بديل أنيق بدون blur */
+  }
+
+  /* طفي اللمعة/البلند */
+  #maintenance-overlay .activation-dialog::before {
+    animation: none !important;
+    mix-blend-mode: normal !important;
+    opacity: 0.25 !important;
+  }
+
+  /* خفف تغييرات الفوكس اللي تسوي فلاش */
+  #maintenance-overlay .activation-input-row,
+  #maintenance-overlay .activation-input-row:focus-within {
+    box-shadow: none !important;
+    transition: border 0.15s ease, background 0.15s ease !important;
+  }
+
+  /* ✅ يمنع زوم iPhone (إذا الخط أقل من 16 يصير زوم وفلاش) */
+  #maintenance-overlay input {
+    font-size: 16px !important;
+  }
+
+  /* ✅ يمنع “الوميض الأزرق” مال اللمس */
+  #maintenance-overlay, #maintenance-overlay * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+
+
 
 
 
