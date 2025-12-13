@@ -3799,6 +3799,89 @@ body {
 }
 
 
+@media (hover: none), (pointer: coarse), (max-width: 768px) {
+
+  /* ✅ ثبّت الأوفرلاي */
+  #activation-overlay.activation-overlay{
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    z-index: 999999 !important;
+    background: rgba(0,0,0,0.78) !important;
+    isolation: isolate;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    overscroll-behavior: contain;
+  }
+
+  /* ✅ خَلّي النافذة طبقة مستقرة */
+  #activation-overlay .activation-dialog{
+    transform: translate3d(0,0,0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    contain: layout paint;
+  }
+
+  /* ✅ امنع قفزة التخطيط لما يظهر الخطأ */
+  #activation-overlay #activation-error-row{
+    min-height: 18px;
+  }
+
+  /* ✅ اهتزاز 3D يقلل الفلاش */
+  #activation-overlay .activation-dialog.is-shaking{
+    animation: activationShake3d 0.35s ease;
+  }
+
+  @keyframes activationShake3d{
+    0%   { transform: translate3d(0,0,0); }
+    20%  { transform: translate3d(-6px,0,0); }
+    40%  { transform: translate3d(6px,0,0); }
+    60%  { transform: translate3d(-4px,0,0); }
+    80%  { transform: translate3d(4px,0,0); }
+    100% { transform: translate3d(0,0,0); }
+  }
+
+  /* ✅ يمنع اللمعة/البلند إذا كانت موجودة بالـ ::before (نفس فكرة الصيانة) */
+  #activation-overlay .activation-dialog::before{
+    animation: none !important;
+    mix-blend-mode: normal !important;
+    opacity: 0.25 !important;
+  }
+
+  /* ✅ يمنع الوميض الأزرق */
+  #activation-overlay, #activation-overlay * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ✅ يمنع زوم iPhone اللي يسبب وميض */
+  #activation-overlay input{
+    font-size: 16px !important;
+  }
+
+  /* ✅ خفف الفوكس شادو */
+  #activation-overlay .activation-input-row,
+  #activation-overlay .activation-input-row:focus-within{
+    box-shadow: none !important;
+    transition: border 0.15s ease, background 0.15s ease !important;
+  }
+}
+
+
+@media (hover: none), (pointer: coarse), (max-width: 768px) {
+  /* يمنع المتصفح يسوي highlight/وميض وقت اللمس */
+  #activation-overlay * { -webkit-tap-highlight-color: transparent; }
+
+  /* يقفل أي سكرول داخل الأوفرلاي ويسوي طبقة ثابتة */
+  #activation-overlay { touch-action: none; }
+
+  /* يطفي أي outline افتراضي ممكن يسبب ومضة */
+  #activation-overlay input:focus { outline: none !important; }
+}
+
+
+
 
 
 
@@ -4735,6 +4818,16 @@ async function showActivationPopup() {
         const cancelBtn     = document.getElementById('activation-cancel-btn');
         const toggleBtn     = overlay.querySelector('.activation-toggle-password');
 
+        const focusNoScroll = () => {
+            setTimeout(() => {
+                try {
+                    passwordInput.focus({ preventScroll: true });
+                } catch (e) {
+                    passwordInput.focus();
+                }
+            }, 50);
+        };
+
         const setError = (msg) => {
             errorRow.textContent = msg || '';
             dialog.classList.remove('is-shaking');
@@ -4752,7 +4845,7 @@ async function showActivationPopup() {
             toggleBtn.innerHTML = isPassword
                 ? '<i class="fa-regular fa-eye-slash"></i>'
                 : '<i class="fa-regular fa-eye"></i>';
-            passwordInput.focus();
+            focusNoScroll(); // ✅ بدل focus العادي
         });
 
         // زر تأكيد الدخول
@@ -4761,7 +4854,7 @@ async function showActivationPopup() {
 
             if (!value) {
                 setError('رجاءً اكتب كلمة المرور أولاً.');
-                passwordInput.focus();
+                focusNoScroll(); // ✅ بدل focus العادي
                 return;
             }
 
@@ -4792,6 +4885,11 @@ async function showActivationPopup() {
                 // بعد الأنيميشن نعيد تحميل الصفحة
                 setTimeout(() => {
                     overlay.classList.remove('is-open');
+
+                    // ✅ فتح السكرول قبل الريلود
+                    document.documentElement.style.overflow = '';
+                    document.body.style.overflow = '';
+
                     setTimeout(() => {
                         location.reload();
                     }, 150);
@@ -4806,7 +4904,7 @@ async function showActivationPopup() {
         // زر إغلاق التطبيق (نفس فكرة "لازم تفعّل")
         cancelBtn.addEventListener('click', () => {
             setError('لا يمكنك استخدام التطبيق بدون تفعيل. راجع مكتب عسل للحصول على كلمة المرور.');
-            passwordInput.focus();
+            focusNoScroll(); // ✅ بدل focus العادي
         });
 
         // إنتر = تأكيد
@@ -4821,15 +4919,28 @@ async function showActivationPopup() {
     // كل مرة ننادي showActivationPopup نعرض النافذة
     overlay.classList.add('is-open');
 
+    // ✅ قفل السكرول أول ما تنفتح النافذة
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
     const input = document.getElementById('activation-password-input');
     const error = document.getElementById('activation-error-row');
 
     if (error) error.textContent = '';
     if (input) {
         input.value = '';
-        input.focus();
+
+        // ✅ فوكس بدون سكرول لتقليل وميض الموبايل
+        setTimeout(() => {
+            try {
+                input.focus({ preventScroll: true });
+            } catch (e) {
+                input.focus();
+            }
+        }, 50);
     }
 }
+
 
 
 
