@@ -4470,8 +4470,8 @@ function triggerAnimation() {
     setTimeout(triggerAnimation, 8000);
 }
 
-      
-      
+
+
       
     // ✅ قفل الصيانة: true = تظهر نافذة الصيانة وتمنع الدخول، false = طبيعي
 let maintenanceLock = true;
@@ -4482,29 +4482,81 @@ const maintenanceBypassKey = 'maintenanceBypass';
 // ✅ كلمة أدمن الصيانة (لا تخليها 112233)
 const MAINTENANCE_ADMIN_PASSWORD = '445566';
 
+
+
+
+
+// ✅ يبقى محفوظ بالجهاز
+const MAINTENANCE_BYPASS_TTL_HOURS = 24; // "بعد فترة" = 24 ساعة (غيّرها إذا تريد)
+
+function getMaintenanceBypass() {
+    // أولاً إذا موجود بالجلسة
+    if (sessionStorage.getItem(maintenanceBypassKey) === 'true') return true;
+
+    // ثانياً إذا محفوظ بالجهاز
+    const raw = localStorage.getItem(maintenanceBypassKey);
+    if (!raw) return false;
+
+    try {
+        const data = JSON.parse(raw);
+        if (!data || data.ok !== true || !data.ts) return false;
+
+        const age = Date.now() - data.ts;
+        const maxAge = MAINTENANCE_BYPASS_TTL_HOURS * 60 * 60 * 1000;
+
+        // انتهت الصلاحية -> لازم يطلب مرة ثانية
+        if (age > maxAge) return false;
+
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function setMaintenanceBypass() {
+    const payload = { ok: true, ts: Date.now() };
+    localStorage.setItem(maintenanceBypassKey, JSON.stringify(payload));
+    sessionStorage.setItem(maintenanceBypassKey, 'true');
+}
+
+function clearMaintenanceBypass() {
+    localStorage.removeItem(maintenanceBypassKey);
+    sessionStorage.removeItem(maintenanceBypassKey);
+}
+
+
+
+
+
+
       
       
  let showPromoPopup = true; // 🔥 يتحكم فقط في النافذة المنبثقة، false = تعطيل النافذة
 let promoAlreadyShown = sessionStorage.getItem('promoShown') === 'true';
 
 window.onload = function() {
-    const bypass = sessionStorage.getItem(maintenanceBypassKey) === 'true';
+
+    // ✅ إذا الصيانة مطفية: امسح bypass حتى إذا شغّلتها بعدين ترجع تطلب مرة وحدة
+    if (!maintenanceLock) {
+        clearMaintenanceBypass();
+    }
+
+    const bypass = getMaintenanceBypass();
     const isActivated = localStorage.getItem('isActivated') === 'true';
 
     // ✅ أول شرط: إذا صيانة شغالة وماكو أدمن => امنع الدخول للجميع (حتى لو مفعل سابقاً)
     if (maintenanceLock && !bypass) {
-        localStorage.setItem('isActivated', 'false'); // 🔥 هذا التعديل
         showMaintenancePopup();
         return;
     }
 
-    // ✅ الأدمن إذا bypass = true يدخل حتى لو مو مفعّل (بدون 112233)
+    // ✅ إذا مو مفعل وماكو bypass => نافذة 112233
     if (!isActivated && !bypass) {
         showActivationPopup();
         return;
     }
 
-    // ✅ هنا طبيعي يدخل
+    // ✅ هنا طبيعي يدخل (اللي مفعل سابقاً ما يطلب 112233 بعد ما تنطفي الصيانة)
     triggerAnimation();
 
     if (showPromoPopup && !promoAlreadyShown) {
@@ -4526,6 +4578,8 @@ window.onload = function() {
         }
     });
 };
+
+
 
 
 
@@ -4836,7 +4890,7 @@ function showMaintenancePopup() {
 
             // ✅ هنا كلمة الأدمن الخاصة بالصيانة فقط
             if (entered === MAINTENANCE_ADMIN_PASSWORD) {
-                sessionStorage.setItem(maintenanceBypassKey, 'true');
+                setMaintenanceBypass(); // ✅ التعديل: ينحفظ بالجهاز وما يطلبه كل مرة
                 setError('');
                 overlay.classList.remove('is-open');
                 setTimeout(() => location.reload(), 150);
@@ -4870,6 +4924,7 @@ function showMaintenancePopup() {
         adminInput.focus();
     }
 }
+
 
 
 
