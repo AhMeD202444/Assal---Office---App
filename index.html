@@ -4436,38 +4436,62 @@ function triggerAnimation() {
       
       
       
+    // ✅ قفل الصيانة: true = تظهر نافذة الصيانة وتمنع الدخول، false = طبيعي
+let maintenanceLock = true;
+
+// ✅ سماح مؤقت للأدمن (جلسة المتصفح الحالية فقط)
+const maintenanceBypassKey = 'maintenanceBypass';
+
+// ✅ كلمة أدمن الصيانة (لا تخليها 112233)
+const MAINTENANCE_ADMIN_PASSWORD = '445566';
+
+      
+      
  let showPromoPopup = true; // 🔥 يتحكم فقط في النافذة المنبثقة، false = تعطيل النافذة
 let promoAlreadyShown = sessionStorage.getItem('promoShown') === 'true';
 
 window.onload = function() {
+    const bypass = sessionStorage.getItem(maintenanceBypassKey) === 'true';
     const isActivated = localStorage.getItem('isActivated') === 'true';
 
-    if (!isActivated) {
-        showActivationPopup();
-    } else {
-        triggerAnimation();
-       if (showPromoPopup && !promoAlreadyShown) {
-    setTimeout(() => {
-        let popup = document.getElementById('promoPopup');
-        popup.style.display = 'flex';
-        popup.style.animation = 'slideDown 0.6s ease-out forwards';
-
-        // ✅ خلي الخلفية الضبابية تشتغل
-        document.getElementById('overlay').style.display = 'block';
-    }, 500);
-    sessionStorage.setItem('promoShown', 'true');
-}
-
-        loadExcelFiles().then(result => {
-            if (result.success) {
-                console.log("تم تحميل البيانات بنجاح، جارٍ تحميل العناصر الجديدة...");
-                loadNewItems();
-            } else {
-                console.warn("فشل تحميل البيانات:", result.message);
-            }
-        });
+    // ✅ أول شرط: إذا صيانة شغالة وماكو أدمن => امنع الدخول للجميع (حتى لو مفعل سابقاً)
+    if (maintenanceLock && !bypass) {
+        localStorage.setItem('isActivated', 'false'); // 🔥 هذا التعديل
+        showMaintenancePopup();
+        return;
     }
+
+    // ✅ الأدمن إذا bypass = true يدخل حتى لو مو مفعّل (بدون 112233)
+    if (!isActivated && !bypass) {
+        showActivationPopup();
+        return;
+    }
+
+    // ✅ هنا طبيعي يدخل
+    triggerAnimation();
+
+    if (showPromoPopup && !promoAlreadyShown) {
+        setTimeout(() => {
+            let popup = document.getElementById('promoPopup');
+            popup.style.display = 'flex';
+            popup.style.animation = 'slideDown 0.6s ease-out forwards';
+            document.getElementById('overlay').style.display = 'block';
+        }, 500);
+        sessionStorage.setItem('promoShown', 'true');
+    }
+
+    loadExcelFiles().then(result => {
+        if (result.success) {
+            console.log("تم تحميل البيانات بنجاح، جارٍ تحميل العناصر الجديدة.");
+            loadNewItems();
+        } else {
+            console.warn("فشل تحميل البيانات:", result.message);
+        }
+    });
 };
+
+
+
 
 
 async function showActivationPopup() {
@@ -4657,6 +4681,8 @@ async function showActivationPopup() {
 }
 
 
+
+
 // ✅ حركة الخروج بنفس مسار النزول (لأعلى)
 function closePopup() {
     let popup = document.getElementById('promoPopup');
@@ -4667,6 +4693,150 @@ function closePopup() {
         document.getElementById('overlay').style.display = 'none';
     }, 600); // ⏳ وقت متزامن مع الأنيميشن لضمان خروج سلس
 }
+
+
+
+function showMaintenancePopup() {
+    let overlay = document.getElementById('maintenance-overlay');
+
+    if (!overlay) {
+        const template = `
+            <div id="maintenance-overlay" class="activation-overlay">
+                <div class="activation-dialog" dir="rtl">
+                    <div class="activation-logo">
+                        <div class="activation-logo-ring">
+                            <div class="activation-logo-core">
+                                <i class="fa-solid fa-screwdriver-wrench"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="activation-header">
+                        <div class="activation-label">Maintenance Mode</div>
+                        <div class="activation-title">التطبيق تحت الصيانة</div>
+                        <div class="activation-subtitle">الدخول فقط لكادر عسل</div>
+                    </div>
+
+                    <div class="activation-body">
+                        <p class="activation-text">
+                            حالياً التطبيق متوقف للصيانة والتحديثات.
+                            إذا انت من الكادر، سجل دخول أدمن.
+                        </p>
+
+                        <label class="activation-field-label" for="maintenance-admin-input">
+                            دخول أدمن
+                        </label>
+
+                        <div class="activation-input-row">
+                            <input
+                                id="maintenance-admin-input"
+                                type="password"
+                                autocomplete="off"
+                                placeholder="اكتب كلمة الأدمن"
+                            />
+                            <button
+                                type="button"
+                                class="activation-toggle-password"
+                                aria-label="إظهار / إخفاء كلمة المرور"
+                                id="maintenance-toggle-btn"
+                            >
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+
+                        <div class="activation-error" id="maintenance-error-row"></div>
+                    </div>
+
+                    <div class="activation-footer">
+                        <button type="button" id="maintenance-enter-btn" class="activation-btn primary">
+                            دخول
+                        </button>
+
+                        <button type="button" id="maintenance-close-btn" class="activation-btn ghost">
+                            إغلاق
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', template);
+        overlay = document.getElementById('maintenance-overlay');
+
+        const dialog     = overlay.querySelector('.activation-dialog');
+        const adminInput = document.getElementById('maintenance-admin-input');
+        const errorRow   = document.getElementById('maintenance-error-row');
+        const enterBtn   = document.getElementById('maintenance-enter-btn');
+        const closeBtn   = document.getElementById('maintenance-close-btn');
+        const toggleBtn  = document.getElementById('maintenance-toggle-btn');
+
+        const setError = (msg) => {
+            errorRow.textContent = msg || '';
+            dialog.classList.remove('is-shaking');
+            if (msg) {
+                void dialog.offsetWidth;
+                dialog.classList.add('is-shaking');
+            }
+        };
+
+        toggleBtn.addEventListener('click', () => {
+            const isPassword = adminInput.type === 'password';
+            adminInput.type = isPassword ? 'text' : 'password';
+            toggleBtn.innerHTML = isPassword
+                ? '<i class="fa-regular fa-eye-slash"></i>'
+                : '<i class="fa-regular fa-eye"></i>';
+            adminInput.focus();
+        });
+
+        enterBtn.addEventListener('click', () => {
+            const entered = (adminInput.value || '').trim();
+
+            if (!entered) {
+                setError('رجاءً اكتب كلمة الأدمن أولاً.');
+                adminInput.focus();
+                return;
+            }
+
+            // ✅ هنا كلمة الأدمن الخاصة بالصيانة فقط
+            if (entered === MAINTENANCE_ADMIN_PASSWORD) {
+                sessionStorage.setItem(maintenanceBypassKey, 'true');
+                setError('');
+                overlay.classList.remove('is-open');
+                setTimeout(() => location.reload(), 150);
+            } else {
+                setError('كلمة الأدمن غير صحيحة.');
+                adminInput.select();
+            }
+        });
+
+        closeBtn.addEventListener('click', () => {
+            setError('التطبيق تحت الصيانة. الدخول متاح فقط للأدمن.');
+            adminInput.focus();
+        });
+
+        adminInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                enterBtn.click();
+            }
+        });
+    }
+
+    overlay.classList.add('is-open');
+
+    const adminInput = document.getElementById('maintenance-admin-input');
+    const error = document.getElementById('maintenance-error-row');
+
+    if (error) error.textContent = '';
+    if (adminInput) {
+        adminInput.value = '';
+        adminInput.focus();
+    }
+}
+
+
+
+
 
 // إغلاق النافذة أو الإعلان عند الضغط على الخلفية الضبابية
 document.addEventListener("DOMContentLoaded", () => {
