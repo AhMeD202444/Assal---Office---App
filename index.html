@@ -6695,7 +6695,6 @@ function showImagePreviewDataUrl(dataUrl, filename){
         <div style="font-weight:900; font-size:14px;">Invoice Preview</div>
 
         <div style="display:flex; align-items:center; gap:10px;">
-          <!-- ✅ Full Screen -->
           <button id="imgPrevFull" type="button" title="Full Screen"
             style="
               padding:8px 12px;
@@ -6727,17 +6726,17 @@ function showImagePreviewDataUrl(dataUrl, filename){
         </div>
       </div>
 
-      <div id="imgPrevBox" style="
+      <div style="
         flex:1;
         overflow:auto;
         background:#ffffff;
         border-radius:14px;
         padding:10px;
         -webkit-overflow-scrolling: touch;
-        touch-action: manipulation; /* ✅ يساعد بالـzoom/scroll */
+        touch-action: manipulation;
       ">
-        <img id="imgPrevImg" src="${dataUrl}" alt="Invoice"
-             style="width:100%; height:auto; display:block; max-width:900px; margin:0 auto;" />
+        <img src="${dataUrl}" alt="Invoice"
+             style="width:100%; height:auto; display:block; max-width:900px; margin:0 auto; image-rendering:auto;" />
       </div>
 
       <div dir="rtl" style="
@@ -6769,12 +6768,70 @@ function showImagePreviewDataUrl(dataUrl, filename){
   ov.querySelector("#imgPrevClose").onclick = ()=>ov.remove();
   ov.onclick = (e)=>{ if(e.target === ov) ov.remove(); };
 
-  // ✅ Full Screen: يفتح الصورة بحجم كبير حتى السكرين يطلع واضح
- ov.querySelector("#imgPrevFull").onclick = ()=>{
-  openFullImageOverlay(dataUrl, filename);
-};
-
+  // ✅ Full Screen داخل نفس التطبيق + رجوع أنيق
+  ov.querySelector("#imgPrevFull").onclick = ()=>{
+    openFullImageOverlay(dataUrl, filename);
+  };
 }
+
+function openFullImageOverlay(dataUrl, filename){
+  document.getElementById("imgFullOverlay")?.remove();
+
+  const f = document.createElement("div");
+  f.id = "imgFullOverlay";
+  f.style.cssText = `
+    position: fixed; inset: 0; z-index: 2147483647;
+    background: #0b1220;
+    display:flex; flex-direction:column;
+  `;
+
+  f.innerHTML = `
+    <div style="
+      height:56px; padding:10px 12px;
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      color:#fff;
+    ">
+      <button id="imgFullBack" type="button" style="
+        display:flex; align-items:center; gap:8px;
+        padding:10px 12px;
+        border-radius:999px;
+        border:1px solid rgba(255,255,255,.18);
+        background: rgba(255,255,255,.08);
+        color:#fff; font-weight:900; cursor:pointer;
+      ">
+        ← Back
+      </button>
+
+      <div style="font-weight:900; font-size:13px; opacity:.9;">
+        ${filename || "Invoice"}
+      </div>
+
+      <button id="imgFullClose" type="button" aria-label="Close" style="
+        width:38px; height:38px;
+        border-radius:999px;
+        border:1px solid rgba(255,255,255,.18);
+        background:#b91c1c; color:#fff;
+        font-size:20px; cursor:pointer;
+      ">×</button>
+    </div>
+
+    <div style="
+      flex:1; overflow:auto; background:#fff;
+      -webkit-overflow-scrolling: touch;
+      padding:10px;
+    ">
+      <img src="${dataUrl}" style="width:100%;max-width:1200px;height:auto;display:block;margin:0 auto;image-rendering:auto;" />
+    </div>
+  `;
+
+  document.body.appendChild(f);
+
+  const close = ()=> f.remove();
+  f.querySelector("#imgFullBack").onclick = close;
+  f.querySelector("#imgFullClose").onclick = close;
+}
+
 
 function openFullImageOverlay(dataUrl, filename){
   document.getElementById("imgFullOverlay")?.remove();
