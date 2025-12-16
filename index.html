@@ -6515,16 +6515,16 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
 
 async function exportInvoicePDF(filename){
   const el = document.getElementById("invoiceTemplate");
-  if(!el) throw new Error("invoiceTemplate missing"); // مثل كودك الحالي :contentReference[oaicite:2]{index=2}
+  if(!el) throw new Error("invoiceTemplate missing");
 
-  // نخليه داخل الشاشة حتى الموبايل يرسمه (بدون ما يبين)
+  // نخليه داخل الشاشة حتى WebView يرسمه (مو zIndex -1)
   const prev = el.getAttribute("style") || "";
   el.style.display = "block";
   el.style.position = "fixed";
   el.style.left = "0";
   el.style.top = "0";
-  el.style.zIndex = "9999";      // ✅ مهم: بدل -1 (بعض الموبايلات تتجاهل الرسم)
-  el.style.opacity = "0.01";     // ✅ لا تخليها 0
+  el.style.zIndex = "9999";     // ✅ بدل -1
+  el.style.opacity = "0.01";    // ✅ لا تخليها 0
   el.style.pointerEvents = "none";
   el.style.background = "#ffffff";
 
@@ -6541,38 +6541,40 @@ async function exportInvoicePDF(filename){
 
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ orientation:"p", unit:"pt", format:"a4", compress:true });
+
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
-  const ratio = pageH / pageW; // ~1.414
+  const a4Ratio = pageH / pageW; // ~1.414
 
-  const baseW = el.scrollWidth || el.offsetWidth || 794;
-  const totalH = el.scrollHeight || el.offsetHeight || 1123;
+  // أبعاد الفاتورة داخل الـHTML
+  const cssW = el.scrollWidth || el.offsetWidth || 794;
+  const cssH = el.scrollHeight || el.offsetHeight || 1123;
 
-  // ارتفاع صفحة A4 "بالبكسل داخل HTML" حسب عرض الفاتورة
-  const pageCssH = Math.floor(baseW * ratio);
+  // ارتفاع صفحة A4 بالـCSS pixels حسب عرض الفاتورة
+  const pageCssH = Math.floor(cssW * a4Ratio);
 
-  // Scale خفيف للموبايل حتى ما يبيض
-  const scale = Math.min(1.15, (window.devicePixelRatio || 1));
+  // scale خفيف حتى لا يبيض بالموبايل
+  const scale = 1.05;
 
   let y = 0;
   let page = 0;
 
-  while (y < totalH) {
-    const sliceH = Math.min(pageCssH, totalH - y);
+  while (y < cssH) {
+    const sliceH = Math.min(pageCssH, cssH - y);
 
-    // ✅ رندر جزء فقط (صفحة واحدة) — ماكو Canvas عملاق
+    // ✅ رندر جزء واحد فقط (صفحة) — هذا اللي يحل “أبيض” بالـWebView
     const canvas = await html2canvas(el, {
       scale,
       backgroundColor: "#ffffff",
       useCORS: true,
       scrollX: 0,
       scrollY: 0,
-      windowWidth: baseW,
-      windowHeight: sliceH,
       x: 0,
       y: y,
-      width: baseW,
-      height: sliceH
+      width: cssW,
+      height: sliceH,
+      windowWidth: cssW,
+      windowHeight: sliceH
     });
 
     const imgData = canvas.toDataURL("image/jpeg", 0.92);
@@ -6586,39 +6588,29 @@ async function exportInvoicePDF(filename){
     page++;
   }
 
-  // ✅ تنزيل متوافق للموبايل: Blob
+  // ✅ بديل pdf.save() لأن WebIntoApp مرات يمنع التحميل
   const blob = pdf.output("blob");
-  const url = URL.createObjectURL(blob);
 
-  const ua = navigator.userAgent || "";
-  const isIOS = /iPad|iPhone|iPod/.test(ua);
-
-  // iOS: إذا يدعم Share يكون أفضل
-  if (navigator.share && isIOS) {
+  // أفضل خيار داخل WebView: مشاركة الملف
+  if (navigator.share) {
     try {
       const file = new File([blob], filename, { type: "application/pdf" });
       await navigator.share({ files: [file], title: filename });
-    } catch(_) {
+    } catch (e) {
+      // إذا فشل الشير، نفتح بالمتصفح
+      const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
     }
   } else {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    // بعض iOS ما يحترم download => افتحه بتبويب
-    if (isIOS) window.open(url, "_blank");
+    // fallback: افتحه بصفحة جديدة
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
   }
 
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
-
-  // رجّع العنصر مثل ما كان :contentReference[oaicite:3]{index=3}
   el.setAttribute("style", prev);
 }
-
 
 
 
