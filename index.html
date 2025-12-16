@@ -4585,6 +4585,7 @@ body {
 
       <div class="cart-actions">
         <button class="cart-btn ghost" id="clearCartBtn" type="button"><i class="fas fa-trash"></i> تفريغ</button>
+        <button class="cart-btn ghost" id="printImgBtn" type="button"><i class="fas fa-image"></i> Image</button>
         <button class="cart-btn primary" id="printPdfBtn" type="button"><i class="fas fa-file-pdf"></i> PDF</button>
       </div>
     </div>
@@ -6602,6 +6603,89 @@ function numOnlyIQD(n){
   n = Math.max(0, Math.round(Number(n)||0));
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
+
+async function exportInvoiceImagePNG(filename){
+  const el = document.getElementById("invoiceTemplate");
+  if(!el) throw new Error("invoiceTemplate missing");
+
+  // Stage داخل الشاشة حتى ما تطلع بيضة بالموبايل
+  const parent = el.parentNode;
+  const next = el.nextSibling;
+  const prevStyle = el.getAttribute("style") || "";
+
+  const stage = document.createElement("div");
+  stage.style.cssText = `
+    position: fixed; inset: 0;
+    background: #fff;
+    z-index: 2147483647;
+    overflow: auto;
+    padding: 16px;
+  `;
+  document.body.appendChild(stage);
+  stage.appendChild(el);
+
+  el.style.display = "block";
+  el.style.position = "relative";
+  el.style.left = "0";
+  el.style.top = "0";
+  el.style.opacity = "1";
+  el.style.pointerEvents = "none";
+
+  // انتظر رندر + خطوط + صور
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  if (document.fonts?.ready) { try { await document.fonts.ready; } catch(_){} }
+
+  const imgs = [...el.querySelectorAll("img")];
+  await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(res=>{
+    img.onload = img.onerror = () => res();
+  })));
+
+  const scale = (window.innerWidth <= 600) ? 1.2 : 2;
+
+  const canvas = await html2canvas(el, {
+    scale,
+    backgroundColor: "#ffffff",
+    useCORS: true,
+    allowTaint: true,
+    imageTimeout: 15000
+  });
+
+  // رجّع العنصر لمكانه الأصلي
+  stage.remove();
+  if (next) parent.insertBefore(el, next); else parent.appendChild(el);
+  el.setAttribute("style", prevStyle);
+
+  // طلّع PNG
+  const blob = await new Promise(res => canvas.toBlob(res, "image/png", 1));
+  if(!blob) throw new Error("Failed to create image blob");
+
+  const file = new File([blob], filename, { type: "image/png" });
+
+  // مشاركة بالموبايل إذا متاحة
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    await navigator.share({ files: [file], title: filename });
+    return;
+  }
+
+  // fallback: فتحها
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank");
+  setTimeout(()=>URL.revokeObjectURL(url), 20000);
+}
+
+document.getElementById("printImgBtn")?.addEventListener("click", async ()=>{
+  try{
+    // لازم تكون الفاتورة متولدة (مثل ما تسوي داخل checkoutPDF)
+    // إذا عندك دالة تولّد الفاتورة HTML استدعيها هنا قبل التصوير
+    await exportInvoiceImagePNG("invoice.png");
+  }catch(e){
+    alert(e?.message || e);
+  }
+});
+
+
+
 
 async function exportInvoicePDF_AutoTable(filename, {invNo, dateStr, subtotal, discount, total, note}) {
   const { jsPDF } = window.jspdf;
