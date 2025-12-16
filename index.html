@@ -6609,7 +6609,6 @@ async function exportInvoiceImagePNG(filename){
   const el = document.getElementById("invoiceTemplate");
   if(!el) throw new Error("invoiceTemplate missing");
 
-  // Stage داخل الشاشة حتى ما تطلع بيضة بالموبايل
   const parent = el.parentNode;
   const next = el.nextSibling;
   const prevStyle = el.getAttribute("style") || "";
@@ -6632,7 +6631,6 @@ async function exportInvoiceImagePNG(filename){
   el.style.opacity = "1";
   el.style.pointerEvents = "none";
 
-  // انتظر رندر + خطوط + صور
   await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
   if (document.fonts?.ready) { try { await document.fonts.ready; } catch(_){} }
 
@@ -6641,8 +6639,7 @@ async function exportInvoiceImagePNG(filename){
     img.onload = img.onerror = () => res();
   })));
 
-  const scale = (window.innerWidth <= 600) ? 1.2 : 2;
-
+  const scale = (window.innerWidth <= 600) ? 1.0 : 1.6; // خففناها للموبايل
   const canvas = await html2canvas(el, {
     scale,
     backgroundColor: "#ffffff",
@@ -6651,39 +6648,94 @@ async function exportInvoiceImagePNG(filename){
     imageTimeout: 15000
   });
 
-  // رجّع العنصر لمكانه الأصلي
+  // رجّع العنصر لمكانه
   stage.remove();
   if (next) parent.insertBefore(el, next); else parent.appendChild(el);
   el.setAttribute("style", prevStyle);
 
-  // طلّع PNG
-  const blob = await new Promise(res => canvas.toBlob(res, "image/png", 1));
-  if(!blob) throw new Error("Failed to create image blob");
+  // ✅ هذا أهم تغيير: نخليها DataURL حتى تنعرض داخل WebView
+  const dataUrl = canvas.toDataURL("image/png");
 
-  const file = new File([blob], filename, { type: "image/png" });
+  // اعرض Preview داخل التطبيق
+  showImagePreviewDataUrl(dataUrl, filename);
 
-  // مشاركة بالموبايل إذا متاحة
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    await navigator.share({ files: [file], title: filename });
-    return;
-  }
-
-  // fallback: تحميل + Preview داخل التطبيق
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-
-  // ✅ التعديل: عرض الصورة داخل التطبيق حتى لو WebView ما يفتح التحميل
-  showImagePreview(url, filename);
-
-  // نظافة
-  setTimeout(()=>URL.revokeObjectURL(url), 60000);
+  // إذا مشاركة الملفات متاحة (مو دائماً بالـWebView) نخليها اختيارية من زر Share داخل الـPreview
 }
+
+
+
+function showImagePreviewDataUrl(dataUrl, filename){
+  document.getElementById("imgPrevOverlay")?.remove();
+
+  const ov = document.createElement("div");
+  ov.id = "imgPrevOverlay";
+  ov.style.cssText = `
+    position: fixed; inset: 0; z-index: 2147483647;
+    background: rgba(0,0,0,.65);
+    display:flex; align-items:center; justify-content:center;
+    padding: 14px;
+  `;
+
+  ov.innerHTML = `
+    <div style="width:min(520px, 96vw); background:#0b1220; border:1px solid rgba(255,255,255,.12);
+                border-radius:16px; padding:12px; color:#fff;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;">
+        <div style="font-weight:900; font-size:14px;">Invoice Image</div>
+        <button id="imgPrevClose" style="background:transparent;border:0;color:#fff;font-size:20px;cursor:pointer;">×</button>
+      </div>
+
+      <img src="${dataUrl}" alt="Invoice" style="width:100%; height:auto; border-radius:12px; background:#fff;" />
+
+      <div style="display:flex; gap:10px; margin-top:12px;">
+        <button id="imgPrevSave"
+           style="flex:1; padding:10px 12px; border-radius:12px; border:0;
+                  background: linear-gradient(135deg,#2563eb,#60a5fa); color:#fff; font-weight:900;">
+          Save
+        </button>
+        <button id="imgPrevShare"
+           style="flex:1; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.16);
+                  background: rgba(255,255,255,.06); color:#fff; font-weight:900;">
+          Share
+        </button>
+      </div>
+
+      <div style="opacity:.8; font-size:12px; margin-top:10px;">
+        إذا ما يدعم Share بالتطبيق، تگدر تضغط <b>Save</b> أو تسوي Screenshot.
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(ov);
+
+  ov.querySelector("#imgPrevClose").onclick = ()=>ov.remove();
+  ov.onclick = (e)=>{ if(e.target === ov) ov.remove(); };
+
+  // ✅ Save: هنا بس نطلع نافذة Save As (بس هسه صارت اختيارية مو غصب)
+  ov.querySelector("#imgPrevSave").onclick = ()=>{
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  // ✅ Share: إذا WebView يدعم مشاركة ملفات
+  ov.querySelector("#imgPrevShare").onclick = async ()=>{
+    try{
+      if(!navigator.share) throw 0;
+      const resp = await fetch(dataUrl);
+      const blob = await resp.blob();
+      const file = new File([blob], filename, {type:"image/png"});
+      if(navigator.canShare && !navigator.canShare({files:[file]})) throw 0;
+      await navigator.share({ files:[file], title: filename });
+    }catch(_){
+      alert("Share مو مدعوم بهالتطبيق. استخدم Save أو Screenshot.");
+    }
+  };
+}
+
+
 
 
 function showImagePreview(url, filename){
