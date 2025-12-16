@@ -6517,80 +6517,85 @@ async function exportInvoicePDF(filename){
   const el = document.getElementById("invoiceTemplate");
   if(!el) throw new Error("invoiceTemplate missing");
 
-  // خليه يشتغل بدون ما يبين
+  // نخليه يظهر داخل الشاشة بس بدون ما ينشاف
   const prev = el.getAttribute("style") || "";
   el.style.display = "block";
   el.style.position = "fixed";
-  el.style.left = "-9999px";
+  el.style.left = "0";
   el.style.top = "0";
-  el.style.background = "#fff";
+  el.style.zIndex = "-1";
+  el.style.opacity = "0.01";          // مهم للموبايل (0 أحياناً يخرب الرندر)
+  el.style.pointerEvents = "none";
+  el.style.background = "#ffffff";
 
+  // انتظر الخطوط
   if (document.fonts && document.fonts.ready) {
     try { await document.fonts.ready; } catch(_) {}
   }
 
+  // انتظر الصور داخل الفاتورة (الشعار مثلاً)
+  const imgs = Array.from(el.querySelectorAll("img"));
+  await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(res => {
+    img.onload = res; img.onerror = res;
+  })));
+
+  // Scale أخف للموبايل حتى ما يصير Canvas أبيض بسبب الذاكرة
+  const scale = Math.min(1.4, (window.devicePixelRatio || 1));
+
   const canvas = await html2canvas(el, {
-    scale: 1.5,                 // أقل من 2 حتى ما يصير ملف ضخم
+    scale,
     backgroundColor: "#ffffff",
-    useCORS: true
+    useCORS: true,
+    scrollX: 0,
+    scrollY: 0,
+    windowWidth: el.scrollWidth,
+    windowHeight: el.scrollHeight
   });
 
-  const pdf = new window.jspdf.jsPDF({
-    orientation: "p",
-    unit: "pt",
-    format: "a4",
-    compress: true
-  });
-
+  // قص صفحات A4 “قص حقيقي” (بدون تحريك سالب)
+  const pdf = new window.jspdf.jsPDF({ orientation:"p", unit:"pt", format:"a4", compress:true });
   const pageWidth  = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
-  // تحويل “نقاط PDF” إلى “بكسلات canvas” حتى نقص الصفحة صح
   const pxPerPt = canvas.width / pageWidth;
   const pagePxHeight = Math.floor(pageHeight * pxPerPt);
 
   const pageCanvas = document.createElement("canvas");
-  const pageCtx = pageCanvas.getContext("2d");
+  const ctx = pageCanvas.getContext("2d");
 
   let y = 0;
-  let pageIndex = 0;
+  let page = 0;
 
   while (y < canvas.height) {
-    const sliceHeight = Math.min(pagePxHeight, canvas.height - y);
-
+    const sliceH = Math.min(pagePxHeight, canvas.height - y);
     pageCanvas.width = canvas.width;
-    pageCanvas.height = sliceHeight;
+    pageCanvas.height = sliceH;
 
-    // خلفية بيضا
-    pageCtx.fillStyle = "#ffffff";
-    pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
 
-    // قص جزء من الصورة الأصلية
-    pageCtx.drawImage(
-      canvas,
-      0, y, canvas.width, sliceHeight,
-      0, 0, canvas.width, sliceHeight
-    );
+    ctx.drawImage(canvas, 0, y, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
 
-    // JPEG مضغوط (أكثر توافقاً مع موبايلات)
-    const imgData = pageCanvas.toDataURL("image/jpeg", 0.92);
+    // JPEG أفضل للموبايل من PNG
+    const imgData = pageCanvas.toDataURL("image/jpeg", 0.9);
 
-    if (pageIndex > 0) pdf.addPage();
+    if (page > 0) pdf.addPage();
 
-    const imgWidth = pageWidth;
-    const imgHeight = (sliceHeight * imgWidth) / pageCanvas.width;
+    const imgW = pageWidth;
+    const imgH = (sliceH * imgW) / pageCanvas.width;
 
-    pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
+    pdf.addImage(imgData, "JPEG", 0, 0, imgW, imgH);
 
-    y += sliceHeight;
-    pageIndex++;
+    y += sliceH;
+    page++;
   }
 
   pdf.save(filename);
 
-  // رجّع الستايل
+  // رجّع العنصر مثل ما كان
   el.setAttribute("style", prev);
 }
+
 
 
 function calcTotalsForInvoice(){
