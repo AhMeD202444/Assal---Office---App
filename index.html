@@ -4227,13 +4227,6 @@ body {
 
 
 
-#invoicePreview{
-  background:#fff !important;
-  color:#111 !important;
-}
-#invoicePreview *{
-  color: #111 !important;   /* حتى لو عندك global يخليها بيضة */
-}
 
 
 
@@ -4518,38 +4511,6 @@ body {
 <div id="invoiceTemplate" class="invoice-paper" style="display:none;"></div>
 
 
-<div id="invoiceOverlay" style="display:none; position:fixed; inset:0; z-index:999999; background:rgba(0,0,0,.6);">
-  <div style="height:100%; display:flex; flex-direction:column;">
-    <div style="padding:10px; display:flex; gap:10px; justify-content:space-between; align-items:center;">
-      <button id="saveInvoiceImgBtn" style="padding:10px 14px; border:0; border-radius:12px; background:#f97316; color:#fff; font-weight:800; cursor:pointer;">
-        حفظ صورة
-      </button>
-      <button id="closeInvoiceOverlayBtn" style="padding:10px 14px; border:0; border-radius:12px; background:rgba(255,255,255,.12); color:#fff; font-weight:800; cursor:pointer;">
-        إغلاق
-      </button>
-    </div>
-
-    <div style="flex:1; overflow:auto; padding:10px;">
-      <!-- هنا نعرض الفاتورة -->
-      <div id="invoicePreview" style="background:#fff; border-radius:14px; overflow:hidden;"></div>
-      
-      <div id="invoiceImgWrap" style="display:none; margin-top:12px; background:#fff; border-radius:14px; padding:10px;">
-  <div style="font-weight:800; margin-bottom:8px; color:#111;">
-    تم إنشاء الصورة ✅ — اضغط مطوّل على الصورة حتى تحفظها
-  </div>
-  <img id="invoiceImgResult" alt="invoice" style="width:100%; height:auto; border-radius:12px; border:1px solid #eee;" />
-</div>
-<div id="invoiceImgWrap" style="display:none; margin-top:12px; background:#fff; border-radius:14px; padding:10px;">
-  <div style="font-weight:800; margin-bottom:8px; color:#111;">
-    تم إنشاء الصورة ✅ — اضغط مطوّل على الصورة حتى تحفظها
-  </div>
-  <img id="invoiceImgResult" alt="invoice" style="width:100%; height:auto; border-radius:12px; border:1px solid #eee;" />
-</div>
-
-      
-    </div>
-  </div>
-</div>
 
 
 
@@ -6641,6 +6602,7 @@ function calcTotalsForInvoice(){
 
 async function checkoutPDF(){
   if(!cart || cart.length === 0){
+    // إذا تستخدم SweetAlert2:
     if(window.Swal) Swal.fire({icon:"info", title:"السلة فارغة", text:"ضيف عناصر حتى نطبع فاتورة."});
     return;
   }
@@ -6653,10 +6615,9 @@ async function checkoutPDF(){
     String(now.getHours()).padStart(2,"0") +
     String(now.getMinutes()).padStart(2,"0");
 
-  __lastInvNo = invNo; // ✅ حتى اسم الصورة يصير نفس رقم الفاتورة
-
   const { subtotal, discount, total } = calcTotalsForInvoice();
 
+  // إذا عندك حقل ملاحظة بالسلة استعمله، إذا لا خلي فاضي:
   const noteEl = document.getElementById("cartNote");
   const note = noteEl ? noteEl.value : "";
 
@@ -6669,15 +6630,8 @@ async function checkoutPDF(){
     note
   });
 
-  // ✅ بدل PDF: افتح معاينة وخلي زر "حفظ صورة"
-  openInvoiceOverlay();
+  await exportInvoicePDF(invNo + ".pdf");
 }
-window.checkoutPDF = checkoutPDF;
-
-
-// مهم إذا عندك onclick
-window.checkoutPDF = checkoutPDF;
-
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -6700,129 +6654,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
-function openInvoiceHTMLForPrint(invNo){
-  const tpl = document.getElementById("invoiceTemplate");
-  if(!tpl) throw new Error("invoiceTemplate missing");
-
-  const html = `
-<!doctype html>
-<html dir="rtl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>${invNo}</title>
-  <style>
-    body{ margin:0; background:#fff; font-family: Cairo, Arial, sans-serif; }
-    .bar{
-      position: sticky; top:0; z-index:10;
-      display:flex; gap:10px; align-items:center; justify-content:space-between;
-      padding:12px; background:#0f172a; color:#fff;
-    }
-    .btn{
-      border:0; padding:10px 14px; border-radius:12px;
-      background:#f97316; color:#fff; font-weight:800; cursor:pointer;
-    }
-    .btn2{ background: rgba(255,255,255,.12); }
-    .wrap{ padding:12px; }
-    @media print{
-      .bar{ display:none !important; }
-      .wrap{ padding:0; }
-      body{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    }
-  </style>
-</head>
-<body>
-  <div class="bar">
-    <div>فاتورة: ${invNo}</div>
-    <div style="display:flex; gap:10px">
-      <button class="btn" onclick="window.print()">طباعة / حفظ PDF</button>
-      <button class="btn btn2" onclick="history.back()">رجوع</button>
-    </div>
-  </div>
-  <div class="wrap">
-    ${tpl.innerHTML}
-  </div>
-</body>
-</html>`;
-
-  // ✅ Data URL (يشتغل أكثر من Blob داخل WebView)
-  const url = "data:text/html;charset=utf-8," + encodeURIComponent(html);
-
-  // ✅ جرّب new tab… إذا WebView يمنع، افتحه بنفس الصفحة
-  const w = window.open(url, "_blank");
-  if(!w){
-    window.location.href = url;
-  }
-}
-
-let __lastInvNo = "invoice";
-
-function openInvoiceOverlay(){
-  const overlay = document.getElementById("invoiceOverlay");
-  const preview = document.getElementById("invoicePreview");
-  const tpl = document.getElementById("invoiceTemplate");
-  if(!overlay || !preview || !tpl) throw new Error("invoice overlay/template missing");
-
-  preview.innerHTML = tpl.innerHTML;
-
-  // خلي العرض مناسب للموبايل (حتى ما يثقل)
-  preview.style.maxWidth = "520px";
-  preview.style.margin = "0 auto";
-
-  overlay.style.display = "block";
-}
-
-function closeInvoiceOverlay(){
-  const overlay = document.getElementById("invoiceOverlay");
-  if(overlay) overlay.style.display = "none";
-}
-
-async function saveInvoiceAsImage(){
-  if(!window.html2canvas) throw new Error("html2canvas missing");
-
-  const preview = document.getElementById("invoicePreview");
-  const wrap = document.getElementById("invoiceImgWrap");
-  const imgEl = document.getElementById("invoiceImgResult");
-  if(!preview || !wrap || !imgEl) throw new Error("invoice preview/result missing");
-
-  // اخفي الصورة القديمة إذا موجودة
-  wrap.style.display = "none";
-  imgEl.removeAttribute("src");
-
-  // خليها ترسم صح
-  await new Promise(r => requestAnimationFrame(()=>requestAnimationFrame(r)));
-
-  const canvas = await html2canvas(preview, {
-    backgroundColor: "#ffffff",
-    scale: 1,          // مهم للموبايل
-    useCORS: true
-  });
-
-  // ✅ الأضمن داخل WebView: نحولها DataURL ونخليها <img>
-  const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
-  imgEl.src = dataUrl;
-  wrap.style.display = "block";
-}
-
-
-document.addEventListener("DOMContentLoaded", ()=>{
-  document.getElementById("closeInvoiceOverlayBtn")?.addEventListener("click", closeInvoiceOverlay);
-document.getElementById("saveInvoiceImgBtn")?.addEventListener("click", async ()=>{
-  try{
-    await saveInvoiceAsImage();
-    if(window.Swal) Swal.fire({ icon:"success", title:"تم", text:"اضغط مطوّل على الصورة حتى تحفظها." });
-  }catch(e){
-    console.error(e);
-    if(window.Swal) Swal.fire({ icon:"error", title:"فشل حفظ الصورة", text: e?.message || String(e) });
-    else alert("فشل حفظ الصورة: " + (e?.message || String(e)));
-  }
-});
-
-  
-  
-});
-
 
 
 
