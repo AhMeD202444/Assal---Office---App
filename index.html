@@ -6831,62 +6831,8 @@ function openFullImageOverlay(dataUrl, filename){
 
 
 
-function openFullImageOverlay(dataUrl, filename){
-  // ✅ علامة حتى نتأكد الجديدة هي اللي تشتغل
-  console.log("FULLSCREEN (floating back) is running");
 
-  document.getElementById("imgFullOverlay")?.remove();
 
-  const f = document.createElement("div");
-  f.id = "imgFullOverlay";
-  f.style.cssText = `
-    position: fixed;
-    inset: 0;
-    z-index: 2147483647;
-    background: #ffffff;
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-  `;
-
-  f.innerHTML = `
-    <!-- ✅ زر رجوع عائم فوق الصورة -->
-    <button id="imgFullBack" type="button" aria-label="Back" style="
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 2147483647;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid rgba(0,0,0,.12);
-      background: rgba(255,255,255,.92);
-      color:#111;
-      font-weight:900;
-      cursor:pointer;
-      box-shadow: 0 10px 25px rgba(0,0,0,.20);
-      backdrop-filter: blur(10px);
-    ">
-      ← Back
-    </button>
-
-    <div style="padding:10px;">
-      <img src="${dataUrl}" alt="${filename || "Invoice"}" style="
-        width:100%;
-        max-width:1200px;
-        height:auto;
-        display:block;
-        margin:0 auto;
-        image-rendering:auto;
-      " />
-    </div>
-  `;
-
-  document.body.appendChild(f);
-
-  f.querySelector("#imgFullBack").onclick = ()=> f.remove();
-}
 
 
 
