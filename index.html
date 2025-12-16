@@ -6513,48 +6513,64 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
   `;
 }
 
+
+function isCanvasBlank(canvas){
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width, h = canvas.height;
+  if(!w || !h) return true;
+  const pts = [[5,5],[w-6,5],[5,h-6],[w-6,h-6],[Math.floor(w/2),Math.floor(h/2)]];
+  for (const [x,y] of pts){
+    const p = ctx.getImageData(Math.max(0,x), Math.max(0,y), 1, 1).data;
+    if(!(p[0] === 255 && p[1] === 255 && p[2] === 255)) return false;
+  }
+  return true;
+}
+
+async function waitForImages(root){
+  const imgs = Array.from(root.querySelectorAll("img"));
+  await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(res=>{
+    img.onload = res; img.onerror = res;
+  })));
+}
+
+
 async function exportInvoicePDF(filename){
+  if(!window.html2canvas) throw new Error("html2canvas مو محمّلة");
+  if(!window.jspdf || !window.jspdf.jsPDF) throw new Error("jsPDF مو محمّلة");
+
   const el = document.getElementById("invoiceTemplate");
   if(!el) throw new Error("invoiceTemplate missing");
 
-  // نخليه داخل الشاشة حتى WebView يرسمه (مو zIndex -1)
+  // تأكد الفاتورة مو فاضية
+  if(!el.innerHTML || el.innerHTML.trim().length < 30) {
+    throw new Error("invoiceTemplate empty (buildInvoiceHTML ما انبنى؟)");
+  }
+
+  // نخلي الأصل يظل مخفي (مثل ما عندك)
   const prev = el.getAttribute("style") || "";
-  el.style.display = "block";
-  el.style.position = "fixed";
-  el.style.left = "0";
-  el.style.top = "0";
-  el.style.zIndex = "9999";     // ✅ بدل -1
-  el.style.opacity = "0.01";    // ✅ لا تخليها 0
-  el.style.pointerEvents = "none";
-  el.style.background = "#ffffff";
+  el.style.display = "block"; // لازم حتى ناخذ الارتفاع الحقيقي
+  await waitForImages(el);
 
   // انتظر الخطوط
   if (document.fonts && document.fonts.ready) {
     try { await document.fonts.ready; } catch(_) {}
   }
 
-  // انتظر الصور (اللوجو)
-  const imgs = Array.from(el.querySelectorAll("img"));
-  await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(res => {
-    img.onload = res; img.onerror = res;
-  })));
-
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ orientation:"p", unit:"pt", format:"a4", compress:true });
-
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
   const a4Ratio = pageH / pageW; // ~1.414
 
-  // أبعاد الفاتورة داخل الـHTML
+  // ابعاد الفاتورة بالـCSS
   const cssW = el.scrollWidth || el.offsetWidth || 794;
   const cssH = el.scrollHeight || el.offsetHeight || 1123;
 
-  // ارتفاع صفحة A4 بالـCSS pixels حسب عرض الفاتورة
+  // ارتفاع صفحة A4 بالـCSS px
   const pageCssH = Math.floor(cssW * a4Ratio);
 
-  // scale خفيف حتى لا يبيض بالموبايل
-  const scale = 1.05;
+  // scale خفيف (WebView يحب الخفيف)
+  const scale = 1.0;
 
   let y = 0;
   let page = 0;
@@ -6562,20 +6578,43 @@ async function exportInvoicePDF(filename){
   while (y < cssH) {
     const sliceH = Math.min(pageCssH, cssH - y);
 
-    // ✅ رندر جزء واحد فقط (صفحة) — هذا اللي يحل “أبيض” بالـWebView
-    const canvas = await html2canvas(el, {
+    // ✅ Wrapper يقص صفحة وحدة + Clone ينزاح للأعلى
+    const wrapper = document.createElement("div");
+    wrapper.style.width = cssW + "px";
+    wrapper.style.height = sliceH + "px";
+    wrapper.style.overflow = "hidden";
+    wrapper.style.position = "fixed";
+    wrapper.style.left = "0";
+    wrapper.style.top = "0";
+    wrapper.style.zIndex = "2147483647"; // فوق كلشي حتى يرسمه WebView
+    wrapper.style.background = "#ffffff";
+    wrapper.style.opacity = "0.01"; // ما يبين للمستخدم (بس يبقى مرسوم)
+
+    const clone = el.cloneNode(true);
+    clone.style.display = "block";
+    clone.style.position = "relative";
+    clone.style.transform = `translateY(-${y}px)`;
+    clone.style.background = "#ffffff";
+
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+
+    await waitForImages(wrapper);
+
+    const canvas = await html2canvas(wrapper, {
       scale,
       backgroundColor: "#ffffff",
       useCORS: true,
       scrollX: 0,
-      scrollY: 0,
-      x: 0,
-      y: y,
-      width: cssW,
-      height: sliceH,
-      windowWidth: cssW,
-      windowHeight: sliceH
+      scrollY: 0
     });
+
+    document.body.removeChild(wrapper);
+
+    if (isCanvasBlank(canvas)) {
+      el.setAttribute("style", prev);
+      throw new Error("canvas_blank (WebView render)");
+    }
 
     const imgData = canvas.toDataURL("image/jpeg", 0.92);
 
@@ -6588,29 +6627,29 @@ async function exportInvoicePDF(filename){
     page++;
   }
 
-  // ✅ بديل pdf.save() لأن WebIntoApp مرات يمنع التحميل
+  // ✅ WebIntoApp: الأفضل Blob + open/share
   const blob = pdf.output("blob");
 
-  // أفضل خيار داخل WebView: مشاركة الملف
+  // جرّب مشاركة (أفضل حفظ بالموبايل)
   if (navigator.share) {
     try {
       const file = new File([blob], filename, { type: "application/pdf" });
       await navigator.share({ files: [file], title: filename });
-    } catch (e) {
-      // إذا فشل الشير، نفتح بالمتصفح
+    } catch(_) {
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      setTimeout(()=>URL.revokeObjectURL(url), 4000);
     }
   } else {
-    // fallback: افتحه بصفحة جديدة
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
-    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
   }
 
+  // رجّع الستايل مثل ما كان
   el.setAttribute("style", prev);
 }
+
 
 
 
@@ -6651,8 +6690,16 @@ async function checkoutPDF(){
     note
   });
 
-  await exportInvoicePDF(invNo + ".pdf");
+  try {
+    await exportInvoicePDF(invNo + ".pdf");
+  } catch (e) {
+    const msg = (e && (e.message || e.toString())) ? (e.message || e.toString()) : "سبب غير معروف";
+    console.error("PDF FAIL:", e);
+    if (window.Swal) Swal.fire({ icon:"error", title:"فشل تصدير PDF", text: msg });
+    else alert("فشل تصدير PDF: " + msg);
+  }
 }
+
 
 
 document.addEventListener("DOMContentLoaded", () => {
