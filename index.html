@@ -6602,7 +6602,6 @@ function calcTotalsForInvoice(){
 
 async function checkoutPDF(){
   if(!cart || cart.length === 0){
-    // إذا تستخدم SweetAlert2:
     if(window.Swal) Swal.fire({icon:"info", title:"السلة فارغة", text:"ضيف عناصر حتى نطبع فاتورة."});
     return;
   }
@@ -6616,8 +6615,6 @@ async function checkoutPDF(){
     String(now.getMinutes()).padStart(2,"0");
 
   const { subtotal, discount, total } = calcTotalsForInvoice();
-
-  // إذا عندك حقل ملاحظة بالسلة استعمله، إذا لا خلي فاضي:
   const noteEl = document.getElementById("cartNote");
   const note = noteEl ? noteEl.value : "";
 
@@ -6630,8 +6627,17 @@ async function checkoutPDF(){
     note
   });
 
-  await exportInvoicePDF(invNo + ".pdf");
+  try{
+    openInvoiceHTMLForPrint(invNo);
+  }catch(e){
+    console.error(e);
+    if(window.Swal) Swal.fire({icon:"error", title:"فشل فتح صفحة الطباعة", text: e?.message || String(e)});
+  }
 }
+
+// مهم إذا عندك onclick
+window.checkoutPDF = checkoutPDF;
+
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -6654,6 +6660,61 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+function openInvoiceHTMLForPrint(invNo){
+  const tpl = document.getElementById("invoiceTemplate");
+  if(!tpl) throw new Error("invoiceTemplate missing");
+
+  const html = `
+<!doctype html>
+<html dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>${invNo}</title>
+  <style>
+    body{ margin:0; background:#fff; font-family: Cairo, Arial, sans-serif; }
+    .bar{
+      position: sticky; top:0; z-index:10;
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      padding:12px; background:#0f172a; color:#fff;
+    }
+    .btn{
+      border:0; padding:10px 14px; border-radius:12px;
+      background:#f97316; color:#fff; font-weight:800; cursor:pointer;
+    }
+    .btn2{ background: rgba(255,255,255,.12); }
+    .wrap{ padding:12px; }
+    @media print{
+      .bar{ display:none !important; }
+      .wrap{ padding:0; }
+      body{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <div>فاتورة: ${invNo}</div>
+    <div style="display:flex; gap:10px">
+      <button class="btn" onclick="window.print()">طباعة / حفظ PDF</button>
+      <button class="btn btn2" onclick="history.back()">رجوع</button>
+    </div>
+  </div>
+  <div class="wrap">
+    ${tpl.innerHTML}
+  </div>
+</body>
+</html>`;
+
+  // ✅ Data URL (يشتغل أكثر من Blob داخل WebView)
+  const url = "data:text/html;charset=utf-8," + encodeURIComponent(html);
+
+  // ✅ جرّب new tab… إذا WebView يمنع، افتحه بنفس الصفحة
+  const w = window.open(url, "_blank");
+  if(!w){
+    window.location.href = url;
+  }
+}
 
 
 
