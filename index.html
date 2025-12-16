@@ -6670,19 +6670,34 @@ async function exportInvoiceImagePNG(filename){
 
   // fallback: فتحها
   const url = URL.createObjectURL(blob);
-  window.open(url, "_blank");
+
+
+const a = document.createElement("a");
+a.href = url;
+a.download = filename;
+document.body.appendChild(a);
+a.click();
+setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 20000);
+
+
+
   setTimeout(()=>URL.revokeObjectURL(url), 20000);
 }
 
-document.getElementById("printImgBtn")?.addEventListener("click", async ()=>{
-  try{
-    // لازم تكون الفاتورة متولدة (مثل ما تسوي داخل checkoutPDF)
-    // إذا عندك دالة تولّد الفاتورة HTML استدعيها هنا قبل التصوير
-    await exportInvoiceImagePNG("invoice.png");
-  }catch(e){
-    alert(e?.message || e);
-  }
+document.addEventListener("DOMContentLoaded", () => {
+  const imgBtn = document.getElementById("printImgBtn");
+  if(!imgBtn) return;
+
+  imgBtn.addEventListener("click", async ()=>{
+    try{
+      if(!window.html2canvas) throw new Error("html2canvas is not loaded");
+      await checkoutImage();
+    }catch(e){
+      alert(e?.message || e);
+    }
+  });
 });
+
 
 
 
@@ -6834,6 +6849,40 @@ function calcTotalsForInvoice(){
   const total = Math.max(0, subtotal - discount);
   return { subtotal, discount, total };
 }
+
+
+async function checkoutImage(){
+  if(!cart || cart.length === 0){
+    if(window.Swal) Swal.fire({icon:"info", title:"Cart is empty", text:"Add items to export an invoice image."});
+    return;
+  }
+
+  const now = new Date();
+  const invNo = "INV-" +
+    now.getFullYear() +
+    String(now.getMonth()+1).padStart(2,"0") +
+    String(now.getDate()).padStart(2,"0") + "-" +
+    String(now.getHours()).padStart(2,"0") +
+    String(now.getMinutes()).padStart(2,"0");
+
+  const { subtotal, discount, total } = calcTotalsForInvoice();
+
+  const noteEl = document.getElementById("cartNote");
+  const note = noteEl ? noteEl.value : "";
+
+  // ✅ مهم: نبني الفاتورة قبل التصوير (هذا سبب البياض)
+  buildInvoiceHTML({
+    invNo,
+    dateStr: now.toLocaleString("en-GB"),
+    subtotal,
+    discount,
+    total,
+    note
+  });
+
+  await exportInvoiceImagePNG(invNo + ".png");
+}
+
 
 async function checkoutPDF(){
   if(!cart || cart.length === 0){
