@@ -4287,7 +4287,6 @@ body {
     </div>
 </header>
  
- 
  <!-- ✅ الطبقة الضبابية Overlay -->
 
 
@@ -6518,37 +6517,81 @@ async function exportInvoicePDF(filename){
   const el = document.getElementById("invoiceTemplate");
   if(!el) throw new Error("invoiceTemplate missing");
 
+  // خليه يشتغل بدون ما يبين
+  const prev = el.getAttribute("style") || "";
   el.style.display = "block";
+  el.style.position = "fixed";
+  el.style.left = "-9999px";
+  el.style.top = "0";
+  el.style.background = "#fff";
 
-  // دقة عالية حتى يطلع برو
-  const canvas = await html2canvas(el, { scale: 2, useCORS: true });
-  const imgData = canvas.toDataURL("image/png");
+  if (document.fonts && document.fonts.ready) {
+    try { await document.fonts.ready; } catch(_) {}
+  }
 
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF("p", "pt", "a4");
+  const canvas = await html2canvas(el, {
+    scale: 1.5,                 // أقل من 2 حتى ما يصير ملف ضخم
+    backgroundColor: "#ffffff",
+    useCORS: true
+  });
 
-  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pdf = new window.jspdf.jsPDF({
+    orientation: "p",
+    unit: "pt",
+    format: "a4",
+    compress: true
+  });
+
+  const pageWidth  = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  // تحويل “نقاط PDF” إلى “بكسلات canvas” حتى نقص الصفحة صح
+  const pxPerPt = canvas.width / pageWidth;
+  const pagePxHeight = Math.floor(pageHeight * pxPerPt);
 
-  let heightLeft = imgHeight;
-  let position = 0;
+  const pageCanvas = document.createElement("canvas");
+  const pageCtx = pageCanvas.getContext("2d");
 
-  pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-  heightLeft -= pageHeight;
+  let y = 0;
+  let pageIndex = 0;
 
-  while(heightLeft > 10){
-    position -= pageHeight;
-    pdf.addPage();
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+  while (y < canvas.height) {
+    const sliceHeight = Math.min(pagePxHeight, canvas.height - y);
+
+    pageCanvas.width = canvas.width;
+    pageCanvas.height = sliceHeight;
+
+    // خلفية بيضا
+    pageCtx.fillStyle = "#ffffff";
+    pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+
+    // قص جزء من الصورة الأصلية
+    pageCtx.drawImage(
+      canvas,
+      0, y, canvas.width, sliceHeight,
+      0, 0, canvas.width, sliceHeight
+    );
+
+    // JPEG مضغوط (أكثر توافقاً مع موبايلات)
+    const imgData = pageCanvas.toDataURL("image/jpeg", 0.92);
+
+    if (pageIndex > 0) pdf.addPage();
+
+    const imgWidth = pageWidth;
+    const imgHeight = (sliceHeight * imgWidth) / pageCanvas.width;
+
+    pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
+
+    y += sliceHeight;
+    pageIndex++;
   }
 
   pdf.save(filename);
-  el.style.display = "none";
+
+  // رجّع الستايل
+  el.setAttribute("style", prev);
 }
+
 
 function calcTotalsForInvoice(){
   const subtotal = cart.reduce((s,it)=> s + (Number(it.price)||0) * (Number(it.qty)||0), 0);
