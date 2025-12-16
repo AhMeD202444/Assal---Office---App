@@ -4226,8 +4226,77 @@ body {
 }
 
 
+/* ✅ أزرار أيقونات للهيدر (عدا السلة) */
+.header-icon-btn{
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 16px;
+    line-height: 1;
+}
+.header-icon-btn i{
+    pointer-events: none;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
+}
+
+/* ✅ ستايل زر العروض */
+.header-btn.offers-btn{
+    background: linear-gradient(135deg, #b45309, #d97706);
+}
+.header-btn.offers-btn:hover{
+    background: linear-gradient(135deg, #d97706, #f59e0b);
+}
 
 
+/* ✅ Feedback: يبين تمّت الإضافة للسلة */
+.add-mini{
+  transition: transform .15s ease, filter .2s ease, box-shadow .2s ease;
+}
+.add-mini:focus-visible{
+  outline: 2px solid rgba(96,165,250,.7);
+  outline-offset: 2px;
+}
+.add-mini.adding{ transform: scale(.92); }
+
+.add-mini.added{
+  border-color: rgba(34,197,94,.35);
+  background: linear-gradient(135deg, rgba(34,197,94,.65), rgba(16,185,129,.25));
+  box-shadow: 0 12px 28px rgba(34,197,94,.18), 0 10px 25px rgba(0,0,0,.35);
+}
+.add-mini.added i{ animation: addPop .35s ease; }
+
+.add-mini::after{
+  content: "تمت الإضافة";
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  transform: translate(-50%, -100%) scale(.96);
+  opacity: 0;
+  pointer-events: none;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+  background: rgba(2,6,23,.75);
+  border: 1px solid rgba(255,255,255,.14);
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+.add-mini.added::after{
+  opacity: 1;
+  transform: translate(-50%, -100%) scale(1);
+}
+
+@keyframes addPop{
+  0%{ transform: scale(.85) rotate(-6deg); }
+  60%{ transform: scale(1.15) rotate(0deg); }
+  100%{ transform: scale(1) rotate(0deg); }
+}
 
 
 
@@ -4273,18 +4342,30 @@ body {
  
  <header class="header">
     <div class="header-title">مكتب عسل</div>
-    <div class="header-buttons">
-        <button class="header-btn refresh-btn" onclick="refreshData()" title="تحديث البيانات">تحديث</button>
-        <button class="header-btn exit-btn" onclick="confirmExit()" title="خروج">خروج</button>
-        <button class="header-btn offers-btn" onclick="openOffersModal()" title="عروض">عروض</button>
-        
-        <button class="header-btn header-cart-btn" id="openCartBtn" type="button" title="سلة المبيعات">
-  <i class="fas fa-shopping-cart"></i>
-  <span class="header-cart-badge" id="cartCount">0</span>
-</button>
+   
+   
+   <div class="header-buttons">
+  <button class="header-btn header-icon-btn refresh-btn" onclick="refreshData()" title="تحديث البيانات" aria-label="تحديث البيانات">
+    <i class="fas fa-arrows-rotate"></i>
+  </button>
 
+  <button class="header-btn header-icon-btn exit-btn" onclick="confirmExit()" title="خروج" aria-label="خروج">
+    <i class="fas fa-right-from-bracket"></i>
+  </button>
 
-    </div>
+  <button class="header-btn header-icon-btn offers-btn" onclick="openOffersModal()" title="عروض" aria-label="عروض">
+    <i class="fas fa-tags"></i>
+  </button>
+
+  <!-- السلة تبقى مثل ما هي -->
+  <button class="header-btn header-cart-btn" id="openCartBtn" type="button" title="سلة المبيعات">
+    <i class="fas fa-shopping-cart"></i>
+    <span class="header-cart-badge" id="cartCount">0</span>
+  </button>
+</div>
+
+   
+   
 </header>
  
  <!-- ✅ الطبقة الضبابية Overlay -->
@@ -5878,7 +5959,7 @@ function displayResults(results) {
                             data-category="${encodeURIComponent(currentCategory)}"
                             data-price="${effectivePrice}"
                             data-img="${imgSrc}">
-                            <i class="fas fa-plus"></i>
+                            <i class="fas fa-cart-plus"></i>
                         </button>
                     ` : ''}
 
