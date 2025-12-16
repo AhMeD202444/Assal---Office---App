@@ -6671,36 +6671,53 @@ function showImagePreviewDataUrl(dataUrl, filename){
   ov.id = "imgPrevOverlay";
   ov.style.cssText = `
     position: fixed; inset: 0; z-index: 2147483647;
-    background: rgba(0,0,0,.65);
+    background: rgba(0,0,0,.70);
     display:flex; align-items:center; justify-content:center;
-    padding: 14px;
+    padding: 12px;
   `;
 
   ov.innerHTML = `
-    <div style="width:min(520px, 96vw); background:#0b1220; border:1px solid rgba(255,255,255,.12);
-                border-radius:16px; padding:12px; color:#fff;">
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;">
-        <div style="font-weight:900; font-size:14px;">Invoice Image</div>
-        <button id="imgPrevClose" style="background:transparent;border:0;color:#fff;font-size:20px;cursor:pointer;">×</button>
-      </div>
-
-      <img src="${dataUrl}" alt="Invoice" style="width:100%; height:auto; border-radius:12px; background:#fff;" />
-
-      <div style="display:flex; gap:10px; margin-top:12px;">
-        <button id="imgPrevSave"
-           style="flex:1; padding:10px 12px; border-radius:12px; border:0;
-                  background: linear-gradient(135deg,#2563eb,#60a5fa); color:#fff; font-weight:900;">
-          Save
-        </button>
-        <button id="imgPrevShare"
-           style="flex:1; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.16);
-                  background: rgba(255,255,255,.06); color:#fff; font-weight:900;">
-          Share
+    <div style="
+      width:min(560px, 96vw);
+      height: min(92vh, 980px);
+      background:#0b1220;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:18px;
+      padding:12px;
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    ">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <div style="font-weight:900; font-size:14px;">Invoice Preview</div>
+        <button id="imgPrevClose" type="button"
+          style="background:transparent;border:0;color:#fff;font-size:22px;cursor:pointer;line-height:1;">
+          ×
         </button>
       </div>
 
-      <div style="opacity:.8; font-size:12px; margin-top:10px;">
-        إذا ما يدعم Share بالتطبيق، تگدر تضغط <b>Save</b> أو تسوي Screenshot.
+      <div style="
+        flex:1;
+        overflow:auto;
+        background:#ffffff;
+        border-radius:14px;
+        padding:10px;
+      ">
+        <img src="${dataUrl}" alt="Invoice"
+             style="width:100%; height:auto; display:block;" />
+      </div>
+
+      <div style="
+        border-radius:14px;
+        padding:12px;
+        background: rgba(255,255,255,.06);
+        border: 1px solid rgba(255,255,255,.14);
+        font-size:13px;
+        line-height:1.6;
+      ">
+        <div style="font-weight:900; margin-bottom:6px;">ملاحظة</div>
+        يرجى أخذ سكرين للصورة وإرسالها إلينا عن طريق الواتساب.
       </div>
     </div>
   `;
@@ -6709,31 +6726,8 @@ function showImagePreviewDataUrl(dataUrl, filename){
 
   ov.querySelector("#imgPrevClose").onclick = ()=>ov.remove();
   ov.onclick = (e)=>{ if(e.target === ov) ov.remove(); };
-
-  // ✅ Save: هنا بس نطلع نافذة Save As (بس هسه صارت اختيارية مو غصب)
-  ov.querySelector("#imgPrevSave").onclick = ()=>{
-    const a = document.createElement("a");
-    a.href = dataUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  };
-
-  // ✅ Share: إذا WebView يدعم مشاركة ملفات
-  ov.querySelector("#imgPrevShare").onclick = async ()=>{
-    try{
-      if(!navigator.share) throw 0;
-      const resp = await fetch(dataUrl);
-      const blob = await resp.blob();
-      const file = new File([blob], filename, {type:"image/png"});
-      if(navigator.canShare && !navigator.canShare({files:[file]})) throw 0;
-      await navigator.share({ files:[file], title: filename });
-    }catch(_){
-      alert("Share مو مدعوم بهالتطبيق. استخدم Save أو Screenshot.");
-    }
-  };
 }
+
 
 
 
