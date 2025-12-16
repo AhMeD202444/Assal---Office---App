@@ -6768,23 +6768,70 @@ function showImagePreviewDataUrl(dataUrl, filename){
   ov.onclick = (e)=>{ if(e.target === ov) ov.remove(); };
 
   // ✅ Full Screen: يفتح الصورة بحجم كبير حتى السكرين يطلع واضح
-  ov.querySelector("#imgPrevFull").onclick = ()=>{
-    const w = window.open();
-    if(!w){ alert("Open not allowed. Try again."); return; }
-    w.document.write(`
-      <html>
-        <head>
-          <meta name="viewport" content="width=device-width,initial-scale=1">
-          <title>${filename}</title>
-        </head>
-        <body style="margin:0;background:#fff;display:flex;justify-content:center;align-items:flex-start;padding:10px;">
-          <img src="${dataUrl}" style="width:100%;max-width:1100px;height:auto;display:block;" />
-        </body>
-      </html>
-    `);
-    w.document.close();
-  };
+ ov.querySelector("#imgPrevFull").onclick = ()=>{
+  openFullImageOverlay(dataUrl, filename);
+};
+
 }
+
+function openFullImageOverlay(dataUrl, filename){
+  document.getElementById("imgFullOverlay")?.remove();
+
+  const f = document.createElement("div");
+  f.id = "imgFullOverlay";
+  f.style.cssText = `
+    position: fixed; inset: 0; z-index: 2147483647;
+    background: #0b1220;
+    display:flex; flex-direction:column;
+  `;
+
+  f.innerHTML = `
+    <div style="
+      height:56px; padding:10px 12px;
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      color:#fff;
+    ">
+      <button id="imgFullBack" type="button" style="
+        display:flex; align-items:center; gap:8px;
+        padding:10px 12px;
+        border-radius:999px;
+        border:1px solid rgba(255,255,255,.18);
+        background: rgba(255,255,255,.08);
+        color:#fff; font-weight:900; cursor:pointer;
+      ">
+        ← Back
+      </button>
+
+      <div style="font-weight:900; font-size:13px; opacity:.9;">
+        ${filename || "Invoice"}
+      </div>
+
+      <button id="imgFullClose" type="button" aria-label="Close" style="
+        width:38px; height:38px;
+        border-radius:999px;
+        border:1px solid rgba(255,255,255,.18);
+        background:#b91c1c; color:#fff;
+        font-size:20px; cursor:pointer;
+      ">×</button>
+    </div>
+
+    <div style="
+      flex:1; overflow:auto; background:#fff;
+      -webkit-overflow-scrolling: touch;
+      padding:10px;
+    ">
+      <img src="${dataUrl}" style="width:100%; height:auto; display:block; max-width:1200px; margin:0 auto;" />
+    </div>
+  `;
+
+  document.body.appendChild(f);
+
+  const close = ()=> f.remove();
+  f.querySelector("#imgFullBack").onclick = close;
+  f.querySelector("#imgFullClose").onclick = close;
+}
+
 
 
 
