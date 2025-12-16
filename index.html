@@ -8,6 +8,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    
+    <!-- PDF libs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -3881,6 +3886,345 @@ body {
 }
 
 
+/* ===== Header Cart Button ===== */
+.header-cart-btn{
+  position: relative;
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: radial-gradient(circle at top left, rgba(96,165,250,.35), rgba(15,23,42,.2));
+}
+.header-cart-badge{
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(17,24,39,.95);
+  border: 1px solid rgba(255,255,255,.18);
+  color:#fff;
+  font-size: 11px;
+  font-weight: 900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* ===== Overlay (اذا مو موجود عندك) ===== */
+.overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 9998;
+}
+
+/* ===== Cart Modal ===== */
+.cart-modal{
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 9999;
+  direction: rtl;
+  font-family: 'Cairo', sans-serif;
+}
+.cart-shell{
+  position: absolute;
+  top: 70px;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(980px, calc(100% - 20px));
+  background:
+    radial-gradient(circle at top left, rgba(249,115,22,.14), transparent 45%),
+    radial-gradient(circle at bottom right, rgba(96,165,250,.16), transparent 55%),
+    rgba(15,23,42,.92);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  box-shadow: 0 28px 70px rgba(0,0,0,.75);
+  backdrop-filter: blur(18px);
+  display:flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* top */
+.cart-top{
+  padding: 14px 14px 10px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+.cart-title{display:flex;align-items:center;gap:10px;}
+.cart-ico{
+  width: 38px;height:38px;border-radius: 14px;
+  background: linear-gradient(135deg, rgba(249,115,22,.35), rgba(96,165,250,.20));
+  border: 1px solid rgba(255,255,255,.12);
+  display:grid;place-items:center;color:#fff;
+}
+.cart-h1{color:#fff;font-weight: 900;font-size: 18px;}
+.cart-h2{color:#cbd5e1;font-size: 12px;margin-top:2px;}
+.cart-x{
+  width: 38px;height:38px;border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color:#fff;cursor:pointer;
+}
+.cart-x:hover{background: rgba(239,68,68,.25);}
+
+/* body */
+.cart-body{
+  padding: 12px;
+  overflow: auto;
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cart-body::-webkit-scrollbar{display:none;}
+.cart-body{scrollbar-width:none;-ms-overflow-style:none;}
+
+/* item row */
+.cart-item{
+  display:grid;
+  grid-template-columns: 62px 1fr auto;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+}
+.cart-item img{
+  width: 62px;height:62px;border-radius: 16px;
+  object-fit: cover;
+  background: rgba(255,255,255,.06);
+}
+.cart-info{min-width:0;}
+.cart-name{
+  color:#fff;font-weight: 900;font-size: 14px;
+  line-height: 1.25;
+  white-space: normal;           /* <-- هذا يحل مشكلة “اسم المادة ما يطلع” */
+  overflow: hidden;
+  display:-webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.cart-sub{
+  margin-top: 6px;
+  display:flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color:#cbd5e1;
+  font-size: 12px;
+}
+.cart-chip{
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.25);
+}
+.cart-side{
+  display:flex;
+  flex-direction: column;
+  align-items:flex-end;
+  gap: 8px;
+}
+.cart-line-total{color:#fff;font-weight: 900;}
+.qty{
+  display:flex;align-items:center;gap:6px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.25);
+}
+.qty button{
+  width: 28px;height:28px;border-radius: 999px;
+  border:none;background: rgba(255,255,255,.10);
+  color:#fff;cursor:pointer;
+}
+.qty .qv{min-width: 18px;text-align:center;color:#fff;font-weight: 900;}
+.cart-rm{
+  width: 34px;height:34px;border-radius: 12px;
+  border: 1px solid rgba(239,68,68,.25);
+  background: rgba(239,68,68,.12);
+  color:#fff;cursor:pointer;
+}
+
+/* bottom */
+.cart-bottom{
+  padding: 12px;
+  border-top: 1px solid rgba(255,255,255,.10);
+  background: rgba(2,6,23,.25);
+}
+.cart-sum{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;}
+.sum-row{display:flex;justify-content:space-between;align-items:center;color:#e5e7eb;}
+.sum-disc{display:flex;align-items:center;gap:8px;}
+.sum-disc input{
+  width: 130px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color:#fff;outline:none;
+}
+.sum-grand{
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255,255,255,.16);
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.cart-actions{display:flex;gap:10px;}
+.cart-btn{
+  flex:1;
+  padding: 12px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.12);
+  cursor:pointer;
+  font-weight: 900;
+  font-family:'Cairo',sans-serif;
+  color:#fff;
+}
+.cart-btn.ghost{background: rgba(255,255,255,.06);}
+.cart-btn.primary{background: linear-gradient(135deg, rgba(249,115,22,.9), rgba(96,165,250,.55));}
+.cart-btn:active{transform: scale(.98);}
+
+/* ===== Mini Add Button (Elegant) داخل كارت النتيجة بدون تأثير على المقاس ===== */
+.result-card{ position: relative; } /* مهم جداً */
+.add-mini{
+  position:absolute;
+  top: 10px;
+  left: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: linear-gradient(135deg, rgba(249,115,22,.55), rgba(96,165,250,.25));
+  color:#fff;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  box-shadow: 0 10px 25px rgba(0,0,0,.35);
+  backdrop-filter: blur(10px);
+}
+.add-mini:hover{transform: translateY(-1px);}
+.add-mini:active{transform: scale(.96);}
+@media (max-width: 520px){
+  .add-mini{ width: 38px; height: 38px; border-radius: 16px; }
+}
+
+
+/* Invoice paper */
+.invoice-paper{
+  width: 794px;            /* تقريب A4 على 96dpi */
+  background: #fff;
+  color: #0f172a;
+  direction: rtl;
+  font-family: 'Cairo', sans-serif;
+  padding: 28px;
+}
+
+.inv-head{
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid #e5e7eb;
+}
+.inv-brand{
+  display:flex; align-items:center; gap:12px;
+}
+.inv-brand img{
+  width: 66px; height: 66px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+}
+.inv-brand .t1{font-size:18px;font-weight:900;}
+.inv-brand .t2{font-size:12px;color:#475569;margin-top:2px;}
+
+.inv-meta{
+  text-align:left;
+  direction:ltr;
+  font-size:12px;
+  color:#334155;
+}
+.inv-meta div{margin-bottom:4px;}
+
+.inv-panels{
+  margin-top: 14px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.inv-panel{
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 12px;
+  background: #f8fafc;
+}
+.inv-panel .h{font-weight:900;margin-bottom:8px;}
+.inv-panel .p{font-size:12px;color:#334155;line-height:1.6;}
+
+.inv-table{
+  width:100%;
+  border-collapse: collapse;
+  margin-top: 14px;
+}
+.inv-table th{
+  background:#0f172a;
+  color:#fff;
+  font-size:12px;
+  padding:10px;
+  text-align:center;
+}
+.inv-table td{
+  border:1px solid #e5e7eb;
+  padding:10px;
+  font-size:12px;
+  vertical-align: top;
+}
+.inv-table td.center{text-align:center;}
+.inv-item-name{font-weight:900;}
+.inv-item-sub{margin-top:4px;color:#64748b;font-size:10px;}
+
+.inv-sum{
+  margin-top: 12px;
+  display:flex;
+  justify-content: flex-end;
+}
+.inv-sum .box{
+  width: 320px;
+  border:1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 12px;
+  background:#fff;
+}
+.inv-sum .row{
+  display:flex;
+  justify-content: space-between;
+  font-size:12px;
+  margin-bottom:8px;
+}
+.inv-sum .row.g{
+  border-top: 1px dashed #e5e7eb;
+  padding-top: 10px;
+  font-size:14px;
+  font-weight:900;
+}
+
+.inv-foot{
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top:1px solid #e5e7eb;
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  font-size:11px;
+  color:#475569;
+}
+
 
 
 
@@ -3933,6 +4277,12 @@ body {
         <button class="header-btn refresh-btn" onclick="refreshData()" title="تحديث البيانات">تحديث</button>
         <button class="header-btn exit-btn" onclick="confirmExit()" title="خروج">خروج</button>
         <button class="header-btn offers-btn" onclick="openOffersModal()" title="عروض">عروض</button>
+        
+        <button class="header-btn header-cart-btn" id="openCartBtn" type="button" title="سلة المبيعات">
+  <i class="fas fa-shopping-cart"></i>
+  <span class="header-cart-badge" id="cartCount">0</span>
+</button>
+
 
     </div>
 </header>
@@ -4117,6 +4467,50 @@ body {
         <div id="results" class="results"></div>
 
 </div>
+
+
+
+<div id="cartModal" class="cart-modal" aria-hidden="true">
+  <div class="cart-shell">
+    <div class="cart-top">
+      <div class="cart-title">
+        <div class="cart-ico"><i class="fas fa-receipt"></i></div>
+        <div>
+          <div class="cart-h1">سلة المبيعات</div>
+          <div class="cart-h2" id="cartSubtitle">0 عنصر</div>
+        </div>
+      </div>
+
+      <button class="cart-x" id="closeCartBtn" type="button" title="إغلاق">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="cart-body" id="cartItems"></div>
+
+    <div class="cart-bottom">
+      <div class="cart-sum">
+        <div class="sum-row"><span>المجموع</span><strong id="cartSubtotal">0 د.ع</strong></div>
+        <div class="sum-row">
+          <span>خصم</span>
+          <div class="sum-disc">
+            <input id="cartDiscount" type="number" min="0" step="250" value="0" />
+            <span>د.ع</span>
+          </div>
+        </div>
+        <div class="sum-row sum-grand"><span>الإجمالي</span><strong id="cartTotal">0 د.ع</strong></div>
+      </div>
+
+      <div class="cart-actions">
+        <button class="cart-btn ghost" id="clearCartBtn" type="button"><i class="fas fa-trash"></i> تفريغ</button>
+        <button class="cart-btn primary" id="printPdfBtn" type="button"><i class="fas fa-file-pdf"></i> PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="invoiceTemplate" class="invoice-paper" style="display:none;"></div>
+
 
 
 
@@ -5411,6 +5805,7 @@ function filterCategory(category) {
         }
 
 
+
 function displayResults(results) {
     const resultsContainer = document.getElementById("results");
     resultsContainer.innerHTML = '';
@@ -5468,10 +5863,28 @@ function displayResults(results) {
                 }
             }
 
+            /* ===== التعديل فقط: زر اضافة صغير + تحديد السعر الفعلي ===== */
+            const itemName = (item["Item Name"] || item["Item"] || "بدون اسم").toString();
+            const effectivePriceRaw = discountPriceRaw || originalPriceRaw;
+            const effectivePrice = parseFloat(String(effectivePriceRaw || "").replace(/,/g, "")) || 0;
+            const canAddToCart = effectivePrice > 0;
+
             htmlContent += `
                 <div class="result-card">
+                    ${canAddToCart ? `
+                        <button class="add-mini"
+                            type="button"
+                            title="اضف للسلة"
+                            data-name="${encodeURIComponent(itemName)}"
+                            data-category="${encodeURIComponent(currentCategory)}"
+                            data-price="${effectivePrice}"
+                            data-img="${imgSrc}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    ` : ''}
+
                     <img src="${imgSrc}" alt="Item Image">
-                    <h4>${item["Item Name"] || item["Item"]}</h4>
+                    <h4>${itemName}</h4>
                     ${priceHtml}
                 </div>
             `;
@@ -5486,6 +5899,7 @@ function displayResults(results) {
         toggleScrollToTopButton();
     });
 }
+
 
 
 
@@ -5856,6 +6270,349 @@ window.addEventListener("pageshow", function() {
 window.addEventListener("load", function() {
     refreshNewsTicker(); // إعادة تشغيل الأخبار عند التحميل
 });
+
+
+let cart = JSON.parse(localStorage.getItem("assal_cart") || "[]");
+
+function escapeHtml(s){
+  return String(s ?? "")
+    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+function moneyIQD(n){
+  n = Math.max(0, Math.round(Number(n)||0));
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " د.ع";
+}
+function saveCart(){
+  localStorage.setItem("assal_cart", JSON.stringify(cart));
+  updateCartHeader();
+  renderCart();
+}
+
+function updateCartHeader(){
+  const count = cart.reduce((s,it)=> s + it.qty, 0);
+  const badge = document.getElementById("cartCount");
+  const sub = document.getElementById("cartSubtitle");
+  if(badge) badge.textContent = String(count);
+  if(sub) sub.textContent = `${count} عنصر`;
+}
+
+function addToCart({name, category, price, img}){
+  name = String(name||"").trim();
+  category = String(category||"").trim();
+  price = Number(price)||0;
+
+  if(!name || price <= 0) return;
+
+  const id = (category + "||" + name).toLowerCase();
+  const found = cart.find(x=>x.id === id);
+
+  if(found) found.qty += 1;
+  else cart.push({ id, name, category, price, img: img||"", qty: 1 });
+
+  saveCart();
+}
+
+function incQty(id){ const it = cart.find(x=>x.id===id); if(it){ it.qty = Math.min(99, it.qty+1); saveCart(); } }
+function decQty(id){ const it = cart.find(x=>x.id===id); if(it){ it.qty = Math.max(1, it.qty-1); saveCart(); } }
+function removeItem(id){ cart = cart.filter(x=>x.id!==id); saveCart(); }
+
+function calcTotals(){
+  const subtotal = cart.reduce((s,it)=> s + it.price*it.qty, 0);
+  const disc = Math.max(0, Number(document.getElementById("cartDiscount")?.value || 0));
+  const total = Math.max(0, subtotal - disc);
+  return { subtotal, disc, total };
+}
+
+function renderCart(){
+  const box = document.getElementById("cartItems");
+  if(!box) return;
+
+  if(cart.length === 0){
+    box.innerHTML = `
+      <div class="cart-item" style="grid-template-columns:1fr; text-align:center;">
+        <div class="cart-name" style="text-align:center;">السلة فارغة حالياً 🙃</div>
+        <div class="cart-sub" style="justify-content:center;">ضيف عناصر من النتائج حتى نطلع فاتورة.</div>
+      </div>
+    `;
+  } else {
+    box.innerHTML = cart.map(it=>{
+      const line = it.price * it.qty;
+      return `
+        <div class="cart-item">
+          <img src="${it.img || 'images/default.png'}" onerror="this.src='images/default.png'" alt="img">
+          <div class="cart-info">
+            <div class="cart-name">${escapeHtml(it.name)}</div>
+            <div class="cart-sub">
+              <span class="cart-chip">${escapeHtml(it.category)}</span>
+              <span class="cart-chip">سعر: ${moneyIQD(it.price)}</span>
+            </div>
+          </div>
+          <div class="cart-side">
+            <div class="cart-line-total">${moneyIQD(line)}</div>
+            <div class="qty">
+              <button type="button" data-act="dec" data-id="${escapeHtml(it.id)}">-</button>
+              <div class="qv">${it.qty}</div>
+              <button type="button" data-act="inc" data-id="${escapeHtml(it.id)}">+</button>
+            </div>
+            <button type="button" class="cart-rm" data-act="rm" data-id="${escapeHtml(it.id)}" title="حذف">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  const { subtotal, total } = calcTotals();
+  document.getElementById("cartSubtotal").textContent = moneyIQD(subtotal);
+  document.getElementById("cartTotal").textContent = moneyIQD(total);
+  updateCartHeader();
+}
+
+/* فتح/غلق */
+function openCart(){
+  document.getElementById("cartModal").style.display = "block";
+  document.getElementById("cartModal").setAttribute("aria-hidden","false");
+  const ov = document.getElementById("overlay");
+  if(ov) ov.style.display = "block";
+  renderCart();
+}
+function closeCart(){
+  document.getElementById("cartModal").style.display = "none";
+  document.getElementById("cartModal").setAttribute("aria-hidden","true");
+  const ov = document.getElementById("overlay");
+  if(ov) ov.style.display = "none";
+}
+
+/* Events */
+document.addEventListener("DOMContentLoaded", ()=>{
+  updateCartHeader();
+  renderCart();
+
+  document.getElementById("openCartBtn")?.addEventListener("click", openCart);
+  document.getElementById("closeCartBtn")?.addEventListener("click", closeCart);
+  document.getElementById("overlay")?.addEventListener("click", closeCart);
+
+  document.getElementById("cartDiscount")?.addEventListener("input", renderCart);
+
+  document.getElementById("clearCartBtn")?.addEventListener("click", ()=>{
+    cart = [];
+    saveCart();
+  });
+
+  // أزرار + - حذف داخل السلة
+  document.getElementById("cartItems")?.addEventListener("click", (e)=>{
+    const btn = e.target.closest("[data-act]");
+    if(!btn) return;
+    const act = btn.dataset.act;
+    const id = btn.dataset.id;
+
+    if(act === "inc") incQty(id);
+    if(act === "dec") decQty(id);
+    if(act === "rm")  removeItem(id);
+  });
+
+  // زر الإضافة الصغير داخل النتائج (بدون onclick داخل HTML)
+  document.getElementById("results")?.addEventListener("click", (e)=>{
+    const b = e.target.closest(".add-mini");
+    if(!b) return;
+    addToCart({
+      name: decodeURIComponent(b.dataset.name || ""),
+      category: decodeURIComponent(b.dataset.category || ""),
+      price: Number(b.dataset.price || 0),
+      img: b.dataset.img || ""
+    });
+  });
+});
+
+function moneyIQD(n){
+  n = Math.max(0, Math.round(Number(n)||0));
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " د.ع";
+}
+function escapeHtml(s){
+  return String(s ?? "")
+    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+
+function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
+  const el = document.getElementById("invoiceTemplate");
+  if(!el) throw new Error("invoiceTemplate missing");
+
+  const rows = cart.map((it, idx)=>{
+    const line = (Number(it.price)||0) * (Number(it.qty)||0);
+    return `
+      <tr>
+        <td class="center">${idx+1}</td>
+        <td>
+          <div class="inv-item-name">${escapeHtml(it.name)}</div>
+          <div class="inv-item-sub">${escapeHtml(it.category || "")}</div>
+        </td>
+        <td class="center">${moneyIQD(it.price)}</td>
+        <td class="center">${it.qty}</td>
+        <td class="center">${moneyIQD(line)}</td>
+      </tr>
+    `;
+  }).join("");
+
+  el.innerHTML = `
+    <div class="inv-head">
+      <div class="inv-brand">
+        <img src="images/logo.png" onerror="this.style.display='none'">
+        <div>
+          <div class="t1">Assal Office</div>
+          <div class="t2">فاتورة مبيعات - قطع موبايل</div>
+        </div>
+      </div>
+      <div class="inv-meta">
+        <div><strong>Invoice:</strong> ${escapeHtml(invNo)}</div>
+        <div><strong>Date:</strong> ${escapeHtml(dateStr)}</div>
+        <div><strong>Currency:</strong> IQD</div>
+      </div>
+    </div>
+
+    <div class="inv-panels">
+      <div class="inv-panel">
+        <div class="h">معلومات</div>
+        <div class="p">هذه الفاتورة مُنشأة من نظام السلة داخل الموقع.</div>
+        <div class="p">يرجى الاحتفاظ بها للضمان/المراجعة.</div>
+      </div>
+      <div class="inv-panel">
+        <div class="h">ملاحظة</div>
+        <div class="p">${escapeHtml(note || "—")}</div>
+      </div>
+    </div>
+
+    <table class="inv-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>الصنف</th>
+          <th>سعر القطعة</th>
+          <th>الكمية</th>
+          <th>الإجمالي</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+
+    <div class="inv-sum">
+      <div class="box">
+        <div class="row"><span>المجموع</span><strong>${moneyIQD(subtotal)}</strong></div>
+        <div class="row"><span>الخصم</span><strong>${moneyIQD(discount)}</strong></div>
+        <div class="row g"><span>الإجمالي</span><strong>${moneyIQD(total)}</strong></div>
+      </div>
+    </div>
+
+    <div class="inv-foot">
+      <div>شكراً لتعاملكم ويانه 🤍</div>
+      <div>© ${new Date().getFullYear()} Assal Office</div>
+    </div>
+  `;
+}
+
+async function exportInvoicePDF(filename){
+  const el = document.getElementById("invoiceTemplate");
+  if(!el) throw new Error("invoiceTemplate missing");
+
+  el.style.display = "block";
+
+  // دقة عالية حتى يطلع برو
+  const canvas = await html2canvas(el, { scale: 2, useCORS: true });
+  const imgData = canvas.toDataURL("image/png");
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("p", "pt", "a4");
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+
+  const imgWidth = pageWidth;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while(heightLeft > 10){
+    position -= pageHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+  }
+
+  pdf.save(filename);
+  el.style.display = "none";
+}
+
+function calcTotalsForInvoice(){
+  const subtotal = cart.reduce((s,it)=> s + (Number(it.price)||0) * (Number(it.qty)||0), 0);
+  const discount = Math.max(0, Number(document.getElementById("cartDiscount")?.value || 0));
+  const total = Math.max(0, subtotal - discount);
+  return { subtotal, discount, total };
+}
+
+async function checkoutPDF(){
+  if(!cart || cart.length === 0){
+    // إذا تستخدم SweetAlert2:
+    if(window.Swal) Swal.fire({icon:"info", title:"السلة فارغة", text:"ضيف عناصر حتى نطبع فاتورة."});
+    return;
+  }
+
+  const now = new Date();
+  const invNo = "INV-" +
+    now.getFullYear() +
+    String(now.getMonth()+1).padStart(2,"0") +
+    String(now.getDate()).padStart(2,"0") + "-" +
+    String(now.getHours()).padStart(2,"0") +
+    String(now.getMinutes()).padStart(2,"0");
+
+  const { subtotal, discount, total } = calcTotalsForInvoice();
+
+  // إذا عندك حقل ملاحظة بالسلة استعمله، إذا لا خلي فاضي:
+  const noteEl = document.getElementById("cartNote");
+  const note = noteEl ? noteEl.value : "";
+
+  buildInvoiceHTML({
+    invNo,
+    dateStr: now.toLocaleString(),
+    subtotal,
+    discount,
+    total,
+    note
+  });
+
+  await exportInvoicePDF(invNo + ".pdf");
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("printPdfBtn");
+  if (!btn) return console.error("❌ زر PDF غير موجود: printPdfBtn");
+
+  btn.addEventListener("click", async () => {
+    try {
+      console.log("PDF click ✅");
+
+      if (!window.html2canvas) throw new Error("html2canvas مو محمّلة (تأكد من سكربت المكتبة داخل <head>)");
+      if (!window.jspdf || !window.jspdf.jsPDF) throw new Error("jsPDF مو محمّلة (تأكد من سكربت jspdf.umd داخل <head>)");
+
+      await checkoutPDF();
+    } catch (e) {
+      console.error("PDF ERROR:", e);
+      const msg = (e && e.message) ? e.message : String(e);
+      if (window.Swal) Swal.fire({ icon: "error", title: "فشل إنشاء PDF", text: msg });
+      else alert("فشل إنشاء PDF: " + msg);
+    }
+  });
+});
+
+
 
         
     </script>
