@@ -12,6 +12,8 @@
     <!-- PDF libs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+
 
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
@@ -6508,8 +6510,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
 function moneyIQD(n){
   n = Math.max(0, Math.round(Number(n)||0));
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " د.ع";
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " IQD";
 }
+
 function escapeHtml(s){
   return String(s ?? "")
     .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
@@ -6593,6 +6596,73 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
     </div>
   `;
 }
+
+
+function numOnlyIQD(n){
+  n = Math.max(0, Math.round(Number(n)||0));
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+async function exportInvoicePDF_AutoTable(filename, {invNo, dateStr, subtotal, discount, total, note}) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Header (EN)
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.text("ASSAL OFFICE", pageWidth/2, 50, { align: "center" });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.text("Sales Invoice - Mobile Parts", pageWidth/2, 70, { align: "center" });
+
+  // Meta (EN)
+  doc.setFontSize(11);
+  doc.text(`Invoice: ${invNo}`, 50, 98);
+  doc.text(`Date: ${dateStr}`, 50, 114);
+  doc.text(`Currency: IQD`, 50, 130);
+
+  // Table
+  doc.autoTable({
+    head: [["#", "Item", "Category", "Unit Price (IQD)", "Qty", "Line Total (IQD)"]],
+    body: cart.map((it, i) => {
+      const line = (Number(it.price)||0) * (Number(it.qty)||0);
+      return [
+        i+1,
+        String(it.name || ""),
+        String(it.category || ""),
+        numOnlyIQD(it.price),
+        String(it.qty || ""),
+        numOnlyIQD(line)
+      ];
+    }),
+    startY: 160,
+    theme: "grid",
+    styles: { halign: "center", font: "helvetica", fontSize: 10 },
+    headStyles: { fontStyle: "bold" },
+    margin: { left: 50, right: 50 }
+  });
+
+  // Summary (EN)
+  const y = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY + 20 : 180;
+  doc.setFont("helvetica", "bold");
+  doc.text("Summary", 50, y);
+
+  doc.setFont("helvetica", "normal");
+  doc.text(`Subtotal: ${numOnlyIQD(subtotal)} IQD`, 50, y + 18);
+  doc.text(`Discount: ${numOnlyIQD(discount)} IQD`, 50, y + 34);
+  doc.setFont("helvetica", "bold");
+  doc.text(`Total: ${numOnlyIQD(total)} IQD`, 50, y + 54);
+
+  // Note (EN)
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text(`Note: ${note ? String(note) : "-"}`, 50, y + 78);
+
+  doc.save(filename);
+}
+
 
 async function exportInvoicePDF(filename){
   const el = document.getElementById("invoiceTemplate");
@@ -6704,14 +6774,22 @@ async function checkoutPDF(){
 
   buildInvoiceHTML({
     invNo,
-    dateStr: now.toLocaleString(),
+   dateStr: now.toLocaleString("en-GB"),
     subtotal,
     discount,
     total,
     note
   });
 
-  await exportInvoicePDF(invNo + ".pdf");
+  await exportInvoicePDF_AutoTable(invNo + ".pdf", {
+  invNo,
+  dateStr: now.toLocaleString("en-GB"),
+  subtotal,
+  discount,
+  total,
+  note
+});
+
 }
 
 
@@ -6723,8 +6801,10 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       console.log("PDF click ✅");
 
-      if (!window.html2canvas) throw new Error("html2canvas مو محمّلة (تأكد من سكربت المكتبة داخل <head>)");
-      if (!window.jspdf || !window.jspdf.jsPDF) throw new Error("jsPDF مو محمّلة (تأكد من سكربت jspdf.umd داخل <head>)");
+     if (!window.jspdf || !window.jspdf.jsPDF) throw new Error("jsPDF not loaded");
+const t = new window.jspdf.jsPDF();
+if (typeof t.autoTable !== "function") throw new Error("autoTable not loaded (check the script in <head>)");
+
 
       await checkoutPDF();
     } catch (e) {
