@@ -6513,144 +6513,84 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
   `;
 }
 
-
-function isCanvasBlank(canvas){
-  const ctx = canvas.getContext("2d");
-  const w = canvas.width, h = canvas.height;
-  if(!w || !h) return true;
-  const pts = [[5,5],[w-6,5],[5,h-6],[w-6,h-6],[Math.floor(w/2),Math.floor(h/2)]];
-  for (const [x,y] of pts){
-    const p = ctx.getImageData(Math.max(0,x), Math.max(0,y), 1, 1).data;
-    if(!(p[0] === 255 && p[1] === 255 && p[2] === 255)) return false;
-  }
-  return true;
-}
-
-async function waitForImages(root){
-  const imgs = Array.from(root.querySelectorAll("img"));
-  await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(res=>{
-    img.onload = res; img.onerror = res;
-  })));
-}
-
-
 async function exportInvoicePDF(filename){
-  if(!window.html2canvas) throw new Error("html2canvas مو محمّلة");
-  if(!window.jspdf || !window.jspdf.jsPDF) throw new Error("jsPDF مو محمّلة");
-
   const el = document.getElementById("invoiceTemplate");
   if(!el) throw new Error("invoiceTemplate missing");
 
-  // تأكد الفاتورة مو فاضية
-  if(!el.innerHTML || el.innerHTML.trim().length < 30) {
-    throw new Error("invoiceTemplate empty (buildInvoiceHTML ما انبنى؟)");
-  }
-
-  // نخلي الأصل يظل مخفي (مثل ما عندك)
+  // خليه يشتغل بدون ما يبين
   const prev = el.getAttribute("style") || "";
-  el.style.display = "block"; // لازم حتى ناخذ الارتفاع الحقيقي
-  await waitForImages(el);
+  el.style.display = "block";
+  el.style.position = "fixed";
+  el.style.left = "-9999px";
+  el.style.top = "0";
+  el.style.background = "#fff";
 
-  // انتظر الخطوط
   if (document.fonts && document.fonts.ready) {
     try { await document.fonts.ready; } catch(_) {}
   }
 
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({ orientation:"p", unit:"pt", format:"a4", compress:true });
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-  const a4Ratio = pageH / pageW; // ~1.414
+  const canvas = await html2canvas(el, {
+    scale: 1.5,                 // أقل من 2 حتى ما يصير ملف ضخم
+    backgroundColor: "#ffffff",
+    useCORS: true
+  });
 
-  // ابعاد الفاتورة بالـCSS
-  const cssW = el.scrollWidth || el.offsetWidth || 794;
-  const cssH = el.scrollHeight || el.offsetHeight || 1123;
+  const pdf = new window.jspdf.jsPDF({
+    orientation: "p",
+    unit: "pt",
+    format: "a4",
+    compress: true
+  });
 
-  // ارتفاع صفحة A4 بالـCSS px
-  const pageCssH = Math.floor(cssW * a4Ratio);
+  const pageWidth  = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
 
-  // scale خفيف (WebView يحب الخفيف)
-  const scale = 1.0;
+  // تحويل “نقاط PDF” إلى “بكسلات canvas” حتى نقص الصفحة صح
+  const pxPerPt = canvas.width / pageWidth;
+  const pagePxHeight = Math.floor(pageHeight * pxPerPt);
+
+  const pageCanvas = document.createElement("canvas");
+  const pageCtx = pageCanvas.getContext("2d");
 
   let y = 0;
-  let page = 0;
+  let pageIndex = 0;
 
-  while (y < cssH) {
-    const sliceH = Math.min(pageCssH, cssH - y);
+  while (y < canvas.height) {
+    const sliceHeight = Math.min(pagePxHeight, canvas.height - y);
 
-    // ✅ Wrapper يقص صفحة وحدة + Clone ينزاح للأعلى
-    const wrapper = document.createElement("div");
-    wrapper.style.width = cssW + "px";
-    wrapper.style.height = sliceH + "px";
-    wrapper.style.overflow = "hidden";
-    wrapper.style.position = "fixed";
-    wrapper.style.left = "0";
-    wrapper.style.top = "0";
-    wrapper.style.zIndex = "2147483647"; // فوق كلشي حتى يرسمه WebView
-    wrapper.style.background = "#ffffff";
-    wrapper.style.opacity = "0.01"; // ما يبين للمستخدم (بس يبقى مرسوم)
+    pageCanvas.width = canvas.width;
+    pageCanvas.height = sliceHeight;
 
-    const clone = el.cloneNode(true);
-    clone.style.display = "block";
-    clone.style.position = "relative";
-    clone.style.transform = `translateY(-${y}px)`;
-    clone.style.background = "#ffffff";
+    // خلفية بيضا
+    pageCtx.fillStyle = "#ffffff";
+    pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
 
-    wrapper.appendChild(clone);
-    document.body.appendChild(wrapper);
+    // قص جزء من الصورة الأصلية
+    pageCtx.drawImage(
+      canvas,
+      0, y, canvas.width, sliceHeight,
+      0, 0, canvas.width, sliceHeight
+    );
 
-    await waitForImages(wrapper);
+    // JPEG مضغوط (أكثر توافقاً مع موبايلات)
+    const imgData = pageCanvas.toDataURL("image/jpeg", 0.92);
 
-    const canvas = await html2canvas(wrapper, {
-      scale,
-      backgroundColor: "#ffffff",
-      useCORS: true,
-      scrollX: 0,
-      scrollY: 0
-    });
+    if (pageIndex > 0) pdf.addPage();
 
-    document.body.removeChild(wrapper);
+    const imgWidth = pageWidth;
+    const imgHeight = (sliceHeight * imgWidth) / pageCanvas.width;
 
-    if (isCanvasBlank(canvas)) {
-      el.setAttribute("style", prev);
-      throw new Error("canvas_blank (WebView render)");
-    }
+    pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
 
-    const imgData = canvas.toDataURL("image/jpeg", 0.92);
-
-    if (page > 0) pdf.addPage();
-
-    const imgH = (canvas.height * pageW) / canvas.width;
-    pdf.addImage(imgData, "JPEG", 0, 0, pageW, Math.min(imgH, pageH));
-
-    y += sliceH;
-    page++;
+    y += sliceHeight;
+    pageIndex++;
   }
 
-  // ✅ WebIntoApp: الأفضل Blob + open/share
-  const blob = pdf.output("blob");
+  pdf.save(filename);
 
-  // جرّب مشاركة (أفضل حفظ بالموبايل)
-  if (navigator.share) {
-    try {
-      const file = new File([blob], filename, { type: "application/pdf" });
-      await navigator.share({ files: [file], title: filename });
-    } catch(_) {
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-      setTimeout(()=>URL.revokeObjectURL(url), 4000);
-    }
-  } else {
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
-    setTimeout(()=>URL.revokeObjectURL(url), 4000);
-  }
-
-  // رجّع الستايل مثل ما كان
+  // رجّع الستايل
   el.setAttribute("style", prev);
 }
-
-
 
 
 function calcTotalsForInvoice(){
@@ -6690,16 +6630,8 @@ async function checkoutPDF(){
     note
   });
 
-  try {
-    await exportInvoicePDF(invNo + ".pdf");
-  } catch (e) {
-    const msg = (e && (e.message || e.toString())) ? (e.message || e.toString()) : "سبب غير معروف";
-    console.error("PDF FAIL:", e);
-    if (window.Swal) Swal.fire({ icon:"error", title:"فشل تصدير PDF", text: msg });
-    else alert("فشل تصدير PDF: " + msg);
-  }
+  await exportInvoicePDF(invNo + ".pdf");
 }
-
 
 
 document.addEventListener("DOMContentLoaded", () => {
