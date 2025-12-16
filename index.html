@@ -6639,7 +6639,9 @@ async function exportInvoiceImagePNG(filename){
     img.onload = img.onerror = () => res();
   })));
 
-  const scale = (window.innerWidth <= 600) ? 1.0 : 1.6; // خففناها للموبايل
+ const dpr = Math.min(window.devicePixelRatio || 1, 3);
+const scale = (window.innerWidth <= 600) ? (2.0 * dpr) : (2.5 * dpr);
+
   const canvas = await html2canvas(el, {
     scale,
     backgroundColor: "#ffffff",
