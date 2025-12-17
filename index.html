@@ -4302,7 +4302,6 @@ body {
 
 
 
-
     </style>
 </head>
 <body>
@@ -4370,53 +4369,44 @@ body {
    
 </header>
  
- <!-- ✅ الطبقة الضبابية Overlay -->
-
-
 <!-- يبقى الـ overlay مثل ما هو -->
 <div id="overlay"></div>
 
-<!-- قالب إشعار عام -->
-<div id="promoPopup" class="alert-shell alert-sale" dir="rtl">
-    <div class="alert-header">
-        <div class="alert-icon">
-            <!-- غيّر الأيقونة حسب نوع الإشعار -->
-            <i class="fas fa-tag"></i>
-        </div>
-        <div class="alert-head-text">
-            <span class="alert-kicker">عرض خاص لزبائنا</span>
-            <h1 class="alert-title">
-                خصم ١٥٪ على شاشات سامسونج الأصلية
-            </h1>
-        </div>
+<!-- إعلان تعليمي لسلة المبيعات -->
+<div id="promoPopup" class="alert-shell alert-info" dir="rtl">
+  <div class="alert-header">
+    <div class="alert-icon">
+      <i class="fas fa-cart-shopping"></i>
     </div>
-
-    <div class="alert-body">
-        <p class="alert-text">
-            العرض ساري لفترة محدودة على جميع الشاشات الأصلية
-            المختارة، داخل التطبيق وعبر مكتب عسل حصرا ولكل الشركات.
-        </p>
-
-        <div class="alert-meta">
-            <span class="alert-pill">
-                <i class="fas fa-clock"></i>
-                ينتهي العرض خلال فترة قصيرة
-            </span>
-            <span class="alert-pill">
-                <i class="fas fa-store"></i>
-                جميع الفروع
-            </span>
-        </div>
+    <div class="alert-head-text">
+      <span class="alert-kicker">تحديث التطبيق</span>
+      <h1 class="alert-title">تمت إضافة سلة المبيعات ✅</h1>
     </div>
+  </div>
 
-    <div class="alert-footer">
-        <button class="alert-secondary" onclick="closePopup()">
-            إغلاق
-        </button>
-        <button class="alert-primary" onclick="closePopup()">
-            شوف التفاصيل
-        </button>
+  <div class="alert-body">
+    <p class="alert-text" style="text-align:right;">
+      هسه تگدر تجمع المواد بسلة وحدة وتطلعها بصورة بسهولة وترسلها لاي فرع من فروعنا عن طريق الواتساب.
+    </p>
+
+    <ol class="alert-steps" style="text-align:right; margin:0; padding:0 18px 0 0; line-height:1.75;">
+      <li><b>إضافة للسلة:</b> من كل مادة اضغط زر السلة الموجود يم <b>اسم المادة</b>.</li>
+      <li><b>افتح السلة:</b> اضغط زر السلة (سلة المبيعات).</li>
+      <li><b>اطبع صورة:</b> من داخل السلة اختار زر <b>Image</b>.</li>
+      <li><b>أرسل لاي فرع من فروعنا:</b> خذ <b>سكرين شوت</b> للصورة وارسله <b>لأرقام واتساب فروع مكتب عسل</b>.</li>
+    </ol>
+
+    <div class="alert-meta" style="justify-content:center;">
+      <span class="alert-pill"><i class="fas fa-image"></i> فاتورة بصورة</span>
+      <span class="alert-pill"><i class="fas fa-receipt"></i> سلة مبيعات</span>
+      <span class="alert-pill"><i class="fab fa-whatsapp"></i> إرسال واتساب</span>
     </div>
+  </div>
+
+  <div class="alert-footer">
+    <button class="alert-secondary" onclick="closePopup()">إغلاق</button>
+    <button class="alert-primary" onclick="openCartFromPromo()">فتح السلة</button>
+  </div>
 </div>
 
 
@@ -5432,6 +5422,15 @@ function closePopup() {
         document.getElementById('overlay').style.display = 'none';
     }, 600); // ⏳ وقت متزامن مع الأنيميشن لضمان خروج سلس
 }
+
+
+function openCartFromPromo(){
+  closePopup();
+  setTimeout(() => {
+    try { if (typeof openCart === "function") openCart(); } catch(e) {}
+  }, 650);
+}
+
 
 
 
