@@ -6870,7 +6870,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
       .sum{
         flex:0 0 320px;
         border-radius:22px;
-        padding:10px 14px;              /* ✅ أقل ارتفاع */
+        padding:10px 14px;
         background: linear-gradient(180deg,#0b1220 0%,#111827 100%);
         color:#fff;
         box-shadow: 0 18px 40px rgba(2,6,23,.14);
@@ -6879,20 +6879,20 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         display:flex;
         justify-content:space-between;
         align-items:center;
-        padding:6px 0;                  /* ✅ أقل ارتفاع */
+        padding:6px 0;
         border-bottom:1px solid rgba(255,255,255,.12);
         font-variant-numeric: tabular-nums;
-        line-height:1.15;               /* ✅ */
+        line-height:1.15;
       }
       .sum .row:last-child{ border-bottom:none; }
       .sum .row span{ color: rgba(255,255,255,.82); font-weight:800; }
       .sum .row strong{ font-weight:900; white-space:nowrap; }
       .sum .total{
-        margin-top:4px;                 /* ✅ أقل */
-        padding-top:8px;                /* ✅ أقل */
+        margin-top:4px;
+        padding-top:8px;
         border-top:1px solid rgba(255,255,255,.16);
       }
-      .sum .total strong{ font-size:16px; }  /* ✅ أخف شوي حتى ما يكبر الصندوق */
+      .sum .total strong{ font-size:16px; }
 
       .foot{
         margin-top:14px;
@@ -6925,11 +6925,11 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
 
         .hdr-top{
           padding:14px 14px 12px;
-          border-radius:26px;          /* ✅ بيضوي أكثر بالموبايل */
+          border-radius:26px;
         }
 
         .hdr-row{
-          flex-direction:row;          /* ✅ يبقى صف واحد */
+          flex-direction:row;
           align-items:center;
           gap:10px;
           flex-wrap:nowrap;
@@ -6959,7 +6959,15 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
 
         .bottom{ flex-direction:column; }
         .terms{ width:100%; }
-        .sum{ width:100%; padding:10px 14px; } /* ✅ ثابت ومناسب */
+
+        /* ✅ هذا هو التعديل الأساسي لمنع الفراغ */
+        .sum{
+          width:100%;
+          flex: 0 0 auto;   /* يمنع 320px تصير ارتفاع */
+          height:auto;
+          align-self: stretch;
+          padding:10px 14px;
+        }
       }
     </style>
 
@@ -7063,6 +7071,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
     </div>
   `;
 }
+
 
 
 
