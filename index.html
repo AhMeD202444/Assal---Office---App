@@ -6547,7 +6547,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
 
       .inv-doc{
         width: 100%;
-        max-width: 920px;                /* ✅ للحاسبة */
+        max-width: 920px;
         margin: 0 auto;
         padding: 26px 28px 24px;
         font-family: "Cairo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans Arabic", "Noto Kufi Arabic", sans-serif;
@@ -6555,6 +6555,11 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         overflow:hidden;
         border:1px solid #e5e7eb;
         box-shadow: 0 18px 42px rgba(2,6,23,.10);
+
+        direction: rtl;
+        unicode-bidi: plaintext;
+        font-kerning: normal;
+        font-feature-settings: "kern" 1, "liga" 1;
       }
 
       /* ===== HEADER ===== */
@@ -6595,7 +6600,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         display:flex;
         align-items:center;
         gap:14px;
-        min-width: 0;                    /* ✅ حتى ما يكسر بالموبايل */
+        min-width: 0;
       }
 
       .logo{
@@ -6610,7 +6615,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
       .logo img{ width:100%;height:100%;object-fit:contain; }
 
       .bname{
-        font-weight:950;
+        font-weight:900;   /* ✅ بدل 950 */
         font-size:18px;
         letter-spacing:.2px;
         color:#fff;
@@ -6626,7 +6631,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
       .inv-badge{
         color:#fff;
         min-width: 240px;
-        text-align:left; /* حلو بالديسكتوب */
+        text-align:left;
       }
       .inv-badge .cap{
         font-size:12px;
@@ -6638,7 +6643,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
       .inv-badge .no{
         margin-top:6px;
         font-size:20px;
-        font-weight:950;
+        font-weight:900;   /* ✅ بدل 950 */
         letter-spacing:.02em;
         word-break: break-word;
       }
@@ -6652,7 +6657,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         border:1px solid rgba(255,255,255,.18);
         background: rgba(255,255,255,.08);
         color:rgba(255,255,255,.92);
-        font-weight:850;
+        font-weight:800;
         font-size:12px;
         letter-spacing:.06em;
         text-transform:uppercase;
@@ -6667,7 +6672,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         justify-content:space-between;
         align-items:center;
         gap:12px;
-        flex-wrap:wrap;                   /* ✅ يلف بالموبايل */
+        flex-wrap:wrap;
       }
 
       .meta{
@@ -6703,7 +6708,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
       }
 
       .hdr-mark{
-        font-weight:950;
+        font-weight:900;   /* ✅ بدل 950 */
         letter-spacing:.14em;
         text-transform:uppercase;
         color:#0b1220;
@@ -6735,10 +6740,10 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         box-shadow: 0 12px 28px rgba(2,6,23,.04);
       }
       .card .h{
-        font-weight:950;
+        font-weight:900;     /* ✅ بدل 950 */
         font-size:12.5px;
-        letter-spacing:.10em;
-        text-transform:uppercase;
+        letter-spacing:0;    /* ✅ مهم للعربي */
+        text-transform:none; /* ✅ مهم للعربي */
         color:#0b1220;
         display:flex;
         align-items:center;
@@ -6754,18 +6759,18 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
       }
       .cardDot{ width:8px;height:8px;border-radius:999px;background:#0b1220;opacity:.9; }
 
-      /* ===== TABLE WRAP (✅ Mobile safe) ===== */
+      /* ===== TABLE WRAP ===== */
       .tbl-wrap{
         width:100%;
-        overflow-x:auto;                  /* ✅ على الموبايل */
+        overflow-x:auto;
         -webkit-overflow-scrolling: touch;
         border-radius:22px;
       }
 
       .tbl{
         width:100%;
-        min-width:0;                      /* ✅ */
-        table-layout:fixed;               /* ✅ */
+        min-width:0;
+        table-layout:fixed;
         border-collapse:separate;
         border-spacing:0;
         border:1px solid #e5e7eb;
@@ -6777,16 +6782,16 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
       .tbl thead th{
         background: linear-gradient(180deg,#0b1220 0%,#111827 100%);
         color:#fff;
-        padding:10px 8px;                 /* ✅ أصغر شوي */
+        padding:10px 8px;
         font-size:12px;
-        letter-spacing:.08em;
-        text-transform:uppercase;
-        font-weight:950;
+        letter-spacing:0;     /* ✅ مهم للعربي */
+        text-transform:none;  /* ✅ مهم للعربي */
+        font-weight:900;      /* ✅ بدل 950 */
         border-bottom:1px solid rgba(255,255,255,.10);
         white-space:nowrap;
       }
       .tbl tbody td{
-        padding:6px 8px;                  /* ✅ أصغر شوي */
+        padding:6px 8px;
         font-size:12.7px;
         border-bottom:1px solid #eef2f7;
         background:#fff;
@@ -6796,31 +6801,28 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
       .tbl tbody tr:nth-child(even) td{ background:#f9fafb; }
       .tbl tbody tr:last-child td{ border-bottom:none; }
 
-      /* ✅ توزيع أعمدة مضغوط ويضمن ظهور الإجمالي */
-      .td-idx{ width:52px; text-align:center; font-weight:950; color:#0b1220; }
-      .td-cat{ width:120px; color:#334155; font-weight:850; }
-
+      .td-idx{ width:52px; text-align:center; font-weight:900; color:#0b1220; }
+      .td-cat{ width:120px; color:#334155; font-weight:800; }
       .td-name .nm{
-        font-weight:950;
+        font-weight:900; /* ✅ بدل 950 */
         color:#0b1220;
         white-space:nowrap;
         overflow:hidden;
         text-overflow:ellipsis;
         max-width: 9999px;
       }
-
       .td-qty{ width:74px; }
       .td-price{ width:96px; }
-      .td-total{ width:132px; }           /* ✅ أوسع حتى يبين الرقم */
+      .td-total{ width:132px; }
 
       .td-num{
         text-align:center;
         font-variant-numeric: tabular-nums;
         white-space:nowrap;
-        font-weight:850;
+        font-weight:800;
         color:#0b1220;
       }
-      .td-strong{ font-weight:950; }
+      .td-strong{ font-weight:900; }
 
       /* ===== BOTTOM ===== */
       .bottom{
@@ -6838,10 +6840,10 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         background: linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
       }
       .terms .h{
-        font-weight:950;
+        font-weight:900;     /* ✅ بدل 950 */
         font-size:12.5px;
-        letter-spacing:.10em;
-        text-transform:uppercase;
+        letter-spacing:0;    /* ✅ مهم للعربي */
+        text-transform:none; /* ✅ مهم للعربي */
         color:#0b1220;
         display:flex;
         align-items:center;
@@ -6873,8 +6875,8 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         font-variant-numeric: tabular-nums;
       }
       .sum .row:last-child{ border-bottom:none; }
-      .sum .row span{ color: rgba(255,255,255,.82); font-weight:850; }
-      .sum .row strong{ font-weight:950; white-space:nowrap; }
+      .sum .row span{ color: rgba(255,255,255,.82); font-weight:800; }
+      .sum .row strong{ font-weight:900; white-space:nowrap; }
       .sum .total{
         margin-top:6px;
         padding-top:12px;
@@ -6890,7 +6892,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         gap:12px;
         color:#64748b;
         font-size:12px;
-        flex-wrap:wrap;                   /* ✅ بالموبايل ما ينكسر */
+        flex-wrap:wrap;
       }
       .chip{
         padding:6px 10px;
@@ -6898,7 +6900,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         border:1px solid #e5e7eb;
         background:#fff;
         color:#0b1220;
-        font-weight:950;
+        font-weight:900; /* ✅ بدل 950 */
         letter-spacing:.10em;
         text-transform:uppercase;
         font-size:10.8px;
@@ -6914,32 +6916,29 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         .hdr-top{ padding:14px 14px 12px; }
 
         .hdr-row{
-          flex-direction:column;          /* ✅ stack */
+          flex-direction:column;
           align-items:flex-start;
           gap:12px;
         }
 
         .inv-badge{
-          text-align:right;               /* ✅ مع RTL على الموبايل */
+          text-align:right;
           min-width: 0;
           width:100%;
         }
 
-        .bname{ font-size:16px; }
-        .btag{ font-size:12px; }
-
-        .kv{ min-width: 140px; padding:7px 9px; }
-        .kv .v{ font-size:12.5px; }
-
         .panels{
-          grid-template-columns: 1fr;     /* ✅ كارد فوق كارد */
+          grid-template-columns: 1fr;
         }
 
         .bottom{
-          flex-direction:column;          /* ✅ terms فوق sum */
+          flex-direction:column;
+        }
+
+        .terms{
+          width:100%;      /* ✅ نفس عرض خانة المجموع */
         }
         .sum{
-          flex: 1 1 auto;
           width:100%;
         }
       }
@@ -7019,7 +7018,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
 
       <div class="bottom">
         <div class="terms">
-          <div class="h"><span class="cardDot"></span> Terms</div>
+          <div class="h"><span class="cardDot"></span> الشروط</div>
           <ul>
             <li>الأسعار حسب ما ظاهر في السلة وقت إصدار الفاتورة.</li>
             <li>الضمان/الاستبدال يعتمد على نوع القطعة وحالتها.</li>
@@ -7046,6 +7045,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
     </div>
   `;
 }
+
 
 
 
