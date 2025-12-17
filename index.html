@@ -6533,9 +6533,9 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         <td class="td-name">
           <div class="nm">${escapeHtml(it.name)}</div>
         </td>
-        <td class="td-num">${it.qty}</td>
-        <td class="td-num">${moneyIQD(it.price)}</td>
-        <td class="td-num td-strong">${moneyIQD(line)}</td>
+        <td class="td-num td-qty">${it.qty}</td>
+        <td class="td-num td-price">${moneyIQD(it.price)}</td>
+        <td class="td-num td-total td-strong">${moneyIQD(line)}</td>
       </tr>
     `;
   }).join("");
@@ -6543,9 +6543,11 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
   el.innerHTML = `
     <style>
       #invoiceTemplate{ background:#fff; }
+      *{ box-sizing:border-box; }
 
       .inv-doc{
-        width: 900px;
+        width: 100%;
+        max-width: 920px;                /* ✅ للحاسبة */
         margin: 0 auto;
         padding: 26px 28px 24px;
         font-family: "Cairo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans Arabic", "Noto Kufi Arabic", sans-serif;
@@ -6553,15 +6555,14 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         overflow:hidden;
         border:1px solid #e5e7eb;
         box-shadow: 0 18px 42px rgba(2,6,23,.10);
-        margin-bottom:14px;
       }
 
+      /* ===== HEADER ===== */
       .hdr-top{
         background: linear-gradient(135deg,#0b1220 0%, #111827 45%, #0b1220 100%);
         padding:18px 18px 16px;
         position:relative;
       }
-
       .hdr-top:before{
         content:"";
         position:absolute;
@@ -6594,7 +6595,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         display:flex;
         align-items:center;
         gap:14px;
-        min-width: 360px;
+        min-width: 0;                    /* ✅ حتى ما يكسر بالموبايل */
       }
 
       .logo{
@@ -6623,9 +6624,9 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
       }
 
       .inv-badge{
-        text-align:left;
         color:#fff;
-        min-width: 260px;
+        min-width: 240px;
+        text-align:left; /* حلو بالديسكتوب */
       }
       .inv-badge .cap{
         font-size:12px;
@@ -6639,6 +6640,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         font-size:20px;
         font-weight:950;
         letter-spacing:.02em;
+        word-break: break-word;
       }
       .inv-badge .pill{
         margin-top:10px;
@@ -6656,10 +6658,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         text-transform:uppercase;
         white-space:nowrap;
       }
-      .dot{
-        width:8px;height:8px;border-radius:999px;
-        background:#34d399; /* green-ish status dot */
-      }
+      .dot{ width:8px;height:8px;border-radius:999px; background:#34d399; }
 
       .hdr-bottom{
         background: linear-gradient(180deg,#ffffff 0%, #f8fafc 100%);
@@ -6668,6 +6667,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         justify-content:space-between;
         align-items:center;
         gap:12px;
+        flex-wrap:wrap;                   /* ✅ يلف بالموبايل */
       }
 
       .meta{
@@ -6750,23 +6750,34 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         font-size:12.6px;
         line-height:1.65;
         margin: 4px 0;
+        word-break: break-word;
       }
       .cardDot{ width:8px;height:8px;border-radius:999px;background:#0b1220;opacity:.9; }
 
-      /* ===== TABLE (Premium + Compact rows) ===== */
+      /* ===== TABLE WRAP (✅ Mobile safe) ===== */
+      .tbl-wrap{
+        width:100%;
+        overflow-x:auto;                  /* ✅ على الموبايل */
+        -webkit-overflow-scrolling: touch;
+        border-radius:22px;
+      }
+
       .tbl{
         width:100%;
+        min-width:0;                      /* ✅ */
+        table-layout:fixed;               /* ✅ */
         border-collapse:separate;
         border-spacing:0;
         border:1px solid #e5e7eb;
         border-radius:22px;
         overflow:hidden;
         box-shadow: 0 16px 36px rgba(2,6,23,.06);
+        background:#fff;
       }
       .tbl thead th{
         background: linear-gradient(180deg,#0b1220 0%,#111827 100%);
         color:#fff;
-        padding:10px 10px;
+        padding:10px 8px;                 /* ✅ أصغر شوي */
         font-size:12px;
         letter-spacing:.08em;
         text-transform:uppercase;
@@ -6775,7 +6786,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         white-space:nowrap;
       }
       .tbl tbody td{
-        padding:6px 10px;           /* ✅ صفوف أقصر */
+        padding:6px 8px;                  /* ✅ أصغر شوي */
         font-size:12.7px;
         border-bottom:1px solid #eef2f7;
         background:#fff;
@@ -6785,18 +6796,24 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
       .tbl tbody tr:nth-child(even) td{ background:#f9fafb; }
       .tbl tbody tr:last-child td{ border-bottom:none; }
 
-      .td-idx{ width:70px; text-align:center; font-weight:950; color:#0b1220; }
-      .td-cat{ width:170px; color:#334155; font-weight:850; }
+      /* ✅ توزيع أعمدة مضغوط ويضمن ظهور الإجمالي */
+      .td-idx{ width:52px; text-align:center; font-weight:950; color:#0b1220; }
+      .td-cat{ width:120px; color:#334155; font-weight:850; }
+
       .td-name .nm{
         font-weight:950;
         color:#0b1220;
         white-space:nowrap;
         overflow:hidden;
         text-overflow:ellipsis;
-        max-width: 440px;
+        max-width: 9999px;
       }
+
+      .td-qty{ width:74px; }
+      .td-price{ width:96px; }
+      .td-total{ width:132px; }           /* ✅ أوسع حتى يبين الرقم */
+
       .td-num{
-        width:140px;
         text-align:center;
         font-variant-numeric: tabular-nums;
         white-space:nowrap;
@@ -6873,6 +6890,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         gap:12px;
         color:#64748b;
         font-size:12px;
+        flex-wrap:wrap;                   /* ✅ بالموبايل ما ينكسر */
       }
       .chip{
         padding:6px 10px;
@@ -6885,48 +6903,86 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         text-transform:uppercase;
         font-size:10.8px;
       }
+
+      /* ===== RESPONSIVE (Mobile) ===== */
+      @media (max-width: 640px){
+        .inv-doc{
+          padding: 16px 14px 14px;
+          border-radius:18px;
+        }
+
+        .hdr-top{ padding:14px 14px 12px; }
+
+        .hdr-row{
+          flex-direction:column;          /* ✅ stack */
+          align-items:flex-start;
+          gap:12px;
+        }
+
+        .inv-badge{
+          text-align:right;               /* ✅ مع RTL على الموبايل */
+          min-width: 0;
+          width:100%;
+        }
+
+        .bname{ font-size:16px; }
+        .btag{ font-size:12px; }
+
+        .kv{ min-width: 140px; padding:7px 9px; }
+        .kv .v{ font-size:12.5px; }
+
+        .panels{
+          grid-template-columns: 1fr;     /* ✅ كارد فوق كارد */
+        }
+
+        .bottom{
+          flex-direction:column;          /* ✅ terms فوق sum */
+        }
+        .sum{
+          flex: 1 1 auto;
+          width:100%;
+        }
+      }
     </style>
 
     <div class="inv-doc" dir="rtl" lang="ar">
 
-      <div class="hdr">
-        <div class="hdr-top">
-          <div class="hdr-row">
-            <div class="brand">
-              <div class="logo">
-                <img src="images/logo.png" onerror="this.style.display='none'">
-              </div>
-              <div>
-                <div class="bname">Assal Office</div>
-                <div class="btag">فاتورة مبيعات رسمية • قطع موبايل • إصدار نظام السلة</div>
-              </div>
+      <div class="hdr-top">
+        <div class="hdr-row">
+          <div class="brand">
+            <div class="logo">
+              <img src="images/logo.png" onerror="this.style.display='none'">
             </div>
-
-            <div class="inv-badge">
-              <div class="cap">Sales Invoice</div>
-              <div class="no">${escapeHtml(invNo)}</div>
-              <div class="pill"><span class="dot"></span> ISSUED</div>
+            <div>
+              <div class="bname">Assal Office</div>
+              <div class="btag">فاتورة مبيعات رسمية • قطع موبايل • إصدار نظام السلة</div>
             </div>
           </div>
-        </div>
 
-        <div class="hdr-bottom">
-          <div class="meta">
-            <div class="kv">
-              <div class="k">Date</div>
-              <div class="v">${escapeHtml(dateStr)}</div>
-            </div>
-            <div class="kv">
-              <div class="k">Currency</div>
-              <div class="v">IQD</div>
-            </div>
-            <div class="kv">
-              <div class="k">Reference</div>
-              <div class="v">${escapeHtml(invNo)}</div>
-            </div>
+          <div class="inv-badge">
+            <div class="cap">Sales Invoice</div>
+            <div class="no">${escapeHtml(invNo)}</div>
+            <div class="pill"><span class="dot"></span> ISSUED</div>
           </div>
-          <div class="hdr-mark">ASSAL • OFFICIAL</div>
         </div>
+      </div>
+
+      <div class="hdr-bottom">
+        <div class="meta">
+          <div class="kv">
+            <div class="k">Date</div>
+            <div class="v">${escapeHtml(dateStr)}</div>
+          </div>
+          <div class="kv">
+            <div class="k">Currency</div>
+            <div class="v">IQD</div>
+          </div>
+          <div class="kv">
+            <div class="k">Reference</div>
+            <div class="v">${escapeHtml(invNo)}</div>
+          </div>
+        </div>
+        <div class="hdr-mark">ASSAL • OFFICIAL</div>
       </div>
 
       <div class="accent"></div>
@@ -6943,21 +6999,23 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         </div>
       </div>
 
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th style="width:70px;">تسلسل</th>
-            <th style="width:170px; text-align:right;">الصنف</th>
-            <th style="text-align:right;">اسم المادة</th>
-            <th style="width:120px;">العدد</th>
-            <th style="width:150px;">السعر</th>
-            <th style="width:170px;">الإجمالي</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-        </tbody>
-      </table>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="width:52px;">تسلسل</th>
+              <th style="width:120px; text-align:right;">الصنف</th>
+              <th style="text-align:right;">اسم المادة</th>
+              <th style="width:74px;">العدد</th>
+              <th style="width:96px;">السعر</th>
+              <th style="width:132px;">الإجمالي</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
 
       <div class="bottom">
         <div class="terms">
@@ -6979,7 +7037,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
       </div>
 
       <div class="foot">
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <span class="chip">Thank you</span>
           <div>شكراً لتعاملكم ويانه 🤍</div>
         </div>
@@ -6988,6 +7046,8 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
     </div>
   `;
 }
+
+
 
 
 
