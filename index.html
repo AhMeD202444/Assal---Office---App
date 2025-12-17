@@ -6528,75 +6528,468 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
     const line = (Number(it.price)||0) * (Number(it.qty)||0);
     return `
       <tr>
-        <td class="center">${idx+1}</td>
-        <td>
-          <div class="inv-item-name">${escapeHtml(it.name)}</div>
-          <div class="inv-item-sub">${escapeHtml(it.category || "")}</div>
+        <td class="td-idx">${idx+1}</td>
+        <td class="td-cat">${escapeHtml(it.category || "")}</td>
+        <td class="td-name">
+          <div class="nm">${escapeHtml(it.name)}</div>
         </td>
-        <td class="center">${moneyIQD(it.price)}</td>
-        <td class="center">${it.qty}</td>
-        <td class="center">${moneyIQD(line)}</td>
+        <td class="td-num">${it.qty}</td>
+        <td class="td-num">${moneyIQD(it.price)}</td>
+        <td class="td-num td-strong">${moneyIQD(line)}</td>
       </tr>
     `;
   }).join("");
 
   el.innerHTML = `
-    <div class="inv-head">
-      <div class="inv-brand">
-        <img src="images/logo.png" onerror="this.style.display='none'">
-        <div>
-          <div class="t1">Assal Office</div>
-          <div class="t2">فاتورة مبيعات - قطع موبايل</div>
+    <style>
+      #invoiceTemplate{ background:#fff; }
+
+      .inv-doc{
+        width: 900px;
+        margin: 0 auto;
+        padding: 26px 28px 24px;
+        font-family: "Cairo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans Arabic", "Noto Kufi Arabic", sans-serif;
+        border-radius:24px;
+        overflow:hidden;
+        border:1px solid #e5e7eb;
+        box-shadow: 0 18px 42px rgba(2,6,23,.10);
+        margin-bottom:14px;
+      }
+
+      .hdr-top{
+        background: linear-gradient(135deg,#0b1220 0%, #111827 45%, #0b1220 100%);
+        padding:18px 18px 16px;
+        position:relative;
+      }
+
+      .hdr-top:before{
+        content:"";
+        position:absolute;
+        inset:-120px -120px auto auto;
+        width:260px;
+        height:260px;
+        background: radial-gradient(circle at center, rgba(255,255,255,.18), rgba(255,255,255,0) 60%);
+        transform: rotate(12deg);
+        pointer-events:none;
+      }
+      .hdr-top:after{
+        content:"";
+        position:absolute;
+        inset:auto auto -140px -140px;
+        width:300px;height:300px;
+        background: radial-gradient(circle at center, rgba(255,255,255,.10), rgba(255,255,255,0) 65%);
+        pointer-events:none;
+      }
+
+      .hdr-row{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:16px;
+        position:relative;
+        z-index:1;
+      }
+
+      .brand{
+        display:flex;
+        align-items:center;
+        gap:14px;
+        min-width: 360px;
+      }
+
+      .logo{
+        width:54px;height:54px;
+        border-radius:18px;
+        background:#fff;
+        display:flex;align-items:center;justify-content:center;
+        overflow:hidden;
+        box-shadow: 0 10px 22px rgba(0,0,0,.22);
+        flex:0 0 auto;
+      }
+      .logo img{ width:100%;height:100%;object-fit:contain; }
+
+      .bname{
+        font-weight:950;
+        font-size:18px;
+        letter-spacing:.2px;
+        color:#fff;
+        line-height:1.15;
+      }
+      .btag{
+        margin-top:6px;
+        color:rgba(255,255,255,.72);
+        font-size:12.5px;
+        line-height:1.35;
+      }
+
+      .inv-badge{
+        text-align:left;
+        color:#fff;
+        min-width: 260px;
+      }
+      .inv-badge .cap{
+        font-size:12px;
+        letter-spacing:.18em;
+        text-transform:uppercase;
+        font-weight:900;
+        color:rgba(255,255,255,.75);
+      }
+      .inv-badge .no{
+        margin-top:6px;
+        font-size:20px;
+        font-weight:950;
+        letter-spacing:.02em;
+      }
+      .inv-badge .pill{
+        margin-top:10px;
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        padding:7px 12px;
+        border-radius:999px;
+        border:1px solid rgba(255,255,255,.18);
+        background: rgba(255,255,255,.08);
+        color:rgba(255,255,255,.92);
+        font-weight:850;
+        font-size:12px;
+        letter-spacing:.06em;
+        text-transform:uppercase;
+        white-space:nowrap;
+      }
+      .dot{
+        width:8px;height:8px;border-radius:999px;
+        background:#34d399; /* green-ish status dot */
+      }
+
+      .hdr-bottom{
+        background: linear-gradient(180deg,#ffffff 0%, #f8fafc 100%);
+        padding:12px 16px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+      }
+
+      .meta{
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+        align-items:center;
+      }
+
+      .kv{
+        background:#fff;
+        border:1px solid #e5e7eb;
+        border-radius:16px;
+        padding:8px 10px;
+        min-width: 160px;
+        box-shadow: 0 10px 22px rgba(2,6,23,.05);
+      }
+      .kv .k{
+        color:#64748b;
+        font-size:11px;
+        letter-spacing:.10em;
+        text-transform:uppercase;
+        font-weight:900;
+      }
+      .kv .v{
+        margin-top:6px;
+        font-size:13px;
+        font-weight:900;
+        color:#0b1220;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+
+      .hdr-mark{
+        font-weight:950;
+        letter-spacing:.14em;
+        text-transform:uppercase;
+        color:#0b1220;
+        opacity:.35;
+        font-size:12px;
+        white-space:nowrap;
+      }
+
+      .accent{
+        height: 7px;
+        border-radius: 999px;
+        background: linear-gradient(90deg,#0b1220 0%,#334155 45%,#0b1220 100%);
+        margin: 12px 0 14px;
+        opacity:.92;
+      }
+
+      /* ===== PANELS ===== */
+      .panels{
+        display:grid;
+        grid-template-columns: 1.2fr .8fr;
+        gap:12px;
+        margin-bottom:12px;
+      }
+      .card{
+        border:1px solid #e5e7eb;
+        border-radius:22px;
+        padding:12px 14px;
+        background:#fff;
+        box-shadow: 0 12px 28px rgba(2,6,23,.04);
+      }
+      .card .h{
+        font-weight:950;
+        font-size:12.5px;
+        letter-spacing:.10em;
+        text-transform:uppercase;
+        color:#0b1220;
+        display:flex;
+        align-items:center;
+        gap:8px;
+        margin-bottom:8px;
+      }
+      .card .p{
+        color:#475569;
+        font-size:12.6px;
+        line-height:1.65;
+        margin: 4px 0;
+      }
+      .cardDot{ width:8px;height:8px;border-radius:999px;background:#0b1220;opacity:.9; }
+
+      /* ===== TABLE (Premium + Compact rows) ===== */
+      .tbl{
+        width:100%;
+        border-collapse:separate;
+        border-spacing:0;
+        border:1px solid #e5e7eb;
+        border-radius:22px;
+        overflow:hidden;
+        box-shadow: 0 16px 36px rgba(2,6,23,.06);
+      }
+      .tbl thead th{
+        background: linear-gradient(180deg,#0b1220 0%,#111827 100%);
+        color:#fff;
+        padding:10px 10px;
+        font-size:12px;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+        font-weight:950;
+        border-bottom:1px solid rgba(255,255,255,.10);
+        white-space:nowrap;
+      }
+      .tbl tbody td{
+        padding:6px 10px;           /* ✅ صفوف أقصر */
+        font-size:12.7px;
+        border-bottom:1px solid #eef2f7;
+        background:#fff;
+        vertical-align:middle;
+        line-height:1.15;
+      }
+      .tbl tbody tr:nth-child(even) td{ background:#f9fafb; }
+      .tbl tbody tr:last-child td{ border-bottom:none; }
+
+      .td-idx{ width:70px; text-align:center; font-weight:950; color:#0b1220; }
+      .td-cat{ width:170px; color:#334155; font-weight:850; }
+      .td-name .nm{
+        font-weight:950;
+        color:#0b1220;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        max-width: 440px;
+      }
+      .td-num{
+        width:140px;
+        text-align:center;
+        font-variant-numeric: tabular-nums;
+        white-space:nowrap;
+        font-weight:850;
+        color:#0b1220;
+      }
+      .td-strong{ font-weight:950; }
+
+      /* ===== BOTTOM ===== */
+      .bottom{
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:12px;
+        margin-top:12px;
+      }
+      .terms{
+        flex:1 1 auto;
+        border:1px dashed #cbd5e1;
+        border-radius:22px;
+        padding:12px 14px;
+        background: linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+      }
+      .terms .h{
+        font-weight:950;
+        font-size:12.5px;
+        letter-spacing:.10em;
+        text-transform:uppercase;
+        color:#0b1220;
+        display:flex;
+        align-items:center;
+        gap:8px;
+        margin-bottom:8px;
+      }
+      .terms ul{
+        margin:0;
+        padding:0 18px 0 0;
+        color:#475569;
+        font-size:12.4px;
+        line-height:1.75;
+      }
+
+      .sum{
+        flex:0 0 320px;
+        border-radius:22px;
+        padding:14px 16px;
+        background: linear-gradient(180deg,#0b1220 0%,#111827 100%);
+        color:#fff;
+        box-shadow: 0 18px 40px rgba(2,6,23,.14);
+      }
+      .sum .row{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:9px 0;
+        border-bottom:1px solid rgba(255,255,255,.12);
+        font-variant-numeric: tabular-nums;
+      }
+      .sum .row:last-child{ border-bottom:none; }
+      .sum .row span{ color: rgba(255,255,255,.82); font-weight:850; }
+      .sum .row strong{ font-weight:950; white-space:nowrap; }
+      .sum .total{
+        margin-top:6px;
+        padding-top:12px;
+        border-top:1px solid rgba(255,255,255,.16);
+      }
+      .sum .total strong{ font-size:18px; }
+
+      .foot{
+        margin-top:14px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+        color:#64748b;
+        font-size:12px;
+      }
+      .chip{
+        padding:6px 10px;
+        border-radius:999px;
+        border:1px solid #e5e7eb;
+        background:#fff;
+        color:#0b1220;
+        font-weight:950;
+        letter-spacing:.10em;
+        text-transform:uppercase;
+        font-size:10.8px;
+      }
+    </style>
+
+    <div class="inv-doc" dir="rtl" lang="ar">
+
+      <div class="hdr">
+        <div class="hdr-top">
+          <div class="hdr-row">
+            <div class="brand">
+              <div class="logo">
+                <img src="images/logo.png" onerror="this.style.display='none'">
+              </div>
+              <div>
+                <div class="bname">Assal Office</div>
+                <div class="btag">فاتورة مبيعات رسمية • قطع موبايل • إصدار نظام السلة</div>
+              </div>
+            </div>
+
+            <div class="inv-badge">
+              <div class="cap">Sales Invoice</div>
+              <div class="no">${escapeHtml(invNo)}</div>
+              <div class="pill"><span class="dot"></span> ISSUED</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hdr-bottom">
+          <div class="meta">
+            <div class="kv">
+              <div class="k">Date</div>
+              <div class="v">${escapeHtml(dateStr)}</div>
+            </div>
+            <div class="kv">
+              <div class="k">Currency</div>
+              <div class="v">IQD</div>
+            </div>
+            <div class="kv">
+              <div class="k">Reference</div>
+              <div class="v">${escapeHtml(invNo)}</div>
+            </div>
+          </div>
+          <div class="hdr-mark">ASSAL • OFFICIAL</div>
         </div>
       </div>
-      <div class="inv-meta">
-        <div><strong>Invoice:</strong> ${escapeHtml(invNo)}</div>
-        <div><strong>Date:</strong> ${escapeHtml(dateStr)}</div>
-        <div><strong>Currency:</strong> IQD</div>
-      </div>
-    </div>
 
-    <div class="inv-panels">
-      <div class="inv-panel">
-        <div class="h">معلومات</div>
-        <div class="p">هذه الفاتورة مُنشأة من نظام السلة داخل الموقع.</div>
-        <div class="p">يرجى الاحتفاظ بها للضمان/المراجعة.</div>
-      </div>
-      <div class="inv-panel">
-        <div class="h">ملاحظة</div>
-        <div class="p">${escapeHtml(note || "—")}</div>
-      </div>
-    </div>
+      <div class="accent"></div>
 
-    <table class="inv-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>الصنف</th>
-          <th>سعر القطعة</th>
-          <th>الكمية</th>
-          <th>الإجمالي</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-
-    <div class="inv-sum">
-      <div class="box">
-        <div class="row"><span>المجموع</span><strong>${moneyIQD(subtotal)}</strong></div>
-        <div class="row"><span>الخصم</span><strong>${moneyIQD(discount)}</strong></div>
-        <div class="row g"><span>الإجمالي</span><strong>${moneyIQD(total)}</strong></div>
+      <div class="panels">
+        <div class="card">
+          <div class="h"><span class="cardDot"></span> معلومات</div>
+          <div class="p">هذه الفاتورة مُنشأة من نظام السلة داخل الموقع وتُعتمد كإثبات شراء.</div>
+          <div class="p">يرجى الاحتفاظ بها للضمان/المراجعة، ويمكن تقديمها عند الاستبدال أو الصيانة.</div>
+        </div>
+        <div class="card">
+          <div class="h"><span class="cardDot"></span> ملاحظة</div>
+          <div class="p">${escapeHtml(note || "—")}</div>
+        </div>
       </div>
-    </div>
 
-    <div class="inv-foot">
-      <div>شكراً لتعاملكم ويانه 🤍</div>
-      <div>© ${new Date().getFullYear()} Assal Office</div>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th style="width:70px;">تسلسل</th>
+            <th style="width:170px; text-align:right;">الصنف</th>
+            <th style="text-align:right;">اسم المادة</th>
+            <th style="width:120px;">العدد</th>
+            <th style="width:150px;">السعر</th>
+            <th style="width:170px;">الإجمالي</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+
+      <div class="bottom">
+        <div class="terms">
+          <div class="h"><span class="cardDot"></span> Terms</div>
+          <ul>
+            <li>الأسعار حسب ما ظاهر في السلة وقت إصدار الفاتورة.</li>
+            <li>الضمان/الاستبدال يعتمد على نوع القطعة وحالتها.</li>
+            <li>الاحتفاظ بالفاتورة يسرّع خدمة المراجعة والمتابعة.</li>
+          </ul>
+        </div>
+
+        <div class="sum">
+          <div class="row"><span>المجموع</span><strong>${moneyIQD(subtotal)}</strong></div>
+          <div class="row"><span>الخصم</span><strong>${moneyIQD(discount)}</strong></div>
+          <div class="total">
+            <div class="row"><span>الإجمالي</span><strong>${moneyIQD(total)}</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="chip">Thank you</span>
+          <div>شكراً لتعاملكم ويانه 🤍</div>
+        </div>
+        <div>© ${new Date().getFullYear()} Assal Office</div>
+      </div>
     </div>
   `;
 }
+
+
 
 
 function numOnlyIQD(n){
