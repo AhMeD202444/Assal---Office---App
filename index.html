@@ -4368,6 +4368,86 @@ body {
 }
 
 
+/* ✅ نفس إحساس زر الخروج: بدون هايلايت/فوكس */
+#offersModal .close-modal-btn,
+#newItemsModal .close-modal-btn,
+.cart-x,
+.cart-btn,
+.qty button,
+.cart-rm{
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* ✅ قص صارم لأزرار الإغلاق (X) لأنها دائرية */
+#offersModal .close-modal-btn,
+#newItemsModal .close-modal-btn,
+.cart-x{
+  position: relative;
+  overflow: hidden !important;
+  clip-path: circle(50% at 50% 50%) !important;
+}
+
+/* ✅ قص صارم لأزرار السلة (مستطيلة بحواف 14px) */
+.cart-btn{
+  position: relative;
+  overflow: hidden !important;
+  clip-path: inset(0 0 0 0 round 14px) !important;
+}
+
+/* ✅ قص صارم لأزرار الكمية لأنها دائرية */
+.qty button{
+  position: relative;
+  overflow: hidden !important;
+  clip-path: circle(50% at 50% 50%) !important;
+}
+
+/* ✅ قص صارم لزر الحذف (حوافه 12px) */
+.cart-rm{
+  position: relative;
+  overflow: hidden !important;
+  clip-path: inset(0 0 0 0 round 12px) !important;
+}
+
+/* ✅ يشيل focus نهائياً حتى ما يطلع برّه الزر */
+#offersModal .close-modal-btn:focus,
+#offersModal .close-modal-btn:focus-visible,
+#newItemsModal .close-modal-btn:focus,
+#newItemsModal .close-modal-btn:focus-visible,
+.cart-x:focus,
+.cart-x:focus-visible,
+.cart-btn:focus,
+.cart-btn:focus-visible,
+.qty button:focus,
+.qty button:focus-visible,
+.cart-rm:focus,
+.cart-rm:focus-visible{
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* فايرفوكس */
+#offersModal .close-modal-btn::-moz-focus-inner,
+#newItemsModal .close-modal-btn::-moz-focus-inner,
+.cart-x::-moz-focus-inner,
+.cart-btn::-moz-focus-inner,
+.qty button::-moz-focus-inner,
+.cart-rm::-moz-focus-inner{
+  border: 0 !important;
+}
+
+
+.close-modal-btn{
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  overflow: hidden !important;
+  clip-path: circle(50% at 50% 50%) !important;
+}
+
+
+
 
 
 
@@ -6097,18 +6177,13 @@ function searchItems() {
 
     if (!searchInput) {
         resultsContainer.style.display = 'none';
-        Swal.fire({
-            title: 'حقل فارغ',
-            html: '<p style="color: #dcdcdc;">يرجى كتابة اسم العنصر قبل المتابعة</p>',
-            iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-            confirmButtonText: 'موافق',
-            customClass: {
-                popup: 'swal2-popup',
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                confirmButton: 'swal2-confirm'
-            }
-        });
+      showExitLikeAlert({
+  icon: "fas fa-exclamation-circle",
+  title: "حقل فارغ",
+  message: "يرجى كتابة اسم العنصر قبل المتابعة",
+  confirmText: "موافق"
+});
+
         return;
     }
 
