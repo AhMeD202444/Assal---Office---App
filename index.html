@@ -4533,6 +4533,33 @@ body {
 }
 
 
+/* ✅ نفس إحساس زر الخروج: بدون هايلايت/فوكس يطلع برّه الزر (معاينة + فول سكرين) */
+#imgPrevFull,
+#imgPrevClose,
+#imgFullBack{
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+
+  overflow: hidden !important;
+  clip-path: inset(0 0 0 0 round 14px) !important; /* ✅ حواف مثل باقي الأزرار */
+  border-radius: 14px !important;                 /* ✅ حتى يصير الشكل مو بيضوي */
+}
+
+/* ✅ يشيل الـ focus outline نهائياً */
+#imgPrevFull:focus,
+#imgPrevFull:focus-visible,
+#imgPrevClose:focus,
+#imgPrevClose:focus-visible,
+#imgFullBack:focus,
+#imgFullBack:focus-visible{
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
+
 
     </style>
 </head>
