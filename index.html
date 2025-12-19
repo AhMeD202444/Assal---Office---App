@@ -4323,6 +4323,51 @@ body {
   font-family: 'Cairo', sans-serif !important;
 }
 
+/* ✅ نفس إحساس زر الخروج: بدون هايلايت/فوكس يطلع برّه الزر */
+.header-btn,
+.header-icon-btn,
+.header-cart-btn,
+.exit-confirm,
+.exit-cancel {
+  -webkit-tap-highlight-color: transparent; /* يشيل لمعة الموبايل */
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* ✅ قص صارم يطابق الحواف (حتى الظلال/التأثيرات ما تطلع برّه) */
+.header-btn{
+  overflow: hidden !important;
+  clip-path: inset(0 0 0 0 round 8px) !important; /* نفس border-radius مال header-btn */
+}
+
+/* زر العروض (لأن عنده border-radius 10px بالـ header-icon-btn) */
+.header-icon-btn{
+  overflow: hidden !important;
+  clip-path: inset(0 0 0 0 round 10px) !important;
+}
+
+/* زر السلة (هو أصلاً header-btn بس نخليه مؤكد) */
+.header-cart-btn{
+  overflow: hidden !important;
+  clip-path: inset(0 0 0 0 round 8px) !important;
+}
+
+/* ✅ يشيل الـ focus outline نهائياً (حتى بعد الضغط) */
+.header-btn:focus,
+.header-btn:focus-visible,
+.header-icon-btn:focus,
+.header-icon-btn:focus-visible,
+.header-cart-btn:focus,
+.header-cart-btn:focus-visible,
+.exit-confirm:focus,
+.exit-confirm:focus-visible,
+.exit-cancel:focus,
+.exit-cancel:focus-visible{
+  outline: none !important;
+}
+
+
 
 
 
