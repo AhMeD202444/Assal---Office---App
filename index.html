@@ -4302,6 +4302,31 @@ body {
 
 
 
+.swal2-container {
+  z-index: 30000 !important;
+}
+
+
+.swal2-confirm, .swal2-cancel {
+  border-radius: 8px !important;
+  clip-path: inset(0 0 0 0 round 8px) !important;
+  font-family: 'Cairo', sans-serif !important;
+}
+
+
+.swal2-confirm:active, .swal2-cancel:active {
+  clip-path: inset(0 0 0 0 round 8px) !important;
+}
+
+.exit-confirm, .exit-cancel {
+  border-radius: 8px !important;
+  font-family: 'Cairo', sans-serif !important;
+}
+
+
+
+
+
     </style>
 </head>
 <body>
@@ -5627,6 +5652,37 @@ function filterCategory(category) {
     alert("تم اختيار: " + category);
 }
 
+
+
+
+function showExitLikeAlert({ icon = "fas fa-exclamation-circle", title = "تنبيه", message = "", confirmText = "موافق" }) {
+  return Swal.fire({
+    html: `
+      <div class="exit-shell">
+        <div class="exit-icon">
+          <i class="${icon}"></i>
+        </div>
+        <h2 class="exit-title">${title}</h2>
+        <p class="exit-text">${message}</p>
+      </div>
+    `,
+    confirmButtonText: confirmText,
+    backdrop: 'rgba(2, 6, 23, 0.82)',
+    allowOutsideClick: true,
+    allowEscapeKey: true,
+    customClass: {
+      popup: 'swal2-popup exit-popup animate__animated animate__zoomIn',
+      confirmButton: 'exit-confirm'
+    },
+    hideClass: {
+      popup: 'animate__animated animate__zoomOut'
+    }
+  });
+}
+
+
+
+
         
    const dropboxMainFile = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSZww_ZDcqXnX6pUjlKccZdFUkRR9Z_JmfmdvNsnGVYT_rq_RTsSB1ydTy6QVrrS_o4s_ml1DNBTnaQ/pub?output=xlsx&t=" + Date.now();
 
@@ -5649,7 +5705,8 @@ async function loadExcelFiles() {
                     confirmButton: 'swal2-confirm'
                 }
             });
-            return { success: true, hasData: false, message: "رابط ملف Excel غير معرف." };
+           return { success: false, hasData: false, message: "رابط ملف Excel غير معرف." };
+
         }
 
         console.log("جارٍ تحميل ملف Excel من:", dropboxMainFile);
@@ -5668,7 +5725,8 @@ async function loadExcelFiles() {
                     confirmButton: 'swal2-confirm'
                 }
             });
-            return { success: true, hasData: false, message: `فشل تحميل ملف Excel: ${mainResponse.status}` };
+           return { success: false, hasData: false, message: `فشل تحميل ملف Excel: ${mainResponse.status}` };
+
         }
 
         const mainBuffer = await mainResponse.arrayBuffer();
@@ -5747,25 +5805,21 @@ async function loadExcelFiles() {
                     confirmButton: 'swal2-confirm'
                 }
             });
-            return { success: true, hasData: false, message: "ملف Excel لا يحتوي على بيانات صالحة." };
+           return { success: false, hasData: false, message: "ملف Excel لا يحتوي على بيانات صالحة." };
         }
 
         return { success: true, hasData: true };
     } catch (error) {
         console.error("خطأ في تحميل ملف Excel:", error.message, error.stack);
-        Swal.fire({
-            title: 'خطأ',
-            html: `<p style="color: #ff4d4d;">حدث خطأ أثناء تحميل البيانات: ${error.message}</p>`,
-            iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-            confirmButtonText: 'موافق',
-            customClass: {
-                popup: 'swal2-popup',
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                confirmButton: 'swal2-confirm'
-            }
-        });
-        return { success: true, hasData: false, message: error.message };
+       showExitLikeAlert({
+  icon: "fas fa-wifi",
+  title: "خطأ بالتحميل",
+  message: `حدث خطأ أثناء تحميل البيانات: ${error.message}`,
+  confirmText: "موافق"
+});
+
+       return { success: false, hasData: false, message: error.message };
+
     }
 }
 
@@ -6048,18 +6102,13 @@ if (!currentCategory) {
 
     if (!database || !database[currentCategory] || database[currentCategory].length === 0) {
         resultsContainer.style.display = 'none';
-        Swal.fire({
-            title: 'لا توجد بيانات',
-            html: `<p style="color: #ff4d4d;">لا توجد بيانات متاحة لفئة ${currentCategory}. يرجى تحديث الصفحة أو التحقق من الاتصال.</p>`,
-            iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-            confirmButtonText: 'موافق',
-            customClass: {
-                popup: 'swal2-popup',
-                title: 'swal2-title',
-                htmlContainer: 'swal2-html-container',
-                confirmButton: 'swal2-confirm'
-            }
-        });
+      showExitLikeAlert({
+  icon: "fas fa-database",
+  title: "لا توجد بيانات",
+  message: `لا توجد بيانات متاحة لفئة ${currentCategory}. يرجى تحديث الصفحة أو التحقق من الاتصال.`,
+  confirmText: "موافق"
+});
+
         return;
     }
 
@@ -6205,8 +6254,22 @@ async function refreshData() {
 
     const [_, loadResult] = await Promise.all([loadingPromise, loadFilesPromise]);
 
-    if (!loadResult.hasData) {
-        console.warn("لا توجد بيانات:", loadResult.message);
+    // ✅ التعديل المطلوب: إذا فشل التحميل/ماكو بيانات لا تكمل ولا تطلع "تم تحديث البيانات"
+    if (!loadResult || loadResult.success === false || !loadResult.hasData) {
+        // سكّر نافذة جاري التحديث
+        Swal.close();
+
+        // طلع رسالة فشل (مثل نافذة الخروج) — لازم تكون عندك دالة showExitLikeAlert
+        showExitLikeAlert({
+            icon: "fas fa-wifi",
+            title: "فشل التحديث",
+            message: (loadResult && loadResult.message)
+                ? loadResult.message
+                : "تعذر تحميل البيانات. تحقق من الاتصال وحاول مرة ثانية.",
+            confirmText: "موافق"
+        });
+
+        return; // ✅ مهم: يمنع ظهور نافذة "تم تحديث البيانات"
     }
 
     await loadNewItems();
@@ -6248,6 +6311,7 @@ async function refreshData() {
         }
     });
 }
+
 
 
 
