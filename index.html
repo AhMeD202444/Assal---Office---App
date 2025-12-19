@@ -4559,6 +4559,155 @@ body {
 }
 
 
+/* =========================================================
+   PROMO POPUP THEME (EDIT HERE)  ✅
+   - خليه آخر CSS بالملف
+   - كل أسبوع غيّر المتغيرات فقط (الألوان/الحركة)
+   ========================================================= */
+
+#promoPopup{
+  /* ====== EDIT ONLY (متغيرات) ====== */
+  --promo-radius: 18px;
+  --promo-border: rgba(148,163,184,.22);
+
+  --promo-bg-1: rgba(220, 38, 38, 0.18); /* بقعة 1 */
+  --promo-bg-2: rgba(34, 197, 94, 0.12); /* بقعة 2 */
+  --promo-bg-base: rgba(15, 23, 42, 0.97);
+
+  --promo-title: #f9fafb;
+  --promo-text:  #cbd5f5;
+
+  --promo-quote-bg: rgba(2, 6, 23, 0.35);
+  --promo-quote-border: rgba(148,163,184,.18);
+
+  /* زر "تمام" */
+  --promo-btn-bg: #8b0000;            /* ✅ هنا تغيّر لون الزر */
+  --promo-btn-bg-hover: #a00000;
+  --promo-btn-bg-active: #6f0000;
+  --promo-btn-text: #ffffff;
+  --promo-btn-radius: 14px;
+
+  /* حركة الدخول/الخروج */
+  --promo-in: promoPopIn;
+  --promo-out: promoPopOut;
+  --promo-in-dur: .75s;
+  --promo-out-dur: .55s;
+  /* ====== STOP EDITING BELOW ====== */
+}
+
+/* شكل النافذة */
+#promoPopup{
+  font-family: 'Cairo', sans-serif !important;
+
+  /* ✅ دعم متصفحات أقدم (fallback) */
+  width: 94vw !important;
+  max-width: 520px !important;
+
+  /* ✅ المتصفحات الحديثة */
+  width: min(520px, 94vw) !important;
+
+  box-sizing: border-box !important;
+
+  border-radius: var(--promo-radius);
+  border: 1px solid var(--promo-border);
+  background:
+    radial-gradient(circle at 18% 10%, var(--promo-bg-1), transparent 55%),
+    radial-gradient(circle at 85% 95%, var(--promo-bg-2), transparent 55%),
+    var(--promo-bg-base);
+
+  /* ✅ دعم سفاري */
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+
+  box-shadow: 0 22px 55px rgba(0,0,0,.75);
+}
+
+/* ✅ أعرض شوية على الحاسوب (إجباري يغلب على أي ستايل ثاني) */
+@media (min-width: 992px){
+  #promoPopup{
+    width: 760px !important;     /* ✅ هذا اللي يوسع فعلاً */
+    max-width: 760px !important; /* ✅ حتى ما ينحصر */
+  }
+}
+
+/* العنوان والنص */
+#promoPopup .popup-title,
+#promoPopup .alert-title{
+  color: var(--promo-title) !important;
+}
+#promoPopup .promo-text,
+#promoPopup .alert-text{
+  color: var(--promo-text) !important;
+}
+
+/* صندوق الاقتباس إذا موجود */
+#promoPopup .promo-quote,
+#promoPopup .alert-quote{
+  background: var(--promo-quote-bg) !important;
+  border: 1px solid var(--promo-quote-border) !important;
+  border-radius: 14px;
+}
+
+/* زر "تمام" */
+#promoPopup #closeBtn,
+#promoPopup .alert-primary{
+  background: var(--promo-btn-bg) !important;
+  color: var(--promo-btn-text) !important;
+  border-radius: var(--promo-btn-radius) !important;
+
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  overflow: hidden !important;
+  clip-path: inset(0 0 0 0 round var(--promo-btn-radius)) !important;
+}
+
+/* ✅ دعم متصفحات ما تدعم clip-path */
+@supports not (clip-path: inset(0 0 0 0 round 14px)) {
+  #promoPopup #closeBtn,
+  #promoPopup .alert-primary{
+    clip-path: none !important;
+    border-radius: var(--promo-btn-radius) !important;
+  }
+}
+
+#promoPopup #closeBtn:hover,
+#promoPopup .alert-primary:hover{
+  background: var(--promo-btn-bg-hover) !important;
+}
+#promoPopup #closeBtn:active,
+#promoPopup .alert-primary:active{
+  background: var(--promo-btn-bg-active) !important;
+}
+
+#promoPopup #closeBtn:focus,
+#promoPopup #closeBtn:focus-visible,
+#promoPopup .alert-primary:focus,
+#promoPopup .alert-primary:focus-visible{
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* أنيميشن ثابت (تستخدمه بالـ JS) */
+@keyframes promoPopIn{
+  0%   { transform: translate(-50%, -60%) scale(.92); opacity: 0; filter: blur(2px); }
+  60%  { transform: translate(-50%, -52%) scale(1.02); opacity: 1; filter: blur(0px); }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+@keyframes promoPopOut{
+  0%   { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -60%) scale(.96); opacity: 0; }
+}
+
+
+
+/* =========================================================
+   PROMO POPUP THEME (EDIT HERE)  ✅
+                         نهاية البلووووووك   
+   ========================================================= */
+
+
+
+
 
 
     </style>
@@ -4632,41 +4781,43 @@ body {
 <div id="overlay"></div>
 
 <!-- إعلان تعليمي لسلة المبيعات -->
-<div id="promoPopup" class="alert-shell alert-info" dir="rtl">
+<div id="promoPopup" class="alert-shell alert-faith promo-rahidun" dir="rtl">
   <div class="alert-header">
     <div class="alert-icon">
-      <i class="fas fa-cart-shopping"></i>
+      <i class="fas fa-heart"></i>
     </div>
+
     <div class="alert-head-text">
-      <span class="alert-kicker">تحديث التطبيق</span>
-      <h1 class="alert-title">تمت إضافة سلة المبيعات ✅</h1>
+      <span class="alert-kicker">رسالة محبّة ووحدة</span>
+      <h1 class="alert-title">محبّة الإمام علي (ع) للصحابة الكرام</h1>
     </div>
   </div>
 
   <div class="alert-body">
     <p class="alert-text" style="text-align:right;">
-      هسه تگدر تجمع المواد بسلة وحدة وتطلعها بصورة بسهولة وترسلها لاي فرع من فروعنا عن طريق الواتساب.
+     حبّ الإمام عليّ (عليه السلام) للصحابة الكرام يتجسّد حين خطب بعد تولّيه الخلافة فقال:
     </p>
 
-    <ol class="alert-steps" style="text-align:right; margin:0; padding:0 18px 0 0; line-height:1.75;">
-      <li><b>إضافة للسلة:</b> من كل مادة اضغط زر السلة الموجود يم <b>اسم المادة</b>.</li>
-      <li><b>افتح السلة:</b> اضغط زر السلة (سلة المبيعات).</li>
-      <li><b>اطبع صورة:</b> من داخل السلة اختار زر <b>Image</b>.</li>
-      <li><b>أرسل لاي فرع من فروعنا:</b> خذ <b>سكرين شوت</b> للصورة وارسله <b>لأرقام واتساب فروع مكتب عسل</b>.</li>
-    </ol>
+    <div class="alert-quote" style="text-align:right;">
+      <i class="fas fa-quote-right"></i>
+      <p class="alert-quote-text">
+       «خيرُ هذهِ الأُمّةِ بعدَ نبيِّها أبو بكرٍ ثمَّ عمرُ.»
+      </p>
+      <div class="alert-quote-ref">البخاري)</div>
+    </div>
 
     <div class="alert-meta" style="justify-content:center;">
-      <span class="alert-pill"><i class="fas fa-image"></i> فاتورة بصورة</span>
-      <span class="alert-pill"><i class="fas fa-receipt"></i> سلة مبيعات</span>
-      <span class="alert-pill"><i class="fab fa-whatsapp"></i> إرسال واتساب</span>
+      <span class="alert-pill"><i class="fas fa-hand-holding-heart"></i> محبّة</span>
+      <span class="alert-pill"><i class="fas fa-shield-heart"></i> احترام</span>
+      <span class="alert-pill"><i class="fas fa-people-group"></i> وحدة</span>
     </div>
   </div>
 
   <div class="alert-footer">
-    <button class="alert-secondary" onclick="closePopup()">إغلاق</button>
-    <button class="alert-primary" onclick="openCartFromPromo()">فتح السلة</button>
+    <button class="alert-primary" onclick="closePopup()">تمام</button>
   </div>
 </div>
+
 
 
 
@@ -5431,7 +5582,8 @@ window.onload = function() {
         setTimeout(() => {
             let popup = document.getElementById('promoPopup');
             popup.style.display = 'flex';
-            popup.style.animation = 'slideDown 0.6s ease-out forwards';
+           popup.style.animation = 'promoPopIn 0.75s cubic-bezier(.2,.8,.2,1) forwards';
+
             document.getElementById('overlay').style.display = 'block';
         }, 500);
         sessionStorage.setItem('promoShown', 'true');
@@ -5673,13 +5825,22 @@ async function showActivationPopup() {
 
 // ✅ حركة الخروج بنفس مسار النزول (لأعلى)
 function closePopup() {
-    let popup = document.getElementById('promoPopup');
-    popup.style.animation = 'slideUp 0.6s ease-in forwards';
+  const popup  = document.getElementById('promoPopup');
+  const overlay = document.getElementById('overlay');
+  const newItemsModal = document.getElementById("newItemsModal");
+  const offersModal   = document.getElementById("offersModal");
 
-    setTimeout(() => {
-        popup.style.display = 'none';
-        document.getElementById('overlay').style.display = 'none';
-    }, 600); // ⏳ وقت متزامن مع الأنيميشن لضمان خروج سلس
+  popup.style.animation = 'promoPopOut 0.55s ease-in forwards';
+
+  setTimeout(() => {
+    popup.style.display = 'none';
+
+    if (overlay) {
+      const isNewOpen    = newItemsModal && newItemsModal.style.display === "flex";
+      const isOffersOpen = offersModal && offersModal.style.display === "flex";
+      if (!isNewOpen && !isOffersOpen) overlay.style.display = 'none';
+    }
+  }, 560);
 }
 
 
