@@ -6107,18 +6107,13 @@ async function loadExcelFiles() {
         const mainResponse = await fetch(dropboxMainFile, { cache: 'no-store' });
         if (!mainResponse.ok) {
             console.error(`فشل تحميل ملف Excel: ${mainResponse.status} ${mainResponse.statusText}`);
-            Swal.fire({
-                title: 'خطأ في التحميل',
-                html: `<p style="color: #ff4d4d;">فشل تحميل البيانات: ${mainResponse.status} - ${mainResponse.statusText}</p>`,
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
+            showExitLikeAlert({
+             icon: "fas fa-exclamation-circle",
+             title: "خطأ في التحميل",
+             message: `فشل تحميل البيانات: ${mainResponse.status} - ${mainResponse.statusText}`,
+             confirmText: "موافق"
             });
+
            return { success: false, hasData: false, message: `فشل تحميل ملف Excel: ${mainResponse.status}` };
 
         }
@@ -6187,18 +6182,15 @@ async function loadExcelFiles() {
         const hasData = Object.values(database).some(items => items.length > 0);
         if (!hasData) {
             console.warn("ملف Excel لا يحتوي على بيانات صالحة (جميع الفئات فارغة).");
-            Swal.fire({
-                title: 'خطأ',
-                html: '<p style="color: #ff4d4d;">ملف Excel لا يحتوي على بيانات صالحة.</p>',
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
+           
+           showExitLikeAlert({
+  icon: "fas fa-exclamation-circle",
+  title: "خطأ",
+  message: "ملف Excel لا يحتوي على بيانات صالحة.",
+  confirmText: "موافق"
+});
+
+           
            return { success: false, hasData: false, message: "ملف Excel لا يحتوي على بيانات صالحة." };
         }
 
