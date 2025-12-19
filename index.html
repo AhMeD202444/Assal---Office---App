@@ -4325,6 +4325,77 @@ body {
 
 
 
+/* ✅ توحيد قص تأثير الضغط لكل الأزرار + منع اللمعة الزرقاء */
+button,
+a,
+[role="button"],
+.category-btn,
+.new-category-btn,
+.tools-btn,
+.exit-confirm,
+.exit-cancel,
+.swal2-confirm,
+.swal2-cancel,
+.close-modal-btn,
+.floating-new-btn{
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+}
+
+/* ✅ أزرار بشكل كبسولة/مستطيل */
+.category-btn,
+.new-category-btn,
+.tools-btn,
+.exit-confirm,
+.exit-cancel,
+.swal2-confirm,
+.swal2-cancel{
+  position: relative;
+  overflow: hidden !important;
+  clip-path: inset(0 0 0 0 round 999px) !important; /* نفس فكرة نافذة الخروج */
+}
+
+/* ✅ أزرار دائرية */
+.search-container button,
+.search-container .clear-btn,
+.scroll-to-top,
+.slider-btn,
+.floating-new-btn,
+#newItemsModal .close-modal-btn{
+  position: relative;
+  overflow: hidden !important;
+  clip-path: circle(50% at 50% 50%) !important;
+}
+
+/* ✅ لما ينضغط: لا تخلي ظل يهرب برا الزر (خله داخلي فقط) */
+.category-btn:active,
+.new-category-btn:active,
+.tools-btn:active,
+.exit-confirm:active,
+.exit-cancel:active,
+.swal2-confirm:active,
+.swal2-cancel:active{
+  box-shadow: none !important;
+  box-shadow: inset 0 4px 8px rgba(0,0,0,.55) !important;
+}
+
+/* ✅ شيل فوكس رينغ المتصفح نهائياً (حتى ما يطلع برا الزر) */
+button:focus,
+button:focus-visible,
+a:focus,
+a:focus-visible{
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* فايرفوكس */
+button::-moz-focus-inner{
+  border: 0 !important;
+}
+
+
+
+
 
 
     </style>
