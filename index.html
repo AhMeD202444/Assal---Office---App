@@ -790,7 +790,7 @@
     }
 
     .search-container input {
-        padding: 10px 40px 10px 10px; /* تعديل الحشوة لتناسب الشاشات الصغيرة */
+        padding: 10px 40px 10px 55px; /* تعديل الحشوة لتناسب الشاشات الصغيرة + زر التوافقات */
     }
 
     .search-container button {
@@ -1176,9 +1176,28 @@ h1 {
     clip-path: circle(15px at center) !important;
 }
 
+
+/* زر التوافقات (كادر عسل فقط) داخل شريط البحث */
+.search-container .admin-compat-btn{
+    position: absolute;
+    left: 10px;
+    right: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(45deg, #f6d365, #fda085);
+}
+.search-container .admin-compat-btn:disabled,
+.search-container .admin-compat-btn.is-disabled{
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(0.6);
+    transform: translateY(-50%) scale(1) !important;
+    box-shadow: none !important;
+}
 /* تعديل padding حقل الإدخال لتجنب التداخل مع الأزرار */
 .search-container input {
     padding-right: 90px; /* زيادة المسافة لاستيعاب زر المسح + زر البحث */
+    padding-left: 60px; /* مساحة لزر التوافقات */
 }
 
 /* Media Queries للشاشات الصغيرة */
@@ -1191,6 +1210,7 @@ h1 {
     }
     .search-container input {
         padding-right: 85px; /* تعديل المسافة */
+    padding-left: 60px; /* مساحة لزر التوافقات */
     }
 }
 
@@ -1204,6 +1224,7 @@ h1 {
     }
     .search-container input {
         padding-right: 88px;
+    padding-left: 60px; /* مساحة لزر التوافقات */
     }
 }
 
@@ -4851,7 +4872,7 @@ body {
     <!-- زر أسعار بنمط الكروب -->
      <button class="new-category-btn" onclick="openLCDPage()"><i class="fas fa-list"></i> أسعار بنمط الكروب</button>
           <button class="category-btn tools-btn" onclick="openToolsPage()"><i class="fas fa-shopping-cart"></i> متجر عسل </button>
-      <button class="category-btn" onclick="window.location.href='similarites.html'"><i class="fas fa-sync"></i> توافقات قطع الغيار  </button>
+      <button class="category-btn" onclick="openSimilaritesPage()"><i class="fas fa-sync"></i> توافقات قطع الغيار  </button>
            <div class="slider-container">
     <button class="slider-btn prev-btn"><i class="fas fa-chevron-left"></i></button>
     <div class="slider" id="slider">
@@ -4939,6 +4960,9 @@ body {
 </div>
 
         <div class="search-container">
+    <button id="adminCompatBtn" class="admin-compat-btn" type="button" onclick="searchCompatibilitiesAdmin()" title="توافقات (كادر عسل فقط)" disabled>
+        <i class="fas fa-sync"></i>
+    </button>
     <input type="text" id="searchInput" placeholder="Search for items...">
     <button id="clearBtn" class="clear-btn" onclick="clearSearch()" style="display: none;"><i class="fas fa-times"></i></button>
     <button id="searchBtn" onclick="searchItems()"><i class="fas fa-search"></i></button>
@@ -5004,6 +5028,56 @@ body {
 
 
     <script>
+// ================== صلاحية كادر مكتب عسل (أدمن) ==================
+// ⚠️ غيّر كلمة الأدمن هنا (لا تخليها نفس 112233)
+const ADMIN_PASSWORD = "778899"; 
+const ADMIN_FLAG_KEY = "isAdmin";
+
+// ملف التوافقات (Google Sheet)
+const dropboxSimilaritesFile = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRRZZFGe3dDXCCb9L5HtgpnXoj-H6kvqWeMS_tvYyWAL2VqpJh64rCMqRpoTaMw3v9fdazd5fWB5E2d/pub?output=xlsx" + "&t=" + new Date().getTime();
+
+let compatDatabase = [];
+let compatLoaded = false;
+
+function isAdminUser() {
+    return localStorage.getItem(ADMIN_FLAG_KEY) === "true";
+}
+
+function setAdminUser(isAdmin) {
+    if (isAdmin) localStorage.setItem(ADMIN_FLAG_KEY, "true");
+    else localStorage.removeItem(ADMIN_FLAG_KEY);
+    updateAdminCompatBtn();
+}
+
+function updateAdminCompatBtn() {
+    const btn = document.getElementById("adminCompatBtn");
+    if (!btn) return;
+    const ok = isAdminUser();
+    btn.disabled = !ok;
+    btn.classList.toggle("is-disabled", !ok);
+    btn.title = ok ? "بحث التوافقات" : "هذه الخاصية حصرا لكادر مكتب عسل";
+}
+
+function showStaffOnlyPopup() {
+    showExitLikeAlert({
+        icon: "fas fa-user-lock",
+        title: "وصول محدود",
+        message: "هذه الخاصية حصرا لكادر مكتب عسل",
+        confirmText: "موافق"
+    });
+}
+
+function openSimilaritesPage() {
+    if (!isAdminUser()) {
+        showStaffOnlyPopup();
+        return;
+    }
+    window.location.href = "similarites.html";
+}
+
+document.addEventListener("DOMContentLoaded", updateAdminCompatBtn);
+// ================================================================
+
       
 
 
@@ -5736,9 +5810,12 @@ async function showActivationPopup() {
             }
 
             // نفس كلمة المرور القديمة بالضبط
-            if (value === '112233') {
+            if (value === '112233' || value === ADMIN_PASSWORD) {
                 // ✅ تفعيل التطبيق
                 localStorage.setItem('isActivated', 'true');
+                // ✅ تفعيل وضع الكادر حسب كلمة المرور
+                setAdminUser(value === ADMIN_PASSWORD);
+
                 setError('');
                 dialog.classList.remove('is-shaking');
 
@@ -6430,6 +6507,220 @@ function displayResults(results) {
 
 
 
+
+/* ================== توافقات قطع الغيار (بحث الأدمن) ================== */
+
+function escapeHtml(str) {
+    return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+async function loadCompatibilitiesFile() {
+    if (compatLoaded && Array.isArray(compatDatabase) && compatDatabase.length) {
+        return { success: true };
+    }
+
+    try {
+        const response = await fetch(dropboxSimilaritesFile, { cache: "no-store" });
+        if (!response.ok) throw new Error("تعذر تحميل ملف التوافقات.");
+
+        const arrayBuffer = await response.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
+        const preferredSheet =
+            workbook.SheetNames.find(n => n.toUpperCase().includes("SIMILAR")) ||
+            workbook.SheetNames[0];
+
+        const worksheet = workbook.Sheets[preferredSheet];
+        compatDatabase = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+        compatLoaded = true;
+        return { success: true };
+    } catch (err) {
+        compatLoaded = false;
+        compatDatabase = [];
+
+        showExitLikeAlert({
+            icon: "fas fa-exclamation-circle",
+            title: "خطأ",
+            message: "ما كدرنا نحمّل ملف التوافقات. تأكد من النت أو الرابط.",
+            confirmText: "موافق"
+        });
+
+        return { success: false, message: err?.message || "error" };
+    }
+}
+
+function pickCompatText(row) {
+    // الشيت بيه حقل واحد فقط اسمه "Item"
+    // نعتبره هو نص/وصف التوافق أو السطر اللي نبحث داخله
+    const v = row && row["Item"] !== undefined ? String(row["Item"]).trim() : "";
+    return v;
+}
+
+
+function pickItemName(row) {
+    const keys = ["Item Name", "Item", "Name", "Part", "Model", "الموديل", "القطعة"];
+    for (const k of keys) {
+        if (row && row[k] !== undefined && String(row[k]).trim() !== "") {
+            return String(row[k]).trim();
+        }
+    }
+    return "بدون اسم";
+}
+
+function levenshteinDistance(a, b) {
+    a = String(a || "");
+    b = String(b || "");
+    const alen = a.length, blen = b.length;
+    if (alen === 0) return blen;
+    if (blen === 0) return alen;
+
+    const dp = new Array(blen + 1);
+    for (let j = 0; j <= blen; j++) dp[j] = j;
+
+    for (let i = 1; i <= alen; i++) {
+        let prev = dp[0];
+        dp[0] = i;
+        for (let j = 1; j <= blen; j++) {
+            const tmp = dp[j];
+            const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+            dp[j] = Math.min(
+                dp[j] + 1,      // حذف
+                dp[j - 1] + 1,  // إضافة
+                prev + cost     // استبدال
+            );
+            prev = tmp;
+        }
+    }
+    return dp[blen];
+}
+
+function similarityScore(textNorm, queryNorm) {
+    if (!textNorm || !queryNorm) return 0;
+
+    // تطابق مباشر
+    if (textNorm.includes(queryNorm)) return 1;
+
+    // تشابه عبر Levenshtein
+    const lev = levenshteinDistance(textNorm, queryNorm);
+    const maxLen = Math.max(textNorm.length, queryNorm.length, 1);
+    const levRatio = Math.max(0, 1 - (lev / maxLen));
+
+    // تشابه عبر تقاطع الكلمات (Token Overlap)
+    const t1 = textNorm.split(/\s+/).filter(Boolean);
+    const t2 = queryNorm.split(/\s+/).filter(Boolean);
+    const s1 = new Set(t1);
+    const s2 = new Set(t2);
+    let inter = 0;
+    for (const x of s2) if (s1.has(x)) inter++;
+
+    const union = new Set([...s1, ...s2]).size || 1;
+    const jaccard = inter / union;
+
+    // نختار الأفضل، مع وزن بسيط
+    return Math.max(jaccard, levRatio * 0.92);
+}
+
+
+function displayCompatResults(results) {
+    const resultsContainer = document.getElementById("results");
+    resultsContainer.innerHTML = "";
+
+    if (!results || results.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="no-results">
+                هذا العنصر غير متوفر في الوقت الحالي
+            </div>
+        `;
+    } else {
+        let htmlContent = "";
+        const imgSrc = "images/default.png";
+
+        results.forEach(item => {
+            const row = item.row || item;
+            const score = typeof item.score === "number" ? item.score : 0;
+
+            const rawText = pickCompatText(row) || pickItemName(row);
+            const itemName = escapeHtml(rawText || "بدون اسم");
+
+            const pct = Math.round(Math.max(0, Math.min(1, score)) * 100);
+
+            htmlContent += `
+                <div class="result-card">
+                    <img src="${imgSrc}" alt="Item Image">
+                    <h4>${itemName}</h4>
+                    <p>نسبة التشابه: ${pct}%</p>
+                </div>
+            `;
+        });
+
+        resultsContainer.innerHTML = htmlContent;
+    }
+
+    requestAnimationFrame(() => {
+        resultsContainer.style.display = "flex";
+        resultsContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+        toggleScrollToTopButton();
+    });
+}
+
+async function searchCompatibilitiesAdmin() {
+    // ❌ مو أدمن
+    if (!isAdminUser()) {
+        showStaffOnlyPopup();
+        return;
+    }
+
+    const inputEl = document.getElementById("searchInput");
+    const searchInput = (inputEl?.value || "").trim();
+    const resultsContainer = document.getElementById("results");
+
+    if (!searchInput) {
+        resultsContainer.style.display = "none";
+        showExitLikeAlert({
+            icon: "fas fa-exclamation-circle",
+            title: "حقل فارغ",
+            message: "يرجى كتابة اسم العنصر قبل المتابعة",
+            confirmText: "موافق"
+        });
+        return;
+    }
+
+    const loadRes = await loadCompatibilitiesFile();
+    if (!loadRes.success) return;
+
+    const q = normalizeString(searchInput);
+
+    // ✅ الشيت بيه عمود واحد فقط (Item)
+    // نطلع "أقرب" النتائج حسب التشابه، ونرتبها
+    const scored = (compatDatabase || []).map(row => {
+        const txtNorm = normalizeString(pickCompatText(row) || pickItemName(row));
+        const score = similarityScore(txtNorm, q);
+        return { row, score, txtNorm };
+    })
+    .filter(x => x.score >= 0.32)          // فلترة بسيطة حتى لا تطلع نتائج بعيدة
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 80);
+
+    // إذا ماكو نتائج بعد الفلترة، نجرب "contains" فقط كخطة بديلة
+    if (scored.length === 0) {
+        const fallback = (compatDatabase || []).filter(row => {
+            const txtNorm = normalizeString(pickCompatText(row) || pickItemName(row));
+            return txtNorm.includes(q);
+        }).slice(0, 80).map(row => ({ row, score: 1 }));
+        displayCompatResults(fallback);
+        return;
+    }
+
+    displayCompatResults(scored);
+}
+
+/* =============================================================== */
 
 // إخفاء الحاوية عند تفريغ حقل البحث
 function searchItems() {
