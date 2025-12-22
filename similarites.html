@@ -52,8 +52,8 @@
         button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         button { outline: none; }
         button:focus { outline: none; }
-        button:focus-visible,
-        
+        button:focus-visible { box-shadow: 0 0 0 3px rgba(163, 191, 250, 0.35); }
+
         .header-btn {
             width: 34px;
             height: 34px;
@@ -1570,6 +1570,191 @@ body {
                 padding: 20px;
             }
         }
+    
+        /* ===================== Pro UI Override (2025) ===================== */
+        :root{
+            --shadow-lg: 0 18px 60px rgba(0,0,0,.55);
+            --shadow-md: 0 10px 28px rgba(0,0,0,.35);
+            --ring: 0 0 0 3px rgba(163,191,250,.35);
+        }
+
+        /* Unified button UX (touch highlight + focus ring + ripple) */
+        button, a { -webkit-tap-highlight-color: transparent; }
+        button { outline: none; }
+        .ui-btn{
+            border-radius: var(--ui-radius-btn);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            touch-action: manipulation;
+            transform: translateZ(0);
+        }
+        .ui-btn:focus-visible{
+            outline: none !important;
+            box-shadow: var(--ring), var(--shadow-md) !important;
+        }
+        .ui-btn:active{
+            transform: translateZ(0) scale(.985) !important;
+        }
+        .ui-ripple::after{
+            content:"";
+            position:absolute;
+            inset:-2px;
+            background: radial-gradient(circle at var(--rx,50%) var(--ry,50%),
+                rgba(255,255,255,.28),
+                rgba(255,255,255,0) 45%);
+            opacity:0;
+            transform: scale(.35);
+            transition: transform .55s ease, opacity .55s ease;
+            pointer-events:none;
+        }
+        .ui-ripple:active::after{
+            opacity:1;
+            transform: scale(1);
+            transition: 0s;
+        }
+
+        /* Header (icon buttons like premium apps) */
+        .header{
+            height: 44px;
+            background: rgba(10, 15, 25, 0.82);
+            backdrop-filter: blur(10px) saturate(1.2);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        }
+        .header-buttons{ gap: 8px; }
+        .header-btn{
+            width: 36px !important;
+            height: 36px !important;
+            padding: 0 !important;
+            gap: 0 !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            background: rgba(255,255,255,0.06) !important;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.28) !important;
+        }
+        .header-btn i{ font-size: 15px !important; }
+        .header-btn:hover{
+            transform: translateY(-1px) !important;
+            filter: brightness(1.08);
+        }
+        .header-btn.back-btn{
+            background: linear-gradient(135deg, rgba(139,0,0,0.78), rgba(178,34,34,0.78)) !important;
+        }
+        .header-btn.refresh-btn{
+            background: linear-gradient(135deg, rgba(107,114,128,0.75), rgba(75,85,99,0.75)) !important;
+        }
+        .header-btn.notes-btn{
+            background: linear-gradient(135deg, rgba(70,130,180,0.75), rgba(32,178,170,0.75)) !important;
+        }
+        .notes-count{
+            top: 2px !important;
+            right: 2px !important;
+            min-width: 18px !important;
+            height: 18px !important;
+            font-size: 10px !important;
+        }
+
+        /* Notes Drawer (modern panel) */
+        .notes-drawer{
+            background: rgba(17,24,39,0.92) !important;
+            border-left: 1px solid rgba(255,255,255,0.10);
+            border-top-left-radius: 22px;
+            border-bottom-left-radius: 22px;
+            padding: 18px 16px !important;
+            box-shadow: -18px 0 60px rgba(0,0,0,0.55) !important;
+        }
+        .notes-drawer h3{
+            font-size: 20px !important;
+            margin: 6px 0 14px 0 !important;
+            color: #A3BFFA !important;
+            text-shadow: none !important;
+        }
+        .notes-drawer .close-btn{
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .notes-item{
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid rgba(255,255,255,0.10) !important;
+            border-radius: 14px !important;
+        }
+
+        /* New Items Modal (company-grade) */
+        #newItemsModal{
+            background: rgba(17,24,39,0.92) !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            box-shadow: var(--shadow-lg) !important;
+            border-radius: 22px !important;
+            padding: 16px !important;
+        }
+        #newItemsModal h2{
+            margin: 0 0 12px 0 !important;
+            padding: 8px 0 10px 0 !important;
+            text-shadow: none !important;
+        }
+        #newItemsModal .close-modal-btn{
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.28) !important;
+        }
+        #newItemsModal .modal-content .new-item-card{
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid rgba(255,255,255,0.10) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.25) !important;
+        }
+
+        /* Refresh dialog (premium progress ring) */
+        .refresh-wrap{
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:10px;
+            padding-top: 2px;
+        }
+        .refresh-ring{
+            --p: 0;
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            position: relative;
+            display: grid;
+            place-items: center;
+            background: conic-gradient(var(--ui-accent-2) calc(var(--p)*1%), rgba(255,255,255,0.12) 0);
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 18px 45px rgba(0,0,0,0.45);
+        }
+        .refresh-ring::before{
+            content:"";
+            position:absolute;
+            inset: 9px;
+            border-radius: 50%;
+            background: rgba(17,24,39,0.96);
+            border: 1px solid rgba(255,255,255,0.10);
+        }
+        .refresh-ring span{
+            position: relative;
+            font-weight: 900;
+            font-family: 'Montserrat', sans-serif;
+            letter-spacing: .4px;
+        }
+        .refresh-title{
+            font-size: 16px;
+            font-weight: 900;
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+        }
+        .refresh-sub{
+            font-size: 13px;
+            color: var(--ui-muted);
+            line-height: 1.6;
+        }
+
     </style>
 </head>
 <body>
@@ -1579,7 +1764,7 @@ body {
         <div class="header-buttons">
             <button class="header-btn back-btn icon-only" onclick="goBack()" aria-label="رجوع" title="رجوع"><i class="fas fa-arrow-right"></i></button>
             <button class="header-btn refresh-btn icon-only" onclick="refreshData()" aria-label="تحديث" title="تحديث البيانات"><i class="fas fa-sync"></i></button>
-            <button class="header-btn notes-btn" onclick="toggleNotes()" title="عرض الملاحظات"><i class="fas fa-sticky-note"></i> ملاحظات <span class="notes-count" id="headerNotesCount">0</span></button>
+            <button class="header-btn notes-btn icon-only" onclick="toggleNotes()" aria-label="الملاحظات" title="الملاحظات"><i class="fas fa-sticky-note"></i><span class="notes-count" id="headerNotesCount">0</span></button>
         </div>
     </header>
     <div id="drawerOverlay" class="ui-overlay" onclick="toggleNotes()"></div>
@@ -1680,7 +1865,8 @@ body {
 
     <script>
         let isAnimating = false;
-    const dropboxSimilaritesFile = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRRZZFGe3dDXCCb9L5HtgpnXoj-H6kvqWeMS_tvYyWAL2VqpJh64rCMqRpoTaMw3v9fdazd5fWB5E2d/pub?output=xlsx" + "&t=" + new Date().getTime();
+    const dropboxSimilaritesFileBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRRZZFGe3dDXCCb9L5HtgpnXoj-H6kvqWeMS_tvYyWAL2VqpJh64rCMqRpoTaMw3v9fdazd5fWB5E2d/pub?output=xlsx";
+        const getSimilaritesUrl = () => `${dropboxSimilaritesFileBase}&t=${Date.now()}`;
         let database = {};
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
         let stats = JSON.parse(localStorage.getItem('stats')) || { searches: 0, notesAdded: 0 };
@@ -1870,7 +2056,7 @@ body {
 
         async function loadExcelFiles() {
             try {
-                if (!dropboxSimilaritesFile) {
+                if (!dropboxSimilaritesFileBase) {
                     console.error("رابط ملف Excel غير معرف.");
                     Swal.fire({
                         title: 'خطأ',
@@ -1887,8 +2073,9 @@ body {
                     return { success: false, hasData: false, message: "رابط ملف Excel غير معرف." };
                 }
 
-                console.log("جارٍ تحميل ملف Excel من:", dropboxSimilaritesFile);
-                const response = await fetch(dropboxSimilaritesFile, { cache: 'no-store' });
+                const excelUrl = getSimilaritesUrl();
+                console.log("جارٍ تحميل ملف Excel من:", excelUrl);
+                const response = await fetch(excelUrl, { cache: 'no-store' });
                 if (!response.ok) {
                     console.error(`فشل تحميل ملف Excel: ${response.status} ${response.statusText}`);
                     Swal.fire({
@@ -2288,7 +2475,25 @@ body {
         }
     }
 
-    window.onload = async function() {
+    
+    // UX: توحيد تجربة الأزرار (هايلايت لمس + Ripple + Focus ring)
+    function applyGlobalButtonsUX() {
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach((btn) => {
+            btn.classList.add('ui-btn', 'ui-ripple');
+            // تحديد موقع الـ ripple داخل الزر
+            btn.addEventListener('pointerdown', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                btn.style.setProperty('--rx', `${Math.max(0, Math.min(100, x))}%`);
+                btn.style.setProperty('--ry', `${Math.max(0, Math.min(100, y))}%`);
+            }, { passive: true });
+        });
+    }
+
+window.onload = async function() {
+        applyGlobalButtonsUX();
         let db;
         try {
             const firebaseConfig = {
@@ -2554,41 +2759,79 @@ body {
     }
 
     async function refreshData() {
+        let ringEl, pctEl, subEl;
+
+        const setProgress = (pct, msg) => {
+            if (ringEl && typeof pct === 'number') ringEl.style.setProperty('--p', String(pct));
+            if (pctEl && typeof pct === 'number') pctEl.textContent = `${pct}%`;
+            if (subEl && msg) subEl.textContent = msg;
+        };
+
         Swal.fire({
+            title: 'تحديث البيانات',
             html: `
-                <div style="display: flex; flex-direction: column; align-items: center;">
-                    <div class="loading-circle"></div>
-                    <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جاري التحديث...</p>
+                <div class="refresh-wrap">
+                    <div class="refresh-ring" id="refreshRing"><span id="refreshPct">0%</span></div>
+                    <div class="refresh-title">جاري تحديث الصفحة</div>
+                    <div class="refresh-sub" id="refreshSub">تهيئة التحديث…</div>
                 </div>
             `,
             showConfirmButton: false,
-            allowOutsideClick: true,
-            allowEscapeKey: true,
-            customClass: {
-                popup: 'swal2-popup activation-popup'
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            customClass: { popup: 'swal2-popup activation-popup refresh-popup' },
+            didOpen: () => {
+                ringEl = document.getElementById('refreshRing');
+                pctEl = document.getElementById('refreshPct');
+                subEl = document.getElementById('refreshSub');
+                setProgress(6, 'تهيئة التحديث…');
             }
         });
 
         try {
+            setProgress(18, 'تحميل آخر نسخة من بيانات التوافقات…');
             await loadSimilaritesData();
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            await Swal.fire({
-                title: 'تم التحديث',
-                text: 'تم تحديث البيانات بنجاح',
+
+            setProgress(55, 'تحديث شريط "الجديد"…');
+            await loadNewItems(true);
+
+            // إذا نافذة الجديد مفتوحة، نحدّثها مباشرة
+            if (typeof isModalOpen !== 'undefined' && isModalOpen) {
+                setProgress(75, 'تحديث نافذة التوافقات الجديدة…');
+                await loadNewItems(false);
+            }
+
+            setProgress(92, 'إنهاء التحديث…');
+            await new Promise(r => setTimeout(r, 350));
+
+            setProgress(100, 'تم ✅');
+            await new Promise(r => setTimeout(r, 250));
+
+            const result = await Swal.fire({
+                title: 'تم التحديث بنجاح',
+                html: `<div class="ui-footnote">إذا تحب تحديث كامل (Reload) حتى تتأكد 100%، اضغط <b>تحديث كامل</b>.</div>`,
                 icon: 'success',
-                confirmButtonText: 'موافق',
+                showCancelButton: true,
+                confirmButtonText: 'تحديث كامل',
+                cancelButtonText: 'تمام',
                 allowOutsideClick: true,
                 allowEscapeKey: true,
                 customClass: {
                     popup: 'swal2-popup activation-popup',
                     title: 'swal2-title',
                     htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
                 }
             });
+
+            if (result.isConfirmed) {
+                window.location.reload();
+            }
+
             triggerAnimation();
-            displayNewSimilarities();
         } catch (error) {
+            console.error("Refresh error:", error);
             await Swal.fire({
                 title: 'خطأ',
                 text: 'حدث خطأ أثناء التحديث',
