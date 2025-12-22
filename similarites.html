@@ -742,8 +742,7 @@ body {
             width: 90%;
             max-width: 800px;
             margin: 10px auto;
-            
-            overflow: visible;
+overflow: visible;
             max-height: none;
         }
 
@@ -926,9 +925,8 @@ body {
         /* Scroll to Top Button */
         .scroll-to-top {
             position: fixed;
-            bottom: 78px;
-            left: 20px;
-            right: auto;
+            bottom: 60px;
+            right: 20px;
             background: linear-gradient(45deg, #8B0000, #DC143C);
             color: #fff;
             border: none;
@@ -1572,276 +1570,116 @@ body {
             }
         }
     
-        /* ===================== Pro UI Override (2025) ===================== */
-        :root{
-            --shadow-lg: 0 18px 60px rgba(0,0,0,.55);
-            --shadow-md: 0 10px 28px rgba(0,0,0,.35);
-            --ring: 0 0 0 3px rgba(163,191,250,.35);
-        }
+        
 
-        /* Unified button UX (touch highlight + focus ring + ripple) */
-        button, a { -webkit-tap-highlight-color: transparent; }
-        button { outline: none; }
-        .ui-btn{
-            border-radius: var(--ui-radius-btn);
-            position: relative;
-            overflow: hidden;
-            user-select: none;
-            touch-action: manipulation;
-        }
-        /* Buttons that must stay perfectly circular (prev/next, search, scroll up, modal close) */
-        .ui-circle{
-            border-radius: 50% !important;
-            clip-path: circle(50% at center) !important;
-            overflow: hidden;
-            position: relative;
-        }
-        .ui-circle:focus-visible{
-            outline: none !important;
-            box-shadow: var(--ring), var(--shadow-md) !important;
-        }
-        button.slider-btn.ui-circle,
-        .search-container button.ui-circle,
-        button.scroll-to-top.ui-circle,
-        button.close-modal-btn.ui-circle{
-            border-radius: 50% !important;
-            clip-path: circle(50% at center) !important;
-        }
+        /* ======= UI Patch (Dec 2025) ======= */
 
-        .ui-btn:focus-visible{
-            outline: none !important;
-            box-shadow: var(--ring), var(--shadow-md) !important;
-        }
-        .ui-btn:active{
-            transform: translateZ(0) scale(.985) !important;
-        }
-        .ui-ripple::after{
-            content:"";
-            position:absolute;
-            inset:-2px;
-            background: radial-gradient(circle at var(--rx,50%) var(--ry,50%),
-                rgba(255,255,255,.28),
-                rgba(255,255,255,0) 45%);
-            opacity:0;
-            transform: scale(.35);
-            transition: transform .55s ease, opacity .55s ease;
-            pointer-events:none;
-        }
-        .ui-ripple:active::after{
-            opacity:1;
-            transform: scale(1);
-            transition: 0s;
-        }
 
-        /* Header (icon buttons like premium apps) */
-        .header{
-            height: 44px;
-            background: rgba(10, 15, 25, 0.82);
-            backdrop-filter: blur(10px) saturate(1.2);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-        }
-        .header-buttons{ gap: 8px; }
-        .header-btn{
-            width: 36px !important;
-            height: 36px !important;
+    
+        /* ======= UI Patch (Dec 2025) ======= */
+
+        /* Category slider arrows: perfect circles */
+        .slider-container .slider-btn{
+            border-radius: 9999px !important;
+            width: 40px !important;
+            height: 40px !important;
             padding: 0 !important;
-            gap: 0 !important;
-            border: 1px solid rgba(255,255,255,0.12) !important;
-            background: rgba(255,255,255,0.06) !important;
-            box-shadow: 0 10px 24px rgba(0,0,0,0.28) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
-        .header-btn i{ font-size: 15px !important; }
-        .header-btn:hover{
-            transform: translateY(-1px) !important;
-            filter: brightness(1.08);
-        }
-        .header-btn.back-btn{
-            background: linear-gradient(135deg, rgba(139,0,0,0.78), rgba(178,34,34,0.78)) !important;
-        }
-        .header-btn.refresh-btn{
-            background: linear-gradient(135deg, rgba(107,114,128,0.75), rgba(75,85,99,0.75)) !important;
-        }
-        .header-btn.notes-btn{
-            background: linear-gradient(135deg, rgba(70,130,180,0.75), rgba(32,178,170,0.75)) !important;
-        }
-        .notes-count{
-            top: 2px !important;
-            right: 2px !important;
-            min-width: 18px !important;
-            height: 18px !important;
-            font-size: 10px !important;
+        .slider-container .slider-btn i{
+            font-size: 16px !important;
         }
 
-        /* Notes Drawer (modern panel) */
-        .notes-drawer{
-            background: rgba(17,24,39,0.92) !important;
-            border-left: 1px solid rgba(255,255,255,0.10);
-            border-top-left-radius: 22px;
-            border-bottom-left-radius: 22px;
-            padding: 18px 16px !important;
-            box-shadow: -18px 0 60px rgba(0,0,0,0.55) !important;
-        }
-        .notes-drawer h3{
-            font-size: 20px !important;
-            margin: 6px 0 14px 0 !important;
-            color: #A3BFFA !important;
-            text-shadow: none !important;
-        }
-        .notes-drawer .close-btn{
-            width: 36px;
-            height: 36px;
-            display: grid;
-            place-items: center;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.12);
-        }
-        .notes-item{
-            background: rgba(255,255,255,0.06) !important;
-            border: 1px solid rgba(255,255,255,0.10) !important;
-            border-radius: 14px !important;
+        /* Scroll-to-top: bottom-left above footer (prevents mid-page drift) */
+        .scroll-to-top{
+            position: fixed !important;
+            left: 16px !important;
+            right: auto !important;
+            bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+            z-index: 9999 !important;
+            transform: none !important;
         }
 
-        /* New Items Modal (company-grade) */
-        #newItemsModal{
-            background: rgba(17,24,39,0.92) !important;
-            border: 1px solid rgba(255,255,255,0.12) !important;
-            box-shadow: var(--shadow-lg) !important;
-            border-radius: 22px !important;
-            padding: 16px !important;
+        /* Modern global loader (no SweetAlert) */
+        .gl-overlay{
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,.55);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 10000;
+            padding: 18px;
         }
-        #newItemsModal h2{
-            margin: 0 0 12px 0 !important;
-            padding: 8px 0 10px 0 !important;
-            text-shadow: none !important;
+        .gl-overlay.show{ display:flex; }
+        .gl-card{
+            width: min(520px, 96vw);
+            border-radius: 18px;
+            background: rgba(255,255,255,.10);
+            border: 1px solid rgba(255,255,255,.18);
+            box-shadow: 0 22px 70px rgba(0,0,0,.55);
+            padding: 18px 18px 16px;
+            text-align: center;
         }
-        #newItemsModal .close-modal-btn{
-            background: rgba(255,255,255,0.06) !important;
-            border: 1px solid rgba(255,255,255,0.12) !important;
-            box-shadow: 0 10px 24px rgba(0,0,0,0.28) !important;
-        }
-        #newItemsModal .modal-content .new-item-card{
-            background: rgba(255,255,255,0.06) !important;
-            border: 1px solid rgba(255,255,255,0.10) !important;
-            border-radius: 16px !important;
-            box-shadow: 0 8px 22px rgba(0,0,0,0.25) !important;
-        }
-
-                /* Refresh dialog — Global loader (premium) */
-        .refresh-popup.swal2-popup{
-            padding: 0 !important;
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-        .refresh-ui{
-            width: min(440px, 92vw);
-            border-radius: 22px;
-            background: linear-gradient(180deg, rgba(17,24,39,0.92), rgba(17,24,39,0.78));
-            border: 1px solid rgba(255,255,255,0.14);
-            box-shadow: 0 22px 70px rgba(0,0,0,0.60);
-            padding: 18px 16px;
-            position: relative;
-            overflow: hidden;
-        }
-        .refresh-ui::before{
-            content:"";
-            position:absolute;
-            inset:-70px;
-            background:
-                radial-gradient(circle at 18% 12%, rgba(99,102,241,0.28), transparent 56%),
-                radial-gradient(circle at 85% 0%, rgba(34,197,94,0.18), transparent 58%),
-                radial-gradient(circle at 45% 112%, rgba(245,158,11,0.18), transparent 58%);
-            filter: blur(14px);
-        }
-        .refresh-ui > *{ position: relative; }
-
-        .refresh-headrow{
+        .gl-head{
             display:flex;
             align-items:center;
-            justify-content:space-between;
-            gap: 14px;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
         }
-        .refresh-brand{
-            display:flex;
-            align-items:center;
-            gap: 12px;
-            text-align:right;
+        .gl-spinner{
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,.25);
+            border-top-color: rgba(255,255,255,.9);
+            animation: glspin 1s linear infinite;
         }
-        .refresh-mark{
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            display:grid;
-            place-items:center;
-            background: rgba(255,255,255,0.10);
-            border: 1px solid rgba(255,255,255,0.14);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-        }
-        .refresh-mark i{ font-size: 18px; }
+        @keyframes glspin{ to{ transform: rotate(360deg);} }
 
-        .refresh-titles{
-            display:flex;
-            flex-direction:column;
-            gap: 3px;
-        }
-        .refresh-h1{
-            font-size: 16px;
-            font-weight: 900;
-            color: #fff;
-            font-family: 'Cairo', sans-serif;
-        }
-        .refresh-h2{
-            font-size: 13px;
-            color: var(--ui-muted);
-            line-height: 1.55;
-        }
-        .refresh-pct{
+        .gl-title{
+            font-weight: 800;
             font-size: 18px;
-            font-weight: 900;
-            letter-spacing: .4px;
-            font-family: 'Montserrat', sans-serif;
-            color: #fff;
-            min-width: 58px;
-            text-align:left;
+            letter-spacing: .2px;
         }
-
-        .refresh-bar{
-            margin-top: 14px;
-            height: 12px;
+        .gl-sub{
+            opacity: .9;
+            margin: 6px 0 14px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .gl-bar{
+            height: 10px;
             border-radius: 999px;
-            background: rgba(255,255,255,0.10);
-            border: 1px solid rgba(255,255,255,0.12);
             overflow: hidden;
+            background: rgba(255,255,255,.14);
+            border: 1px solid rgba(255,255,255,.16);
         }
-        .refresh-bar-fill{
+        .gl-fill{
             height: 100%;
             width: 0%;
             border-radius: 999px;
-            background: linear-gradient(90deg, var(--ui-accent), var(--ui-accent-2), #22c55e);
-            box-shadow: 0 10px 24px rgba(0,0,0,0.35);
-            position: relative;
+            background: linear-gradient(90deg, rgba(67,206,162,.95), rgba(24,90,157,.95));
+            transition: width .28s ease;
         }
-        .refresh-bar-fill::after{
-            content:"";
-            position:absolute;
-            inset:0;
-            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.42), rgba(255,255,255,0));
-            transform: translateX(-70%);
-            animation: refreshShimmer 1.2s linear infinite;
-            opacity: .55;
-        }
-        @keyframes refreshShimmer{
-            0%{ transform: translateX(-75%); }
-            100%{ transform: translateX(75%); }
-        }
-        .refresh-foot{
+        .gl-foot{
+            display:flex;
+            align-items:center;
+            justify-content: space-between;
             margin-top: 10px;
             font-size: 12px;
-            color: rgba(255,255,255,0.72);
+            opacity: .9;
         }
-</style>
+        .gl-pct{
+            font-weight: 800;
+        }
+
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -1939,6 +1777,25 @@ body {
         <i class="fas fa-times close-btn" onclick="toggleNotes()"></i>
         <h3>سلة الملاحظات</h3>
         <div class="notes-items-container" id="notesItems"></div>
+    </div>
+
+
+    <!-- Global Loader -->
+    <div class="gl-overlay" id="globalLoader" aria-hidden="true">
+        <div class="gl-card">
+            <div class="gl-head">
+                <div class="gl-spinner" aria-hidden="true"></div>
+                <div class="gl-title" id="glTitle">جاري التحديث</div>
+            </div>
+            <div class="gl-sub" id="glSub">يرجى الانتظار…</div>
+            <div class="gl-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="gl-fill" id="glFill"></div>
+            </div>
+            <div class="gl-foot">
+                <span id="glStage">تهيئة…</span>
+                <span class="gl-pct" id="glPct">0%</span>
+            </div>
+        </div>
     </div>
 
     <!-- Scroll to Top -->
@@ -2561,38 +2418,8 @@ body {
         }
     }
 
-    
-    // UX: توحيد تجربة الأزرار (هايلايت لمس + Ripple + Focus ring)
-    function applyGlobalButtonsUX() {
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach((btn) => {
-            const isCircle =
-                btn.classList.contains('slider-btn') ||
-                btn.classList.contains('scroll-to-top') ||
-                btn.classList.contains('close-modal-btn') ||
-                (btn.closest('.search-container') !== null);
-
-            // Ripple everywhere (هايلايت لمس + تموّج)
-            btn.classList.add('ui-ripple');
-            if (isCircle) {
-                btn.classList.add('ui-circle');
-            } else {
-                btn.classList.add('ui-btn');
-            }
-
-            // تحديد موقع الـ ripple داخل الزر
-            btn.addEventListener('pointerdown', (e) => {
-                const rect = btn.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width) * 100;
-                const y = ((e.clientY - rect.top) / rect.height) * 100;
-                btn.style.setProperty('--rx', `${Math.max(0, Math.min(100, x))}%`);
-                btn.style.setProperty('--ry', `${Math.max(0, Math.min(100, y))}%`);
-            }, { passive: true });
-        });
-    }
 
 window.onload = async function() {
-        applyGlobalButtonsUX();
         let db;
         try {
             const firebaseConfig = {
@@ -2858,47 +2685,74 @@ window.onload = async function() {
     }
 
     async function refreshData() {
-        let pctEl, subEl, barEl;
+        const overlay = document.getElementById('globalLoader');
+        const titleEl = document.getElementById('glTitle');
+        const subEl   = document.getElementById('glSub');
+        const fillEl  = document.getElementById('glFill');
+        const pctEl   = document.getElementById('glPct');
+        const stageEl = document.getElementById('glStage');
+        const barEl   = overlay?.querySelector('.gl-bar');
 
-        const setProgress = (pct, msg) => {
-            const safePct = Math.max(0, Math.min(100, Number(pct) || 0));
-            if (pctEl) pctEl.textContent = `${safePct}%`;
-            if (barEl) barEl.style.width = `${safePct}%`;
-            if (subEl && msg) subEl.textContent = msg;
+        const show = () => { if (overlay) { overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false'); } };
+        const hide = () => { if (overlay) { overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true'); } };
+
+        const set = (pct, stage, sub) => {
+            const p = Math.max(0, Math.min(100, Number(pct) || 0));
+            if (fillEl) fillEl.style.width = `${p}%`;
+            if (pctEl) pctEl.textContent = `${p}%`;
+            if (stageEl && stage) stageEl.textContent = stage;
+            if (subEl && sub) subEl.textContent = sub;
+            if (barEl) barEl.setAttribute('aria-valuenow', String(p));
         };
 
-        Swal.fire({
-            title: '',
-            html: `
-                <div class="refresh-ui" role="status" aria-live="polite">
-                    <div class="refresh-headrow">
-                        <div class="refresh-brand">
-                            <div class="refresh-mark"><i class="fas fa-sync-alt"></i></div>
-                            <div class="refresh-titles">
-                                <div class="refresh-h1">جاري تحديث البيانات</div>
-                                <div class="refresh-h2" id="refreshSub">تهيئة التحديث…</div>
-                            </div>
-                        </div>
-                        <div class="refresh-pct" id="refreshPct">0%</div>
-                    </div>
+        show();
+        if (titleEl) titleEl.textContent = 'تحديث البيانات';
+        set(8, 'تهيئة…', 'جاري تجهيز التحديث');
 
-                    <div class="refresh-bar" aria-hidden="true">
-                        <div class="refresh-bar-fill" id="refreshBar"></div>
-                    </div>
-
-                    <div class="refresh-foot">رجاءً لا تغلق الصفحة…</div>
-                </div>
-            `,
-            showConfirmButton: false,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            customClass: { popup: 'swal2-popup activation-popup refresh-popup' },
-            didOpen: () => {
-                pctEl = document.getElementById('refreshPct');
-                subEl = document.getElementById('refreshSub');
-                barEl = document.getElementById('refreshBar');
-                setProgress(6, 'تهيئة التحديث…');
+        try {
+            // 1) Refresh Excel / DB
+            set(18, 'تحميل البيانات…', 'جاري جلب آخر نسخة من ملف التوافقات');
+            await new Promise(r => setTimeout(r, 180));
+            if (typeof loadExcelFiles === 'function') {
+                await loadExcelFiles();
             }
+
+            // 2) Update new similarities ticker + modal data if open
+            set(62, 'تحديث الجديد…', 'جاري تحديث شريط التوافقات الجديدة');
+            await new Promise(r => setTimeout(r, 140));
+            if (typeof displayNewSimilarities === 'function') {
+                displayNewSimilarities();
+            }
+
+            // 3) Keep UX: if results are visible, keep scroll-to-first-result behavior
+            set(82, 'ترتيب الواجهة…', 'جاري تثبيت الواجهة بعد التحديث');
+            await new Promise(r => setTimeout(r, 160));
+            const resultsContainer = document.getElementById('resultsContainer');
+            if (resultsContainer?.classList?.contains('visible') && typeof scrollToResults === 'function') {
+                scrollToResults();
+            }
+
+            // Done
+            set(100, 'تم ✅', 'اكتمل التحديث');
+            await new Promise(r => setTimeout(r, 420));
+            hide();
+
+            // Full refresh (صدك تحديث كامل)
+            window.location.reload();
+        } catch (err) {
+            console.error(err);
+            hide();
+            Swal.fire({
+                title: 'تعذر التحديث',
+                text: 'صار خطأ أثناء تحديث البيانات. جرّب مرة ثانية.',
+                icon: 'error',
+                confirmButtonText: 'موافق',
+                customClass: { popup: 'swal2-popup activation-popup' }
+            });
+        }
+    }
+
+
         });
 
         try {
@@ -2914,13 +2768,35 @@ window.onload = async function() {
                 await loadNewItems(false);
             }
 
-            setProgress(92, 'ترتيب الواجهة…');
-            await new Promise(r => setTimeout(r, 250));
-
-            setProgress(100, 'تم ✅ جاري إعادة تحميل الصفحة…');
+            setProgress(92, 'إنهاء التحديث…');
             await new Promise(r => setTimeout(r, 350));
 
-            window.location.reload();
+            setProgress(100, 'تم ✅');
+            await new Promise(r => setTimeout(r, 250));
+
+            const result = await Swal.fire({
+                title: 'تم التحديث بنجاح',
+                html: `<div class="ui-footnote">إذا تحب تحديث كامل (Reload) حتى تتأكد 100%، اضغط <b>تحديث كامل</b>.</div>`,
+                icon: 'success',
+                showCancelButton: true,
+                confirmButtonText: 'تحديث كامل',
+                cancelButtonText: 'تمام',
+                allowOutsideClick: true,
+                allowEscapeKey: true,
+                customClass: {
+                    popup: 'swal2-popup activation-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel'
+                }
+            });
+
+            if (result.isConfirmed) {
+                window.location.reload();
+            }
+
+            triggerAnimation();
         } catch (error) {
             console.error("Refresh error:", error);
             await Swal.fire({
