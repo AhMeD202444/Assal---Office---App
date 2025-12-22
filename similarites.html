@@ -52,8 +52,8 @@
         button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         button { outline: none; }
         button:focus { outline: none; }
-        button:focus-visible,
-        
+        button:focus-visible { box-shadow: 0 0 0 3px rgba(163, 191, 250, 0.35); }
+
         .header-btn {
             width: 34px;
             height: 34px;
@@ -742,7 +742,7 @@ body {
             width: 90%;
             max-width: 800px;
             margin: 10px auto;
-            transform: translateZ(0);
+            
             overflow: visible;
             max-height: none;
         }
@@ -926,8 +926,9 @@ body {
         /* Scroll to Top Button */
         .scroll-to-top {
             position: fixed;
-            bottom: 60px;
-            right: 20px;
+            bottom: 78px;
+            left: 20px;
+            right: auto;
             background: linear-gradient(45deg, #8B0000, #DC143C);
             color: #fff;
             border: none;
@@ -1571,365 +1572,275 @@ body {
             }
         }
     
+        /* ===================== Pro UI Override (2025) ===================== */
+        :root{
+            --shadow-lg: 0 18px 60px rgba(0,0,0,.55);
+            --shadow-md: 0 10px 28px rgba(0,0,0,.35);
+            --ring: 0 0 0 3px rgba(163,191,250,.35);
+        }
 
-    /* ==========================
-       Pro UI Reset (Scoped + Safe)
-       ========================== */
-    :root{
-        --ui-bg: #0b0b10;
-        --ui-surface: rgba(18, 18, 24, 0.92);
-        --ui-surface-2: rgba(28, 28, 36, 0.92);
-        --ui-border: rgba(255,255,255,0.10);
-        --ui-border-2: rgba(255,255,255,0.16);
-        --ui-text: #f3f4f6;
-        --ui-text-dim: rgba(243,244,246,0.78);
-        --ui-shadow: 0 18px 45px rgba(0,0,0,0.55);
-        --ui-shadow-strong: 0 24px 70px rgba(0,0,0,0.70);
-        --ui-accent: #ff3b3b; /* حافظنا على روح الواجهة */
-        --ui-accent-2: #ff6b6b;
-        --ui-ring: rgba(255, 59, 59, 0.35);
-        --ui-radius: 18px;
-        --ui-radius-sm: 14px;
-        --ui-glass: blur(12px);
-    }
+        /* Unified button UX (touch highlight + focus ring + ripple) */
+        button, a { -webkit-tap-highlight-color: transparent; }
+        button { outline: none; }
+        .ui-btn{
+            border-radius: var(--ui-radius-btn);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        /* Buttons that must stay perfectly circular (prev/next, search, scroll up, modal close) */
+        .ui-circle{
+            border-radius: 50% !important;
+            clip-path: circle(50% at center) !important;
+            overflow: hidden;
+            position: relative;
+        }
+        .ui-circle:focus-visible{
+            outline: none !important;
+            box-shadow: var(--ring), var(--shadow-md) !important;
+        }
+        button.slider-btn.ui-circle,
+        .search-container button.ui-circle,
+        button.scroll-to-top.ui-circle,
+        button.close-modal-btn.ui-circle{
+            border-radius: 50% !important;
+            clip-path: circle(50% at center) !important;
+        }
 
-    button, a, .category, .category-btn, .new-category-btn, .slider-btn, .scroll-to-top {
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
-    }
+        .ui-btn:focus-visible{
+            outline: none !important;
+            box-shadow: var(--ring), var(--shadow-md) !important;
+        }
+        .ui-btn:active{
+            transform: translateZ(0) scale(.985) !important;
+        }
+        .ui-ripple::after{
+            content:"";
+            position:absolute;
+            inset:-2px;
+            background: radial-gradient(circle at var(--rx,50%) var(--ry,50%),
+                rgba(255,255,255,.28),
+                rgba(255,255,255,0) 45%);
+            opacity:0;
+            transform: scale(.35);
+            transition: transform .55s ease, opacity .55s ease;
+            pointer-events:none;
+        }
+        .ui-ripple:active::after{
+            opacity:1;
+            transform: scale(1);
+            transition: 0s;
+        }
 
-    /* Focus ring (احترافي) */
-    button:focus-visible, a:focus-visible, .category:focus-visible {
-        outline: 2px solid var(--ui-ring);
-        outline-offset: 3px;
-        border-radius: 12px;
-    }
+        /* Header (icon buttons like premium apps) */
+        .header{
+            height: 44px;
+            background: rgba(10, 15, 25, 0.82);
+            backdrop-filter: blur(10px) saturate(1.2);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        }
+        .header-buttons{ gap: 8px; }
+        .header-btn{
+            width: 36px !important;
+            height: 36px !important;
+            padding: 0 !important;
+            gap: 0 !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            background: rgba(255,255,255,0.06) !important;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.28) !important;
+        }
+        .header-btn i{ font-size: 15px !important; }
+        .header-btn:hover{
+            transform: translateY(-1px) !important;
+            filter: brightness(1.08);
+        }
+        .header-btn.back-btn{
+            background: linear-gradient(135deg, rgba(139,0,0,0.78), rgba(178,34,34,0.78)) !important;
+        }
+        .header-btn.refresh-btn{
+            background: linear-gradient(135deg, rgba(107,114,128,0.75), rgba(75,85,99,0.75)) !important;
+        }
+        .header-btn.notes-btn{
+            background: linear-gradient(135deg, rgba(70,130,180,0.75), rgba(32,178,170,0.75)) !important;
+        }
+        .notes-count{
+            top: 2px !important;
+            right: 2px !important;
+            min-width: 18px !important;
+            height: 18px !important;
+            font-size: 10px !important;
+        }
 
-    /* Ripple ink (بدون ما نخرب البوزيشن لأي زر) */
-    .ui-ripple-ink{
-        position:absolute;
-        border-radius:999px;
-        transform: translate(-50%,-50%) scale(0);
-        opacity:0.9;
-        pointer-events:none;
-        animation: uiRipple 520ms ease-out forwards;
-        background: radial-gradient(circle, rgba(255,255,255,0.35), rgba(255,255,255,0) 65%);
-        mix-blend-mode: screen;
-    }
-    @keyframes uiRipple{
-        to { transform: translate(-50%,-50%) scale(2.4); opacity:0; }
-    }
+        /* Notes Drawer (modern panel) */
+        .notes-drawer{
+            background: rgba(17,24,39,0.92) !important;
+            border-left: 1px solid rgba(255,255,255,0.10);
+            border-top-left-radius: 22px;
+            border-bottom-left-radius: 22px;
+            padding: 18px 16px !important;
+            box-shadow: -18px 0 60px rgba(0,0,0,0.55) !important;
+        }
+        .notes-drawer h3{
+            font-size: 20px !important;
+            margin: 6px 0 14px 0 !important;
+            color: #A3BFFA !important;
+            text-shadow: none !important;
+        }
+        .notes-drawer .close-btn{
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        .notes-item{
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid rgba(255,255,255,0.10) !important;
+            border-radius: 14px !important;
+        }
 
-    /* ==========================
-       Header Icon Buttons
-       ========================== */
-    .header-buttons{
-        gap: 10px;
-    }
-    .header-btn{
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid var(--ui-border);
-        background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-        box-shadow: 0 10px 28px rgba(0,0,0,0.35);
-        transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background 140ms ease;
-        position: relative; /* icon button only */
-        overflow: hidden; /* for ripple */
-    }
-    .header-btn i{
-        font-size: 18px;
-        color: var(--ui-text);
-        opacity: 0.92;
-    }
-    .header-btn:active{ transform: translateY(1px) scale(0.98); }
-    .header-btn:hover{ border-color: var(--ui-border-2); box-shadow: 0 14px 34px rgba(0,0,0,0.45); }
+        /* New Items Modal (company-grade) */
+        #newItemsModal{
+            background: rgba(17,24,39,0.92) !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            box-shadow: var(--shadow-lg) !important;
+            border-radius: 22px !important;
+            padding: 16px !important;
+        }
+        #newItemsModal h2{
+            margin: 0 0 12px 0 !important;
+            padding: 8px 0 10px 0 !important;
+            text-shadow: none !important;
+        }
+        #newItemsModal .close-modal-btn{
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.28) !important;
+        }
+        #newItemsModal .modal-content .new-item-card{
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid rgba(255,255,255,0.10) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 8px 22px rgba(0,0,0,0.25) !important;
+        }
 
-    .notes-btn{
-        padding: 0; /* ensure icon-only */
-    }
-    .notes-count{
-        position: absolute;
-        top: -6px;
-        left: -6px;
-        min-width: 18px;
-        height: 18px;
-        padding: 0 5px;
-        border-radius: 999px;
-        background: linear-gradient(180deg, var(--ui-accent), var(--ui-accent-2));
-        color: #fff;
-        font-size: 11px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        border: 1px solid rgba(255,255,255,0.25);
-        box-shadow: 0 10px 24px rgba(255, 59, 59, 0.28);
-    }
+                /* Refresh dialog — Global loader (premium) */
+        .refresh-popup.swal2-popup{
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .refresh-ui{
+            width: min(440px, 92vw);
+            border-radius: 22px;
+            background: linear-gradient(180deg, rgba(17,24,39,0.92), rgba(17,24,39,0.78));
+            border: 1px solid rgba(255,255,255,0.14);
+            box-shadow: 0 22px 70px rgba(0,0,0,0.60);
+            padding: 18px 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        .refresh-ui::before{
+            content:"";
+            position:absolute;
+            inset:-70px;
+            background:
+                radial-gradient(circle at 18% 12%, rgba(99,102,241,0.28), transparent 56%),
+                radial-gradient(circle at 85% 0%, rgba(34,197,94,0.18), transparent 58%),
+                radial-gradient(circle at 45% 112%, rgba(245,158,11,0.18), transparent 58%);
+            filter: blur(14px);
+        }
+        .refresh-ui > *{ position: relative; }
 
-    /* ==========================
-       Slider arrows (يمين/يسار الأصناف)
-       ========================== */
-    .slider-container .slider-btn{
-        width: 44px;
-        height: 44px;
-        border-radius: 16px;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: rgba(18,18,24,0.65);
-        backdrop-filter: var(--ui-glass);
-        -webkit-backdrop-filter: var(--ui-glass);
-        box-shadow: 0 16px 40px rgba(0,0,0,0.55);
-        transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
-        overflow: hidden; /* ripple */
-    }
-    .slider-container .slider-btn i{
-        color: rgba(255,255,255,0.92);
-        font-size: 18px;
-    }
-    .slider-container .slider-btn:hover{
-        background: rgba(28,28,36,0.70);
-        border-color: rgba(255,255,255,0.20);
-    }
-    .slider-container .slider-btn:active{
-        transform: translateY(1px) scale(0.98);
-    }
+        .refresh-headrow{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 14px;
+        }
+        .refresh-brand{
+            display:flex;
+            align-items:center;
+            gap: 12px;
+            text-align:right;
+        }
+        .refresh-mark{
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display:grid;
+            place-items:center;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.14);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+        }
+        .refresh-mark i{ font-size: 18px; }
 
-    /* ==========================
-       Scroll-to-top (سهم السكرول)
-       ========================== */
-    .scroll-to-top{
-        width: 48px;
-        height: 48px;
-        border-radius: 18px;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: rgba(18,18,24,0.70);
-        backdrop-filter: var(--ui-glass);
-        -webkit-backdrop-filter: var(--ui-glass);
-        box-shadow: var(--ui-shadow);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        overflow:hidden; /* ripple */
-        z-index: 9999;
-        position: fixed; /* تأكيد حتى ما يتغيّر */
-        bottom: 60px;
-        right: 20px;
-    }
-    .scroll-to-top i{ color: rgba(255,255,255,0.92); font-size: 18px; }
+        .refresh-titles{
+            display:flex;
+            flex-direction:column;
+            gap: 3px;
+        }
+        .refresh-h1{
+            font-size: 16px;
+            font-weight: 900;
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+        }
+        .refresh-h2{
+            font-size: 13px;
+            color: var(--ui-muted);
+            line-height: 1.55;
+        }
+        .refresh-pct{
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: .4px;
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
+            min-width: 58px;
+            text-align:left;
+        }
 
-    /* ==========================
-       Overlays + Modals / Drawers
-       ========================== */
-    .ui-overlay{
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.55);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 180ms ease;
-        z-index: 9990;
-    }
-    .ui-overlay.show{ opacity: 1; pointer-events: auto; }
-
-    /* New Items Modal */
-    #newItemsModal{
-        border-radius: var(--ui-radius);
-        border: 1px solid var(--ui-border);
-        background: linear-gradient(180deg, rgba(28,28,36,0.92), rgba(18,18,24,0.92));
-        box-shadow: var(--ui-shadow-strong);
-        backdrop-filter: var(--ui-glass);
-        -webkit-backdrop-filter: var(--ui-glass);
-        overflow: hidden;
-    }
-    #newItemsModal h2{
-        margin: 0;
-        padding: 16px 18px;
-        font-size: 18px;
-        color: var(--ui-text);
-        background: linear-gradient(90deg, rgba(255,59,59,0.20), rgba(255,255,255,0.02));
-        border-bottom: 1px solid rgba(255,255,255,0.10);
-    }
-    #newItemsModal .modal-content{
-        padding: 14px 14px 16px;
-    }
-    .close-modal-btn{
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        width: 38px;
-        height: 38px;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: rgba(255,255,255,0.06);
-        color: var(--ui-text);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        box-shadow: 0 16px 40px rgba(0,0,0,0.45);
-        transition: transform 140ms ease, background 140ms ease;
-        overflow:hidden; /* ripple */
-    }
-    .close-modal-btn:active{ transform: translateY(1px) scale(0.98); }
-    .close-modal-btn i{ font-size: 16px; }
-
-    /* Notes Drawer */
-    .notes-drawer{
-        border-left: 1px solid rgba(255,255,255,0.10);
-        background: linear-gradient(180deg, rgba(28,28,36,0.95), rgba(14,14,18,0.95));
-        box-shadow: -30px 0 80px rgba(0,0,0,0.70);
-        backdrop-filter: var(--ui-glass);
-        -webkit-backdrop-filter: var(--ui-glass);
-    }
-    .notes-drawer h3{
-        padding-top: 14px;
-        color: var(--ui-text);
-        letter-spacing: 0.2px;
-    }
-    .drawer-close{
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        width: 40px;
-        height: 40px;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: rgba(255,255,255,0.06);
-        color: var(--ui-text);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        box-shadow: 0 16px 40px rgba(0,0,0,0.45);
-        cursor: pointer;
-        overflow:hidden; /* ripple */
-    }
-    .drawer-close i{ font-size: 16px; }
-
-    /* ==========================
-       SweetAlert2 (نوافذ النظام)
-       ========================== */
-    .swal2-container{
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-    }
-    .swal2-popup{
-        border-radius: var(--ui-radius);
-        border: 1px solid rgba(255,255,255,0.12);
-        background: linear-gradient(180deg, rgba(28,28,36,0.94), rgba(18,18,24,0.94));
-        box-shadow: var(--ui-shadow-strong);
-        color: var(--ui-text);
-    }
-    .swal2-title{
-        color: var(--ui-text);
-        font-weight: 700;
-        letter-spacing: 0.2px;
-    }
-    .swal2-html-container{
-        color: var(--ui-text-dim);
-    }
-    .swal2-confirm, .swal2-cancel{
-        border-radius: 14px !important;
-        border: 1px solid rgba(255,255,255,0.12) !important;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.45) !important;
-        overflow:hidden !important; /* ripple */
-    }
-    .swal2-confirm{
-        background: linear-gradient(180deg, var(--ui-accent), var(--ui-accent-2)) !important;
-        color: #fff !important;
-    }
-    .swal2-cancel{
-        background: rgba(255,255,255,0.06) !important;
-        color: var(--ui-text) !important;
-    }
-
-    /* ==========================
-       Refresh Overlay (شركة عالمية)
-       ========================== */
-    .refresh-overlay{
-        position: fixed;
-        inset: 0;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0,0,0,0.62);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        z-index: 1050;
-        padding: 16px;
-    }
-    .refresh-overlay.show{ display:flex; }
-    .refresh-card{
-        width: min(440px, 92vw);
-        border-radius: var(--ui-radius);
-        border: 1px solid rgba(255,255,255,0.14);
-        background: linear-gradient(180deg, rgba(28,28,36,0.94), rgba(18,18,24,0.94));
-        box-shadow: var(--ui-shadow-strong);
-        padding: 18px 18px 16px;
-    }
-    .refresh-head{
-        display:flex;
-        align-items:center;
-        gap: 12px;
-        margin-bottom: 14px;
-    }
-    .refresh-spinner{
-        width: 44px;
-        height: 44px;
-        border-radius: 999px;
-        border: 3px solid rgba(255,255,255,0.16);
-        border-top-color: rgba(255,59,59,0.85);
-        animation: refreshSpin 900ms linear infinite;
-        box-shadow: 0 16px 38px rgba(0,0,0,0.55);
-    }
-    @keyframes refreshSpin{ to{ transform: rotate(360deg); } }
-    .refresh-title{
-        font-size: 18px;
-        font-weight: 800;
-        color: var(--ui-text);
-    }
-    .refresh-sub{
-        margin-top: 4px;
-        font-size: 13px;
-        color: var(--ui-text-dim);
-    }
-    .refresh-bar{
-        height: 10px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,255,255,0.10);
-        overflow:hidden;
-    }
-    .refresh-bar-fill{
-        height: 100%;
-        width: 0%;
-        border-radius: 999px;
-        background: linear-gradient(90deg, rgba(255,59,59,0.95), rgba(255,107,107,0.85));
-        box-shadow: 0 12px 30px rgba(255,59,59,0.20);
-        transition: width 240ms ease;
-    }
-    .refresh-meta{
-        display:flex;
-        align-items:center;
-        justify-content: space-between;
-        margin-top: 10px;
-        font-size: 12px;
-        color: var(--ui-text-dim);
-    }
-    .refresh-pct{
-        font-weight: 800;
-        color: rgba(255,255,255,0.92);
-    }
-
-
-    #newItemsModal h2 i,
-    .notes-drawer h3 i{
-        margin-left: 8px;
-        opacity: 0.92;
-        font-size: 16px;
-    }
+        .refresh-bar{
+            margin-top: 14px;
+            height: 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.12);
+            overflow: hidden;
+        }
+        .refresh-bar-fill{
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--ui-accent), var(--ui-accent-2), #22c55e);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+            position: relative;
+        }
+        .refresh-bar-fill::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.42), rgba(255,255,255,0));
+            transform: translateX(-70%);
+            animation: refreshShimmer 1.2s linear infinite;
+            opacity: .55;
+        }
+        @keyframes refreshShimmer{
+            0%{ transform: translateX(-75%); }
+            100%{ transform: translateX(75%); }
+        }
+        .refresh-foot{
+            margin-top: 10px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.72);
+        }
 </style>
 </head>
 <body>
@@ -1939,7 +1850,7 @@ body {
         <div class="header-buttons">
             <button class="header-btn back-btn icon-only" onclick="goBack()" aria-label="رجوع" title="رجوع"><i class="fas fa-arrow-right"></i></button>
             <button class="header-btn refresh-btn icon-only" onclick="refreshData()" aria-label="تحديث" title="تحديث البيانات"><i class="fas fa-sync"></i></button>
-            <button class="header-btn notes-btn icon-only" onclick="toggleNotes()" aria-label="الملاحظات" title="الملاحظات"><i class="fas fa-clipboard"></i><span class="notes-count" id="headerNotesCount">0</span></button>
+            <button class="header-btn notes-btn icon-only" onclick="toggleNotes()" aria-label="الملاحظات" title="الملاحظات"><i class="fas fa-sticky-note"></i><span class="notes-count" id="headerNotesCount">0</span></button>
         </div>
     </header>
     <div id="drawerOverlay" class="ui-overlay" onclick="toggleNotes()"></div>
@@ -1948,8 +1859,8 @@ body {
 
     <!-- New Items Modal -->
     <div id="newItemsModal">
-        <button type="button" class="close-modal-btn ui-icon-btn" onclick="closeNewItemsModal()" aria-label="إغلاق"><i class="fas fa-xmark"></i></button>
-        <h2><i class="fas fa-bell"></i> توافقات جديدة</h2>
+        <button class="close-modal-btn" onclick="closeNewItemsModal()"><i class="fas fa-times"></i></button>
+        <h2>توافقات جديدة</h2>
         <div class="modal-content"></div>
     </div>
 
@@ -2023,31 +1934,10 @@ body {
         </div>
     </div>
 
-
-    <!-- Refresh Overlay -->
-    <div id="refreshOverlay" class="refresh-overlay" aria-hidden="true">
-        <div class="refresh-card" role="dialog" aria-modal="true" aria-label="تحديث البيانات">
-            <div class="refresh-head">
-                <div class="refresh-spinner" aria-hidden="true"></div>
-                <div class="refresh-text">
-                    <div class="refresh-title">جاري تحديث البيانات</div>
-                    <div class="refresh-sub" id="refreshSub">نجهّز التحديث...</div>
-                </div>
-            </div>
-            <div class="refresh-bar" aria-hidden="true">
-                <div class="refresh-bar-fill" id="refreshBarFill"></div>
-            </div>
-            <div class="refresh-meta">
-                <span class="refresh-pct" id="refreshPct">0%</span>
-                <span class="refresh-hint">رجاءً لا تغلق الصفحة</span>
-            </div>
-        </div>
-    </div>
-
     <!-- Notes Drawer -->
     <div class="notes-drawer" id="notesDrawer">
-        <button type="button" class="drawer-close ui-icon-btn" onclick="toggleNotes()" aria-label="إغلاق"><i class="fas fa-xmark"></i></button>
-        <h3><i class="fas fa-clipboard"></i> سلة الملاحظات</h3>
+        <i class="fas fa-times close-btn" onclick="toggleNotes()"></i>
+        <h3>سلة الملاحظات</h3>
         <div class="notes-items-container" id="notesItems"></div>
     </div>
 
@@ -2062,10 +1952,7 @@ body {
     <script>
         let isAnimating = false;
     const dropboxSimilaritesFileBase = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRRZZFGe3dDXCCb9L5HtgpnXoj-H6kvqWeMS_tvYyWAL2VqpJh64rCMqRpoTaMw3v9fdazd5fWB5E2d/pub?output=xlsx";
-        function getSimilaritesUrl() {
-            const sep = dropboxSimilaritesFileBase.includes("?") ? "&" : "?";
-            return dropboxSimilaritesFileBase + sep + "t=" + Date.now();
-        }
+        const getSimilaritesUrl = () => `${dropboxSimilaritesFileBase}&t=${Date.now()}`;
         let database = {};
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
         let stats = JSON.parse(localStorage.getItem('stats')) || { searches: 0, notesAdded: 0 };
@@ -2260,7 +2147,7 @@ body {
                     Swal.fire({
                         title: 'خطأ',
                         html: '<p style="color: #ff4d4d;">رابط ملف Excel غير معرف. يرجى التحقق من الاتصال.</p>',
-                        iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                        iconHtml: '<i class="fas fa-exclamation-circle"></i>',
                         confirmButtonText: 'موافق',
                         customClass: {
                             popup: 'swal2-popup',
@@ -2280,7 +2167,7 @@ body {
                     Swal.fire({
                         title: 'خطأ في التحميل',
                         html: `<p style="color: #ff4d4d;">فشل تحميل البيانات: ${response.status} - ${response.statusText}</p>`,
-                        iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                        iconHtml: '<i class="fas fa-exclamation-circle"></i>',
                         confirmButtonText: 'موافق',
                         customClass: {
                             popup: 'swal2-popup',
@@ -2308,7 +2195,7 @@ body {
                 Swal.fire({
                     title: 'خطأ',
                     html: '<p style="color: #ff4d4d;">ملف Excel لا يحتوي على بيانات صالحة.</p>',
-                    iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                    iconHtml: '<i class="fas fa-exclamation-circle"></i>',
                     confirmButtonText: 'موافق',
                     customClass: {
                         popup: 'swal2-popup',
@@ -2326,7 +2213,7 @@ body {
             Swal.fire({
                 title: 'خطأ',
                 html: `<p style="color: #ff4d4d;">حدث خطأ أثناء تحميل البيانات: ${error.message}</p>`,
-                iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
                 confirmButtonText: 'موافق',
                 customClass: {
                     popup: 'swal2-popup',
@@ -2459,7 +2346,7 @@ body {
             Swal.fire({
                 title: 'خطأ',
                 html: `<p style="color: #ff4d4d;">حدث خطأ أثناء فتح النافذة: ${error.message}</p>`,
-                iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
                 confirmButtonText: 'موافق',
                 customClass: {
                     popup: 'swal2-popup',
@@ -2486,7 +2373,7 @@ body {
             Swal.fire({
                 title: 'خطأ',
                 html: `<p style="color: #ff4d4d;">حدث خطأ أثناء إغلاق النافذة: ${error.message}</p>`,
-                iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
                 confirmButtonText: 'موافق',
                 customClass: {
                     popup: 'swal2-popup',
@@ -2531,7 +2418,6 @@ body {
         if (!result.hasData) {
             console.warn("لا توجد بيانات في ملف Excel.");
         }
-        return result;
     }
 
     async function getDeviceId() {
@@ -2675,7 +2561,38 @@ body {
         }
     }
 
-    window.onload = async function() {
+    
+    // UX: توحيد تجربة الأزرار (هايلايت لمس + Ripple + Focus ring)
+    function applyGlobalButtonsUX() {
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach((btn) => {
+            const isCircle =
+                btn.classList.contains('slider-btn') ||
+                btn.classList.contains('scroll-to-top') ||
+                btn.classList.contains('close-modal-btn') ||
+                (btn.closest('.search-container') !== null);
+
+            // Ripple everywhere (هايلايت لمس + تموّج)
+            btn.classList.add('ui-ripple');
+            if (isCircle) {
+                btn.classList.add('ui-circle');
+            } else {
+                btn.classList.add('ui-btn');
+            }
+
+            // تحديد موقع الـ ripple داخل الزر
+            btn.addEventListener('pointerdown', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                btn.style.setProperty('--rx', `${Math.max(0, Math.min(100, x))}%`);
+                btn.style.setProperty('--ry', `${Math.max(0, Math.min(100, y))}%`);
+            }, { passive: true });
+        });
+    }
+
+window.onload = async function() {
+        applyGlobalButtonsUX();
         let db;
         try {
             const firebaseConfig = {
@@ -2940,113 +2857,87 @@ body {
         });
     }
 
-    
+    async function refreshData() {
+        let pctEl, subEl, barEl;
 
-    /* ==========================
-       Pro Refresh Overlay + Ripple
-       ========================== */
-    function proDelay(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
+        const setProgress = (pct, msg) => {
+            const safePct = Math.max(0, Math.min(100, Number(pct) || 0));
+            if (pctEl) pctEl.textContent = `${safePct}%`;
+            if (barEl) barEl.style.width = `${safePct}%`;
+            if (subEl && msg) subEl.textContent = msg;
+        };
 
-    function showRefreshOverlay(subText){
-        const o = document.getElementById('refreshOverlay');
-        if(!o) return;
-        o.classList.add('show');
-        o.setAttribute('aria-hidden','false');
-        setRefreshProgress(2, subText || 'نجهّز التحديث...');
-    }
-    function setRefreshProgress(pct, subText){
-        const fill = document.getElementById('refreshBarFill');
-        const pctEl = document.getElementById('refreshPct');
-        const sub = document.getElementById('refreshSub');
-        const p = Math.max(0, Math.min(100, Number(pct) || 0));
-        if(fill) fill.style.width = p + '%';
-        if(pctEl) pctEl.textContent = p + '%';
-        if(subText && sub) sub.textContent = subText;
-    }
-    function hideRefreshOverlay(){
-        const o = document.getElementById('refreshOverlay');
-        if(!o) return;
-        o.classList.remove('show');
-        o.setAttribute('aria-hidden','true');
-        setRefreshProgress(0, 'نجهّز التحديث...');
-    }
+        Swal.fire({
+            title: '',
+            html: `
+                <div class="refresh-ui" role="status" aria-live="polite">
+                    <div class="refresh-headrow">
+                        <div class="refresh-brand">
+                            <div class="refresh-mark"><i class="fas fa-sync-alt"></i></div>
+                            <div class="refresh-titles">
+                                <div class="refresh-h1">جاري تحديث البيانات</div>
+                                <div class="refresh-h2" id="refreshSub">تهيئة التحديث…</div>
+                            </div>
+                        </div>
+                        <div class="refresh-pct" id="refreshPct">0%</div>
+                    </div>
 
-    function attachRipple(el){
-        if(!el || el.__hasRipple) return;
-        el.__hasRipple = true;
+                    <div class="refresh-bar" aria-hidden="true">
+                        <div class="refresh-bar-fill" id="refreshBar"></div>
+                    </div>
 
-        el.addEventListener('pointerdown', (e) => {
-            try{
-                if(el.disabled) return;
+                    <div class="refresh-foot">رجاءً لا تغلق الصفحة…</div>
+                </div>
+            `,
+            showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            customClass: { popup: 'swal2-popup activation-popup refresh-popup' },
+            didOpen: () => {
+                pctEl = document.getElementById('refreshPct');
+                subEl = document.getElementById('refreshSub');
+                barEl = document.getElementById('refreshBar');
+                setProgress(6, 'تهيئة التحديث…');
+            }
+        });
 
-                const rect = el.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height) * 1.25;
-
-                const ink = document.createElement('span');
-                ink.className = 'ui-ripple-ink';
-                ink.style.width = ink.style.height = size + 'px';
-                ink.style.left = (e.clientX - rect.left) + 'px';
-                ink.style.top  = (e.clientY - rect.top) + 'px';
-
-                const cs = getComputedStyle(el);
-                if(cs.position === 'static') el.style.position = 'relative';
-                if(cs.overflow !== 'hidden') el.style.overflow = 'hidden';
-
-                el.appendChild(ink);
-                ink.addEventListener('animationend', () => ink.remove());
-            }catch(_){}
-        }, { passive: true });
-    }
-
-    function initProInteractions(){
-        // كل الأزرار + عناصر الضغط
-        document.querySelectorAll('button, .swal2-confirm, .swal2-cancel, .category, .category-btn, .new-category-btn, .slider-btn, .scroll-to-top')
-            .forEach(attachRipple);
-    }
-
-    window.addEventListener('load', initProInteractions);
-
-async function refreshData() {
         try {
-            showRefreshOverlay('نبدّي نحدّث البيانات...');
-            setRefreshProgress(10, 'تحميل البيانات من المصدر...');
-            const result = await loadSimilaritesData();
+            setProgress(18, 'تحميل آخر نسخة من بيانات التوافقات…');
+            await loadSimilaritesData();
 
-            // إذا ماكو بيانات، نخليها بهدوء (الرسائل الأصلية تبقى عبر Swal داخل loadExcelFiles)
-            if (!result || result.hasData === false) {
-                setRefreshProgress(100, 'ماكو بيانات كافية للتحديث');
-                await proDelay(700);
-                hideRefreshOverlay();
-                return;
+            setProgress(55, 'تحديث شريط "الجديد"…');
+            await loadNewItems(true);
+
+            // إذا نافذة الجديد مفتوحة، نحدّثها مباشرة
+            if (typeof isModalOpen !== 'undefined' && isModalOpen) {
+                setProgress(75, 'تحديث نافذة التوافقات الجديدة…');
+                await loadNewItems(false);
             }
 
-            setRefreshProgress(55, 'تحديث "جديد التوافقات"...');
-            try { displayNewSimilarities(); } catch(_) {}
+            setProgress(92, 'ترتيب الواجهة…');
+            await new Promise(r => setTimeout(r, 250));
 
-            setRefreshProgress(82, 'ترتيب الواجهة...');
-            await proDelay(350);
+            setProgress(100, 'تم ✅ جاري إعادة تحميل الصفحة…');
+            await new Promise(r => setTimeout(r, 350));
 
-            setRefreshProgress(100, 'تم التحديث بنجاح');
-            await proDelay(500);
-            hideRefreshOverlay();
-
-            // حركة بسيطة بعد التحديث
-            try { triggerAnimation(); } catch(_) {}
+            window.location.reload();
         } catch (error) {
-            console.error(error);
-            hideRefreshOverlay();
+            console.error("Refresh error:", error);
             await Swal.fire({
                 title: 'خطأ',
                 text: 'حدث خطأ أثناء التحديث',
-                iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                icon: 'error',
                 confirmButtonText: 'موافق',
+                allowOutsideClick: true,
+                allowEscapeKey: true,
                 customClass: {
-                    popup: 'swal2-popup',
+                    popup: 'swal2-popup activation-popup',
                     title: 'swal2-title',
                     htmlContainer: 'swal2-html-container',
                     confirmButton: 'swal2-confirm'
                 }
             });
+            triggerAnimation();
         }
     }
     </script>
