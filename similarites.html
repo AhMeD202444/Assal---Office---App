@@ -31,7 +31,67 @@
             box-sizing: border-box;
         }
 
-        body {
+        
+        /* Global UI (v2) */
+        :root {
+            --ui-bg: rgba(0, 0, 0, 0.35);
+            --ui-surface: rgba(17, 24, 39, 0.92);
+            --ui-surface-2: rgba(255, 255, 255, 0.06);
+            --ui-border: rgba(255, 255, 255, 0.12);
+            --ui-text: rgba(226, 232, 240, 0.95);
+            --ui-muted: rgba(226, 232, 240, 0.75);
+            --ui-accent: #A3BFFA;
+            --ui-accent-2: #43cea2;
+            --ui-danger: #FF4B2B;
+            --ui-radius: 18px;
+            --ui-radius-btn: 12px; /* بيضوي خفيف */
+        }
+
+        /* منع هايلايت اللمس الافتراضي + تحديد هايلايت محترم */
+        * { -webkit-tap-highlight-color: transparent; }
+        button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        button { outline: none; }
+        button:focus { outline: none; }
+        button:focus-visible,
+        
+        .header-btn {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border-radius: var(--ui-radius-btn);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            background: linear-gradient(135deg, #5A6388, #4A5275);
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .header-btn i { font-size: 14px; }
+
+        /* Overlay طبقة تظليل للنوافذ */
+        .ui-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .ui-overlay.active { opacity: 1; pointer-events: auto; }
+        #drawerOverlay { z-index: 1990; }
+        #modalOverlay { z-index: 9999; }
+body {
             font-family: 'Tajawal', sans-serif;
             background: linear-gradient(135deg, #3A6073, #16222A);
             color: #fff;
@@ -257,36 +317,35 @@
             background: linear-gradient(135deg, #CD5C5C, #8B0000);
         }
 
+        
         .notes-btn {
             background: linear-gradient(135deg, #4682B4, #20B2AA);
             position: relative;
-            padding-right: 24px;
-            padding-left: 10px;
         }
-
-        .notes-btn:hover {
+.notes-btn:hover {
             background: linear-gradient(135deg, #20B2AA, #4682B4);
         }
 
+        
         .notes-count {
             position: absolute;
-            top: 50%;
-            right: 4px;
-            transform: translateY(-50%);
+            top: 3px;
+            right: 3px;
             background: #DC143C;
             color: #fff;
-            border-radius: 50%;
-            width: 16px;
+            border-radius: 999px;
+            min-width: 16px;
             height: 16px;
+            padding: 0 4px;
             font-size: 9px;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
             display: none;
+            line-height: 1;
         }
-
-        .notes-count.visible {
+.notes-count.visible {
             display: flex;
         }
 
@@ -313,7 +372,7 @@
         /* تنسيق زر أضف إلى الملاحظات في النافذة */
         #newItemsModal .modal-content .new-item-card .item-details button {
             padding: 8px 16px;
-            border-radius: 10px;
+            border-radius: var(--ui-radius-btn);
             background: linear-gradient(45deg, #4682B4, #20B2AA);
             color: #fff;
             border: none;
@@ -447,13 +506,13 @@
             width: 85%;
             max-width: 250px;
           padding: 8px 30px; /* زيادة padding-left لاستيعاب العداد */
-            border-radius: 25px;
+            border-radius: 14px;
             background: rgba(0, 0, 0, 0.3);
             color: white;
             font-size: 16px;
             font-family: 'Cairo', sans-serif;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -464,12 +523,12 @@
         }
 
         .category-btn:hover, .new-category-btn:hover {
-            transform: scale(1.1);
+            transform: scale(1.04);
             background: linear-gradient(45deg, #43cea2, #185a9d);
         }
 
         .category-btn:active, .new-category-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.99);
             box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
@@ -629,7 +688,7 @@
             padding: 8px 16px;
             font-size: 16px;
             border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 25px;
+            border-radius: 14px;
             background: rgba(0, 0, 0, 0.3);
             color: white;
             outline: none;
@@ -758,17 +817,17 @@
         .result-card button {
             padding: 6px 16px;
             background: linear-gradient(45deg, #4682B4, #20B2AA);
-            border-radius: 8px;
+            border-radius: var(--ui-radius-btn);
             font-size: 14px;
             color: #fff;
             border: none;
             cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
             font-family: 'Cairo', sans-serif;
         }
 
         .result-card button:hover {
-            transform: scale(1.05);
+            transform: translateY(-1px);
             box-shadow: 0 4px 10px rgba(70, 130, 180, 0.6);
         }
 
@@ -845,7 +904,7 @@
 
         .notes-item button {
             padding: 8px 15px;
-            border-radius: 10px;
+            border-radius: var(--ui-radius-btn);
             background: linear-gradient(45deg, #FF416C, #FF4B2B);
             color: #fff;
             border: none;
@@ -855,7 +914,7 @@
             transition: all 0.3s ease;
             box-shadow: 0 0 10px rgba(255, 75, 75, 0.5);
             overflow: hidden;
-            clip-path: inset(0 0 0 0 round 10px);
+            clip-path: inset(0 0 0 0 round var(--ui-radius-btn));
             font-family: 'Cairo', sans-serif;
         }
 
@@ -922,167 +981,164 @@
             color: white;
         }
 
-        /* SweetAlert2 Customization */
+        
+        /* SweetAlert2 — Global Design */
+        .swal2-container {
+            padding: 14px !important;
+        }
+
+        .swal2-container.swal2-backdrop-show,
+        .swal2-container.swal2-noanimation {
+            background: rgba(0, 0, 0, 0.55) !important;
+            backdrop-filter: blur(8px);
+        }
+
         .swal2-popup {
-            background: linear-gradient(135deg, #1E2A44, #2D3E66);
-            border-radius: 20px;
-            padding: 15px;
-            font-family: 'Cairo', sans-serif;
-            text-align: center;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 350px;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            align-items: center;
-            box-sizing: border-box;
-            box-shadow: 0 0 20px rgba(163, 191, 250, 0.7), 0 0 40px rgba(212, 175, 55, 0.5);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            gap: 5px;
-        }
-
-        .swal2-backdrop {
-            background: rgba(0, 0, 0, 0.7);
-        }
-
-        .swal2-show {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .swal2-hide {
-            animation: fadeOut 0.5s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-
-        @keyframes fadeOut {
-            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-        }
-
-        .swal2-icon {
-            margin: 0 auto;
-            margin-bottom: 5px;
-            margin-top: 5px;
-        }
-
-        .swal2-success-ring {
-            border: 0.25em solid #D4AF37 !important;
-        }
-
-        .swal2-success-fix {
-            background: transparent !important;
-        }
-
-        .swal2-success-line-tip,
-        .swal2-success-line-long {
-            background-color: #D4AF37 !important;
-        }
-
-        .swal2-success-circular-line-left,
-        .swal2-success-circular-line-right {
-            background: transparent !important;
+            background: var(--ui-surface) !important;
+            border: 1px solid var(--ui-border) !important;
+            border-radius: var(--ui-radius) !important;
+            padding: 18px 16px !important;
+            width: min(420px, 92vw) !important;
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55) !important;
+            text-align: center !important;
+            font-family: 'Cairo', sans-serif !important;
         }
 
         .swal2-title {
-            color: #D4AF37;
-            font-family: 'Tajawal', sans-serif;
-            font-weight: 700;
-            margin-bottom: 0;
-            font-size: clamp(16px, 3.5vw, 20px);
+            color: #fff !important;
+            font-family: 'Tajawal', sans-serif !important;
+            font-weight: 800 !important;
+            margin: 0 0 8px 0 !important;
+            font-size: clamp(16px, 3.6vw, 20px) !important;
+            letter-spacing: 0.2px;
         }
 
         .swal2-html-container {
-            color: #E2E8F0 !important;
-            font-family: 'Cairo', sans-serif;
-            margin-bottom: 0;
-            font-size: 16px;
-            line-height: 1.6;
+            color: var(--ui-text) !important;
+            margin: 0 !important;
+            font-size: 15px !important;
+            line-height: 1.7 !important;
         }
 
-        .swal2-html-container .welcome-message {
-            font-family: 'Tajawal', sans-serif;
-            font-size: clamp(18px, 3.5vw, 20px);
-            color: #E2E8F0;
-            line-height: 1.6;
-            text-align: center;
-            margin: 10px 0;
-        }
-
-        .welcome-message .highlight {
-            color: #D4AF37;
-            font-weight: 700;
+        .swal2-icon {
+            margin: 10px auto 8px auto !important;
         }
 
         .swal2-input {
-            width: 80%;
-            max-width: 250px;
-            padding: 8px 12px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid #D4AF37;
-            color: #E2E8F0;
-            font-size: 14px;
-            font-family: 'Cairo', sans-serif;
-            margin: 10px auto;
-            display: block;
-            text-align: center;
+            border-radius: var(--ui-radius-btn) !important;
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            background: rgba(255, 255, 255, 0.06) !important;
+            color: #fff !important;
+            padding: 10px 12px !important;
+            width: min(320px, 86%) !important;
+            text-align: center !important;
+            font-family: 'Cairo', sans-serif !important;
+        }
+
+        .swal2-input:focus {
+            outline: none !important;
+            border-color: rgba(163, 191, 250, 0.85) !important;
+            box-shadow: 0 0 0 3px rgba(163, 191, 250, 0.25) !important;
         }
 
         .swal2-actions {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            margin-top: 10px;
-            gap: 8px;
+            gap: 10px !important;
+            margin-top: 14px !important;
         }
 
-        .swal2-confirm, .swal2-cancel {
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 700;
-            font-family: 'Tajawal', sans-serif;
-            border: none;
-            cursor: pointer;
-            width: auto;
-            min-width: 110px;
-            white-space: nowrap;
-            margin: 0;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        .swal2-styled {
+            border-radius: var(--ui-radius-btn) !important;
+            padding: 10px 16px !important;
+            font-weight: 800 !important;
+            font-family: 'Cairo', sans-serif !important;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28) !important;
+            overflow: hidden !important;
+            position: relative !important;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .swal2-styled:focus { outline: none !important; }
+        .swal2-styled:focus-visible {
+            box-shadow: 0 0 0 3px rgba(163, 191, 250, 0.35), 0 10px 24px rgba(0, 0, 0, 0.28) !important;
+        }
+
+        .swal2-styled:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .swal2-styled:active {
+            transform: translateY(0) scale(0.99);
+            box-shadow: inset 0 6px 12px rgba(0, 0, 0, 0.35) !important;
         }
 
         .swal2-confirm {
-            background: linear-gradient(45deg, #D4AF37, #A3BFFA);
-            color: #fff;
+            background: linear-gradient(135deg, #43cea2, #185a9d) !important;
         }
 
         .swal2-cancel {
-            background: linear-gradient(45deg, #E53E3E, #9B2C2C);
+            background: linear-gradient(135deg, #FF416C, #FF4B2B) !important;
+        }
+
+        /* نصوص نافذة كلمة المرور */
+        .welcome-message {
+            font-family: 'Tajawal', sans-serif;
+            font-size: clamp(16px, 3.6vw, 18px);
+            color: var(--ui-text);
+        }
+        .welcome-sub {
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--ui-muted);
+        }
+        .welcome-message .highlight {
+            color: var(--ui-accent);
+            font-weight: 800;
+        }
+
+        /* Cards داخل النوافذ (تفاصيل الاشتراك / احصائيات) */
+        .ui-stat-grid {
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .ui-stat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: var(--ui-surface-2);
+            border: 1px solid var(--ui-border);
+            border-radius: 14px;
+            text-align: right;
+        }
+        .ui-stat i {
+            font-size: 16px;
+            color: var(--ui-accent);
+            width: 22px;
+            text-align: center;
+            flex: 0 0 22px;
+        }
+        .ui-stat .meta { flex: 1; }
+        .ui-stat .label {
+            font-size: 13px;
+            color: var(--ui-muted);
+        }
+        .ui-stat .value {
+            font-size: 16px;
+            font-weight: 800;
             color: #fff;
+            margin-top: 2px;
+            direction: ltr;
+            unicode-bidi: plaintext;
         }
-
-        .swal2-confirm:hover, .swal2-cancel:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+        .ui-footnote {
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--ui-muted);
         }
-
-        .swal2-confirm:active, .swal2-cancel:active {
-            transform: scale(0.95);
-            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Loading Circle */
+/* Loading Circle */
         .loading-circle {
             width: 80px;
             height: 80px;
@@ -1521,11 +1577,14 @@
     <header class="header">
         <div class="header-title">مكتب عسل</div>
         <div class="header-buttons">
-            <button class="header-btn back-btn" onclick="goBack()" title="رجوع"><i class="fas fa-arrow-right"></i> رجوع</button>
-            <button class="header-btn refresh-btn" onclick="refreshData()" title="تحديث البيانات"><i class="fas fa-sync"></i> تحديث</button>
+            <button class="header-btn back-btn icon-only" onclick="goBack()" aria-label="رجوع" title="رجوع"><i class="fas fa-arrow-right"></i></button>
+            <button class="header-btn refresh-btn icon-only" onclick="refreshData()" aria-label="تحديث" title="تحديث البيانات"><i class="fas fa-sync"></i></button>
             <button class="header-btn notes-btn" onclick="toggleNotes()" title="عرض الملاحظات"><i class="fas fa-sticky-note"></i> ملاحظات <span class="notes-count" id="headerNotesCount">0</span></button>
         </div>
     </header>
+    <div id="drawerOverlay" class="ui-overlay" onclick="toggleNotes()"></div>
+    <div id="modalOverlay" class="ui-overlay" onclick="closeNewItemsModal()"></div>
+
 
     <!-- New Items Modal -->
     <div id="newItemsModal">
@@ -1729,9 +1788,21 @@
             Swal.fire({
                 title: 'إحصائيات الاستخدام',
                 html: `
-                    <div style="text-align: center; color: #dcdcdc; line-height: 1.6;">
-                        <p><i class="fas fa-search"></i> عدد عمليات البحث: ${stats.searches}</p>
-                        <p><i class="fas fa-sticky-note"></i> عدد الملاحظات المحفوظة: ${stats.notesAdded}</p>
+                    <div class="ui-stat-grid">
+                        <div class="ui-stat">
+                            <i class="fas fa-search"></i>
+                            <div class="meta">
+                                <div class="label">عمليات البحث</div>
+                                <div class="value">${stats.searches}</div>
+                            </div>
+                        </div>
+                        <div class="ui-stat">
+                            <i class="fas fa-sticky-note"></i>
+                            <div class="meta">
+                                <div class="label">الملاحظات المحفوظة</div>
+                                <div class="value">${stats.notesAdded}</div>
+                            </div>
+                        </div>
                     </div>
                 `,
                 icon: 'info',
@@ -1753,12 +1824,30 @@
             Swal.fire({
                 title: 'تفاصيل الاشتراك',
                 html: `
-                    <div style="text-align: center; color: #dcdcdc; line-height: 1.6;">
-                        <p><i class="fas fa-star"></i> نوع الاشتراك: مميز</p>
-                        <p><i class="fas fa-calendar-alt"></i> تاريخ البدء: 2025-01-01</p>
-                        <p><i class="fas fa-calendar-alt"></i> تاريخ الانتهاء: 2026-01-01</p>
-                        <p>اشتراكك المميز يوفرلك توافقات دقيقة، تحديثات يومية، وتجربة فريدة!</p>
+                    <div class="ui-stat-grid">
+                        <div class="ui-stat">
+                            <i class="fas fa-star"></i>
+                            <div class="meta">
+                                <div class="label">نوع الاشتراك</div>
+                                <div class="value">مميز</div>
+                            </div>
+                        </div>
+                        <div class="ui-stat">
+                            <i class="fas fa-calendar-alt"></i>
+                            <div class="meta">
+                                <div class="label">تاريخ البدء</div>
+                                <div class="value">2025-01-01</div>
+                            </div>
+                        </div>
+                        <div class="ui-stat">
+                            <i class="fas fa-calendar-check"></i>
+                            <div class="meta">
+                                <div class="label">تاريخ الانتهاء</div>
+                                <div class="value">2026-01-01</div>
+                            </div>
+                        </div>
                     </div>
+                    <div class="ui-footnote">اشتراكك المميز يوفّر توافقات أدق وتحديثات مستمرة وتجربة أرتّب.</div>
                 `,
                 icon: 'info',
                 confirmButtonText: 'موافق',
@@ -1974,6 +2063,7 @@
             const modal = document.getElementById("newItemsModal");
             if (modal.style.display === "none" || !modal.style.display) {
                 modal.style.display = "flex";
+                document.getElementById("modalOverlay")?.classList.add("active");
                 modal.style.animation = "slideDownModal 0.5s ease-out forwards";
                 isModalOpen = true;
                 loadNewItems();
@@ -2001,6 +2091,7 @@
             modal.style.animation = "slideUpModal 0.5s ease-in forwards";
             setTimeout(() => {
                 modal.style.display = "none";
+                document.getElementById("modalOverlay")?.classList.remove("active");
                 isModalOpen = false;
             }, 500);
         } catch (error) {
@@ -2076,7 +2167,8 @@
             title: 'دخول محمي',
             html: `
                 <div class="welcome-message">
-                    هلا بيك بخدمتنا <span class="highlight">المميزة</span> .. اذا انت مشترك ويانة ادخل كلمة المرور .. وراها رح تدخل على <span class="highlight">كنز التوافقات</span> .. يعني تعرف شنو يرهم على شنو .. وفر وقتك وخلي شغلك <span class="highlight">نظيف</span> .. هاي الخدمة وفرناها الك اذا انت من اهل <span class="highlight">الشغل الصح</span>
+                    أدخل كلمة المرور للمتابعة.
+                    <div class="welcome-sub">إذا ما عندك اشتراك، تواصل ويانة.</div>
                 </div>
             `,
             icon: 'question',
@@ -2111,8 +2203,8 @@
                     title: 'خطأ',
                     html: `
                         <div class="welcome-message">
-                            كلمة المرور غير صحيحة! <br>
-                            مبين بعدك ما مفعل <span class="highlight">الخدمة</span> !! .. بس صدكني ديضيع عليك هواية .. <span class="highlight">توافقات جاهزة</span> .. <span class="highlight">وقت اقل</span> .. <span class="highlight">شغل ادق</span> ... فعل دخولك وخليك دائما <span class="highlight">مميز</span>
+                            كلمة المرور غير صحيحة.
+                            <div class="welcome-sub">تأكد منها وحاول مرة ثانية.</div>
                         </div>
                     `,
                     showConfirmButton: true,
@@ -2402,7 +2494,13 @@
 
     function toggleNotes() {
         const notesDrawer = document.getElementById('notesDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+
         notesDrawer.classList.toggle('active');
+
+        if (drawerOverlay) {
+            drawerOverlay.classList.toggle('active', notesDrawer.classList.contains('active'));
+        }
     }
 
     function addToNotes(itemName) {
