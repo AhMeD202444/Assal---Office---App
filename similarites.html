@@ -17,9 +17,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 
     <!-- Firebase SDK (Local files) -->
-    <script src="firebase-app.js"></script>
-    <script src="firebase-firestore.js"></script>
-    <script src="firebase-analytics.js"></script>
+    
+    
+    
+    <!-- Firebase OFF (DEV) -->
+<!-- <script src="firebase-app.js"></script> -->
+<!-- <script src="firebase-firestore.js"></script> -->
+<!-- <script src="firebase-analytics.js"></script> -->
+
+    
+    
+    
     <!-- FingerprintJS (Local file) -->
     <script src="fingerprint.min.js"></script>
 
@@ -906,7 +914,7 @@
             text-align: center;
             padding: 10px 0;
             width: 100%;
-            font-family: 'Cairo', sans-serif;
+            font-family: 'Montserrat', sans-serif;
             font-size: 14px;
             box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.4);
             position: fixed;
@@ -1271,189 +1279,6 @@
             }
         }
 
-
-        /* --- Global UI polish (Professional Modals + Buttons) --- */
-        :root{
-            --glass-bg: rgba(15, 23, 42, 0.88);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --shadow-strong: 0 22px 60px rgba(0,0,0,.55);
-            --shadow-soft: 0 10px 28px rgba(0,0,0,.35);
-            --radius-xl: 22px;
-            --radius-lg: 16px;
-            --radius-pill: 999px;
-            --accent-a: #43cea2;
-            --accent-b: #185a9d;
-            --danger-a: #ff416c;
-            --danger-b: #ff4b2b;
-        }
-
-        /* منع هايلايت اللمس بالهواتف + منع تحديد نص الأزرار */
-        * { -webkit-tap-highlight-color: transparent; }
-        button, a { -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
-        button:focus, button:active, .swal2-confirm:focus, .swal2-cancel:focus { outline: none !important; }
-        .swal2-confirm, .swal2-cancel { -webkit-tap-highlight-color: transparent; }
-
-        /* Global overlay for in-page windows (New Items + Notes Drawer) */
-        .global-overlay{
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(1200px 600px at 50% 20%, rgba(67,206,162,.18), transparent 60%),
-                        rgba(0,0,0,.72);
-            backdrop-filter: blur(7px);
-            -webkit-backdrop-filter: blur(7px);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity .25s ease, visibility .25s ease;
-            z-index: 8000;
-            pointer-events: none;
-        }
-        .global-overlay.active{
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto; /* يمنع الضغط على الخلفية */
-        }
-
-        /* Header buttons as icon buttons (keep layout) */
-        .header-btn.icon-btn{
-            width: 32px;
-            height: 30px;
-            padding: 0;
-            border-radius: 12px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0;
-        }
-        .header-btn.icon-btn i{ font-size: 14px; }
-        .header-btn:hover{
-            transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
-        }
-        .header-btn:active{
-            transform: translateY(0);
-            box-shadow: inset 0 2px 6px rgba(0,0,0,.35);
-        }
-        .notes-btn{ padding-right: 0; padding-left: 0; }
-        .notes-count{
-            right: -6px;
-            top: -6px;
-            transform: none;
-            width: 18px;
-            height: 18px;
-            font-size: 10px;
-            border: 2px solid rgba(0,0,0,.55);
-            display: none;
-        }
-        .notes-count.visible{ display: flex; }
-
-        /* Notes Drawer: more premium */
-        .notes-drawer{
-            z-index: 8100;
-            background: rgba(10, 15, 26, 0.92);
-            border-left: 1px solid var(--glass-border);
-            box-shadow: -18px 0 60px rgba(0,0,0,.55);
-        }
-        .notes-drawer .close-btn{
-            width: 34px;
-            height: 34px;
-            border-radius: 12px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255,255,255,.06);
-            border: 1px solid rgba(255,255,255,.08);
-        }
-
-        /* New Items Modal: premium glass */
-        #newItemsModal{
-            box-shadow: var(--shadow-strong);
-            border: 1px solid var(--glass-border);
-        }
-
-        /* Modal buttons inside New Items / Notes: slightly oval + smaller */
-        #newItemsModal .modal-content .new-item-card .item-details button,
-        .notes-item button{
-            border-radius: 14px !important;
-            padding: 6px 14px !important;
-            font-size: 12.5px !important;
-            min-width: 110px;
-        }
-
-        /* SweetAlert2: professional glass + elegant shadow */
-        .swal2-container{
-            z-index: 12000 !important;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
-        .swal2-backdrop{
-            background: radial-gradient(1200px 600px at 50% 15%, rgba(163,191,250,.18), transparent 60%),
-                        rgba(0,0,0,.74) !important;
-        }
-        .swal2-popup{
-            background: var(--glass-bg) !important;
-            border: 1px solid var(--glass-border) !important;
-            box-shadow: var(--shadow-strong) !important;
-            border-radius: var(--radius-xl) !important;
-        }
-        .swal2-title{
-            color: #E2E8F0 !important;
-            text-shadow: none !important;
-            letter-spacing: .2px;
-        }
-        .swal2-html-container{
-            color: rgba(226,232,240,.92) !important;
-        }
-        .swal2-input{
-            border-radius: 16px !important;
-            border: 1px solid rgba(255,255,255,.14) !important;
-            background: rgba(255,255,255,.06) !important;
-        }
-
-        /* Swal buttons: compact, oval, no harsh focus highlight */
-        .swal2-confirm, .swal2-cancel{
-            border-radius: 16px !important;
-            padding: 8px 16px !important;
-            min-width: 96px !important;
-            box-shadow: var(--shadow-soft) !important;
-        }
-        .swal2-confirm:focus, .swal2-cancel:focus{ box-shadow: var(--shadow-soft) !important; }
-
-        /* New loading UI (progress) */
-        .app-progress{
-            width: 100%;
-            max-width: 320px;
-            margin: 6px auto 0;
-        }
-        .app-progress-text{
-            font-family: 'Cairo', sans-serif;
-            font-size: 14px;
-            line-height: 1.6;
-            opacity: .95;
-            margin: 8px 0 12px;
-        }
-        .app-progress-bar{
-            width: 100%;
-            height: 10px;
-            background: rgba(255,255,255,.10);
-            border-radius: var(--radius-pill);
-            overflow: hidden;
-            border: 1px solid rgba(255,255,255,.10);
-        }
-        .app-progress-fill{
-            height: 100%;
-            width: 0%;
-            border-radius: var(--radius-pill);
-            background: linear-gradient(90deg, var(--accent-a), var(--accent-b));
-            transition: width .22s ease;
-        }
-        .app-progress-meta{
-            margin-top: 10px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            opacity: .85;
-        }
-
         /* Media Queries */
         @media (max-width: 480px) {
             .container {
@@ -1697,22 +1522,610 @@
                 padding: 20px;
             }
         }
+        
+        /* Icon-only header buttons */
+.header-btn{
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  font-size: 14px;
+}
+
+.header-btn i{
+  font-size: 16px;
+}
+
+/* Notes button: badge over icon (top-right) */
+.notes-btn{
+  position: relative;
+  padding: 0; /* كان عندك padding-right/left :contentReference[oaicite:5]{index=5} */
+}
+
+.header-btn.notes-btn{
+  position: relative;
+  overflow: visible;
+}
+
+
+.notes-count{
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 18px;
+  min-width: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+
+/* =========================
+   Assal Pro UI – Override Pack
+   Paste at END of <style>
+   ========================= */
+
+:root{
+  --bg-0:#0b1220;
+  --bg-1:#0e1a2f;
+  --surface: rgba(255,255,255,.07);
+  --surface-2: rgba(255,255,255,.10);
+  --border: rgba(255,255,255,.14);
+
+  --text:#e9eefc;
+  --muted: rgba(233,238,252,.72);
+
+  --primary:#46b3ff;
+  --primary-2:#2dd4bf;
+  --danger:#ff4d6d;
+
+  --r-12:12px;
+  --r-16:16px;
+  --r-20:20px;
+
+  --shadow-sm: 0 6px 18px rgba(0,0,0,.25);
+  --shadow-md: 0 14px 38px rgba(0,0,0,.35);
+  --shadow-lg: 0 22px 60px rgba(0,0,0,.45);
+
+  --blur: 14px;
+}
+
+/* Reduce “cheap” motion */
+*{ transition: background-color .25s ease, color .25s ease, transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+@media (prefers-reduced-motion: reduce){
+  *{ animation: none !important; transition: none !important; }
+}
+
+/* Body: بدل التدرج المتحرك القوي :contentReference[oaicite:2]{index=2} */
+body{
+  background:
+    radial-gradient(900px 500px at 20% 10%, rgba(70,179,255,.20), transparent 55%),
+    radial-gradient(900px 500px at 80% 0%, rgba(45,212,191,.16), transparent 55%),
+    linear-gradient(160deg, var(--bg-1), var(--bg-0));
+  animation: none !important; /* يوقف gradientAnimation */
+  color: var(--text);
+}
+
+/* Header: أبسط وأنظف :contentReference[oaicite:3]{index=3} */
+.header{
+  background: rgba(8,12,22,.72);
+  backdrop-filter: blur(var(--blur));
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Header buttons: شيل rotate/scale المبالغ بيه :contentReference[oaicite:4]{index=4} */
+.header-btn{
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 8px 18px rgba(0,0,0,.28);
+}
+.header-btn:hover{
+  transform: translateY(-1px); /* بدل rotate */
+  box-shadow: 0 14px 28px rgba(0,0,0,.38);
+}
+.header-btn:active{ transform: translateY(0px) scale(.99); }
+
+.refresh-btn{ background: linear-gradient(135deg, rgba(70,179,255,.22), rgba(255,255,255,.06)); }
+.notes-btn{ background: linear-gradient(135deg, rgba(45,212,191,.22), rgba(255,255,255,.06)); }
+.back-btn{  background: linear-gradient(135deg, rgba(255,77,109,.22), rgba(255,255,255,.06)); }
+
+/* Main container: خليها “card” فخمة :contentReference[oaicite:5]{index=5} */
+.container{
+  background: linear-gradient(135deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: var(--r-20);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(var(--blur));
+  padding: 22px 14px;
+}
+
+/* Buttons general: category/new-category */
+.category-btn, .new-category-btn{
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  box-shadow: var(--shadow-sm);
+}
+.category-btn:hover, .new-category-btn:hover{
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, rgba(70,179,255,.18), rgba(45,212,191,.14));
+  box-shadow: var(--shadow-md);
+}
+
+/* Slider categories: هدوء بالهوفر */
+.category{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: var(--r-16);
+  box-shadow: var(--shadow-sm);
+}
+.category:hover{
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(70,179,255,.14), rgba(45,212,191,.10));
+}
+.category.active{
+  background: linear-gradient(135deg, rgba(70,179,255,.26), rgba(45,212,191,.20));
+  border-color: rgba(70,179,255,.35);
+}
+
+/* Search */
+.search-container input{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+}
+.search-container input::placeholder{ color: rgba(233,238,252,.55); }
+.search-container input:focus{
+  border-color: rgba(70,179,255,.45);
+  box-shadow: 0 0 0 4px rgba(70,179,255,.12), var(--shadow-sm);
+}
+.search-container button{
+  background: linear-gradient(135deg, rgba(70,179,255,.85), rgba(45,212,191,.75));
+  box-shadow: 0 10px 22px rgba(0,0,0,.32);
+}
+.search-container button:hover{ transform: translateY(-1px) scale(1.02); }
+
+/* Cards (results) */
+.result-card{
+  background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: var(--r-20);
+  box-shadow: var(--shadow-md);
+}
+.result-card:hover{
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* New Items Modal: خلي عنده overlay محترم :contentReference[oaicite:6]{index=6} */
+#newItemsModal{
+  background: linear-gradient(135deg, rgba(8,12,22,.90), rgba(12,20,36,.72));
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: var(--shadow-lg);
+}
+#newItemsModal h2{
+  letter-spacing: .2px;
+}
+#newItemsModal .close-modal-btn{
+  background: linear-gradient(135deg, rgba(255,77,109,.85), rgba(255,77,109,.55));
+  box-shadow: 0 10px 20px rgba(0,0,0,.35);
+}
+
+/* Notes drawer */
+.notes-drawer{
+  background: rgba(8,12,22,.82);
+  border-left: 1px solid rgba(255,255,255,.10);
+  backdrop-filter: blur(var(--blur));
+  box-shadow: var(--shadow-lg);
+}
+
+/* SweetAlert2 (نافذة كلمة السر) – كان ستايلها قوي :contentReference[oaicite:7]{index=7} */
+.swal2-popup{
+  background: linear-gradient(135deg, rgba(8,12,22,.92), rgba(12,20,36,.78)) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+.swal2-title{ color: var(--text) !important; }
+.swal2-html-container{ color: var(--muted) !important; }
+.swal2-input{
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  color: var(--text) !important;
+}
+.swal2-input:focus{
+  border-color: rgba(70,179,255,.45) !important;
+  box-shadow: 0 0 0 4px rgba(70,179,255,.12) !important;
+}
+.swal2-confirm{
+  background: linear-gradient(135deg, rgba(70,179,255,.85), rgba(45,212,191,.75)) !important;
+  box-shadow: 0 12px 24px rgba(0,0,0,.30) !important;
+}
+.swal2-cancel{
+  background: linear-gradient(135deg, rgba(255,77,109,.85), rgba(255,77,109,.60)) !important;
+}
+
+/* Footer: نظيف */
+footer{
+  background: rgba(8,12,22,.72);
+  backdrop-filter: blur(var(--blur));
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+/* Scroll button */
+.scroll-to-top{
+  background: linear-gradient(135deg, rgba(70,179,255,.85), rgba(45,212,191,.75));
+  box-shadow: var(--shadow-md);
+}
+.scroll-to-top:hover{ transform: translateY(-2px) scale(1.03); }
+
+
+/* === Pro Dialog (Subscription + Stats) === */
+.pro-popup.swal2-popup{
+  border-radius: 18px !important;
+  padding: 18px 18px 14px !important;
+  background: linear-gradient(135deg, rgba(10,14,26,.96), rgba(14,22,40,.86)) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: 0 22px 60px rgba(0,0,0,.55) !important;
+  backdrop-filter: blur(14px);
+}
+
+.pro-dialog{
+  direction: rtl;
+  text-align: right;
+  color: rgba(233,238,252,.92);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pro-hero{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 10px 24px rgba(0,0,0,.30);
+}
+
+.pro-hero-icon{
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(70,179,255,.30), rgba(45,212,191,.22));
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 12px 24px rgba(0,0,0,.35);
+}
+
+.pro-hero-icon i{ font-size: 18px; }
+.pro-hero-icon-gold{ background: linear-gradient(135deg, rgba(255,215,0,.28), rgba(255,170,0,.18)); }
+
+.pro-hero-title{ font-weight: 800; letter-spacing: .2px; }
+.pro-hero-sub{ color: rgba(233,238,252,.70); font-size: 12px; margin-top: 2px; }
+.pro-hero-sub span{ color: rgba(233,238,252,.86); }
+
+.pro-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pro-card{
+  padding: 12px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+}
+
+.pro-card-wide{ width: 100%; }
+
+.pro-card-top{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.pro-card-label{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(233,238,252,.86);
+  font-size: 13px;
+}
+
+.pro-number{
+  font-size: 28px;
+  font-weight: 900;
+  margin: 2px 0 10px;
+  letter-spacing: .5px;
+}
+
+.pro-chip{
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: rgba(233,238,252,.86);
+}
+
+.pro-chip-blue{ background: rgba(70,179,255,.14); border-color: rgba(70,179,255,.22); }
+.pro-chip-teal{ background: rgba(45,212,191,.14); border-color: rgba(45,212,191,.22); }
+.pro-chip-gold{ background: rgba(255,215,0,.14); border-color: rgba(255,215,0,.20); }
+
+.pro-meter{
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.10);
+}
+.pro-meter span{
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(70,179,255,.95), rgba(45,212,191,.80));
+}
+.pro-meter-teal span{
+  background: linear-gradient(90deg, rgba(45,212,191,.95), rgba(70,179,255,.70));
+}
+
+.pro-hint{
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(233,238,252,.68);
+  line-height: 1.5;
+}
+
+.pro-row{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pro-pill{
+  flex: 1;
+  min-width: 160px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 10px 22px rgba(0,0,0,.28);
+  color: rgba(233,238,252,.86);
+  font-size: 12px;
+}
+.pro-pill b{ margin-right: auto; color: rgba(233,238,252,.95); }
+
+.pro-banner{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,215,0,.10), rgba(255,255,255,.03));
+  border: 1px solid rgba(255,215,0,.18);
+  box-shadow: 0 12px 28px rgba(0,0,0,.33);
+  color: rgba(233,238,252,.86);
+  font-size: 12px;
+}
+.pro-banner b{ margin-right: auto; color: rgba(255,235,140,.95); }
+
+.pro-list{
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pro-list li{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(233,238,252,.82);
+  font-size: 13px;
+}
+.pro-list i{ color: rgba(45,212,191,.95); }
+
+.pro-note{
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(70,179,255,.08);
+  border: 1px solid rgba(70,179,255,.16);
+  color: rgba(233,238,252,.72);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pro-footer{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  color: rgba(233,238,252,.60);
+  font-size: 11px;
+  margin-top: 2px;
+}
+.pro-dot{
+  width: 8px; height: 8px;
+  border-radius: 99px;
+  background: rgba(45,212,191,.9);
+  box-shadow: 0 0 0 4px rgba(45,212,191,.12);
+}
+
+/* Responsive */
+@media (max-width: 520px){
+  .pro-grid{ grid-template-columns: 1fr; }
+}
+
+
+/* === Pro Dialog: Compact Height Patch === */
+/* مهم: يلغي الـ min-height والفراغات اللي تطوّل نافذة SweetAlert */
+.swal2-popup.activation-popup.pro-popup{
+  min-height: auto !important;
+  height: auto !important;
+  max-height: 82vh !important;
+  padding: 14px 14px 12px !important;  /* كان 18 */
+  gap: 10px !important;
+  justify-content: flex-start !important; /* بدل أي space-around */
+}
+
+/* خلي المحتوى يسكرول داخل النافذة بدل ما تطول */
+.swal2-popup.activation-popup.pro-popup .swal2-html-container{
+  margin: 0 !important;
+  padding: 0 !important;
+  max-height: 58vh !important;
+  overflow: auto !important;
+}
+
+/* تقليل المسافات الداخلية بدون تغيير شكل التصميم */
+.pro-dialog{ gap: 10px !important; }
+
+.pro-hero{
+  padding: 10px !important; /* كان 12 */
+  gap: 10px !important;
+}
+
+.pro-hero-icon{
+  width: 38px !important;   /* كان 42 */
+  height: 38px !important;
+  border-radius: 12px !important; /* كان 14 */
+}
+
+.pro-grid{ gap: 8px !important; } /* كان 10 */
+
+.pro-card{
+  padding: 10px !important; /* كان 12 */
+}
+
+.pro-card-top{ margin-bottom: 6px !important; } /* كان 8 */
+
+.pro-number{
+  font-size: 24px !important;   /* كان 28 */
+  margin: 0 0 8px !important;   /* كان 2px 0 10px */
+}
+
+.pro-hint{ margin-top: 6px !important; }
+
+.pro-pill{
+  padding: 8px 10px !important; /* كان 10 12 */
+  min-width: 140px !important;  /* كان 160 */
+}
+
+.pro-banner{ padding: 8px 10px !important; }
+
+.pro-list{ gap: 8px !important; margin: 4px 0 0 !important; }
+
+.pro-note{
+  margin-top: 10px !important;  /* كان 12 */
+  padding: 8px 10px !important;
+}
+
+/* زر موافق: شبه مربع + أحمر غامق */
+.pro-popup .swal2-confirm{
+  border-radius: 8px !important;     /* حواف قليلة */
+  background: #7a0f1a !important;    /* أحمر غامق */
+  border: 1px solid rgba(255,255,255,.12) !important;
+  box-shadow: 0 12px 26px rgba(0,0,0,.35) !important;
+}
+.pro-popup .swal2-confirm:hover{
+  background: #641018 !important;
+  transform: translateY(-1px);
+}
+.pro-popup .swal2-confirm:active{
+  transform: translateY(0px) scale(.99);
+}
+
+
+/* زر التمام/موافق: نفس المكان، بس شكل أحلى وحواف أكثر بيضوية */
+.pro-popup .swal2-confirm{
+  border-radius: 14px !important;   /* أكثر بيضوية من 8 */
+  background: #7a0f1a !important;  /* أحمر غامق */
+  border: 1px solid rgba(255,255,255,.12) !important;
+  box-shadow: 0 12px 26px rgba(0,0,0,.35) !important;
+  padding: 10px 18px !important;
+}
+.pro-popup .swal2-confirm:hover{
+  background: #641018 !important;
+}
+.pro-popup .swal2-confirm:active{
+  transform: scale(.99);
+}
+
+
+/* خلي SweetAlert يغطي كل شي فوق الهيدر/الفوتر */
+.swal2-container{
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+}
+
+/* طبقة Blur فخمة + ظل أنيق (مو سواد كامل) */
+.swal2-backdrop{
+  background:
+    radial-gradient(900px 500px at 20% 10%, rgba(70,179,255,.18), transparent 60%),
+    radial-gradient(900px 500px at 80% 0%, rgba(45,212,191,.14), transparent 60%),
+    rgba(0,0,0,.60) !important;  /* تعتيم متوسط فخم */
+  -webkit-backdrop-filter: blur(12px) saturate(120%) !important;
+  backdrop-filter: blur(12px) saturate(120%) !important;
+}
+
+
+
+        
+        
     </style>
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-title">مكتب عسل</div>
-        <div class="header-buttons">
-            <button class="header-btn back-btn icon-btn" onclick="goBack()" title="رجوع" aria-label="رجوع"><i class="fas fa-arrow-right"></i></button>
-            <button class="header-btn refresh-btn icon-btn" onclick="refreshData()" title="تحديث البيانات" aria-label="تحديث البيانات"><i class="fas fa-rotate"></i></button>
-            <button class="header-btn notes-btn icon-btn" onclick="toggleNotes()" title="الملاحظات" aria-label="الملاحظات"><i class="fas fa-note-sticky"></i><span class="notes-count" id="headerNotesCount">0</span></button>
-        </div>
+      
+      
+      <div class="header-buttons">
+  <button class="header-btn back-btn" onclick="goBack()" title="رجوع" aria-label="رجوع">
+    <i class="fas fa-arrow-right"></i>
+  </button>
+
+  <button class="header-btn refresh-btn" onclick="refreshData()" title="تحديث البيانات" aria-label="تحديث البيانات">
+    <i class="fas fa-sync"></i>
+  </button>
+
+  <button class="header-btn notes-btn" onclick="toggleNotes()" title="عرض الملاحظات" aria-label="عرض الملاحظات">
+    <i class="fas fa-sticky-note"></i>
+    <span class="notes-count" id="headerNotesCount">0</span>
+  </button>
+</div>
+
+      
+      
     </header>
-
-    <!-- Global Overlay (for in-page windows) -->
-    <div id="globalOverlay" class="global-overlay" aria-hidden="true"></div>
-
 
     <!-- New Items Modal -->
     <div id="newItemsModal">
@@ -1803,78 +2216,17 @@
 
     <!-- Footer -->
     <footer>
-        <p>© <span id="footerYear"></span> مكتب عسل — جميع الحقوق محفوظة</p>
+        <p>جميع الحقوق محفوظة - مكتب عسل</p>
     </footer>
 
     <script>
+      
+      
+      const DEV_NO_FIREBASE = true; // ✅ خليها true بس وقت التجربة
+      
+      
+      
         let isAnimating = false;
-        let overlayLocks = 0;
-
-        function lockOverlay(){
-            overlayLocks++;
-            const ov = document.getElementById('globalOverlay');
-            if (ov) ov.classList.add('active');
-        }
-        function unlockOverlay(){
-            overlayLocks = Math.max(0, overlayLocks - 1);
-            if (overlayLocks === 0){
-                const ov = document.getElementById('globalOverlay');
-                if (ov) ov.classList.remove('active');
-            }
-        }
-
-        // Progress modal helpers
-        function showProgressModal(title, message){
-            Swal.fire({
-                title: title || 'جاري التحميل...',
-                html: `
-                    <div class="app-progress">
-                        <div class="app-progress-text">${message || 'يرجى الانتظار…'}</div>
-                        <div class="app-progress-bar"><div class="app-progress-fill" id="appProgressFill"></div></div>
-                        <div class="app-progress-meta"><span id="appProgressPct">0%</span><span id="appProgressHint">تحميل البيانات</span></div>
-                    </div>
-                `,
-                showConfirmButton: false,
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                didOpen: () => {
-                    const fill = Swal.getPopup()?.querySelector('#appProgressFill');
-                    if (fill) fill.style.width = '6%';
-                }
-            });
-
-            return {
-                set: (pct, hint) => {
-                    const p = Math.max(0, Math.min(100, Number(pct) || 0));
-                    const popup = Swal.getPopup();
-                    if (!popup) return;
-                    const fill = popup.querySelector('#appProgressFill');
-                    const pctEl = popup.querySelector('#appProgressPct');
-                    const hintEl = popup.querySelector('#appProgressHint');
-                    if (fill) fill.style.width = `${p}%`;
-                    if (pctEl) pctEl.textContent = `${Math.round(p)}%`;
-                    if (hintEl && hint) hintEl.textContent = hint;
-                },
-                close: () => Swal.close()
-            };
-        }
-
-        function showDownloadSuccess(){
-            return Swal.fire({
-                icon: 'success',
-                title: 'تم التحميل بنجاح',
-                html: '<div style="line-height:1.7;">تم تحديث البيانات بنجاح ✅</div>',
-                confirmButtonText: 'تمام',
-                allowOutsideClick: false,
-                allowEscapeKey: true
-            });
-        }
-
-        // Footer year
-        document.addEventListener('DOMContentLoaded', () => {
-            const y = document.getElementById('footerYear');
-            if (y) y.textContent = new Date().getFullYear();
-        });
     const dropboxSimilaritesFile = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRRZZFGe3dDXCCb9L5HtgpnXoj-H6kvqWeMS_tvYyWAL2VqpJh64rCMqRpoTaMw3v9fdazd5fWB5E2d/pub?output=xlsx" + "&t=" + new Date().getTime();
         let database = {};
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
@@ -1979,55 +2331,147 @@
             loadNewItems(true);
         }
 
-        function showUsageStats() {
-            Swal.fire({
-                title: 'إحصائيات الاستخدام',
-                html: `
-                    <div style="text-align: center; color: #dcdcdc; line-height: 1.6;">
-                        <p><i class="fas fa-search"></i> عدد عمليات البحث: ${stats.searches}</p>
-                        <p><i class="fas fa-sticky-note"></i> عدد الملاحظات المحفوظة: ${stats.notesAdded}</p>
-                    </div>
-                `,
-                icon: 'info',
-                confirmButtonText: 'موافق',
-                allowOutsideClick: true,
-                allowEscapeKey: true,
-                customClass: {
-                    popup: 'swal2-popup activation-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            }).then(() => {
-                triggerAnimation();
-            });
-        }
+   function showUsageStats() {
+  const last = new Date().toLocaleString('ar-IQ');
 
-        function showSubscriptionDetails() {
-            Swal.fire({
-                title: 'تفاصيل الاشتراك',
-                html: `
-                    <div style="text-align: center; color: #dcdcdc; line-height: 1.6;">
-                        <p><i class="fas fa-star"></i> نوع الاشتراك: مميز</p>
-                        <p><i class="fas fa-calendar-alt"></i> تاريخ البدء: 2025-01-01</p>
-                        <p><i class="fas fa-calendar-alt"></i> تاريخ الانتهاء: 2026-01-01</p>
-                        <p>اشتراكك المميز يوفرلك توافقات دقيقة، تحديثات يومية، وتجربة فريدة!</p>
-                    </div>
-                `,
-                icon: 'info',
-                confirmButtonText: 'موافق',
-                allowOutsideClick: true,
-                allowEscapeKey: true,
-                customClass: {
-                    popup: 'swal2-popup activation-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            }).then(() => {
-                triggerAnimation();
-            });
-        }
+  const searchesFill = Math.min(100, (stats.searches || 0) * 6);
+  const notesFill = Math.min(100, (stats.notesAdded || 0) * 10);
+
+  Swal.fire({
+    title: 'إحصائيات الاستخدام',
+    html: `
+      <div class="pro-dialog">
+        <div class="pro-hero">
+          <div class="pro-hero-icon"><i class="fas fa-chart-line"></i></div>
+          <div class="pro-hero-text">
+            <div class="pro-hero-title">ملخّص نشاطك</div>
+            <div class="pro-hero-sub">آخر تحديث: <span>${last}</span></div>
+          </div>
+        </div>
+
+        <div class="pro-grid">
+          <div class="pro-card">
+            <div class="pro-card-top">
+              <span class="pro-card-label"><i class="fas fa-search"></i> عمليات البحث</span>
+              <span class="pro-chip pro-chip-blue">نشاط</span>
+            </div>
+            <div class="pro-number">${stats.searches || 0}</div>
+            <div class="pro-meter"><span style="width:${searchesFill}%"></span></div>
+            <div class="pro-hint">يساعدك تتبع النشاط حتى تحسّن شغلك بسرعة.</div>
+          </div>
+
+          <div class="pro-card">
+            <div class="pro-card-top">
+              <span class="pro-card-label"><i class="fas fa-sticky-note"></i> الملاحظات</span>
+              <span class="pro-chip pro-chip-teal">محفوظ</span>
+            </div>
+            <div class="pro-number">${stats.notesAdded || 0}</div>
+            <div class="pro-meter pro-meter-teal"><span style="width:${notesFill}%"></span></div>
+            <div class="pro-hint">ملاحظات أكثر = متابعة أدق للتوافقات.</div>
+          </div>
+        </div>
+
+        <div class="pro-footer">
+          <span class="pro-dot"></span>
+          <span>البيانات محفوظة محلياً على جهازك</span>
+        </div>
+      </div>
+    `,
+    showCloseButton: true,
+    confirmButtonText: 'تمام',
+    allowOutsideClick: true,
+    allowEscapeKey: true,
+    customClass: {
+      popup: 'swal2-popup activation-popup pro-popup',
+      title: 'swal2-title',
+      htmlContainer: 'swal2-html-container',
+      confirmButton: 'swal2-confirm'
+    }
+  }).then(() => {
+    triggerAnimation();
+  });
+}
+
+
+       function showSubscriptionDetails() {
+  const planName = 'مميز';
+  const startDate = '2025-01-01';
+  const endDate = '2026-01-01';
+
+  let daysLeft = null;
+  try {
+    const diff = new Date(endDate) - new Date();
+    daysLeft = Math.max(0, Math.ceil(diff / 86400000));
+  } catch (e) {}
+
+  Swal.fire({
+    title: 'تفاصيل الاشتراك',
+    html: `
+      <div class="pro-dialog">
+        <div class="pro-hero">
+          <div class="pro-hero-icon pro-hero-icon-gold"><i class="fas fa-crown"></i></div>
+          <div class="pro-hero-text">
+            <div class="pro-hero-title">اشتراك ${planName}</div>
+            <div class="pro-hero-sub">جاهز للشغل الثقيل — تجربة مرتّبة ومضمونـة</div>
+          </div>
+        </div>
+
+        <div class="pro-row">
+          <div class="pro-pill">
+            <i class="fas fa-calendar-alt"></i>
+            <span>يبدأ</span>
+            <b>${startDate}</b>
+          </div>
+          <div class="pro-pill">
+            <i class="fas fa-calendar-check"></i>
+            <span>ينتهي</span>
+            <b>${endDate}</b>
+          </div>
+        </div>
+
+        ${daysLeft !== null ? `
+          <div class="pro-banner">
+            <i class="fas fa-hourglass-half"></i>
+            <span>المتبقي على الانتهاء</span>
+            <b>${daysLeft} يوم</b>
+          </div>
+        ` : ''}
+
+        <div class="pro-card pro-card-wide">
+          <div class="pro-card-top">
+            <span class="pro-card-label"><i class="fas fa-gem"></i> مميزات الاشتراك</span>
+            <span class="pro-chip pro-chip-gold">Premium</span>
+          </div>
+
+          <ul class="pro-list">
+            <li><i class="fas fa-check-circle"></i> توافقات أدق ونتائج أسرع</li>
+            <li><i class="fas fa-check-circle"></i> تحديثات يومية للتوافقات</li>
+            <li><i class="fas fa-check-circle"></i> تجربة واجهة أنظف وأسهل بالشغل</li>
+            <li><i class="fas fa-check-circle"></i> دعم أفضل للمشتركين</li>
+          </ul>
+
+          <div class="pro-note">
+            <i class="fas fa-shield-alt"></i>
+            <span>ملاحظة: بيانات اشتراكك محفوظة بأمان داخل التطبيق.</span>
+          </div>
+        </div>
+      </div>
+    `,
+    showCloseButton: true,
+    confirmButtonText: 'موافق',
+    allowOutsideClick: true,
+    allowEscapeKey: true,
+    customClass: {
+      popup: 'swal2-popup activation-popup pro-popup',
+      title: 'swal2-title',
+      htmlContainer: 'swal2-html-container',
+      confirmButton: 'swal2-confirm'
+    }
+  }).then(() => {
+    triggerAnimation();
+  });
+}
+
 
         function showNewSimilarities() {
             openModal();
@@ -2035,16 +2479,7 @@
 
         async function loadExcelFiles() {
             try {
-                const progress = showProgressModal('جاري تحميل البيانات…', 'تحميل ملف التوافقات…');
-                let fakePct = 6;
-                const fakeTimer = setInterval(() => {
-                    fakePct = Math.min(90, fakePct + (Math.random() * 7 + 3));
-                    progress.set(fakePct, 'تحميل البيانات');
-                }, 180);
-
                 if (!dropboxSimilaritesFile) {
-                    clearInterval(fakeTimer);
-                    progress.close();
                     console.error("رابط ملف Excel غير معرف.");
                     Swal.fire({
                         title: 'خطأ',
@@ -2077,8 +2512,6 @@
                             confirmButton: 'swal2-confirm'
                         }
                     });
-                    clearInterval(fakeTimer);
-                    progress.close();
                     return { success: false, hasData: false, message: `فشل تحميل ملف Excel: ${response.status}` };
                 }
 
@@ -2095,8 +2528,6 @@
 
                 if (database.SIMILARITES.length === 0) {
                    console.warn("لا توجد بيانات في ورقة SIMILARITES");
-                clearInterval(fakeTimer);
-                progress.close();
                 Swal.fire({
                     title: 'خطأ',
                     html: '<p style="color: #ff4d4d;">ملف Excel لا يحتوي على بيانات صالحة.</p>',
@@ -2112,26 +2543,9 @@
                 return { success: false, hasData: false, message: "ملف Excel لا يحتوي على بيانات صالحة." };
             }
 
-            clearInterval(fakeTimer);
-
-
-            progress.set(100, 'اكتمل');
-
-
-            await new Promise(r => setTimeout(r, 250));
-
-
-            progress.close();
-
-
-            await showDownloadSuccess();
-
-
-
             return { success: true, hasData: true };
         } catch (error) {
             console.error("خطأ في تحميل ملف Excel:", error.message, error.stack);
-            try { clearInterval(fakeTimer); progress.close(); } catch(e) {}
             Swal.fire({
                 title: 'خطأ',
                 html: `<p style="color: #ff4d4d;">حدث خطأ أثناء تحميل البيانات: ${error.message}</p>`,
@@ -2257,8 +2671,7 @@
             if (isModalOpen) return;
             const modal = document.getElementById("newItemsModal");
             if (modal.style.display === "none" || !modal.style.display) {
-                                lockOverlay();
-modal.style.display = "flex";
+                modal.style.display = "flex";
                 modal.style.animation = "slideDownModal 0.5s ease-out forwards";
                 isModalOpen = true;
                 loadNewItems();
@@ -2287,7 +2700,6 @@ modal.style.display = "flex";
             setTimeout(() => {
                 modal.style.display = "none";
                 isModalOpen = false;
-                unlockOverlay();
             }, 500);
         } catch (error) {
             console.error("Error in closeNewItemsModal:", error);
@@ -2361,9 +2773,8 @@ modal.style.display = "flex";
         const { value: password } = await Swal.fire({
             title: 'دخول محمي',
             html: `
-                <div class="welcome-message" style="margin: 6px 0 0;">
-                    هلا بيك 👋<br>
-                    حتى تدخل للصفحة، اكتب <span class="highlight">كلمة المرور</span>.
+                <div class="welcome-message">
+                    هلا بيك بخدمتنا <span class="highlight">المميزة</span> .. اذا انت مشترك ويانة ادخل كلمة المرور .. وراها رح تدخل على <span class="highlight">كنز التوافقات</span> .. يعني تعرف شنو يرهم على شنو .. وفر وقتك وخلي شغلك <span class="highlight">نظيف</span> .. هاي الخدمة وفرناها الك اذا انت من اهل <span class="highlight">الشغل الصح</span>
                 </div>
             `,
             icon: 'question',
@@ -2372,8 +2783,8 @@ modal.style.display = "flex";
             showCancelButton: true,
             confirmButtonText: 'تأكيد',
             cancelButtonText: 'إغلاق',
-            allowOutsideClick: false,
-            allowEscapeKey: false
+            allowOutsideClick: true,
+            allowEscapeKey: true
         });
         return password;
     }
@@ -2483,7 +2894,21 @@ modal.style.display = "flex";
         }
     }
 
-    window.onload = async function() {
+ window.onload = async function() {
+
+        // ✅ DEV MODE: تعطيل Firebase + تعطيل كلمة المرور مؤقتاً
+        if (DEV_NO_FIREBASE) {
+            localStorage.removeItem("password");
+            const result = await loadExcelFiles();
+            if (result.success) {
+                console.log("تم تحميل البيانات بنجاح، جارٍ تحميل التوافقات الجديدة...");
+                displayNewSimilarities();
+            } else {
+                console.warn("فشل تحميل البيانات:", result.message);
+            }
+            return;
+        }
+
         let db;
         try {
             const firebaseConfig = {
@@ -2550,6 +2975,7 @@ modal.style.display = "flex";
             console.warn("فشل تحميل البيانات:", result.message);
         }
     };
+
 
     document.getElementById("searchInput").addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
@@ -2689,13 +3115,7 @@ modal.style.display = "flex";
 
     function toggleNotes() {
         const notesDrawer = document.getElementById('notesDrawer');
-        const willOpen = !notesDrawer.classList.contains('active');
         notesDrawer.classList.toggle('active');
-        if (willOpen) {
-            lockOverlay();
-        } else {
-            unlockOverlay();
-        }
     }
 
     function addToNotes(itemName) {
