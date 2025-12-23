@@ -2377,6 +2377,68 @@ body{
   contain: paint;
 }
 
+/* ===== Premium Logo Motion (No blur / No flicker) ===== */
+#logo{
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.logo-container{
+  position: relative; /* مهم حتى الانفجار ::after يشتغل */
+  overflow: visible;
+}
+
+/* Burst wave around logo */
+.logo-container.logo-burst::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width: 140px;
+  height: 140px;
+  transform: translate(-50%,-50%) scale(.55);
+  border-radius: 999px;
+  pointer-events:none;
+
+  /* موجة فخمة */
+  background:
+    radial-gradient(circle,
+      rgba(70,179,255,.28) 0%,
+      rgba(45,212,191,.20) 35%,
+      rgba(255,255,255,.10) 55%,
+      transparent 70%);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.10),
+    0 24px 70px rgba(0,0,0,.45);
+  opacity: 0;
+  animation: burstWave .55s ease-out forwards;
+}
+
+@keyframes burstWave{
+  0%   { opacity: 0;   transform: translate(-50%,-50%) scale(.55); }
+  25%  { opacity: .90; }
+  100% { opacity: 0;   transform: translate(-50%,-50%) scale(1.25); }
+}
+
+/* Wobble (بديل shake القديم) */
+@keyframes logoWobble{
+  0%   { transform: translateZ(0) rotate(0deg) scale(1); }
+  25%  { transform: translateZ(0) rotate(-6deg) scale(1.02); }
+  50%  { transform: translateZ(0) rotate(6deg)  scale(1.02); }
+  75%  { transform: translateZ(0) rotate(-3deg) scale(1.01); }
+  100% { transform: translateZ(0) rotate(0deg)  scale(1); }
+}
+
+/* Pop-out (بديل explode القديم) — بدون blur */
+@keyframes logoPopOut{
+  0%   { transform: translateZ(0) scale(1);    opacity: 1; }
+  60%  { transform: translateZ(0) scale(1.35); opacity: .55; }
+  100% { transform: translateZ(0) scale(1.75); opacity: 0; }
+}
+
+
 
 
 
@@ -2557,72 +2619,120 @@ function triggerAnimation() {
   const resultsContainer = document.getElementById("resultsContainer");
   const searchInput = document.getElementById("searchInput");
 
-  // إذا النتائج ظاهرة أو المستخدم كاتب بالبحث أو حاليا انيميشن شغّال => نأخر
   if (
     !logo || !notification || !notificationText || !resultsContainer || !searchInput ||
     resultsContainer.classList.contains("visible") ||
-    searchInput.value.trim().length > 0 ||
-    isAnimating
+    searchInput.value.trim().length > 0
   ) {
-    setTimeout(triggerAnimation, 100);
+    setTimeout(triggerAnimation, 150);
     return;
   }
 
+  if (isAnimating) return;
   isAnimating = true;
 
-  // اهتزاز اللوغو
-  logo.style.animation = "shake 0.5s ease-in-out";
-  setTimeout(() => {
-    logo.style.animation = "none";
-  }, 500);
+  // امنع أي تعارض/تراكم
+  gsap.killTweensOf([logo, notification]);
+  logo.style.animation = "none";
+  notification.style.animation = "none";
 
-  // انفجار اللوغو واختفاءه
-  setTimeout(() => {
-    logo.style.animation = "explode 0.5s ease-out";
-    logo.style.opacity = "0";
-  }, 800);
+  // وضعيات ثابتة بالبداية
+  gsap.set(logo, {
+    x: 0, y: 0,
+    scale: 1,
+    opacity: 1,
+    rotation: 0,
+    transformOrigin: "50% 50%"
+  });
 
-  // عرض الإشعار
-  setTimeout(() => {
+  gsap.set(notification, {
+    opacity: 0,
+    scale: 0.92,
+    y: 8,
+    rotation: 0
+  });
+
+  const tl = gsap.timeline({
+    onComplete: () => {
+      isAnimating = false;
+      triggerAnimation();
+    }
+  });
+
+  // 1) micro-jiggle (بديل shake) بدون دوران
+  tl.to(logo, { x: -3, duration: 0.09, ease: "power1.inOut" })
+    .to(logo, { x:  3, duration: 0.09, ease: "power1.inOut" })
+    .to(logo, { x: -2, duration: 0.09, ease: "power1.inOut" })
+    .to(logo, { x:  2, duration: 0.09, ease: "power1.inOut" })
+    .to(logo, { x:  0, duration: 0.08, ease: "power1.out" });
+
+  // 2) pop-out (بديل الانفجار) — بدون blur وبدون دوران
+  tl.to(logo, {
+    scale: 1.6,
+    opacity: 0,
+    y: -6,
+    duration: 0.55,
+    ease: "power3.out"
+  }, "+=0.08");
+
+  // 3) show notification
+  tl.add(() => {
     const randomNotification = notifications[Math.floor(Math.random() * notifications.length)];
     notificationText.textContent = randomNotification;
     notification.classList.add("show");
-  }, 1300);
+  });
 
-  // اختفاء الإشعار (GSAP)
-  setTimeout(() => {
-    notification.classList.remove("show");
-    gsap.to(notification, {
-      scale: 0.8,
-      opacity: 0,
-      rotation: 180,
-      duration: 0.8,
-      ease: "power2.inOut",
-      onComplete: () => {
-        notification.style.transform = "scale(0)";
-      }
-    });
-  }, 5000);
+  tl.to(notification, {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    duration: 0.28,
+    ease: "power2.out"
+  }, "+=0.05");
 
-  // رجوع اللوغو (بدون دوران) + Bounce
-  setTimeout(() => {
-    logo.style.animation = "none";
-    gsap.set(logo, { scale: 0, opacity: 0 }); // ماكو rotation
-    gsap.to(logo, {
-      scale: 1,
-      opacity: 1,
-      duration: 1.2,
-      ease: "bounce.out"
-    });
-  }, 5800);
+  // 4) خلي الإشعار يبقى
+  tl.to({}, { duration: 2.0 });
 
-  // إعادة الدورة
- setTimeout(() => {
-  logo.style.animation = "explode 0.5s ease-out";
-  // لا تحط opacity هنا — الانيميشن نفسه ينزّلها
-}, 800);
+  // 5) hide notification (بدون دوران)
+  tl.to(notification, {
+    opacity: 0,
+    scale: 0.90,
+    y: 10,
+    duration: 0.45,
+    ease: "power2.inOut",
+    onComplete: () => {
+      notification.classList.remove("show");
+      notification.style.transform = "scale(0)";
+    }
+  });
 
+  // 6) logo comeback (Premium pop + bounce + float) بدون دوران
+  tl.set(logo, {
+    scale: 0.60,
+    opacity: 0,
+    y: 12,
+    rotation: 0
+  }, "+=0.10");
+
+  tl.to(logo, {
+    scale: 1,
+    opacity: 1,
+    y: 0,
+    duration: 0.85,
+    ease: "elastic.out(1, 0.55)"  // هذا يعطيك رجعة “حلوة مدفوعة”
+  });
+
+  // 7) float subtle (لمسة فخمة قصيرة)
+  tl.to(logo, { y: -3, duration: 0.55, ease: "sine.inOut" })
+    .to(logo, { y:  0, duration: 0.55, ease: "sine.inOut" });
+
+  // 8) pause صغيرة قبل الإعادة
+  tl.to({}, { duration: 0.45 });
 }
+
+
+
+
 
 
 
