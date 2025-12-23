@@ -2766,6 +2766,13 @@ body{
   transform: translateZ(0);
 }
 
+.login-center-strong{
+  text-align: center !important;
+  font-weight: 900 !important;
+  display: block !important; /* حتى السنتر يشتغل صح على span */
+}
+
+
 
 
 
@@ -3536,7 +3543,7 @@ function triggerAnimation() {
 
     <div class="login-hint">
       <i class="fas fa-shield-halved"></i>
-      <span>كلمة المرور مخصصة للمشتركين فقط.</span>
+      <span class="login-center-strong">كلمة المرور مخصصة للمشتركين فقط.</span>
     </div>
   </div>
 `,
@@ -3572,14 +3579,19 @@ iconHtml: '<i class="fas fa-lock"></i>',
       cancelButton: 'login-cancel'
     },
 
-    didOpen: () => {
-      const input = Swal.getInput();
-      if (input) {
-        setTimeout(() => {
-          try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
-        }, 60);
-      }
-    },
+didOpen: () => {
+  const input = Swal.getInput();
+  if (!input) return;
+
+  const isMobile = window.matchMedia('(pointer:coarse)').matches; // موبايل/تاتش
+  if (isMobile) return; // ✅ يمنع الومضة بالموبايل
+
+  setTimeout(() => {
+    try { input.focus({ preventScroll: true }); }
+    catch (e) { input.focus(); }
+  }, 250); // ✅ نخليه بعد ما يخلص أنيميشن النافذة
+},
+
 
     preConfirm: () => {
       const v = (Swal.getInput()?.value || '').trim();
