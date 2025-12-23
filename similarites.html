@@ -2653,6 +2653,70 @@ body{
 }
 
 
+/* ===== SweetAlert top empty circle -> rotating lock ===== */
+.login-top-icon.swal2-icon{
+  width: 76px !important;
+  height: 76px !important;
+  margin: 0 auto 10px !important;
+  border: 0 !important;
+  background: transparent !important;
+  position: relative !important;
+  overflow: visible !important;
+  box-shadow: none !important;
+}
+
+.login-top-icon.swal2-icon::before{
+  content:"";
+  position:absolute;
+  inset:-3px;
+  border-radius: 50%;
+  background: conic-gradient(
+    rgba(255,215,0,.95),
+    rgba(45,212,191,.85),
+    rgba(70,179,255,.85),
+    rgba(255,215,0,.95)
+  );
+  animation: loginTopSpin 1.1s linear infinite;
+  filter: drop-shadow(0 12px 28px rgba(0,0,0,.45));
+}
+
+.login-top-icon.swal2-icon::after{
+  content:"";
+  position:absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(10,14,26,.98), rgba(14,22,40,.90));
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+}
+
+.login-top-icon.swal2-icon .swal2-icon-content{
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  z-index: 2 !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.login-top-icon.swal2-icon i{
+  font-size: 28px !important;
+  color: #fff !important;
+  transform: translateY(1px);
+  animation: loginTopPulse 1.3s ease-in-out infinite;
+}
+
+@keyframes loginTopSpin{ to{ transform: rotate(360deg); } }
+@keyframes loginTopPulse{
+  0%,100%{ transform: translateY(1px) scale(1); opacity: .95; }
+  50%{ transform: translateY(-1px) scale(1.06); opacity: 1; }
+}
+
+
+
 
         
         
@@ -3425,8 +3489,9 @@ function triggerAnimation() {
   </div>
 `,
 
-    icon: undefined,
-    iconHtml: '<i class="fas fa-shield-halved"></i>',
+   icon: 'info',
+iconHtml: '<i class="fas fa-lock"></i>',
+
 
     input: 'password',
     inputPlaceholder: 'كلمة المرور',
@@ -3450,6 +3515,7 @@ function triggerAnimation() {
       title: 'swal2-title',
       htmlContainer: 'swal2-html-container',
       input: 'login-input',
+      icon: 'login-top-icon',          // ✅ هذا السطر الجديد
       confirmButton: 'login-confirm',
       cancelButton: 'login-cancel'
     },
