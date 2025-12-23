@@ -232,13 +232,13 @@
         }
 
         .header-btn:hover {
-            transform: scale(1.1) rotate(5deg);
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
         }
 
         .header-btn:active {
-            transform: scale(0.95);
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
+            transform: translateY(0);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
         }
 
         .refresh-btn {
@@ -260,9 +260,9 @@
         .notes-btn {
             background: linear-gradient(135deg, #4682B4, #20B2AA);
             position: relative;
-            padding-right: 24px;
-            padding-left: 10px;
-        }
+            padding-right: 0;
+            padding-left: 0;
+            }
 
         .notes-btn:hover {
             background: linear-gradient(135deg, #20B2AA, #4682B4);
@@ -768,8 +768,9 @@
         }
 
         .result-card button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 10px rgba(70, 130, 180, 0.6);
+            transform: none;
+            filter: brightness(1.06);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.28);
         }
 
         /* Notes Drawer */
@@ -860,8 +861,9 @@
         }
 
         .notes-item button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(255, 75, 75, 0.7);
+            transform: none;
+            filter: brightness(1.06);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.28);
         }
 
         /* Scroll to Top Button */
@@ -906,7 +908,7 @@
             text-align: center;
             padding: 10px 0;
             width: 100%;
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Cairo', sans-serif;
             font-size: 14px;
             box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.4);
             position: fixed;
@@ -1236,7 +1238,7 @@
             right: 15px;
             background: linear-gradient(45deg, #FF416C, #FF4B2B);
             border: none;
-            border-radius: 50%;
+            border-radius: 12px;
             width: 35px;
             height: 35px;
             display: flex;
@@ -1515,138 +1517,263 @@
             }
         }
     
+        /* ===== Global Pro UI tweaks (overlay + buttons + tap highlight) ===== */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
 
-        /* ===== World-class Windows Patch (safe overrides) ===== */
-        /* Global tap highlight off (mobile) */
-        *, *::before, *::after { -webkit-tap-highlight-color: transparent; }
-        button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+        /* Prevent mobile tap highlight + accidental glow */
+        button, a, .category, .category-btn, .new-category-btn, .header-btn, .slider-btn, .scroll-to-top {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
         button:focus, a:focus { outline: none; }
-        button::-moz-focus-inner { border: 0; }
+        button:focus-visible, a:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(163, 191, 250, 0.28);
+        }
 
-        /* Global overlay that blocks touches/clicks behind windows */
-        .global-overlay{
+        /* Full-screen elegant overlay (used with modal + drawer) */
+        .ui-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.55);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
             opacity: 0;
             pointer-events: none;
-            transition: opacity .18s ease;
-            z-index: 1500; /* above header/footer, below drawer & modal */
+            transition: opacity 0.25s ease;
+            background:
+              radial-gradient(1200px 800px at 50% 25%, rgba(163, 191, 250, 0.16), rgba(0, 0, 0, 0.62)),
+              linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.65));
+            backdrop-filter: blur(6px);
         }
-        .global-overlay.active{
+        .ui-overlay.visible {
             opacity: 1;
-            pointer-events: auto; /* blocks all interaction behind */
-        }
-        body.window-locked{
-            overflow: hidden;
-            touch-action: none;
+            pointer-events: auto;
         }
 
-        /* Make modal/drawer look more premium without changing layout */
-        #newItemsModal{
-            border: 1px solid rgba(255,255,255,0.10);
-            box-shadow: 0 18px 55px rgba(0,0,0,0.60);
-        }
-        .notes-drawer{
-            border-left: 1px solid rgba(255,255,255,0.10);
-            box-shadow: -18px 0 55px rgba(0,0,0,0.60);
+                body.overlay-on { overflow: hidden; }
+        body.swal2-shown { overflow: hidden; }
+
+body.overlay-on .container,
+        body.overlay-on footer,
+        body.overlay-on .scroll-to-top,
+        body.swal2-shown .container,
+        body.swal2-shown footer,
+        body.swal2-shown .scroll-to-top {
+            filter: blur(1.5px);
         }
 
-        /* Window buttons: slightly oval, no “pop out” transform, no focus highlight */
-        #newItemsModal button,
-        #newItemsModal .modal-content button,
-        .notes-drawer button,
-        .swal2-popup .swal2-styled{
-            border-radius: 14px !important;
+        /* Header icon buttons: keep same placement, just more pro */
+        .header-btn.icon-btn {
+            width: 34px;
+            height: 30px;
+            padding: 0;
+            justify-content: center;
+            gap: 0;
+            border-radius: 12px;
+        }
+        .header-btn.icon-btn i {
+            font-size: 14px;
+        }
+
+        .header-btn {
+            border-radius: 12px;
+        }
+        .header-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+        }
+        .header-btn:active {
+            transform: translateY(0);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+        }
+
+        /* Move notes badge to look nicer with icon-only */
+        .notes-count {
+            top: 6px;
+            right: 6px;
+            transform: none;
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Buttons inside windows: slightly oval + smaller, no scaling */
+        .result-card button,
+        .notes-item button,
+        .category-btn,
+        .new-category-btn,
+        .search-container button,
+        #newItemsModal .close-modal-btn {
+            border-radius: 14px;
+        }
+
+        .result-card button,
+        .notes-item button,
+        .category-btn,
+        .new-category-btn {
+            transition: box-shadow 0.25s ease, filter 0.25s ease, background 0.25s ease;
+        }
+
+        .result-card button:hover,
+        .notes-item button:hover,
+        .category-btn:hover,
+        .new-category-btn:hover {
+            transform: none;
+            filter: brightness(1.06);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.28);
+        }
+
+        .result-card button:active,
+        .notes-item button:active,
+        .category-btn:active,
+        .new-category-btn:active {
+            transform: none;
+            filter: brightness(0.97);
+            box-shadow: inset 0 3px 10px rgba(0,0,0,0.38);
+        }
+        /* New items modal action button: match global buttons (oval + no scale) */
+        #newItemsModal .modal-content .new-item-card .item-details button {
+            border-radius: 14px;
+            padding: 7px 14px;
+            font-size: 13px;
+            min-width: 120px; /* حافظ على نفس العرض تقريبًا */
             transform: none !important;
-            transition: background .15s ease, opacity .15s ease, filter .15s ease !important;
-            outline: none !important;
-            box-shadow: none !important;
+            transition: box-shadow 0.25s ease, filter 0.25s ease, background 0.25s ease;
         }
-        #newItemsModal button:active,
-        #newItemsModal .modal-content button:active,
-        .notes-drawer button:active,
-        .swal2-popup .swal2-styled:active{
+        #newItemsModal .modal-content .new-item-card .item-details button:hover {
             transform: none !important;
-            filter: brightness(0.96);
+            filter: brightness(1.06);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.28);
         }
-        .swal2-popup .swal2-styled:focus,
-        .swal2-popup .swal2-styled:focus-visible{
-            outline: none !important;
-            box-shadow: none !important;
-        }
-
-        /* Header buttons: keep size/position, remove enlarge/rotate */
-        .header-btn:hover,
-        .header-btn:active{
+        #newItemsModal .modal-content .new-item-card .item-details button:active {
             transform: none !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.35) !important;
+            filter: brightness(0.97);
+            box-shadow: inset 0 3px 10px rgba(0,0,0,0.38);
         }
 
-        /* Footer brand color back (yellow like you like) */
-        footer .brand{
-            color: #f7c948;
-            font-weight: 800;
-            text-shadow: 0 2px 10px rgba(247,201,72,0.20);
+
+        /* Notes drawer: more premium feel without changing layout */
+        .notes-drawer {
+            z-index: 9001;
+            background: linear-gradient(145deg, rgba(0, 0, 0, 0.92), rgba(20, 25, 40, 0.78));
+            border-left: 1px solid rgba(163, 191, 250, 0.14);
+            box-shadow: -18px 0 45px rgba(0, 0, 0, 0.55);
         }
 
-        /* Premium refresh modal (progress) */
-        .pro-refresh{
-            border-radius: 24px !important;
-            border: 1px solid rgba(255,255,255,0.12);
-            box-shadow: 0 22px 65px rgba(0,0,0,0.65);
-            background: linear-gradient(135deg, rgba(10,12,18,0.96), rgba(26,30,45,0.88)) !important;
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+        /* New items modal: add a premium border + shadow */
+        #newItemsModal {
+            box-shadow: 0 30px 90px rgba(0,0,0,0.65);
+            border: 1px solid rgba(163, 191, 250, 0.14);
         }
-        .pro-progress{
+
+        /* SweetAlert2 backdrop: more elegant, consistent with overlay */
+        .swal2-backdrop {
+            background:
+              radial-gradient(1100px 700px at 50% 20%, rgba(163, 191, 250, 0.14), rgba(0, 0, 0, 0.72)),
+              linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.70));
+            backdrop-filter: blur(7px);
+        }
+
+        /* Loading progress UI inside Swal */
+        .swal-loading-row {
+            width: 100%;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        .swal-loading-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(212,175,55,0.18);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.28);
+            flex: 0 0 auto;
+        }
+        .swal-loading-icon i { font-size: 18px; color: #D4AF37; }
+
+        .swal-loading-sub {
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            color: #E2E8F0;
+            margin-bottom: 10px;
+        }
+        .swal-progress {
             width: 100%;
             height: 10px;
+            border-radius: 999px;
             background: rgba(255,255,255,0.10);
-            border-radius: 999px;
             overflow: hidden;
-            margin-top: 14px;
-            box-shadow: inset 0 1px 4px rgba(0,0,0,0.45);
+            border: 1px solid rgba(163,191,250,0.18);
         }
-        .pro-progress > span{
-            display:block;
-            height:100%;
-            width:0%;
+        .swal-progress-bar {
+            height: 100%;
+            width: 0%;
             border-radius: 999px;
-            background: linear-gradient(90deg, #43cea2, #185a9d);
-            transition: width .2s ease;
+            background: linear-gradient(90deg, #43cea2, #185a9d, #D4AF37);
+            transition: width 0.2s ease;
         }
-        .pro-pct{
-            margin-top: 10px;
-            display:flex;
-            align-items:center;
+        .swal-progress-meta {
+            display: flex;
             justify-content: space-between;
+            margin-top: 8px;
+            font-family: 'Cairo', sans-serif;
             font-size: 12px;
-            color: rgba(233,238,247,0.85);
+            color: rgba(226,232,240,0.9);
         }
-</style>
+        .swal-success-message {
+            font-family: 'Cairo', sans-serif;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        /* Footer refinement */
+        footer p {
+            font-family: 'Cairo', sans-serif;
+            letter-spacing: 0.2px;
+        }
+        footer .footer-brand {
+            color: #D4AF37;
+            font-weight: 800;
+        }
+
+    </style>
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <div class="header-title">مكتب عسل</div>
         <div class="header-buttons">
-            <button class="header-btn back-btn" onclick="goBack()" title="رجوع"><i class="fas fa-arrow-right"></i> رجوع</button>
-            <button class="header-btn refresh-btn" onclick="refreshData()" title="تحديث البيانات"><i class="fas fa-sync"></i> تحديث</button>
-            <button class="header-btn notes-btn" onclick="toggleNotes()" title="عرض الملاحظات"><i class="fas fa-sticky-note"></i> ملاحظات <span class="notes-count" id="headerNotesCount">0</span></button>
+            <button class="header-btn back-btn icon-btn" onclick="goBack()" title="رجوع"><i class="fas fa-arrow-right"></i><span class="sr-only">رجوع</span></button>
+            <button class="header-btn refresh-btn icon-btn" onclick="refreshData()" title="تحديث البيانات"><i class="fas fa-sync-alt"></i><span class="sr-only">تحديث</span></button>
+            <button class="header-btn notes-btn icon-btn" onclick="toggleNotes()" title="عرض الملاحظات"><i class="fas fa-sticky-note"></i><span class="sr-only">ملاحظات</span><span class="notes-count" id="headerNotesCount">0</span></button>
         </div>
     </header>
+
+    <!-- Elegant Overlay for Windows -->
+    <div id="uiOverlay" class="ui-overlay" onclick="closeUiOverlays()"></div>
+
 
     <!-- New Items Modal -->
     <div id="newItemsModal">
         <button class="close-modal-btn" onclick="closeNewItemsModal()"><i class="fas fa-times"></i></button>
         <h2>توافقات جديدة</h2>
         <div class="modal-content"></div>
-    
-    <div id="globalOverlay" class="global-overlay" aria-hidden="true"></div>
-</div>
+    </div>
 
     <div class="container">
         <!-- Logo -->
@@ -1730,7 +1857,7 @@
 
     <!-- Footer -->
     <footer>
-        <p>جميع الحقوق محفوظة - <span class="brand">مكتب عسل</span></p>
+        <p>© <span class="footer-brand">مكتب عسل</span> — منصة التوافقات للهواتف | جميع الحقوق محفوظة</p>
     </footer>
 
     <script>
@@ -1742,65 +1869,6 @@
         let currentCategory = null;
         let isModalOpen = false;
         let newSimilaritiesCount = 0;
-
-
-        // ===== Global window lock (blocks touch/click outside windows) =====
-        let __windowLockCount = 0;
-
-        function __setWindowLocked(locked){
-            const overlay = document.getElementById('globalOverlay');
-            if (overlay) overlay.classList.toggle('active', !!locked);
-            document.body.classList.toggle('window-locked', !!locked);
-        }
-
-        function lockWindow(){
-            __windowLockCount++;
-            if (__windowLockCount === 1) __setWindowLocked(true);
-        }
-
-        function unlockWindow(){
-            __windowLockCount = Math.max(0, __windowLockCount - 1);
-            if (__windowLockCount === 0) __setWindowLocked(false);
-        }
-
-        // Overlay should NEVER close anything; it only blocks interactions.
-        document.addEventListener('DOMContentLoaded', () => {
-            const overlay = document.getElementById('globalOverlay');
-            if (!overlay) return;
-            const block = (e) => { e.preventDefault(); e.stopPropagation(); };
-            overlay.addEventListener('click', block, {passive:false});
-            overlay.addEventListener('mousedown', block, {passive:false});
-            overlay.addEventListener('touchstart', block, {passive:false});
-        });
-
-        // ===== SweetAlert2: enforce no outside click/escape + premium class =====
-        (function(){
-            if (!window.Swal || Swal.__proPatched) return;
-            Swal.__proPatched = true;
-
-            const _fire = Swal.fire.bind(Swal);
-
-            Swal.fire = function(options, ...rest){
-                // Support Swal.fire(title, text, icon)
-                if (typeof options === 'string') return _fire(options, ...rest);
-
-                if (options && typeof options === 'object'){
-                    options.allowOutsideClick = false;
-                    options.allowEscapeKey = false;
-                    options.stopKeydownPropagation = true;
-                    options.heightAuto = false;
-
-                    options.customClass = options.customClass || {};
-                    // Keep user's popup class but add ours
-                    const existing = options.customClass.popup ? (options.customClass.popup + ' ') : '';
-                    options.customClass.popup = existing + 'pro-swal';
-                    // Buttons styling will be handled via CSS already in the page
-                    options.buttonsStyling = true;
-                }
-                return _fire(options, ...rest);
-            };
-        })();
-
 
         const notifications = [
             "توافقات دقيقة بضغطة زر!",
@@ -2149,7 +2217,7 @@
                 modal.style.display = "flex";
                 modal.style.animation = "slideDownModal 0.5s ease-out forwards";
                 isModalOpen = true;
-                lockWindow();
+                updateUiOverlay();
                 loadNewItems();
             }
         } catch (error) {
@@ -2176,8 +2244,8 @@
             setTimeout(() => {
                 modal.style.display = "none";
                 isModalOpen = false;
-                unlockWindow();
-            }, 500);
+            updateUiOverlay();
+                }, 500);
         } catch (error) {
             console.error("Error in closeNewItemsModal:", error);
             isModalOpen = false;
@@ -2267,20 +2335,64 @@
     }
 
     async function verifyPassword(password, db) {
+        
+        let loginProgress = 0;
+        let loginIntervalId = null;
+
+        const updateLoginProgress = (p) => {
+            const popup = Swal.getPopup();
+            const bar = popup ? popup.querySelector('#swalProgressBar') : null;
+            const percent = popup ? popup.querySelector('#swalProgressPercent') : null;
+            const progressEl = popup ? popup.querySelector('.swal-progress') : null;
+            const v = Math.max(0, Math.min(100, Math.round(p)));
+            if (bar) bar.style.width = `${v}%`;
+            if (percent) percent.textContent = `${v}%`;
+            if (progressEl) progressEl.setAttribute('aria-valuenow', String(v));
+        };
+
+        const stopLoginLoader = () => {
+            if (loginIntervalId) clearInterval(loginIntervalId);
+            loginIntervalId = null;
+        };
+
         Swal.fire({
-            title: 'جاري الدخول...',
-            text: 'يرجى الانتظار',
+            title: 'تحميل البيانات',
+            html: `
+                <div class="swal-loading-row">
+                    <div class="swal-loading-icon"><i class="fas fa-user-shield"></i></div>
+                    <div style="width: 100%; max-width: 360px;">
+                        <div class="swal-loading-sub">جاري التحقق من الاشتراك وتحميل التوافقات…</div>
+                        <div class="swal-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                            <div class="swal-progress-bar" id="swalProgressBar"></div>
+                        </div>
+                        <div class="swal-progress-meta">
+                            <span id="swalProgressPercent">0%</span>
+                            <span class="swal-progress-hint">يرجى الانتظار</span>
+                        </div>
+                    </div>
+                </div>
+            `,
+            showConfirmButton: false,
             allowOutsideClick: false,
+            allowEscapeKey: false,
+            customClass: { popup: 'swal2-popup activation-popup' },
             didOpen: () => {
-                Swal.showLoading();
+                loginIntervalId = setInterval(() => {
+                    // تصعد تدريجيًا لحد 88% ونكمّل 100% بعد ما يخلص التحميل فعليًا
+                    loginProgress = Math.min(loginProgress + (Math.random() * 6 + 2), 88);
+                    updateLoginProgress(loginProgress);
+                }, 250);
             }
         });
+
 
         try {
             const codeRef = db.collection('passwords').doc(password);
             const doc = await codeRef.get();
 
             if (!doc.exists) {
+                stopLoginLoader();
+                Swal.close();
                 await Swal.fire({
                     icon: 'error',
                     title: 'خطأ',
@@ -2312,16 +2424,13 @@
                 });
                 localStorage.setItem("password", password);
                 await loadSimilaritesData();
-            try {
-                const fill = document.getElementById('proProgressFill');
-                const pct = document.getElementById('proProgressPct');
-                if (fill) fill.style.width = '100%';
-                if (pct) pct.textContent = '100%';
-                const popup = Swal.getPopup();
-                if (popup && popup.__proTimer) { clearInterval(popup.__proTimer); popup.__proTimer = null; }
-            } catch(_) {}
-
+                updateLoginProgress(100);
+                stopLoginLoader();
+                await new Promise(resolve => setTimeout(resolve, 250));
+                Swal.close();
                 updateNotes();
+                stopLoginLoader();
+                Swal.close();
                 await Swal.fire({
                     icon: 'success',
                     title: 'تم الدخول بنجاح',
@@ -2336,17 +2445,14 @@
                 if (data.deviceId === deviceId) {
                     localStorage.setItem("password", password);
                     await loadSimilaritesData();
-            try {
-                const fill = document.getElementById('proProgressFill');
-                const pct = document.getElementById('proProgressPct');
-                if (fill) fill.style.width = '100%';
-                if (pct) pct.textContent = '100%';
-                const popup = Swal.getPopup();
-                if (popup && popup.__proTimer) { clearInterval(popup.__proTimer); popup.__proTimer = null; }
-            } catch(_) {}
-
+                updateLoginProgress(100);
+                stopLoginLoader();
+                await new Promise(resolve => setTimeout(resolve, 250));
+                Swal.close();
                     updateNotes();
-                    await Swal.fire({
+                    stopLoginLoader();
+                Swal.close();
+                await Swal.fire({
                         icon: 'success',
                         title: 'تم الدخول بنجاح',
                         text: 'كلمة المرور صحيحة!',
@@ -2357,7 +2463,9 @@
                     triggerAnimation();
                     return true;
                 } else {
-                    await Swal.fire({
+                    stopLoginLoader();
+                Swal.close();
+                await Swal.fire({
                         icon: 'error',
                         title: 'خطأ',
                         text: 'كلمة المرور مستخدمة على جهاز آخر!',
@@ -2373,7 +2481,9 @@
                 }
             }
         } catch (error) {
-            await Swal.fire({
+            stopLoginLoader();
+                Swal.close();
+                await Swal.fire({
                 icon: 'error',
                 title: 'خطأ',
                 text: error.message.includes('offline') ? 'أنت غير متصل بالإنترنت. يرجى التحقق من الاتصال.' : 'حدث خطأ: ' + error.message,
@@ -2387,6 +2497,10 @@
             triggerAnimation();
             return false;
         }
+        finally {
+            stopLoginLoader();
+        }
+
     }
 
     window.onload = async function() {
@@ -2448,14 +2562,9 @@
             }
         }
 
-        const result = await loadExcelFiles();
-        if (result.success) {
-            console.log("تم تحميل البيانات بنجاح، جارٍ تحميل التوافقات الجديدة...");
-            displayNewSimilarities();
-        } else {
-            console.warn("فشل تحميل البيانات:", result.message);
-        }
-    };
+        // البيانات تنحمّل داخل verifyPassword() حتى يكون التحميل بنفس نافذة الدخول
+        displayNewSimilarities();
+};
 
     document.getElementById("searchInput").addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
@@ -2593,10 +2702,59 @@
         }
     }
 
-    function toggleNotes() {
+    
+    function showUiOverlay(zIndex) {
+        const overlay = document.getElementById('uiOverlay');
+        if (!overlay) return;
+        overlay.style.zIndex = String(zIndex);
+        overlay.classList.add('visible');
+        document.body.classList.add('overlay-on');
+    }
+
+    function hideUiOverlay() {
+        const overlay = document.getElementById('uiOverlay');
+        if (!overlay) return;
+        overlay.classList.remove('visible');
+        document.body.classList.remove('overlay-on');
+    }
+
+    function updateUiOverlay() {
+        const modal = document.getElementById('newItemsModal');
+        const drawer = document.getElementById('notesDrawer');
+
+        const modalOpen = !!(modal && isModalOpen && modal.style.display !== 'none');
+        const drawerOpen = !!(drawer && drawer.classList.contains('active'));
+
+        if (modalOpen) {
+            showUiOverlay(9999); // behind modal (modal z-index 10000)
+            return;
+        }
+        if (drawerOpen) {
+            showUiOverlay(9000); // behind drawer (drawer z-index 9001)
+            return;
+        }
+        hideUiOverlay();
+    }
+
+    function closeUiOverlays() {
+        const modal = document.getElementById('newItemsModal');
+        const drawer = document.getElementById('notesDrawer');
+
+        if (modal && isModalOpen && modal.style.display !== 'none') {
+            closeNewItemsModal();
+            return;
+        }
+        if (drawer && drawer.classList.contains('active')) {
+            toggleNotes(false);
+        }
+    }
+
+
+    function toggleNotes(forceOpen) {
         const notesDrawer = document.getElementById('notesDrawer');
-        const isActive = notesDrawer.classList.toggle('active');
-        if (isActive) lockWindow(); else unlockWindow();
+        const willOpen = (typeof forceOpen === 'boolean') ? forceOpen : !notesDrawer.classList.contains('active');
+        notesDrawer.classList.toggle('active', willOpen);
+        updateUiOverlay();
     }
 
     function addToNotes(itemName) {
@@ -2650,62 +2808,69 @@
     }
 
     async function refreshData() {
+        let progress = 0;
+        let intervalId = null;
+
         Swal.fire({
+            title: 'تحديث البيانات',
             html: `
-                <div style="display:flex;flex-direction:column;align-items:stretch;gap:12px;min-width:260px;">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <div style="width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(67,206,162,0.12);border:1px solid rgba(67,206,162,0.22);">
-                            <i class="fas fa-sync" style="color:#43cea2;font-size:18px;"></i>
+                <div class="swal-loading-row">
+                    <div class="swal-loading-icon"><i class="fas fa-cloud-download-alt"></i></div>
+                    <div style="width: 100%; max-width: 360px;">
+                        <div class="swal-loading-sub">جاري تنزيل آخر تحديثات التوافقات...</div>
+                        <div class="swal-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                            <div class="swal-progress-bar" id="swalProgressBar"></div>
                         </div>
-                        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;">
-                            <div style="font-size:16px;font-weight:800;color:#eef2ff;">جارٍ تحديث البيانات</div>
-                            <div style="font-size:12px;color:rgba(233,238,247,0.75);">رجاءً لا تغلق الصفحة</div>
+                        <div class="swal-progress-meta">
+                            <span id="swalProgressPercent">0%</span>
+                            <span class="swal-progress-hint">يرجى الانتظار</span>
                         </div>
-                    </div>
-                    <div class="pro-progress"><span id="proProgressFill"></span></div>
-                    <div class="pro-pct">
-                        <span id="proProgressPct">0%</span>
-                        <span>يتم التحميل…</span>
                     </div>
                 </div>
             `,
             showConfirmButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            customClass: { popup: 'swal2-popup activation-popup' },
             didOpen: () => {
-                let p = 0;
-                const fill = document.getElementById('proProgressFill');
-                const pct = document.getElementById('proProgressPct');
-                const tick = () => {
-                    p = Math.min(p + (Math.random()*6 + 3), 92);
-                    if (fill) fill.style.width = p.toFixed(0) + '%';
-                    if (pct) pct.textContent = p.toFixed(0) + '%';
-                };
-                tick();
-                const t = setInterval(tick, 180);
                 const popup = Swal.getPopup();
-                if (popup) popup.__proTimer = t;
-            },
-            customClass: {
-                popup: 'swal2-popup activation-popup pro-refresh'
+                const bar = popup ? popup.querySelector('#swalProgressBar') : null;
+                const percent = popup ? popup.querySelector('#swalProgressPercent') : null;
+                const progressEl = popup ? popup.querySelector('.swal-progress') : null;
+
+                intervalId = setInterval(() => {
+                    // اطلع تدريجيًا لحد 90% (و نكمّل 100% بعد ما يخلص التحميل فعليًا)
+                    progress = Math.min(progress + (Math.random() * 6 + 2), 90);
+                    const p = Math.round(progress);
+                    if (bar) bar.style.width = `${p}%`;
+                    if (percent) percent.textContent = `${p}%`;
+                    if (progressEl) progressEl.setAttribute('aria-valuenow', String(p));
+                }, 250);
             }
         });
 
         try {
             await loadSimilaritesData();
-            try {
-                const fill = document.getElementById('proProgressFill');
-                const pct = document.getElementById('proProgressPct');
-                if (fill) fill.style.width = '100%';
-                if (pct) pct.textContent = '100%';
-                const popup = Swal.getPopup();
-                if (popup && popup.__proTimer) { clearInterval(popup.__proTimer); popup.__proTimer = null; }
-            } catch(_) {}
 
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const popup = Swal.getPopup();
+            const bar = popup ? popup.querySelector('#swalProgressBar') : null;
+            const percent = popup ? popup.querySelector('#swalProgressPercent') : null;
+            const progressEl = popup ? popup.querySelector('.swal-progress') : null;
+
+            progress = 100;
+            if (bar) bar.style.width = '100%';
+            if (percent) percent.textContent = '100%';
+            if (progressEl) progressEl.setAttribute('aria-valuenow', '100');
+
+            if (intervalId) clearInterval(intervalId);
+            await new Promise(resolve => setTimeout(resolve, 350));
+            Swal.close();
+
             await Swal.fire({
-                title: 'تم التحديث',
-                text: 'تم تحديث البيانات بنجاح',
+                title: 'تم التحديث بنجاح',
+                html: '<div class="swal-success-message">تم تنزيل أحدث التوافقات وتحديثها بنجاح ✅</div>',
                 icon: 'success',
-                confirmButtonText: 'موافق',
+                confirmButtonText: 'تمام',
                 allowOutsideClick: true,
                 allowEscapeKey: true,
                 customClass: {
@@ -2715,9 +2880,13 @@
                     confirmButton: 'swal2-confirm'
                 }
             });
+
             triggerAnimation();
             displayNewSimilarities();
         } catch (error) {
+            if (intervalId) clearInterval(intervalId);
+            Swal.close();
+
             await Swal.fire({
                 title: 'خطأ',
                 text: 'حدث خطأ أثناء التحديث',
@@ -2735,6 +2904,7 @@
             triggerAnimation();
         }
     }
-    </script>
+
+</script>
 </body>
 </html>
