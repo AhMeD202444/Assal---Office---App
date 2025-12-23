@@ -2443,6 +2443,7 @@ body{
 
 
 
+
         
         
     </style>
@@ -2612,6 +2613,7 @@ body{
             return categoryName.trim();
         }
 
+
 function triggerAnimation() {
   const logo = document.getElementById("logo");
   const notification = document.getElementById("notification");
@@ -2624,19 +2626,22 @@ function triggerAnimation() {
     resultsContainer.classList.contains("visible") ||
     searchInput.value.trim().length > 0
   ) {
-    setTimeout(triggerAnimation, 150);
+    setTimeout(triggerAnimation, 180);
     return;
   }
 
   if (isAnimating) return;
   isAnimating = true;
 
-  // امنع أي تعارض/تراكم
   gsap.killTweensOf([logo, notification]);
   logo.style.animation = "none";
   notification.style.animation = "none";
 
-  // وضعيات ثابتة بالبداية
+  // مرة يمين/مرة يسار (عشوائي)
+  const dir = Math.random() < 0.5 ? -1 : 1;        // -1 يسار, 1 يمين
+  const outX = dir * 120;                          // مقدار الخروج
+  const inX  = -dir * 140;                         // يرجع من الجهة المقابلة
+
   gsap.set(logo, {
     x: 0, y: 0,
     scale: 1,
@@ -2645,12 +2650,7 @@ function triggerAnimation() {
     transformOrigin: "50% 50%"
   });
 
-  gsap.set(notification, {
-    opacity: 0,
-    scale: 0.92,
-    y: 8,
-    rotation: 0
-  });
+  gsap.set(notification, { opacity: 0, scale: 0.95, y: 10, rotation: 0 });
 
   const tl = gsap.timeline({
     onComplete: () => {
@@ -2659,23 +2659,20 @@ function triggerAnimation() {
     }
   });
 
-  // 1) micro-jiggle (بديل shake) بدون دوران
-  tl.to(logo, { x: -3, duration: 0.09, ease: "power1.inOut" })
-    .to(logo, { x:  3, duration: 0.09, ease: "power1.inOut" })
-    .to(logo, { x: -2, duration: 0.09, ease: "power1.inOut" })
-    .to(logo, { x:  2, duration: 0.09, ease: "power1.inOut" })
-    .to(logo, { x:  0, duration: 0.08, ease: "power1.out" });
+  // 1) pre-nudge (لمسة بسيطة قبل الخروج)
+  tl.to(logo, { x: dir * 8, duration: 0.12, ease: "power2.out" })
+    .to(logo, { x: 0, duration: 0.12, ease: "power2.inOut" });
 
-  // 2) pop-out (بديل الانفجار) — بدون blur وبدون دوران
+  // 2) slide-out (اختفاء يمين/يسار)
   tl.to(logo, {
-    scale: 1.6,
+    x: outX,
     opacity: 0,
-    y: -6,
+    scale: 0.92,
     duration: 0.55,
-    ease: "power3.out"
-  }, "+=0.08");
+    ease: "power3.in"
+  }, "+=0.05");
 
-  // 3) show notification
+  // 3) notification show
   tl.add(() => {
     const randomNotification = notifications[Math.floor(Math.random() * notifications.length)];
     notificationText.textContent = randomNotification;
@@ -2688,17 +2685,17 @@ function triggerAnimation() {
     y: 0,
     duration: 0.28,
     ease: "power2.out"
-  }, "+=0.05");
+  }, "+=0.06");
 
-  // 4) خلي الإشعار يبقى
+  // 4) hold
   tl.to({}, { duration: 2.0 });
 
-  // 5) hide notification (بدون دوران)
+  // 5) notification hide
   tl.to(notification, {
     opacity: 0,
-    scale: 0.90,
-    y: 10,
-    duration: 0.45,
+    scale: 0.92,
+    y: 12,
+    duration: 0.42,
     ease: "power2.inOut",
     onComplete: () => {
       notification.classList.remove("show");
@@ -2706,29 +2703,31 @@ function triggerAnimation() {
     }
   });
 
-  // 6) logo comeback (Premium pop + bounce + float) بدون دوران
+  // 6) logo come back from opposite side (بشكل احترافي)
   tl.set(logo, {
-    scale: 0.60,
+    x: inX,
     opacity: 0,
-    y: 12,
+    scale: 0.92,
     rotation: 0
   }, "+=0.10");
 
   tl.to(logo, {
-    scale: 1,
+    x: 0,
     opacity: 1,
-    y: 0,
-    duration: 0.85,
-    ease: "elastic.out(1, 0.55)"  // هذا يعطيك رجعة “حلوة مدفوعة”
+    scale: 1,
+    duration: 0.75,
+    ease: "power3.out"
   });
 
-  // 7) float subtle (لمسة فخمة قصيرة)
-  tl.to(logo, { y: -3, duration: 0.55, ease: "sine.inOut" })
-    .to(logo, { y:  0, duration: 0.55, ease: "sine.inOut" });
+  // 7) subtle settle (تثبيت ناعم)
+  tl.to(logo, { y: -2, duration: 0.18, ease: "power2.out" })
+    .to(logo, { y: 0, duration: 0.22, ease: "power2.inOut" });
 
-  // 8) pause صغيرة قبل الإعادة
-  tl.to({}, { duration: 0.45 });
+  // pause
+  tl.to({}, { duration: 0.55 });
 }
+
+
 
 
 
@@ -2792,12 +2791,18 @@ function triggerAnimation() {
     confirmButtonText: 'تمام',
     allowOutsideClick: true,
     allowEscapeKey: true,
-    customClass: {
-      popup: 'swal2-popup activation-popup pro-popup',
-      title: 'swal2-title',
-      htmlContainer: 'swal2-html-container',
-      confirmButton: 'swal2-confirm'
-    }
+    
+    
+   customClass: {
+  container: 'pro-refresh-container',   // ✅ نفس طبقة الظلال مال refresh
+  popup: 'swal2-popup activation-popup pro-popup',
+  title: 'swal2-title',
+  htmlContainer: 'swal2-html-container',
+  confirmButton: 'swal2-confirm'
+}
+
+    
+    
   }).then(() => {
     triggerAnimation();
   });
@@ -2872,12 +2877,17 @@ function triggerAnimation() {
     confirmButtonText: 'موافق',
     allowOutsideClick: true,
     allowEscapeKey: true,
+    
+    
     customClass: {
-      popup: 'swal2-popup activation-popup pro-popup',
-      title: 'swal2-title',
-      htmlContainer: 'swal2-html-container',
-      confirmButton: 'swal2-confirm'
-    }
+  container: 'pro-refresh-container',   // ✅ نفس طبقة الظلال مال refresh
+  popup: 'swal2-popup activation-popup pro-popup',
+  title: 'swal2-title',
+  htmlContainer: 'swal2-html-container',
+  confirmButton: 'swal2-confirm'
+}
+
+    
   }).then(() => {
     triggerAnimation();
   });
