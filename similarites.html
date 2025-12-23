@@ -2743,6 +2743,31 @@ body{
 .login-popup .swal2-actions button{ margin: 0 !important; }
 
 
+/* يمنع وميض/رعشة الفوكس بالموبايل */
+.login-popup .swal2-input.login-input{
+  font-size: 16px !important;              /* أهم شي (خصوصاً iOS) */
+  -webkit-text-size-adjust: 100%;
+  outline: none !important;
+  transition: border-color .15s ease, box-shadow .15s ease;
+  transform: translateZ(0);                /* يقلل repaint */
+  will-change: transform;
+}
+
+/* فوكس أنيق بدون ومضة */
+.login-popup .swal2-input.login-input:focus{
+  border-color: rgba(45,212,191,.35) !important;
+  box-shadow: 0 0 0 3px rgba(45,212,191,.14) !important;
+}
+
+/* يقلل الوميض بسبب blur/backdrop-filter */
+.pro-refresh-container{
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+
+
 
 
         
