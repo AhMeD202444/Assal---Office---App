@@ -2948,7 +2948,7 @@ function triggerAnimation() {
       </div>
     `,
     showCloseButton: true,
-    confirmButtonText: 'موافق',
+    showConfirmButton: false,
     allowOutsideClick: true,
     allowEscapeKey: true,
     
@@ -2958,7 +2958,7 @@ function triggerAnimation() {
  popup: 'swal2-popup activation-popup pro-popup stats-popup',
   title: 'swal2-title',
   htmlContainer: 'swal2-html-container',
-  confirmButton: 'swal2-confirm'
+  
 }
 
     
@@ -3756,6 +3756,13 @@ async function refreshData() {
     triggerAnimation();
     displayNewSimilarities();
 
+    // ✅ تعديل: ريفريش فعلي للصفحة (Hard Reload)
+    setTimeout(() => {
+      const url = new URL(window.location.href);
+      url.searchParams.set('_r', Date.now());
+      window.location.replace(url.toString());
+    }, 250);
+
   } catch (error) {
     Swal.close();
 
@@ -3777,6 +3784,7 @@ async function refreshData() {
     triggerAnimation();
   }
 }
+
 
 
 
