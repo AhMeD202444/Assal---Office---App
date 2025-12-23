@@ -2794,6 +2794,91 @@ body{
   50%{ transform: translateX(-50%) translateY(-2px) scale(1.03); opacity: .95; }
 }
 
+/* ===== FINAL: Top circle badge EXACTLY centered ===== */
+.login-popup{
+  position: relative !important;
+  overflow: visible !important;
+  padding-top: 70px !important; /* مساحة للدائرة الفوك */
+}
+
+.login-popup .swal2-html-container{
+  overflow: visible !important;
+}
+
+/* الدائرة الفوك نفسها */
+.login-popup .login-top-badge{
+  position: absolute !important;
+  top: 16px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+
+  width: 86px !important;
+  height: 86px !important;
+  border-radius: 999px !important;
+
+  display: grid !important;
+  place-items: center !important;
+
+  background: linear-gradient(135deg, rgba(10,14,26,.98), rgba(14,22,40,.92)) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  box-shadow: 0 26px 70px rgba(0,0,0,.65) !important;
+
+  z-index: 50 !important;
+  isolation: isolate;
+}
+
+/* الحلقة الدوّارة حول الدائرة */
+.login-popup .login-top-badge::before{
+  content:"";
+  position:absolute;
+  inset:-4px;
+  border-radius: 999px;
+  background: conic-gradient(
+    rgba(45,212,191,.95),
+    rgba(70,179,255,.90),
+    rgba(255,215,0,.85),
+    rgba(45,212,191,.95)
+  );
+  animation: loginTopSpin 1.05s linear infinite;
+  z-index: -1;
+}
+
+/* لمعان داخلي خفيف */
+.login-popup .login-top-badge::after{
+  content:"";
+  position:absolute;
+  inset: 7px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.10), rgba(255,255,255,.03) 55%, rgba(0,0,0,.10));
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+  z-index: 0;
+}
+
+@keyframes loginTopSpin{ to{ transform: rotate(360deg); } }
+
+/* القفل بالنص */
+.login-popup .login-top-badge i{
+  position: relative;
+  z-index: 2;
+  font-size: 22px;
+  color: rgba(233,238,252,.96);
+  text-shadow: 0 10px 22px rgba(0,0,0,.45);
+  animation: lockPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes lockPulse{
+  0%,100%{ transform: translateY(0) scale(1); opacity: 1; }
+  50%{ transform: translateY(-2px) scale(1.03); opacity: .95; }
+}
+
+/* خلّي العنوان مرتب تحت الدائرة */
+.login-popup .swal2-title{
+  text-align: center !important;
+  margin-top: 6px !important;
+}
+
+
 
 
 
@@ -3571,10 +3656,8 @@ async function showPasswordPrompt() {
         </div>
       </div>
     `,
-
     icon: undefined,
     iconHtml: '<i class="fas fa-shield-halved"></i>',
-
     input: 'password',
     inputPlaceholder: 'كلمة المرور',
     inputAttributes: {
@@ -3583,24 +3666,20 @@ async function showPasswordPrompt() {
       autocorrect: 'off',
       inputmode: 'text'
     },
-
     showCancelButton: true,
     confirmButtonText: 'دخول',
     cancelButtonText: 'إغلاق',
-
     allowOutsideClick: false,
     allowEscapeKey: false,
-
     customClass: {
       container: 'pro-refresh-container',
       popup: 'swal2-popup activation-popup pro-popup login-popup',
-     title: 'swal2-title login-title',
+      title: 'swal2-title',
       htmlContainer: 'swal2-html-container',
       input: 'login-input',
       confirmButton: 'login-confirm',
       cancelButton: 'login-cancel'
     },
-
     didOpen: () => {
       const input = Swal.getInput();
       if (input) {
@@ -3609,7 +3688,6 @@ async function showPasswordPrompt() {
         }, 60);
       }
     },
-
     preConfirm: () => {
       const v = (Swal.getInput()?.value || '').trim();
       if (!v) {
@@ -3622,6 +3700,7 @@ async function showPasswordPrompt() {
 
   return password;
 }
+
 
 
 
