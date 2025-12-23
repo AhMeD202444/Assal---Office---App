@@ -19,10 +19,10 @@
     <!-- Firebase SDK (Local files) -->
     
     
-    
-   <script src="firebase-app.js"></script>
-<script src="firebase-firestore.js"></script>
-<script src="firebase-analytics.js"></script>
+   <!-- Firebase OFF (DEV) -->
+<!-- <script src="firebase-app.js"></script> -->
+<!-- <script src="firebase-firestore.js"></script> -->
+<!-- <script src="firebase-analytics.js"></script> -->
 
     
     
@@ -2901,7 +2901,7 @@ body{
     <script>
       
       
-      const DEV_NO_FIREBASE = false; // ✅ خليها true بس وقت التجربة
+      const DEV_NO_FIREBASE = true; // ✅ خليها true بس وقت التجربة
       
       
       
@@ -3236,18 +3236,20 @@ function triggerAnimation() {
             try {
                 if (!dropboxSimilaritesFile) {
                     console.error("رابط ملف Excel غير معرف.");
-                    Swal.fire({
-                        title: 'خطأ',
-                        html: '<p style="color: #ff4d4d;">رابط ملف Excel غير معرف. يرجى التحقق من الاتصال.</p>',
-                        iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                        confirmButtonText: 'موافق',
-                        customClass: {
-                            popup: 'swal2-popup',
-                            title: 'swal2-title',
-                            htmlContainer: 'swal2-html-container',
-                            confirmButton: 'swal2-confirm'
-                        }
-                    });
+                
+                fireLoginStyle({
+  title: 'خطأ',
+  html: '<p style="color:#ff4d4d;">رابط ملف Excel غير معرف. يرجى التحقق من الاتصال.</p>',
+  icon: 'info',
+  iconHtml: '<i class="fas fa-link-slash"></i>',
+  confirmButtonText: 'موافق',
+  customClass: {
+    confirmButton: 'login-confirm danger'
+  }
+});
+
+                
+                
                     return { success: false, hasData: false, message: "رابط ملف Excel غير معرف." };
                 }
 
@@ -3255,18 +3257,20 @@ function triggerAnimation() {
                 const response = await fetch(dropboxSimilaritesFile, { cache: 'no-store' });
                 if (!response.ok) {
                     console.error(`فشل تحميل ملف Excel: ${response.status} ${response.statusText}`);
-                    Swal.fire({
-                        title: 'خطأ في التحميل',
-                        html: `<p style="color: #ff4d4d;">فشل تحميل البيانات: ${response.status} - ${response.statusText}</p>`,
-                        iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                        confirmButtonText: 'موافق',
-                        customClass: {
-                            popup: 'swal2-popup',
-                            title: 'swal2-title',
-                            htmlContainer: 'swal2-html-container',
-                            confirmButton: 'swal2-confirm'
-                        }
-                    });
+                  
+                  fireLoginStyle({
+  title: 'خطأ في التحميل',
+  html: `<p style="color:#ff4d4d;">فشل تحميل البيانات: ${response.status} - ${response.statusText}</p>`,
+  icon: 'info',
+  iconHtml: '<i class="fas fa-cloud-arrow-down"></i>',
+  confirmButtonText: 'موافق',
+  customClass: {
+    confirmButton: 'login-confirm danger'
+  }
+});
+
+                  
+                  
                     return { success: false, hasData: false, message: `فشل تحميل ملف Excel: ${response.status}` };
                 }
 
@@ -3283,36 +3287,40 @@ function triggerAnimation() {
 
                 if (database.SIMILARITES.length === 0) {
                    console.warn("لا توجد بيانات في ورقة SIMILARITES");
-                Swal.fire({
-                    title: 'خطأ',
-                    html: '<p style="color: #ff4d4d;">ملف Excel لا يحتوي على بيانات صالحة.</p>',
-                    iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                    confirmButtonText: 'موافق',
-                    customClass: {
-                        popup: 'swal2-popup',
-                        title: 'swal2-title',
-                        htmlContainer: 'swal2-html-container',
-                        confirmButton: 'swal2-confirm'
-                    }
-                });
+             
+             fireLoginStyle({
+  title: 'خطأ',
+  html: '<p style="color:#ff4d4d;">ملف Excel لا يحتوي على بيانات صالحة.</p>',
+  icon: 'info',
+  iconHtml: '<i class="fas fa-triangle-exclamation"></i>',
+  showConfirmButton: true,
+  confirmButtonText: 'موافق',
+  showCancelButton: true,
+  cancelButtonText: 'إغلاق',
+  customClass: {
+    confirmButton: 'login-confirm danger'
+  }
+});
+
+             
+             
                 return { success: false, hasData: false, message: "ملف Excel لا يحتوي على بيانات صالحة." };
             }
 
             return { success: true, hasData: true };
         } catch (error) {
             console.error("خطأ في تحميل ملف Excel:", error.message, error.stack);
-            Swal.fire({
-                title: 'خطأ',
-                html: `<p style="color: #ff4d4d;">حدث خطأ أثناء تحميل البيانات: ${error.message}</p>`,
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
+           fireLoginStyle({
+  title: 'خطأ',
+  html: `<p style="color:#ff4d4d;">حدث خطأ أثناء تحميل البيانات: ${error.message}</p>`,
+  icon: 'info',
+  iconHtml: '<i class="fas fa-bug"></i>',
+  confirmButtonText: 'موافق',
+  customClass: {
+    confirmButton: 'login-confirm danger'
+  }
+});
+
             return { success: false, hasData: false, message: error.message };
         }
     }
@@ -3433,18 +3441,22 @@ function triggerAnimation() {
             }
         } catch (error) {
             console.error("Error in openModal:", error);
-            Swal.fire({
-                title: 'خطأ',
-                html: `<p style="color: #ff4d4d;">حدث خطأ أثناء فتح النافذة: ${error.message}</p>`,
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
+          
+          fireLoginStyle({
+  title: 'خطأ',
+  html: `<p style="color:#ff4d4d;">حدث خطأ أثناء فتح النافذة: ${error.message}</p>`,
+  icon: 'info',
+  iconHtml: '<i class="fas fa-window-restore"></i>',
+  showConfirmButton: true,
+  confirmButtonText: 'موافق',
+  showCancelButton: true,
+  cancelButtonText: 'إغلاق',
+  customClass: {
+    confirmButton: 'login-confirm danger'
+  }
+});
+
+          
         }
     }
 
@@ -3459,18 +3471,22 @@ function triggerAnimation() {
         } catch (error) {
             console.error("Error in closeNewItemsModal:", error);
             isModalOpen = false;
-            Swal.fire({
-                title: 'خطأ',
-                html: `<p style="color: #ff4d4d;">حدث خطأ أثناء إغلاق النافذة: ${error.message}</p>`,
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
+        
+        fireLoginStyle({
+  title: 'خطأ',
+  html: `<p style="color:#ff4d4d;">حدث خطأ أثناء إغلاق النافذة: ${error.message}</p>`,
+  icon: 'info',
+  iconHtml: '<i class="fas fa-window-close"></i>',
+  showConfirmButton: true,
+  confirmButtonText: 'موافق',
+  showCancelButton: true,
+  cancelButtonText: 'إغلاق',
+  customClass: {
+    confirmButton: 'login-confirm danger'
+  }
+});
+
+        
         }
     }
 
@@ -3754,62 +3770,79 @@ async function verifyPassword(password, db) {
     }
 
     // ❌ مستخدمة بجهاز ثاني
-    await Swal.fire({
-      title: 'خطأ',
-      html: `
-        <div class="pro-dialog login-dialog">
-          <div class="pro-hero">
-            <div class="pro-hero-icon" style="background:linear-gradient(135deg, rgba(220,20,60,.25), rgba(139,0,0,.18));">
-              <i class="fas fa-triangle-exclamation"></i>
-            </div>
-            <div class="pro-hero-text">
-              <div class="pro-hero-title">غير مسموح</div>
-              <div class="pro-hero-sub">كلمة المرور مستخدمة على جهاز آخر!</div>
-            </div>
-          </div>
+  await fireLoginStyle({
+  html: `
+    <div class="pro-dialog login-dialog">
+      <div class="pro-hero">
+        <div class="pro-hero-icon" style="background:linear-gradient(135deg, rgba(220,20,60,.25), rgba(139,0,0,.18));">
+          <i class="fas fa-triangle-exclamation"></i>
         </div>
-      `,
-      showConfirmButton: true,
-      confirmButtonText: 'حاول مرة أخرى',
-      timer: 3200,
-      timerProgressBar: true,
-      allowOutsideClick: false,
-      allowEscapeKey: true,
-      customClass: {
-        container: 'pro-refresh-container',
-        popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
-        title: 'swal2-title',
-        htmlContainer: 'swal2-html-container',
-        confirmButton: 'login-confirm danger'
-      }
-    });
+        <div class="pro-hero-text">
+          <div class="pro-hero-title">غير مسموح</div>
+          <div class="pro-hero-sub">كلمة المرور مستخدمة على جهاز آخر!</div>
+        </div>
+      </div>
+    </div>
+  `,
+  showConfirmButton: true,
+  confirmButtonText: 'حاول مرة أخرى',
+  timer: 3200,
+  timerProgressBar: true,
+  allowOutsideClick: false,
+  allowEscapeKey: true,
+  customClass: {
+    popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
+    confirmButton: 'login-confirm danger'
+  }
+});
+
 
     triggerAnimation();
     return false;
 
   } catch (error) {
-    await Swal.fire({
-      title: 'خطأ',
-      text: error.message.includes('offline')
-        ? 'أنت غير متصل بالإنترنت. يرجى التحقق من الاتصال.'
-        : 'حدث خطأ: ' + error.message,
-      showConfirmButton: true,
-      confirmButtonText: 'حاول مرة أخرى',
-      allowOutsideClick: false,
-      allowEscapeKey: true,
-      customClass: {
-        container: 'pro-refresh-container',
-        popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
-        title: 'swal2-title',
-        htmlContainer: 'swal2-html-container',
-        confirmButton: 'login-confirm danger'
-      }
-    });
+    await fireLoginStyle({
+  title: 'خطأ',
+  text: error.message.includes('offline')
+    ? 'أنت غير متصل بالإنترنت. يرجى التحقق من الاتصال.'
+    : 'حدث خطأ: ' + error.message,
+  icon: 'info',
+  iconHtml: error.message.includes('offline')
+    ? '<i class="fas fa-wifi-slash"></i>'
+    : '<i class="fas fa-triangle-exclamation"></i>',
+  showConfirmButton: true,
+  confirmButtonText: 'حاول مرة أخرى',
+  allowOutsideClick: false,
+  allowEscapeKey: true,
+  customClass: {
+    popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
+    confirmButton: 'login-confirm danger'
+  }
+});
+
 
     triggerAnimation();
     return false;
   }
 }
+
+
+
+function fireLoginStyle(opts = {}) {
+  const baseCustomClass = {
+    container: 'pro-refresh-container',
+    popup: 'swal2-popup activation-popup pro-popup login-popup',
+    title: 'swal2-title',
+    htmlContainer: 'swal2-html-container',
+    icon: 'login-top-icon',
+    confirmButton: 'login-confirm',
+    cancelButton: 'login-cancel'
+  };
+
+  const mergedCustomClass = { ...baseCustomClass, ...(opts.customClass || {}) };
+  return Swal.fire({ ...opts, customClass: mergedCustomClass });
+}
+
 
 
  window.onload = async function() {
@@ -3841,20 +3874,19 @@ async function verifyPassword(password, db) {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
         } catch (error) {
-            await Swal.fire({
-                icon: 'error',
-                title: 'خطأ',
-                text: 'فشل في تهيئة قاعدة البيانات: ' + error.message,
-                confirmButtonText: 'موافق',
-                allowOutsideClick: true,
-                allowEscapeKey: true,
-                customClass: {
-                    popup: 'swal2-popup activation-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
+            await fireLoginStyle({
+  title: 'خطأ',
+  text: 'فشل في تهيئة قاعدة البيانات: ' + error.message,
+  icon: 'info',
+  iconHtml: '<i class="fas fa-database"></i>',
+  confirmButtonText: 'موافق',
+  allowOutsideClick: true,
+  allowEscapeKey: true,
+  customClass: {
+    confirmButton: 'login-confirm danger'
+  }
+});
+
             window.location.href = 'index.html';
             return;
         }
@@ -3928,29 +3960,29 @@ async function verifyPassword(password, db) {
         const resultsContainer = document.getElementById("resultsContainer");
 
         if (!searchInput && !currentCategory) {
-            Swal.fire({
-                title: 'حقل فارغ',
-                text: 'يرجى اختيار صنف أو كتابة اسم العنصر قبل البحث',
-                icon: 'warning',
-                showConfirmButton: true,
-                confirmButtonText: 'موافق',
-                showCancelButton: true,
-                cancelButtonText: 'إغلاق',
-                allowOutsideClick: true,
-                allowEscapeKey: true,
-                customClass: {
-                    popup: 'swal2-popup activation-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm',
-                    cancelButton: 'swal2-cancel'
-                }
-            }).then(() => {
-                triggerAnimation();
-            });
-            resultsContainer.classList.remove('visible');
-            return;
-        }
+  fireLoginStyle({
+    title: 'حقل فارغ',
+    text: 'يرجى اختيار صنف أو كتابة اسم العنصر قبل البحث',
+    icon: 'info',
+    iconHtml: '<i class="fas fa-triangle-exclamation"></i>',
+    showConfirmButton: true,
+    confirmButtonText: 'موافق',
+    showCancelButton: true,
+    cancelButtonText: 'إغلاق',
+    allowOutsideClick: true,
+    allowEscapeKey: true,
+    customClass: {
+      confirmButton: 'login-confirm',
+      cancelButton: 'login-cancel'
+    }
+  }).then(() => {
+    triggerAnimation();
+  });
+
+  resultsContainer.classList.remove('visible');
+  return;
+}
+
 
         let results = database.SIMILARITES || [];
         if (currentCategory && currentCategory !== 'all') {
@@ -3961,30 +3993,30 @@ async function verifyPassword(password, db) {
             results = results.filter(item => normalizeString(item["Item"]).includes(query));
         }
 
-        if (results.length === 0) {
-            Swal.fire({
-                title: 'لا توجد نتائج',
-                text: 'ماكو توافقات بهذا الاسم أو الصنف',
-                icon: 'info',
-                showConfirmButton: true,
-                confirmButtonText: 'موافق',
-                showCancelButton: true,
-                cancelButtonText: 'إغلاق',
-                allowOutsideClick: true,
-                allowEscapeKey: true,
-                customClass: {
-                    popup: 'swal2-popup activation-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm',
-                    cancelButton: 'swal2-cancel'
-                }
-            }).then(() => {
-                triggerAnimation();
-            });
-            resultsContainer.classList.remove('visible');
-            return;
-        }
+       if (results.length === 0) {
+  fireLoginStyle({
+    title: 'لا توجد نتائج',
+    text: 'ماكو توافقات بهذا الاسم أو الصنف',
+    icon: 'info',
+    iconHtml: '<i class="fas fa-magnifying-glass"></i>',
+    showConfirmButton: true,
+    confirmButtonText: 'موافق',
+    showCancelButton: true,
+    cancelButtonText: 'إغلاق',
+    allowOutsideClick: true,
+    allowEscapeKey: true,
+    customClass: {
+      confirmButton: 'login-confirm',
+      cancelButton: 'login-cancel'
+    }
+  }).then(() => {
+    triggerAnimation();
+  });
+
+  resultsContainer.classList.remove('visible');
+  return;
+}
+
 
         stats.searches++;
         localStorage.setItem('stats', JSON.stringify(stats));
@@ -4189,20 +4221,19 @@ async function refreshData() {
   } catch (error) {
     Swal.close();
 
-    await Swal.fire({
-      title: 'خطأ',
-      text: 'حدث خطأ أثناء التحديث',
-      icon: 'error',
-      confirmButtonText: 'موافق',
-      allowOutsideClick: true,
-      allowEscapeKey: true,
-      customClass: {
-        popup: 'swal2-popup activation-popup',
-        title: 'swal2-title',
-        htmlContainer: 'swal2-html-container',
-        confirmButton: 'swal2-confirm'
-      }
-    });
+  await fireLoginStyle({
+  title: 'خطأ',
+  text: 'حدث خطأ أثناء التحديث',
+  icon: 'info',
+  iconHtml: '<i class="fas fa-arrows-rotate"></i>',
+  confirmButtonText: 'موافق',
+  allowOutsideClick: true,
+  allowEscapeKey: true,
+  customClass: {
+    confirmButton: 'login-confirm danger'
+  }
+});
+
 
     triggerAnimation();
   }
