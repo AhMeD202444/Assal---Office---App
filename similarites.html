@@ -165,11 +165,13 @@
             75% { transform: translate(-4px, 4px) rotate(-3deg); }
         }
 
-        @keyframes explode {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.6); opacity: 0.7; filter: blur(3px); }
-            100% { transform: scale(2); opacity: 0; filter: blur(6px); }
-        }
+@keyframes explode {
+  0%   { transform: scale(1);   opacity: 1; }
+  60%  { transform: scale(1.65); opacity: .55; }
+  100% { transform: scale(2);   opacity: 0; }
+}
+
+
 
         @keyframes screenPop {
             0% { transform: scale(0) rotate(0deg); opacity: 0; box-shadow: none; }
@@ -2111,6 +2113,271 @@ button, a, .header-btn, .category, .category-btn, .new-category-btn, .search-con
   -webkit-touch-callout: none;
 }
 
+/* =========================
+   PRO Refresh – Premium Loader (No Scroll / Centered)
+   ========================= */
+
+/* Center + full-screen premium blur */
+.pro-refresh-container.swal2-container{
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  z-index: 99999 !important;
+
+  background: rgba(0,0,0,.62) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(135%) !important;
+  backdrop-filter: blur(14px) saturate(135%) !important;
+}
+
+/* Big popup, no scroll anywhere */
+.pro-refresh-popup.swal2-popup,
+.pro-success-popup.swal2-popup{
+  width: min(92vw, 520px) !important;
+  min-height: auto !important;
+  margin: 0 !important;
+  padding: 22px !important;
+  border-radius: 22px !important;
+
+  background: linear-gradient(135deg, rgba(10,14,26,.98), rgba(14,22,40,.90)) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: 0 34px 110px rgba(0,0,0,.78) !important;
+
+  overflow: hidden !important; /* يمنع أي شي يطلع ويسبب سكرول */
+}
+
+/* SweetAlert html container: امنع سكرول الافتراضي */
+.pro-refresh-popup .swal2-html-container,
+.pro-success-popup .swal2-html-container{
+  margin: 0 !important;
+  padding: 0 !important;
+  max-height: none !important;
+  overflow: hidden !important;
+}
+
+/* ===== Loader UI ===== */
+.prx{
+  direction: rtl;
+  text-align: right;
+  color: rgba(233,238,252,.92);
+}
+
+.prx-frame{
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 18px;
+
+  background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 18px 48px rgba(0,0,0,.45);
+}
+
+/* Premium animated ring */
+.prx-ring{
+  width: 92px;
+  height: 92px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  isolation: isolate;
+
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.18), 0 16px 40px rgba(0,0,0,.45);
+}
+.prx-ring::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius: 24px;
+  background: conic-gradient(from 0deg,
+    rgba(70,179,255,.95),
+    rgba(45,212,191,.90),
+    rgba(255,77,109,.78),
+    rgba(70,179,255,.95)
+  );
+  filter: blur(.2px);
+  z-index:-1;
+  animation: prxSpin 1.15s linear infinite;
+}
+.prx-ring::after{
+  content:"";
+  position:absolute;
+  inset: 8px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(10,14,26,.96), rgba(14,22,40,.86));
+  border: 1px solid rgba(255,255,255,.08);
+}
+@keyframes prxSpin{ to{ transform: rotate(360deg); } }
+
+.prx-ring i{
+  font-size: 22px;
+  color: rgba(233,238,252,.92);
+  z-index: 2;
+}
+
+.prx-title{
+  font-weight: 900;
+  letter-spacing: .2px;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+.prx-sub{
+  font-size: 12px;
+  color: rgba(233,238,252,.68);
+  line-height: 1.5;
+}
+
+/* Progress bar (premium) */
+.prx-bar{
+  margin-top: 12px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.12);
+}
+.prx-bar > span{
+  display:block;
+  height:100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(70,179,255,.95), rgba(45,212,191,.85));
+  transition: width .35s ease;
+  position: relative;
+}
+.prx-bar > span::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.20), transparent);
+  transform: translateX(-100%);
+  animation: prxShimmer 1.0s linear infinite;
+}
+@keyframes prxShimmer{ to{ transform: translateX(100%); } }
+
+.prx-meta{
+  margin-top: 10px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(233,238,252,.70);
+}
+.prx-meta b{
+  color: rgba(233,238,252,.92);
+  font-weight: 900;
+}
+
+/* ===== Success UI (auto-close) ===== */
+.prx-done{
+  direction: rtl;
+  text-align: right;
+  padding: 16px;
+  border-radius: 18px;
+
+  background: linear-gradient(135deg, rgba(45,212,191,.14), rgba(255,255,255,.03));
+  border: 1px solid rgba(45,212,191,.22);
+  box-shadow: 0 18px 48px rgba(0,0,0,.45);
+
+  display:flex;
+  gap: 14px;
+  align-items:center;
+}
+
+.prx-done i{
+  font-size: 26px;
+  color: rgba(45,212,191,.95);
+  filter: drop-shadow(0 12px 22px rgba(0,0,0,.35));
+}
+.prx-done h3{
+  margin: 0;
+  font-size: 15px;
+  font-weight: 900;
+}
+.prx-done p{
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: rgba(233,238,252,.70);
+  line-height: 1.6;
+}
+
+
+
+/* ===== App Bars: Header = Footer + Premium Footer + Cairo ===== */
+:root{
+  --appbar-h: 44px; /* نفس الارتفاع للهيدر والفوتر */
+}
+
+/* خط عالمي */
+body, button, input, textarea, select{
+  font-family: 'Cairo', sans-serif !important;
+}
+
+/* Header same height as footer */
+.header{
+  height: var(--appbar-h) !important;
+  padding: 0 14px !important;     /* بدل 0 12 */
+}
+
+/* Footer premium (أنيق) + نفس الارتفاع */
+footer{
+  height: var(--appbar-h) !important;
+  padding: 0 !important;          /* يلغي padding:10px 0 القديم :contentReference[oaicite:2]{index=2} */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  font-family: 'Cairo', sans-serif !important; /* بدل Montserrat :contentReference[oaicite:3]{index=3} */
+  font-size: 13px !important;
+
+  background: rgba(0,0,0,.62) !important;
+  border-top: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: 0 -14px 40px rgba(0,0,0,.55) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(130%) !important;
+  backdrop-filter: blur(10px) saturate(130%) !important;
+}
+
+footer p{
+  margin: 0 !important;
+  padding: 0 !important;          /* يلغي padding:3px 0 :contentReference[oaicite:4]{index=4} */
+  color: rgba(233,238,252,.88) !important;
+  letter-spacing: .2px;
+}
+
+/* (اختياري) حتى المحتوى ما يروح تحت الهيدر/الفوتر */
+body{
+  padding-top: var(--appbar-h);
+  padding-bottom: var(--appbar-h);
+}
+
+.logo-container,
+.logo-container img,
+.notification,
+.notification::before{
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  contain: paint;
+}
+
+.logo-container, .notification{
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  contain: paint;
+}
+
+
 
 
 
@@ -2283,65 +2550,83 @@ button, a, .header-btn, .category, .category-btn, .new-category-btn, .search-con
             return categoryName.trim();
         }
 
-        function triggerAnimation() {
-            const logo = document.getElementById("logo");
-            const notification = document.getElementById("notification");
-            const notificationText = document.getElementById("notification-text");
-            const resultsContainer = document.getElementById("resultsContainer");
+function triggerAnimation() {
+  const logo = document.getElementById("logo");
+  const notification = document.getElementById("notification");
+  const notificationText = document.getElementById("notification-text");
+  const resultsContainer = document.getElementById("resultsContainer");
+  const searchInput = document.getElementById("searchInput");
 
-            if (!logo || !notification || !notificationText || resultsContainer.classList.contains('visible') || isAnimating) {
-                setTimeout(triggerAnimation, 100);
-                return;
-            }
+  // إذا النتائج ظاهرة أو المستخدم كاتب بالبحث أو حاليا انيميشن شغّال => نأخر
+  if (
+    !logo || !notification || !notificationText || !resultsContainer || !searchInput ||
+    resultsContainer.classList.contains("visible") ||
+    searchInput.value.trim().length > 0 ||
+    isAnimating
+  ) {
+    setTimeout(triggerAnimation, 100);
+    return;
+  }
 
-            isAnimating = true;
+  isAnimating = true;
 
-            logo.style.animation = "shake 0.5s ease-in-out";
-            setTimeout(() => {
-                logo.style.animation = "none";
-            }, 500);
+  // اهتزاز اللوغو
+  logo.style.animation = "shake 0.5s ease-in-out";
+  setTimeout(() => {
+    logo.style.animation = "none";
+  }, 500);
 
-            setTimeout(() => {
-                logo.style.animation = "explode 0.5s ease-out";
-                logo.style.opacity = "0";
-            }, 800);
+  // انفجار اللوغو واختفاءه
+  setTimeout(() => {
+    logo.style.animation = "explode 0.5s ease-out";
+    logo.style.opacity = "0";
+  }, 800);
 
-            setTimeout(() => {
-                const randomNotification = notifications[Math.floor(Math.random() * notifications.length)];
-                notificationText.textContent = randomNotification;
-                notification.classList.add("show");
-            }, 1300);
+  // عرض الإشعار
+  setTimeout(() => {
+    const randomNotification = notifications[Math.floor(Math.random() * notifications.length)];
+    notificationText.textContent = randomNotification;
+    notification.classList.add("show");
+  }, 1300);
 
-            setTimeout(() => {
-                notification.classList.remove("show");
-                gsap.to(notification, {
-                    scale: 0.8,
-                    opacity: 0,
-                    rotation: 180,
-                    duration: 0.8,
-                    ease: "power2.inOut",
-                    onComplete: () => {
-                        notification.style.transform = "scale(0)";
-                    }
-                });
-            }, 5000);
+  // اختفاء الإشعار (GSAP)
+  setTimeout(() => {
+    notification.classList.remove("show");
+    gsap.to(notification, {
+      scale: 0.8,
+      opacity: 0,
+      rotation: 180,
+      duration: 0.8,
+      ease: "power2.inOut",
+      onComplete: () => {
+        notification.style.transform = "scale(0)";
+      }
+    });
+  }, 5000);
 
-            setTimeout(() => {
-                gsap.set(logo, { scale: 0, opacity: 0, rotation: 0 });
-                gsap.to(logo, {
-                    scale: 1,
-                    opacity: 1,
-                    rotation: 360,
-                    duration: 1.5,
-                    ease: "power2.out"
-                });
-            }, 6000);
+  // رجوع اللوغو (بدون دوران) + Bounce
+  setTimeout(() => {
+    logo.style.animation = "none";
+    gsap.set(logo, { scale: 0, opacity: 0 }); // ماكو rotation
+    gsap.to(logo, {
+      scale: 1,
+      opacity: 1,
+      duration: 1.2,
+      ease: "bounce.out"
+    });
+  }, 5800);
 
-            setTimeout(() => {
-                isAnimating = false;
-                triggerAnimation();
-            }, 8500);
-        }
+  // إعادة الدورة
+ setTimeout(() => {
+  logo.style.animation = "explode 0.5s ease-out";
+  // لا تحط opacity هنا — الانيميشن نفسه ينزّلها
+}, 800);
+
+}
+
+
+
+
 
         function displayNewSimilarities() {
             loadNewItems(true);
@@ -3184,59 +3469,125 @@ button, a, .header-btn, .category, .category-btn, .new-category-btn, .search-con
         });
     }
 
-    async function refreshData() {
-        Swal.fire({
-            html: `
-                <div style="display: flex; flex-direction: column; align-items: center;">
-                    <div class="loading-circle"></div>
-                    <p style="margin-top: 20px; font-size: 18px; color: #dcdcdc;">جاري التحديث...</p>
-                </div>
-            `,
-            showConfirmButton: false,
-            allowOutsideClick: true,
-            allowEscapeKey: true,
-            customClass: {
-                popup: 'swal2-popup activation-popup'
-            }
-        });
+   
+   
+async function refreshData() {
+  let msgEl, stepEl, pctEl, barEl;
 
-        try {
-            await loadSimilaritesData();
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            await Swal.fire({
-                title: 'تم التحديث',
-                text: 'تم تحديث البيانات بنجاح',
-                icon: 'success',
-                confirmButtonText: 'موافق',
-                allowOutsideClick: true,
-                allowEscapeKey: true,
-                customClass: {
-                    popup: 'swal2-popup activation-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            triggerAnimation();
-            displayNewSimilarities();
-        } catch (error) {
-            await Swal.fire({
-                title: 'خطأ',
-                text: 'حدث خطأ أثناء التحديث',
-                icon: 'error',
-                confirmButtonText: 'موافق',
-                allowOutsideClick: true,
-                allowEscapeKey: true,
-                customClass: {
-                    popup: 'swal2-popup activation-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-            triggerAnimation();
-        }
+  const setP = (pct, msg, step) => {
+    if (barEl) barEl.style.width = Math.max(0, Math.min(100, pct)) + '%';
+    if (pctEl) pctEl.textContent = Math.round(pct) + '%';
+    if (msgEl && msg) msgEl.textContent = msg;
+    if (stepEl && step) stepEl.textContent = step;
+  };
+
+  // Loader – centered, no scroll, premium
+  Swal.fire({
+    html: `
+      <div class="prx">
+        <div class="prx-frame">
+          <div class="prx-ring">
+            <i class="fas fa-arrows-rotate"></i>
+          </div>
+
+          <div>
+            <div class="prx-title">تحديث البيانات</div>
+            <div class="prx-sub" id="prxMsg">تهيئة…</div>
+
+            <div class="prx-bar"><span id="prxBar"></span></div>
+
+            <div class="prx-meta">
+              <span id="prxStep">بدء</span>
+              <b id="prxPct">0%</b>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+    showConfirmButton: false,
+    showCloseButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    customClass: {
+      container: 'pro-refresh-container',
+      popup: 'pro-refresh-popup'
+    },
+    didOpen: () => {
+      msgEl = document.getElementById('prxMsg');
+      stepEl = document.getElementById('prxStep');
+      pctEl = document.getElementById('prxPct');
+      barEl = document.getElementById('prxBar');
+      setP(8, 'جاري تهيئة الاتصال…', 'تهيئة');
     }
+  });
+
+  try {
+    setP(22, 'جاري جلب آخر نسخة…', 'اتصال');
+    await new Promise(r => setTimeout(r, 800));
+
+    setP(55, 'جاري تحميل البيانات…', 'تحميل');
+    await loadSimilaritesData();
+
+    setP(88, 'جاري ترتيب وعرض النتائج…', 'معالجة');
+    await new Promise(r => setTimeout(r, 800));
+
+    setP(100, 'اكتمل ✅', 'تم');
+    await new Promise(r => setTimeout(r, 800));
+    Swal.close();
+
+    // Success – no button, auto close with timer
+    const ms = 1400;
+    await Swal.fire({
+      html: `
+        <div class="prx-done">
+          <i class="fas fa-check-circle"></i>
+          <div>
+            <h3>تم التحديث بنجاح</h3>
+            <p>سيتم الإغلاق تلقائياً خلال لحظات…</p>
+          </div>
+        </div>
+      `,
+      timer: ms,
+      timerProgressBar: true,
+      showConfirmButton: false,
+      showCloseButton: false,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      customClass: {
+        container: 'pro-refresh-container',
+        popup: 'pro-success-popup'
+      }
+    });
+
+    triggerAnimation();
+    displayNewSimilarities();
+
+  } catch (error) {
+    Swal.close();
+
+    await Swal.fire({
+      title: 'خطأ',
+      text: 'حدث خطأ أثناء التحديث',
+      icon: 'error',
+      confirmButtonText: 'موافق',
+      allowOutsideClick: true,
+      allowEscapeKey: true,
+      customClass: {
+        popup: 'swal2-popup activation-popup',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container',
+        confirmButton: 'swal2-confirm'
+      }
+    });
+
+    triggerAnimation();
+  }
+}
+
+
+
+   
+   
     </script>
 </body>
 </html>
