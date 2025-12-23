@@ -232,13 +232,13 @@
         }
 
         .header-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
         }
 
         .header-btn:active {
-            transform: translateY(0);
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+            transform: scale(0.95);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
         .refresh-btn {
@@ -260,9 +260,9 @@
         .notes-btn {
             background: linear-gradient(135deg, #4682B4, #20B2AA);
             position: relative;
-            padding-right: 0;
-            padding-left: 0;
-            }
+            padding-right: 24px;
+            padding-left: 10px;
+        }
 
         .notes-btn:hover {
             background: linear-gradient(135deg, #20B2AA, #4682B4);
@@ -768,9 +768,8 @@
         }
 
         .result-card button:hover {
-            transform: none;
-            filter: brightness(1.06);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.28);
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(70, 130, 180, 0.6);
         }
 
         /* Notes Drawer */
@@ -861,9 +860,8 @@
         }
 
         .notes-item button:hover {
-            transform: none;
-            filter: brightness(1.06);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.28);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 75, 75, 0.7);
         }
 
         /* Scroll to Top Button */
@@ -908,7 +906,7 @@
             text-align: center;
             padding: 10px 0;
             width: 100%;
-            font-family: 'Cairo', sans-serif;
+            font-family: 'Montserrat', sans-serif;
             font-size: 14px;
             box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.4);
             position: fixed;
@@ -1238,7 +1236,7 @@
             right: 15px;
             background: linear-gradient(45deg, #FF416C, #FF4B2B);
             border: none;
-            border-radius: 12px;
+            border-radius: 50%;
             width: 35px;
             height: 35px;
             display: flex;
@@ -1517,233 +1515,240 @@
             }
         }
     
-        /* ===== Global Pro UI tweaks (overlay + buttons + tap highlight) ===== */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
+        /* =========================
+           Global Premium Window UI
+           ========================= */
+        body.modal-lock {
+            overflow: hidden !important;
+            touch-action: none;
         }
-
-        /* Prevent mobile tap highlight + accidental glow */
-        button, a, .category, .category-btn, .new-category-btn, .header-btn, .slider-btn, .scroll-to-top {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            user-select: none;
-            touch-action: manipulation;
-        }
-
-        button:focus, a:focus { outline: none; }
-        button:focus-visible, a:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(163, 191, 250, 0.28);
-        }
-
-        /* Full-screen elegant overlay (used with modal + drawer) */
-        .ui-overlay {
+        .app-overlay {
             position: fixed;
             inset: 0;
+            background: radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,0.55), rgba(0,0,0,0.78));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             opacity: 0;
+            visibility: hidden;
             pointer-events: none;
-            transition: opacity 0.25s ease;
-            background:
-              radial-gradient(1200px 800px at 50% 25%, rgba(163, 191, 250, 0.16), rgba(0, 0, 0, 0.62)),
-              linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.65));
-            backdrop-filter: blur(6px);
+            transition: opacity .22s ease, visibility .22s ease;
         }
-        .ui-overlay.visible {
+        .app-overlay.active {
             opacity: 1;
+            visibility: visible;
             pointer-events: auto;
         }
-
-        body.overlay-on .container,
-        body.overlay-on footer,
-        body.overlay-on .scroll-to-top {
-            filter: blur(1.5px);
+        .app-modal, .app-drawer, .swal2-popup, .swal2-container, .app-overlay,
+        .app-modal * , .app-drawer * , .swal2-popup * {
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Header icon buttons: keep same placement, just more pro */
-        .header-btn.icon-btn {
-            width: 34px;
-            height: 30px;
-            padding: 0;
-            justify-content: center;
-            gap: 0;
-            border-radius: 12px;
+        /* ===== Premium buttons inside windows (ONLY) ===== */
+        .app-modal button,
+        .app-drawer button,
+        .swal2-actions button,
+        .swal2-confirm,
+        .swal2-cancel,
+        .swal2-deny {
+            border-radius: 999px !important;
+            padding: 8px 14px !important;
+            min-height: 34px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .2px;
+            transform: none !important;
+            box-shadow: none;
+            outline: none !important;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
-        .header-btn.icon-btn i {
-            font-size: 14px;
+        .app-modal button:hover,
+        .app-drawer button:hover,
+        .swal2-actions button:hover,
+        .swal2-confirm:hover,
+        .swal2-cancel:hover,
+        .swal2-deny:hover {
+            transform: none !important;
+            filter: brightness(1.05);
         }
-
-        .header-btn {
-            border-radius: 12px;
+        .app-modal button:active,
+        .app-drawer button:active,
+        .swal2-actions button:active,
+        .swal2-confirm:active,
+        .swal2-cancel:active,
+        .swal2-deny:active {
+            transform: none !important;
         }
-        .header-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+        .app-modal button:focus,
+        .app-drawer button:focus,
+        .swal2-actions button:focus {
+            outline: none !important;
+            box-shadow: none !important;
         }
-        .header-btn:active {
-            transform: translateY(0);
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
-        }
-
-        /* Move notes badge to look nicer with icon-only */
-        .notes-count {
-            top: 6px;
-            right: 6px;
-            transform: none;
-            width: 16px;
-            height: 16px;
-        }
-
-        /* Buttons inside windows: slightly oval + smaller, no scaling */
-        .result-card button,
-        .notes-item button,
-        .category-btn,
-        .new-category-btn,
-        .search-container button,
-        #newItemsModal .close-modal-btn {
-            border-radius: 14px;
-        }
-
-        .result-card button,
-        .notes-item button,
-        .category-btn,
-        .new-category-btn {
-            transition: box-shadow 0.25s ease, filter 0.25s ease, background 0.25s ease;
+        .app-modal button:focus-visible,
+        .app-drawer button:focus-visible,
+        .swal2-actions button:focus-visible {
+            box-shadow: 0 0 0 3px rgba(99, 195, 255, 0.25) !important;
         }
 
-        .result-card button:hover,
-        .notes-item button:hover,
-        .category-btn:hover,
-        .new-category-btn:hover {
-            transform: none;
-            filter: brightness(1.06);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.28);
-        }
-
-        .result-card button:active,
-        .notes-item button:active,
-        .category-btn:active,
-        .new-category-btn:active {
-            transform: none;
-            filter: brightness(0.97);
-            box-shadow: inset 0 3px 10px rgba(0,0,0,0.38);
-        }
-
-        /* Notes drawer: more premium feel without changing layout */
-        .notes-drawer {
-            z-index: 9001;
-            background: linear-gradient(145deg, rgba(0, 0, 0, 0.92), rgba(20, 25, 40, 0.78));
-            border-left: 1px solid rgba(163, 191, 250, 0.14);
-            box-shadow: -18px 0 45px rgba(0, 0, 0, 0.55);
-        }
-
-        /* New items modal: add a premium border + shadow */
-        #newItemsModal {
+        /* ===== New Items Modal: premium glass ===== */
+        #newItemsModal.app-modal {
+            border: 1px solid rgba(255,255,255,0.10);
             box-shadow: 0 30px 90px rgba(0,0,0,0.65);
-            border: 1px solid rgba(163, 191, 250, 0.14);
+            background: linear-gradient(180deg, rgba(18,18,22,0.92), rgba(10,10,12,0.88));
+        }
+        #newItemsModal .close-modal-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.06);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        }
+        #newItemsModal .close-modal-btn:hover { filter: brightness(1.08); }
+
+        /* ===== Notes Drawer: premium drawer ===== */
+        .notes-drawer.app-drawer {
+            border-left: 1px solid rgba(255,255,255,0.10);
+            border-radius: 20px 0 0 20px;
+            background: linear-gradient(180deg, rgba(16,16,20,0.94), rgba(0,0,0,0.90));
+            box-shadow: -18px 0 60px rgba(0,0,0,0.60);
+        }
+        .notes-drawer .close-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.14);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
         }
 
-        /* SweetAlert2 backdrop: more elegant, consistent with overlay */
-        .swal2-backdrop {
-            background:
-              radial-gradient(1100px 700px at 50% 20%, rgba(163, 191, 250, 0.14), rgba(0, 0, 0, 0.72)),
-              linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.70));
-            backdrop-filter: blur(7px);
+        /* ===== SweetAlert2: global premium theme for ALL popups ===== */
+        .swal2-container.swal2-backdrop-show,
+        .swal2-container.swal2-noanimation {
+            background: radial-gradient(1200px 600px at 50% 10%, rgba(0,0,0,0.55), rgba(0,0,0,0.82)) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .swal2-popup {
+            border-radius: 18px !important;
+            border: 1px solid rgba(255,255,255,0.10) !important;
+            box-shadow: 0 30px 90px rgba(0,0,0,0.65) !important;
+            background: linear-gradient(180deg, rgba(18,18,22,0.92), rgba(10,10,12,0.88)) !important;
+        }
+        .swal2-title, .swal2-html-container, .swal2-input, .swal2-actions button {
+            font-family: 'Cairo', sans-serif !important;
+        }
+        .swal2-input {
+            border-radius: 14px !important;
+            border: 1px solid rgba(255,255,255,0.14) !important;
+            background: rgba(255,255,255,0.06) !important;
+            color: #fff !important;
+        }
+        .swal2-input:focus {
+            box-shadow: 0 0 0 3px rgba(99, 195, 255, 0.20) !important;
+            outline: none !important;
         }
 
-        /* Loading progress UI inside Swal */
-        .swal-loading-row {
+        /* ===== Premium progress (refresh) ===== */
+        .app-progress {
             width: 100%;
             display: flex;
-            gap: 12px;
-            align-items: flex-start;
-            justify-content: center;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 8px;
+            direction: rtl;
         }
-        .swal-loading-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
+        .app-progress-top {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(212,175,55,0.18);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.28);
-            flex: 0 0 auto;
+            gap: 10px;
         }
-        .swal-loading-icon i { font-size: 18px; color: #D4AF37; }
-
-        .swal-loading-sub {
-            font-family: 'Cairo', sans-serif;
-            font-size: 14px;
-            color: #E2E8F0;
-            margin-bottom: 10px;
+        .app-progress-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.14);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.30);
         }
-        .swal-progress {
+        .app-progress-text {
+            font-size: 15px;
+            color: #e9eef7;
+            font-weight: 700;
+        }
+        .app-progress-bar {
+            position: relative;
             width: 100%;
             height: 10px;
             border-radius: 999px;
-            background: rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.10);
             overflow: hidden;
-            border: 1px solid rgba(163,191,250,0.18);
         }
-        .swal-progress-bar {
+        .app-progress-bar span {
+            display: block;
             height: 100%;
             width: 0%;
             border-radius: 999px;
-            background: linear-gradient(90deg, #43cea2, #185a9d, #D4AF37);
-            transition: width 0.2s ease;
+            background: linear-gradient(90deg, rgba(99,195,255,0.85), rgba(67,206,162,0.85));
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            transition: width .18s ease;
         }
-        .swal-progress-meta {
+        .app-progress-meta {
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            margin-top: 8px;
-            font-family: 'Cairo', sans-serif;
             font-size: 12px;
-            color: rgba(226,232,240,0.9);
-        }
-        .swal-success-message {
-            font-family: 'Cairo', sans-serif;
-            font-size: 16px;
-            line-height: 1.7;
+            color: rgba(233,238,247,0.85);
         }
 
-        /* Footer refinement */
-        footer p {
-            font-family: 'Cairo', sans-serif;
-            letter-spacing: 0.2px;
-        }
-        footer .footer-brand {
-            color: #D4AF37;
-            font-weight: 800;
-        }
+        footer p { font-family: 'Cairo', sans-serif; letter-spacing: .2px; }
 
-    </style>
+
+        /* ===== Header buttons: icon-only, premium ===== */
+        .header-buttons .header-btn {
+            width: 42px;
+            height: 42px;
+            padding: 0  !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0 !important;
+            border-radius: 14px;
+        }
+        .header-buttons .header-btn { font-size: 0; }
+        .header-buttons .header-btn i { font-size: 16px; }
+        .header-buttons .header-btn .notes-count { font-size: 11px; }
+
+</style>
 </head>
 <body>
+    <!-- Global overlay for app windows -->
+    <div id="appOverlay" class="app-overlay" aria-hidden="true"></div>
     <!-- Header -->
     <header class="header">
         <div class="header-title">مكتب عسل</div>
         <div class="header-buttons">
-            <button class="header-btn back-btn icon-btn" onclick="goBack()" title="رجوع"><i class="fas fa-arrow-right"></i><span class="sr-only">رجوع</span></button>
-            <button class="header-btn refresh-btn icon-btn" onclick="refreshData()" title="تحديث البيانات"><i class="fas fa-sync-alt"></i><span class="sr-only">تحديث</span></button>
-            <button class="header-btn notes-btn icon-btn" onclick="toggleNotes()" title="عرض الملاحظات"><i class="fas fa-sticky-note"></i><span class="sr-only">ملاحظات</span><span class="notes-count" id="headerNotesCount">0</span></button>
+            <button class="header-btn back-btn" onclick="goBack()" title="رجوع"><i class="fas fa-arrow-right"></i> رجوع</button>
+            <button class="header-btn refresh-btn" onclick="refreshData()" title="تحديث البيانات"><i class="fas fa-sync"></i> تحديث</button>
+            <button class="header-btn notes-btn" onclick="toggleNotes()" title="عرض الملاحظات"><i class="fas fa-sticky-note"></i> ملاحظات <span class="notes-count" id="headerNotesCount">0</span></button>
         </div>
     </header>
 
-    <!-- Elegant Overlay for Windows -->
-    <div id="uiOverlay" class="ui-overlay" onclick="closeUiOverlays()"></div>
-
-
     <!-- New Items Modal -->
-    <div id="newItemsModal">
+    <div id="newItemsModal" class="app-modal" role="dialog" aria-modal="true" tabindex="-1">
         <button class="close-modal-btn" onclick="closeNewItemsModal()"><i class="fas fa-times"></i></button>
         <h2>توافقات جديدة</h2>
         <div class="modal-content"></div>
@@ -1820,7 +1825,7 @@
     </div>
 
     <!-- Notes Drawer -->
-    <div class="notes-drawer" id="notesDrawer">
+    <div class="notes-drawer app-drawer" id="notesDrawer" role="dialog" aria-modal="true" tabindex="-1">
         <i class="fas fa-times close-btn" onclick="toggleNotes()"></i>
         <h3>سلة الملاحظات</h3>
         <div class="notes-items-container" id="notesItems"></div>
@@ -1831,10 +1836,98 @@
 
     <!-- Footer -->
     <footer>
-        <p>© <span class="footer-brand">مكتب عسل</span> — جميع الحقوق محفوظة</p>
+        <p>© مكتب عسل — جميع الحقوق محفوظة</p>
     </footer>
 
     <script>
+        /* =========================
+           APP_UI_LAYER: modal overlay + input safety
+           ========================= */
+        const APP_UI_LAYER = (() => {
+            const overlay = document.getElementById('appOverlay');
+
+            const swallow = (e) => { e.preventDefault(); e.stopPropagation(); };
+            ['click','pointerdown','mousedown','touchstart','touchend'].forEach(evt => {
+                overlay.addEventListener(evt, swallow, { passive: false });
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (document.body.classList.contains('modal-lock')) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            let lockStack = 0;
+
+            function setOverlayActive(active, forEl) {
+                if (!overlay) return;
+                if (active) {
+                    try {
+                        const z = parseInt(getComputedStyle(forEl).zIndex || '2000', 10);
+                        overlay.style.zIndex = String(Math.max(999, z - 1));
+                    } catch (_) {
+                        overlay.style.zIndex = '1999';
+                    }
+                    overlay.classList.add('active');
+                    overlay.setAttribute('aria-hidden', 'false');
+                } else {
+                    overlay.classList.remove('active');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    overlay.style.zIndex = '';
+                }
+            }
+
+            function lock(forEl) {
+                lockStack++;
+                document.body.classList.add('modal-lock');
+                setOverlayActive(true, forEl || document.body);
+            }
+
+            function unlock(forEl) {
+                lockStack = Math.max(0, lockStack - 1);
+                if (lockStack === 0) {
+                    document.body.classList.remove('modal-lock');
+                    setOverlayActive(false, forEl || document.body);
+                }
+            }
+
+            return { lock, unlock };
+        })();
+
+        /* =========================
+           SweetAlert2 global defaults (no outside touch)
+           ========================= */
+        (function patchSweetAlert() {
+            if (!window.Swal || !Swal.fire || window.__ASSAL_SWAL_PATCHED__) return;
+            window.__ASSAL_SWAL_PATCHED__ = true;
+
+            const originalFire = Swal.fire.bind(Swal);
+            Swal.fire = function(options = {}) {
+                const defaultCustom = {
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm',
+                    cancelButton: 'swal2-cancel',
+                    denyButton: 'swal2-deny'
+                };
+
+                const mergedCustom = { ...defaultCustom, ...(options.customClass || {}) };
+
+                return originalFire({
+                    backdrop: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: true,
+                    returnFocus: false,
+                    focusConfirm: false,
+                    ...options,
+                    customClass: mergedCustom
+                });
+            };
+        })();
+
+
         let isAnimating = false;
     const dropboxSimilaritesFile = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRRZZFGe3dDXCCb9L5HtgpnXoj-H6kvqWeMS_tvYyWAL2VqpJh64rCMqRpoTaMw3v9fdazd5fWB5E2d/pub?output=xlsx" + "&t=" + new Date().getTime();
         let database = {};
@@ -2191,23 +2284,14 @@
                 modal.style.display = "flex";
                 modal.style.animation = "slideDownModal 0.5s ease-out forwards";
                 isModalOpen = true;
-                updateUiOverlay();
+
+                APP_UI_LAYER.lock(modal);
+                setTimeout(() => { try { modal.focus(); } catch (_) {} }, 0);
+
                 loadNewItems();
             }
         } catch (error) {
             console.error("Error in openModal:", error);
-            Swal.fire({
-                title: 'خطأ',
-                html: `<p style="color: #ff4d4d;">حدث خطأ أثناء فتح النافذة: ${error.message}</p>`,
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
         }
     }
 
@@ -2218,22 +2302,17 @@
             setTimeout(() => {
                 modal.style.display = "none";
                 isModalOpen = false;
-            updateUiOverlay();
-                }, 500);
+                APP_UI_LAYER.unlock(modal);
+            }, 500);
         } catch (error) {
             console.error("Error in closeNewItemsModal:", error);
             isModalOpen = false;
+            try { APP_UI_LAYER.unlock(document.getElementById("newItemsModal")); } catch (_) {}
             Swal.fire({
                 title: 'خطأ',
                 html: `<p style="color: #ff4d4d;">حدث خطأ أثناء إغلاق النافذة: ${error.message}</p>`,
                 iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
+                confirmButtonText: 'موافق'
             });
         }
     }
@@ -2617,59 +2696,18 @@
         }
     }
 
-    
-    function showUiOverlay(zIndex) {
-        const overlay = document.getElementById('uiOverlay');
-        if (!overlay) return;
-        overlay.style.zIndex = String(zIndex);
-        overlay.classList.add('visible');
-        document.body.classList.add('overlay-on');
-    }
-
-    function hideUiOverlay() {
-        const overlay = document.getElementById('uiOverlay');
-        if (!overlay) return;
-        overlay.classList.remove('visible');
-        document.body.classList.remove('overlay-on');
-    }
-
-    function updateUiOverlay() {
-        const modal = document.getElementById('newItemsModal');
-        const drawer = document.getElementById('notesDrawer');
-
-        const modalOpen = !!(modal && isModalOpen && modal.style.display !== 'none');
-        const drawerOpen = !!(drawer && drawer.classList.contains('active'));
-
-        if (modalOpen) {
-            showUiOverlay(9999); // behind modal (modal z-index 10000)
-            return;
-        }
-        if (drawerOpen) {
-            showUiOverlay(9000); // behind drawer (drawer z-index 9001)
-            return;
-        }
-        hideUiOverlay();
-    }
-
-    function closeUiOverlays() {
-        const modal = document.getElementById('newItemsModal');
-        const drawer = document.getElementById('notesDrawer');
-
-        if (modal && isModalOpen && modal.style.display !== 'none') {
-            closeNewItemsModal();
-            return;
-        }
-        if (drawer && drawer.classList.contains('active')) {
-            toggleNotes(false);
-        }
-    }
-
-
-    function toggleNotes(forceOpen) {
+    function toggleNotes() {
         const notesDrawer = document.getElementById('notesDrawer');
-        const willOpen = (typeof forceOpen === 'boolean') ? forceOpen : !notesDrawer.classList.contains('active');
-        notesDrawer.classList.toggle('active', willOpen);
-        updateUiOverlay();
+        const isOpening = !notesDrawer.classList.contains('active');
+
+        notesDrawer.classList.toggle('active');
+
+        if (isOpening) {
+            APP_UI_LAYER.lock(notesDrawer);
+            setTimeout(() => { try { notesDrawer.focus(); } catch (_) {} }, 0);
+        } else {
+            APP_UI_LAYER.unlock(notesDrawer);
+        }
     }
 
     function addToNotes(itemName) {
@@ -2722,104 +2760,76 @@
         });
     }
 
-    async function refreshData() {
+    async async function refreshData() {
         let progress = 0;
-        let intervalId = null;
+        let timer = null;
+
+        const renderProgress = (val) => {
+            const fill = document.getElementById('appProgressFill');
+            const pct  = document.getElementById('appProgressPct');
+            if (fill) fill.style.width = `${val}%`;
+            if (pct) pct.textContent = `${Math.round(val)}%`;
+        };
 
         Swal.fire({
             title: 'تحديث البيانات',
             html: `
-                <div class="swal-loading-row">
-                    <div class="swal-loading-icon"><i class="fas fa-cloud-download-alt"></i></div>
-                    <div style="width: 100%; max-width: 360px;">
-                        <div class="swal-loading-sub">جاري تنزيل آخر تحديثات التوافقات...</div>
-                        <div class="swal-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                            <div class="swal-progress-bar" id="swalProgressBar"></div>
-                        </div>
-                        <div class="swal-progress-meta">
-                            <span id="swalProgressPercent">0%</span>
-                            <span class="swal-progress-hint">يرجى الانتظار</span>
-                        </div>
+                <div class="app-progress">
+                    <div class="app-progress-top">
+                        <div class="app-progress-icon"><i class="fas fa-cloud-download-alt"></i></div>
+                        <div class="app-progress-text">جاري تحديث قاعدة البيانات…</div>
+                    </div>
+                    <div class="app-progress-bar"><span id="appProgressFill"></span></div>
+                    <div class="app-progress-meta">
+                        <span id="appProgressPct">0%</span>
+                        <span>يرجى الانتظار</span>
                     </div>
                 </div>
             `,
             showConfirmButton: false,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            customClass: { popup: 'swal2-popup activation-popup' },
             didOpen: () => {
-                const popup = Swal.getPopup();
-                const bar = popup ? popup.querySelector('#swalProgressBar') : null;
-                const percent = popup ? popup.querySelector('#swalProgressPercent') : null;
-                const progressEl = popup ? popup.querySelector('.swal-progress') : null;
-
-                intervalId = setInterval(() => {
-                    // اطلع تدريجيًا لحد 90% (و نكمّل 100% بعد ما يخلص التحميل فعليًا)
-                    progress = Math.min(progress + (Math.random() * 6 + 2), 90);
-                    const p = Math.round(progress);
-                    if (bar) bar.style.width = `${p}%`;
-                    if (percent) percent.textContent = `${p}%`;
-                    if (progressEl) progressEl.setAttribute('aria-valuenow', String(p));
-                }, 250);
+                renderProgress(0);
+                timer = setInterval(() => {
+                    const bump = (Math.random() * 6) + 2;
+                    progress = Math.min(progress + bump, 90);
+                    renderProgress(progress);
+                }, 160);
+            },
+            willClose: () => {
+                if (timer) clearInterval(timer);
+                timer = null;
             }
         });
 
         try {
             await loadSimilaritesData();
 
-            const popup = Swal.getPopup();
-            const bar = popup ? popup.querySelector('#swalProgressBar') : null;
-            const percent = popup ? popup.querySelector('#swalProgressPercent') : null;
-            const progressEl = popup ? popup.querySelector('.swal-progress') : null;
+            progress = 96; renderProgress(progress);
+            await new Promise(r => setTimeout(r, 250));
+            progress = 100; renderProgress(progress);
+            await new Promise(r => setTimeout(r, 200));
 
-            progress = 100;
-            if (bar) bar.style.width = '100%';
-            if (percent) percent.textContent = '100%';
-            if (progressEl) progressEl.setAttribute('aria-valuenow', '100');
-
-            if (intervalId) clearInterval(intervalId);
-            await new Promise(resolve => setTimeout(resolve, 350));
             Swal.close();
 
             await Swal.fire({
-                title: 'تم التحديث بنجاح',
-                html: '<div class="swal-success-message">تم تنزيل أحدث التوافقات وتحديثها بنجاح ✅</div>',
                 icon: 'success',
-                confirmButtonText: 'تمام',
-                allowOutsideClick: true,
-                allowEscapeKey: true,
-                customClass: {
-                    popup: 'swal2-popup activation-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
+                title: 'تم التحديث بنجاح',
+                html: `<div style="line-height:1.8;color:rgba(233,238,247,0.92);font-size:14px;">تم تحديث البيانات وعرض آخر التوافقات.</div>`,
+                confirmButtonText: 'تمام'
             });
 
             triggerAnimation();
             displayNewSimilarities();
         } catch (error) {
-            if (intervalId) clearInterval(intervalId);
-            Swal.close();
-
-            await Swal.fire({
-                title: 'خطأ',
-                text: 'حدث خطأ أثناء التحديث',
+            try { Swal.close(); } catch (_) {}
+            Swal.fire({
                 icon: 'error',
-                confirmButtonText: 'موافق',
-                allowOutsideClick: true,
-                allowEscapeKey: true,
-                customClass: {
-                    popup: 'swal2-popup activation-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
+                title: 'فشل التحديث',
+                html: `<div style="line-height:1.8;color:rgba(233,238,247,0.92);font-size:14px;">صار خطأ أثناء التحديث.<br><span style="color:#ff6b6b;">${error.message || error}</span></div>`,
+                confirmButtonText: 'موافق'
             });
-            triggerAnimation();
         }
     }
-
-</script>
+    </script>
 </body>
 </html>
