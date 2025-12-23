@@ -232,12 +232,12 @@
         }
 
         .header-btn:hover {
-            transform: translateY(-1px);
+            transform: none;
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
         }
 
         .header-btn:active {
-            transform: translateY(0);
+            transform: none;
             box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
         }
 
@@ -1538,11 +1538,8 @@
             touch-action: manipulation;
         }
 
-        button:focus, a:focus { outline: none; }
-        button:focus-visible, a:focus-visible {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(163, 191, 250, 0.28);
-        }
+        button:focus, a:focus { outline: none; box-shadow: none; }
+        button:focus-visible, a:focus-visible { outline: none; box-shadow: none; }
 
         /* Full-screen elegant overlay (used with modal + drawer) */
         .ui-overlay {
@@ -1561,15 +1558,9 @@
             pointer-events: auto;
         }
 
-                body.overlay-on { overflow: hidden; }
-        body.swal2-shown { overflow: hidden; }
-
-body.overlay-on .container,
+        body.overlay-on .container,
         body.overlay-on footer,
-        body.overlay-on .scroll-to-top,
-        body.swal2-shown .container,
-        body.swal2-shown footer,
-        body.swal2-shown .scroll-to-top {
+        body.overlay-on .scroll-to-top {
             filter: blur(1.5px);
         }
 
@@ -1590,11 +1581,11 @@ body.overlay-on .container,
             border-radius: 12px;
         }
         .header-btn:hover {
-            transform: translateY(-1px);
+            transform: none;
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
         }
         .header-btn:active {
-            transform: translateY(0);
+            transform: none;
             box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
         }
 
@@ -1633,6 +1624,22 @@ body.overlay-on .container,
             box-shadow: 0 8px 20px rgba(0,0,0,0.28);
         }
 
+        /* Kill all scale/translate "press" effects on buttons (keeps layout/position unchanged) */
+        .header-btn:hover, .header-btn:active { transform: none !important; }
+
+        .slider-btn:hover, .slider-btn:active { transform: translateY(-50%) !important; }
+
+        .search-container button:hover, .search-container button:active { transform: translateY(-50%) !important; }
+
+        .scroll-to-top:hover, .scroll-to-top:active { transform: none !important; }
+
+        #newItemsModal .modal-content .new-item-card .item-details button:hover,
+        #newItemsModal .modal-content .new-item-card .item-details button:active { transform: none !important; }
+
+        .swal2-confirm:hover, .swal2-cancel:hover,
+        .swal2-confirm:active, .swal2-cancel:active { transform: none !important; }
+
+
         .result-card button:active,
         .notes-item button:active,
         .category-btn:active,
@@ -1641,26 +1648,6 @@ body.overlay-on .container,
             filter: brightness(0.97);
             box-shadow: inset 0 3px 10px rgba(0,0,0,0.38);
         }
-        /* New items modal action button: match global buttons (oval + no scale) */
-        #newItemsModal .modal-content .new-item-card .item-details button {
-            border-radius: 14px;
-            padding: 7px 14px;
-            font-size: 13px;
-            min-width: 120px; /* حافظ على نفس العرض تقريبًا */
-            transform: none !important;
-            transition: box-shadow 0.25s ease, filter 0.25s ease, background 0.25s ease;
-        }
-        #newItemsModal .modal-content .new-item-card .item-details button:hover {
-            transform: none !important;
-            filter: brightness(1.06);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.28);
-        }
-        #newItemsModal .modal-content .new-item-card .item-details button:active {
-            transform: none !important;
-            filter: brightness(0.97);
-            box-shadow: inset 0 3px 10px rgba(0,0,0,0.38);
-        }
-
 
         /* Notes drawer: more premium feel without changing layout */
         .notes-drawer {
@@ -1857,7 +1844,7 @@ body.overlay-on .container,
 
     <!-- Footer -->
     <footer>
-        <p>© <span class="footer-brand">مكتب عسل</span> — منصة التوافقات للهواتف | جميع الحقوق محفوظة</p>
+        <p>© <span class="footer-brand">مكتب عسل</span> — جميع الحقوق محفوظة</p>
     </footer>
 
     <script>
@@ -2335,64 +2322,20 @@ body.overlay-on .container,
     }
 
     async function verifyPassword(password, db) {
-        
-        let loginProgress = 0;
-        let loginIntervalId = null;
-
-        const updateLoginProgress = (p) => {
-            const popup = Swal.getPopup();
-            const bar = popup ? popup.querySelector('#swalProgressBar') : null;
-            const percent = popup ? popup.querySelector('#swalProgressPercent') : null;
-            const progressEl = popup ? popup.querySelector('.swal-progress') : null;
-            const v = Math.max(0, Math.min(100, Math.round(p)));
-            if (bar) bar.style.width = `${v}%`;
-            if (percent) percent.textContent = `${v}%`;
-            if (progressEl) progressEl.setAttribute('aria-valuenow', String(v));
-        };
-
-        const stopLoginLoader = () => {
-            if (loginIntervalId) clearInterval(loginIntervalId);
-            loginIntervalId = null;
-        };
-
         Swal.fire({
-            title: 'تحميل البيانات',
-            html: `
-                <div class="swal-loading-row">
-                    <div class="swal-loading-icon"><i class="fas fa-user-shield"></i></div>
-                    <div style="width: 100%; max-width: 360px;">
-                        <div class="swal-loading-sub">جاري التحقق من الاشتراك وتحميل التوافقات…</div>
-                        <div class="swal-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                            <div class="swal-progress-bar" id="swalProgressBar"></div>
-                        </div>
-                        <div class="swal-progress-meta">
-                            <span id="swalProgressPercent">0%</span>
-                            <span class="swal-progress-hint">يرجى الانتظار</span>
-                        </div>
-                    </div>
-                </div>
-            `,
-            showConfirmButton: false,
+            title: 'جاري الدخول...',
+            text: 'يرجى الانتظار',
             allowOutsideClick: false,
-            allowEscapeKey: false,
-            customClass: { popup: 'swal2-popup activation-popup' },
             didOpen: () => {
-                loginIntervalId = setInterval(() => {
-                    // تصعد تدريجيًا لحد 88% ونكمّل 100% بعد ما يخلص التحميل فعليًا
-                    loginProgress = Math.min(loginProgress + (Math.random() * 6 + 2), 88);
-                    updateLoginProgress(loginProgress);
-                }, 250);
+                Swal.showLoading();
             }
         });
-
 
         try {
             const codeRef = db.collection('passwords').doc(password);
             const doc = await codeRef.get();
 
             if (!doc.exists) {
-                stopLoginLoader();
-                Swal.close();
                 await Swal.fire({
                     icon: 'error',
                     title: 'خطأ',
@@ -2424,13 +2367,7 @@ body.overlay-on .container,
                 });
                 localStorage.setItem("password", password);
                 await loadSimilaritesData();
-                updateLoginProgress(100);
-                stopLoginLoader();
-                await new Promise(resolve => setTimeout(resolve, 250));
-                Swal.close();
                 updateNotes();
-                stopLoginLoader();
-                Swal.close();
                 await Swal.fire({
                     icon: 'success',
                     title: 'تم الدخول بنجاح',
@@ -2445,14 +2382,8 @@ body.overlay-on .container,
                 if (data.deviceId === deviceId) {
                     localStorage.setItem("password", password);
                     await loadSimilaritesData();
-                updateLoginProgress(100);
-                stopLoginLoader();
-                await new Promise(resolve => setTimeout(resolve, 250));
-                Swal.close();
                     updateNotes();
-                    stopLoginLoader();
-                Swal.close();
-                await Swal.fire({
+                    await Swal.fire({
                         icon: 'success',
                         title: 'تم الدخول بنجاح',
                         text: 'كلمة المرور صحيحة!',
@@ -2463,9 +2394,7 @@ body.overlay-on .container,
                     triggerAnimation();
                     return true;
                 } else {
-                    stopLoginLoader();
-                Swal.close();
-                await Swal.fire({
+                    await Swal.fire({
                         icon: 'error',
                         title: 'خطأ',
                         text: 'كلمة المرور مستخدمة على جهاز آخر!',
@@ -2481,9 +2410,7 @@ body.overlay-on .container,
                 }
             }
         } catch (error) {
-            stopLoginLoader();
-                Swal.close();
-                await Swal.fire({
+            await Swal.fire({
                 icon: 'error',
                 title: 'خطأ',
                 text: error.message.includes('offline') ? 'أنت غير متصل بالإنترنت. يرجى التحقق من الاتصال.' : 'حدث خطأ: ' + error.message,
@@ -2497,10 +2424,6 @@ body.overlay-on .container,
             triggerAnimation();
             return false;
         }
-        finally {
-            stopLoginLoader();
-        }
-
     }
 
     window.onload = async function() {
@@ -2562,9 +2485,14 @@ body.overlay-on .container,
             }
         }
 
-        // البيانات تنحمّل داخل verifyPassword() حتى يكون التحميل بنفس نافذة الدخول
-        displayNewSimilarities();
-};
+        const result = await loadExcelFiles();
+        if (result.success) {
+            console.log("تم تحميل البيانات بنجاح، جارٍ تحميل التوافقات الجديدة...");
+            displayNewSimilarities();
+        } else {
+            console.warn("فشل تحميل البيانات:", result.message);
+        }
+    };
 
     document.getElementById("searchInput").addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
