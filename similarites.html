@@ -2577,6 +2577,82 @@ body{
 }
 
 
+/* ===== Login Hero: rotating lock badge ===== */
+.login-popup .pro-hero{
+  position: relative;
+  padding: 14px !important;
+  border-radius: 18px !important;
+}
+
+.login-popup .pro-hero-icon{
+  position: relative;
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
+.login-popup .pro-hero-icon::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius: 18px;
+  background: conic-gradient(
+    rgba(255,215,0,.95),
+    rgba(45,212,191,.85),
+    rgba(70,179,255,.85),
+    rgba(255,215,0,.95)
+  );
+  animation: loginSpin 1.1s linear infinite;
+  opacity: .95;
+}
+
+.login-popup .pro-hero-icon::after{
+  content:"";
+  position:absolute;
+  inset: 6px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(10,14,26,.98), rgba(14,22,40,.90));
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.10);
+}
+
+@keyframes loginSpin{ to{ transform: rotate(360deg); } }
+
+.login-popup .pro-hero-icon i{
+  position: relative;
+  z-index: 2;
+  font-size: 18px;
+  color: rgba(233,238,252,.95);
+  animation: lockFloat 1.2s ease-in-out infinite;
+}
+@keyframes lockFloat{
+  0%,100%{ transform: translateY(0); }
+  50%{ transform: translateY(-2px); }
+}
+
+/* ===== Nicer login layout ===== */
+.login-popup .pro-hero-title{
+  font-size: 15px !important;
+  font-weight: 900 !important;
+}
+
+.login-popup .pro-hero-sub{
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+}
+
+.login-popup .swal2-input.login-input{
+  margin-top: 12px !important;
+}
+
+/* hint card prettier */
+.login-popup .login-hint{
+  background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.03)) !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,.28) !important;
+}
+
+
 
         
         
@@ -3329,24 +3405,26 @@ function triggerAnimation() {
   const { value: password } = await Swal.fire({
     title: 'دخول محمي',
     html: `
-      <div class="pro-dialog login-dialog">
-        <div class="pro-hero">
-          <div class="pro-hero-icon pro-hero-icon-gold">
-            <i class="fas fa-lock"></i>
-          </div>
-          <div class="pro-hero-text">
-            <div class="pro-hero-title">أدخل كلمة المرور</div>
-            <div class="pro-hero-sub">
-              هلا بيك بخدمتنا <span>المميزة</span> — أدخل الكود حتى تفتح <span>كنز التوافقات</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="login-hint">
-          ملاحظة: كلمة المرور خاصة بالمشتركين فقط.
+  <div class="pro-dialog login-dialog">
+    <div class="pro-hero">
+      <div class="pro-hero-icon pro-hero-icon-gold">
+        <i class="fas fa-lock"></i>
+      </div>
+      <div class="pro-hero-text">
+        <div class="pro-hero-title">دخول محمي</div>
+        <div class="pro-hero-sub">
+          أدخل كلمة المرور حتى تفتح <span>التوافقات</span> وتستخدم كل الميزات.
         </div>
       </div>
-    `,
+    </div>
+
+    <div class="login-hint">
+      <i class="fas fa-shield-halved"></i>
+      <span>كلمة المرور مخصصة للمشتركين فقط.</span>
+    </div>
+  </div>
+`,
+
     icon: undefined,
     iconHtml: '<i class="fas fa-shield-halved"></i>',
 
