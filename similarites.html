@@ -2513,6 +2513,68 @@ body{
 }
 
 
+/* ===== Login (Password + Success/Fail) Premium ===== */
+.swal2-popup.login-popup{
+  min-height: auto !important;
+  height: auto !important;
+  max-width: 420px !important;
+  padding: 18px 18px 14px !important;
+  overflow: visible !important;
+}
+
+.swal2-popup.login-popup .swal2-html-container{
+  margin: 8px 0 0 !important;
+  padding: 0 !important;
+}
+
+.login-hint{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  color: rgba(233,238,252,.72);
+  font-size: 12px;
+}
+
+/* input */
+.login-input.swal2-input{
+  width: 100% !important;
+  height: 44px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  background: rgba(255,255,255,.06) !important;
+  color: rgba(233,238,252,.92) !important;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.12) !important;
+  font-family: 'Cairo', sans-serif !important;
+}
+
+/* buttons */
+.login-confirm.swal2-confirm{
+  border-radius: 14px !important;
+  padding: 10px 14px !important;
+  background: linear-gradient(135deg, rgba(45,212,191,.95), rgba(70,179,255,.85)) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  box-shadow: 0 14px 32px rgba(0,0,0,.35) !important;
+  font-weight: 800 !important;
+}
+
+.login-confirm.danger.swal2-confirm{
+  background: linear-gradient(135deg, #8B0000, #B22222) !important;
+}
+
+.login-cancel.swal2-cancel{
+  border-radius: 14px !important;
+  padding: 10px 14px !important;
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  color: rgba(233,238,252,.88) !important;
+}
+
+/* no ugly scroll */
+.swal2-popup.login-popup .swal2-actions{
+  margin-top: 10px !important;
+}
 
 
 
@@ -3263,130 +3325,287 @@ function triggerAnimation() {
         }
     }
 
-    async function showPasswordPrompt() {
-        const { value: password } = await Swal.fire({
-            title: 'دخول محمي',
-            html: `
-                <div class="welcome-message">
-                    هلا بيك بخدمتنا <span class="highlight">المميزة</span> .. اذا انت مشترك ويانة ادخل كلمة المرور .. وراها رح تدخل على <span class="highlight">كنز التوافقات</span> .. يعني تعرف شنو يرهم على شنو .. وفر وقتك وخلي شغلك <span class="highlight">نظيف</span> .. هاي الخدمة وفرناها الك اذا انت من اهل <span class="highlight">الشغل الصح</span>
+  async function showPasswordPrompt() {
+  const { value: password } = await Swal.fire({
+    title: 'دخول محمي',
+    html: `
+      <div class="pro-dialog login-dialog">
+        <div class="pro-hero">
+          <div class="pro-hero-icon pro-hero-icon-gold">
+            <i class="fas fa-lock"></i>
+          </div>
+          <div class="pro-hero-text">
+            <div class="pro-hero-title">أدخل كلمة المرور</div>
+            <div class="pro-hero-sub">
+              هلا بيك بخدمتنا <span>المميزة</span> — أدخل الكود حتى تفتح <span>كنز التوافقات</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="login-hint">
+          ملاحظة: كلمة المرور خاصة بالمشتركين فقط.
+        </div>
+      </div>
+    `,
+    icon: undefined,
+    iconHtml: '<i class="fas fa-shield-halved"></i>',
+
+    input: 'password',
+    inputPlaceholder: 'كلمة المرور',
+    inputAttributes: {
+      autocapitalize: 'off',
+      autocomplete: 'current-password',
+      autocorrect: 'off',
+      inputmode: 'text'
+    },
+
+    showCancelButton: true,
+    confirmButtonText: 'دخول',
+    cancelButtonText: 'إغلاق',
+
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+
+    customClass: {
+      container: 'pro-refresh-container',                    // ✅ نفس طبقة ظلال الريفريش
+      popup: 'swal2-popup activation-popup pro-popup login-popup',
+      title: 'swal2-title',
+      htmlContainer: 'swal2-html-container',
+      input: 'login-input',
+      confirmButton: 'login-confirm',
+      cancelButton: 'login-cancel'
+    },
+
+    didOpen: () => {
+      const input = Swal.getInput();
+      if (input) {
+        setTimeout(() => {
+          try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
+        }, 60);
+      }
+    },
+
+    preConfirm: () => {
+      const v = (Swal.getInput()?.value || '').trim();
+      if (!v) {
+        Swal.showValidationMessage('رجاءً اكتب كلمة المرور أولاً.');
+        return false;
+      }
+      return v;
+    }
+  });
+
+  return password;
+}
+
+
+async function verifyPassword(password, db) {
+
+  // Loader (نفس أسلوب الريفريش)
+  Swal.fire({
+    html: `
+      <div class="prx">
+        <div class="prx-frame">
+          <div class="prx-ring">
+            <i class="fas fa-spinner"></i>
+          </div>
+
+          <div>
+            <div class="prx-title">جاري التحقق</div>
+            <div class="prx-sub">يرجى الانتظار…</div>
+            <div class="prx-bar"><span style="width:65%"></span></div>
+            <div class="prx-meta">
+              <span>اتصال</span>
+              <b>...</b>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+    showConfirmButton: false,
+    showCloseButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    customClass: {
+      container: 'pro-refresh-container',
+      popup: 'pro-refresh-popup login-loading'
+    }
+  });
+
+  try {
+    const codeRef = db.collection('passwords').doc(password);
+    const doc = await codeRef.get();
+
+    // ❌ كلمة مرور غلط
+    if (!doc.exists) {
+      await Swal.fire({
+        title: 'خطأ',
+        html: `
+          <div class="pro-dialog login-dialog">
+            <div class="pro-hero">
+              <div class="pro-hero-icon" style="background:linear-gradient(135deg, rgba(220,20,60,.25), rgba(139,0,0,.18));">
+                <i class="fas fa-circle-xmark"></i>
+              </div>
+              <div class="pro-hero-text">
+                <div class="pro-hero-title">كلمة المرور غير صحيحة</div>
+                <div class="pro-hero-sub">
+                  مبين بعدك ما مفعل <span>الخدمة</span> — فعل دخولك وخليك <span>مميز</span>
                 </div>
-            `,
-            icon: 'question',
-            input: 'password',
-            inputPlaceholder: 'كلمة المرور',
-            showCancelButton: true,
-            confirmButtonText: 'تأكيد',
-            cancelButtonText: 'إغلاق',
-            allowOutsideClick: true,
-            allowEscapeKey: true
-        });
-        return password;
-    }
-
-    async function verifyPassword(password, db) {
-        Swal.fire({
-            title: 'جاري الدخول...',
-            text: 'يرجى الانتظار',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        try {
-            const codeRef = db.collection('passwords').doc(password);
-            const doc = await codeRef.get();
-
-            if (!doc.exists) {
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'خطأ',
-                    html: `
-                        <div class="welcome-message">
-                            كلمة المرور غير صحيحة! <br>
-                            مبين بعدك ما مفعل <span class="highlight">الخدمة</span> !! .. بس صدكني ديضيع عليك هواية .. <span class="highlight">توافقات جاهزة</span> .. <span class="highlight">وقت اقل</span> .. <span class="highlight">شغل ادق</span> ... فعل دخولك وخليك دائما <span class="highlight">مميز</span>
-                        </div>
-                    `,
-                    showConfirmButton: true,
-                    confirmButtonText: 'حاول مرة أخرى',
-                    timer: 5000,
-                    timerProgressBar: true,
-                    allowOutsideClick: true,
-                    allowEscapeKey: true
-                });
-                triggerAnimation();
-                return false;
-            }
-
-            const data = doc.data();
-            const deviceId = await getDeviceId();
-
-            if (!data.used) {
-                await codeRef.update({
-                    deviceId: deviceId,
-                    used: true,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                localStorage.setItem("password", password);
-                await loadSimilaritesData();
-                updateNotes();
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'تم الدخول بنجاح',
-                    text: 'تم تفعيل كلمة المرور بنجاح!',
-                    confirmButtonText: 'موافق',
-                    allowOutsideClick: true,
-                    allowEscapeKey: true
-                });
-                triggerAnimation();
-                return true;
-            } else {
-                if (data.deviceId === deviceId) {
-                    localStorage.setItem("password", password);
-                    await loadSimilaritesData();
-                    updateNotes();
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'تم الدخول بنجاح',
-                        text: 'كلمة المرور صحيحة!',
-                        confirmButtonText: 'موافق',
-                        allowOutsideClick: true,
-                        allowEscapeKey: true
-                    });
-                    triggerAnimation();
-                    return true;
-                } else {
-                    await Swal.fire({
-                        icon: 'error',
-                        title: 'خطأ',
-                        text: 'كلمة المرور مستخدمة على جهاز آخر!',
-                        showConfirmButton: true,
-                        confirmButtonText: 'حاول مرة أخرى',
-                        timer: 3000,
-                        timerProgressBar: true,
-                        allowOutsideClick: true,
-                        allowEscapeKey: true
-                    });
-                    triggerAnimation();
-                    return false;
-                }
-            }
-        } catch (error) {
-            await Swal.fire({
-                icon: 'error',
-                title: 'خطأ',
-                text: error.message.includes('offline') ? 'أنت غير متصل بالإنترنت. يرجى التحقق من الاتصال.' : 'حدث خطأ: ' + error.message,
-                showConfirmButton: true,
-                confirmButtonText: 'حاول مرة أخرى',
-                timer: 3000,
-                timerProgressBar: true,
-                allowOutsideClick: true,
-                allowEscapeKey: true
-            });
-            triggerAnimation();
-            return false;
+              </div>
+            </div>
+          </div>
+        `,
+        showConfirmButton: true,
+        confirmButtonText: 'حاول مرة أخرى',
+        timer: 5000,
+        timerProgressBar: true,
+        allowOutsideClick: false,
+        allowEscapeKey: true,
+        customClass: {
+          container: 'pro-refresh-container',
+          popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
+          title: 'swal2-title',
+          htmlContainer: 'swal2-html-container',
+          confirmButton: 'login-confirm danger'
         }
+      });
+
+      triggerAnimation();
+      return false;
     }
+
+    const data = doc.data();
+    const deviceId = await getDeviceId();
+
+    // ✅ أول استخدام
+    if (!data.used) {
+      await codeRef.update({
+        deviceId: deviceId,
+        used: true,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      localStorage.setItem("password", password);
+      await loadSimilaritesData();
+      updateNotes();
+
+      // ✅ نجاح (بدون زر – يختفي وحده)
+      await Swal.fire({
+        html: `
+          <div class="prx-done">
+            <i class="fas fa-check-circle"></i>
+            <div>
+              <h3>تم الدخول بنجاح</h3>
+              <p>تم تفعيل كلمة المرور ✅</p>
+            </div>
+          </div>
+        `,
+        timer: 1400,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        showCloseButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        customClass: {
+          container: 'pro-refresh-container',
+          popup: 'pro-success-popup login-success'
+        }
+      });
+
+      triggerAnimation();
+      return true;
+    }
+
+    // ✅ مستخدم قبل: نفس الجهاز
+    if (data.deviceId === deviceId) {
+      localStorage.setItem("password", password);
+      await loadSimilaritesData();
+      updateNotes();
+
+      await Swal.fire({
+        html: `
+          <div class="prx-done">
+            <i class="fas fa-check-circle"></i>
+            <div>
+              <h3>تم الدخول بنجاح</h3>
+              <p>كلمة المرور صحيحة ✅</p>
+            </div>
+          </div>
+        `,
+        timer: 1200,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        showCloseButton: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        customClass: {
+          container: 'pro-refresh-container',
+          popup: 'pro-success-popup login-success'
+        }
+      });
+
+      triggerAnimation();
+      return true;
+    }
+
+    // ❌ مستخدمة بجهاز ثاني
+    await Swal.fire({
+      title: 'خطأ',
+      html: `
+        <div class="pro-dialog login-dialog">
+          <div class="pro-hero">
+            <div class="pro-hero-icon" style="background:linear-gradient(135deg, rgba(220,20,60,.25), rgba(139,0,0,.18));">
+              <i class="fas fa-triangle-exclamation"></i>
+            </div>
+            <div class="pro-hero-text">
+              <div class="pro-hero-title">غير مسموح</div>
+              <div class="pro-hero-sub">كلمة المرور مستخدمة على جهاز آخر!</div>
+            </div>
+          </div>
+        </div>
+      `,
+      showConfirmButton: true,
+      confirmButtonText: 'حاول مرة أخرى',
+      timer: 3200,
+      timerProgressBar: true,
+      allowOutsideClick: false,
+      allowEscapeKey: true,
+      customClass: {
+        container: 'pro-refresh-container',
+        popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container',
+        confirmButton: 'login-confirm danger'
+      }
+    });
+
+    triggerAnimation();
+    return false;
+
+  } catch (error) {
+    await Swal.fire({
+      title: 'خطأ',
+      text: error.message.includes('offline')
+        ? 'أنت غير متصل بالإنترنت. يرجى التحقق من الاتصال.'
+        : 'حدث خطأ: ' + error.message,
+      showConfirmButton: true,
+      confirmButtonText: 'حاول مرة أخرى',
+      allowOutsideClick: false,
+      allowEscapeKey: true,
+      customClass: {
+        container: 'pro-refresh-container',
+        popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container',
+        confirmButton: 'login-confirm danger'
+      }
+    });
+
+    triggerAnimation();
+    return false;
+  }
+}
+
 
  window.onload = async function() {
 
