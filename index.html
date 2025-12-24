@@ -4924,71 +4924,36 @@ body {
   #promoPopup.promo-gift .promo-btn{ min-width: 120px; }
 }
 
-/* ===== Anti-Flicker Mobile Fix (Popup only) ===== */
+/* ===== FIX: popup اختفت بسبب visibility hidden ===== */
+#promoPopup{
+  visibility: visible !important;   /* ✅ مهم حتى ما تختفي */
+}
+
+/* ===== Mobile Smooth (works with popup.style.animation) ===== */
 #promoPopup.promo-gift{
-  /* تثبيت بالنص */
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-
-  /* خليها مخفية أول ما تنرسم حتى ما تومض */
-  opacity: 0;
-  visibility: hidden;
-
-  /* GPU smooth */
-  transform: translate3d(-50%, -52%, 0) scale(.985);
+  /* خلي الرسم يصير ناعم بالموبايل */
   will-change: transform, opacity;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 
-  /* دعم iOS للبلر */
-  -webkit-backdrop-filter: blur(18px);
+  /* حالة البداية (قبل الأنيميشن) حتى ما يصير فلاش */
+  transform: translate3d(-50%, -60%, 0) scale(.96);
+  opacity: 0;
 }
 
-/* لما تبدي الأنيميشن (نفس منطقك) تصير ظاهرة */
-#promoPopup.promo-gift.promoPopIn{
-  visibility: visible;
-  animation: promoPopInSmooth .45s cubic-bezier(.2,.9,.2,1) forwards;
+/* ✅ نعيد تعريف نفس الأنيميشن اللي كودك يناديه */
+@keyframes promoPopIn{
+  0%   { transform: translate3d(-50%, -60%, 0) scale(.96); opacity: 0; filter: blur(1px); }
+  60%  { transform: translate3d(-50%, -52%, 0) scale(1.02); opacity: 1; filter: blur(0px); }
+  100% { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 1; }
 }
 
-#promoPopup.promo-gift.promoPopOut{
-  visibility: visible; /* تبقى ظاهرة لحد ما تخلص */
-  animation: promoPopOutSmooth .28s ease-in forwards;
+@keyframes promoPopOut{
+  0%   { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 1; }
+  100% { transform: translate3d(-50%, -60%, 0) scale(.96); opacity: 0; }
 }
 
-/* keyframes جديدة ناعمة بدون فلاش */
-@keyframes promoPopInSmooth{
-  from{
-    opacity: 0;
-    transform: translate3d(-50%, -56%, 0) scale(.985);
-    filter: saturate(1.05);
-  }
-  to{
-    opacity: 1;
-    transform: translate3d(-50%, -50%, 0) scale(1);
-    filter: saturate(1);
-  }
-}
 
-@keyframes promoPopOutSmooth{
-  from{
-    opacity: 1;
-    transform: translate3d(-50%, -50%, 0) scale(1);
-  }
-  to{
-    opacity: 0;
-    transform: translate3d(-50%, -56%, 0) scale(.985);
-  }
-}
-
-/* إذا البلر هو سبب الوميض ببعض الأجهزة: خففه بالموبايل */
-@media (max-width: 600px){
-  #promoPopup.promo-gift{
-    /* جرّب تخفيفه بدل إلغائه نهائياً */
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-  }
-}
 
 
 
