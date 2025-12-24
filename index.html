@@ -5012,6 +5012,58 @@ body {
   }
 }
 
+/* =========================
+   NO-FLICKER MOBILE MODE ✅
+   (Popup + Overlay only)
+   ========================= */
+@media (max-width: 768px){
+
+  /* 1) الغِ blur نهائياً (هو مصدر الوميض) */
+  #overlay{
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(0,0,0,.68) !important; /* نفس الإحساس بدون blur */
+  }
+
+  #promoPopup{
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* 2) الغِ أي filter/blur داخل أنيميشن الدخول/الخروج (مصدر وميض قوي) */
+  @keyframes promoPopIn{
+    0%   { transform: translate3d(-50%, -60%, 0) scale(.96); opacity: 0; }
+    60%  { transform: translate3d(-50%, -52%, 0) scale(1.01); opacity: 1; }
+    100% { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 1; }
+  }
+  @keyframes promoPopOut{
+    0%   { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 1; }
+    100% { transform: translate3d(-50%, -60%, 0) scale(.96); opacity: 0; }
+  }
+
+  /* 3) امنع إعادة الرسم الثقيلة بسبب الحلقات/اللمعة المتحركة */
+  #promoPopup.promo-gift::after{ content: none !important; } /* لمعان متحرك */
+  #promoPopup .promo-ring,
+  #promoPopup .promo-spark{ display: none !important; }      /* حلقات/شرارات */
+
+  /* 4) خلّي حركة “خفيفة” فقط على الأيقونة (transform GPU) بدون أي مؤثرات ثقيلة */
+  #promoPopup .promo-badge{ 
+    animation: badgeFloatMobile 3.2s ease-in-out infinite !important;
+    will-change: transform;
+  }
+  #promoPopup .promo-badge i{
+    animation: none !important; /* نوقف wiggle إذا كان يسبب redraw */
+  }
+  @keyframes badgeFloatMobile{
+    0%,100%{ transform: translate3d(0,0,0); }
+    50%{ transform: translate3d(0,-4px,0); }
+  }
+
+  /* 5) أوقف لمعة زر الدخول المتحركة لأنها تسبب repaint ببعض الأجهزة */
+  #promoPopup .promo-primary::after{ animation: none !important; }
+}
+
+
 
 
 
