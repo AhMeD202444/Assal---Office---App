@@ -5066,6 +5066,120 @@ body {
   100% { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 1; }
 }
 
+/* === ONLY: Remove X + Remove button effects (no other changes) === */
+
+/* امسح X */
+#promoPopup.promo-gift .promo-x{
+  display: none !important;
+}
+
+/* الغي كل تأثيرات الأزرار */
+#promoPopup.promo-gift .promo-btn{
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* الغي hover/active اللي يغير شكلها */
+#promoPopup.promo-gift .promo-btn:hover,
+#promoPopup.promo-gift .promo-btn:active{
+  transform: none !important;
+  filter: none !important;
+}
+
+/* الغي اللمعة/الأنيميشن على زر الدخول */
+#promoPopup.promo-gift .promo-primary::after{
+  content: none !important;
+  animation: none !important;
+  display: none !important;
+}
+
+
+
+
+#promoPopup.promo-gift{
+  top: 50% !important;
+  left: 50% !important;
+  animation-fill-mode: forwards !important;
+}
+
+
+
+/* ===== FINAL: NO FLICKER ON PHONE + NO X + NO BUTTON FX ===== */
+
+/* امسح X */
+#promoPopup.promo-gift .promo-x{ display:none !important; }
+
+/* الغي تأثيرات الأزرار فقط */
+#promoPopup.promo-gift .promo-btn,
+#promoPopup.promo-gift .promo-btn:hover,
+#promoPopup.promo-gift .promo-btn:active{
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+#promoPopup.promo-gift .promo-primary::after{
+  content: none !important;
+  display: none !important;
+  animation: none !important;
+}
+
+/* أهم شي: امنع “الفلاش” قبل ما تبدي الأنيميشن */
+#promoPopup.promo-gift{
+  opacity: 0; /* حتى لو صار display:flex، ما يبرق */
+  transform: translate3d(-50%, -60%, 0) scale(.96);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* overlay يصعد بنعومة (بدون وميض) */
+#overlay{
+  opacity: 0;
+  transition: opacity .2s ease;
+  will-change: opacity;
+}
+#overlay[style*="display: block"],
+#overlay[style*="display:block"]{
+  opacity: 1;
+}
+
+/* نفس أسماء الأنيميشن اللي كودك يناديها (بدون blur/filter نهائياً) */
+@keyframes promoPopIn{
+  0%   { transform: translate3d(-50%, -60%, 0) scale(.96); opacity: 0; }
+  70%  { transform: translate3d(-50%, -52%, 0) scale(1.01); opacity: 1; }
+  100% { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 1; }
+}
+@keyframes promoPopOut{
+  0%   { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 1; }
+  100% { transform: translate3d(-50%, -60%, 0) scale(.96); opacity: 0; }
+}
+
+/* بالموبايل: طفي مؤثرات blur اللي تسوي redraw قوي */
+@media (max-width: 768px){
+  #overlay{
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(0,0,0,.70) !important;
+  }
+  #promoPopup.promo-gift{
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* اذا عندك لمعان/شرارات بالنافذة تسوي redraw: طفيها بالموبايل فقط */
+  #promoPopup.promo-gift::before,
+  #promoPopup.promo-gift::after{
+    content: none !important;
+  }
+  #promoPopup .promo-ring,
+  #promoPopup .promo-spark{
+    display: none !important;
+  }
+}
+
+
+
 
 
 
@@ -5154,10 +5268,7 @@ body {
 
 <!-- إعلان هدية التوافقات -->
 <div id="promoPopup" class="alert-shell alert-event promo-gift" dir="rtl">
-  <button class="promo-x" type="button" aria-label="إغلاق" onclick="closePopup()">
-    <i class="fas fa-xmark"></i>
-  </button>
-
+  
   <div class="promo-top">
     <div class="promo-badge" aria-hidden="true">
       <span class="promo-ring"></span>
