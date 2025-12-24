@@ -5066,107 +5066,135 @@ body {
   100% { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 1; }
 }
 
-/* === ONLY: Remove X + Remove button effects (no other changes) === */
 
-/* امسح X */
-#promoPopup.promo-gift .promo-x{
-  display: none !important;
-}
+/* =========================
+   NO-FLASH FIX (CSS ONLY)
+   Paste at the VERY END
+   ========================= */
 
-/* الغي كل تأثيرات الأزرار */
-#promoPopup.promo-gift .promo-btn{
-  transition: none !important;
-  transform: none !important;
-  filter: none !important;
-}
+/* 1) overlay: خلي الفتح يصير بسلاسة بدون ومضة */
+#overlay{
+  /* خلي الخلفية ثابتة وناعمة بدل blur */
+  background: rgba(0,0,0,.55) !important;
 
-/* الغي hover/active اللي يغير شكلها */
-#promoPopup.promo-gift .promo-btn:hover,
-#promoPopup.promo-gift .promo-btn:active{
-  transform: none !important;
-  filter: none !important;
-}
-
-/* الغي اللمعة/الأنيميشن على زر الدخول */
-#promoPopup.promo-gift .promo-primary::after{
-  content: none !important;
-  animation: none !important;
-  display: none !important;
-}
-
-
-
-
-#promoPopup.promo-gift{
-  top: 50% !important;
-  left: 50% !important;
-  animation-fill-mode: forwards !important;
-}
-
-/* ===== NO-FLICKER (keep gift icon animation) ===== */
-
-/* امسح X (اذا بعدك تريده ينشال) */
-#promoPopup.promo-gift .promo-x{ display:none !important; }
-
-/* الغي تأثيرات الأزرار فقط */
-#promoPopup.promo-gift .promo-btn,
-#promoPopup.promo-gift .promo-btn:hover,
-#promoPopup.promo-gift .promo-btn:active{
-  transition: none !important;
-  transform: none !important;
-  filter: none !important;
-}
-#promoPopup.promo-gift .promo-primary::after{
-  content: none !important;
-  display: none !important;
-  animation: none !important;
-}
-
-/* يمنع “الفلاش” قبل الأنيميشن */
-#promoPopup.promo-gift{
+  /* يمنع أول فريم يطلع مفاجئ */
   opacity: 0;
-  transform: translate3d(-50%, -60%, 0) scale(.96);
-  will-change: transform, opacity;
+
+  /* أول ما يصير display:block من JS راح يبدي هذا الأنيميشن */
+  animation: overlayFadeIn .18s ease-out forwards;
+
+  /* تحسينات أداء */
+  will-change: opacity;
+  transform: translateZ(0);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+
+  /* أهم شي: شيل البلور اللي يسوي وميض */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-/* overlay بدون وميض */
-#overlay{
+/* 2) popup: ثبّت مكانه وخلي الأنيميشن transform/opacity */
+#promoPopup{
+  top: 50% !important;
+  left: 50% !important;
+
+  /* أول ما ينفتح (display:flex) يبقى مخفي لحظة بدل الومضة */
   opacity: 0;
-  transition: opacity .2s ease;
-  will-change: opacity;
-}
-#overlay[style*="display: block"],
-#overlay[style*="display:block"]{
-  opacity: 1;
+
+  /* تحسينات أداء */
+  will-change: transform, opacity;
+  transform: translate3d(-50%,-50%,0) scale(.98);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  contain: layout paint;
+  isolation: isolate;
+
+  /* شيل blur اللي يسبب ومضة */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-/* نفس أسماء الأنيميشن اللي كودك يناديها */
+/* 3) إعادة تعريف نفس الأنيميشنات اللي الـ JS يناديها */
 @keyframes promoPopIn{
-  0%   { transform: translate3d(-50%, -60%, 0) scale(.96); opacity: 0; }
-  70%  { transform: translate3d(-50%, -52%, 0) scale(1.01); opacity: 1; }
-  100% { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 1; }
-}
-@keyframes promoPopOut{
-  0%   { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 1; }
-  100% { transform: translate3d(-50%, -60%, 0) scale(.96); opacity: 0; }
+  from{
+    opacity: 0;
+    transform: translate3d(-50%,-54%,0) scale(.98);
+  }
+  to{
+    opacity: 1;
+    transform: translate3d(-50%,-50%,0) scale(1);
+  }
 }
 
-/* بالموبايل: اطفي blur فقط (هو سبب الوميض) — بدون لمس حركة الهدية */
+@keyframes promoPopOut{
+  from{
+    opacity: 1;
+    transform: translate3d(-50%,-50%,0) scale(1);
+  }
+  to{
+    opacity: 0;
+    transform: translate3d(-50%,-46%,0) scale(.98);
+  }
+}
+
+@keyframes overlayFadeIn{
+  from{ opacity: 0; }
+  to{ opacity: 1; }
+}
+
+
+
+/* =========================
+   NO-FLICKER MOBILE MODE ✅
+   (Popup + Overlay only)
+   ========================= */
 @media (max-width: 768px){
+
+  /* 1) الغِ blur نهائياً (هو مصدر الوميض) */
   #overlay{
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    background: rgba(0,0,0,.70) !important;
+    background: rgba(0,0,0,.68) !important; /* نفس الإحساس بدون blur */
   }
-  #promoPopup.promo-gift{
+
+  #promoPopup{
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
+
+  /* 2) الغِ أي filter/blur داخل أنيميشن الدخول/الخروج (مصدر وميض قوي) */
+  @keyframes promoPopIn{
+    0%   { transform: translate3d(-50%, -60%, 0) scale(.96); opacity: 0; }
+    60%  { transform: translate3d(-50%, -52%, 0) scale(1.01); opacity: 1; }
+    100% { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 1; }
+  }
+  @keyframes promoPopOut{
+    0%   { transform: translate3d(-50%, -50%, 0) scale(1); opacity: 1; }
+    100% { transform: translate3d(-50%, -60%, 0) scale(.96); opacity: 0; }
+  }
+
+  /* 3) امنع إعادة الرسم الثقيلة بسبب الحلقات/اللمعة المتحركة */
+  #promoPopup.promo-gift::after{ content: none !important; } /* لمعان متحرك */
+  #promoPopup .promo-ring,
+  #promoPopup .promo-spark{ display: none !important; }      /* حلقات/شرارات */
+
+  /* 4) خلّي حركة “خفيفة” فقط على الأيقونة (transform GPU) بدون أي مؤثرات ثقيلة */
+  #promoPopup .promo-badge{ 
+    animation: badgeFloatMobile 3.2s ease-in-out infinite !important;
+    will-change: transform;
+  }
+  #promoPopup .promo-badge i{
+    animation: none !important; /* نوقف wiggle إذا كان يسبب redraw */
+  }
+  @keyframes badgeFloatMobile{
+    0%,100%{ transform: translate3d(0,0,0); }
+    50%{ transform: translate3d(0,-4px,0); }
+  }
+
+  /* 5) أوقف لمعة زر الدخول المتحركة لأنها تسبب repaint ببعض الأجهزة */
+  #promoPopup .promo-primary::after{ animation: none !important; }
 }
-
-
 
 
 
@@ -5253,7 +5281,10 @@ body {
 
 <!-- إعلان هدية التوافقات -->
 <div id="promoPopup" class="alert-shell alert-event promo-gift" dir="rtl">
-  
+  <button class="promo-x" type="button" aria-label="إغلاق" onclick="closePopup()">
+    <i class="fas fa-xmark"></i>
+  </button>
+
   <div class="promo-top">
     <div class="promo-badge" aria-hidden="true">
       <span class="promo-ring"></span>
