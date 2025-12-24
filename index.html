@@ -4924,6 +4924,71 @@ body {
   #promoPopup.promo-gift .promo-btn{ min-width: 120px; }
 }
 
+/* ===== Anti-Flicker Mobile Fix (Popup only) ===== */
+#promoPopup.promo-gift{
+  /* تثبيت بالنص */
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+
+  /* خليها مخفية أول ما تنرسم حتى ما تومض */
+  opacity: 0;
+  visibility: hidden;
+
+  /* GPU smooth */
+  transform: translate3d(-50%, -52%, 0) scale(.985);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+
+  /* دعم iOS للبلر */
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* لما تبدي الأنيميشن (نفس منطقك) تصير ظاهرة */
+#promoPopup.promo-gift.promoPopIn{
+  visibility: visible;
+  animation: promoPopInSmooth .45s cubic-bezier(.2,.9,.2,1) forwards;
+}
+
+#promoPopup.promo-gift.promoPopOut{
+  visibility: visible; /* تبقى ظاهرة لحد ما تخلص */
+  animation: promoPopOutSmooth .28s ease-in forwards;
+}
+
+/* keyframes جديدة ناعمة بدون فلاش */
+@keyframes promoPopInSmooth{
+  from{
+    opacity: 0;
+    transform: translate3d(-50%, -56%, 0) scale(.985);
+    filter: saturate(1.05);
+  }
+  to{
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(1);
+    filter: saturate(1);
+  }
+}
+
+@keyframes promoPopOutSmooth{
+  from{
+    opacity: 1;
+    transform: translate3d(-50%, -50%, 0) scale(1);
+  }
+  to{
+    opacity: 0;
+    transform: translate3d(-50%, -56%, 0) scale(.985);
+  }
+}
+
+/* إذا البلر هو سبب الوميض ببعض الأجهزة: خففه بالموبايل */
+@media (max-width: 600px){
+  #promoPopup.promo-gift{
+    /* جرّب تخفيفه بدل إلغائه نهائياً */
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+}
 
 
 
