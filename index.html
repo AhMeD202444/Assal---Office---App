@@ -5103,11 +5103,9 @@ body {
   animation-fill-mode: forwards !important;
 }
 
+/* ===== NO-FLICKER (keep gift icon animation) ===== */
 
-
-/* ===== FINAL: NO FLICKER ON PHONE + NO X + NO BUTTON FX ===== */
-
-/* امسح X */
+/* امسح X (اذا بعدك تريده ينشال) */
 #promoPopup.promo-gift .promo-x{ display:none !important; }
 
 /* الغي تأثيرات الأزرار فقط */
@@ -5124,16 +5122,16 @@ body {
   animation: none !important;
 }
 
-/* أهم شي: امنع “الفلاش” قبل ما تبدي الأنيميشن */
+/* يمنع “الفلاش” قبل الأنيميشن */
 #promoPopup.promo-gift{
-  opacity: 0; /* حتى لو صار display:flex، ما يبرق */
+  opacity: 0;
   transform: translate3d(-50%, -60%, 0) scale(.96);
   will-change: transform, opacity;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-/* overlay يصعد بنعومة (بدون وميض) */
+/* overlay بدون وميض */
 #overlay{
   opacity: 0;
   transition: opacity .2s ease;
@@ -5144,7 +5142,7 @@ body {
   opacity: 1;
 }
 
-/* نفس أسماء الأنيميشن اللي كودك يناديها (بدون blur/filter نهائياً) */
+/* نفس أسماء الأنيميشن اللي كودك يناديها */
 @keyframes promoPopIn{
   0%   { transform: translate3d(-50%, -60%, 0) scale(.96); opacity: 0; }
   70%  { transform: translate3d(-50%, -52%, 0) scale(1.01); opacity: 1; }
@@ -5155,7 +5153,7 @@ body {
   100% { transform: translate3d(-50%, -60%, 0) scale(.96); opacity: 0; }
 }
 
-/* بالموبايل: طفي مؤثرات blur اللي تسوي redraw قوي */
+/* بالموبايل: اطفي blur فقط (هو سبب الوميض) — بدون لمس حركة الهدية */
 @media (max-width: 768px){
   #overlay{
     backdrop-filter: none !important;
@@ -5166,20 +5164,7 @@ body {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
-
-  /* اذا عندك لمعان/شرارات بالنافذة تسوي redraw: طفيها بالموبايل فقط */
-  #promoPopup.promo-gift::before,
-  #promoPopup.promo-gift::after{
-    content: none !important;
-  }
-  #promoPopup .promo-ring,
-  #promoPopup .promo-spark{
-    display: none !important;
-  }
 }
-
-
-
 
 
 
