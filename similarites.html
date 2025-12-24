@@ -3112,19 +3112,32 @@ body{
             "مكتب عسل: رائد قطع الغيار!"
         ];
 
-        const companies = ["SAMSUNG", "HUAWEI", "TECNO", "HONOR", "IPHONE", "XIAOMI", "OPPO", "VIVO", "REALME", "INFINIX", "NOKIA", "BLACKVIEW"];
+        const companies = ["SAMSUNG", "HUAWEI", "TECNO", "HONOR", "IPHONE", "XIAOMI", "OPPO", "VIVO", "REALME", "INFINIX", "NOKIA", "BLACKVIEW", "ITEL", "TCL", "POCO", "REDMI", "MI"];
 
-        function extractCategoryName(item) {
-            const words = item.split(" ");
-            let categoryName = "";
-            for (let i = 0; i < words.length; i++) {
-                categoryName += (i > 0 ? " " : "") + words[i];
-                if (companies.includes(words[i].toUpperCase())) {
-                    break;
-                }
-            }
-            return categoryName.trim();
-        }
+     function extractCategoryName(item) {
+  const words = item.trim().split(/\s+/);
+  let picked = [];
+  let foundCompany = false;
+
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i];
+    picked.push(w);
+
+    const up = w.toUpperCase();
+    if (companies.some(c => up.startsWith(c))) {
+      foundCompany = true;
+      break;
+    }
+  }
+
+  // fallback: إذا ما لكت شركة، خذ أول كلمتين بس (مثل: BATTERY ITEL)
+  if (!foundCompany) {
+    return words.slice(0, 2).join(" ");
+  }
+
+  return picked.join(" ").trim();
+}
+
 
 
 function triggerAnimation() {
