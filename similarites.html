@@ -2809,6 +2809,125 @@ body{
 }
 
 
+/* ===== PRO NOTES DRAWER (آخر الستايل) ===== */
+.notes-drawer{
+  width: min(440px, 92vw) !important;
+  right: calc(-1 * min(440px, 92vw)) !important;
+  padding: 16px 14px 14px !important;
+  background: linear-gradient(135deg, rgba(10,14,26,.92), rgba(15,26,45,.86)) !important;
+  border-left: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: -18px 0 55px rgba(0,0,0,.55) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
+  backdrop-filter: blur(14px) saturate(140%) !important;
+}
+
+.notes-drawer.active{ right: 0 !important; }
+
+.notes-drawer h3{
+  margin: 10px 0 14px !important;
+  font-size: 20px !important;
+  color: rgba(233,238,252,.96) !important;
+  text-shadow: none !important;
+  letter-spacing: .2px;
+}
+
+.notes-drawer .close-btn{
+  top: 12px !important;
+  left: 12px !important;
+  width: 38px;
+  height: 38px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 20px rgba(0,0,0,.35);
+  transition: transform .15s ease, background .15s ease;
+}
+.notes-drawer .close-btn:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.12);
+}
+
+.notes-items-container{
+  max-height: calc(100vh - 110px) !important;
+  overflow: auto !important;
+  padding: 4px 2px 2px;
+}
+
+.notes-items-container::-webkit-scrollbar{ width: 10px; }
+.notes-items-container::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.14);
+  border-radius: 999px;
+  border: 2px solid rgba(0,0,0,.25);
+}
+
+.notes-item{
+  display: flex !important;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px !important;
+  padding: 14px 14px 12px !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04)) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: 0 14px 35px rgba(0,0,0,.35);
+  transition: border-color .2s ease, transform .2s ease;
+}
+.notes-item:hover{
+  border-color: rgba(70,179,255,.35) !important;
+  transform: translateY(-1px);
+}
+
+/* اسم التوافق: لف + توسيط */
+.notes-item .note-name{
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.55;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  color: rgba(233,238,252,.92);
+  padding: 2px 6px;
+}
+
+/* زر الإزالة */
+.notes-item .note-remove{
+  align-self: center;
+  width: min(240px, 92%);
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,77,109,.92), rgba(255,77,109,.62));
+  border: 1px solid rgba(255,255,255,.10);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 16px 30px rgba(0,0,0,.35);
+  transition: transform .15s ease, filter .15s ease;
+}
+.notes-item .note-remove:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+.notes-item .note-remove:active{ transform: translateY(0px) scale(.99); }
+
+/* Empty state */
+.notes-empty{
+  padding: 18px 12px;
+  text-align: center;
+  color: rgba(233,238,252,.72);
+  border: 1px dashed rgba(255,255,255,.18);
+  border-radius: 16px;
+  background: rgba(255,255,255,.04);
+}
+
+
 
         
         
@@ -3520,6 +3639,11 @@ function triggerAnimation() {
     $(document).ready(function() {
         triggerAnimation();
         displayNewSimilarities();
+        // أول تشغيل: سوّي مزامنة وحدث السلة/العداد
+stats.notesAdded = Array.isArray(notes) ? notes.length : 0;
+localStorage.setItem('stats', JSON.stringify(stats));
+updateNotes();
+
 
         const slider = document.getElementById('slider');
         const prevBtn = document.querySelector('.prev-btn');
@@ -4086,49 +4210,87 @@ function fireLoginStyle(opts = {}) {
         }
     }
 
-    function toggleNotes() {
-        const notesDrawer = document.getElementById('notesDrawer');
-        notesDrawer.classList.toggle('active');
-    }
+ function toggleNotes() {
+  const notesDrawer = document.getElementById('notesDrawer');
+  notesDrawer.classList.toggle('active');
 
-    function addToNotes(itemName) {
-        notes.push({ name: itemName });
-        stats.notesAdded++;
-        localStorage.setItem('notes', JSON.stringify(notes));
-        localStorage.setItem('stats', JSON.stringify(stats));
-        updateNotes();
-    }
+  // إذا انفتحت السلة، حدّث المحتوى والعداد فوراً
+  if (notesDrawer.classList.contains('active')) {
+    updateNotes();
+  }
+}
 
-    function updateNotes() {
-        const notesItems = document.getElementById('notesItems');
-        const headerNotesCount = document.getElementById('headerNotesCount');
-        notesItems.innerHTML = '';
 
-        notes.forEach((item, index) => {
-            const notesItem = document.createElement('div');
-            notesItem.classList.add('notes-item');
-            notesItem.innerHTML = `
-                <span>${item.name}</span>
-                <button onclick="removeFromNotes(${index})">إزالة</button>
-            `;
-            notesItems.appendChild(notesItem);
-        });
+function addToNotes(itemName) {
+  notes.push({ name: itemName });
 
-        headerNotesCount.textContent = notes.length;
-        if (notes.length > 0) {
-            headerNotesCount.classList.add('visible');
-        } else {
-            headerNotesCount.classList.remove('visible');
-        }
-    }
+  // خلي العداد دائماً يطابق عدد العناصر الحقيقي
+  stats.notesAdded = notes.length;
 
-    function removeFromNotes(index) {
-        notes.splice(index, 1);
-        stats.notesAdded--;
-        localStorage.setItem('notes', JSON.stringify(notes));
-        localStorage.setItem('stats', JSON.stringify(stats));
-        updateNotes();
-    }
+  localStorage.setItem('notes', JSON.stringify(notes));
+  localStorage.setItem('stats', JSON.stringify(stats));
+  updateNotes();
+}
+
+function removeFromNotes(index) {
+  notes.splice(index, 1);
+
+  // خلي العداد دائماً يطابق عدد العناصر الحقيقي
+  stats.notesAdded = notes.length;
+
+  localStorage.setItem('notes', JSON.stringify(notes));
+  localStorage.setItem('stats', JSON.stringify(stats));
+  updateNotes();
+}
+
+
+
+ 
+
+  function updateNotes() {
+  const notesItems = document.getElementById('notesItems');
+  const headerNotesCount = document.getElementById('headerNotesCount');
+  if (!notesItems || !headerNotesCount) return;
+
+  // أمان
+  if (!Array.isArray(notes)) notes = [];
+
+  notesItems.innerHTML = '';
+
+  // Empty state فخم
+  if (notes.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'notes-empty';
+    empty.textContent = 'ماكو ملاحظات حالياً — أضف توافقات حتى تنحفظ هنا.';
+    notesItems.appendChild(empty);
+  } else {
+    notes.forEach((item, index) => {
+      const notesItem = document.createElement('div');
+      notesItem.className = 'notes-item';
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'note-name';
+      nameEl.textContent = item?.name ?? '';
+
+      const btn = document.createElement('button');
+      btn.className = 'note-remove';
+      btn.type = 'button';
+      btn.innerHTML = '<i class="fas fa-trash"></i> إزالة';
+      btn.addEventListener('click', () => removeFromNotes(index));
+
+      notesItem.appendChild(nameEl);
+      notesItem.appendChild(btn);
+      notesItems.appendChild(notesItem);
+    });
+  }
+
+  // عداد الهيدر
+  headerNotesCount.textContent = String(notes.length);
+  headerNotesCount.classList.toggle('visible', notes.length > 0);
+}
+
+
+
 
     function goBack() {
         window.location.href = "index.html";
