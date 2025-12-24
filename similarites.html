@@ -2443,10 +2443,14 @@ body{
 .swal2-popup.stats-popup{
   min-height: auto !important;
   height: auto !important;
-  max-height: 82vh !important;
+   max-height: 95vh !important;  /* كان 82vh */
   justify-content: flex-start !important;
   padding-bottom: 14px !important;
+   width: min(92vw, 620px) !important;
+   max-width: 620px !important;
 }
+
+
 
 /* احتياط: إذا بقى مكان للأزرار */
 .swal2-popup.stats-popup .swal2-actions{
@@ -2774,6 +2778,28 @@ body{
 }
 
 
+
+.swal2-popup.stats-popup .swal2-close{
+  font-size: 0 !important;   /* يخفي الـ × الأصلي */
+  line-height: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.swal2-popup.stats-popup .swal2-close::before{
+  content: "×";
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 900;
+  color: #fff;
+  transform: translateY(-1px); /* تعديل بصري بسيط إذا تحسها نازلة */
+}
+
+.swal2-popup.activation-popup.pro-popup.stats-popup .swal2-html-container{
+  max-height: none !important;
+  overflow: visible !important;
+}
 
 
 
