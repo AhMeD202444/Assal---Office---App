@@ -186,9 +186,9 @@
     }
 
     .logo-orb{
-      width: 104px;
-      height: 104px;
-      border-radius: 18px; /* مربع ناعم */
+      width: 92px;      /* نفس الروح */
+      height: 92px;     /* مربع */
+      border-radius: 22px;
       padding: 8px;
       background:
         radial-gradient(80px 80px at 30% 30%, rgba(124,58,237,.45), transparent 70%),
@@ -201,9 +201,9 @@
       justify-content:center;
     }
     .logo-orb img{
-      width:100%;
-      height:100%;
-      border-radius: 14px; /* مربع ناعم */
+      width: 100%;
+      height: 100%;
+      border-radius: 18px;  /* مربع ناعم */
       object-fit: cover;
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
@@ -816,6 +816,47 @@ body{
 }
 @keyframes gtDraw{ to{ stroke-dashoffset: 0; } }
 
+/* ترتيب البادجات بشكل مرتب */
+.hero-badges{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 بادجات صف واحد */
+  gap: 10px;
+  justify-content: stretch;
+  align-items: stretch;
+  flex: 1 1 100%;
+}
+
+.badge{
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  padding: 10px 10px;
+  border-radius: 16px;
+  min-height: 42px;        /* نفس طول موحد */
+}
+
+/* للموبايل: يصير 2 فوق + 1 تحت بالنص */
+@media (max-width: 520px){
+  .hero-badges{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .hero-badges .badge:last-child{
+    grid-column: 1 / -1;   /* الثالثة تاخذ سطر وحدها */
+  }
+}
+
+
+.hero-brand{
+  width: 100%;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.hero-brand{
+  flex-direction: row-reverse; /* يقلب ترتيب العناصر */
+}
 
 
     
@@ -849,23 +890,29 @@ body{
 
   <main class="wrap">
     <section class="hero animate__animated animate__fadeInUp">
-      <div class="hero-inner">
-        <div class="hero-brand">
-          <div class="logo-orb">
-            <img src="images/logo.png" alt="Logo" />
-          </div>
-          <div class="hero-text">
-            <h1>قائمة الأصناف</h1>
-            <p>اختار الشركة/القسم… والنتائج تطلع بشكل مرتب وسريع.</p>
-          </div>
-        </div>
+   
+   
+   <div class="hero-inner">
+  <div class="hero-brand">
+    <div class="hero-text">
+      <h1>قائمة الأصناف</h1>
+      <p>اختار الشركة/القسم… والنتائج تطلع بشكل مرتب وسريع.</p>
+    </div>
 
-        <div class="hero-badges">
-          <div class="badge"><i class="fa-solid fa-bolt"></i> تحديث مباشر</div>
-          <div class="badge"><i class="fa-solid fa-shield-halved"></i> عرض نظيف</div>
-          <div class="badge"><i class="fa-solid fa-wand-magic-sparkles"></i> تصميم Premium</div>
-        </div>
-      </div>
+    <div class="logo-orb">
+      <img src="images/logo.png" alt="Logo" />
+    </div>
+  </div>
+
+  <div class="hero-badges">
+    <div class="badge"><i class="fa-solid fa-bolt"></i> تحديث مباشر</div>
+    <div class="badge"><i class="fa-solid fa-shield-halved"></i> عرض نظيف</div>
+    <div class="badge"><i class="fa-solid fa-wand-magic-sparkles"></i> تصميم Premium</div>
+  </div>
+</div>
+
+   
+   
     </section>
 
     <section class="panel animate__animated animate__fadeInUp" style="animation-delay:.08s;">
