@@ -518,6 +518,306 @@ footer i{
 }
 
 
+/* ==========================
+   GLOBAL TOUCH / HIGHLIGHT
+   ========================== */
+
+/* يمنع أي تأثير لمس/هايلايت خارج العناصر القابلة للنقر */
+html, body{
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* يمنع تحديد النص باللمس بالغلط */
+body{
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* هايلايت محدد لكل العناصر القابلة للنقر بالصفحة */
+:where(
+  button,
+  a,
+  .icon-btn,
+  .cat,
+  .result-card,
+  .scroll-to-top,
+  .swal2-confirm,
+  .swal2-cancel,
+  .swal2-close
+){
+  -webkit-tap-highlight-color: rgba(6,182,212,.25); /* لون الهايلايت */
+  touch-action: manipulation;
+}
+
+/* تأثير ضغط (Active) أنيق بدل “لمعة” سخيفة */
+:where(.icon-btn, .cat, .result-card, .scroll-to-top, button, a):active{
+  transform: scale(.985);
+  filter: brightness(1.06);
+}
+
+/* فوكَس واضح للكيبورد/اكسسبيليتي */
+:where(.icon-btn, .cat, .result-card, button, a, .swal2-confirm, .swal2-cancel):focus-visible{
+  outline: 2px solid rgba(6,182,212,.55);
+  outline-offset: 3px;
+  border-radius: 16px;
+}
+
+
+
+/* ==========================
+   SWEETALERT2 — GLOBAL TECH (NO SCROLL)
+   ========================== */
+
+.swal2-container.swal2-backdrop-show{
+  background: radial-gradient(900px 650px at 20% 12%, rgba(6,182,212,.12), transparent 58%),
+              radial-gradient(900px 650px at 86% 18%, rgba(124,58,237,.12), transparent 60%),
+              rgba(0,0,0,.78) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* أهم شي: لا سكرول نهائياً داخل النافذة */
+.swal2-popup.gt-popup{
+  width: min(420px, 92vw) !important;
+  max-height: calc(100vh - 28px) !important;
+  overflow: hidden !important;
+  border-radius: 22px !important;
+  padding: 16px 16px 14px !important;
+
+  background: rgba(10,14,24,.78) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: 0 32px 110px rgba(0,0,0,.78) !important;
+  color: rgba(240,246,255,.92) !important;
+  position: relative;
+}
+
+.swal2-title.gt-title{
+  font-family:"Cairo",sans-serif !important;
+  font-weight: 900 !important;
+  letter-spacing: .3px;
+  margin: 6px 0 0 !important;
+}
+
+.swal2-html-container.gt-html{
+  margin: 10px 0 0 !important;
+  overflow: hidden !important;      /* يمنع السكرول */
+  max-height: none !important;      /* SweetAlert يسوي max-height أحياناً */
+  padding: 0 !important;
+  color: rgba(240,246,255,.72) !important;
+  font-family:"Cairo",sans-serif !important;
+  line-height: 1.55 !important;
+}
+
+/* محتوى مودال صغير ومضغوط حتى ما يحتاج سكرول */
+.gt-wrap{
+  position: relative;
+  border-radius: 18px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  overflow: hidden;
+}
+
+/* شريط تقني متحرك */
+.gt-scan{
+  position:absolute;
+  left:-20%;
+  right:-20%;
+  height: 46px;
+  top: -60px;
+  background: linear-gradient(180deg, transparent, rgba(6,182,212,.18), transparent);
+  animation: gtScan 1.7s ease-in-out infinite;
+  pointer-events:none;
+  opacity: .9;
+}
+@keyframes gtScan{
+  0%{ transform: translateY(0); opacity:0; }
+  20%{ opacity:.95; }
+  100%{ transform: translateY(210px); opacity:0; }
+}
+
+/* Header row */
+.gt-row{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.gt-logo{
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  overflow:hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  flex: 0 0 52px;
+  box-shadow: 0 20px 55px rgba(0,0,0,.55);
+}
+.gt-logo img{ width:100%; height:100%; object-fit:cover; }
+
+.gt-text{
+  flex: 1;
+  min-width: 0;
+}
+.gt-text .a{
+  font-size: 13.7px;
+  color: rgba(240,246,255,.88);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gt-text .b{
+  font-size: 12.3px;
+  color: rgba(240,246,255,.62);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* Loader (تقني) - Rings */
+.gt-loader{
+  width: 82px;
+  height: 82px;
+  position: relative;
+  flex: 0 0 82px;
+  filter: drop-shadow(0 18px 45px rgba(0,0,0,.55));
+}
+.gt-ring{
+  position:absolute;
+  inset:0;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.02);
+  overflow:hidden;
+}
+.gt-ring::before{
+  content:"";
+  position:absolute;
+  inset:-70%;
+  background: conic-gradient(from 90deg,
+    rgba(6,182,212,0),
+    rgba(6,182,212,.65),
+    rgba(124,58,237,.55),
+    rgba(34,197,94,.28),
+    rgba(6,182,212,0)
+  );
+  animation: gtSpin .95s linear infinite;
+}
+@keyframes gtSpin{ to{ transform: rotate(360deg);} }
+
+.gt-ring::after{
+  content:"";
+  position:absolute;
+  inset: 9px;
+  border-radius: 50%;
+  background: rgba(10,14,24,.92);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.gt-core{
+  position:absolute;
+  inset:0;
+  margin:auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(6,182,212,.95);
+  box-shadow: 0 0 24px rgba(6,182,212,.35);
+  animation: gtPulse 1.05s ease-in-out infinite;
+}
+@keyframes gtPulse{
+  0%,100%{ transform: scale(.85); opacity:.7; }
+  50%{ transform: scale(1.25); opacity:1; }
+}
+
+/* شريط تقدم ناعم (بدون سكرول) */
+.gt-bar{
+  margin-top: 12px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  overflow:hidden;
+}
+.gt-bar i{
+  display:block;
+  height:100%;
+  width: 32%;
+  background: linear-gradient(90deg,
+    rgba(6,182,212,0),
+    rgba(6,182,212,.55),
+    rgba(124,58,237,.45),
+    rgba(6,182,212,0)
+  );
+  animation: gtSweep 1.05s ease-in-out infinite;
+}
+@keyframes gtSweep{
+  from{ transform: translateX(-160%); }
+  to  { transform: translateX(380%); }
+}
+
+/* Success */
+.gt-success{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  margin-top: 6px;
+}
+.gt-badge{
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  border: 1px solid rgba(34,197,94,.22);
+  background: rgba(255,255,255,.05);
+  position: relative;
+  overflow:hidden;
+  flex: 0 0 60px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.65);
+}
+.gt-badge::before{
+  content:"";
+  position:absolute;
+  inset:-70%;
+  background: conic-gradient(from 90deg,
+    rgba(34,197,94,0),
+    rgba(34,197,94,.55),
+    rgba(6,182,212,.30),
+    rgba(34,197,94,0)
+  );
+  animation: gtSpin 1.2s linear infinite;
+  opacity:.75;
+}
+.gt-badge::after{
+  content:"";
+  position:absolute;
+  inset: 9px;
+  border-radius: 12px;
+  background: rgba(10,14,24,.92);
+  border: 1px solid rgba(255,255,255,.08);
+}
+.gt-badge svg{
+  position:absolute;
+  inset:0;
+  margin:auto;
+  width: 34px;
+  height: 34px;
+  z-index:2;
+}
+.gt-badge path{
+  stroke: rgba(34,197,94,.95);
+  stroke-width: 6.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill:none;
+  stroke-dasharray: 120;
+  stroke-dashoffset: 120;
+  animation: gtDraw .55s ease forwards .10s;
+}
+@keyframes gtDraw{ to{ stroke-dashoffset: 0; } }
+
+
+
     
     
   </style>
@@ -726,35 +1026,31 @@ footer i{
       return dropboxMainFileBase + Date.now();
     }
 
-    async function loadExcelFiles() {
-      try {
-        const mainResponse = await fetch(getDropboxMainFile());
-        if (!mainResponse.ok) throw new Error("Failed to fetch Excel file");
+async function loadExcelFiles() {
+  try {
+    const mainResponse = await fetch(getDropboxMainFile());
+    if (!mainResponse.ok) throw new Error("Failed to fetch Excel file");
 
-        const mainBuffer = await mainResponse.arrayBuffer();
-        const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
+    const mainBuffer = await mainResponse.arrayBuffer();
+    const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
 
-        database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {});
-        database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
-        database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
-        database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BACK"] || {});
-        database.CAMERA = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CAMERA"] || {});
-        database.CHARGING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CHARGING"] || {});
-        database.BUZZER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BUZZER"] || {});
-        database.FINGER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["FINGER"] || {});
+    database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {});
+    database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {});
+    database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {});
+    database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BACK"] || {});
+    database.CAMERA = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CAMERA"] || {});
+    database.CHARGING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CHARGING"] || {});
+    database.BUZZER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BUZZER"] || {});
+    database.FINGER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["FINGER"] || {});
 
-        console.log("Excel files loaded successfully");
-      } catch (error) {
-        console.error("Error loading Excel files:", error);
-        Swal.fire({
-          icon: "error",
-          title: "خطأ",
-          text: "فشل في تحميل البيانات، حاول مرة أخرى!",
-          background: "linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9))",
-          color: "#fff",
-        });
-      }
-    }
+    console.log("Excel files loaded successfully");
+    return true;
+  } catch (error) {
+    console.error("Error loading Excel files:", error);
+    throw error;
+  }
+}
+
 
     function formatPrice(p) {
       if (p === undefined || p === null) return "غير متوفر";
@@ -901,39 +1197,131 @@ footer i{
       );
     }
 
-    async function refreshData() {
-      try {
-        Swal.fire({
-          title: "جاري التحديث",
-          text: "يرجى الانتظار...",
-          allowOutsideClick: false,
-          background: "linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9))",
-          color: "#fff",
-          didOpen: () => Swal.showLoading(),
-        });
+const LOADING_MIN_MS = 6500; // ✅ زيد وقت نافذة التحميل (مثلاً 6.5 ث)
+const SUCCESS_MS     = 3200; // ✅ زيد وقت نافذة النجاح (مثلاً 3.2 ث)
 
-        await loadExcelFiles();
+function delay(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-        Swal.fire({
-          title: "تم التحديث",
-          text: "تم تحديث البيانات بنجاح",
-          icon: "success",
-          background: "linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9))",
-          color: "#fff",
-          showConfirmButton: false,
-          timer: 1300,
-        });
-      } catch (error) {
-        Swal.fire({
-          title: "خطأ",
-          text: "حدث خطأ أثناء التحديث",
-          icon: "error",
-          background: "linear-gradient(135deg, rgba(26, 58, 71, 0.9), rgba(10, 21, 26, 0.9))",
-          color: "#fff",
-          confirmButtonText: "موافق",
-        });
-      }
+function openGlobalTechLoading(){
+  Swal.fire({
+    title: "تحديث البيانات",
+    html: `
+      <div class="gt-wrap">
+        <div class="gt-scan"></div>
+
+        <div class="gt-row">
+          <div class="gt-logo"><img src="images/logo.png" alt="logo"></div>
+
+          <div class="gt-text">
+            <div class="a">جاري التحميل والمزامنة…</div>
+            <div class="b" id="gtSub">Downloading workbook</div>
+          </div>
+
+          <div class="gt-loader">
+            <div class="gt-ring"></div>
+            <div class="gt-core"></div>
+          </div>
+        </div>
+
+        <div class="gt-bar"><i></i></div>
+      </div>
+    `,
+    showConfirmButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    heightAuto: false,               // ✅ يقلل مشاكل الارتفاع/السكرول
+    scrollbarPadding: false,         // ✅ يمنع أي حركات padding
+    customClass: {
+      popup: "gt-popup",
+      title: "gt-title",
+      htmlContainer: "gt-html",
     }
+  });
+}
+
+function setGlobalTechSub(t){
+  const el = document.getElementById("gtSub");
+  if (el) el.textContent = t;
+}
+
+function openGlobalTechSuccess(){
+  Swal.fire({
+    title: "تم التحديث",
+    html: `
+      <div class="gt-wrap">
+        <div class="gt-scan"></div>
+
+        <div class="gt-success">
+          <div class="gt-badge">
+            <svg viewBox="0 0 52 52" aria-hidden="true">
+              <path d="M14 27 L23 35 L38 17"></path>
+            </svg>
+          </div>
+          <div style="min-width:0;">
+            <div style="color: rgba(240,246,255,.88); font-size:13.7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              مزامنة مكتملة ✅
+            </div>
+            <div style="color: rgba(240,246,255,.62); font-size:12.3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;">
+              سيتم تحديث الواجهة خلال لحظات…
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+    showConfirmButton: false,
+    timer: SUCCESS_MS,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    heightAuto: false,
+    scrollbarPadding: false,
+    customClass: {
+      popup: "gt-popup",
+      title: "gt-title",
+      htmlContainer: "gt-html",
+    },
+    willClose: () => window.location.reload(true) // إذا تريد بدون Reload قولي وخليه false
+  });
+}
+
+function openGlobalTechError(){
+  Swal.fire({
+    icon: "error",
+    title: "فشل التحميل",
+    text: "تعذّر تحميل البيانات… جرّب مرة ثانية.",
+    confirmButtonText: "حاضر",
+    heightAuto: false,
+    scrollbarPadding: false,
+    customClass: {
+      popup: "gt-popup",
+      title: "gt-title",
+      htmlContainer: "gt-html",
+      confirmButton: "holo-btn"
+    }
+  });
+}
+
+async function refreshData(){
+  const start = Date.now();
+  try{
+    openGlobalTechLoading();       // ✅ بدون await حتى ما يعلگ
+    setGlobalTechSub("Downloading workbook…");
+
+    await loadExcelFiles();
+
+    setGlobalTechSub("Parsing sheets…");
+
+    // ✅ يضمن إن نافذة التحميل تبقى مدة أطول حتى لو التحميل سريع
+    const elapsed = Date.now() - start;
+    if (elapsed < LOADING_MIN_MS) await delay(LOADING_MIN_MS - elapsed);
+
+    Swal.close();
+    openGlobalTechSuccess();
+  } catch(e){
+    Swal.close();
+    openGlobalTechError();
+  }
+}
+
 
     function goBack() {
       window.location.href = "index.html";
