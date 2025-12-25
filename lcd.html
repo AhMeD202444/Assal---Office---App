@@ -969,6 +969,23 @@ html, body {
   box-shadow: none !important;
 }
 
+/* يمنع قفزة السكرول بسبب fadeInUp أول مرة */
+.results-wrap.no-jump {
+  animation: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+/* أنيميشن بديل آمن (opacity فقط) بدون translateY */
+.results-wrap.safe-reveal {
+  animation: safeReveal .28s ease both;
+}
+@keyframes safeReveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+
     
     
   </style>
@@ -1217,62 +1234,104 @@ async function loadExcelFiles() {
       if (Number.isNaN(num)) return s;
       return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " دينار";
     }
+    
+    
+    let __resultsOpenedOnce = false;
 
-    async function displayResults(items, title) {
-      const resultsWrap = document.getElementById("resultsWrap");
-      const resultsContainer = document.getElementById("results");
-      const resultsTitle = document.getElementById("resultsTitle");
-      const resultsCount = document.getElementById("resultsCount");
-      const scrollToTopBtn = document.getElementById("scrollToTop");
+function scrollToResultsWrapStable() {
+  const resultsWrap = document.getElementById("resultsWrap");
+  const headerOffset = 72; // عندك body padding-top:72px
 
-      resultsContainer.innerHTML = "";
+  const y = resultsWrap.getBoundingClientRect().top + window.pageYOffset - headerOffset - 8;
 
-      resultsTitle.textContent = "نتائج: " + title;
-      resultsCount.textContent = items.length ? (items.length + " عنصر") : "0 عنصر";
+  // كسر القفزة (auto) وبعدها smooth
+  window.scrollTo({ top: y, behavior: "auto" });
+  requestAnimationFrame(() => window.scrollTo({ top: y, behavior: "smooth" }));
+}
 
-      resultsWrap.style.display = "block";
+    
+    
 
-      if (items.length === 0) {
-        resultsContainer.innerHTML = `<div class="no-results">لا توجد بيانات لـ ${title} حالياً</div>`;
-        scrollToTopBtn.style.display = "none";
-        setTimeout(() => resultsWrap.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
-        return;
+async function displayResults(items, title) {
+  const resultsWrap = document.getElementById("resultsWrap");
+  const resultsContainer = document.getElementById("results");
+  const resultsTitle = document.getElementById("resultsTitle");
+  const resultsCount = document.getElementById("resultsCount");
+  const scrollToTopBtn = document.getElementById("scrollToTop");
+
+  resultsContainer.innerHTML = "";
+
+  resultsTitle.textContent = "نتائج: " + title;
+  resultsCount.textContent = items.length ? (items.length + " عنصر") : "0 عنصر";
+
+  // ✅ أول مرة: نوقف fadeInUp اللي يسبب jump
+  if (!__resultsOpenedOnce) {
+    resultsWrap.classList.add("no-jump");
+  }
+
+  resultsWrap.style.display = "block";
+
+  if (items.length === 0) {
+    resultsContainer.innerHTML = `<div class="no-results">لا توجد بيانات لـ ${title} حالياً</div>`;
+    scrollToTopBtn.style.display = "none";
+
+    // ✅ سكرول ثابت
+    setTimeout(() => {
+      scrollToResultsWrapStable();
+
+      // ✅ بعد ما ثبتنا السكرول: نرجع أنيميشن آمن
+      if (!__resultsOpenedOnce) {
+        resultsWrap.classList.remove("no-jump");
+        resultsWrap.classList.add("safe-reveal");
+        __resultsOpenedOnce = true;
       }
+    }, 30);
 
-      items.sort((a, b) => {
-        return (a["Item Name"] || a["Item"]).localeCompare(b["Item Name"] || b["Item"], "en");
-      });
+    return;
+  }
 
-      items.sort((a, b) => {
-        const baseNameA = (a["Item Name"] || a["Item"]).split("(")[0].trim();
-        const baseNameB = (b["Item Name"] || b["Item"]).split("(")[0].trim();
-        const priceA = parseFloat(a["Price"]) || 0;
-        const priceB = parseFloat(b["Price"]) || 0;
+  items.sort((a, b) => {
+    return (a["Item Name"] || a["Item"]).localeCompare(b["Item Name"] || b["Item"], "en");
+  });
 
-        if (baseNameA === baseNameB) return priceB - priceA;
-        return 0;
-      });
+  items.sort((a, b) => {
+    const baseNameA = (a["Item Name"] || a["Item"]).split("(")[0].trim();
+    const baseNameB = (b["Item Name"] || b["Item"]).split("(")[0].trim();
+    const priceA = parseFloat(a["Price"]) || 0;
+    const priceB = parseFloat(b["Price"]) || 0;
 
-      let htmlContent = "";
-      items.forEach((item) => {
-        htmlContent += `
-          <div class="result-card">
-            <img src="images/lcd.png" alt="Image">
-            <div class="meta">
-              <div class="item-name">${item["Item Name"] ?? item["Item"] ?? ""}</div>
-              <div class="price">${formatPrice(item["Price"])}</div>
-            </div>
-          </div>
-        `;
-      });
+    if (baseNameA === baseNameB) return priceB - priceA;
+    return 0;
+  });
 
-      resultsContainer.innerHTML = htmlContent;
-      scrollToTopBtn.style.display = "none";
+  let htmlContent = "";
+  items.forEach((item) => {
+    htmlContent += `
+      <div class="result-card">
+        <img src="images/lcd.png" alt="Image">
+        <div class="meta">
+          <div class="item-name">${item["Item Name"] ?? item["Item"] ?? ""}</div>
+          <div class="price">${formatPrice(item["Price"])}</div>
+        </div>
+      </div>
+    `;
+  });
 
-      setTimeout(() => {
-        resultsWrap.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 90);
+  resultsContainer.innerHTML = htmlContent;
+  scrollToTopBtn.style.display = "none";
+
+  setTimeout(() => {
+    scrollToResultsWrapStable();
+
+    // ✅ بعد أول سكرول صحيح: نشيل no-jump ونشغل أنيميشن آمن
+    if (!__resultsOpenedOnce) {
+      resultsWrap.classList.remove("no-jump");
+      resultsWrap.classList.add("safe-reveal");
+      __resultsOpenedOnce = true;
     }
+  }, 30);
+}
+
 
     async function filterLCDCategory(categoryNumber, categoryName) {
       if (!database.LCD) {
