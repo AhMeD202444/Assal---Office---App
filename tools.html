@@ -1400,7 +1400,147 @@
   max-height: none !important; /* يلغي 52vh القديمة */
 }
 
+:root{
+  --panel-gap: 12px;     /* المسافة الأنيقة من حدود التطبيق */
+  --panel-radius: 22px;
+}
 
+/* =====================
+   CART = نفس ابعاد الفاتورة
+===================== */
+.cart{
+  position: fixed !important;
+
+  top:    calc(var(--panel-gap) + env(safe-area-inset-top)) !important;
+  bottom: calc(var(--panel-gap) + env(safe-area-inset-bottom)) !important;
+  left:   var(--panel-gap) !important;
+  right:  var(--panel-gap) !important;
+
+  width: auto !important;
+  height: auto !important;
+  max-width: none !important;
+
+  border-radius: var(--panel-radius) !important;
+  overflow: hidden !important;
+
+  transform: translateY(18px) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: transform .22s ease, opacity .22s ease !important;
+  z-index: 9999 !important;
+}
+.cart.open{
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* =====================
+   INVOICE (SweetAlert) = نفس ابعاد السلة
+===================== */
+.swal2-container.gt-inv-container{
+  padding:
+    calc(var(--panel-gap) + env(safe-area-inset-top))
+    var(--panel-gap)
+    calc(var(--panel-gap) + env(safe-area-inset-bottom)) !important;
+
+  align-items: stretch !important;
+  justify-content: stretch !important;
+}
+
+.swal2-popup.gt-swal.gt-inv-popup{
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border-radius: var(--panel-radius) !important;
+  overflow: hidden !important;
+}
+
+.swal2-popup.gt-swal.gt-inv-popup .swal2-html-container{
+  height: 100% !important;
+  max-height: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+
+/* خلي الفاتورة (SweetAlert) فوق السلة دائماً */
+.swal2-container{
+  z-index: 20000 !important;
+}
+
+
+:root{
+  --panel-gap: 12px;
+  --panel-radius: 22px;
+
+  --panel-top: calc(var(--panel-gap) + env(safe-area-inset-top));
+  --panel-h: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - (var(--panel-gap) * 2));
+}
+
+/* SweetAlert فوق الكل */
+.swal2-container{ z-index: 20000 !important; }
+
+/* نلغي قيود الكونتينر */
+.swal2-container.gt-inv-container{
+  padding: 0 !important;
+  display: block !important;
+}
+
+/* ✅ نفس المستطيل (عرض/ارتفاع) بالضبط */
+.cart,
+.swal2-popup.gt-swal.gt-inv-popup{
+  position: fixed !important;
+
+  top: var(--panel-top) !important;
+  height: var(--panel-h) !important;
+  bottom: auto !important;
+
+  left: var(--panel-gap) !important;
+  right: var(--panel-gap) !important;
+  width: auto !important;
+  max-width: none !important;
+
+  border-radius: var(--panel-radius) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* سلوك فتح السلة */
+.cart{
+  transform: translateY(18px) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: transform .22s ease, opacity .22s ease !important;
+}
+.cart.open{
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* محتوى SweetAlert يتمدد بالكامل */
+.swal2-popup.gt-swal.gt-inv-popup{
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.swal2-popup.gt-swal.gt-inv-popup .swal2-html-container{
+  height: 100% !important;
+  max-height: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+/* الفاتورة: خلي جسمها يتمدد وسكرول داخل العناصر */
+.gt-inv{ height: 100%; display:flex; flex-direction:column; }
+.gt-inv-body{ flex:1; min-height:0; display:flex; flex-direction:column; }
+.gt-inv-items{ flex:1; min-height:0; max-height:none !important; }
 
     
     
@@ -4146,15 +4286,15 @@ function openInvoice(){
     </div>
   `;
 
-  Swal.fire({
-  title: "",                 // مهم حتى نلغي مساحة/خط العنوان
+Swal.fire({
+  title: "",
   html,
-  width: "100%",             // كان min(760px, 96vw)
-  heightAuto: false,         // مهم للموبايل حتى ما يصير تمدد غريب
+  width: "auto",          // مهم: نخلي CSS هو اللي يتحكم
+  heightAuto: false,      // مهم للموبايل
   showConfirmButton: false,
   showCancelButton: false,
   customClass: {
-    container: "gt-inv-container",   // ✅ جديد: حتى نضيف padding (gap) للفاتورة فقط
+    container: "gt-inv-container",   // ✅ هذا كان ناقص
     popup: "gt-swal gt-inv-popup",
     title: "gt-swal-title",
     htmlContainer: "gt-swal-html"
@@ -4166,7 +4306,9 @@ function openInvoice(){
   }
 });
 
+
 }
+
 
 
 
