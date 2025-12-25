@@ -858,90 +858,116 @@ body{
   flex-direction: row-reverse; /* يقلب ترتيب العناصر */
 }
 
-/* =========================================
-   MOBILE TAP FIX (YOUR CLASSES) — CSS ONLY
-   يمنع تأثير اللمس خارج الزر + يحدد الهايلايت
-   ========================================= */
 
-:root{
-  /* غيّر اللون إذا تحب (هذا هايلايت خفيف محترم) */
-  --tapHL: rgba(255,255,255,.16);
-}
+/* ==========================
+   FIX: Mobile Tap Highlight + No Outside Press Glow
+   (CSS ONLY - Apply Everywhere)
+   ========================== */
 
-/* 1) اقفل أي هايلايت افتراضي على الصفحة (حتى ما يطلع برا الزر) */
-html, body{
+/* 1) اقفل الهايلايت الأزرق بالموبايل */
+html, body {
   -webkit-tap-highlight-color: transparent !important;
   -webkit-touch-callout: none !important;
 }
 
-/* 2) كل العناصر القابلة للنقر عندك + كل شي داخلها */
-.header-btn, .header-btn *,
-.category-btn, .category-btn *,
-.result-card, .result-card *,
-.no-results, .no-results *,
-.scroll-to-top, .scroll-to-top *,
-a, a*, button, button*,
-.swal2-confirm, .swal2-cancel, .swal2-close,
-.swal2-confirm *, .swal2-cancel *, .swal2-close *{
-  -webkit-tap-highlight-color: var(--tapHL) !important;  /* ✅ الهايلايت اللي تريده */
-  -webkit-touch-callout: none !important;
-
+/* 2) عمّمها على كل شي قابل للنقر عندك */
+:where(
+  button,
+  a,
+  input[type="button"],
+  input[type="submit"],
+  .header-btn,
+  .category-btn,
+  .new-category-btn,
+  .tools-btn,
+  .category,
+  .slider-btn,
+  .scroll-to-top,
+  .no-results,
+  .result-card,
+  .close-modal-btn,
+  .swal2-confirm,
+  .swal2-cancel,
+  .swal2-close
+){
+  -webkit-tap-highlight-color: transparent !important;
   outline: none !important;
   -webkit-appearance: none !important;
   appearance: none !important;
 
-  -webkit-user-select: none !important;
-  user-select: none !important;
+  /* 3) يمنع أي تأثير يطلع برّه العنصر */
+  overflow: hidden !important;
 
-  touch-action: manipulation;
+  /* إذا العنصر مو دائري: قص مطابق للـ border-radius */
+  clip-path: inset(0 0 0 0 round 18px) !important;
 }
 
-/* 3) قصّ أي تأثير داخل حدود العنصر (حتى ما يطلع برا) */
-.header-btn{
-  overflow: hidden !important;
-  clip-path: inset(0 0 0 0 round 5px) !important;
-}
-
-.category-btn{
-  overflow: hidden !important;
+/* عناصر دائرية عندك لازم قص دائري (حتى ما يطلع تأثير خارج الدائرة) */
+:where(.category, .slider-btn, .scroll-to-top, .close-modal-btn, .search-container button, .search-container .clear-btn){
   clip-path: circle(50% at 50% 50%) !important;
 }
 
-.result-card{
-  overflow: hidden !important;
-  clip-path: inset(0 0 0 0 round 15px) !important;
-}
-
-.no-results{
-  overflow: hidden !important;
-  clip-path: inset(0 0 0 0 round 10px) !important;
-}
-
-.scroll-to-top{
-  overflow: hidden !important;
-  clip-path: circle(50% at 50% 50%) !important;
-}
-
-/* 4) شيل أي فوكس/إطار يطلع بالموبايل */
-.header-btn:focus, .header-btn:focus-visible,
-.category-btn:focus, .category-btn:focus-visible,
-.result-card:focus, .result-card:focus-visible,
-.no-results:focus, .no-results:focus-visible,
-.scroll-to-top:focus, .scroll-to-top:focus-visible,
-.swal2-confirm:focus, .swal2-confirm:focus-visible,
-.swal2-cancel:focus, .swal2-cancel:focus-visible,
-.swal2-close:focus, .swal2-close:focus-visible{
+/* شيل أي Focus يظهر بعد الضغط (خصوصاً iOS/Android) */
+:where(
+  button, a,
+  .header-btn, .category-btn, .new-category-btn, .tools-btn,
+  .category, .slider-btn, .scroll-to-top, .no-results, .result-card,
+  .swal2-confirm, .swal2-cancel, .swal2-close, .close-modal-btn
+):focus,
+:where(
+  button, a,
+  .header-btn, .category-btn, .new-category-btn, .tools-btn,
+  .category, .slider-btn, .scroll-to-top, .no-results, .result-card,
+  .swal2-confirm, .swal2-cancel, .swal2-close, .close-modal-btn
+):focus-visible{
   outline: none !important;
   box-shadow: none !important;
 }
 
-/* 5) فايرفوكس (احتياط) */
-.header-btn::-moz-focus-inner,
-.swal2-confirm::-moz-focus-inner,
-.swal2-cancel::-moz-focus-inner{
+/* فايرفوكس: يلغي الإطار الداخلي للأزرار */
+:where(
+  button,
+  .header-btn,
+  .swal2-confirm,
+  .swal2-cancel
+)::-moz-focus-inner{
   border: 0 !important;
 }
 
+/* (اختياري) يخلي الضغط “محترم” بدون وميض */
+:where(.header-btn,.category-btn,.new-category-btn,.tools-btn,.category,.slider-btn,.scroll-to-top,.no-results,.result-card):active{
+  filter: brightness(1.02);
+}
+
+
+/* ==========================
+   FIX for Category Cards (.cat)
+   ========================== */
+
+/* طبق نفس الحماية على أزرار الأصناف عندك */
+.cat{
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+
+  overflow: hidden !important;
+  clip-path: inset(0 0 0 0 round 18px) !important;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* مهم: طبقة اللمعة ::after عندك ممكن تاخذ اللمس */
+.cat::after{
+  pointer-events: none !important;  /* يخلي اللمس يروح للزر نفسه */
+}
+
+/* شيل أي focus */
+.cat:focus,
+.cat:focus-visible{
+  outline: none !important;
+  box-shadow: none !important;
+}
 
     
     
