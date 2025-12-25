@@ -472,7 +472,7 @@
       border:1px solid rgba(255,255,255,.12) !important;
       box-shadow: var(--shadow-soft) !important;
       transition: transform .18s ease, border-color .18s ease, background .18s ease;
-      cursor: default; /* لأن ماكو نافذة */
+      cursor: pointer; /* فتح صورة المنتج عند الضغط */
       display:flex;
       align-items:center !important;
       gap: 12px !important;
@@ -857,6 +857,138 @@
       .cart.open{ bottom: 0; }
     }
 
+
+    /* Force Cairo on all controls */
+    button, input, select, textarea{
+      font-family: "Cairo", sans-serif !important;
+    }
+
+    /* Filter button indicator */
+    .mini-btn.has-filter{ position: relative; }
+    .mini-btn.has-filter::after{
+      content:"";
+      position:absolute;
+      top:6px;
+      right:6px;
+      width:9px;
+      height:9px;
+      border-radius:999px;
+      background: linear-gradient(135deg, rgba(6,182,212,.95), rgba(124,58,237,.90));
+      box-shadow: 0 0 0 4px rgba(6,182,212,.18);
+    }
+
+    /* SweetAlert buttons */
+    .swal2-actions .swal2-styled{
+      font-family:"Cairo", sans-serif !important;
+      border-radius: 16px !important;
+      padding: 10px 14px !important;
+      font-weight: 1000 !important;
+      box-shadow: 0 16px 34px rgba(0,0,0,.32) !important;
+    }
+    .swal2-actions .swal2-styled:focus{
+      box-shadow: 0 16px 34px rgba(0,0,0,.32) !important;
+    }
+
+    /* Filters modal */
+    .gt-filters{ display:grid; gap: 12px; margin-top: 8px; }
+    .gt-grid2{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .gt-field{
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      padding: 10px 12px;
+    }
+    .gt-field label{
+      display:block;
+      font-size: 12px;
+      color: rgba(234,240,255,.72);
+      margin-bottom: 6px;
+      font-weight: 900;
+    }
+    .gt-field input{
+      width:100%;
+      border:none;
+      outline:none;
+      background: transparent;
+      color: rgba(234,240,255,.92);
+      font-weight: 900;
+      direction:ltr;
+      text-align:left;
+      user-select:text;
+      -webkit-user-select:text;
+    }
+    .gt-toggle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+    }
+    .gt-toggle b{ font-size: 13px; }
+    .gt-switch{
+      width: 52px;
+      height: 30px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      position: relative;
+      cursor:pointer;
+      transition: background .18s ease, border-color .18s ease;
+    }
+    .gt-switch::after{
+      content:"";
+      position:absolute;
+      top:3px;
+      left:3px;
+      width:24px;
+      height:24px;
+      border-radius:999px;
+      background: rgba(234,240,255,.92);
+      box-shadow: 0 12px 20px rgba(0,0,0,.30);
+      transition: transform .18s ease;
+    }
+    .gt-switch.on{
+      background: linear-gradient(135deg, rgba(6,182,212,.55), rgba(124,58,237,.42));
+      border-color: rgba(6,182,212,.35);
+    }
+    .gt-switch.on::after{ transform: translateX(22px); }
+
+    @media (max-width: 520px){
+      .gt-grid2{ grid-template-columns: 1fr; }
+    }
+
+    /* Image modal */
+    .gt-img-modal{
+      border-radius: 20px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      box-shadow: 0 22px 70px rgba(0,0,0,.55);
+    }
+    .gt-img-modal img{
+      width:100%;
+      height:auto;
+      max-height: 72vh;
+      object-fit: contain;
+      display:block;
+      background: rgba(0,0,0,.15);
+    }
+
+    /* Cart thumb */
+    .ci-thumb{
+      width:44px; height:44px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      object-fit: cover;
+      flex: 0 0 44px;
+      box-shadow: 0 14px 30px rgba(0,0,0,.22);
+    }
+
+
     /* Hide legacy elements from your original file if present */
     .filters, .custom-dropdown, .dropdown-options, .search-orbit { display:none !important; }
   </style>
@@ -950,6 +1082,10 @@
               <option value="name-desc">الاسم: ي-أ</option>
             </select>
           </div>
+
+          <button class="mini-btn" id="gtFilterBtn" title="فلترة">
+            <i class="fa-solid fa-sliders"></i>
+          </button>
         </div>
       </div>
 
@@ -2935,6 +3071,8 @@
       .replaceAll('"',"&quot;")
       .replaceAll("'","&#039;");
 
+    const escapeAttr = (s) => escapeHTML(s).replaceAll("\n"," ");
+
     const normalize = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g," ");
 
     const iconForCategory = (name) => {
@@ -2961,6 +3099,7 @@
     let currentCategoryKey = null; // لا نعرض أي نتائج بالبداية
     let searchTerm = "";
     let sortMode = "default";
+    let advancedFilters = { min: null, max: null, availableOnly: false };
 
     // ===== DOM =====
     const productsGrid = document.getElementById("productsGrid");
@@ -2973,6 +3112,7 @@
 
     const searchInput = document.getElementById("gtSearchInput");
     const sortSelect = document.getElementById("gtSortSelect");
+    const filterBtn = document.getElementById("gtFilterBtn");
     const hintBox = document.getElementById("hintBox");
 
     const cartDrawer = document.getElementById("cartDrawer");
@@ -2984,7 +3124,32 @@
 
     const scrollToTopBtn = document.getElementById("scrollToTop");
 
-    // ===== Prepare product cards (بدون نافذة عند الضغط) =====
+    // ===== Modal: عرض صورة المنتج فقط =====
+    function openImageOnlyModal(src, title){
+      if (!src){
+        Swal.fire({
+          title:"ماكو صورة",
+          text:"هذا المنتج ما بيه صورة حالياً.",
+          icon:"info",
+          customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
+          background:"transparent",
+          confirmButtonText:"تم",
+          confirmButtonColor:"#06B6D4"
+        });
+        return;
+      }
+
+      Swal.fire({
+        title: title || "صورة المنتج",
+        html: `<div class="gt-img-modal"><img src="${escapeAttr(src)}" alt="${escapeAttr(title || "Product")}" /></div>`,
+        showConfirmButton:false,
+        showCloseButton:true,
+        customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
+        background:"transparent"
+      });
+    }
+
+    // ===== Prepare product cards =====
     function prepareCards(){
       cards.forEach(card => {
         const title = (card.querySelector("h4")?.textContent || "").trim();
@@ -3002,6 +3167,7 @@
         card.dataset.catkey = catKey;    // filter key
 
         const img = card.querySelector("img");
+        card.dataset.img = img ? (img.getAttribute("src") || "") : "";
         const oldBtn = card.querySelector("button");
         if (oldBtn){
           oldBtn.removeAttribute("onclick");
@@ -3040,7 +3206,7 @@
           add.innerHTML = `<i class="fa-solid fa-plus"></i>`;
           add.addEventListener("click", (e) => {
             e.stopPropagation();
-            addToCart(title, price);
+            addToCart(title, price, card.dataset.img);
           });
 
           actions.appendChild(priceBadge);
@@ -3063,6 +3229,12 @@
 
           card.appendChild(meta);
           card.appendChild(actions);
+        }
+
+        // فتح صورة المنتج (نافذة بريميوم) عند الضغط على الكارد
+        if (!card.dataset.imgBound){
+          card.dataset.imgBound = "1";
+          card.addEventListener("click", () => openImageOnlyModal(card.dataset.img, card.dataset.name));
         }
       });
     }
@@ -3224,7 +3396,11 @@
         const inCat = (currentCategoryKey === "all") || (card.dataset.catkey === currentCategoryKey);
         const hay = ((card.dataset.name || "") + " " + (card.dataset.desc || "")).toLowerCase();
         const inSearch = !term || hay.includes(term);
-        const show = inCat && inSearch;
+        const price = Number(card.dataset.price || 0);
+        const passesAvail = !advancedFilters.availableOnly || price > 0;
+        const passesMin = (advancedFilters.min == null) || (price >= advancedFilters.min);
+        const passesMax = (advancedFilters.max == null) || (price <= advancedFilters.max);
+        const show = inCat && inSearch && passesAvail && passesMin && passesMax;
         card.style.setProperty("display", show ? "flex" : "none");
         if (show) visible++;
       });
@@ -3259,6 +3435,95 @@
       updateScrollBtn();
     }
 
+
+    function applyFilterBadge(){
+      if (!filterBtn) return;
+      const active = advancedFilters.availableOnly || advancedFilters.min != null || advancedFilters.max != null;
+      filterBtn.classList.toggle("has-filter", !!active);
+    }
+
+    function openFiltersModal(){
+      const minV = (advancedFilters.min == null) ? "" : String(advancedFilters.min);
+      const maxV = (advancedFilters.max == null) ? "" : String(advancedFilters.max);
+      const avail = !!advancedFilters.availableOnly;
+
+      Swal.fire({
+        title:"فلترة المنتجات",
+        html: `
+          <div class="gt-filters">
+            <div class="gt-grid2">
+              <div class="gt-field">
+                <label>أقل سعر (د.ع)</label>
+                <input id="gtMinPrice" type="number" inputmode="numeric" placeholder="مثال: 5000" value="${minV}">
+              </div>
+              <div class="gt-field">
+                <label>أعلى سعر (د.ع)</label>
+                <input id="gtMaxPrice" type="number" inputmode="numeric" placeholder="مثال: 25000" value="${maxV}">
+              </div>
+            </div>
+
+            <div class="gt-toggle">
+              <div>
+                <b>بس المتوفر</b>
+                <div style="font-size:12px; color: rgba(234,240,255,.62); margin-top:2px;">يخفي المنتجات اللي سعرها "غير متوفر"</div>
+              </div>
+              <div class="gt-switch ${avail ? "on":""}" id="gtAvailSwitch" role="switch" aria-checked="${avail}"></div>
+              <input id="gtAvailVal" type="hidden" value="${avail ? "1":"0"}">
+            </div>
+          </div>
+        `,
+        showCancelButton:true,
+        showDenyButton:true,
+        confirmButtonText:"تطبيق",
+        denyButtonText:"مسح",
+        cancelButtonText:"إغلاق",
+        customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
+        background:"transparent",
+        didOpen: () => {
+          const sw = document.getElementById("gtAvailSwitch");
+          const v = document.getElementById("gtAvailVal");
+          if (sw && v){
+            sw.addEventListener("click", () => {
+              sw.classList.toggle("on");
+              const on = sw.classList.contains("on");
+              sw.setAttribute("aria-checked", on ? "true":"false");
+              v.value = on ? "1":"0";
+            });
+          }
+        },
+        preConfirm: () => {
+          const minInput = document.getElementById("gtMinPrice");
+          const maxInput = document.getElementById("gtMaxPrice");
+          const availVal = document.getElementById("gtAvailVal");
+
+          let min = minInput ? Number(minInput.value) : NaN;
+          let max = maxInput ? Number(maxInput.value) : NaN;
+          min = Number.isFinite(min) ? min : null;
+          max = Number.isFinite(max) ? max : null;
+
+          if (min != null && min < 0) min = 0;
+          if (max != null && max < 0) max = 0;
+          if (min != null && max != null && min > max){
+            const t = min; min = max; max = t;
+          }
+          return { min, max, availableOnly: (availVal && availVal.value === "1") };
+        }
+      }).then(r => {
+        if (r.isDenied){
+          advancedFilters = { min:null, max:null, availableOnly:false };
+          applyFilterBadge();
+          filterAndRender();
+          return;
+        }
+        if (r.isConfirmed && r.value){
+          advancedFilters = r.value;
+          applyFilterBadge();
+          filterAndRender();
+        }
+      });
+    }
+
+
     // ===== Cart =====
     const STORAGE_KEY = "asal_dark_premium_cart_v2";
 
@@ -3275,11 +3540,21 @@
       }catch(e){ cart = new Map(); }
     }
 
-    function addToCart(name, price){
+    function findProductImage(name){
+      const c = cards.find(x => (x.dataset.name || "") === name);
+      return c ? (c.dataset.img || "") : "";
+    }
+
+    function addToCart(name, price, img){
       if (!name) return;
-      const item = cart.get(name) || { name, price: price || 0, qty: 0 };
+
+      const item = cart.get(name) || { name, price: price || 0, qty: 0, img: "" };
       item.qty += 1;
       item.price = price || item.price || 0;
+
+      if (img) item.img = img;
+      else if (!item.img) item.img = findProductImage(name);
+
       cart.set(name, item);
       saveCart();
       renderCart();
@@ -3324,16 +3599,25 @@
         const line = item.price * item.qty;
         total += line; count += item.qty;
 
+        const imgSrc = item.img || findProductImage(item.name);
+        if (!item.img && imgSrc) item.img = imgSrc;
+        const thumb = imgSrc
+          ? `<img class="ci-thumb" src="${escapeAttr(imgSrc)}" alt="${escapeAttr(item.name)}" />`
+          : `<div class="ci-thumb" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-image" style="opacity:.75"></i></div>`;
+
         const row = document.createElement("div");
         row.className = "cart-item";
         row.innerHTML = `
-          <div>
+          <div style="display:flex; gap:10px; align-items:center; min-width:0;">
+            ${thumb}
+            <div style="min-width:0;">
             <div class="name">${escapeHTML(item.name)}</div>
             <div class="sub">
               <span>${item.price ? fmtIQD(item.price) : "غير متوفر"}</span>
               <span>•</span>
               <span>المجموع: <b style="color:#06B6D4">${fmtIQD(line)}</b></span>
             </div>
+          </div>
           </div>
           <div style="display:grid; gap:10px; justify-items:end;">
             <div class="qty">
@@ -3379,16 +3663,29 @@
       }
 
       const rows = items.map(i => {
-        const line = i.price * i.qty;
+        const imgSrc = i.img || findProductImage(i.name);
+        const thumb = imgSrc
+          ? `<img src="${escapeAttr(imgSrc)}" alt="${escapeAttr(i.name)}" style="width:44px;height:44px;border-radius:16px;object-fit:cover;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow:0 14px 30px rgba(0,0,0,.22);flex:0 0 44px;" />`
+          : `<div style="width:44px;height:44px;border-radius:16px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;flex:0 0 44px;"><i class="fa-solid fa-image" style="opacity:.75"></i></div>`;
+
+        const line = (i.price || 0) * i.qty;
+
         return `
           <tr>
-            <td style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08);">
-              <div style="font-weight:900; color: rgba(234,240,255,.92)">${escapeHTML(i.name)}</div>
-              <div style="margin-top:4px; color: rgba(234,240,255,.62); font-size:12px;">
-                ${i.qty} × ${fmtIQD(i.price)}
+            <td style="padding:12px 0; border-bottom:1px solid rgba(255,255,255,.08);">
+              <div style="display:flex; gap:12px; align-items:center;">
+                ${thumb}
+                <div style="min-width:0;">
+                  <div style="font-weight:1000; color: rgba(234,240,255,.95); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width: 320px;">
+                    ${escapeHTML(i.name)}
+                  </div>
+                  <div style="margin-top:4px; color: rgba(234,240,255,.62); font-size:12px;">
+                    ${i.qty} × ${fmtIQD(i.price)}
+                  </div>
+                </div>
               </div>
             </td>
-            <td style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); text-align:left; white-space:nowrap; font-weight:1000; color:#06B6D4;">
+            <td style="padding:12px 0; border-bottom:1px solid rgba(255,255,255,.08); text-align:left; white-space:nowrap; font-weight:1000; color:#06B6D4;">
               ${fmtIQD(line)}
             </td>
           </tr>
@@ -3399,10 +3696,14 @@
 
       const html = `
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px; border-radius:18px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);">
-          <div style="display:flex; flex-direction:column; gap:2px;">
-            <div style="font-weight:1000; color: rgba(234,240,255,.95)">فاتورة مبيعات</div>
-            <div style="font-size:12px; color: rgba(234,240,255,.62)">${nowStamp()}</div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <img src="images/logo.png" alt="Logo" style="width:44px;height:44px;border-radius:16px;object-fit:cover;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow: 0 14px 30px rgba(0,0,0,.28);" />
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <div style="font-weight:1000; color: rgba(234,240,255,.95)">فاتورة مبيعات</div>
+              <div style="font-size:12px; color: rgba(234,240,255,.62)">${nowStamp()}</div>
+            </div>
           </div>
+
           <div style="width:44px; height:44px; border-radius:16px; display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg, rgba(6,182,212,.95), rgba(124,58,237,.90)); color: rgba(10,14,24,.95); box-shadow: 0 14px 30px rgba(0,0,0,.28);">
             <i class="fa-solid fa-receipt"></i>
           </div>
@@ -3434,7 +3735,7 @@
       Swal.fire({
         title: "مكتب عسل",
         html,
-        width: 560,
+        width: 600,
         showCancelButton: true,
         confirmButtonText: "تم",
         cancelButtonText: "إغلاق",
@@ -3496,6 +3797,12 @@
       sortMode = e.target.value; 
       filterAndRender(); 
     });
+
+    // ===== Filters =====
+    if (filterBtn){
+      filterBtn.addEventListener("click", openFiltersModal);
+      applyFilterBadge();
+    }
 
     // ===== Scroll top =====
     function updateScrollBtn(){
