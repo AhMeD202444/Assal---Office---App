@@ -1178,6 +1178,133 @@
   box-shadow: 0 0 0 4px rgba(6,182,212,.15);
 }
 
+
+/* Invoice popup only: شيل عنوان السوال حتى ما يصير خط/فراغ أبيض */
+.swal2-popup.gt-swal.gt-inv-popup .swal2-title{
+  display:none !important;
+}
+.swal2-popup.gt-swal.gt-inv-popup .swal2-html-container{
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Premium Invoice v2 (Cards) */
+.gt-inv{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.gt-inv-body{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.gt-inv-items{
+  display:grid;
+  gap:10px;
+  max-height: 52vh;          /* مهم للموبايل */
+  overflow:auto;
+  padding: 2px;
+}
+
+.gt-inv-card{
+  display:grid;
+  grid-template-columns: 46px 1fr auto;
+  gap: 10px;
+  align-items:center;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 18px 40px rgba(0,0,0,.28);
+}
+
+.gt-inv-card .meta{ min-width:0; }
+.gt-inv-card .name{
+  font-weight: 1000;
+  color: rgba(234,240,255,.95);
+  line-height: 1.35;
+  overflow-wrap:anywhere;
+  word-break: break-word;
+}
+
+.gt-inv-card .sub{
+  margin-top: 6px;
+  display:flex;
+  flex-wrap:wrap;
+  gap: 8px;
+  align-items:center;
+  color: rgba(234,240,255,.62);
+  font-size: 12px;
+}
+
+.gt-inv-pill{
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.gt-inv-amount{
+  text-align:left;
+  white-space:nowrap;
+  font-weight: 1000;
+  color: #06B6D4;
+}
+
+.gt-inv-footer{
+  display:grid;
+  gap:10px;
+}
+
+.gt-inv-total{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.gt-inv-actions{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+}
+
+.gt-inv-btn{
+  border-radius: 18px;
+  padding: 12px 12px;
+  font-weight: 1000;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.06);
+  color: rgba(234,240,255,.92);
+  box-shadow: 0 18px 40px rgba(0,0,0,.25);
+  transition: transform .15s ease, background .2s ease, border-color .2s ease;
+}
+.gt-inv-btn:active{ transform: scale(.98); }
+.gt-inv-btn:hover{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.18); }
+
+.gt-inv-btn.primary{
+  border:0;
+  background: linear-gradient(135deg, rgba(6,182,212,.95), rgba(124,58,237,.90));
+  color: rgba(10,14,24,.95);
+}
+
     
     
   </style>
@@ -3864,7 +3991,7 @@ function openInvoice(){
     return;
   }
 
-  const rows = items.map(i => {
+  const cardsHtml = items.map(i => {
     const imgSrc = i.img || findProductImage(i.name);
     const thumb = imgSrc
       ? `<img class="gt-inv-thumb" src="${escapeAttr(imgSrc)}" alt="${escapeAttr(i.name)}" />`
@@ -3873,18 +4000,17 @@ function openInvoice(){
     const line = (i.price || 0) * i.qty;
 
     return `
-      <tr>
-        <td>
-          <div class="gt-inv-item-wrap">
-            ${thumb}
-            <div class="gt-inv-meta">
-              <div class="gt-inv-name">${escapeHTML(i.name)}</div>
-              <div class="gt-inv-sub">${i.qty} × ${fmtIQD(i.price)}</div>
-            </div>
+      <div class="gt-inv-card">
+        ${thumb}
+        <div class="meta">
+          <div class="name">${escapeHTML(i.name)}</div>
+          <div class="sub">
+            <span class="gt-inv-pill">${i.qty} × ${fmtIQD(i.price)}</span>
+            <span class="gt-inv-pill">سعر مفرد: ${fmtIQD(i.price)}</span>
           </div>
-        </td>
-        <td class="gt-inv-line">${fmtIQD(line)}</td>
-      </tr>
+        </div>
+        <div class="gt-inv-amount">${fmtIQD(line)}</div>
+      </div>
     `;
   }).join("");
 
@@ -3903,38 +4029,43 @@ function openInvoice(){
         <div class="gt-inv-icon"><i class="fa-solid fa-receipt"></i></div>
       </div>
 
-      <div class="gt-inv-table-wrap">
-        <table class="gt-inv-table">
-          <thead>
-            <tr>
-              <th style="text-align:right;">الصنف</th>
-              <th style="text-align:left;">الإجمالي</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
+      <div class="gt-inv-body">
+        <div class="gt-inv-items">${cardsHtml}</div>
 
-      <div class="gt-inv-total">
-        <div class="gt-inv-total-label">المجموع</div>
-        <div class="gt-inv-total-val"><span class="gt-dot"></span><span>${total}</span></div>
+        <div class="gt-inv-footer">
+          <div class="gt-inv-total">
+            <div class="gt-inv-total-label">المجموع</div>
+            <div class="gt-inv-total-val"><span class="gt-dot"></span><span>${total}</span></div>
+          </div>
+
+          <div class="gt-inv-actions">
+            <button class="gt-inv-btn" id="gtInvClose"><i class="fa-solid fa-xmark"></i> إغلاق</button>
+            <button class="gt-inv-btn primary" id="gtInvDone"><i class="fa-solid fa-circle-check"></i> تم</button>
+          </div>
+        </div>
       </div>
     </div>
   `;
 
   Swal.fire({
-    title: "مكتب عسل",
+    title: "",                 // مهم حتى نلغي مساحة/خط العنوان
     html,
     width: "min(760px, 96vw)",
-    showCancelButton: true,
-    confirmButtonText: "تم",
-    cancelButtonText: "إغلاق",
-    confirmButtonColor: "#06B6D4",
-    cancelButtonColor: "#111827",
-    customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
-    background: "transparent"
+    showConfirmButton: false,
+    showCancelButton: false,
+    customClass: {
+      popup: "gt-swal gt-inv-popup",
+      title: "gt-swal-title",
+      htmlContainer: "gt-swal-html"
+    },
+    background: "transparent",
+    didOpen: () => {
+      document.getElementById("gtInvClose")?.addEventListener("click", () => Swal.close());
+      document.getElementById("gtInvDone")?.addEventListener("click", () => Swal.close());
+    }
   });
 }
+
 
 
     // ===== Buttons =====
