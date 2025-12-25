@@ -135,7 +135,7 @@
       cursor:pointer;
       transition: transform .18s ease, background .18s ease, border-color .18s ease;
       box-shadow: 0 10px 26px rgba(0,0,0,.25);
-      overflow:hidden;
+     overflow: visible;
       position: relative;
     }
     .icon-btn:hover{
@@ -152,8 +152,9 @@
 
     .pill{
       position:absolute;
-      top:-6px;
-      left:-6px;
+       top:-10px;
+       right:-10px;
+        left:auto;
       min-width: 22px;
       height: 22px;
       padding: 0 6px;
@@ -167,6 +168,7 @@
       font-weight: 900;
       border: 2px solid rgba(11,18,32,.95);
       box-shadow: 0 14px 30px rgba(0,0,0,.35);
+        z-index: 3;
     }
 
     /* Layout */
@@ -591,8 +593,9 @@
       z-index: 70;
     }
     .overlay.show{ opacity: 1; pointer-events:auto; }
-
-    .cart{
+    
+    
+.cart{
       position: fixed;
       top: 0;
       left: -420px; /* RTL: يسار */
@@ -614,6 +617,7 @@
       backdrop-filter: blur(12px);
     }
     .cart.open{ left: 0; }
+
 
     .cart-top{
       display:flex;
@@ -842,20 +846,34 @@
       .categories{ grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
       .search-box{ min-width: 100%; }
     }
-    @media (max-width: 560px){
-      .cart{
-        top: auto;
-        bottom: -92%;
-        left: 0;
-        width: 100%;
-        height: 92%;
-        border-right: none;
-        border-top: 1px solid rgba(255,255,255,.10);
-        border-radius: 22px 22px 0 0;
-        transition: bottom .30s ease;
-      }
-      .cart.open{ bottom: 0; }
-    }
+
+
+@media (max-width: 560px){
+  .cart{
+    top: auto;
+    left: 0;
+    right: 0;
+    transform: none;
+    opacity: 1;
+
+    width: 100%;
+    height: 92%;
+    bottom: -92%;
+
+    border-radius: 22px 22px 0 0;
+    border: none;
+    border-top: 1px solid rgba(255,255,255,.10);
+
+    pointer-events: none;
+    transition: bottom .30s ease;
+  }
+  .cart.open{
+    bottom: 0;
+    pointer-events: auto;
+  }
+}
+
+
 
 
     /* Force Cairo on all controls */
@@ -960,22 +978,56 @@
       .gt-grid2{ grid-template-columns: 1fr; }
     }
 
-    /* Image modal */
-    .gt-img-modal{
-      border-radius: 20px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      box-shadow: 0 22px 70px rgba(0,0,0,.55);
-    }
-    .gt-img-modal img{
-      width:100%;
-      height:auto;
-      max-height: 72vh;
-      object-fit: contain;
-      display:block;
-      background: rgba(0,0,0,.15);
-    }
+   /* SweetAlert: زر الإغلاق دائماً يمين */
+.swal2-close{
+  right: 14px !important;
+  left: auto !important;
+}
+.swal2-popup.gt-img-popup .swal2-title{
+  display:none !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+
+/* Premium Image Viewer */
+.gt-img-premium{
+  display:grid;
+  gap: 12px;
+  justify-items:center;
+}
+.gt-img-premium-photo{
+  width: 100%;
+  max-width: min(720px, 92vw);
+  max-height: 72vh;
+  object-fit: contain;
+  display:block;
+  border-radius: 22px;
+  background: rgba(0,0,0,.12);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 26px 80px rgba(0,0,0,.55);
+}
+.gt-img-premium-cap{
+  width: 100%;
+  max-width: min(720px, 92vw);
+  border-radius: 18px;
+  padding: 12px 14px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 16px 44px rgba(0,0,0,.35);
+}
+.gt-img-premium-name{
+  font-weight: 1000;
+  color: rgba(234,240,255,.95);
+  overflow-wrap:anywhere;
+}
+.gt-img-premium-desc{
+  margin-top: 6px;
+  font-size: 13px;
+  color: rgba(234,240,255,.72);
+  line-height: 1.55;
+  overflow-wrap:anywhere;
+}
 
     /* Cart thumb */
     .ci-thumb{
@@ -991,6 +1043,107 @@
 
     /* Hide legacy elements from your original file if present */
     .filters, .custom-dropdown, .dropdown-options, .search-orbit { display:none !important; }
+    
+    
+    /* Premium Invoice */
+.gt-inv{ display:flex; flex-direction:column; gap:12px; }
+.gt-inv-head{
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+  padding:12px; border-radius:18px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+}
+.gt-inv-brand{ display:flex; align-items:center; gap:10px; min-width:0; }
+.gt-inv-logo{
+  width:44px; height:44px; border-radius:16px; object-fit:cover;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 14px 30px rgba(0,0,0,.28);
+  flex:0 0 44px;
+}
+.gt-inv-title{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.gt-inv-h1{ font-weight:1000; color: rgba(234,240,255,.95); }
+.gt-inv-date{ font-size:12px; color: rgba(234,240,255,.62); }
+
+.gt-inv-icon{
+  width:44px; height:44px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(135deg, rgba(6,182,212,.95), rgba(124,58,237,.90));
+  color: rgba(10,14,24,.95);
+  box-shadow: 0 14px 30px rgba(0,0,0,.28);
+  flex:0 0 44px;
+}
+
+.gt-inv-table-wrap{
+  border-radius:18px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10);
+  overflow:hidden;
+}
+.gt-inv-table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout: fixed; /* مهم حتى ما يطلع النص */
+}
+.gt-inv-table th{
+  padding:12px 12px;
+  color: rgba(234,240,255,.72);
+  font-size:12px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.gt-inv-table td{
+  padding:12px 12px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  vertical-align:top;
+}
+.gt-inv-item-wrap{ display:flex; gap:12px; align-items:flex-start; min-width:0; }
+.gt-inv-thumb{
+  width:44px; height:44px; border-radius:16px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  object-fit:cover;
+  flex:0 0 44px;
+  box-shadow: 0 14px 30px rgba(0,0,0,.22);
+}
+.gt-inv-meta{ min-width:0; }
+.gt-inv-name{
+  font-weight:1000;
+  color: rgba(234,240,255,.95);
+  overflow-wrap:anywhere; /* هذا اللي يمنع الخروج */
+  word-break: break-word;
+  line-height:1.35;
+}
+.gt-inv-sub{
+  margin-top:4px;
+  color: rgba(234,240,255,.62);
+  font-size:12px;
+}
+.gt-inv-line{
+  text-align:left;
+  white-space:nowrap;
+  font-weight:1000;
+  color:#06B6D4;
+}
+.gt-inv-total{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px; border-radius:18px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+}
+.gt-inv-total-label{ color: rgba(234,240,255,.72); font-weight:900; }
+.gt-inv-total-val{
+  color: rgba(234,240,255,.95);
+  font-weight:1000;
+  display:flex; gap:8px; align-items:center;
+}
+.gt-dot{
+  width:10px; height:10px; border-radius:999px;
+  background:#06B6D4;
+  box-shadow: 0 0 0 4px rgba(6,182,212,.15);
+}
+
+    
+    
   </style>
 </head>
 
@@ -3124,30 +3277,42 @@
 
     const scrollToTopBtn = document.getElementById("scrollToTop");
 
-    // ===== Modal: عرض صورة المنتج فقط =====
-    function openImageOnlyModal(src, title){
-      if (!src){
-        Swal.fire({
-          title:"ماكو صورة",
-          text:"هذا المنتج ما بيه صورة حالياً.",
-          icon:"info",
-          customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
-          background:"transparent",
-          confirmButtonText:"تم",
-          confirmButtonColor:"#06B6D4"
-        });
-        return;
-      }
+// ===== Modal: عرض صورة المنتج فقط (Premium) =====
+function openImageOnlyModal(src, title, desc){
+  if (!src){
+    Swal.fire({
+      title:"ماكو صورة",
+      text:"هذا المنتج ما بيه صورة حالياً.",
+      icon:"info",
+      customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
+      background:"transparent",
+      confirmButtonText:"تم",
+      confirmButtonColor:"#06B6D4"
+    });
+    return;
+  }
 
-      Swal.fire({
-        title: title || "صورة المنتج",
-        html: `<div class="gt-img-modal"><img src="${escapeAttr(src)}" alt="${escapeAttr(title || "Product")}" /></div>`,
-        showConfirmButton:false,
-        showCloseButton:true,
-        customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
-        background:"transparent"
-      });
-    }
+  const safeTitle = title || "صورة المنتج";
+  const safeDesc = (desc || "").trim();
+
+  Swal.fire({
+    title: "", // نخفي عنوان Swal حتى يصير العارض “صورة فقط”
+    html: `
+      <div class="gt-img-premium">
+        <img class="gt-img-premium-photo" src="${escapeAttr(src)}" alt="${escapeAttr(safeTitle)}" />
+        <div class="gt-img-premium-cap">
+          <div class="gt-img-premium-name">${escapeHTML(safeTitle)}</div>
+          ${safeDesc ? `<div class="gt-img-premium-desc">${escapeHTML(safeDesc)}</div>` : ``}
+        </div>
+      </div>
+    `,
+    showConfirmButton:false,
+    showCloseButton:true,
+    customClass: { popup:"gt-swal gt-img-popup", htmlContainer:"gt-swal-html" },
+    background:"transparent"
+  });
+}
+
 
     // ===== Prepare product cards =====
     function prepareCards(){
@@ -3234,7 +3399,8 @@
         // فتح صورة المنتج (نافذة بريميوم) عند الضغط على الكارد
         if (!card.dataset.imgBound){
           card.dataset.imgBound = "1";
-          card.addEventListener("click", () => openImageOnlyModal(card.dataset.img, card.dataset.name));
+          card.addEventListener("click", () => openImageOnlyModal(card.dataset.img, card.dataset.name, card.dataset.desc));
+
         }
       });
     }
@@ -3648,103 +3814,92 @@
     function openCart(){ cartDrawer.classList.add("open"); overlay.classList.add("show"); }
     function closeCart(){ cartDrawer.classList.remove("open"); overlay.classList.remove("show"); }
 
-    // ===== Invoice (تصميم بريميوم) =====
-    function openInvoice(){
-      const items = Array.from(cart.values());
-      if (items.length === 0){
-        Swal.fire({
-          title:"السلة فارغة",
-          icon:"info",
-          customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
-          background:"transparent",
-          confirmButtonColor:"#06B6D4"
-        });
-        return;
-      }
+   // ===== Invoice (Premium) =====
+function openInvoice(){
+  const items = Array.from(cart.values());
+  if (items.length === 0){
+    Swal.fire({
+      title:"السلة فارغة",
+      icon:"info",
+      customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
+      background:"transparent",
+      confirmButtonColor:"#06B6D4"
+    });
+    return;
+  }
 
-      const rows = items.map(i => {
-        const imgSrc = i.img || findProductImage(i.name);
-        const thumb = imgSrc
-          ? `<img src="${escapeAttr(imgSrc)}" alt="${escapeAttr(i.name)}" style="width:44px;height:44px;border-radius:16px;object-fit:cover;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow:0 14px 30px rgba(0,0,0,.22);flex:0 0 44px;" />`
-          : `<div style="width:44px;height:44px;border-radius:16px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;flex:0 0 44px;"><i class="fa-solid fa-image" style="opacity:.75"></i></div>`;
+  const rows = items.map(i => {
+    const imgSrc = i.img || findProductImage(i.name);
+    const thumb = imgSrc
+      ? `<img class="gt-inv-thumb" src="${escapeAttr(imgSrc)}" alt="${escapeAttr(i.name)}" />`
+      : `<div class="gt-inv-thumb" style="display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-image" style="opacity:.75"></i></div>`;
 
-        const line = (i.price || 0) * i.qty;
+    const line = (i.price || 0) * i.qty;
 
-        return `
-          <tr>
-            <td style="padding:12px 0; border-bottom:1px solid rgba(255,255,255,.08);">
-              <div style="display:flex; gap:12px; align-items:center;">
-                ${thumb}
-                <div style="min-width:0;">
-                  <div style="font-weight:1000; color: rgba(234,240,255,.95); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width: 320px;">
-                    ${escapeHTML(i.name)}
-                  </div>
-                  <div style="margin-top:4px; color: rgba(234,240,255,.62); font-size:12px;">
-                    ${i.qty} × ${fmtIQD(i.price)}
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td style="padding:12px 0; border-bottom:1px solid rgba(255,255,255,.08); text-align:left; white-space:nowrap; font-weight:1000; color:#06B6D4;">
-              ${fmtIQD(line)}
-            </td>
-          </tr>
-        `;
-      }).join("");
-
-      const total = cartTotal.textContent;
-
-      const html = `
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px; border-radius:18px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <img src="images/logo.png" alt="Logo" style="width:44px;height:44px;border-radius:16px;object-fit:cover;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);box-shadow: 0 14px 30px rgba(0,0,0,.28);" />
-            <div style="display:flex; flex-direction:column; gap:2px;">
-              <div style="font-weight:1000; color: rgba(234,240,255,.95)">فاتورة مبيعات</div>
-              <div style="font-size:12px; color: rgba(234,240,255,.62)">${nowStamp()}</div>
+    return `
+      <tr>
+        <td>
+          <div class="gt-inv-item-wrap">
+            ${thumb}
+            <div class="gt-inv-meta">
+              <div class="gt-inv-name">${escapeHTML(i.name)}</div>
+              <div class="gt-inv-sub">${i.qty} × ${fmtIQD(i.price)}</div>
             </div>
           </div>
+        </td>
+        <td class="gt-inv-line">${fmtIQD(line)}</td>
+      </tr>
+    `;
+  }).join("");
 
-          <div style="width:44px; height:44px; border-radius:16px; display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg, rgba(6,182,212,.95), rgba(124,58,237,.90)); color: rgba(10,14,24,.95); box-shadow: 0 14px 30px rgba(0,0,0,.28);">
-            <i class="fa-solid fa-receipt"></i>
+  const total = cartTotal.textContent;
+
+  const html = `
+    <div class="gt-inv" dir="rtl">
+      <div class="gt-inv-head">
+        <div class="gt-inv-brand">
+          <img class="gt-inv-logo" src="images/logo.png" alt="Logo" />
+          <div class="gt-inv-title">
+            <div class="gt-inv-h1">فاتورة مبيعات</div>
+            <div class="gt-inv-date">${nowStamp()}</div>
           </div>
         </div>
+        <div class="gt-inv-icon"><i class="fa-solid fa-receipt"></i></div>
+      </div>
 
-        <div style="margin-top:12px; border-radius:18px; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10); padding: 0 12px;">
-          <table style="width:100%; border-collapse:collapse;">
-            <thead>
-              <tr>
-                <th style="text-align:right; padding:12px 0; color: rgba(234,240,255,.72); font-size:12px; border-bottom:1px solid rgba(255,255,255,.08);">الصنف</th>
-                <th style="text-align:left; padding:12px 0; color: rgba(234,240,255,.72); font-size:12px; border-bottom:1px solid rgba(255,255,255,.08);">الإجمالي</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows}
-            </tbody>
-          </table>
-        </div>
+      <div class="gt-inv-table-wrap">
+        <table class="gt-inv-table">
+          <thead>
+            <tr>
+              <th style="text-align:right;">الصنف</th>
+              <th style="text-align:left;">الإجمالي</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
 
-        <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center; padding:12px; border-radius:18px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);">
-          <div style="color: rgba(234,240,255,.72); font-weight:900;">المجموع</div>
-          <div style="color: rgba(234,240,255,.95); font-weight:1000; display:flex; gap:8px; align-items:center;">
-            <span style="width:10px; height:10px; border-radius:999px; background:#06B6D4; box-shadow: 0 0 0 4px rgba(6,182,212,.15);"></span>
-            <span>${total}</span>
-          </div>
-        </div>
-      `;
+      <div class="gt-inv-total">
+        <div class="gt-inv-total-label">المجموع</div>
+        <div class="gt-inv-total-val"><span class="gt-dot"></span><span>${total}</span></div>
+      </div>
+    </div>
+  `;
 
-      Swal.fire({
-        title: "مكتب عسل",
-        html,
-        width: 600,
-        showCancelButton: true,
-        confirmButtonText: "تم",
-        cancelButtonText: "إغلاق",
-        confirmButtonColor: "#06B6D4",
-        cancelButtonColor: "#111827",
-        customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
-        background: "transparent"
-      });
-    }
+  Swal.fire({
+    title: "مكتب عسل",
+    html,
+    width: "min(760px, 96vw)",
+    showCancelButton: true,
+    confirmButtonText: "تم",
+    cancelButtonText: "إغلاق",
+    confirmButtonColor: "#06B6D4",
+    cancelButtonColor: "#111827",
+    customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
+    background: "transparent"
+  });
+}
+
 
     // ===== Buttons =====
     document.getElementById("backBtn").addEventListener("click", () => window.location.href = "index.html");
