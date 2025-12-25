@@ -1320,6 +1320,88 @@
 }
 
 
+/* ================================
+   FULLSCREEN Cart + Invoice (Premium)
+   ضع هذا آخر شي داخل <style>
+================================== */
+:root{
+  --sheet-gap: 12px; /* تگدر تغيرها 10/14 حسب ذوقك */
+}
+
+/* ---------- Cart: fullscreen with elegant gaps ---------- */
+.cart{
+  /* نلغي نظام السحب من اليسار/البوتوم شيت */
+  top: calc(var(--sheet-gap) + env(safe-area-inset-top)) !important;
+  bottom: calc(var(--sheet-gap) + env(safe-area-inset-bottom)) !important;
+  left: var(--sheet-gap) !important;
+  right: var(--sheet-gap) !important;
+
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+
+  /* شكل بريميوم */
+  border-radius: var(--radius) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+
+  /* حركة ظهور ناعمة */
+  transform: translateY(18px) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: transform .22s ease, opacity .22s ease !important;
+}
+
+/* حالة الفتح */
+.cart.open{
+  /* مهم: نلغي تأثير left:0 الموجود بالكود الأصلي */
+  left: var(--sheet-gap) !important;
+  right: var(--sheet-gap) !important;
+
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* حتى السكرول الداخلي يشتغل صح ضمن فول سكرين */
+.cart-items{ min-height: 0; }
+
+
+/* ---------- Invoice: fullscreen SweetAlert with gaps ---------- */
+/* راح نستخدم container class حتى تأثير الفول سكرين يكون خاص بالفاتورة */
+.swal2-container.gt-inv-container{
+  padding:
+    calc(var(--sheet-gap) + env(safe-area-inset-top))
+    var(--sheet-gap)
+    calc(var(--sheet-gap) + env(safe-area-inset-bottom)) !important;
+}
+
+/* خلي البوب اب ياخذ 100% من مساحة الكونتينر (اللي بيها padding) */
+.swal2-popup.gt-swal.gt-inv-popup{
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: var(--radius) !important;
+  overflow: hidden !important;
+}
+
+/* خلي محتوى الفاتورة يتمدد على طول البوب اب */
+.gt-inv{ height: 100%; }
+.gt-inv-body{
+  flex: 1;
+  min-height: 0;
+  display:flex;
+  flex-direction:column;
+}
+.gt-inv-items{
+  flex: 1;
+  min-height: 0;
+  max-height: none !important; /* يلغي 52vh القديمة */
+}
+
+
+
     
     
   </style>
@@ -4065,22 +4147,25 @@ function openInvoice(){
   `;
 
   Swal.fire({
-    title: "",                 // مهم حتى نلغي مساحة/خط العنوان
-    html,
-    width: "min(760px, 96vw)",
-    showConfirmButton: false,
-    showCancelButton: false,
-    customClass: {
-      popup: "gt-swal gt-inv-popup",
-      title: "gt-swal-title",
-      htmlContainer: "gt-swal-html"
-    },
-    background: "transparent",
-    didOpen: () => {
-      document.getElementById("gtInvClose")?.addEventListener("click", () => Swal.close());
-      document.getElementById("gtInvDone")?.addEventListener("click", () => Swal.close());
-    }
-  });
+  title: "",                 // مهم حتى نلغي مساحة/خط العنوان
+  html,
+  width: "100%",             // كان min(760px, 96vw)
+  heightAuto: false,         // مهم للموبايل حتى ما يصير تمدد غريب
+  showConfirmButton: false,
+  showCancelButton: false,
+  customClass: {
+    container: "gt-inv-container",   // ✅ جديد: حتى نضيف padding (gap) للفاتورة فقط
+    popup: "gt-swal gt-inv-popup",
+    title: "gt-swal-title",
+    htmlContainer: "gt-swal-html"
+  },
+  background: "transparent",
+  didOpen: () => {
+    document.getElementById("gtInvClose")?.addEventListener("click", () => Swal.close());
+    document.getElementById("gtInvDone")?.addEventListener("click", () => Swal.close());
+  }
+});
+
 }
 
 
