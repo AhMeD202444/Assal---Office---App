@@ -858,6 +858,87 @@ body{
   flex-direction: row-reverse; /* يقلب ترتيب العناصر */
 }
 
+/* ==========================
+   FIX: Mobile Tap Highlight + No Outside Press Glow
+   (CSS ONLY - Apply Everywhere)
+   ========================== */
+
+/* 1) اقفل الهايلايت الأزرق بالموبايل */
+html, body {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none !important;
+}
+
+/* 2) عمّمها على كل شي قابل للنقر عندك */
+:where(
+  button,
+  a,
+  input[type="button"],
+  input[type="submit"],
+  .header-btn,
+  .category-btn,
+  .new-category-btn,
+  .tools-btn,
+  .category,
+  .slider-btn,
+  .scroll-to-top,
+  .no-results,
+  .result-card,
+  .close-modal-btn,
+  .swal2-confirm,
+  .swal2-cancel,
+  .swal2-close
+){
+  -webkit-tap-highlight-color: transparent !important;
+  outline: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+
+  /* 3) يمنع أي تأثير يطلع برّه العنصر */
+  overflow: hidden !important;
+
+  /* إذا العنصر مو دائري: قص مطابق للـ border-radius */
+  clip-path: inset(0 0 0 0 round 18px) !important;
+}
+
+/* عناصر دائرية عندك لازم قص دائري (حتى ما يطلع تأثير خارج الدائرة) */
+:where(.category, .slider-btn, .scroll-to-top, .close-modal-btn, .search-container button, .search-container .clear-btn){
+  clip-path: circle(50% at 50% 50%) !important;
+}
+
+/* شيل أي Focus يظهر بعد الضغط (خصوصاً iOS/Android) */
+:where(
+  button, a,
+  .header-btn, .category-btn, .new-category-btn, .tools-btn,
+  .category, .slider-btn, .scroll-to-top, .no-results, .result-card,
+  .swal2-confirm, .swal2-cancel, .swal2-close, .close-modal-btn
+):focus,
+:where(
+  button, a,
+  .header-btn, .category-btn, .new-category-btn, .tools-btn,
+  .category, .slider-btn, .scroll-to-top, .no-results, .result-card,
+  .swal2-confirm, .swal2-cancel, .swal2-close, .close-modal-btn
+):focus-visible{
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* فايرفوكس: يلغي الإطار الداخلي للأزرار */
+:where(
+  button,
+  .header-btn,
+  .swal2-confirm,
+  .swal2-cancel
+)::-moz-focus-inner{
+  border: 0 !important;
+}
+
+/* (اختياري) يخلي الضغط “محترم” بدون وميض */
+:where(.header-btn,.category-btn,.new-category-btn,.tools-btn,.category,.slider-btn,.scroll-to-top,.no-results,.result-card):active{
+  filter: brightness(1.02);
+}
+
+
 
     
     
