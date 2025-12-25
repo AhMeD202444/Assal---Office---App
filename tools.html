@@ -1305,6 +1305,21 @@
   color: rgba(10,14,24,.95);
 }
 
+.gt-inv-amount{
+  text-align:left;
+  white-space:nowrap;
+  font-weight: 1000;
+
+  /* Badge look */
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(6,182,212,.12);
+  border: 1px solid rgba(6,182,212,.30);
+  color: #06B6D4;
+  box-shadow: 0 10px 24px rgba(0,0,0,.20);
+}
+
+
     
     
   </style>
@@ -3651,8 +3666,7 @@ function openImageOnlyModal(src, title, desc){
       const y = resultsWrap.getBoundingClientRect().top + window.pageYOffset - headerOffset - 8;
       window.scrollTo({ top: y, behavior: "smooth" });
 
-      // focus search
-      setTimeout(() => searchInput && searchInput.focus(), 150);
+      
     }
 
     function rebuildCategoryBindings(){
@@ -4004,10 +4018,13 @@ function openInvoice(){
         ${thumb}
         <div class="meta">
           <div class="name">${escapeHTML(i.name)}</div>
+          
           <div class="sub">
-            <span class="gt-inv-pill">${i.qty} × ${fmtIQD(i.price)}</span>
-            <span class="gt-inv-pill">سعر مفرد: ${fmtIQD(i.price)}</span>
-          </div>
+  <span class="gt-inv-pill">الكمية: ${i.qty}</span>
+</div>
+
+          
+          
         </div>
         <div class="gt-inv-amount">${fmtIQD(line)}</div>
       </div>
