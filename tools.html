@@ -9,6 +9,8 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
 
   <style>
@@ -37,9 +39,9 @@
     html, body{
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
+      font-family: "Cairo", sans-serif;
     }
     body{
-      font-family:"Cairo", sans-serif;
       color:var(--txt);
       min-height:100vh;
       background:
@@ -72,7 +74,7 @@
       to  { transform: translate3d( 1.5%,  1.2%, 0) scale(1.05); }
     }
 
-    /* App bar (نفس روح الكود المرجع) */
+    /* App bar */
     header{
       position:fixed;
       top:0;
@@ -282,76 +284,7 @@
     .panel-head b{ font-size: 14px; letter-spacing:.2px; }
     .panel-head span{ font-size: 12px; color: var(--muted); }
 
-    /* Search / sort row */
-    .tools{
-      display:flex;
-      gap: 10px;
-      align-items:center;
-      flex-wrap: wrap;
-    }
-    .search{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 18px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      box-shadow: 0 12px 30px rgba(0,0,0,.18);
-      min-width: min(520px, 100%);
-    }
-    .search i{ color: rgba(6,182,212,.95); }
-    .search input{
-      width: 100%;
-      border: none;
-      outline: none;
-      background: transparent;
-      color: var(--txt);
-      font-family: inherit;
-      font-weight: 700;
-      user-select: text;
-      -webkit-user-select: text;
-    }
-    .mini-btn{
-      width: 42px;
-      height: 42px;
-      border-radius: 16px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.08);
-      color: var(--txt);
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow: 0 10px 26px rgba(0,0,0,.25);
-      transition: transform .18s ease, background .18s ease, border-color .18s ease;
-      overflow:hidden;
-    }
-    .mini-btn:hover{ transform: translateY(-2px); background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.22); }
-    .mini-btn:active{ transform: scale(.96); }
-
-    .select{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 18px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      box-shadow: 0 12px 30px rgba(0,0,0,.18);
-    }
-    .select i{ color: rgba(124,58,237,.95); }
-    .select select{
-      border: none;
-      outline: none;
-      background: transparent;
-      color: var(--txt);
-      font-family: inherit;
-      font-weight: 800;
-      cursor:pointer;
-    }
-
-    /* Categories grid (نفس .cat بالكود المرجع) */
+    /* Categories grid */
     .categories{
       padding: 14px;
       display:grid;
@@ -438,7 +371,7 @@
       color: rgba(234,240,255,.85);
     }
 
-    /* Results */
+    /* Results panel */
     .results-wrap{ display:none; }
     .results-head{
       padding: 14px 16px;
@@ -453,7 +386,76 @@
     .results-head b{ font-size: 14px; }
     .results-head span{ font-size: 12px; color: var(--muted); }
 
-    /* Product list: make original cards look like reference result-card */
+    /* Tools row */
+    .tools{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+    .search-box{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      box-shadow: 0 12px 30px rgba(0,0,0,.18);
+      min-width: min(520px, 100%);
+    }
+    .search-box i{ color: rgba(6,182,212,.95); }
+    .search-box input{
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--txt);
+      font-family: inherit;
+      font-weight: 700;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    .mini-btn{
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      color: var(--txt);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: 0 10px 26px rgba(0,0,0,.25);
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+      overflow:hidden;
+    }
+    .mini-btn:hover{ transform: translateY(-2px); background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.22); }
+    .mini-btn:active{ transform: scale(.96); }
+
+    .select{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      box-shadow: 0 12px 30px rgba(0,0,0,.18);
+    }
+    .select i{ color: rgba(124,58,237,.95); }
+    .select select{
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--txt);
+      font-family: inherit;
+      font-weight: 800;
+      cursor:pointer;
+    }
+
+    /* Products grid look */
     .gt-products{
       padding: 14px;
       display:grid;
@@ -470,20 +472,20 @@
       border:1px solid rgba(255,255,255,.12) !important;
       box-shadow: var(--shadow-soft) !important;
       transition: transform .18s ease, border-color .18s ease, background .18s ease;
-      cursor:pointer;
-      display:flex !important;
+      cursor: default; /* لأن ماكو نافذة */
+      display:flex;
       align-items:center !important;
       gap: 12px !important;
       min-height: 96px;
       overflow:hidden;
       text-align: right;
+      position: relative;
     }
     .gt-products .product-card:hover{
       transform: translateY(-3px);
       background: rgba(255,255,255,.09) !important;
       border-color: rgba(255,255,255,.20) !important;
     }
-    .gt-products .product-card:active{ transform: scale(.985); }
 
     .gt-products .product-card img{
       width: 58px !important;
@@ -509,7 +511,6 @@
       line-height: 1.25;
       color: var(--txt);
       text-shadow: 0 8px 20px rgba(0,0,0,.30);
-      word-wrap:break-word;
       overflow:hidden;
       display:-webkit-box;
       -webkit-line-clamp: 2;
@@ -543,23 +544,23 @@
       white-space: nowrap;
     }
     .p-add{
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 16px;
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.08);
+      background:
+        radial-gradient(120px 90px at 30% 20%, rgba(6,182,212,.22), transparent 60%),
+        rgba(255,255,255,.08);
       color: var(--txt);
       cursor:pointer;
       display:flex;
       align-items:center;
       justify-content:center;
-      box-shadow: 0 10px 26px rgba(0,0,0,.25);
+      box-shadow: 0 14px 34px rgba(0,0,0,.30);
       transition: transform .18s ease, background .18s ease, border-color .18s ease;
-      overflow:hidden;
     }
     .p-add:hover{ transform: translateY(-2px); background: rgba(255,255,255,.12); border-color: rgba(6,182,212,.35); }
     .p-add:active{ transform: scale(.96); }
-    .p-add i{ color: rgba(234,240,255,.92); }
 
     .no-results{
       grid-column: 1 / -1;
@@ -570,8 +571,17 @@
       color: var(--muted);
       text-align:center;
     }
+    .hint{
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(255,255,255,.06);
+      border:1px dashed rgba(255,255,255,.18);
+      color: rgba(234,240,255,.75);
+      text-align:center;
+      margin: 14px;
+    }
 
-    /* Cart drawer */
+    /* Overlay + Cart */
     .overlay{
       position:fixed; inset:0;
       background: rgba(0,0,0,.62);
@@ -585,11 +595,14 @@
     .cart{
       position: fixed;
       top: 0;
-      left: -420px; /* RTL: نخليه يسار حتى ما يغطي المحتوى */
+      left: -420px; /* RTL: يسار */
       width: 420px;
       max-width: calc(100vw - 24px);
       height: 100%;
-      background: rgba(10,14,24,.82);
+      background:
+        radial-gradient(520px 380px at 20% 10%, rgba(124,58,237,.18), transparent 60%),
+        radial-gradient(520px 380px at 80% 20%, rgba(6,182,212,.16), transparent 60%),
+        rgba(10,14,24,.86);
       border-right: 1px solid rgba(255,255,255,.10);
       box-shadow: 0 34px 120px rgba(0,0,0,.78);
       z-index: 80;
@@ -607,15 +620,25 @@
       align-items:center;
       justify-content: space-between;
       gap: 10px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 40px rgba(0,0,0,.28);
     }
-    .cart-top h3{ margin:0; font-size: 16px; font-weight: 1000; }
-    .cart-top .mini-btn{ width: 42px; height: 42px; }
+    .cart-top h3{ margin:0; font-size: 16px; font-weight: 1000; display:flex; gap:10px; align-items:center; }
+    .cart-top h3 i{
+      width: 38px; height: 38px;
+      border-radius: 16px;
+      display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(135deg, rgba(6,182,212,.95), rgba(124,58,237,.90));
+      color: rgba(10,14,24,.95);
+      box-shadow: 0 14px 30px rgba(0,0,0,.28);
+    }
 
     .cart-items{
       overflow:auto;
-      padding: 8px 2px;
+      padding: 2px;
       display:grid;
       gap: 10px;
       user-select: text;
@@ -665,18 +688,27 @@
       color: rgba(234,240,255,.92);
       cursor:pointer;
       font-weight: 1000;
+      transition: transform .15s ease, background .15s ease;
     }
+    .qty button:hover{ background: rgba(255,255,255,.12); transform: translateY(-1px); }
+    .qty button:active{ transform: scale(.96); }
+
     .trash{
-      width: 42px; height: 42px;
+      width: 44px; height: 44px;
       border-radius: 16px;
       border: 1px solid rgba(239,68,68,.35);
-      background: rgba(239,68,68,.12);
+      background:
+        radial-gradient(120px 90px at 30% 20%, rgba(239,68,68,.22), transparent 60%),
+        rgba(239,68,68,.10);
       cursor:pointer;
       display:flex;
       align-items:center;
       justify-content:center;
-      box-shadow: 0 10px 26px rgba(0,0,0,.25);
+      box-shadow: 0 14px 34px rgba(0,0,0,.30);
+      transition: transform .15s ease, background .2s ease;
     }
+    .trash:hover{ transform: translateY(-2px); background: rgba(239,68,68,.16); }
+    .trash:active{ transform: scale(.96); }
     .trash i{ color: rgba(239,68,68,.95); }
 
     .cart-bottom{
@@ -691,8 +723,13 @@
       align-items:center;
       color: rgba(234,240,255,.72);
       font-weight: 900;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 40px rgba(0,0,0,.28);
     }
-    .total b{ color: rgba(234,240,255,.92); font-weight: 1000; }
+    .total b{ color: rgba(234,240,255,.95); font-weight: 1000; }
 
     .cta{
       display:grid;
@@ -700,31 +737,37 @@
       gap: 10px;
     }
     .btn{
-      border: 1px solid rgba(255,255,255,.10);
       border-radius: 18px;
       padding: 12px 12px;
       font-weight: 1000;
       cursor: pointer;
-      background: rgba(255,255,255,.06);
-      transition: transform .15s ease, background .2s ease;
+      transition: transform .15s ease, filter .2s ease;
       display:flex;
       align-items:center;
       justify-content:center;
       gap: 10px;
-      color: rgba(234,240,255,.92);
-      box-shadow: 0 14px 30px rgba(0,0,0,.22);
+      font-family: inherit;
+      box-shadow: 0 18px 40px rgba(0,0,0,.25);
     }
-    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); }
     .btn:active{ transform: scale(.98); }
     .btn.primary{
+      border:0;
       background: linear-gradient(135deg, rgba(6,182,212,.95), rgba(124,58,237,.90));
       color: rgba(10,14,24,.95);
-      border: 0;
     }
+    .btn.primary:hover{ filter: brightness(1.04); transform: translateY(-1px); }
+    .btn.ghost{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color: rgba(234,240,255,.92);
+    }
+    .btn.ghost:hover{ background: rgba(255,255,255,.10); transform: translateY(-1px); }
     .btn.danger{
+      border: 1px solid rgba(239,68,68,.35);
       background: rgba(239,68,68,.12);
-      border-color: rgba(239,68,68,.35);
+      color: rgba(234,240,255,.92);
     }
+    .btn.danger:hover{ background: rgba(239,68,68,.18); transform: translateY(-1px); }
 
     /* Scroll to top */
     .scroll-to-top{
@@ -771,13 +814,33 @@
     }
     footer i{ margin-left: 6px; opacity: .9; }
 
+    /* Swal theme */
+    .swal2-popup.gt-swal{
+      font-family: "Cairo", sans-serif !important;
+      background: rgba(10,14,24,.92) !important;
+      color: rgba(234,240,255,.92) !important;
+      border: 1px solid rgba(255,255,255,.10) !important;
+      border-radius: 22px !important;
+      box-shadow: 0 30px 120px rgba(0,0,0,.75) !important;
+      backdrop-filter: blur(10px);
+    }
+    .swal2-title.gt-swal-title{
+      font-weight: 1000 !important;
+      letter-spacing: .2px !important;
+    }
+    .swal2-html-container.gt-swal-html{
+      text-align: right !important;
+      line-height: 1.95 !important;
+      color: rgba(234,240,255,.78) !important;
+    }
+
     @media (max-width: 520px){
       .brand-mini{ display:none; }
       .app-left{ min-width: 100px; }
       .hero-badges{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .hero-badges .badge:last-child{ grid-column: 1 / -1; }
       .categories{ grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-      .search{ min-width: 100%; }
+      .search-box{ min-width: 100%; }
     }
     @media (max-width: 560px){
       .cart{
@@ -833,7 +896,7 @@
         <div class="hero-brand">
           <div class="hero-text">
             <h1>قائمة المنتجات</h1>
-            <p>اختار القسم… وفلتر بالبحث — والسلة جاهزة للطلبات.</p>
+            <p>اختار القسم… بعدها راح تظهر النتائج والبحث.</p>
           </div>
           <div class="logo-orb">
             <img src="images/logo.png" alt="Logo" />
@@ -871,15 +934,15 @@
         </div>
 
         <div class="tools">
-          <div class="search">
+          <div class="search-box">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input id="searchInput" type="text" placeholder="ابحث بالاسم/الوصف…" autocomplete="off" />
-            <button class="mini-btn" id="clearSearch" title="مسح"><i class="fa-solid fa-xmark"></i></button>
+            <input id="gtSearchInput" type="text" placeholder="ابحث بالاسم/الوصف…" autocomplete="off" />
+            <button class="mini-btn" id="gtClearSearch" title="مسح"><i class="fa-solid fa-xmark"></i></button>
           </div>
 
           <div class="select" title="ترتيب">
             <i class="fa-solid fa-arrow-up-wide-short"></i>
-            <select id="sortSelect">
+            <select id="gtSortSelect">
               <option value="default">الافتراضي</option>
               <option value="price-asc">السعر: من الأقل</option>
               <option value="price-desc">السعر: من الأعلى</option>
@@ -2821,6 +2884,7 @@
     <button onclick="addToCart('أداة تكسير ظهر ماركة RELIFE', 12000)">أضف إلى السلة</button>
 </div>
 </div>
+      <div class="hint" id="hintBox">اختر قسم بالأعلى حتى تظهر النتائج هنا ✅</div>
     </section>
   </main>
 
@@ -2828,7 +2892,7 @@
 
   <aside class="cart" id="cartDrawer" aria-label="سلة المشتريات">
     <div class="cart-top">
-      <h3>السلة</h3>
+      <h3><i class="fa-solid fa-bag-shopping"></i> سلة المبيعات</h3>
       <button class="mini-btn" id="closeCartBtn" title="إغلاق"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
@@ -2864,6 +2928,15 @@
 
     const fmtIQD = (n) => new Intl.NumberFormat("ar-IQ").format(n) + " د.ع";
 
+    const escapeHTML = (s) => String(s || "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+
+    const normalize = (s) => String(s || "").trim().toLowerCase().replace(/\s+/g," ");
+
     const iconForCategory = (name) => {
       const n = (name || "").toLowerCase();
       if (n.includes("شاشة") || n.includes("lcd")) return "fa-mobile-screen";
@@ -2877,9 +2950,15 @@
       return "fa-layer-group";
     };
 
+    const nowStamp = () => {
+      const d = new Date();
+      const pad = (x) => String(x).padStart(2,"0");
+      return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} • ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
     // ===== State =====
     let cart = new Map();
-    let currentCategory = "all";
+    let currentCategoryKey = null; // لا نعرض أي نتائج بالبداية
     let searchTerm = "";
     let sortMode = "default";
 
@@ -2892,8 +2971,9 @@
     const resultsTitle = document.getElementById("resultsTitle");
     const resultsCount = document.getElementById("resultsCount");
 
-    const searchInput = document.getElementById("searchInput");
-    const sortSelect = document.getElementById("sortSelect");
+    const searchInput = document.getElementById("gtSearchInput");
+    const sortSelect = document.getElementById("gtSortSelect");
+    const hintBox = document.getElementById("hintBox");
 
     const cartDrawer = document.getElementById("cartDrawer");
     const overlay = document.getElementById("overlay");
@@ -2904,7 +2984,7 @@
 
     const scrollToTopBtn = document.getElementById("scrollToTop");
 
-    // ===== Prepare product cards (نعيد بناء الكارد بنفس ستايل المرجع) =====
+    // ===== Prepare product cards (بدون نافذة عند الضغط) =====
     function prepareCards(){
       cards.forEach(card => {
         const title = (card.querySelector("h4")?.textContent || "").trim();
@@ -2913,10 +2993,13 @@
         const price = Number(toLatinDigits(priceText)) || 0;
         const cat = (card.getAttribute("data-category") || "").trim() || "منوع";
 
+        const catKey = normalize(cat);
+
         card.dataset.name = title;
         card.dataset.desc = desc;
         card.dataset.price = String(price);
-        card.dataset.category = cat;
+        card.dataset.category = cat;     // display
+        card.dataset.catkey = catKey;    // filter key
 
         const img = card.querySelector("img");
         const oldBtn = card.querySelector("button");
@@ -2925,21 +3008,16 @@
           oldBtn.style.display = "none";
         }
 
-        // remove legacy text nodes styling remains but override in CSS
         // Build new inner structure once
         if (!card.querySelector(".p-meta")){
-          // Keep img in place (first)
-          if (img) img.alt = title || "Product";
-
-          // Remove old elements to avoid duplicates
           const h4 = card.querySelector("h4");
           const p = card.querySelector("p");
           const priceEl = card.querySelector(".price");
-
-          // Clean old
           if (h4) h4.remove();
           if (p) p.remove();
           if (priceEl) priceEl.remove();
+
+          if (img) img.alt = title || "Product";
 
           const meta = document.createElement("div");
           meta.className = "p-meta";
@@ -2968,7 +3046,7 @@
           actions.appendChild(priceBadge);
           actions.appendChild(add);
 
-          // If no image exists, create placeholder
+          // Placeholder if no image
           if (!img){
             const ph = document.createElement("div");
             ph.style.width = "58px";
@@ -2986,95 +3064,171 @@
           card.appendChild(meta);
           card.appendChild(actions);
         }
-
-        // Click = Quick view
-        card.addEventListener("click", () => {
-          Swal.fire({
-            title: title || "تفاصيل المنتج",
-            html: `
-              <div style="text-align:right; line-height:1.9">
-                <div style="margin-bottom:10px; color: rgba(234,240,255,.75)">القسم: <b style="color: rgba(234,240,255,.95)">${escapeHTML(cat)}</b></div>
-                <div style="margin-bottom:10px; color: rgba(234,240,255,.75)">السعر: <b style="background: linear-gradient(135deg, rgba(124,58,237,.24), rgba(6,182,212,.18)); border: 1px solid rgba(255,255,255,.14); padding: 6px 10px; border-radius: 14px; display:inline-block">${price ? fmtIQD(price) : "غير متوفر"}</b></div>
-                <div style="color: rgba(234,240,255,.65)">${escapeHTML(desc || "—")}</div>
-              </div>`,
-            background: "rgba(10,14,24,.90)",
-            color: "rgba(234,240,255,.92)",
-            showCancelButton: true,
-            confirmButtonText: "إضافة للسلة",
-            cancelButtonText: "إغلاق",
-            confirmButtonColor: "#06B6D4",
-            cancelButtonColor: "#111827",
-          }).then(r => { if (r.isConfirmed) addToCart(title, price); });
-        });
       });
-    }
-
-    function escapeHTML(s){
-      return String(s || "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
     }
 
     // ===== Categories =====
     function buildCategories(){
-      const counts = new Map();
+      const counts = new Map(); // key => {label,count}
       cards.forEach(c => {
-        const cat = c.dataset.category || "منوع";
-        counts.set(cat, (counts.get(cat) || 0) + 1);
+        const key = c.dataset.catkey || normalize(c.dataset.category || "منوع");
+        const label = (c.dataset.category || "منوع").trim() || "منوع";
+        const cur = counts.get(key) || { label, count: 0 };
+        cur.count += 1;
+        // keep first label (nice)
+        counts.set(key, cur);
       });
 
-      const items = [["all", "الكل", cards.length], ...Array.from(counts.entries()).map(([k,v]) => [k, k, v])];
+      const items = Array.from(counts.entries())
+        .map(([key, v]) => ({ key, label: v.label, count: v.count }))
+        .sort((a,b) => b.count - a.count);
 
       categoriesGrid.innerHTML = "";
-      items.forEach(([key,label,count], idx) => {
+
+      // Optional: "الكل" chip
+      const allCount = cards.length;
+      const allEl = document.createElement("div");
+      allEl.className = "cat";
+      allEl.innerHTML = `
+        <div class="ic"><i class="fa-solid fa-layer-group"></i></div>
+        <div class="txt">
+          <b>الكل</b>
+          <span><span class="count">${allCount}</span> منتج</span>
+        </div>
+      `;
+      allEl.addEventListener("click", () => {
+        setActiveCategory("all", "الكل");
+      });
+      categoriesGrid.appendChild(allEl);
+
+      items.forEach(({key,label,count}) => {
         const el = document.createElement("div");
-        el.className = "cat" + (key === "all" ? " active" : "");
+        el.className = "cat";
         el.innerHTML = `
-          <div class="ic"><i class="fa-solid ${key === "all" ? "fa-layer-group" : iconForCategory(label)}"></i></div>
+          <div class="ic"><i class="fa-solid ${iconForCategory(label)}"></i></div>
           <div class="txt">
             <b>${escapeHTML(label)}</b>
             <span><span class="count">${count}</span> منتج</span>
           </div>
         `;
-        el.addEventListener("click", () => {
-          currentCategory = key;
-          document.querySelectorAll(".cat").forEach(x => x.classList.remove("active"));
-          el.classList.add("active");
-          openResults(label);
-          filterAndRender();
-        });
+        el.addEventListener("click", () => setActiveCategory(key, label));
         categoriesGrid.appendChild(el);
+      });
+    }
+
+    function setActiveCategory(key, label){
+      currentCategoryKey = (key === "all") ? "all" : key;
+
+      document.querySelectorAll(".cat").forEach(x => x.classList.remove("active"));
+      // mark active based on label/key
+      // easiest: add active to clicked (event handler closure). Instead: find by text matches; fallback keep none.
+      // We'll set active using last clicked element via event.currentTarget
+      // (We call from handler directly with element context)
+    }
+
+    // We override setActiveCategory to accept element context
+    function bindCategoryClick(el, key, label){
+      el.addEventListener("click", () => {
+        currentCategoryKey = (key === "all") ? "all" : key;
+        document.querySelectorAll(".cat").forEach(x => x.classList.remove("active"));
+        el.classList.add("active");
+
+        openResults(label);
+        // reset search when switching category
+        searchTerm = "";
+        if (searchInput) searchInput.value = "";
+        filterAndRender();
       });
     }
 
     function openResults(label){
       resultsWrap.style.display = "block";
-      resultsTitle.textContent = "نتائج: " + (label || "الكل");
-      // سكرول ثابت مشابه المرجع
+      if (hintBox) hintBox.style.display = "none";
+      resultsTitle.textContent = "نتائج: " + (label || "—");
+      // Scroll into view
       const headerOffset = 72;
       const y = resultsWrap.getBoundingClientRect().top + window.pageYOffset - headerOffset - 8;
-      window.scrollTo({ top: y, behavior: "auto" });
-      requestAnimationFrame(() => window.scrollTo({ top: y, behavior: "smooth" }));
+      window.scrollTo({ top: y, behavior: "smooth" });
+
+      // focus search
+      setTimeout(() => searchInput && searchInput.focus(), 150);
+    }
+
+    function rebuildCategoryBindings(){
+      const cats = Array.from(document.querySelectorAll(".cat"));
+      if (cats.length === 0) return;
+
+      // first is "all"
+      const allEl = cats[0];
+      bindCategoryClick(allEl, "all", "الكل");
+
+      // others: map using DOM label text to data
+      // We'll read label from <b> inside
+      cats.slice(1).forEach(el => {
+        const label = (el.querySelector("b")?.textContent || "").trim();
+        const key = normalize(label);
+        // But our counts key may differ from label normalization; safer: store in dataset when creating.
+      });
+    }
+
+    // We'll build categories again but with dataset keys
+    function buildCategoriesV2(){
+      const counts = new Map();
+      cards.forEach(c => {
+        const key = c.dataset.catkey || normalize(c.dataset.category || "منوع");
+        const label = (c.dataset.category || "منوع").trim() || "منوع";
+        const cur = counts.get(key) || { label, count: 0 };
+        cur.count += 1;
+        counts.set(key, cur);
+      });
+
+      const items = Array.from(counts.entries())
+        .map(([key, v]) => ({ key, label: v.label, count: v.count }))
+        .sort((a,b) => b.count - a.count);
+
+      categoriesGrid.innerHTML = "";
+
+      const makeCat = (key, label, count, icon) => {
+        const el = document.createElement("div");
+        el.className = "cat";
+        el.dataset.key = key;
+        el.dataset.label = label;
+        el.innerHTML = `
+          <div class="ic"><i class="fa-solid ${icon}"></i></div>
+          <div class="txt">
+            <b>${escapeHTML(label)}</b>
+            <span><span class="count">${count}</span> منتج</span>
+          </div>
+        `;
+        bindCategoryClick(el, key, label);
+        return el;
+      };
+
+      categoriesGrid.appendChild(makeCat("all", "الكل", cards.length, "fa-layer-group"));
+      items.forEach(({key,label,count}) => categoriesGrid.appendChild(makeCat(key, label, count, iconForCategory(label))));
     }
 
     // ===== Filter + Sort =====
     function filterAndRender(){
       const term = (searchTerm || "").trim().toLowerCase();
-      let visible = 0;
 
+      // If no category selected, hide everything
+      if (!currentCategoryKey){
+        cards.forEach(c => c.style.setProperty("display","none"));
+        resultsCount.textContent = "—";
+        return;
+      }
+
+      let visible = 0;
       cards.forEach(card => {
-        const inCat = currentCategory === "all" || (card.dataset.category === currentCategory);
+        const inCat = (currentCategoryKey === "all") || (card.dataset.catkey === currentCategoryKey);
         const hay = ((card.dataset.name || "") + " " + (card.dataset.desc || "")).toLowerCase();
         const inSearch = !term || hay.includes(term);
         const show = inCat && inSearch;
-        card.style.display = show ? "" : "none";
+        card.style.setProperty("display", show ? "flex" : "none");
         if (show) visible++;
       });
 
-      // Sort visible
       const visibleCards = cards.filter(c => c.style.display !== "none");
       if (sortMode !== "default"){
         visibleCards.sort((a,b) => {
@@ -3106,7 +3260,7 @@
     }
 
     // ===== Cart =====
-    const STORAGE_KEY = "asal_dark_premium_cart_v1";
+    const STORAGE_KEY = "asal_dark_premium_cart_v2";
 
     function saveCart(){
       const arr = Array.from(cart.values());
@@ -3131,10 +3285,10 @@
       renderCart();
 
       Swal.fire({
-        toast:true, position:"top", showConfirmButton:false, timer:1200,
+        toast:true, position:"top", showConfirmButton:false, timer:1100,
         icon:"success", title:"انضاف للسلة",
-        background:"rgba(10,14,24,.90)",
-        color:"rgba(234,240,255,.92)"
+        customClass: { popup: "gt-swal" },
+        background: "transparent"
       });
     }
 
@@ -3210,6 +3364,87 @@
     function openCart(){ cartDrawer.classList.add("open"); overlay.classList.add("show"); }
     function closeCart(){ cartDrawer.classList.remove("open"); overlay.classList.remove("show"); }
 
+    // ===== Invoice (تصميم بريميوم) =====
+    function openInvoice(){
+      const items = Array.from(cart.values());
+      if (items.length === 0){
+        Swal.fire({
+          title:"السلة فارغة",
+          icon:"info",
+          customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
+          background:"transparent",
+          confirmButtonColor:"#06B6D4"
+        });
+        return;
+      }
+
+      const rows = items.map(i => {
+        const line = i.price * i.qty;
+        return `
+          <tr>
+            <td style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08);">
+              <div style="font-weight:900; color: rgba(234,240,255,.92)">${escapeHTML(i.name)}</div>
+              <div style="margin-top:4px; color: rgba(234,240,255,.62); font-size:12px;">
+                ${i.qty} × ${fmtIQD(i.price)}
+              </div>
+            </td>
+            <td style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); text-align:left; white-space:nowrap; font-weight:1000; color:#06B6D4;">
+              ${fmtIQD(line)}
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      const total = cartTotal.textContent;
+
+      const html = `
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px; border-radius:18px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);">
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <div style="font-weight:1000; color: rgba(234,240,255,.95)">فاتورة مبيعات</div>
+            <div style="font-size:12px; color: rgba(234,240,255,.62)">${nowStamp()}</div>
+          </div>
+          <div style="width:44px; height:44px; border-radius:16px; display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg, rgba(6,182,212,.95), rgba(124,58,237,.90)); color: rgba(10,14,24,.95); box-shadow: 0 14px 30px rgba(0,0,0,.28);">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+        </div>
+
+        <div style="margin-top:12px; border-radius:18px; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10); padding: 0 12px;">
+          <table style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th style="text-align:right; padding:12px 0; color: rgba(234,240,255,.72); font-size:12px; border-bottom:1px solid rgba(255,255,255,.08);">الصنف</th>
+                <th style="text-align:left; padding:12px 0; color: rgba(234,240,255,.72); font-size:12px; border-bottom:1px solid rgba(255,255,255,.08);">الإجمالي</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center; padding:12px; border-radius:18px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);">
+          <div style="color: rgba(234,240,255,.72); font-weight:900;">المجموع</div>
+          <div style="color: rgba(234,240,255,.95); font-weight:1000; display:flex; gap:8px; align-items:center;">
+            <span style="width:10px; height:10px; border-radius:999px; background:#06B6D4; box-shadow: 0 0 0 4px rgba(6,182,212,.15);"></span>
+            <span>${total}</span>
+          </div>
+        </div>
+      `;
+
+      Swal.fire({
+        title: "مكتب عسل",
+        html,
+        width: 560,
+        showCancelButton: true,
+        confirmButtonText: "تم",
+        cancelButtonText: "إغلاق",
+        confirmButtonColor: "#06B6D4",
+        cancelButtonColor: "#111827",
+        customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
+        background: "transparent"
+      });
+    }
+
     // ===== Buttons =====
     document.getElementById("backBtn").addEventListener("click", () => window.location.href = "index.html");
 
@@ -3218,8 +3453,8 @@
         title:"تم التحديث",
         text:"تم تحديث البيانات بنجاح",
         icon:"success",
-        background:"rgba(10,14,24,.90)",
-        color:"rgba(234,240,255,.92)",
+        customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
+        background:"transparent",
         showConfirmButton:false,
         timer: 1100
       }).then(() => location.reload());
@@ -3237,34 +3472,30 @@
         showCancelButton:true,
         confirmButtonText:"اي تفريغ",
         cancelButtonText:"لا",
-        background:"rgba(10,14,24,.90)",
-        color:"rgba(234,240,255,.92)",
+        customClass: { popup:"gt-swal", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
+        background:"transparent",
         confirmButtonColor:"#EF4444",
         cancelButtonColor:"#111827"
       }).then(r => { if (r.isConfirmed) clearCart(); });
     });
 
-    document.getElementById("checkoutBtn").addEventListener("click", () => {
-      const items = Array.from(cart.values());
-      if (items.length === 0){
-        Swal.fire({ title:"السلة فارغة", icon:"info", background:"rgba(10,14,24,.90)", color:"rgba(234,240,255,.92)" });
-        return;
-      }
-      const lines = items.map(i => `• ${escapeHTML(i.name)} × ${i.qty} = <b style="color:#06B6D4">${fmtIQD(i.price * i.qty)}</b>`).join("<br/>");
-      Swal.fire({
-        title:"فاتورة الطلب",
-        html:`<div style="text-align:right; line-height:2">${lines}<hr style="border-color: rgba(255,255,255,.10)"/>المجموع: <b style="color:#06B6D4">${cartTotal.textContent}</b></div>`,
-        background:"rgba(10,14,24,.90)",
-        color:"rgba(234,240,255,.92)",
-        confirmButtonText:"تمام",
-        confirmButtonColor:"#06B6D4"
-      });
-    });
+    document.getElementById("checkoutBtn").addEventListener("click", openInvoice);
 
     // ===== Search / sort =====
-    searchInput.addEventListener("input", () => { searchTerm = searchInput.value || ""; filterAndRender(); });
-    document.getElementById("clearSearch").addEventListener("click", () => { searchInput.value=""; searchTerm=""; filterAndRender(); searchInput.focus(); });
-    sortSelect.addEventListener("change", (e) => { sortMode = e.target.value; filterAndRender(); });
+    searchInput.addEventListener("input", () => { 
+      searchTerm = searchInput.value || ""; 
+      filterAndRender(); 
+    });
+    document.getElementById("gtClearSearch").addEventListener("click", () => { 
+      searchInput.value=""; 
+      searchTerm=""; 
+      filterAndRender(); 
+      searchInput.focus(); 
+    });
+    sortSelect.addEventListener("change", (e) => { 
+      sortMode = e.target.value; 
+      filterAndRender(); 
+    });
 
     // ===== Scroll top =====
     function updateScrollBtn(){
@@ -3277,13 +3508,18 @@
 
     // ===== Init =====
     prepareCards();
-    buildCategories();
+    buildCategoriesV2();
+
+    // Attach click handlers already done in buildCategoriesV2 via bindCategoryClick
+    // Hide results initially
+    resultsWrap.style.display = "none";
+    if (hintBox) hintBox.style.display = "block";
+    // Hide all cards until category chosen
+    cards.forEach(c => c.style.setProperty("display","none"));
+    resultsCount.textContent = "—";
+
     loadCart();
     renderCart();
-
-    // show results by default on "الكل" (اختياري)
-    openResults("الكل");
-    filterAndRender();
   </script>
 </body>
 </html>
