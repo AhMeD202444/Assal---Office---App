@@ -1542,7 +1542,78 @@
 .gt-inv-body{ flex:1; min-height:0; display:flex; flex-direction:column; }
 .gt-inv-items{ flex:1; min-height:0; max-height:none !important; }
 
-    
+
+/* ===== Image Viewer: New Premium Theme ===== */
+
+/* مساحة أنيقة حول النافذة داخل الشاشة */
+.gt-img-container{
+  padding: 12px !important;
+}
+
+/* النافذة نفسها: لون مختلف + ارتفاع ثابت وطويل */
+.swal2-popup.gt-swal.gt-img-popup{
+  width: min(740px, 94vw) !important;
+  height: min(86dvh, 760px) !important;   /* ✅ ثابت وطويل */
+  padding: 14px !important;
+  border-radius: 26px !important;
+
+  /* ✅ لون مختلف عن باقي النوافذ */
+  background: rgba(17, 24, 39, .94) !important; /* تقدر تغيّره */
+  border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: 0 30px 90px rgba(0,0,0,.60) !important;
+  overflow: hidden !important;
+}
+
+/* نخلي محتوى الـ html ياخذ طول النافذة */
+.swal2-popup.gt-img-popup .swal2-html-container{
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* نخلي داخل العارض موزون: صورة فوق + كابشن تحت */
+.gt-img-premium{
+  height: 100%;
+  grid-template-rows: 1fr auto;
+}
+
+/* نخلي الصورة تلائم الارتفاع الثابت */
+.gt-img-premium-photo{
+  max-height: calc(86dvh - 170px);
+}
+
+/* زر الإغلاق: دائرة حمراء غامقة + الـ X بالنص */
+.swal2-popup.gt-img-popup .swal2-close{
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  left: auto !important;
+
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 999px !important;
+
+  background: rgba(127, 29, 29, .95) !important; /* أحمر غامق */
+  border: 1px solid rgba(255,255,255,.12) !important;
+  color: rgba(255,255,255,.92) !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  font-size: 22px !important;
+  line-height: 1 !important;
+  padding: 0 !important;
+
+  box-shadow: 0 18px 40px rgba(0,0,0,.45) !important;
+}
+
+.swal2-popup.gt-img-popup .swal2-close:hover{
+  background: rgba(153, 27, 27, .98) !important;
+  transform: translateY(-1px);
+}
+
+
     
   </style>
 </head>
@@ -3677,7 +3748,6 @@
 
     const scrollToTopBtn = document.getElementById("scrollToTop");
 
-// ===== Modal: عرض صورة المنتج فقط (Premium) =====
 function openImageOnlyModal(src, title, desc){
   if (!src){
     Swal.fire({
@@ -3708,10 +3778,20 @@ function openImageOnlyModal(src, title, desc){
     `,
     showConfirmButton:false,
     showCloseButton:true,
-    customClass: { popup:"gt-swal gt-img-popup", htmlContainer:"gt-swal-html" },
+
+    /* ✅ إضافات التعديل */
+    width: "auto",
+    heightAuto: false,
+
+    customClass: {
+      container: "gt-img-container",
+      popup:"gt-swal gt-img-popup",
+      htmlContainer:"gt-swal-html"
+    },
     background:"transparent"
   });
 }
+
 
 
     // ===== Prepare product cards =====
