@@ -1461,14 +1461,12 @@ async function loadExcelFiles() {
 
 function scrollToResultsWrapStable() {
   const resultsWrap = document.getElementById("resultsWrap");
-  const headerOffset = 72; // عندك body padding-top:72px
-
+  const headerOffset = 72;
   const y = resultsWrap.getBoundingClientRect().top + window.pageYOffset - headerOffset - 8;
-
-  // كسر القفزة (auto) وبعدها smooth
-  window.scrollTo({ top: y, behavior: "auto" });
-  requestAnimationFrame(() => window.scrollTo({ top: y, behavior: "smooth" }));
+  window.scrollTo({ top: y, behavior: "smooth" });
 }
+
+
 
     
     
