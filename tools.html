@@ -1693,6 +1693,150 @@
   padding: 0 !important;
 }
 
+/* =========================
+   SORT MODAL - Premium (Match UI + X Right)
+   ضع هذا آخر شي داخل <style>
+========================= */
+
+.gt-sort-native{ display:none !important; }
+
+.gt-sort-btn{
+  border:0;
+  outline:0;
+  background: transparent;
+  color: var(--txt);
+  font-family: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+/* ✅ لون مقارب للواجهة (Glass Navy/Teal) */
+.swal2-popup.gt-swal.gt-sort-popup{
+  padding: 0 !important;
+  border-radius: 22px !important;
+  overflow: hidden !important;
+
+  background:
+    radial-gradient(900px 260px at 50% 0%, rgba(6,182,212,.20), transparent 60%),
+    radial-gradient(700px 240px at 10% 100%, rgba(124,58,237,.14), transparent 55%),
+    linear-gradient(180deg, rgba(19,28,45,.92), rgba(9,14,26,.90)) !important;
+
+  border: 1px solid rgba(255,255,255,.12) !important;
+
+  box-shadow:
+    0 34px 95px rgba(0,0,0,.55),
+    0 0 0 1px rgba(6,182,212,.10) inset !important;
+
+  backdrop-filter: blur(12px);
+}
+
+/* ✅ زر الإكس يمين 100% */
+.swal2-popup.gt-swal.gt-sort-popup .swal2-close{
+  position: absolute !important;
+
+  inset-inline-end: 10px !important;
+  inset-inline-start: auto !important;
+  right: 10px !important;
+  left: auto !important;
+  top: 10px !important;
+
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 999px !important;
+
+  background: rgba(239,68,68,.22) !important;  /* أحمر غامق شفاف */
+  border: 1px solid rgba(239,68,68,.45) !important;
+  color: rgba(255,255,255,.95) !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  line-height: 1 !important;
+  padding: 0 !important;
+  box-shadow: 0 18px 44px rgba(0,0,0,.40) !important;
+}
+
+/* محتوى الخيارات */
+.gt-sort-sheet{
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gt-sort-item{
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: rgba(234,240,255,.92);
+  padding: 14px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.gt-sort-item:active{ transform: scale(.99); }
+
+.gt-sort-item .l{ font-weight: 900; }
+.gt-sort-item .r{ opacity: 0; }
+
+.gt-sort-item.active{
+  background: rgba(6,182,212,.10);
+  border-color: rgba(6,182,212,.35);
+}
+.gt-sort-item.active .r{ opacity: 1; color: #06B6D4; }
+
+
+@media (max-width: 560px){
+
+  /* خلي الأدوات تلف (حتى الترتيب ينزل سطر) بدون تغيير ترتيب */
+  .results-head .tools{ flex-wrap: wrap !important; }
+
+  /* ✅ ارتفاع موحّد للبحث والترتيب */
+  :root{ --tools-h: 49px; }  /* غيّرها 42/40 إذا تريد أقصر */
+
+  /* خلي عنصر الترتيب ياخذ عرض كامل */
+  .results-head .tools .select.gt-sort{
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    height: var(--tools-h) !important;
+  }
+
+  /* ✅ البحث نفس الارتفاع */
+  .results-head .tools .search-box{
+    height: var(--tools-h) !important;
+    align-items: center !important;
+  }
+  .results-head .tools .search-box input{
+    height: var(--tools-h) !important;
+    padding: 0 12px !important;
+    line-height: var(--tools-h) !important;
+  }
+
+  /* ✅ زر الترتيب نفس الارتفاع */
+  .results-head .tools .select.gt-sort .gt-sort-btn{
+    height: var(--tools-h) !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    padding: 0 12px !important;  /* بدل 10px 12px حتى يقل الارتفاع */
+  }
+
+  /* أيقونة الترتيب ما تنضغط */
+  .results-head .tools .select.gt-sort i{
+    flex: 0 0 auto !important;
+  }
+}
+
+
+
+
 
 
     
@@ -1777,20 +1921,24 @@
             <button class="mini-btn" id="gtClearSearch" title="مسح"><i class="fa-solid fa-xmark"></i></button>
           </div>
 
-          <div class="select" title="ترتيب">
-            <i class="fa-solid fa-arrow-up-wide-short"></i>
-            <select id="gtSortSelect">
-              <option value="default">الافتراضي</option>
-              <option value="price-asc">السعر: من الأقل</option>
-              <option value="price-desc">السعر: من الأعلى</option>
-              <option value="name-asc">الاسم: أ-ي</option>
-              <option value="name-desc">الاسم: ي-أ</option>
-            </select>
-          </div>
+         <div class="select gt-sort" title="ترتيب">
+  <i class="fa-solid fa-arrow-up-wide-short"></i>
 
-          <button class="mini-btn" id="gtFilterBtn" title="فلترة">
-            <i class="fa-solid fa-sliders"></i>
-          </button>
+  <!-- هذا اللي المستخدم يضغطه -->
+  <button type="button" class="gt-sort-btn" id="gtSortBtn">الافتراضي</button>
+
+  <!-- نخليه موجود (حتى القيم تبقى نفسها) بس نخفيه -->
+  <select id="gtSortSelect" class="gt-sort-native" tabindex="-1" aria-hidden="true">
+    <option value="default">الافتراضي</option>
+    <option value="price-asc">السعر: من الأقل</option>
+    <option value="price-desc">السعر: من الأعلى</option>
+    <option value="name-asc">الاسم: أ-ي</option>
+    <option value="name-desc">الاسم: ي-أ</option>
+  </select>
+</div>
+
+
+          
         </div>
       </div>
 
@@ -3828,6 +3976,74 @@
     const cartTotal = document.getElementById("cartTotal");
 
     const scrollToTopBtn = document.getElementById("scrollToTop");
+    
+    
+    const sortBtn = document.getElementById("gtSortBtn");
+
+function sortLabel(mode){
+  switch(mode){
+    case "price-asc": return "السعر: من الأقل";
+    case "price-desc": return "السعر: من الأعلى";
+    case "name-asc": return "الاسم: أ-ي";
+    case "name-desc": return "الاسم: ي-أ";
+    default: return "الافتراضي";
+  }
+}
+
+function syncSortUI(){
+  if (sortBtn) sortBtn.textContent = sortLabel(sortMode);
+  if (sortSelect) sortSelect.value = sortMode;
+}
+
+function openSortPremium(){
+  Swal.fire({
+    title: "ترتيب النتائج",
+    html: `
+      <div class="gt-sort-sheet" dir="rtl">
+        <button class="gt-sort-item ${sortMode==="default"?"active":""}" data-val="default">
+          <span class="l">الافتراضي</span><span class="r"><i class="fa-solid fa-check"></i></span>
+        </button>
+
+        <button class="gt-sort-item ${sortMode==="price-asc"?"active":""}" data-val="price-asc">
+          <span class="l">السعر: من الأقل</span><span class="r"><i class="fa-solid fa-check"></i></span>
+        </button>
+
+        <button class="gt-sort-item ${sortMode==="price-desc"?"active":""}" data-val="price-desc">
+          <span class="l">السعر: من الأعلى</span><span class="r"><i class="fa-solid fa-check"></i></span>
+        </button>
+
+        <button class="gt-sort-item ${sortMode==="name-asc"?"active":""}" data-val="name-asc">
+          <span class="l">الاسم: أ-ي</span><span class="r"><i class="fa-solid fa-check"></i></span>
+        </button>
+
+        <button class="gt-sort-item ${sortMode==="name-desc"?"active":""}" data-val="name-desc">
+          <span class="l">الاسم: ي-أ</span><span class="r"><i class="fa-solid fa-check"></i></span>
+        </button>
+      </div>
+    `,
+    showConfirmButton: false,
+    showCloseButton: true,
+    customClass: { popup:"gt-swal gt-sort-popup", title:"gt-swal-title", htmlContainer:"gt-swal-html" },
+    background: "transparent",
+    didOpen: () => {
+      document.querySelectorAll(".gt-sort-item").forEach(b => {
+        b.addEventListener("click", () => {
+          sortMode = b.dataset.val || "default";
+          syncSortUI();
+          filterAndRender();
+          Swal.close();
+        });
+      });
+    }
+  });
+}
+
+if (sortBtn){
+  sortBtn.addEventListener("click", openSortPremium);
+  syncSortUI();
+}
+
+    
 
 function openImageOnlyModal(src, title, desc){
   if (!src){
