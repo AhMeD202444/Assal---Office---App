@@ -1835,6 +1835,33 @@
 }
 
 
+/* =========================
+   GLOBAL SweetAlert Backdrop Blur (All Modals)
+   ضع هذا آخر شي داخل <style>
+========================= */
+
+/* بلور قوي + تعتيم أنيق للخلفية */
+body.swal2-shown > .swal2-container.swal2-backdrop-show{
+  background: rgba(2, 6, 23, .42) !important;   /* تغميق خفيف يخفي التفاصيل */
+  backdrop-filter: blur(28px) saturate(175%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(175%) !important;
+}
+
+/* إذا صار تعارض بإزالة الخلفية */
+body.swal2-shown > .swal2-container{
+  background: rgba(2, 6, 23, .42) !important;
+}
+
+/* (اختياري) لمسة “زجاج” ناعمة */
+body.swal2-shown > .swal2-container.swal2-backdrop-show:before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(900px 260px at 50% 0%, rgba(6,182,212,.10), transparent 60%);
+}
+
+
 
 
 
@@ -4501,12 +4528,7 @@ function openImageOnlyModal(src, title, desc){
       saveCart();
       renderCart();
 
-      Swal.fire({
-        toast:true, position:"top", showConfirmButton:false, timer:1100,
-        icon:"success", title:"انضاف للسلة",
-        customClass: { popup: "gt-swal" },
-        background: "transparent"
-      });
+     
     }
 
     function setQty(name, delta){
