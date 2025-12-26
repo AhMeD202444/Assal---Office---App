@@ -1647,6 +1647,53 @@
   width: min(100%, 700px) !important;
 }
 
+/* ✅ Fix: Image modal spacing on mobile + make content tighter */
+.swal2-popup.gt-swal.gt-img-popup .swal2-html-container{
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 56px 14px 14px !important; /* مساحة للأكس + حواف أنيقة */
+  margin: 0 !important;
+}
+
+/* خلي العرض عمودياً مرتب بدون فراغات */
+.gt-img-premium{
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+/* بالموبايل: قلّل ارتفاع الصورة حتى تقرب من الوصف */
+@media (max-width: 560px){
+  .gt-img-premium-photo{
+    max-height: 48dvh !important; /* كانت 72vh */
+  }
+}
+
+/* ✅ زر الإغلاق داخل دائرة حمراء غامقة ومثبت يمين */
+.swal2-popup.gt-swal.gt-img-popup .swal2-close{
+  top: 12px !important;
+  right: 12px !important;
+  left: auto !important;
+
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 999px !important;
+
+  background: rgba(127,29,29,0.95) !important;
+  border: 1px solid rgba(239,68,68,0.45) !important;
+  color: #fff !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  line-height: 1 !important;
+  padding: 0 !important;
+}
+
+
 
     
   </style>
