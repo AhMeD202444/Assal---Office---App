@@ -1613,24 +1613,39 @@
   transform: translateY(-1px);
 }
 
-
-/* ✅ Image modal only: شيل الفراغ وخلي الوصف يقرب للصورة */
+/* ===== Center image + description vertically (Image Modal only) ===== */
 .swal2-popup.gt-img-popup .swal2-html-container{
-  height: 100% !important;              /* خليها تظل فول */
-  overflow: auto !important;            /* بدل hidden */
+  height: 100% !important;
+  overflow: auto !important;
+
   display: flex !important;
   flex-direction: column !important;
-  justify-content: flex-start !important; /* ✅ هذا يقتل الفراغ */
-  gap: 12px !important;
-  padding: 14px !important;             /* مسافة أنيقة من الحواف */
+
+  align-items: center !important;          /* توسيط أفقي */
+  justify-content: center !important;      /* ✅ توسيط عمودي */
+
+  gap: 14px !important;                    /* ✅ مسافة أنيقة بينهم */
+  padding: 16px !important;
   box-sizing: border-box !important;
 }
 
-/* اختياري: حتى تبقى مساحة للوصف وما تبلعها الصورة */
-.gt-img-premium-photo{
-  max-height: 58dvh !important;  /* كان 72vh عندك :contentReference[oaicite:1]{index=1} */
+/* حتى ما يطلع كلشي عريض زيادة */
+.gt-img-premium{
+  width: 100% !important;
+  max-width: 700px !important;
 }
 
+/* ضبط ارتفاع الصورة حتى يبقى مكان للوصف */
+.gt-img-premium-photo{
+  width: min(100%, 520px) !important;
+  max-height: 52dvh !important;           /* تقدر ترفعها 56 لو تحب */
+  object-fit: contain !important;
+}
+
+/* كارد الوصف */
+.gt-img-premium-cap{
+  width: min(100%, 700px) !important;
+}
 
 
     
