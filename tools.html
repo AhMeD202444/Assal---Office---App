@@ -1208,7 +1208,7 @@
 .gt-inv-items{
   display:grid;
   gap:10px;
-  max-height: 60vh;          /* مهم للموبايل */
+  max-height: 52vh;          /* مهم للموبايل */
   overflow:auto;
   padding: 2px;
 }
@@ -1625,7 +1625,7 @@
   justify-content: center !important;      /* ✅ توسيط عمودي */
 
   gap: 8px !important;                    /* ✅ مسافة أنيقة بينهم */
-  padding: 25px !important;
+  padding: 16px !important;
   box-sizing: border-box !important;
 }
 
@@ -1647,14 +1647,7 @@
   width: min(100%, 700px) !important;
 }
 
-/* ✅ Fix: Image modal spacing on mobile + make content tighter */
-.swal2-popup.gt-swal.gt-img-popup .swal2-html-container{
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-  padding: 56px 14px 14px !important; /* مساحة للأكس + حواف أنيقة */
-  margin: 0 !important;
-}
+
 
 /* خلي العرض عمودياً مرتب بدون فراغات */
 .gt-img-premium{
@@ -1864,6 +1857,90 @@ body.swal2-shown > .swal2-container.swal2-backdrop-show:before{
 
 
 
+/* =========================
+   IMAGE MODAL - Perfect Vertical Center
+   (ضعه آخر شي داخل <style>)
+========================= */
+
+:root{
+  --img-pad: 14px;          /* حواف داخلية */
+  --img-safe: 64px;         /* حجز مساحة فوق/جوه حتى يصير التوسيط مضبوط */
+  --img-gap: 12px;          /* مسافة أنيقة بين الصورة والوصف */
+}
+
+/* كونتينر النافذة (أنت مستخدمه بالـ customClass.container) */
+.swal2-container.gt-img-container{
+  padding: 12px !important;
+}
+
+/* النافذة نفسها: تبقى طويلة وثابتة مثل ما عندك */
+.swal2-popup.gt-swal.gt-img-popup{
+  width: min(740px, 94vw) !important;
+  height: min(86dvh, 760px) !important;
+  border-radius: 26px !important;
+  overflow: hidden !important;
+  padding: 0 !important; /* نخلي البادنگ الحقيقي بالـ html container */
+}
+
+/* ✅ هذا المهم: توسيط عمودي حقيقي + نفس مسافة فوق/جوه */
+.swal2-popup.gt-swal.gt-img-popup .swal2-html-container{
+  height: 100% !important;
+  max-height: none !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: var(--img-gap) !important;
+
+  /* نخلي أعلى/أسفل نفس المسافة حتى يصير “بالنص” مضبوط */
+  padding:
+    var(--img-safe)
+    var(--img-pad)
+    var(--img-safe)
+    var(--img-pad) !important;
+
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important; /* يمنع تمدد غريب */
+}
+
+/* المحتوى */
+.gt-img-premium{
+  width: 100% !important;
+  max-width: 700px !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: var(--img-gap) !important;
+}
+
+/* الصورة: لا تكبر وتاكل مساحة الوصف */
+.gt-img-premium-photo{
+  width: min(100%, 560px) !important;
+  max-height: calc(100% - 210px) !important; /* يترك مجال للوصف */
+  object-fit: contain !important;
+}
+
+/* الوصف */
+.gt-img-premium-cap{
+  width: min(100%, 700px) !important;
+}
+
+/* بالموبايل نخليها أرتب */
+@media (max-width: 560px){
+  :root{
+    --img-pad: 12px;
+    --img-safe: 62px;
+    --img-gap: 10px;
+  }
+  .gt-img-premium-photo{
+    max-height: calc(100% - 230px) !important;
+  }
+}
 
 
     
