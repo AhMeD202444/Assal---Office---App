@@ -5617,6 +5617,12 @@ footer{
     <span>ف. سماعة</span>
 </div>
 
+<div class="category" onclick="filterCategory('HOLLDER')">
+  <i class="fas fa-sim-card"></i>
+  <span>هولدر سيم</span>
+</div>
+
+
 
     </div>
     <button class="slider-btn next-btn"><i class="fas fa-chevron-right"></i></button>
@@ -6877,7 +6883,8 @@ async function loadExcelFiles() {
             LENS: [],
             VOLUME: [],
             SPEAKER: [],
-            "FLAT SPEAKER": []
+            "FLAT SPEAKER": [],
+            HOLLDER: []
             
         };
 
@@ -6898,6 +6905,7 @@ async function loadExcelFiles() {
         database.VOLUME = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["VOLUME"] || {}, { defval: null });
         database.SPEAKER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["SPEAKER"] || {}, { defval: null });
         database["FLAT SPEAKER"] = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["FLAT SPEAKER"] || {}, { defval: null });
+        database.HOLLDER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOLLDER"] || {}, { defval: null })
 
 
         // تصحيح البيانات
