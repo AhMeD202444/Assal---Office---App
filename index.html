@@ -5569,10 +5569,7 @@ footer{
             <i class="fas fa-bell"></i>
             <span>جرس</span>
         </div>
-        <div class="category" onclick="filterCategory('HEADPHONE')">
-            <i class="fas fa-volume-up"></i>
-            <span>سماعة</span>
-        </div>
+        
 
 
         <div class="category" onclick="filterCategory('FINGER')">
@@ -5606,10 +5603,11 @@ footer{
     <span>ف. صوت</span>
 </div>
 
+
 <div class="category" onclick="filterCategory('SPEAKER')">
-    <i class="fas fa-phone-volume"></i>
-    <span>س. اتصال</span>
-</div>
+            <i class="fas fa-volume-up"></i>
+            <span>سماعة</span>
+        </div>
 
 
 <div class="category" onclick="filterCategory('FLAT SPEAKER')">
@@ -5621,6 +5619,12 @@ footer{
   <i class="fas fa-sim-card"></i>
   <span>هولدر سيم</span>
 </div>
+
+<div class="category" onclick="filterCategory('IC')">
+  <i class="fas fa-microchip"></i>
+  <span>IC</span>
+</div>
+
 
 
 
@@ -6905,8 +6909,8 @@ async function loadExcelFiles() {
         database.VOLUME = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["VOLUME"] || {}, { defval: null });
         database.SPEAKER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["SPEAKER"] || {}, { defval: null });
         database["FLAT SPEAKER"] = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["FLAT SPEAKER"] || {}, { defval: null });
-        database.HOLLDER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOLLDER"] || {}, { defval: null })
-
+        database.HOLLDER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOLLDER"] || {}, { defval: null }),
+        database.IC = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["IC"] || {}, { defval: null }),
 
         // تصحيح البيانات
         Object.keys(database).forEach(category => {
