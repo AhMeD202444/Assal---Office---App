@@ -5630,8 +5630,10 @@ footer{
   <span>قاعدة شحن</span>
 </div>
 
-
-
+<div class="category" onclick="filterCategory('VIBRATION')">
+  <i class="fa-solid fa-wave-square"></i>
+  <span>هزاز</span>
+</div>
 
 
     </div>
@@ -6917,7 +6919,9 @@ async function loadExcelFiles() {
         database["FLAT SPEAKER"] = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["FLAT SPEAKER"] || {}, { defval: null });
         database.HOLLDER = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOLLDER"] || {}, { defval: null }),
         database.IC = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["IC"] || {}, { defval: null }),
-         database.CC = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CC"] || {}, { defval: null }),
+        database.CC = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CC"] || {}, { defval: null }),
+        database.VIBRATION = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["VIBRATION"] || {}, { defval: null })
+         
 
         // تصحيح البيانات
         Object.keys(database).forEach(category => {
