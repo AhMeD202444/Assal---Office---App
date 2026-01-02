@@ -2956,6 +2956,21 @@ body{
 
 
 
+/* ====== Anti Copy / Anti Select (Global) ====== */
+html, body, *{
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* (اختياري) خلي حقول الإدخال تظل طبيعية للكتابة */
+input, textarea, [contenteditable="true"]{
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+
         
         
     </style>
@@ -3136,6 +3151,30 @@ body{
 
   return picked.join(" ").trim();
 }
+
+
+
+
+/* ====== Anti Copy / Anti Right Click / Anti Hotkeys ====== */
+(function lockCopy(){
+  const block = (e) => { e.preventDefault(); e.stopPropagation(); return false; };
+
+  // يمنع: تحديد/كلك يمين/نسخ/قص/لصق/سحب
+  ['copy','cut','paste','contextmenu','selectstart','dragstart'].forEach(ev => {
+    document.addEventListener(ev, block, true);
+  });
+
+  // يمنع اختصارات لوحة المفاتيح
+  document.addEventListener('keydown', (e) => {
+    const k = (e.key || '').toLowerCase();
+
+    // Ctrl + ...
+    if (e.ctrlKey && ['c','x','v','a','s','u','p'].includes(k)) return block(e);
+
+    // F12 + DevTools shortcuts
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(k))) return block(e);
+  }, true);
+})();
 
 
 
