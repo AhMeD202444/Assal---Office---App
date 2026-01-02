@@ -5366,6 +5366,21 @@ footer{
 }
 
 
+/* منع تحديد النص */
+body, * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none; /* يمنع قائمة النسخ على iOS/بعض الويبفيو */
+}
+
+/* استثناء حقول الإدخال حتى تظل تشتغل طبيعي */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+
+
 
 
     </style>
@@ -9149,6 +9164,28 @@ function goToSimilaritesFromPromo(){
 
 /* ما نلمس window.onload مالك — نضيف listener إضافي فقط */
 window.addEventListener('load', startPromoCountdown);
+
+
+
+(function lockCopy() {
+  const block = (e) => { e.preventDefault(); return false; };
+
+  document.addEventListener('copy', block);
+  document.addEventListener('cut', block);
+  document.addEventListener('paste', block);
+  document.addEventListener('contextmenu', block);
+  document.addEventListener('selectstart', block);
+  document.addEventListener('dragstart', block);
+
+  // منع Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+A
+  document.addEventListener('keydown', (e) => {
+    const k = (e.key || '').toLowerCase();
+    if (e.ctrlKey && ['c','x','v','a','s','u','p'].includes(k)) {
+      e.preventDefault();
+    }
+  });
+})();
+
 
 
         
