@@ -2043,6 +2043,21 @@ body.swal2-shown > .swal2-container.swal2-backdrop-show:before{
 @keyframes gtSpin{ to{ transform: rotate(360deg); } }
 
 
+/* منع تحديد النص */
+html, body, * {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+/* خَلّي الإدخال يظل طبيعي */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+
+
 
     
   </style>
@@ -5095,6 +5110,41 @@ Swal.fire({
 
     loadCart();
     renderCart();
+    
+    
+    (function lockCopy() {
+  const block = (e) => { e.preventDefault(); e.stopPropagation(); return false; };
+
+  // منع النسخ/القص/اللصق + تحديد + كليك يمين + سحب
+  ['copy','cut','paste','contextmenu','selectstart','dragstart'].forEach(ev => {
+    document.addEventListener(ev, block, true);
+  });
+
+  // منع اختصارات لوحة المفاتيح
+  document.addEventListener('keydown', (e) => {
+    const k = (e.key || '').toLowerCase();
+
+    // Ctrl + ...
+    if (e.ctrlKey && ['c','x','v','a','s','u','p'].includes(k)) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+
+    // F12 / DevTools shortcuts
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(k))) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  }, true);
+
+  // منع long-press على الموبايل (بعض WebView)
+  document.addEventListener('touchstart', (e) => {}, {passive: true});
+})();
+    
+    
+    
   </script>
 </body>
 </html>
