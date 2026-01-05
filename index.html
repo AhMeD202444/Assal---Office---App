@@ -5562,17 +5562,20 @@ input, textarea, [contenteditable="true"] {
     </div>
   </div>
 
-  <div class="contact-body">
-    <a id="contactWaLink" class="contact-card" href="#" target="_blank" rel="noopener noreferrer">
-      <div class="contact-card-left">
-        <div class="contact-label">واتساب</div>
-        <div class="contact-num" id="contactWaNum">07706032703</div>
-      </div>
-      <i class="fas fa-chevron-left"></i>
-    </a>
+ <div class="contact-body">
+  <a id="contactWaLink" class="contact-card"
+     href="javascript:void(0)"
+     onclick="openWhatsApp('9647706032703','مرحبا، أريد استفسار'); return false;">
+    <div class="contact-card-left">
+      <div class="contact-label">واتساب</div>
+      <div class="contact-num" id="contactWaNum">07706032703</div>
+    </div>
+    <i class="fas fa-chevron-left"></i>
+  </a>
 
-    <div class="contact-note">اضغط الرقم يفتح محادثة مباشرة</div>
-  </div>
+  <div class="contact-note">اضغط الرقم يفتح محادثة مباشرة</div>
+</div>
+
 </div>
 
 
@@ -9478,6 +9481,21 @@ window.addEventListener('load', startPromoCountdown);
     }
   });
 })();
+
+function openWhatsApp(phoneIntl, message = "") {
+  const msg = encodeURIComponent(message);
+  const waAppUrl = `whatsapp://send?phone=${phoneIntl}${message ? `&text=${msg}` : ""}`;
+  const waWebUrl = `https://wa.me/${phoneIntl}${message ? `?text=${msg}` : ""}`;
+
+  // نحاول نفتح التطبيق
+  window.location.href = waAppUrl;
+
+  // إذا ما فتح (WebView سدّه) نرجع للويب بعد 1.2 ثانية
+  setTimeout(() => {
+    window.location.href = waWebUrl;
+  }, 1200);
+}
+
 
 
 
