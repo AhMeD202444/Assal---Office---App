@@ -5379,6 +5379,7 @@ input, textarea, [contenteditable="true"] {
   user-select: text;
 }
 
+
 /* زر التواصل بالهيدر */
 .header-icon-btn.contact-btn{
   border: 1px solid rgba(255,255,255,0.14);
@@ -5504,6 +5505,103 @@ input, textarea, [contenteditable="true"] {
   text-align: center;
 }
 
+.call-icon-btn{
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.14);
+  background: linear-gradient(135deg, rgba(34,197,94,.55), rgba(22,163,74,.25));
+  box-shadow: 0 12px 28px rgba(0,0,0,.55);
+  transition: transform .18s ease, filter .18s ease;
+  flex: 0 0 auto;
+}
+.call-icon-btn:hover{
+  transform: translateY(-1px) scale(1.05);
+  filter: brightness(1.06);
+}
+.call-icon-btn:active{
+  transform: scale(.95);
+}
+
+/* تباعد مرتب بين الكروت */
+.branches-grid{
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* التباعد اللي تريده */
+}
+
+/* كرت الفرع بشكل احترافي */
+.branch-card{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(34,197,94,.16), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(96,165,250,.12), transparent 65%),
+    rgba(17,24,39,.70);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 18px 44px rgba(0,0,0,.55);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.branch-card:hover{
+  transform: translateY(-1px);
+  border-color: rgba(34,197,94,.35);
+  box-shadow: 0 22px 54px rgba(0,0,0,.65);
+}
+
+.branch-info{
+  display:flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.branch-title{
+  font-size: 12px;
+  font-weight: 900;
+  color: #cbd5e1;
+  letter-spacing: .02em;
+}
+
+.branch-name{
+  font-size: 15px;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* رقم الهاتف بشكل كبسولة */
+.branch-phone{
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 14px;
+  color: #e5e7eb;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.10);
+}
+
+/* نخلي زر الاتصال أوضح شوي داخل الكرت */
+.branch-card .call-icon-btn{
+  width: 42px;
+  height: 42px;
+  box-shadow: 0 14px 34px rgba(0,0,0,.60);
+}
 
 
 
@@ -5547,7 +5645,6 @@ input, textarea, [contenteditable="true"] {
 </div>
 
 
-
 <!-- نافذة التواصل -->
 <div id="contactModal" dir="rtl" aria-hidden="true">
   <button class="close-modal-btn" onclick="closeContactModal()" aria-label="إغلاق">
@@ -5562,21 +5659,58 @@ input, textarea, [contenteditable="true"] {
     </div>
   </div>
 
- <div class="contact-body">
-  <a id="contactWaLink" class="contact-card"
-     href="javascript:void(0)"
-     onclick="openWhatsApp('9647706032703','مرحبا، أريد استفسار'); return false;">
-    <div class="contact-card-left">
-      <div class="contact-label">واتساب</div>
-      <div class="contact-num" id="contactWaNum">07706032703</div>
+ <div class="contact-body branches-grid">
+
+  <div class="contact-card branch-card">
+    <div class="contact-card-left branch-info">
+      <div class="branch-title">الفرع الأول</div>
+      <div class="branch-name">مكتب عسل الفرع الرئيسي</div>
+      <div class="branch-phone">07728640560</div>
     </div>
-    <i class="fas fa-chevron-left"></i>
-  </a>
+    <a class="call-icon-btn" href="tel:07728640560" aria-label="اتصال الفرع الرئيسي">
+      <i class="fas fa-phone"></i>
+    </a>
+  </div>
 
-  <div class="contact-note">اضغط الرقم يفتح محادثة مباشرة</div>
+  <div class="contact-card branch-card">
+    <div class="contact-card-left branch-info">
+      <div class="branch-title">الفرع الثاني</div>
+      <div class="branch-name">مكتب عسل فرع حي المعلمين</div>
+      <div class="branch-phone">07711107595</div>
+    </div>
+    <a class="call-icon-btn" href="tel:07711107595" aria-label="اتصال فرع حي المعلمين">
+      <i class="fas fa-phone"></i>
+    </a>
+  </div>
+
+  <div class="contact-card branch-card">
+    <div class="contact-card-left branch-info">
+      <div class="branch-title">الفرع الثالث</div>
+      <div class="branch-name">مكتب عسل فرع التحرير</div>
+      <div class="branch-phone">07730090731</div>
+    </div>
+    <a class="call-icon-btn" href="tel:07730090731" aria-label="اتصال فرع التحرير">
+      <i class="fas fa-phone"></i>
+    </a>
+  </div>
+
+  <div class="contact-card branch-card">
+    <div class="contact-card-left branch-info">
+      <div class="branch-title">الفرع الرابع</div>
+      <div class="branch-name">مكتب عسل فرع بلدروز</div>
+      <div class="branch-phone">07755206020</div>
+    </div>
+    <a class="call-icon-btn" href="tel:07755206020" aria-label="اتصال فرع بلدروز">
+      <i class="fas fa-phone"></i>
+    </a>
+  </div>
+
+  <div class="contact-note">اضغط على أيقونة الاتصال حتى يتصل</div>
 </div>
 
+
 </div>
+
 
 
 
@@ -5610,7 +5744,6 @@ input, textarea, [contenteditable="true"] {
         aria-label="تواصل ويانه">
   <i class="fab fa-whatsapp"></i>
 </button>
-
   
 </div>
 
@@ -6192,99 +6325,6 @@ function closeOffersModal(){
         if (overlay) overlay.style.display = "none";
     }
 }
-
-
-
-let isContactModalOpen = false;
-
-// يمنع أي كلك على الـ overlay يسوي شي (ويوقف باقي الليسنرز مال overlay)
-function blockOverlayClicks(e){
-  e.preventDefault();
-  e.stopImmediatePropagation();
-  return false;
-}
-
-function openContactModal(){
-  try{
-    if (isContactModalOpen) return;
-
-    const modal = document.getElementById("contactModal");
-    const overlay = document.getElementById("overlay");
-
-    // رقم واحد حالياً (محلي + دولي)
-    const local = "07706032703";
-    const intl  = "9647706032703"; // بدون + وبدون 00
-
-    // جهّز رابط واتساب
-    const wa = document.getElementById("contactWaLink");
-    const waNum = document.getElementById("contactWaNum");
-    if (wa) wa.href = `https://wa.me/${intl}`;
-    if (waNum) waNum.textContent = local;
-
-    // عرض overlay + منع اللمس خارجه (يعني الكلك ما يسوي شي)
-    if (overlay){
-      overlay.style.display = "block";
-      overlay.addEventListener("click", blockOverlayClicks, true); // capture
-    }
-
-    modal.style.display = "flex";
-    modal.setAttribute("aria-hidden","false");
-    modal.style.animation = "slideDownModal 0.5s ease-out forwards";
-
-    // قفل سكرول الخلفية (اختياري بس يطلع أنيق)
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-
-    isContactModalOpen = true;
-  }catch(err){
-    console.error("openContactModal:", err);
-  }
-}
-
-function closeContactModal(){
-  try{
-    const modal = document.getElementById("contactModal");
-    const overlay = document.getElementById("overlay");
-
-    modal.style.animation = "slideUpModal 0.5s ease-in forwards";
-
-    setTimeout(() => {
-      modal.style.display = "none";
-      modal.setAttribute("aria-hidden","true");
-      isContactModalOpen = false;
-
-      // رجّع السكرول
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-
-      // شيل منع الكلك عن overlay
-      if (overlay){
-        overlay.removeEventListener("click", blockOverlayClicks, true);
-
-        // لا تطفي overlay إذا اكو نافذة ثانية مفتوحة
-        const cart  = document.getElementById("cartModal");
-        const offers= document.getElementById("offersModal");
-        const newIt = document.getElementById("newItemsModal");
-        const promo = document.getElementById("promoPopup");
-
-        const anyOpen =
-          (cart  && cart.style.display === "block") ||
-          (offers&& offers.style.display === "flex") ||
-          (newIt && newIt.style.display === "flex") ||
-          (promo && promo.style.display === "flex");
-
-        if (!anyOpen) overlay.style.display = "none";
-      }
-    }, 500);
-  }catch(err){
-    console.error("closeContactModal:", err);
-    isContactModalOpen = false;
-    const overlay = document.getElementById("overlay");
-    if (overlay) overlay.style.display = "none";
-  }
-}
-
-
 
 function loadOffers(){
     const modal = document.getElementById("offersModal");
@@ -9482,22 +9522,85 @@ window.addEventListener('load', startPromoCountdown);
   });
 })();
 
-function openWhatsApp(phoneIntl, message = "") {
-  const msg = encodeURIComponent(message);
-  const waAppUrl = `whatsapp://send?phone=${phoneIntl}${message ? `&text=${msg}` : ""}`;
-  const waWebUrl = `https://wa.me/${phoneIntl}${message ? `?text=${msg}` : ""}`;
 
-  // نحاول نفتح التطبيق
-  window.location.href = waAppUrl;
+let isContactModalOpen = false;
 
-  // إذا ما فتح (WebView سدّه) نرجع للويب بعد 1.2 ثانية
-  setTimeout(() => {
-    window.location.href = waWebUrl;
-  }, 1200);
+// يمنع أي كلك على الـ overlay يسوي شي (ويوقف باقي الليسنرز مال overlay)
+function blockOverlayClicks(e){
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  return false;
 }
 
+function openContactModal(){
+  try{
+    if (isContactModalOpen) return;
 
+    const modal = document.getElementById("contactModal");
+    const overlay = document.getElementById("overlay");
 
+    // عرض overlay + منع اللمس خارجه (يعني الكلك ما يسوي شي)
+    if (overlay){
+      overlay.style.display = "block";
+      overlay.addEventListener("click", blockOverlayClicks, true); // capture
+    }
+
+    modal.style.display = "flex";
+    modal.setAttribute("aria-hidden","false");
+    modal.style.animation = "slideDownModal 0.5s ease-out forwards";
+
+    // قفل سكرول الخلفية (اختياري بس يطلع أنيق)
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
+    isContactModalOpen = true;
+  }catch(err){
+    console.error("openContactModal:", err);
+  }
+}
+
+function closeContactModal(){
+  try{
+    const modal = document.getElementById("contactModal");
+    const overlay = document.getElementById("overlay");
+
+    modal.style.animation = "slideUpModal 0.5s ease-in forwards";
+
+    setTimeout(() => {
+      modal.style.display = "none";
+      modal.setAttribute("aria-hidden","true");
+      isContactModalOpen = false;
+
+      // رجّع السكرول
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+
+      // شيل منع الكلك عن overlay
+      if (overlay){
+        overlay.removeEventListener("click", blockOverlayClicks, true);
+
+        // لا تطفي overlay إذا اكو نافذة ثانية مفتوحة
+        const cart  = document.getElementById("cartModal");
+        const offers= document.getElementById("offersModal");
+        const newIt = document.getElementById("newItemsModal");
+        const promo = document.getElementById("promoPopup");
+
+        const anyOpen =
+          (cart  && cart.style.display === "block") ||
+          (offers&& offers.style.display === "flex") ||
+          (newIt && newIt.style.display === "flex") ||
+          (promo && promo.style.display === "flex");
+
+        if (!anyOpen) overlay.style.display = "none";
+      }
+    }, 500);
+  }catch(err){
+    console.error("closeContactModal:", err);
+    isContactModalOpen = false;
+    const overlay = document.getElementById("overlay");
+    if (overlay) overlay.style.display = "none";
+  }
+}
 
         
     </script>
