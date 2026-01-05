@@ -7693,38 +7693,73 @@ async function refreshData() {
  let newsInterval = null;
 
 async function fetchTechNews() {
-    const rssToJsonUrl = "https://api.rss2json.com/v1/api.json?rss_url=https://aitnews.com/feed/";
-    const resultsContainer = document.getElementById("results");
+  // RSS شغال (بديل عن AITnews لأن feed مالته صار مو RSS)
+  const FEED = "https://taqniatimes.com/rss/category/latest-news";
 
-    // إذا النتائج معروضة، لا تحدث الأخبار
-    if (resultsContainer.style.display === "flex") {
-        return;
+  const ticker = document.getElementById("newsTicker");
+  if (!ticker) return;
+
+  // JSONP helper (يتجاوز CORS لأن يعتمد <script>)
+  function jsonp(url, callbackParam = "callback", timeoutMs = 15000) {
+    return new Promise((resolve, reject) => {
+      const cb = "__rss_cb_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+      const script = document.createElement("script");
+      const sep = url.includes("?") ? "&" : "?";
+
+      const timer = setTimeout(() => {
+        cleanup();
+        reject(new Error("JSONP timeout"));
+      }, timeoutMs);
+
+      function cleanup() {
+        clearTimeout(timer);
+        try { delete window[cb]; } catch (_) { window[cb] = undefined; }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      window[cb] = (data) => {
+        cleanup();
+        resolve(data);
+      };
+
+      script.onerror = () => {
+        cleanup();
+        reject(new Error("JSONP script blocked/failed"));
+      };
+
+      script.src = `${url}${sep}${callbackParam}=${encodeURIComponent(cb)}&_=${Date.now()}`;
+      document.head.appendChild(script);
+    });
+  }
+
+  try {
+    // rss2json يدعم JSONP عن طريق callback
+    const apiUrl =
+      `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(FEED)}&count=10`;
+
+    const data = await jsonp(apiUrl, "callback");
+
+    if (!data || (data.status && data.status !== "ok")) {
+      throw new Error((data && data.message) || "rss2json status not ok");
     }
 
-    try {
-        const response = await fetch(rssToJsonUrl);
-        const data = await response.json();
-        let newsItems = [];
+    const items = Array.isArray(data.items) ? data.items : [];
+    const icon = "https://cdn-icons-png.flaticon.com/16/1041/1041916.png";
 
-        if (data.items) {
-            data.items.forEach(item => {
-                let title = item.title;
-                let link = item.link;
-                let icon = "https://cdn-icons-png.flaticon.com/16/1041/1041916.png";
-                newsItems.push(`<span><img src="${icon}" alt="📢"><a href="${link}" target="_blank">${title}</a></span>`);
-            });
-        }
+    const html = items.slice(0, 10).map((item) => {
+      const title = item.title || "خبر";
+      const link = item.link || "#";
+      return `<span><img src="${icon}" alt="📢">
+        <a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></span>`;
+    }).join(" | ");
 
-        if (newsItems.length > 0) {
-            document.getElementById("newsTicker").innerHTML = newsItems.join(" | ");
-        } else {
-            document.getElementById("newsTicker").textContent = "⚠️ لا توجد أخبار متاحة الآن";
-        }
-    } catch (error) {
-        console.error("Error fetching news:", error);
-        document.getElementById("newsTicker").textContent = "⚠️ تعذر تحميل الأخبار";
-    }
+    ticker.innerHTML = html || "⚠️ ماكو أخبار حالياً";
+  } catch (e) {
+    console.error("TechNews error:", e);
+    ticker.textContent = "⚠️ تعذر تحميل الأخبار حالياً";
+  }
 }
+
 
 function restartNewsTicker() {
     const ticker = document.querySelector(".news-ticker");
