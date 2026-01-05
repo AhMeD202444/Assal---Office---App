@@ -5379,6 +5379,132 @@ input, textarea, [contenteditable="true"] {
   user-select: text;
 }
 
+/* زر التواصل بالهيدر */
+.header-icon-btn.contact-btn{
+  border: 1px solid rgba(255,255,255,0.14);
+  background: radial-gradient(circle at top left, rgba(34,197,94,.35), rgba(15,23,42,.20));
+  box-shadow: 0 10px 22px rgba(0,0,0,.35);
+}
+.header-icon-btn.contact-btn:hover{
+  transform: translateY(-1px) scale(1.02);
+}
+.header-icon-btn.contact-btn:active{
+  transform: scale(.96);
+}
+
+/* نافذة التواصل */
+#contactModal{
+  position: fixed;
+  top: 70px;               /* تحت الهيدر */
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 20px));
+  background:
+    radial-gradient(circle at top left, rgba(34,197,94,.18), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(96,165,250,.14), transparent 60%),
+    rgba(15,23,42,.94);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  box-shadow: 0 28px 70px rgba(0,0,0,.75);
+  padding: 16px;
+  z-index: 10000;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#contactModal .close-modal-btn{
+  position: absolute;
+  top: 10px;
+  inset-inline-end: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: #e5e7eb;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(0,0,0,.55);
+  display: grid;
+  place-items: center;
+  transition: transform .18s ease, background .18s ease;
+}
+#contactModal .close-modal-btn:hover{
+  transform: scale(1.06);
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+#contactModal .close-modal-btn:active{ transform: scale(.92); }
+
+#contactModal .contact-head{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  padding-inline-end: 34px; /* حتى ما يتعارك ويا زر الإغلاق */
+}
+#contactModal .contact-ico{
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  display:grid;
+  place-items:center;
+  background: linear-gradient(135deg, rgba(34,197,94,.35), rgba(96,165,250,.18));
+  border: 1px solid rgba(255,255,255,.12);
+  color: #fff;
+  box-shadow: 0 18px 40px rgba(0,0,0,.45);
+}
+#contactModal h2{
+  margin:0;
+  font-size: 20px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #86efac, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#contactModal .contact-sub{
+  font-size: 12px;
+  color: #cbd5e1;
+  margin-top: 2px;
+}
+
+#contactModal .contact-card{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 12px;
+  border-radius: 16px;
+  text-decoration: none;
+  background: rgba(17,24,39,.72);
+  border: 1px solid rgba(55,65,81,.85);
+  box-shadow: 0 14px 34px rgba(0,0,0,.45);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+#contactModal .contact-card:hover{
+  transform: translateY(-1px);
+  border-color: rgba(34,197,94,.55);
+  box-shadow: 0 18px 44px rgba(0,0,0,.55);
+}
+#contactModal .contact-card:active{ transform: scale(.98); }
+
+#contactModal .contact-label{
+  color:#e5e7eb;
+  font-weight: 900;
+  font-size: 13px;
+}
+#contactModal .contact-num{
+  color:#fff;
+  font-weight: 800;
+  letter-spacing: .02em;
+  font-size: 16px;
+  margin-top: 2px;
+}
+#contactModal .contact-note{
+  color:#94a3b8;
+  font-size: 12px;
+  text-align: center;
+}
+
+
 
 
 
@@ -5421,6 +5547,36 @@ input, textarea, [contenteditable="true"] {
 </div>
 
 
+
+<!-- نافذة التواصل -->
+<div id="contactModal" dir="rtl" aria-hidden="true">
+  <button class="close-modal-btn" onclick="closeContactModal()" aria-label="إغلاق">
+    <i class="fas fa-times"></i>
+  </button>
+
+  <div class="contact-head">
+    <div class="contact-ico"><i class="fab fa-whatsapp"></i></div>
+    <div class="contact-head-text">
+      <h2>تواصل ويانه</h2>
+      <div class="contact-sub">واتساب مباشر</div>
+    </div>
+  </div>
+
+  <div class="contact-body">
+    <a id="contactWaLink" class="contact-card" href="#" target="_blank" rel="noopener noreferrer">
+      <div class="contact-card-left">
+        <div class="contact-label">واتساب</div>
+        <div class="contact-num" id="contactWaNum">07706032703</div>
+      </div>
+      <i class="fas fa-chevron-left"></i>
+    </a>
+
+    <div class="contact-note">اضغط الرقم يفتح محادثة مباشرة</div>
+  </div>
+</div>
+
+
+
  
  <header class="header">
     <div class="header-title">مكتب عسل</div>
@@ -5444,6 +5600,15 @@ input, textarea, [contenteditable="true"] {
     <i class="fas fa-shopping-cart"></i>
     <span class="header-cart-badge" id="cartCount">0</span>
   </button>
+  
+  <button class="header-btn header-icon-btn contact-btn"
+        onclick="openContactModal()"
+        title="تواصل ويانه"
+        aria-label="تواصل ويانه">
+  <i class="fab fa-whatsapp"></i>
+</button>
+
+  
 </div>
 
    
@@ -6024,6 +6189,99 @@ function closeOffersModal(){
         if (overlay) overlay.style.display = "none";
     }
 }
+
+
+
+let isContactModalOpen = false;
+
+// يمنع أي كلك على الـ overlay يسوي شي (ويوقف باقي الليسنرز مال overlay)
+function blockOverlayClicks(e){
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  return false;
+}
+
+function openContactModal(){
+  try{
+    if (isContactModalOpen) return;
+
+    const modal = document.getElementById("contactModal");
+    const overlay = document.getElementById("overlay");
+
+    // رقم واحد حالياً (محلي + دولي)
+    const local = "07706032703";
+    const intl  = "9647706032703"; // بدون + وبدون 00
+
+    // جهّز رابط واتساب
+    const wa = document.getElementById("contactWaLink");
+    const waNum = document.getElementById("contactWaNum");
+    if (wa) wa.href = `https://wa.me/${intl}`;
+    if (waNum) waNum.textContent = local;
+
+    // عرض overlay + منع اللمس خارجه (يعني الكلك ما يسوي شي)
+    if (overlay){
+      overlay.style.display = "block";
+      overlay.addEventListener("click", blockOverlayClicks, true); // capture
+    }
+
+    modal.style.display = "flex";
+    modal.setAttribute("aria-hidden","false");
+    modal.style.animation = "slideDownModal 0.5s ease-out forwards";
+
+    // قفل سكرول الخلفية (اختياري بس يطلع أنيق)
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
+    isContactModalOpen = true;
+  }catch(err){
+    console.error("openContactModal:", err);
+  }
+}
+
+function closeContactModal(){
+  try{
+    const modal = document.getElementById("contactModal");
+    const overlay = document.getElementById("overlay");
+
+    modal.style.animation = "slideUpModal 0.5s ease-in forwards";
+
+    setTimeout(() => {
+      modal.style.display = "none";
+      modal.setAttribute("aria-hidden","true");
+      isContactModalOpen = false;
+
+      // رجّع السكرول
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+
+      // شيل منع الكلك عن overlay
+      if (overlay){
+        overlay.removeEventListener("click", blockOverlayClicks, true);
+
+        // لا تطفي overlay إذا اكو نافذة ثانية مفتوحة
+        const cart  = document.getElementById("cartModal");
+        const offers= document.getElementById("offersModal");
+        const newIt = document.getElementById("newItemsModal");
+        const promo = document.getElementById("promoPopup");
+
+        const anyOpen =
+          (cart  && cart.style.display === "block") ||
+          (offers&& offers.style.display === "flex") ||
+          (newIt && newIt.style.display === "flex") ||
+          (promo && promo.style.display === "flex");
+
+        if (!anyOpen) overlay.style.display = "none";
+      }
+    }, 500);
+  }catch(err){
+    console.error("closeContactModal:", err);
+    isContactModalOpen = false;
+    const overlay = document.getElementById("overlay");
+    if (overlay) overlay.style.display = "none";
+  }
+}
+
+
 
 function loadOffers(){
     const modal = document.getElementById("offersModal");
