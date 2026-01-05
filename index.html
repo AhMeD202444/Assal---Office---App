@@ -5603,6 +5603,44 @@ input, textarea, [contenteditable="true"] {
   box-shadow: 0 14px 34px rgba(0,0,0,.60);
 }
 
+/* الغاء أي تأثير لمس/هوفر على كروت الفروع - فقط زر الاتصال */
+.branch-card{
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* لا تحرّك ولا تلمّع الكرت عند hover/active */
+.branch-card:hover,
+.branch-card:active{
+  transform: none !important;
+  filter: none !important;
+  box-shadow: inherit !important;
+}
+
+/* الغاء الهايلايت على نصوص داخل الكرت */
+.branch-card .branch-info,
+.branch-card .branch-title,
+.branch-card .branch-name,
+.branch-card .branch-phone{
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* زر الاتصال فقط هو القابل للضغط */
+.call-icon-btn{
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+/* امنع أي outline افتراضي */
+.call-icon-btn:focus,
+.call-icon-btn:focus-visible{
+  outline: none;
+}
+
+
 
 
 
@@ -5687,7 +5725,7 @@ input, textarea, [contenteditable="true"] {
     <div class="contact-card-left branch-info">
       <div class="branch-title">الفرع الثالث</div>
       <div class="branch-name">مكتب عسل فرع التحرير</div>
-      <div class="branch-phone">07730090731</div>
+      <div class="branch-phone">07730080731</div>
     </div>
     <a class="call-icon-btn" href="tel:07730090731" aria-label="اتصال فرع التحرير">
       <i class="fas fa-phone"></i>
@@ -5738,12 +5776,13 @@ input, textarea, [contenteditable="true"] {
     <span class="header-cart-badge" id="cartCount">0</span>
   </button>
   
-  <button class="header-btn header-icon-btn contact-btn"
+ <button class="header-btn header-icon-btn contact-btn"
         onclick="openContactModal()"
-        title="تواصل ويانه"
-        aria-label="تواصل ويانه">
-  <i class="fab fa-whatsapp"></i>
+        title="اتصل بينا"
+        aria-label="اتصل بينا">
+  <i class="fas fa-phone"></i>
 </button>
+
   
 </div>
 
