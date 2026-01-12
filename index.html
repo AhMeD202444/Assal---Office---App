@@ -5795,6 +5795,75 @@ input, textarea, [contenteditable="true"] {
 
 
 <!-- إعلان هدية التوافقات -->
+<!-- ====== [إعلان البداية] برشلونة (النسخة اللي قبل الأخيرة) ====== -->
+<!-- [تلميح] لتفعيل/تعطيل الإعلان: غيّر showPromoPopup أعلى الـ JS -->
+<div id="promoPopup" class="alert-shell alert-event promo-gift promo-barca" dir="rtl">
+  <button class="promo-x" type="button" aria-label="إغلاق" onclick="closePopup()">
+    <i class="fas fa-xmark"></i>
+  </button>
+
+  <div class="promo-top">
+    <div class="promo-badge" aria-hidden="true">
+      <span class="promo-ring"></span>
+      <span class="promo-spark s1"></span>
+      <span class="promo-spark s2"></span>
+      <span class="promo-spark s3"></span>
+      <i class="fas fa-trophy"></i>
+    </div>
+
+    <div class="promo-head">
+      <div class="promo-kicker">🏆 عاجل | برشلونة</div>
+      <div class="promo-title">تهنئة لعشّاق برشلونة: لقب السوبر الإسباني (16)</div>
+      <div class="promo-sub">
+        مبروك لكل جمهور البلوگرانا 💙❤️<br>
+        لقب جديد يثبت الهوية: <b>سيطرة</b> + <b>انضباط</b> + <b>شخصية بطل</b>.<br>
+        خلي الفرح يكمّل… <b>Visca Barça!</b>
+      </div>
+    </div>
+  </div>
+
+  <!-- [تلميح] هذا كان عدّاد بالنسخة القديمة… هسه صار شريط بيانات ثابت مثل القنوات -->
+  <div class="promo-countdown" aria-label="شريط بيانات">
+    <div class="cd-box">
+      <div id="promoDays" class="cd-num">BAR</div>
+      <div class="cd-lbl">الفائز</div>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-box">
+      <div id="promoHours" class="cd-num">16</div>
+      <div class="cd-lbl">اللقب</div>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-box">
+      <div id="promoMins" class="cd-num">SUP</div>
+      <div class="cd-lbl">البطولة</div>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-box cd-sec">
+      <div id="promoSecs" class="cd-num">ESP</div>
+      <div class="cd-lbl">البلد</div>
+    </div>
+  </div>
+
+  <div class="promo-actions">
+    <button class="promo-btn promo-primary" type="button" onclick="closePopup()">
+      <i class="fas fa-trophy"></i>
+      ڤيسكا بارسا
+    </button>
+
+    <button class="promo-btn promo-ghost" type="button" onclick="closePopup()">
+      إغلاق
+    </button>
+  </div>
+
+  <div class="promo-footnote">
+    * مبروك لكل محب لبرشلونة… اللقب 16 يكتب فصل جديد من المجد 💙❤️
+  </div>
+</div>
+
+<!-- ====== [أرشيف/مُعطّل] إعلان الهدية القديم ====== -->
+<!-- [تلميح] للتفعيل مستقبلاً: انسخ محتوى السكربت أدناه واستبدله مكان #promoPopup أعلاه -->
+<script type="text/plain" id="OLD_GIFT_PROMO_BLOCK">
 <div id="promoPopup" class="alert-shell alert-event promo-gift" dir="rtl">
   <button class="promo-x" type="button" aria-label="إغلاق" onclick="closePopup()">
     <i class="fas fa-xmark"></i>
@@ -5856,6 +5925,7 @@ input, textarea, [contenteditable="true"] {
     * العرض محدود… لا يفوتك.
   </div>
 </div>
+</script>
 
 
 
@@ -6645,7 +6715,7 @@ function clearMaintenanceBypass() {
 
       
       
- let showPromoPopup = false; // 🔥 يتحكم فقط في النافذة المنبثقة، false = تعطيل النافذة
+let showPromoPopup = true;  // ✅ [تعديل] تفعيل إعلان البداية (غيّرها لـ false إذا تريد تعطل كل الإعلانات)
 let promoAlreadyShown = sessionStorage.getItem('promoShown') === 'true';
 
 window.onload = function() {
@@ -9459,14 +9529,36 @@ if (typeof t.autoTable !== "function") throw new Error("autoTable not loaded (ch
 });
 
 /* ========= Promo Countdown (UI only) =========
-   غيّر هذا الوقت مثل ما تريد (توقيت بغداد +03:00)
-   الفكرة: نحسب النهاية = بداية + يومين
+   ✅ [تعديل] كان هذا الجزء عدّاد "هدية التوافقات" (يومين).
+   ✅ هسه الهدية مُعطّلة، فحوّلناه إلى "شريط بيانات ثابت" لإعلان برشلونة (مثل القنوات).
+
+   🔁 إذا تريد ترجع عدّاد الهدية مستقبلاً:
+   1) فعّل إعلان الهدية (موجود كنص داخل OLD_GIFT_PROMO_BLOCK بالـ HTML).
+   2) بدّل هذا الكود بكود العدّاد القديم (مخليّه بالتعليق أدناه).
 */
-const PROMO_FREE_START_ISO = '2025-12-24T00:00:00+03:00'; // <-- غيّر التاريخ/الوقت
-const PROMO_FREE_DURATION_MS = 2 * 24 * 60 * 60 * 1000;   // يومين
+
+/* =========================
+   (قديم) عدّاد الهدية
+   =========================
+const PROMO_FREE_START_ISO = '2025-12-24T00:00:00+03:00';
+const PROMO_FREE_DURATION_MS = 2 * 24 * 60 * 60 * 1000;
 const PROMO_FREE_END_TS = new Date(PROMO_FREE_START_ISO).getTime() + PROMO_FREE_DURATION_MS;
 
 function pad2(n){ return String(Math.max(0, n)).padStart(2, '0'); }
+
+function updatePromoCountdown(){
+  // ... كود العدّاد القديم ...
+}
+
+let promoCountdownTimer = null;
+function startPromoCountdown(){
+  updatePromoCountdown();
+  if (promoCountdownTimer) clearInterval(promoCountdownTimer);
+  promoCountdownTimer = setInterval(updatePromoCountdown, 1000);
+}
+========================= */
+
+function pad2(n){ return String(Math.max(0, n)).padStart(2, '0'); } // نتركها للتوافق
 
 function updatePromoCountdown(){
   const dEl = document.getElementById('promoDays');
@@ -9475,58 +9567,19 @@ function updatePromoCountdown(){
   const sEl = document.getElementById('promoSecs');
   if (!dEl || !hEl || !mEl || !sEl) return;
 
-  const prev = {
-    d: dEl.textContent,
-    h: hEl.textContent,
-    m: mEl.textContent,
-    s: sEl.textContent
-  };
-
-  let diff = PROMO_FREE_END_TS - Date.now();
-  if (diff < 0) diff = 0;
-
-  const days = Math.floor(diff / (24*60*60*1000));
-  diff -= days * (24*60*60*1000);
-
-  const hours = Math.floor(diff / (60*60*1000));
-  diff -= hours * (60*60*1000);
-
-  const mins = Math.floor(diff / (60*1000));
-  diff -= mins * (60*1000);
-
-  const secs = Math.floor(diff / 1000);
-
-  const next = {
-    d: pad2(days),
-    h: pad2(hours),
-    m: pad2(mins),
-    s: pad2(secs)
-  };
-
-  dEl.textContent = next.d;
-  hEl.textContent = next.h;
-  mEl.textContent = next.m;
-  sEl.textContent = next.s;
-
-  // حركة “tick” بس للرقم اللي تغيّر
-  const tick = (el) => {
-    el.classList.remove('tick');
-    void el.offsetWidth; // reflow
-    el.classList.add('tick');
-  };
-
-  if (prev.d !== next.d) tick(dEl);
-  if (prev.h !== next.h) tick(hEl);
-  if (prev.m !== next.m) tick(mEl);
-  if (prev.s !== next.s) tick(sEl);
+  // ✅ [تعديل] شريط بيانات ثابت لإعلان برشلونة
+  dEl.textContent = 'BAR';
+  hEl.textContent = '16';
+  mEl.textContent = 'SUP';
+  sEl.textContent = 'ESP';
 }
-
 
 let promoCountdownTimer = null;
 function startPromoCountdown(){
-  updatePromoCountdown();
+  // ✅ [تعديل] مرة وحدة فقط (بدون setInterval)
   if (promoCountdownTimer) clearInterval(promoCountdownTimer);
-  promoCountdownTimer = setInterval(updatePromoCountdown, 1000);
+  promoCountdownTimer = null;
+  updatePromoCountdown();
 }
 
 /* زر الدخول لصفحة التوافقات */
