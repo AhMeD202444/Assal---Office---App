@@ -889,7 +889,7 @@ h1 {
 .category-btn, 
 .tools-btn {
     width: 85%; /* جعل العرض موحد */
-    max-width: 250px; /* نفس عرض زر أسعار بنمط الكروب
+    max-width: 250px; /* نفس عرض زر أسعار بنمط الكروب */
 
     
 }
@@ -5645,7 +5645,324 @@ input, textarea, [contenteditable="true"] {
 
 
 
-    </style>
+    
+/* =========================
+   LUX ADS SYSTEM (Ahmed)
+   - control by AD_CHOICE
+   ========================= */
+#adOverlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 100000;
+  display: none;
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+#adModal{
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  z-index: 100001;
+  padding: 18px;
+}
+#adModal .ad-shell{
+  width: min(720px, 94vw);
+  border-radius: 26px;
+  overflow: hidden;
+  color: #fff;
+  box-shadow: 0 30px 80px rgba(0,0,0,.75);
+  transform: translateZ(0);
+}
+#adModal .ad-topbar{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+#adModal .ad-brand{
+  display:flex; align-items:center; gap:10px;
+  font-family:'Cairo',sans-serif;
+  font-weight: 800;
+  letter-spacing: .3px;
+  font-size: clamp(14px, 2.8vw, 18px);
+}
+#adModal .ad-brand i{ opacity:.95; }
+#adModal .ad-close{
+  width: 40px; height: 40px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(0,0,0,.28);
+  color:#fff;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+  transition: transform .18s ease, background .18s ease;
+}
+#adModal .ad-close:hover{ transform: scale(1.06); background: rgba(0,0,0,.38); }
+#adModal .ad-close:active{ transform: scale(.96); }
+
+#adModal .ad-body{
+  padding: 18px 18px 16px;
+  font-family:'Cairo',sans-serif;
+  text-align: center;            /* توسيط النص */
+}
+
+#adModal .ad-body > *{
+  margin-left: auto;
+  margin-right: auto;            /* توسيط العناصر البلوكية */
+}
+
+#adModal .ad-actions{
+  justify-content: center;        /* توسيط الازرار */
+}
+
+#adModal h3{
+  font-size: clamp(22px, 5.4vw, 36px);
+  line-height: 1.15;
+  margin: 0 0 10px 0;
+  letter-spacing: .2px;
+}
+#adModal p{
+  margin: 0;
+  font-size: clamp(14px, 3.7vw, 18px);
+  color: rgba(255,255,255,.88);
+  line-height: 1.75;
+}
+#adModal .ad-actions{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+#adModal .ad-btn{
+  border: 0;
+  cursor: pointer;
+  padding: 11px 14px;
+  border-radius: 16px;
+  font-family:'Cairo',sans-serif;
+  font-weight: 800;
+  font-size: clamp(13px, 3.2vw, 16px);
+  display:flex; align-items:center; gap:10px;
+  transition: transform .18s ease, filter .18s ease;
+}
+#adModal .ad-btn:hover{ transform: translateY(-1px) scale(1.02); filter: brightness(1.05); }
+#adModal .ad-btn:active{ transform: translateY(0) scale(.98); }
+#adModal .ad-btn.secondary{
+  background: rgba(255,255,255,.10);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.14);
+}
+#adModal .ad-btn.primary{ color:#0b1220; }
+
+/* shared animated sparkle */
+@keyframes luxShine{
+  0%{ transform: translateX(-35%) rotate(12deg); opacity:.0; }
+  15%{ opacity:.45; }
+  60%{ opacity:.35; }
+  100%{ transform: translateX(35%) rotate(12deg); opacity:0; }
+}
+.ad-sheen{
+  position: relative;
+  overflow: hidden;
+}
+.ad-sheen::after{
+  content:"";
+  position:absolute;
+  inset:-40% -60%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent);
+  transform: translateX(-35%) rotate(12deg);
+  animation: luxShine 2.8s ease-in-out infinite;
+  pointer-events:none;
+}
+
+/* ===== Theme 1: Barca Super Cup (trophy + confetti) ===== */
+.ad-theme-barca{
+  background:
+    radial-gradient(1200px 600px at 10% 0%, rgba(255, 204, 0, .20), transparent 55%),
+    radial-gradient(900px 500px at 90% 20%, rgba(255, 0, 102, .18), transparent 60%),
+    linear-gradient(135deg, rgba(12, 18, 40, .95), rgba(10, 12, 24, .96));
+  border: 1px solid rgba(255,255,255,.12);
+}
+.ad-theme-barca .ad-topbar{ background: rgba(255, 0, 102, .10); }
+.ad-theme-barca .ad-badge{
+  display:inline-flex; align-items:center; gap:10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,204,0,.14);
+  border: 1px solid rgba(255,204,0,.28);
+  margin-bottom: 12px;
+}
+.ad-theme-barca .ad-badge i{ color: #ffcc00; }
+@keyframes trophyBounce{ 0%,100%{ transform: translateY(0) rotate(-6deg);} 50%{ transform: translateY(-6px) rotate(6deg);} }
+.ad-theme-barca .trophy{
+  margin-left:auto; margin-right:auto;
+  display:inline-grid; place-items:center;
+  width: 74px; height: 74px;
+  border-radius: 24px;
+  background: rgba(255,204,0,.12);
+  border: 1px solid rgba(255,204,0,.30);
+  box-shadow: 0 18px 40px rgba(0,0,0,.45);
+  animation: trophyBounce 1.6s ease-in-out infinite;
+}
+.ad-theme-barca .trophy i{ font-size: 34px; color: #ffcc00; }
+.ad-theme-barca .ad-btn.primary{ background: linear-gradient(135deg, #ffcc00, #ff0066); }
+
+/* ===== Theme 2: Ramadan Greeting (crescent + lantern sway) ===== */
+.ad-theme-ramadan{
+  background:
+    radial-gradient(1200px 700px at 10% 10%, rgba(34, 197, 94, .18), transparent 60%),
+    radial-gradient(900px 500px at 90% 20%, rgba(245, 158, 11, .18), transparent 60%),
+    linear-gradient(135deg, rgba(2, 6, 23, .96), rgba(10, 18, 34, .96));
+  border: 1px solid rgba(255,255,255,.10);
+}
+.ad-theme-ramadan .ad-topbar{ background: rgba(245, 158, 11, .10); }
+.ad-theme-ramadan .moon{
+  display:flex; align-items:center; gap:10px;
+  margin-bottom: 10px;
+  justify-content:center;
+}
+.ad-theme-ramadan .moon i{ color:#fbbf24; font-size: 28px; }
+@keyframes lanternSway{ 0%,100%{ transform: rotate(-6deg) translateY(0);} 50%{ transform: rotate(7deg) translateY(2px);} }
+.ad-theme-ramadan .lantern{
+  margin-left:auto; margin-right:auto;
+  width: 68px; height: 68px;
+  border-radius: 22px;
+  display:grid; place-items:center;
+  background: rgba(245,158,11,.14);
+  border: 1px solid rgba(245,158,11,.30);
+  box-shadow: 0 14px 35px rgba(0,0,0,.45);
+  animation: lanternSway 2.2s ease-in-out infinite;
+}
+.ad-theme-ramadan .lantern i{ font-size: 30px; color:#fbbf24; }
+.ad-theme-ramadan .ad-btn.primary{ background: linear-gradient(135deg, #22c55e, #f59e0b); }
+
+/* ===== Theme 3: Hadith & Duas (quote carousel, calm glass) ===== */
+.ad-theme-dua{
+  background:
+    radial-gradient(1000px 600px at 0% 30%, rgba(99, 102, 241, .18), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(56, 189, 248, .14), transparent 55%),
+    linear-gradient(135deg, rgba(15, 23, 42, .96), rgba(2, 6, 23, .96));
+  border: 1px solid rgba(255,255,255,.10);
+}
+.ad-theme-dua .ad-topbar{ background: rgba(99, 102, 241, .10); }
+.ad-theme-dua .quote-card{
+  margin-top: 10px;
+  padding: 14px 14px;
+  border-radius: 22px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.ad-theme-dua .quote-row{
+  display:flex; align-items:flex-start; gap:12px;
+}
+.ad-theme-dua .quote-ico{
+  width: 44px; height: 44px;
+  border-radius: 16px;
+  display:grid; place-items:center;
+  background: rgba(99,102,241,.16);
+  border: 1px solid rgba(99,102,241,.30);
+}
+.ad-theme-dua .quote-ico i{ color:#a5b4fc; }
+.ad-theme-dua .quote-text{
+  font-size: clamp(14px, 3.8vw, 18px);
+  line-height: 1.85;
+  color: rgba(255,255,255,.92);
+}
+.ad-theme-dua .quote-meta{
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: .75;
+}
+.ad-theme-dua .nav{
+  display:flex; gap:10px; margin-top: 12px; flex-wrap:wrap;
+  justify-content:center;
+}
+.ad-theme-dua .nav button{
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.08);
+  color:#fff;
+  border-radius: 14px;
+  padding: 9px 12px;
+  cursor:pointer;
+  font-family:'Cairo',sans-serif;
+  font-weight: 800;
+  transition: transform .18s ease;
+}
+.ad-theme-dua .nav button:hover{ transform: scale(1.03); }
+.ad-theme-dua .ad-btn.primary{ background: linear-gradient(135deg, #60a5fa, #a78bfa); color:#08101f; }
+
+/* ===== Theme 4: Eid Al-Fitr (fireworks) ===== */
+.ad-theme-eid{
+  background:
+    radial-gradient(1200px 700px at 15% 10%, rgba(236, 72, 153, .18), transparent 55%),
+    radial-gradient(900px 500px at 90% 20%, rgba(34, 197, 94, .16), transparent 60%),
+    linear-gradient(135deg, rgba(4, 6, 28, .96), rgba(12, 14, 40, .96));
+  border: 1px solid rgba(255,255,255,.10);
+}
+.ad-theme-eid .ad-topbar{ background: rgba(236, 72, 153, .10); }
+@keyframes popFire{ 0%{ transform: scale(.92); filter: blur(.2px);} 50%{ transform: scale(1.03);} 100%{ transform: scale(.98);} }
+.ad-theme-eid .fire{
+  margin-left:auto; margin-right:auto;
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  margin-bottom: 10px;
+}
+.ad-theme-eid .fire span{
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(236,72,153,.14);
+  border: 1px solid rgba(236,72,153,.28);
+  animation: popFire 1.8s ease-in-out infinite;
+}
+.ad-theme-eid .fire i{ color:#fb7185; }
+.ad-theme-eid .ad-btn.primary{ background: linear-gradient(135deg, #fb7185, #22c55e); color:#0b1220; }
+
+/* ===== Theme 5: Discounts (neon tag + grid) ===== */
+.ad-theme-discount{
+  background:
+    radial-gradient(1200px 700px at 0% 0%, rgba(16, 185, 129, .18), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(59, 130, 246, .16), transparent 60%),
+    linear-gradient(135deg, rgba(0, 0, 0, .90), rgba(12, 18, 32, .96));
+  border: 1px solid rgba(255,255,255,.10);
+}
+.ad-theme-discount .ad-topbar{ background: rgba(16, 185, 129, .12); }
+.ad-theme-discount .deal-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+  justify-items:center;
+}
+@media (min-width: 640px){
+  .ad-theme-discount .deal-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+.ad-theme-discount .deal{
+  border-radius: 18px;
+  padding: 10px 10px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  display:flex; gap:10px; align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.ad-theme-discount .deal i{ color: #34d399; }
+.ad-theme-discount .deal div{ text-align:center; }
+.ad-theme-discount .deal b{ display:block; font-size: 13px; }
+.ad-theme-discount .deal small{ display:block; opacity:.78; font-size: 11px; margin-top: 2px; }
+.ad-theme-discount .ad-btn.primary{ background: linear-gradient(135deg, #34d399, #60a5fa); color:#06121f; }
+
+/* Reduce motion respect */
+@media (prefers-reduced-motion: reduce){
+  #adModal *{ animation: none !important; transition: none !important; }
+}
+
+</style>
 </head>
 <body>
   
@@ -5792,6 +6109,23 @@ input, textarea, [contenteditable="true"] {
  
 <!-- يبقى الـ overlay مثل ما هو -->
 <div id="overlay"></div>
+
+<!-- ===== LUX ADS SYSTEM ===== -->
+<div id="adOverlay" aria-hidden="true"></div>
+
+<div id="adModal" role="dialog" aria-modal="true" aria-label="إعلان" tabindex="-1">
+  <div class="ad-shell ad-sheen">
+    <div class="ad-topbar">
+      <div class="ad-brand"><i class="fa-solid fa-bolt"></i> إعلانات مكتب عسل</div>
+      <button class="ad-close" type="button" aria-label="إغلاق الإعلان"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="ad-body">
+      <!-- injected -->
+    </div>
+  </div>
+</div>
+<!-- ===== /LUX ADS SYSTEM ===== -->
+
 
 
 <!-- إعلان هدية التوافقات -->
@@ -6685,6 +7019,10 @@ window.onload = function() {
 
     // ✅ هنا طبيعي يدخل
     triggerAnimation();
+
+    // ===== Lux Ads System (Popup Ads) =====
+    LuxAds.maybeShow();
+
 
     if (showPromoPopup && !promoAlreadyShown) {
         setTimeout(() => {
@@ -9642,6 +9980,317 @@ function closeContactModal(){
 }
 
         
-    </script>
+    
+
+
+/* ==========================================================
+   LUX ADS SYSTEM (Ahmed)
+   التحكم:
+   - غير قيمة AD_CHOICE الى:
+     "off"                 => ما يطلع اي اعلان
+     "barca_supercup"      => تهنئة برشلونة
+     "ramadan_greeting"    => تهنئة رمضان
+     "ramadan_dua"         => احاديث/ادعية (كاروسيل)
+     "eid_fitr"            => تهنئة عيد الفطر
+     "discounts"           => تخفيضات قطع الغيار
+   ========================================================== */
+const AD_CHOICE = "barca_supercup"; // <<< غيّرها هنا فقط
+
+// خيارات اضافية (اختياري)
+const AD_DELAY_MS = 650;                 // تأخير بسيط بعد التحميل
+const AD_SHOW_ONCE_PER_SESSION = true;   // لا يعيد نفس الاعلان خلال نفس الجلسة
+
+const LuxAds = (() => {
+  const overlay = () => document.getElementById("adOverlay");
+  const modal   = () => document.getElementById("adModal");
+  const bodyEl  = () => document.querySelector("#adModal .ad-body");
+  const shell   = () => document.querySelector("#adModal .ad-shell");
+  let duaTimer = null;
+
+  const normalize = (v) => String(v || "").trim().toLowerCase();
+  const shownKey  = (k) => `lux_ad_shown__${k}`;
+
+  const duaas = [
+    { t: "اللهم إنك عفوٌ تحب العفو فاعفُ عنّا.", m: "دعاء" },
+    { t: "اللهم بلّغنا رمضان وبارك لنا فيه وتقبّل منا صالح الأعمال.", m: "دعاء" },
+    { t: "ربنا تقبّل منا إنك أنت السميع العليم.", m: "دعاء" },
+    { t: "«من فطّر صائمًا كان له مثل أجره».", m: "حديث مشهور (للتذكير)" },
+    { t: "اللهم اجعلنا من عتقائك من النار في هذا الشهر.", m: "دعاء" },
+    { t: "«خيرُكم من تعلّم القرآن وعلّمه».", m: "حديث مشهور (للتذكير)" },
+    { t: "اللهم ارزقنا قيام الليل وخشوع القلب وصفاء النيّة.", m: "دعاء" },
+  ];
+  let duaIndex = 0;
+
+  function setTheme(themeClass){
+    const s = shell();
+    if (!s) return;
+    s.className = `ad-shell ad-sheen ${themeClass}`;
+  }
+
+  function safeClearTimers(){
+    if (duaTimer) { clearInterval(duaTimer); duaTimer = null; }
+  }
+
+  function fadeIn(){
+    const o = overlay(), m = modal();
+    if (!o || !m) return;
+
+    o.style.display = "block";
+    m.style.display = "grid";
+    requestAnimationFrame(() => {
+      o.style.opacity = "1";
+    });
+
+    // GSAP entry (if available)
+    try{
+      if (window.gsap){
+        gsap.fromTo(shell(), {y: 18, opacity: 0, scale: 0.98}, {y: 0, opacity: 1, scale: 1, duration: 0.55, ease: "power3.out"});
+      }else{
+        shell().style.transform = "translateY(0)";
+      }
+    }catch(e){}
+    // focus for accessibility
+    setTimeout(() => { try{ m.focus(); }catch(e){} }, 80);
+  }
+
+  function close(){
+    safeClearTimers();
+    const o = overlay(), m = modal();
+    if (!o || !m) return;
+
+    // GSAP exit
+    try{
+      if (window.gsap){
+        gsap.to(shell(), {y: 10, opacity: 0, scale: 0.985, duration: 0.28, ease: "power2.in"});
+      }
+    }catch(e){}
+
+    o.style.opacity = "0";
+    setTimeout(() => {
+      o.style.display = "none";
+      m.style.display = "none";
+      if (shell()) shell().style.opacity = "";
+    }, 260);
+  }
+
+  function bindClose(){
+    const o = overlay(), m = modal();
+    if (!o || !m) return;
+
+    const btn = m.querySelector(".ad-close");
+    if (btn && !btn.dataset.bound){
+      btn.dataset.bound = "1";
+      btn.addEventListener("click", close);
+    }
+    if (!o.dataset.bound){
+      o.dataset.bound = "1";
+      o.addEventListener("click", close);
+    }
+    if (!m.dataset.bound){
+      m.dataset.bound = "1";
+      m.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") close();
+      });
+    }
+  }
+
+  function renderBarca(){
+    setTheme("ad-theme-barca");
+    bodyEl().innerHTML = `
+      <div class="ad-badge"><i class="fa-solid fa-sparkles"></i><b>تهنئة خاصة</b></div>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+        <div class="trophy" aria-hidden="true"><i class="fa-solid fa-trophy"></i></div>
+        <div style="flex:1;min-width:220px">
+          <h3>تهنئة بفوز برشلونة 💙❤️</h3>
+          <p>مبروك الفوز بكأس السوبر! ليلة تاريخية… وڤاموس يا أبطال ✨</p>
+        </div>
+      </div>
+      <div class="ad-actions">
+        <button class="ad-btn primary" id="adBarcaOk"><i class="fa-solid fa-fireworks"></i> ڤاموس</button>
+        <button class="ad-btn secondary" id="adBarcaClose"><i class="fa-regular fa-circle-xmark"></i> إغلاق</button>
+      </div>
+    `;
+    document.getElementById("adBarcaOk")?.addEventListener("click", close);
+    document.getElementById("adBarcaClose")?.addEventListener("click", close);
+  }
+
+  function renderRamadan(){
+    setTheme("ad-theme-ramadan");
+    bodyEl().innerHTML = `
+      <div class="moon">
+        <div class="lantern" aria-hidden="true"><i class="fa-solid fa-mosque"></i></div>
+        <div>
+          <h3>رمضان كريم 🌙</h3>
+          <p>الله يجعل هالشهر عليكم بركة وخير… ويكتبلكم قبول وصحة وراحة بال 🤍</p>
+        </div>
+      </div>
+      <div class="ad-actions">
+        <button class="ad-btn primary" id="adRamadanOk"><i class="fa-solid fa-hands-praying"></i> آمين</button>
+        <button class="ad-btn secondary" id="adRamadanClose"><i class="fa-regular fa-circle-xmark"></i> إغلاق</button>
+      </div>
+    `;
+    document.getElementById("adRamadanOk")?.addEventListener("click", close);
+    document.getElementById("adRamadanClose")?.addEventListener("click", close);
+  }
+
+  function renderDua(){
+    setTheme("ad-theme-dua");
+    bodyEl().innerHTML = `
+      <h3>تذكير رمضان ✨</h3>
+      <p>أحاديث وأدعية قصيرة… للتذكير اليومي (سوي سكرول/بدّل بالنكست).</p>
+
+      <div class="quote-card" id="duaCard">
+        <div class="quote-row">
+          <div class="quote-ico" aria-hidden="true"><i class="fa-solid fa-quote-left"></i></div>
+          <div>
+            <div class="quote-text" id="duaText"></div>
+            <div class="quote-meta" id="duaMeta"></div>
+          </div>
+        </div>
+
+        <div class="nav">
+          <button id="duaPrev"><i class="fa-solid fa-arrow-right"></i> السابق</button>
+          <button id="duaNext">التالي <i class="fa-solid fa-arrow-left"></i></button>
+          <button id="duaCopy"><i class="fa-regular fa-copy"></i> نسخ</button>
+        </div>
+      </div>
+
+      <div class="ad-actions">
+        <button class="ad-btn primary" id="duaOk"><i class="fa-solid fa-heart"></i> الله يتقبل</button>
+        <button class="ad-btn secondary" id="duaClose"><i class="fa-regular fa-circle-xmark"></i> إغلاق</button>
+      </div>
+    `;
+
+    const setQuote = () => {
+      const item = duaas[duaIndex % duaas.length];
+      const t = document.getElementById("duaText");
+      const m = document.getElementById("duaMeta");
+      if (t) t.textContent = item.t;
+      if (m) m.textContent = item.m;
+      // soft micro animation
+      try{
+        if (window.gsap){
+          gsap.fromTo("#duaCard", {scale: 0.995, opacity: 0.92}, {scale: 1, opacity: 1, duration: 0.25, ease: "power2.out"});
+        }
+      }catch(e){}
+    };
+
+    const next = () => { duaIndex = (duaIndex + 1) % duaas.length; setQuote(); };
+    const prev = () => { duaIndex = (duaIndex - 1 + duaas.length) % duaas.length; setQuote(); };
+
+    document.getElementById("duaNext")?.addEventListener("click", next);
+    document.getElementById("duaPrev")?.addEventListener("click", prev);
+    document.getElementById("duaOk")?.addEventListener("click", close);
+    document.getElementById("duaClose")?.addEventListener("click", close);
+
+    document.getElementById("duaCopy")?.addEventListener("click", async () => {
+      try{
+        const txt = duaas[duaIndex % duaas.length].t;
+        await navigator.clipboard.writeText(txt);
+        if (window.Swal) Swal.fire({ icon:"success", title:"تم النسخ", timer: 900, showConfirmButton:false });
+      }catch(e){
+        // fallback
+        try{
+          const txt = duaas[duaIndex % duaas.length].t;
+          const ta = document.createElement("textarea");
+          ta.value = txt; document.body.appendChild(ta); ta.select();
+          document.execCommand("copy"); document.body.removeChild(ta);
+        }catch(_e){}
+      }
+    });
+
+    setQuote();
+    safeClearTimers();
+    duaTimer = setInterval(next, 4200);
+  }
+
+  function renderEid(){
+    setTheme("ad-theme-eid");
+    bodyEl().innerHTML = `
+      <div class="fire" aria-hidden="true">
+        <span><i class="fa-solid fa-fireworks"></i> فرحة</span>
+        <span><i class="fa-solid fa-gift"></i> هدايا</span>
+        <span><i class="fa-solid fa-star"></i> بهجة</span>
+      </div>
+      <h3>عيدكم مبارك 🌟</h3>
+      <p>تقبل الله طاعاتكم… وجعل أيامكم كلها أفراح ولمّة حلوة 🤍</p>
+      <div class="ad-actions">
+        <button class="ad-btn primary" id="eidOk"><i class="fa-solid fa-sparkles"></i> آمين</button>
+        <button class="ad-btn secondary" id="eidClose"><i class="fa-regular fa-circle-xmark"></i> إغلاق</button>
+      </div>
+    `;
+    document.getElementById("eidOk")?.addEventListener("click", close);
+    document.getElementById("eidClose")?.addEventListener("click", close);
+  }
+
+  function renderDiscounts(){
+    setTheme("ad-theme-discount");
+    bodyEl().innerHTML = `
+      <h3>تخفيضات قوية 🔥</h3>
+      <p>عروض منوعة على كل قطع الغيار… الحق قبل ما تخلص ✨</p>
+
+      <div class="deal-grid" aria-label="أمثلة عروض">
+        <div class="deal"><i class="fa-solid fa-tag"></i><div><b>شاشات</b><small>خصومات مختارة</small></div></div>
+        <div class="deal"><i class="fa-solid fa-bolt"></i><div><b>بطاريات</b><small>أسعار نار</small></div></div>
+        <div class="deal"><i class="fa-solid fa-microchip"></i><div><b>آيسيات</b><small>تخفيضات جملة</small></div></div>
+        <div class="deal"><i class="fa-solid fa-screwdriver-wrench"></i><div><b>قطع صيانة</b><small>كلشي موجود</small></div></div>
+        <div class="deal"><i class="fa-solid fa-percent"></i><div><b>خصم</b><small>على دفعات</small></div></div>
+        <div class="deal"><i class="fa-solid fa-truck-fast"></i><div><b>تجهيز سريع</b><small>حسب التوفر</small></div></div>
+      </div>
+
+      <div class="ad-actions">
+        <button class="ad-btn primary" id="goShop"><i class="fa-solid fa-cart-shopping"></i> افتح السلة</button>
+        <button class="ad-btn secondary" id="discClose"><i class="fa-regular fa-circle-xmark"></i> إغلاق</button>
+      </div>
+    `;
+    document.getElementById("discClose")?.addEventListener("click", close);
+    document.getElementById("goShop")?.addEventListener("click", () => {
+      close();
+      setTimeout(() => {
+        try{ if (typeof openCart === "function") openCart(); }catch(e){}
+      }, 250);
+    });
+  }
+
+  function showByKey(keyRaw){
+    bindClose();
+    safeClearTimers();
+
+    const key = normalize(keyRaw);
+    if (!key || key === "off") return;
+
+    // once per session
+    if (AD_SHOW_ONCE_PER_SESSION){
+      if (sessionStorage.getItem(shownKey(key)) === "true") return;
+      sessionStorage.setItem(shownKey(key), "true");
+    }
+
+    // render
+    if      (key === "barca_supercup") renderBarca();
+    else if (key === "ramadan_greeting") renderRamadan();
+    else if (key === "ramadan_dua") renderDua();
+    else if (key === "eid_fitr") renderEid();
+    else if (key === "discounts") renderDiscounts();
+    else return;
+
+    fadeIn();
+  }
+
+  function maybeShow(){
+    // لا تعرض اثناء نافذة التفعيل او الصيانة/اللوكدون… نتحقق اذا موجودة
+    const activationOpen = !!document.querySelector(".swal2-container.swal2-shown");
+    if (activationOpen) return;
+
+    const key = normalize(AD_CHOICE);
+    if (!key || key === "off") return;
+
+    setTimeout(() => showByKey(key), AD_DELAY_MS);
+  }
+
+  return { maybeShow, showByKey, close };
+})();
+
+
+</script>
    
       
