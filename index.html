@@ -5925,44 +5925,197 @@ input, textarea, [contenteditable="true"] {
 .ad-theme-eid .fire i{ color:#fb7185; }
 .ad-theme-eid .ad-btn.primary{ background: linear-gradient(135deg, #fb7185, #22c55e); color:#0b1220; }
 
-/* ===== Theme 5: Discounts (neon tag + grid) ===== */
+/* ===== Theme: Discounts (Premium / Bento) ===== */
 .ad-theme-discount{
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
   background:
-    radial-gradient(1200px 700px at 0% 0%, rgba(16, 185, 129, .18), transparent 55%),
-    radial-gradient(900px 500px at 100% 0%, rgba(59, 130, 246, .16), transparent 60%),
-    linear-gradient(135deg, rgba(0, 0, 0, .90), rgba(12, 18, 32, .96));
-  border: 1px solid rgba(255,255,255,.10);
+    radial-gradient(900px 520px at 12% 8%, rgba(255, 204, 0, 0.22), transparent 55%),
+    radial-gradient(900px 520px at 90% 12%, rgba(255, 0, 102, 0.18), transparent 55%),
+    radial-gradient(900px 520px at 55% 120%, rgba(34, 211, 238, 0.14), transparent 55%),
+    linear-gradient(135deg, rgba(10, 14, 36, 0.94), rgba(6, 10, 22, 0.96));
 }
-.ad-theme-discount .ad-topbar{ background: rgba(16, 185, 129, .12); }
-.ad-theme-discount .deal-grid{
-  display:grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 12px;
-  justify-items:center;
-}
-@media (min-width: 640px){
-  .ad-theme-discount .deal-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); }
-}
-.ad-theme-discount .deal{
-  border-radius: 18px;
-  padding: 10px 10px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  display:flex; gap:10px; align-items:center;
-  justify-content:center;
-  text-align:center;
-}
-.ad-theme-discount .deal i{ color: #34d399; }
-.ad-theme-discount .deal div{ text-align:center; }
-.ad-theme-discount .deal b{ display:block; font-size: 13px; }
-.ad-theme-discount .deal small{ display:block; opacity:.78; font-size: 11px; margin-top: 2px; }
-.ad-theme-discount .ad-btn.primary{ background: linear-gradient(135deg, #34d399, #60a5fa); color:#06121f; }
 
-/* Reduce motion respect */
-@media (prefers-reduced-motion: reduce){
-  #adModal *{ animation: none !important; transition: none !important; }
+/* توسيط لطيف ومقاسات موبايل */
+.ad-theme-discount .ad-body{
+  text-align: center;
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  gap: 10px;
 }
+
+.ad-theme-discount h3{
+  margin: 4px 0 0;
+  font-weight: 1000;
+  letter-spacing: .2px;
+  font-size: clamp(16px, 4.4vw, 19px);
+}
+
+.ad-theme-discount .disc-sub{
+  margin: 0;
+  opacity: .86;
+  line-height: 1.65;
+  font-size: clamp(12.5px, 3.6vw, 14px);
+  max-width: 520px;
+}
+
+/* Badge */
+.ad-theme-discount .disc-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.32);
+}
+.ad-theme-discount .disc-badge i{ color: rgba(255, 204, 0, 0.95); }
+.ad-theme-discount .disc-badge b{ font-weight: 1000; }
+
+/* Icons (pretty + motion) */
+.ad-theme-discount .disc-icons{
+  display:flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content:center;
+  margin-top: 2px;
+}
+
+@keyframes discFloat{
+  0%,100%{ transform: translateY(0) scale(1); }
+  50%{ transform: translateY(-6px) scale(1.03); }
+}
+@keyframes discShine{
+  0%{ transform: translateX(-55%) rotate(12deg); opacity:0; }
+  20%{ opacity:.55; }
+  100%{ transform: translateX(55%) rotate(12deg); opacity:0; }
+}
+
+.ad-theme-discount .disc-ico{
+  width: 50px;
+  height: 50px;
+  border-radius: 18px;
+  display:grid;
+  place-items:center;
+  position: relative;
+  overflow: hidden;
+
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.22), transparent 45%),
+    linear-gradient(135deg, rgba(255,204,0,0.55), rgba(255,0,102,0.45));
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 16px 34px rgba(0,0,0,0.26);
+  animation: discFloat 2.4s ease-in-out infinite;
+}
+.ad-theme-discount .disc-ico:nth-child(2){ animation-delay: .12s; }
+.ad-theme-discount .disc-ico:nth-child(3){ animation-delay: .24s; }
+
+.ad-theme-discount .disc-ico::before{
+  content:"";
+  position:absolute;
+  inset:-38% -55%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.42), transparent);
+  transform: translateX(-55%) rotate(12deg);
+  animation: discShine 2.8s ease-in-out infinite;
+  opacity: .75;
+}
+
+.ad-theme-discount .disc-ico i{
+  font-size: 21px;
+  color: rgba(255,255,255,0.95);
+  text-shadow: 0 10px 22px rgba(0,0,0,0.35);
+  position: relative;
+  z-index: 1;
+}
+
+/* Bento grid */
+.ad-theme-discount .disc-grid{
+  width: 100%;
+  max-width: 680px;
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+}
+@media (max-width: 560px){
+  .ad-theme-discount .disc-grid{ grid-template-columns: 1fr; }
+}
+
+.ad-theme-discount .disc-card{
+  position: relative;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 18px;
+  padding: 12px;
+  text-align: center;
+  transition: transform .18s ease, filter .18s ease;
+}
+.ad-theme-discount .disc-card:hover{
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.06);
+}
+
+.ad-theme-discount .disc-chip{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.14);
+  font-weight: 1000;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+.ad-theme-discount .disc-chip i{ opacity:.95; }
+
+.ad-theme-discount .disc-title{
+  font-weight: 1000;
+  font-size: 14px;
+  letter-spacing: .2px;
+}
+.ad-theme-discount .disc-note{
+  margin-top: 4px;
+  font-size: 11px;
+  opacity: .78;
+}
+
+/* CTA area */
+.ad-theme-discount .disc-cta{
+  width: 100%;
+  max-width: 680px;
+  margin-top: 4px;
+}
+
+.ad-theme-discount .disc-mini{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  font-size: 11px;
+  opacity: .85;
+  margin-bottom: 10px;
+}
+.ad-theme-discount .disc-mini i{ opacity:.9; }
+
+/* زر primary يصير “يعجب” مثل المدفوع */
+.ad-theme-discount .ad-btn.primary{
+  background: linear-gradient(135deg, #ffcc00, #ff0066);
+  color:#07121f;
+}
+.ad-theme-discount .ad-btn.secondary{
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.16);
+}
+
+/* ===== Theme: Discounts (Premium / Bento) نهاية البلوك ===== */
+
 
 /* ✅ خلي أزرار الإعلان نفس ستايل أزرار الصفحة (خصوصاً موبايل) */
 #adModal .ad-btn{
@@ -10306,7 +10459,7 @@ function closeContactModal(){
      "paid_ads"            => إعلان مدفوع (للمحل/طلب عمل/عرض حاجة)
 
    ========================================================== */
-const AD_CHOICE = "paid_ads"; // <<< غيّرها هنا فقط
+const AD_CHOICE = "paid_ads"         
 
 // خيارات اضافية (اختياري)
 const AD_DELAY_MS = 650;                 // تأخير بسيط بعد التحميل
@@ -10560,34 +10713,62 @@ function fadeIn(){
     document.getElementById("eidClose")?.addEventListener("click", close);
   }
 
-  function renderDiscounts(){
-    setTheme("ad-theme-discount");
-    bodyEl().innerHTML = `
-      <h3>تخفيضات قوية 🔥</h3>
-      <p>عروض منوعة على كل قطع الغيار… الحق قبل ما تخلص ✨</p>
+function renderDiscounts(){
+  setTheme("ad-theme-discount");
+  bodyEl().innerHTML = `
+    <div class="disc-badge">
+      <i class="fa-solid fa-tags"></i>
+      <b>تخفيضات اليوم</b>
+    </div>
 
-      <div class="deal-grid" aria-label="أمثلة عروض">
-        <div class="deal"><i class="fa-solid fa-tag"></i><div><b>شاشات</b><small>خصومات مختارة</small></div></div>
-        <div class="deal"><i class="fa-solid fa-bolt"></i><div><b>بطاريات</b><small>أسعار نار</small></div></div>
-        <div class="deal"><i class="fa-solid fa-microchip"></i><div><b>آيسيات</b><small>تخفيضات جملة</small></div></div>
-        <div class="deal"><i class="fa-solid fa-screwdriver-wrench"></i><div><b>قطع صيانة</b><small>كلشي موجود</small></div></div>
-        <div class="deal"><i class="fa-solid fa-percent"></i><div><b>خصم</b><small>على دفعات</small></div></div>
-        <div class="deal"><i class="fa-solid fa-truck-fast"></i><div><b>تجهيز سريع</b><small>حسب التوفر</small></div></div>
+    <h3>عروض نار على قطع الغيار 🔥</h3>
+    <p class="disc-sub">اختياراتنا السريعة من الأكثر طلباً… الحق قبل لا تخلص.</p>
+
+    <div class="disc-icons" aria-hidden="true">
+      <div class="disc-ico"><i class="fa-solid fa-bolt"></i></div>
+      <div class="disc-ico"><i class="fa-solid fa-microchip"></i></div>
+      <div class="disc-ico"><i class="fa-solid fa-mobile-screen"></i></div>
+    </div>
+
+    <div class="disc-grid disc-grid-compact" aria-label="أبرز التخفيضات">
+      <div class="disc-card">
+        <span class="disc-chip"><i class="fa-solid fa-tag"></i> خصم</span>
+        <div class="disc-title">شاشات</div>
+        <div class="disc-note">خصومات حلوة</div>
       </div>
 
-      <div class="ad-actions">
-        <button class="ad-btn primary" id="goShop"><i class="fa-solid fa-cart-shopping"></i> افتح السلة</button>
-        <button class="ad-btn secondary" id="discClose"><i class="fa-regular fa-circle-xmark"></i> إغلاق</button>
+      <div class="disc-card">
+        <span class="disc-chip"><i class="fa-solid fa-fire"></i> أسعار</span>
+        <div class="disc-title">بطاريات</div>
+        <div class="disc-note">أسعار قوية</div>
       </div>
-    `;
-    document.getElementById("discClose")?.addEventListener("click", close);
-    document.getElementById("goShop")?.addEventListener("click", () => {
-      close();
-      setTimeout(() => {
-        try{ if (typeof openCart === "function") openCart(); }catch(e){}
-      }, 250);
-    });
-  }
+
+      <div class="disc-card">
+        <span class="disc-chip"><i class="fa-solid fa-screwdriver-wrench"></i> صيانة</span>
+        <div class="disc-title">قطع صيانة</div>
+        <div class="disc-note">الأكثر طلباً</div>
+      </div>
+    </div>
+
+    <div class="ad-actions">
+      <button class="ad-btn primary" id="goShop">
+        <i class="fa-solid fa-cart-shopping"></i> افتح السلة
+      </button>
+      <button class="ad-btn secondary" id="discClose">
+        <i class="fa-regular fa-circle-xmark"></i> إغلاق
+      </button>
+    </div>
+  `;
+
+  document.getElementById("discClose")?.addEventListener("click", close);
+  document.getElementById("goShop")?.addEventListener("click", () => {
+    close();
+    setTimeout(() => {
+      try{ if (typeof openCart === "function") openCart(); }catch(e){}
+    }, 250);
+  });
+}
+
   
 function renderPaidAds(){
   setTheme("ad-theme-paid");
