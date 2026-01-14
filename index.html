@@ -6030,193 +6030,246 @@ input, textarea, [contenteditable="true"] {
 }
 
 
-/* ===== Theme 6: Paid Ads (Aurora / Candy - eye catching) ===== */
-.ad-theme-paid{
-  position: relative;
-  background:
-    radial-gradient(900px 520px at 12% 10%, rgba(255, 204, 0, .28), transparent 55%),
-    radial-gradient(900px 520px at 92% 18%, rgba(255, 0, 102, .22), transparent 55%),
-    radial-gradient(900px 520px at 55% 105%, rgba(67, 206, 162, .22), transparent 55%),
-    linear-gradient(135deg, rgba(12, 18, 40, .92), rgba(16, 24, 48, .90));
-  border: 1px solid rgba(255,255,255,.14);
-  overflow: hidden;
+/* =========================
+   LUX ADS: MOBILE FIT + NO FLICKER
+   Paste near the END of LuxAds CSS
+   ========================= */
+
+/* 1) خلّي نافذة الإعلان ما تطول بالموبايل + يصير سكرول داخلي */
+#adModal{
+  padding: clamp(10px, 3vw, 18px);
 }
 
-/* فقاعات/لمعة متحركة بالخلفية */
-.ad-theme-paid::before{
-  content:"";
-  position:absolute;
-  inset:-40%;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(255,255,255,.18), transparent 35%),
-    radial-gradient(circle at 80% 25%, rgba(255,255,255,.12), transparent 32%),
-    radial-gradient(circle at 60% 80%, rgba(255,255,255,.10), transparent 40%);
-  filter: blur(2px);
-  opacity: .55;
-  animation: paidBG 8s ease-in-out infinite;
-  pointer-events:none;
-}
-@keyframes paidBG{
-  0%,100%{ transform: translate3d(0,0,0) scale(1); }
-  50%{ transform: translate3d(3%, -2%, 0) scale(1.03); }
-}
-
-.ad-theme-paid .ad-topbar{
-  background: rgba(255,255,255,.10);
-  border-bottom: 1px solid rgba(255,255,255,.12);
-}
-
-/* ✅ توسيط “حقيقي” للكل */
-.ad-theme-paid .paid-stage{
-  position: relative;
-  width: 100%;
-  text-align: center;
-  display:flex;
+/* خلي الشيل يصير عمودي حتى الـ body ياخذ مساحة ويسكرول */
+#adModal .ad-shell{
+  display: flex;
   flex-direction: column;
-  align-items:center;
-  gap: 12px;
-}
-.ad-theme-paid .paid-stage > *{
-  margin-left:auto;
-  margin-right:auto;
+  max-height: calc(100svh - 20px);
+  will-change: transform, opacity;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
-.ad-theme-paid .paid-kicker{
-  display:inline-flex;
-  align-items:center;
+/* fallback للمتصفحات اللي ما تدعم svh */
+@supports not (height: 100svh){
+  #adModal .ad-shell{ max-height: calc(100vh - 20px); }
+}
+
+#adModal .ad-body{
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* 2) حل “ومضة” الموبايل: البلور على overlay يسبب redraw قوي */
+@media (max-width: 600px){
+  #adOverlay{
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    will-change: opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
+
+/* =========================================================
+   LUX ADS - THEME: Paid Ads (No scroll + Centered + Motion)
+   Paste after Theme 5 (Discounts). Replace any old ad-theme-paid.
+========================================================= */
+
+/* (اختياري) يقلل ومضة الموبايل: البلور على overlay يسوي redraw */
+@media (max-width: 600px){
+  #adOverlay{
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    will-change: opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
+
+/* نخلي الثيم يشتغل مهما setTheme يضيف الكلاس على المودال أو الشيل */
+.ad-theme-paid,
+#adModal.ad-theme-paid,
+#adModal .ad-shell.ad-theme-paid{
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+  background:
+    radial-gradient(900px 520px at 12% 8%, rgba(168, 85, 247, 0.22), transparent 55%),
+    radial-gradient(900px 520px at 88% 10%, rgba(34, 211, 238, 0.18), transparent 60%),
+    radial-gradient(900px 520px at 50% 120%, rgba(34, 197, 94, 0.16), transparent 55%),
+    linear-gradient(135deg, rgba(10, 14, 36, 0.94), rgba(6, 10, 22, 0.96));
+}
+
+/* توسيط كل شيء داخل جسم الإعلان */
+#adModal.ad-theme-paid .ad-body,
+#adModal .ad-shell.ad-theme-paid .ad-body,
+.ad-theme-paid .ad-body{
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 10px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.18);
+}
+
+/* ===== مهم: بدون سكرول داخل النافذة (مثل طلبك) ===== */
+#adModal.ad-theme-paid .ad-body,
+#adModal .ad-shell.ad-theme-paid .ad-body{
+  overflow: hidden !important;
+}
+
+/* حتى ما تصير النافذة “طويلة” على الموبايل */
+.ad-theme-paid h3{ 
+  margin: 4px 0 0;
   font-weight: 1000;
-  font-size: 12px;
   letter-spacing: .2px;
+  font-size: clamp(16px, 4.4vw, 19px);
+}
+.ad-theme-paid p{
+  margin: 0;
+  line-height: 1.65;
+  opacity: .88;
+  font-size: clamp(12.5px, 3.6vw, 14px);
+  max-width: 560px;
 }
 
-/* أيقونات متحركة (٣ أيقونات تطير) */
-.ad-theme-paid .paid-icons{
-  display:flex;
+/* topbar */
+.ad-theme-paid .ad-topbar{
+  background: rgba(168, 85, 247, 0.10);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+/* Badge */
+.ad-theme-paid .paid-badge{
+  display: inline-flex;
+  align-items: center;
   gap: 10px;
-  justify-content:center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.14);
+  border: 1px solid rgba(168, 85, 247, 0.30);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.35);
+}
+.ad-theme-paid .paid-badge i{
+  color: rgba(192,132,252,0.96);
+}
+.ad-theme-paid .paid-badge b{
+  font-weight: 1000;
+}
+
+/* ===== Prettier icons (Premium motion) ===== */
+.ad-theme-paid .paid-icons{
+  display: flex;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-top: 4px;
+  justify-content: center;
+  margin-top: 2px;
 }
-@keyframes paidFloat{
-  0%,100%{ transform: translateY(0) rotate(-2deg); }
-  50%{ transform: translateY(-7px) rotate(2deg); }
+
+@keyframes paidFloat2{
+  0%,100%{ transform: translateY(0) scale(1); }
+  50%{ transform: translateY(-7px) scale(1.03); }
 }
-@keyframes paidWiggle{
-  0%,100%{ transform: rotate(-6deg); }
-  50%{ transform: rotate(7deg); }
+@keyframes paidPulseRing{
+  0%{ transform: scale(.92); opacity:.35; }
+  60%{ transform: scale(1.05); opacity:.20; }
+  100%{ transform: scale(1.12); opacity:0; }
+}
+@keyframes paidShine2{
+  0%{ transform: translateX(-55%) rotate(12deg); opacity:0; }
+  20%{ opacity:.55; }
+  100%{ transform: translateX(55%) rotate(12deg); opacity:0; }
 }
 
 .ad-theme-paid .paid-ico{
-  width: 62px;
-  height: 62px;
-  border-radius: 22px;
-  display:grid;
-  place-items:center;
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.18);
-  box-shadow: 0 18px 45px rgba(0,0,0,.40);
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
   position: relative;
-  overflow:hidden;
+  overflow: hidden;
+
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255,255,255,0.22), transparent 45%),
+    linear-gradient(135deg, rgba(168,85,247,0.55), rgba(34,211,238,0.45));
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 16px 34px rgba(0,0,0,0.28);
+
+  animation: paidFloat2 2.4s ease-in-out infinite;
 }
+
+.ad-theme-paid .paid-ico::before{
+  content:"";
+  position:absolute;
+  inset:-38% -55%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.42), transparent);
+  transform: translateX(-55%) rotate(12deg);
+  animation: paidShine2 2.8s ease-in-out infinite;
+  opacity: .75;
+}
+
 .ad-theme-paid .paid-ico::after{
   content:"";
   position:absolute;
-  inset:-35% -55%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
-  transform: translateX(-35%) rotate(12deg);
-  animation: paidShine 2.6s ease-in-out infinite;
-  opacity: .7;
+  inset: -6px;
+  border-radius: 22px;
+  border: 2px solid rgba(255,255,255,0.18);
+  animation: paidPulseRing 1.9s ease-out infinite;
 }
-@keyframes paidShine{
-  0%{ transform: translateX(-45%) rotate(12deg); opacity:0; }
-  15%{ opacity:.55; }
-  100%{ transform: translateX(45%) rotate(12deg); opacity:0; }
-}
+
+.ad-theme-paid .paid-ico:nth-child(2){ animation-delay: .12s; }
+.ad-theme-paid .paid-ico:nth-child(3){ animation-delay: .24s; }
 
 .ad-theme-paid .paid-ico i{
-  font-size: 26px;
-  color: rgba(255,255,255,.96);
+  font-size: 22px;
+  color: rgba(255,255,255,0.95);
+  text-shadow: 0 10px 22px rgba(0,0,0,0.35);
   position: relative;
   z-index: 1;
-  animation: paidFloat 2.6s ease-in-out infinite;
 }
-.ad-theme-paid .paid-ico.i2 i{ animation-duration: 2.9s; }
-.ad-theme-paid .paid-ico.i3 i{ animation: paidFloat 2.3s ease-in-out infinite, paidWiggle 1.7s ease-in-out infinite; }
 
-/* سطور/مقاييس بشكل “بهرجة محترمة” */
-.ad-theme-paid .paid-metrics{
+/* أزرار (نفس نظامك، بس نخلي primary يطلع “يجذب”) */
+.ad-theme-paid .ad-actions{
   width: 100%;
-  display:flex;
-  justify-content:center;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-}
-.ad-theme-paid .pill{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap: 8px;
-  padding: 9px 13px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.18);
-  font-weight: 1000;
-  font-size: 12px;
+  margin-top: 4px;
 }
 
-/* كروت الأنواع (مرتبة + وسط) */
-.ad-theme-paid .paid-cards{
-  width: 100%;
-  max-width: 660px;
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+.ad-theme-paid .ad-btn.primary{
+  background: linear-gradient(135deg, #a855f7, #22d3ee);
+  color: #07121f;
+  border: 0;
 }
-@media (max-width: 560px){
-  .ad-theme-paid .paid-cards{ grid-template-columns: 1fr; }
+.ad-theme-paid .ad-btn.secondary{
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.16);
 }
-.ad-theme-paid .paid-card{
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: 18px;
-  padding: 12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap: 10px;
-  text-align:center;
-  transition: transform .18s ease, filter .18s ease;
-}
-.ad-theme-paid .paid-card:hover{ transform: translateY(-2px) scale(1.02); filter: brightness(1.05); }
 
-.ad-theme-paid .paid-card .ico{
-  width: 40px;
-  height: 40px;
-  border-radius: 16px;
-  display:grid;
-  place-items:center;
-  background: rgba(255, 204, 0, .16);
-  border: 1px solid rgba(255, 204, 0, .28);
-}
-.ad-theme-paid .paid-card b{ display:block; font-size: 13px; font-weight: 1000; }
-.ad-theme-paid .paid-card small{ display:block; margin-top: 2px; font-size: 11px; opacity:.78; }
-
+/* ملاحظة صغيرة */
 .ad-theme-paid .paid-note{
-  max-width: 560px;
+  margin-top: 2px;
   font-size: 11px;
   opacity: .78;
+  max-width: 520px;
 }
 
-/* CTA يصيح بس “راقي” */
-.ad-theme-paid .ad-btn.primary{
-  background: linear-gradient(135deg, #ffcc00, #ff0066);
-  color:#0b1220;
+/* موبايل: نضغط المسافات أكثر حتى ما يطول الإعلان */
+@media (max-width: 420px){
+  .ad-theme-paid .paid-badge{ padding: 7px 10px; }
+  .ad-theme-paid .paid-ico{ width: 48px; height: 48px; border-radius: 16px; }
+  .ad-theme-paid .paid-ico i{ font-size: 20px; }
+  .ad-theme-paid .ad-actions{ gap: 8px; }
 }
+
 
 
 </style>
@@ -10290,27 +10343,52 @@ const LuxAds = (() => {
     if (duaTimer) { clearInterval(duaTimer); duaTimer = null; }
   }
 
-  function fadeIn(){
-    const o = overlay(), m = modal();
-    if (!o || !m) return;
+function fadeIn(){
+  const o = overlay(), m = modal();
+  if (!o || !m) return;
 
-    o.style.display = "block";
-    m.style.display = "grid";
+  // ابدأ بحالة مخفية حتى ما يطلع فلاش
+  o.style.opacity = "0";
+  o.style.display = "block";
+
+  m.style.display = "grid";
+
+  // ثبّت الشيل قبل الأنيميشن (خصوصاً إذا GSAP مو موجود)
+  try{
+    const s = shell();
+    if (s){
+      s.style.opacity = "0";
+      s.style.transform = "translateY(18px) scale(.98)";
+      s.style.willChange = "transform, opacity";
+    }
+  }catch(e){}
+
+  // double rAF = يمنع الومضة بالموبايل
+  requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       o.style.opacity = "1";
-    });
 
-    // GSAP entry (if available)
-    try{
-      if (window.gsap){
-        gsap.fromTo(shell(), {y: 18, opacity: 0, scale: 0.98}, {y: 0, opacity: 1, scale: 1, duration: 0.55, ease: "power3.out"});
-      }else{
-        shell().style.transform = "translateY(0)";
-      }
-    }catch(e){}
-    // focus for accessibility
-    setTimeout(() => { try{ m.focus(); }catch(e){} }, 80);
-  }
+      try{
+        if (window.gsap){
+          gsap.fromTo(shell(),
+            { y: 18, opacity: 0, scale: 0.98 },
+            { y: 0, opacity: 1, scale: 1, duration: 0.55, ease: "power3.out" }
+          );
+        }else{
+          const s = shell();
+          if (s){
+            s.style.transition = "transform .38s ease, opacity .38s ease";
+            s.style.opacity = "1";
+            s.style.transform = "translateY(0) scale(1)";
+          }
+        }
+      }catch(e){}
+    });
+  });
+
+  setTimeout(() => { try{ m.focus(); }catch(e){} }, 90);
+}
+
 
   function close(){
     safeClearTimers();
@@ -10514,53 +10592,31 @@ const LuxAds = (() => {
 function renderPaidAds(){
   setTheme("ad-theme-paid");
   bodyEl().innerHTML = `
-    <div class="paid-stage">
-      <div class="paid-kicker ad-sheen">
-        <i class="fa-solid fa-crown"></i>
-        إعلان مدفوع — يلفت النظر
-      </div>
+    <div class="paid-badge">
+      <i class="fa-solid fa-sparkles"></i>
+      <b>إعلان مدفوع داخل التطبيق</b>
+    </div>
 
-      <div class="paid-icons" aria-hidden="true">
-        <div class="paid-ico i1"><i class="fa-solid fa-bullhorn"></i></div>
-        <div class="paid-ico i2"><i class="fa-solid fa-rocket"></i></div>
-        <div class="paid-ico i3"><i class="fa-solid fa-star"></i></div>
-      </div>
+    <h3>إعلانك يوصل بسرعة 🔥</h3>
+    <p>
+      أكثر من <b>1000</b> فني صيانة يستخدمون تطبيقنا.
+      أعلن للمحل/طلب عمل/عرض حاجة بـ <b>5000 د.ع</b> لمدة <b>7 أيام</b>.
+    </p>
 
-      <h3>إعلانك يوصل لأكثر من 1000 فني صيانة</h3>
-      <p>
-        حسب آخر إحصائية… وفرنالك إعلان للمحل أو طلب عمل أو عرض حاجة،
-        وبسعر رمزي ولمدة 7 أيام.
-      </p>
+   <div class="paid-icons" aria-hidden="true">
+  <div class="paid-ico"><i class="fa-solid fa-bullhorn"></i></div>
+  <div class="paid-ico"><i class="fa-solid fa-location-dot"></i></div>
+  <div class="paid-ico"><i class="fa-solid fa-rocket"></i></div>
+</div>
 
-      <div class="paid-metrics" aria-label="السعر والمدة والوصول">
-        <span class="pill"><i class="fa-solid fa-tag"></i> 5,000 د.ع</span>
-        <span class="pill"><i class="fa-solid fa-calendar-days"></i> 7 أيام</span>
-        <span class="pill"><i class="fa-solid fa-users"></i> 1000+ فني</span>
-      </div>
-
-      <div class="paid-cards" aria-label="أنواع الإعلان">
-        <div class="paid-card">
-          <span class="ico"><i class="fa-solid fa-store"></i></span>
-          <div><b>إعلان للمحل</b><small>خدمات • عروض • تعريف</small></div>
-        </div>
-        <div class="paid-card">
-          <span class="ico"><i class="fa-solid fa-briefcase"></i></span>
-          <div><b>طلب عمل</b><small>توظيف • تعاون • شراكة</small></div>
-        </div>
-        <div class="paid-card">
-          <span class="ico"><i class="fa-solid fa-box-open"></i></span>
-          <div><b>عرض حاجة / بيع</b><small>قطعة • جهاز • أدوات</small></div>
-        </div>
-      </div>
-
-      <div class="ad-actions">
-        <button class="ad-btn primary" id="paidStart"><i class="fa-solid fa-paper-plane"></i> اطلب إعلان</button>
-        <button class="ad-btn secondary" id="paidClose"><i class="fa-regular fa-circle-xmark"></i> إغلاق</button>
-      </div>
-
-      <div class="paid-note">
-        * نرتّب وياك النص والصورة حتى يطلع إعلان “مُقنع” ومرتب ويتشاف بسرعة.
-      </div>
+   
+    <div class="ad-actions">
+      <button class="ad-btn primary" id="paidStart">
+        <i class="fa-solid fa-paper-plane"></i> أحجز إعلان
+      </button>
+      <button class="ad-btn secondary" id="paidClose">
+        <i class="fa-regular fa-circle-xmark"></i> إغلاق
+      </button>
     </div>
   `;
 
@@ -10572,6 +10628,8 @@ function renderPaidAds(){
     }, 250);
   });
 }
+
+
 
 
 
