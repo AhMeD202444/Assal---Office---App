@@ -6530,6 +6530,167 @@ input, textarea, [contenteditable="true"] {
   .ad-theme-paid .ad-actions{ gap: 8px; }
 }
 
+/* ===== Theme 7: Sponsored Ad (Advertiser Listing) ===== */
+.ad-theme-sponsor{
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+  background:
+    radial-gradient(900px 520px at 12% 8%, rgba(255, 204, 0, 0.20), transparent 55%),
+    radial-gradient(900px 520px at 88% 10%, rgba(34, 211, 238, 0.18), transparent 60%),
+    radial-gradient(900px 520px at 50% 120%, rgba(168, 85, 247, 0.14), transparent 55%),
+    linear-gradient(135deg, rgba(10, 14, 36, 0.94), rgba(6, 10, 22, 0.96));
+}
+
+.ad-theme-sponsor .ad-body{
+  text-align: center;
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  gap: 10px;
+}
+
+.ad-theme-sponsor .s7-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.30);
+}
+.ad-theme-sponsor .s7-badge i{ color: rgba(255,204,0,0.95); }
+.ad-theme-sponsor .s7-badge b{ font-weight: 1000; }
+
+.ad-theme-sponsor h3{
+  margin: 0;
+  font-weight: 1000;
+  font-size: clamp(16px, 4.4vw, 19px);
+  letter-spacing: .2px;
+}
+.ad-theme-sponsor .s7-sub{
+  margin: 0;
+  opacity: .86;
+  font-size: clamp(12px, 3.6vw, 14px);
+  line-height: 1.6;
+  max-width: 560px;
+}
+
+/* chips */
+.ad-theme-sponsor .s7-chips{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content:center;
+  margin-top: 2px;
+}
+.ad-theme-sponsor .s7-chip{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+  font-weight: 1000;
+  font-size: 12px;
+}
+.ad-theme-sponsor .s7-chip i{ opacity: .95; }
+
+/* contact card */
+.ad-theme-sponsor .s7-contact{
+  width: 100%;
+  max-width: 680px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 20px;
+  padding: 12px;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.34);
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ad-theme-sponsor .s7-left{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  text-align: right;
+}
+.ad-theme-sponsor .s7-ico{
+  width: 44px;
+  height: 44px;
+  border-radius: 18px;
+  display:grid;
+  place-items:center;
+  background: rgba(34,211,238,0.12);
+  border: 1px solid rgba(34,211,238,0.22);
+  flex: 0 0 auto;
+}
+.ad-theme-sponsor .s7-ico i{
+  color: rgba(165,180,252,0.98);
+  font-size: 18px;
+}
+
+.ad-theme-sponsor .s7-number{
+  font-weight: 1100;
+  letter-spacing: .6px;
+  font-size: 16px;
+}
+.ad-theme-sponsor .s7-note{
+  font-size: 11px;
+  opacity: .78;
+  margin-top: 2px;
+}
+
+/* right mini buttons */
+.ad-theme-sponsor .s7-miniActions{
+  display:flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content:center;
+}
+.ad-theme-sponsor .s7-miniBtn{
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.95);
+  font-weight: 1000;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  cursor:pointer;
+  transition: transform .15s ease, background .15s ease;
+}
+.ad-theme-sponsor .s7-miniBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.14); }
+.ad-theme-sponsor .s7-miniBtn:active{ transform: translateY(0) scale(.99); }
+
+.ad-theme-sponsor .s7-miniBtn.call{
+  background: linear-gradient(135deg, rgba(255,204,0,0.92), rgba(34,211,238,0.85));
+  color: #07121f;
+  border: 0;
+}
+
+.ad-theme-sponsor .ad-btn.primary{
+  background: linear-gradient(135deg, #a855f7, #22d3ee);
+  color:#07121f;
+}
+
+/* tighten on very small phones */
+@media (max-width: 420px){
+  .ad-theme-sponsor .s7-contact{
+    flex-direction: column;
+    text-align:center;
+  }
+  .ad-theme-sponsor .s7-left{ justify-content:center; }
+}
+
+/* ===== Theme 7: Sponsored Ad (Advertiser Listing) نهاية البلوك ===== */
+
 
 
 </style>
@@ -10564,6 +10725,7 @@ function closeContactModal(){
      "eid_fitr"            => تهنئة عيد الفطر
      "discounts"           => تخفيضات قطع الغيار
      "paid_ads"            => إعلان مدفوع (للمحل/طلب عمل/عرض حاجة)
+     "sponsor_iphone_back" => إعلان مُعلن: أظهر آيفون (07706032703)
 
    ========================================================== */
 const AD_CHOICE = "paid_ads"; // <<< غيّرها هنا فقط
@@ -10922,6 +11084,75 @@ function renderPaidAds(){
   });
 }
 
+function renderSponsorAd(){
+  setTheme("ad-theme-sponsor");
+
+  const phone = "07706032703";
+  const wa = "964" + phone.replace(/^0/, ""); // 9647706032703
+
+  bodyEl().innerHTML = `
+    <div class="s7-badge">
+      <i class="fa-solid fa-badge-check"></i>
+      <b>إعلان مُعلن داخل التطبيق</b>
+    </div>
+
+    <h3>وصول أجهزة تبديل جميع أظهر الآيفون 📦</h3>
+    <p class="s7-sub">متوفر هسه — للتفاصيل والطلب تواصل ويانه مباشرة.</p>
+
+    <div class="s7-chips" aria-label="تفاصيل سريعة">
+      <span class="s7-chip"><i class="fa-solid fa-bolt"></i> جاهز</span>
+      <span class="s7-chip"><i class="fa-solid fa-truck-fast"></i> تجهيز سريع</span>
+      <span class="s7-chip"><i class="fa-solid fa-shield-halved"></i> شغل مرتب</span>
+    </div>
+
+    <div class="s7-contact" aria-label="معلومات التواصل">
+      <div class="s7-left">
+        <div class="s7-ico" aria-hidden="true"><i class="fa-solid fa-phone"></i></div>
+        <div>
+          <div class="s7-number">${phone}</div>
+          <div class="s7-note">اتصال / واتساب</div>
+        </div>
+      </div>
+
+      <div class="s7-miniActions">
+        <button class="s7-miniBtn call" id="s7Call"><i class="fa-solid fa-phone"></i> اتصال</button>
+        <button class="s7-miniBtn" id="s7Whats"><i class="fa-brands fa-whatsapp"></i> واتساب</button>
+        <button class="s7-miniBtn" id="s7Copy"><i class="fa-regular fa-copy"></i> نسخ</button>
+      </div>
+    </div>
+
+    <div class="ad-actions">
+      <button class="ad-btn primary" id="s7Ok"><i class="fa-solid fa-heart"></i> تمام</button>
+      <button class="ad-btn secondary" id="s7Close"><i class="fa-regular fa-circle-xmark"></i> إغلاق</button>
+    </div>
+  `;
+
+  document.getElementById("s7Close")?.addEventListener("click", close);
+  document.getElementById("s7Ok")?.addEventListener("click", close);
+
+  document.getElementById("s7Call")?.addEventListener("click", () => {
+    try{ window.location.href = `tel:${phone}`; }catch(e){}
+  });
+
+  document.getElementById("s7Whats")?.addEventListener("click", () => {
+    try{ window.open(`https://wa.me/${wa}`, "_blank"); }catch(e){}
+  });
+
+  document.getElementById("s7Copy")?.addEventListener("click", async () => {
+    try{
+      await navigator.clipboard.writeText(phone);
+      if (window.Swal) Swal.fire({ icon:"success", title:"تم النسخ", timer: 900, showConfirmButton:false });
+    }catch(e){
+      try{
+        const ta = document.createElement("textarea");
+        ta.value = phone; document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta);
+      }catch(_e){}
+    }
+  });
+}
+
+
 
 
 
@@ -10952,6 +11183,8 @@ function renderPaidAds(){
     else if (key === "eid_fitr") renderEid();
     else if (key === "discounts") renderDiscounts();
     else if (key === "paid_ads") renderPaidAds();
+    else if (key === "sponsor_iphone_back") renderSponsorAd();
+
 
     else return;
 
