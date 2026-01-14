@@ -5925,7 +5925,7 @@ input, textarea, [contenteditable="true"] {
 .ad-theme-eid .fire i{ color:#fb7185; }
 .ad-theme-eid .ad-btn.primary{ background: linear-gradient(135deg, #fb7185, #22c55e); color:#0b1220; }
 
-/* ===== Theme: Discounts (Premium / Bento) ===== */
+/* ===== Theme5 : Discounts (Premium / Bento) ===== */
 .ad-theme-discount{
   position: relative;
   overflow: hidden;
@@ -6113,6 +6113,14 @@ input, textarea, [contenteditable="true"] {
   background: rgba(255,255,255,0.10);
   border: 1px solid rgba(255,255,255,0.16);
 }
+
+/* Discounts: 1 column on small phones */
+@media (max-width: 360px){
+  .ad-theme-discount .disc-grid{
+    grid-template-columns: 1fr !important;
+  }
+}
+
 
 /* ===== Theme: Discounts (Premium / Bento) نهاية البلوك ===== */
 
@@ -10459,7 +10467,7 @@ function closeContactModal(){
      "paid_ads"            => إعلان مدفوع (للمحل/طلب عمل/عرض حاجة)
 
    ========================================================== */
-const AD_CHOICE = "paid_ads"         
+const AD_CHOICE = "discounts"; // <<< غيّرها هنا فقط
 
 // خيارات اضافية (اختياري)
 const AD_DELAY_MS = 650;                 // تأخير بسيط بعد التحميل
@@ -10713,6 +10721,7 @@ function fadeIn(){
     document.getElementById("eidClose")?.addEventListener("click", close);
   }
 
+
 function renderDiscounts(){
   setTheme("ad-theme-discount");
   bodyEl().innerHTML = `
@@ -10721,8 +10730,8 @@ function renderDiscounts(){
       <b>تخفيضات اليوم</b>
     </div>
 
-    <h3>عروض نار على قطع الغيار 🔥</h3>
-    <p class="disc-sub">اختياراتنا السريعة من الأكثر طلباً… الحق قبل لا تخلص.</p>
+    <h3>خصومات تطگ… مو كلام 🔥</h3>
+    <p class="disc-sub">3 فئات مختارة — الحق قبل لا تخلص.</p>
 
     <div class="disc-icons" aria-hidden="true">
       <div class="disc-ico"><i class="fa-solid fa-bolt"></i></div>
@@ -10732,21 +10741,21 @@ function renderDiscounts(){
 
     <div class="disc-grid disc-grid-compact" aria-label="أبرز التخفيضات">
       <div class="disc-card">
-        <span class="disc-chip"><i class="fa-solid fa-tag"></i> خصم</span>
+        <span class="mini-chip mc1" aria-hidden="true"></span>
         <div class="disc-title">شاشات</div>
-        <div class="disc-note">خصومات حلوة</div>
+        <div class="disc-note">خصم حلو</div>
       </div>
 
       <div class="disc-card">
-        <span class="disc-chip"><i class="fa-solid fa-fire"></i> أسعار</span>
+        <span class="mini-chip mc2" aria-hidden="true"></span>
         <div class="disc-title">بطاريات</div>
-        <div class="disc-note">أسعار قوية</div>
+        <div class="disc-note">سعر قوي</div>
       </div>
 
       <div class="disc-card">
-        <span class="disc-chip"><i class="fa-solid fa-screwdriver-wrench"></i> صيانة</span>
+        <span class="mini-chip mc3" aria-hidden="true"></span>
         <div class="disc-title">قطع صيانة</div>
-        <div class="disc-note">الأكثر طلباً</div>
+        <div class="disc-note">جاهزة</div>
       </div>
     </div>
 
@@ -10768,6 +10777,7 @@ function renderDiscounts(){
     }, 250);
   });
 }
+
 
   
 function renderPaidAds(){
