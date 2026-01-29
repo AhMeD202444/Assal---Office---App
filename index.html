@@ -8848,6 +8848,118 @@ async function searchCompatibilitiesAdmin() {
     displayCompatResults(scored);
 }
 
+
+
+
+function normalizeForSmartSearch(str) {
+  return String(str || "")
+    .toLowerCase()
+    // خلي كل الرموز/الأقواس/الشرطات مسافة حتى يصير tokenization صحيح
+    .replace(/[^a-z0-9]+/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function tokenizeSmart(str) {
+  // نتجاهل الكلمات القصيرة هواي (مثل حرف واحد)
+  return normalizeForSmartSearch(str)
+    .split(" ")
+    .filter(t => t && t.length >= 2);
+}
+
+function levenshteinRatio(a, b) {
+  // تحتاج دالة levenshteinDistance الموجودة عندك
+  const lev = levenshteinDistance(a, b);
+  const maxLen = Math.max(a.length, b.length, 1);
+  return Math.max(0, 1 - (lev / maxLen));
+}
+
+function bestTokenMatchScore(qTok, itemTokens) {
+  // أعلى تطابق لهذا التوكن داخل توكنات الايتم
+  let best = 0;
+
+  for (const t of itemTokens) {
+    if (t === qTok) return 1;
+
+    // ====== التعديل هنا ======
+    // إذا أكو أرقام (موديلات): نمنع qTok.includes(t) حتى ما يصير x8a يطابق x8
+    const hasDigit = /[0-9]/.test(qTok) || /[0-9]/.test(t);
+
+    // substring مرن باتجاه واحد:
+    // يسمح: honorx8a يحتوي x8a
+    if (t.includes(qTok)) {
+      best = Math.max(best, 0.92);
+      continue;
+    }
+
+    // يسمح بالعكس فقط للكلمات بدون أرقام (اختياري)
+    // مثال: "original" داخل "orig" أو بالعكس
+    if (!hasDigit && qTok.includes(t) && t.length >= 3) {
+      best = Math.max(best, 0.85);
+      continue;
+    }
+    // ====== نهاية التعديل ======
+
+    // فزي خفيف للأخطاء الإملائية
+    const r = levenshteinRatio(t, qTok);
+
+    // thresholds حسب طول الكلمة
+    const ok =
+      (qTok.length <= 4 && r >= 0.82) ||
+      (qTok.length > 4 && r >= 0.75);
+
+    if (ok) best = Math.max(best, r * 0.95);
+  }
+
+  return best;
+}
+
+
+function smartScore(itemName, userQuery) {
+  const qTokens = tokenizeSmart(userQuery);
+  const iTokens = tokenizeSmart(itemName);
+
+  if (qTokens.length === 0 || iTokens.length === 0) return 0;
+
+  const itemNorm = normalizeForSmartSearch(itemName);
+  const queryNorm = normalizeForSmartSearch(userQuery);
+
+  // إذا الجملة كاملة موجودة داخل الايتم (أفضل شي)
+  if (itemNorm.includes(queryNorm)) return 1;
+
+  // احسب لكل توكن بالبحث شكد يطابق
+  const scores = qTokens.map(qt => bestTokenMatchScore(qt, iTokens));
+
+  const matchedCount = scores.filter(s => s >= 0.75).length;
+  const coverage = matchedCount / qTokens.length;
+
+  // شرط “ذكي”: إذا كاتب أكثر من كلمة، لازم يطابق أغلبها (مو كلمة وحدة مثل pix)
+  if (qTokens.length >= 2) {
+    // لِـ 2 كلمات لازم 2، لِـ 3 كلمات لازم 3… (يعني ما نسمح بكلمة وحدة تسحب كل النتائج)
+    if (matchedCount < qTokens.length) return 0;
+  }
+
+  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+
+  // بونس بسيط إذا الكلمات موجودة وبنفس ترتيبها تقريباً داخل النص
+  let orderBonus = 0;
+  let lastIdx = -1;
+  let inOrder = 0;
+  for (const qt of qTokens) {
+    const idx = itemNorm.indexOf(qt);
+    if (idx !== -1 && idx >= lastIdx) {
+      inOrder++;
+      lastIdx = idx;
+    }
+  }
+  orderBonus = (inOrder / qTokens.length) * 0.08;
+
+  // السكور النهائي
+  return Math.min(1, (coverage * 0.70) + (avg * 0.30) + orderBonus);
+}
+
+
+
 /* =============================================================== */
 
 // إخفاء الحاوية عند تفريغ حقل البحث
@@ -8913,14 +9025,59 @@ if (!currentCategory) {
     }
 
     const query = normalizeString(searchInput);
-    const results = database[currentCategory]?.filter(item => {
-        const itemName = item["Item Name"] || item["Item"];
-        if (!itemName) {
-            console.warn(`عنصر بدون اسم في فئة ${currentCategory}:`, item);
-            return false;
+
+    // ====== التعديل فقط هنا ======
+    let results = [];
+    const items = database[currentCategory] || [];
+
+    try {
+        if (typeof smartScore === "function" && typeof tokenizeSmart === "function") {
+            const qTokens = tokenizeSmart(searchInput);
+            const strictAnd = (qTokens.length >= 2); // إذا كلمتين+ لازم كلهم ينطابقون
+
+            results = items
+                .map(item => {
+                    const itemName = item["Item Name"] || item["Item"];
+                    if (!itemName) {
+                        console.warn(`عنصر بدون اسم في فئة ${currentCategory}:`, item);
+                        return null;
+                    }
+
+                    const score = smartScore(itemName, searchInput);
+                    return { item, itemName, score };
+                })
+                .filter(x => {
+                    if (!x) return false;
+                    // strict AND: smartScore يرجع 0 إذا ما تحققت كل الكلمات
+                    if (strictAnd) return x.score > 0;
+                    // إذا كلمة وحدة نخلي عتبة بسيطة حتى ما يجيب ضجيج
+                    return x.score >= 0.45;
+                })
+                .sort((a, b) => b.score - a.score)
+                .map(x => x.item);
+        } else {
+            // fallback للبحث القديم إذا الدوال مو موجودة
+            results = items.filter(item => {
+                const itemName = item["Item Name"] || item["Item"];
+                if (!itemName) {
+                    console.warn(`عنصر بدون اسم في فئة ${currentCategory}:`, item);
+                    return false;
+                }
+                return normalizeString(itemName).includes(query);
+            }) || [];
         }
-        return normalizeString(itemName).includes(query);
-    }) || [];
+    } catch (e) {
+        // fallback للبحث القديم إذا صار خطأ
+        results = items.filter(item => {
+            const itemName = item["Item Name"] || item["Item"];
+            if (!itemName) {
+                console.warn(`عنصر بدون اسم في فئة ${currentCategory}:`, item);
+                return false;
+            }
+            return normalizeString(itemName).includes(query);
+        }) || [];
+    }
+    // ====== نهاية التعديل ======
 
     if (results.length === 0) {
         console.log(`لا توجد نتائج مطابقة في فئة ${currentCategory} للبحث: ${query}`);
@@ -8930,6 +9087,7 @@ if (!currentCategory) {
 
     displayResults(results);
 }
+
 
 
 // دالة الرجوع لأعلى الصفحة
