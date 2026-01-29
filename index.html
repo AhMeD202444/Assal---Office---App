@@ -8854,11 +8854,14 @@ async function searchCompatibilitiesAdmin() {
 function normalizeForSmartSearch(str) {
   return String(str || "")
     .toLowerCase()
-    // خلي كل الرموز/الأقواس/الشرطات مسافة حتى يصير tokenization صحيح
+    // ✅ يفصل فقط الكلمات اللي مثل note10 (حروف 3+ وبعدين أرقام بالنهاية)
+    .replace(/([a-z]{3,})(\d{1,4})\b/gi, "$1 $2")
+    // خلي كل الرموز مسافة
     .replace(/[^a-z0-9]+/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
+
 
 function tokenizeSmart(str) {
   // نتجاهل الكلمات القصيرة هواي (مثل حرف واحد)
@@ -8878,32 +8881,40 @@ function bestTokenMatchScore(qTok, itemTokens) {
   // أعلى تطابق لهذا التوكن داخل توكنات الايتم
   let best = 0;
 
+  const hasDigit = /[0-9]/.test(qTok);
+  const isShortAlpha = !hasDigit && /^[a-z]+$/i.test(qTok) && qTok.length <= 3; // مثل sun / org / pix
+
   for (const t of itemTokens) {
     if (t === qTok) return 1;
 
-    // ====== التعديل هنا ======
-    // إذا أكو أرقام (موديلات): نمنع qTok.includes(t) حتى ما يصير x8a يطابق x8
-    const hasDigit = /[0-9]/.test(qTok) || /[0-9]/.test(t);
+    // ====== إضافة مهمة: الكلمات القصيرة لازم تكون exact فقط ======
+    // حتى "sun" ما تطابق "sung" ولا "sunny"
+    if (isShortAlpha) {
+      continue; // بما أننا فوق فحصنا exact، الباقي نرفضه
+    }
+    // ====== نهاية الإضافة ======
 
-    // substring مرن باتجاه واحد:
-    // يسمح: honorx8a يحتوي x8a
+    // ====== التعديل السابق للموديلات ======
+    // إذا أكو أرقام (موديلات): نمنع qTok.includes(t) حتى ما يصير x8a يطابق x8
+    const tHasDigit = /[0-9]/.test(t);
+    const anyDigit = hasDigit || tHasDigit;
+
+    // substring مرن باتجاه واحد
     if (t.includes(qTok)) {
       best = Math.max(best, 0.92);
       continue;
     }
 
     // يسمح بالعكس فقط للكلمات بدون أرقام (اختياري)
-    // مثال: "original" داخل "orig" أو بالعكس
-    if (!hasDigit && qTok.includes(t) && t.length >= 3) {
+    if (!anyDigit && qTok.includes(t) && t.length >= 3) {
       best = Math.max(best, 0.85);
       continue;
     }
-    // ====== نهاية التعديل ======
+    // ====== نهاية تعديل الموديلات ======
 
     // فزي خفيف للأخطاء الإملائية
     const r = levenshteinRatio(t, qTok);
 
-    // thresholds حسب طول الكلمة
     const ok =
       (qTok.length <= 4 && r >= 0.82) ||
       (qTok.length > 4 && r >= 0.75);
@@ -8913,6 +8924,7 @@ function bestTokenMatchScore(qTok, itemTokens) {
 
   return best;
 }
+
 
 
 function smartScore(itemName, userQuery) {
@@ -8927,8 +8939,27 @@ function smartScore(itemName, userQuery) {
   // إذا الجملة كاملة موجودة داخل الايتم (أفضل شي)
   if (itemNorm.includes(queryNorm)) return 1;
 
+  // ====== التعديل هنا فقط ======
+  // نضيف توكنات مركبة حتى note 10 يصير note10
+  const iTokens2 = iTokens.slice();
+  for (let i = 0; i < iTokens.length - 1; i++) {
+    const a = iTokens[i];
+    const b = iTokens[i + 1];
+
+    // حرف+أرقام (note + 10 => note10)
+    if (/^[a-z]{2,}$/i.test(a) && /^\d{1,4}$/.test(b)) {
+      iTokens2.push(a + b);
+    }
+
+    // أرقام+حروف قصيرة (4 + g => 4g) إذا انقسمت
+    if (/^\d{1,4}$/.test(a) && /^[a-z]{1,2}$/i.test(b)) {
+      iTokens2.push(a + b);
+    }
+  }
+  // ====== نهاية التعديل ======
+
   // احسب لكل توكن بالبحث شكد يطابق
-  const scores = qTokens.map(qt => bestTokenMatchScore(qt, iTokens));
+  const scores = qTokens.map(qt => bestTokenMatchScore(qt, iTokens2));
 
   const matchedCount = scores.filter(s => s >= 0.75).length;
   const coverage = matchedCount / qTokens.length;
@@ -8957,6 +8988,7 @@ function smartScore(itemName, userQuery) {
   // السكور النهائي
   return Math.min(1, (coverage * 0.70) + (avg * 0.30) + orderBonus);
 }
+
 
 
 
