@@ -8864,11 +8864,12 @@ function normalizeForSmartSearch(str) {
 
 
 function tokenizeSmart(str) {
-  // نتجاهل الكلمات القصيرة هواي (مثل حرف واحد)
+  // نخلي الأرقام تنقبل حتى لو كانت رقم واحد (مثل 7 / 8)
   return normalizeForSmartSearch(str)
     .split(" ")
-    .filter(t => t && t.length >= 2);
+    .filter(t => t && (t.length >= 2 || /^\d+$/.test(t)));
 }
+
 
 function levenshteinRatio(a, b) {
   // تحتاج دالة levenshteinDistance الموجودة عندك
