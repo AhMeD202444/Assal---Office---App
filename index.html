@@ -7650,7 +7650,7 @@ function triggerAnimation() {
 
       
     // ✅ قفل الصيانة: true = تظهر نافذة الصيانة وتمنع الدخول، false = طبيعي
-let maintenanceLock = false;
+let maintenanceLock = true;
 
 // ✅ سماح مؤقت للأدمن (جلسة المتصفح الحالية فقط)
 const maintenanceBypassKey = 'maintenanceBypass';
@@ -8061,9 +8061,6 @@ function showMaintenancePopup() {
                             إذا انت من الكادر، سجل دخول أدمن.
                         </p>
 
-                        <label class="activation-field-label" for="maintenance-admin-input">
-                            دخول أدمن
-                        </label>
 
                         <div class="activation-input-row">
                             <input
@@ -8126,31 +8123,38 @@ function showMaintenancePopup() {
             adminInput.focus();
         });
 
-        enterBtn.addEventListener('click', () => {
-            const entered = (adminInput.value || '').trim();
+      enterBtn.addEventListener('click', () => {
+  const entered = (adminInput.value || '').trim();
 
-            if (!entered) {
-                setError('رجاءً اكتب كلمة الأدمن أولاً.');
-                adminInput.focus();
-                return;
-            }
+  if (!entered) {
+    setError('رجاءً اكتب كلمة الأدمن أولاً.');
+    adminInput.focus();
+    return;
+  }
 
-            // ✅ هنا كلمة الأدمن الخاصة بالصيانة فقط
-            if (entered === MAINTENANCE_ADMIN_PASSWORD) {
-                setMaintenanceBypass(); // ✅ التعديل: ينحفظ بالجهاز وما يطلبه كل مرة
-                setError('');
-                overlay.classList.remove('is-open');
+  if (entered === MAINTENANCE_ADMIN_PASSWORD) {
+    setMaintenanceBypass();
+    setError('');
+    overlay.classList.remove('is-open');
 
-                // ✅ فتح السكرول قبل الريلود
-                document.documentElement.style.overflow = '';
-                document.body.style.overflow = '';
+    // ✅ خليه يعتبر نفسه مفعل
+    localStorage.setItem('isActivated', 'true');
 
-                setTimeout(() => location.reload(), 150);
-            } else {
-                setError('كلمة الأدمن غير صحيحة.');
-                adminInput.select();
-            }
-        });
+    // ✅ خليه كادر/أدمن حتى يفتح التوافقات
+    localStorage.setItem('isAdmin', 'true'); 
+    // أو إذا عندك دالة جاهزة:
+    // setAdminUser(true);
+
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+
+    setTimeout(() => location.reload(), 150);
+  } else {
+    setError('كلمة الأدمن غير صحيحة.');
+    adminInput.select();
+  }
+});
+
 
         closeBtn.addEventListener('click', () => {
             setError('التطبيق تحت الصيانة. الدخول متاح فقط للأدمن.');
@@ -10728,7 +10732,7 @@ function closeContactModal(){
      "sponsor_iphone_back" => إعلان مُعلن: أظهر آيفون (07706032703)
 
    ========================================================== */
-const AD_CHOICE = "paid_ads"; // <<< غيّرها هنا فقط
+const AD_CHOICE = "off"; // <<< غيّرها هنا فقط
 
 // خيارات اضافية (اختياري)
 const AD_DELAY_MS = 650;                 // تأخير بسيط بعد التحميل
