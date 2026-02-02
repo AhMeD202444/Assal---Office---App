@@ -8863,11 +8863,59 @@ function normalizeForSmartSearch(str) {
 }
 
 
+const SMART_SYNONYMS = {
+  "pls": "plus",
+  "plz": "plus",
+  "pluse": "plus",
+  "pr": "pro",
+  "mx": "max",
+  "lt": "lite",
+  "ul": "ultra",
+  "inc": "incl",
+  "sec": "second",
+  "fr": "frm",
+  "frame": "frm",
+  "not": "note",
+  "smrt": "smart",
+  "ply": "play",
+  "new": "neo",
+  "rel": "realme",
+  "red": "redmi",
+  "xia": "xiaomi",
+  "hnr": "honor",
+  "zer": "zero",
+  "iph": "iphone",
+  "sam": "samsung",
+  "orgg": "org",
+
+  // ====== إضافات مفيدة وآمنة للشاشات ======
+  "inf": "infinix",
+  "tec": "tecno",
+  "hua": "huawei",
+  "opp": "oppo",
+  "viv": "vivo",
+  "poc": "poco",
+  "itl": "itel",
+
+  "spk": "spark",
+  "rno": "reno",
+  "pva": "pova",
+  "nva": "nova",
+  "camn": "camon",
+  "tap": "tab",
+
+  "wi": "wifi",
+  "ol": "oled"
+};
+
+
+
 function tokenizeSmart(str) {
   // نخلي الأرقام تنقبل حتى لو كانت رقم واحد (مثل 7 / 8)
   return normalizeForSmartSearch(str)
     .split(" ")
-    .filter(t => t && (t.length >= 2 || /^\d+$/.test(t)));
+    .filter(t => t && (t.length >= 2 || /^\d+$/.test(t)))
+    .map(t => SMART_SYNONYMS[t] || t); // ✅ التعديل هنا: تحويل اختصارات مثل pls -> plus
 }
 
 
@@ -8884,18 +8932,27 @@ function bestTokenMatchScore(qTok, itemTokens) {
 
   const hasDigit = /[0-9]/.test(qTok);
   const isShortAlpha = !hasDigit && /^[a-z]+$/i.test(qTok) && qTok.length <= 3; // مثل sun / org / pix
+  const isPureNumber = /^\d+$/.test(qTok); // ✅ رقم فقط مثل 5 / 7 / 12
 
   for (const t of itemTokens) {
     if (t === qTok) return 1;
 
-    // ====== إضافة مهمة: الكلمات القصيرة لازم تكون exact فقط ======
+    // ✅ إذا التوكن رقم فقط: لا تقارنه إلا ويا رقم فقط
+    // حتى "5" ما تطابق "5g" أو "2025" أو أي شي بيه حروف
+    if (isPureNumber) {
+      if (!/^\d+$/.test(t)) continue;
+      // بما أنه مو equal (فوق)، خلاص نكمل
+      continue;
+    }
+
+    // ====== الكلمات القصيرة لازم تكون exact فقط ======
     // حتى "sun" ما تطابق "sung" ولا "sunny"
     if (isShortAlpha) {
       continue; // بما أننا فوق فحصنا exact، الباقي نرفضه
     }
     // ====== نهاية الإضافة ======
 
-    // ====== التعديل السابق للموديلات ======
+    // ====== تعديل الموديلات ======
     // إذا أكو أرقام (موديلات): نمنع qTok.includes(t) حتى ما يصير x8a يطابق x8
     const tHasDigit = /[0-9]/.test(t);
     const anyDigit = hasDigit || tHasDigit;
@@ -8928,7 +8985,39 @@ function bestTokenMatchScore(qTok, itemTokens) {
 
 
 
+
 function smartScore(itemName, userQuery) {
+
+  // ====== إضافة وضع القوس "(" (نسخة محسّنة) ======
+  // يطابق آخر كلمات قبل القوس حتى "xs (" يجيب "iphone xs (" وما يجيب "xs max ("
+  const uq = String(userQuery || "");
+  const uParen = uq.indexOf("(");
+  if (uParen !== -1) {
+    const base = uq.slice(0, uParen).trim();
+    if (!base) return 0;
+
+    const iname = String(itemName || "");
+    const iParen = iname.indexOf("(");
+    if (iParen === -1) return 0;
+
+    const itemBase = iname.slice(0, iParen).trim();
+
+    const baseTokens = tokenizeSmart(base);
+    const itemBaseTokens = tokenizeSmart(itemBase);
+
+    if (baseTokens.length === 0 || itemBaseTokens.length === 0) return 0;
+    if (baseTokens.length > itemBaseTokens.length) return 0;
+
+    // لازم آخر توكنات قبل القوس تساوي اللي كتبه المستخدم
+    const start = itemBaseTokens.length - baseTokens.length;
+    for (let i = 0; i < baseTokens.length; i++) {
+      if (itemBaseTokens[start + i] !== baseTokens[i]) return 0;
+    }
+
+    return 1;
+  }
+  // ====== نهاية إضافة القوس ======
+
   const qTokens = tokenizeSmart(userQuery);
   const iTokens = tokenizeSmart(itemName);
 
@@ -8989,6 +9078,8 @@ function smartScore(itemName, userQuery) {
   // السكور النهائي
   return Math.min(1, (coverage * 0.70) + (avg * 0.30) + orderBonus);
 }
+
+
 
 
 
@@ -9086,7 +9177,20 @@ if (!currentCategory) {
                     // إذا كلمة وحدة نخلي عتبة بسيطة حتى ما يجيب ضجيج
                     return x.score >= 0.45;
                 })
-                .sort((a, b) => b.score - a.score)
+               .sort((a, b) => {
+  // 1) الأعلى سكورا أولاً
+  const d = b.score - a.score;
+  if (d !== 0) return d;
+
+  // 2) إذا السكور متساوي: الأقصر/الأقل كلمات أولاً (يفضّل HOT 50 4G على HOT 50 PRO PLUS 4G)
+  const aTok = tokenizeSmart(a.itemName).length;
+  const bTok = tokenizeSmart(b.itemName).length;
+  if (aTok !== bTok) return aTok - bTok;
+
+  // 3) إذا بعده تعادل: الأقصر بالحروف أولاً
+  return a.itemName.length - b.itemName.length;
+})
+
                 .map(x => x.item);
         } else {
             // fallback للبحث القديم إذا الدوال مو موجودة
