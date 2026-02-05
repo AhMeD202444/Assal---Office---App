@@ -1193,6 +1193,109 @@ h1 {
     transform: translateY(-50%);
     background: linear-gradient(45deg, #f6d365, #fda085);
 }
+
+.search-container .admin-wholesale-btn{
+    position: absolute;
+    left: 50px;
+    right: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(45deg, #43cea2, #185a9d);
+}
+
+/* حالة التفعيل (أسعار الجملة) */
+.search-container .admin-wholesale-btn.is-active{
+    background: linear-gradient(45deg, #8B0000, #B22222);
+}
+
+/* تعطيل/رمادي */
+.search-container .admin-wholesale-btn:disabled,
+.search-container .admin-wholesale-btn.is-disabled{
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(0.6);
+    transform: translateY(-50%) scale(1) !important;
+    box-shadow: none !important;
+}
+
+/* قائمة اقتراحات أسعار الجملة (تطلع لفوك) */
+.wholesale-suggestions{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(100% + 8px);
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 240px; /* 5 عناصر تقريباً + سكرول للباقي */
+    overflow-y: auto;
+    background: rgba(2, 6, 23, 0.88);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 10px;
+    backdrop-filter: blur(14px);
+    z-index: 9999;
+}
+
+/* اخفاء سكرول كروم */
+.wholesale-suggestions::-webkit-scrollbar{ width: 6px; }
+.wholesale-suggestions::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.22); border-radius: 10px; }
+.wholesale-suggestions::-webkit-scrollbar-track{ background: transparent; }
+
+.wholesale-suggestion-item{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.06);
+    transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.wholesale-suggestion-item:hover{
+    background: rgba(67, 206, 162, 0.16);
+    transform: scale(1.01);
+}
+
+.wholesale-suggestion-name{
+    font-family: 'Cairo', sans-serif;
+    font-size: 14px;
+    color: #fff;
+    flex: 1;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wholesale-suggestion-meta{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.wholesale-suggestion-cat{
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.10);
+    color: #d1d5db;
+    font-family: 'Cairo', sans-serif;
+}
+
+.wholesale-suggestion-price{
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: linear-gradient(45deg, #8B0000, #B22222);
+    color: #fff;
+    font-weight: 700;
+    font-family: 'Cairo', sans-serif;
+}
+
 .search-container .admin-compat-btn:disabled,
 .search-container .admin-compat-btn.is-disabled{
     opacity: 0.45;
@@ -1204,7 +1307,7 @@ h1 {
 /* تعديل padding حقل الإدخال لتجنب التداخل مع الأزرار */
 .search-container input {
     padding-right: 90px; /* زيادة المسافة لاستيعاب زر المسح + زر البحث */
-    padding-left: 60px; /* مساحة لزر التوافقات */
+    padding-left: 105px; /* مساحة لزرّين (توافقات + جملة) */
 }
 
 /* Media Queries للشاشات الصغيرة */
@@ -1217,7 +1320,7 @@ h1 {
     }
     .search-container input {
         padding-right: 85px; /* تعديل المسافة */
-    padding-left: 60px; /* مساحة لزر التوافقات */
+    padding-left: 105px; /* مساحة لزرّين (توافقات + جملة) */
     }
 }
 
@@ -1231,7 +1334,7 @@ h1 {
     }
     .search-container input {
         padding-right: 88px;
-    padding-left: 60px; /* مساحة لزر التوافقات */
+    padding-left: 105px; /* مساحة لزرّين (توافقات + جملة) */
     }
 }
 
@@ -6691,6 +6794,29 @@ input, textarea, [contenteditable="true"] {
 
 /* ===== Theme 7: Sponsored Ad (Advertiser Listing) نهاية البلوك ===== */
 
+/* العنصر المحدد بالكيبورد */
+.wholesale-suggestion-item.is-selected{
+    background: rgba(139, 0, 0, 0.28);
+    outline: 2px solid rgba(178, 34, 34, 0.55);
+    transform: scale(1.01);
+}
+
+#adminWholesaleBtn.is-active{
+  background: linear-gradient(45deg, #8B0000, #B22222) !important;
+  color: #fff !important;
+}
+
+/* ===== فقط لفّ اسم الاقتراح لسطر ثاني بدل (...) ===== */
+.wholesale-suggestion-name{
+  white-space: normal !important;   /* بدل nowrap */
+  overflow: visible !important;     /* بدل hidden */
+  text-overflow: clip !important;   /* بدل ellipsis */
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+
 
 
 </style>
@@ -7080,7 +7206,14 @@ input, textarea, [contenteditable="true"] {
     <button id="adminCompatBtn" class="admin-compat-btn" type="button" onclick="searchCompatibilitiesAdmin()" title="توافقات (كادر عسل فقط)" disabled>
         <i class="fas fa-sync"></i>
     </button>
+    
+    <button id="adminWholesaleBtn" class="admin-wholesale-btn" type="button" onclick="toggleWholesaleMode()" title="أسعار الجملة (كادر عسل فقط)" disabled>
+        <i class="fas fa-tags"></i>
+</button>
+
+    
     <input type="text" id="searchInput" placeholder="Search for items...">
+    <div id="wholesaleSuggestions" class="wholesale-suggestions" aria-label="Wholesale suggestions"></div>
     <button id="clearBtn" class="clear-btn" onclick="clearSearch()" style="display: none;"><i class="fas fa-times"></i></button>
     <button id="searchBtn" onclick="searchItems()"><i class="fas fa-search"></i></button>
 </div>
@@ -7164,6 +7297,7 @@ function setAdminUser(isAdmin) {
     if (isAdmin) localStorage.setItem(ADMIN_FLAG_KEY, "true");
     else localStorage.removeItem(ADMIN_FLAG_KEY);
     updateAdminCompatBtn();
+    updateAdminWholesaleBtn();
 }
 
 function updateAdminCompatBtn() {
@@ -7174,6 +7308,20 @@ function updateAdminCompatBtn() {
     btn.classList.toggle("is-disabled", !ok);
     btn.title = ok ? "بحث التوافقات" : "هذه الخاصية حصرا لكادر مكتب عسل";
 }
+
+function updateAdminWholesaleBtn() {
+    const btn = document.getElementById("adminWholesaleBtn");
+    if (!btn) return;
+    const ok = isAdminUser();
+    btn.disabled = !ok;
+    btn.classList.toggle("is-disabled", !ok);
+    if (!ok) {
+        btn.classList.remove("is-active");
+        isWholesaleMode = false;
+        hideWholesaleSuggestions();
+    }
+}
+
 
 function showStaffOnlyPopup() {
     showExitLikeAlert({
@@ -7189,7 +7337,7 @@ function openSimilaritesPage() {
     window.location.href = "similarites.html";
 }
 
-document.addEventListener("DOMContentLoaded", updateAdminCompatBtn);
+document.addEventListener("DOMContentLoaded", () => { updateAdminCompatBtn(); updateAdminWholesaleBtn(); });
 // ================================================================
 
       
@@ -8281,6 +8429,9 @@ function showExitLikeAlert({ icon = "fas fa-exclamation-circle", title = "تنب
 
         let database = {};
         let currentCategory = null;
+        let allDatabase = []; // Sheet ALL (Item Name, Price, CAG)
+        let isWholesaleMode = false;
+
 
 async function loadExcelFiles() {
     try {
@@ -8364,6 +8515,10 @@ async function loadExcelFiles() {
         database.CC = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CC"] || {}, { defval: null }),
         database.TOUCH = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["TOUCH"] || {}, { defval: null }),
         database.VIBRATION = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["VIBRATION"] || {}, { defval: null })
+
+        // ✅ تحميل شيت ALL (أسعار الجملة)
+        allDatabase = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["ALL"] || {}, { defval: null });
+
          
 
         // تصحيح البيانات
@@ -8548,7 +8703,8 @@ function displayResults(results) {
         results.forEach(item => {
 
             // جزء الصورة كما هو
-            const normalizedCategory = currentCategory
+            const catForItem = (currentCategory === "ALL" && (item["CAG"] || item.CAG || item.category)) ? String(item["CAG"] || item.CAG || item.category) : currentCategory;
+            const normalizedCategory = String(catForItem || "")
                 .toLowerCase()
                 .replace(/\s+/g, '-');
 
@@ -9103,6 +9259,13 @@ function searchItems() {
         return;
     }
 
+    // ✅ إذا وضع أسعار الجملة مفعّل: نبحث بشيت ALL بدون الحاجة لاختيار صنف
+    if (typeof isWholesaleMode !== "undefined" && isWholesaleMode) {
+        searchWholesaleItems(searchInput);
+        return;
+    }
+
+
 if (!currentCategory) {
     resultsContainer.style.display = 'none';
 
@@ -9224,6 +9387,322 @@ if (!currentCategory) {
 
     displayResults(results);
 }
+
+
+/* ================== أسعار الجملة (شيت ALL) ================== */
+const WHOLESALE_ALLOWED_CATS = [
+    "LCD","BATTERY","HOUSING","FLAT LCD","BACK","CAMERA","CHARGING","BUZZER",
+    "HEADPHONE","FINGER","POWER","LENS","VOLUME","SPEAKER","FLAT SPEAKER",
+    "HOLLDER","IC","CC","VIBRATION","TOUCH","HUAWEI"
+];
+
+function pickAllItemName(row) {
+    return (row && (row["Item Name"] ?? row["ITEM NAME"] ?? row["ItemName"] ?? row["Item"] ?? row["item"] ?? row["Name"] ?? row["name"])) || "";
+}
+function pickAllPrice(row) {
+    return (row && (row["Price"] ?? row["PRICE"] ?? row["price"])) || "";
+}
+function pickAllCat(row) {
+    return (row && (row["CAG"] ?? row["Cat"] ?? row["Category"] ?? row["category"])) || "";
+}
+
+function toggleWholesaleMode() {
+    const btn = document.getElementById("adminWholesaleBtn");
+    if (!btn) return;
+
+    // إذا مو أدمن: نفس سلوك التوافقات
+    if (!isAdminUser()) {
+        showExitLikeAlert({
+            icon: "fas fa-user-lock",
+            title: "وصول محدود",
+            message: "هذه الخاصية حصرا لكادر مكتب عسل",
+            confirmText: "موافق"
+        });
+        return;
+    }
+
+    // ✅ NEW: إذا الزر متعطل بالـ HTML نشيله للأدمن حتى يشتغل اللون والضغط
+    btn.disabled = false;
+
+    isWholesaleMode = !isWholesaleMode;
+
+    // ✅ حالة تفعيل واضحة وصارمة
+    btn.classList.toggle("is-active", isWholesaleMode);
+    btn.setAttribute("aria-pressed", String(isWholesaleMode));
+
+    // ✅ تثبيت اللون حتى لو تعارضت الستايلات
+    btn.style.background = isWholesaleMode
+        ? "linear-gradient(45deg, #8B0000, #B22222)"
+        : "linear-gradient(45deg, #43cea2, #185a9d)";
+    btn.style.color = "#fff";
+
+    // عند الإلغاء نخفي الاقتراحات
+    if (!isWholesaleMode) hideWholesaleSuggestions();
+
+    // فوكس على البحث
+    const input = document.getElementById("searchInput");
+    if (input) input.focus();
+}
+
+
+
+function getWholesaleMatches(queryRaw, limit = 30) {
+    const q = normalizeString((queryRaw || "").trim());
+    if (!q) return [];
+
+    const rows = Array.isArray(allDatabase) ? allDatabase : [];
+    const scored = [];
+
+    for (const row of rows) {
+        const cat = String(pickAllCat(row) || "").trim().toUpperCase();
+        if (!WHOLESALE_ALLOWED_CATS.includes(cat)) continue;
+
+
+        // إذا المستخدم مختار صنف من الشريط (مثل LCD) نخلي الجملة تعرض/تبحث بهالصنف فقط
+        const selectedCat = String(currentCategory || "").trim().toUpperCase();
+        if (selectedCat && selectedCat !== "ALL" && selectedCat !== "SIMILARITES") {
+            if (cat !== selectedCat) continue;
+        }
+        const name = String(pickAllItemName(row) || "").trim();
+        if (!name) continue;
+
+        const nameNorm = normalizeString(name);
+        let score = 0;
+
+        const idx = nameNorm.indexOf(q);
+        if (idx !== -1) {
+            // تطابق مباشر
+            score = 1000 - idx;
+        } else {
+            // تشابه ذكي
+            score = Math.round(similarityScore(q, nameNorm) * 1000);
+        }
+
+        // فلترة خفيفة حتى ما يطلع شي بعيد
+        if (score < 220) continue;
+
+        scored.push({ row, score, cat, name });
+    }
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, limit);
+}
+
+
+// ===== Wholesale Suggestions Keyboard + Exact Pick =====
+let wholesaleSuggestionMatches = [];
+let wholesaleSelectedIndex = -1;
+
+function setWholesaleSelectedIndex(i) {
+    const box = document.getElementById("wholesaleSuggestions");
+    if (!box) return;
+
+    const items = Array.from(box.querySelectorAll(".wholesale-suggestion-item"));
+    if (!items.length) {
+        wholesaleSelectedIndex = -1;
+        return;
+    }
+
+    // لفّ الإندكس
+    const max = items.length - 1;
+    wholesaleSelectedIndex = Math.max(0, Math.min(i, max));
+
+    items.forEach((el, idx) => {
+        el.classList.toggle("is-selected", idx === wholesaleSelectedIndex);
+    });
+
+    // سكرول ناعم حتى العنصر المحدد يظل واضح
+    const activeEl = items[wholesaleSelectedIndex];
+    if (activeEl) activeEl.scrollIntoView({ block: "nearest" });
+}
+
+function renderWholesaleSingleMatch(m) {
+    const resultsContainer = document.getElementById("results");
+    if (!resultsContainer || !m) return;
+
+    const results = [{
+        "Item Name": m.name,
+        "Price": pickAllPrice(m.row),
+        "CAG": m.cat
+    }];
+
+    const prevCat = currentCategory;
+    currentCategory = "ALL";
+
+    resultsContainer.style.display = "block";
+    displayResults(results);
+
+    currentCategory = prevCat;
+}
+
+
+
+
+
+function showWholesaleSuggestions(queryRaw) {
+    const box = document.getElementById("wholesaleSuggestions");
+    if (!box) return;
+
+    if (!isWholesaleMode) {
+        hideWholesaleSuggestions();
+        return;
+    }
+
+    const matches = getWholesaleMatches(queryRaw, 60);
+    if (!matches.length) {
+        hideWholesaleSuggestions();
+        return;
+    }
+
+    // ✅ نخزنها حتى نستخدمها بالكيبورد/الإنتر
+    wholesaleSuggestionMatches = matches;
+    wholesaleSelectedIndex = 0;
+
+    box.innerHTML = matches.map((m, idx) => {
+        const price = pickAllPrice(m.row);
+        const safeName = escapeHtml(m.name);
+        const safeCat = escapeHtml(m.cat);
+        const safePrice = escapeHtml(String(price ?? ""));
+        return `
+            <div class="wholesale-suggestion-item" data-idx="${idx}">
+                <div class="wholesale-suggestion-name">${safeName}</div>
+                <div class="wholesale-suggestion-meta">
+                    <span class="wholesale-suggestion-cat">${safeCat}</span>
+                    <span class="wholesale-suggestion-price">${safePrice}</span>
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    box.style.display = "flex";
+
+    // ✅ حدد أول عنصر بصرياً
+    setWholesaleSelectedIndex(0);
+
+    // click on suggestion (✅ يعرض عنصر واحد فقط)
+    box.querySelectorAll(".wholesale-suggestion-item").forEach(el => {
+        el.addEventListener("click", () => {
+            const idx = parseInt(el.getAttribute("data-idx") || "-1", 10);
+            const m = wholesaleSuggestionMatches[idx];
+            if (!m) return;
+
+            const input = document.getElementById("searchInput");
+            if (input) input.value = m.name;
+
+            hideWholesaleSuggestions();
+
+            // ✅ عرض عنصر واحد فقط
+            renderWholesaleSingleMatch(m);
+        });
+    });
+}
+
+
+function hideWholesaleSuggestions() {
+    const box = document.getElementById("wholesaleSuggestions");
+    if (!box) return;
+    box.style.display = "none";
+    box.innerHTML = "";
+
+    // ✅ تصفير الحالة
+    wholesaleSuggestionMatches = [];
+    wholesaleSelectedIndex = -1;
+}
+
+
+function searchWholesaleItems(queryRaw) {
+    const resultsContainer = document.getElementById("results");
+    const q = (queryRaw || "").trim();
+    if (!q) {
+        resultsContainer.style.display = "none";
+        return;
+    }
+
+    const matches = getWholesaleMatches(q, 120);
+
+    // نحولها لشكل displayResults حتى ما نكسر الواجهة
+    const results = matches.map(m => ({
+        "Item Name": m.name,
+        "Price": pickAllPrice(m.row),
+        "CAG": m.cat
+    }));
+
+    // نخلي currentCategory مؤقتاً حتى displayResults ما ينكسر بالصور
+    const prevCat = currentCategory;
+    currentCategory = "ALL";
+
+    resultsContainer.style.display = "block";
+    displayResults(results);
+
+    currentCategory = prevCat;
+}
+
+/* تفعيل اقتراحات أسعار الجملة من نفس حقل البحث */
+document.addEventListener("DOMContentLoaded", () => {
+  
+  
+  // ✅ NEW: إذا أدمن فعّل زر الجملة (شيل disabled)
+    const wholesaleBtn = document.getElementById("adminWholesaleBtn");
+    if (wholesaleBtn && isAdminUser()) {
+        wholesaleBtn.disabled = false;
+    }
+  
+  
+    const input = document.getElementById("searchInput");
+    if (!input) return;
+
+    input.addEventListener("input", () => {
+        if (!isWholesaleMode) return;
+        showWholesaleSuggestions(input.value);
+    });
+
+    input.addEventListener("focus", () => {
+        if (!isWholesaleMode) return;
+        if (input.value.trim()) showWholesaleSuggestions(input.value);
+    });
+
+    input.addEventListener("blur", () => {
+        // نخليها ما تختفي فوراً حتى يلحگ يضغط
+        setTimeout(() => hideWholesaleSuggestions(), 180);
+    });
+
+    // ✅ NEW: دعم الأسهم + إنتر + اسكيب للاقتراحات
+    input.addEventListener("keydown", (e) => {
+        const box = document.getElementById("wholesaleSuggestions");
+        const isOpen = box && box.style.display === "flex";
+
+        if (!isWholesaleMode || !isOpen) return;
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setWholesaleSelectedIndex(wholesaleSelectedIndex + 1);
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setWholesaleSelectedIndex(wholesaleSelectedIndex - 1);
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            const m = wholesaleSuggestionMatches[wholesaleSelectedIndex];
+            if (!m) return;
+
+            input.value = m.name;
+            hideWholesaleSuggestions();
+            renderWholesaleSingleMatch(m);
+        } else if (e.key === "Escape") {
+            hideWholesaleSuggestions();
+        }
+    });
+
+    // إذا نقر بمكان ثاني: اخفي
+    document.addEventListener("click", (e) => {
+        const box = document.getElementById("wholesaleSuggestions");
+        if (!box) return;
+        const sc = document.querySelector(".search-container");
+        if (!sc) return;
+        if (!sc.contains(e.target)) hideWholesaleSuggestions();
+    });
+});
+
+/* ============================================================ */
 
 
 
@@ -10516,7 +10995,7 @@ function openFullImageOverlay(dataUrl, filename){
 
 
 
-function showImagePreview(url, filename){
+async function showImagePreview(url, filename){
   document.getElementById("imgPrevOverlay")?.remove();
 
   const ov = document.createElement("div");
@@ -11206,7 +11685,7 @@ function fadeIn(){
     document.getElementById("adRamadanClose")?.addEventListener("click", close);
   }
 
-function renderDua(){
+async function renderDua(){
   setTheme("ad-theme-dua");
 
   // اختار واحد عشوائي كل مرة تفتح الإعلان (ويثبت)
@@ -11398,7 +11877,7 @@ function renderPaidAds(){
   });
 }
 
-function renderSponsorAd(){
+async function renderSponsorAd(){
   setTheme("ad-theme-sponsor");
 
   const phone = "07706032703";
