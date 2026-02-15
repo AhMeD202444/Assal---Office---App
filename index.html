@@ -6881,7 +6881,7 @@ body.ramadan-mode::before{
 /* الخيط */
 .ramadan-decor .string{
   width: 2px;
-  height: calc(var(--len) * 0.4px);
+  height: calc(var(--len) * 0.2px);
   background: linear-gradient(to bottom, rgba(255,255,255,.42), var(--ram-string));
   border-radius: 2px;
   margin: 0 auto;
@@ -7011,8 +7011,104 @@ body.ramadan-mode .ramadan-decor .hanger:nth-of-type(5){ animation-duration: 5.9
 }
 
 
+/* ===================== RAMADAN WORDMARK ORNAMENT START ===================== */
+/* يحوّل hanger 1/3/5 إلى كتابة "رمضان كريم" داخل القطعة بدل (المسجد/النجمة) */
+
+/* خط عربي أنيق (شغل مصممين) */
+@import url("https://fonts.googleapis.com/css2?family=Aref+Ruqaa+Ink:wght@400;700&family=Noto+Kufi+Arabic:wght@500;700&display=swap");
+
+/* اخفي الـSVG القديم بس على hangers 1/3/5 (حتى الهلال 2/4 يبقى شغّال) */
+body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(1) .ornament svg,
+body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(3) .ornament svg,
+body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(5) .ornament svg{
+  display: none !important;
+}
+
+/* النص داخل القطعة */
+body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(1) .ornament::after,
+body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(3) .ornament::after,
+body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(5) .ornament::after{
+  content: "رمضان\Aكريم";
+  white-space: pre;                 /* حتى \A تنزل سطر */
+  display: grid;
+  place-items: center;
+  text-align: center;
+
+  width: 100%;
+  height: 100%;
+
+  /* بريميوم: خط + وزن */
+  font-family: "Aref Ruqaa Ink", "Noto Kufi Arabic", system-ui, sans-serif;
+  font-weight: 700;
+  line-height: 1.02;
+  font-size: 13px;                  /* مضبوط على 44×44 */
+  letter-spacing: -0.2px;
+
+  /* تدرّج ذهبي (default للـgold) */
+  background: linear-gradient(135deg,
+    rgba(251,191,36,.98),
+    rgba(245,158,11,.92)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  /* عمق خفيف حتى يطلع “مصممين” */
+  text-shadow: 0 10px 18px rgba(0,0,0,.22);
+}
+
+/* إذا القطعة خضراء (hanger 3/5 عندك green) نخلي التدرّج أخضر */
+body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(3) .ornament.green::after,
+body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(5) .ornament.green::after{
+  background: linear-gradient(135deg,
+    rgba(34,197,94,.98),
+    rgba(16,185,129,.90)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* للموبايل: أصغر شوي حتى ما يزحم */
+@media (max-width: 480px){
+  body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(1) .ornament::after,
+  body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(3) .ornament::after,
+  body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(5) .ornament::after{
+    font-size: 12px;
+  }
+}
+
+/* ===================== RAMADAN WORDMARK ORNAMENT END ===================== */
 
 
+/* ===================== RAMADAN CRESCENT ORNAMENT START ===================== */
+/* الهلال للحلقات 2/4: انحف + نفس اللون + بدون هلالين/ابيض */
+
+/* اخفي الـSVG القديم للهلال حتى ما يصير هلالين */
+body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(2) .ornament svg,
+body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(4) .ornament svg{
+  display: none !important;
+}
+
+/* ثبّت اللون حتى currentColor ما يصير ابيض */
+body.ramadan-mode .ramadan-decor .ornament.gold{ color: rgba(251,191,36,.95) !important; }
+body.ramadan-mode .ramadan-decor .ornament.green{ color: rgba(34,197,94,.95) !important; }
+
+/* ارسم الهلال بـ ::after */
+body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(2) .ornament::after,
+body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(4) .ornament::after{
+  content:"" !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: block !important;
+
+  background: currentColor !important;
+
+  /* هلال أنحف شوي */
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M14.25 3.45a9.05 9.05 0 1 0 0 17.1a7.25 7.25 0 1 1 0-17.1Zm0 2.85a6.6 6.6 0 1 0 0 12.2a5.15 5.15 0 1 1 0-12.2Z'/%3E%3C/svg%3E") center/contain no-repeat !important;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M14.25 3.45a9.05 9.05 0 1 0 0 17.1a7.25 7.25 0 1 1 0-17.1Zm0 2.85a6.6 6.6 0 1 0 0 12.2a5.15 5.15 0 1 1 0-12.2Z'/%3E%3C/svg%3E") center/contain no-repeat !important;
+}
+/* ===================== RAMADAN CRESCENT ORNAMENT END ===================== */
 
 
 </style>
