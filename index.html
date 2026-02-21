@@ -7109,6 +7109,64 @@ body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(4) .ornament::after{
 }
 /* ===================== RAMADAN CRESCENT ORNAMENT END ===================== */
 
+/* 🟢🟢🟢 RAMADAN IMSAKIYA START 🟢🟢🟢 */
+.floating-ramadan-btn{
+  position: fixed;
+  bottom: 50px;
+  left: 20px;
+
+  /* الحجم راح ينضبط من JS حتى يصير نفس دائرة (جديد) */
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+
+  /* ✅ تعديل: خلفية رمضانية أشيك + لمعة خفيفة */
+  background:
+    radial-gradient(circle at 30% 25%, rgba(245,158,11,.30), rgba(245,158,11,0) 45%),
+    linear-gradient(135deg, #0b1220, #111827);
+
+  /* ✅ تعديل: إطار ذهبي أنعم */
+  border: 1px solid rgba(245, 158, 11, .60);
+
+  /* ✅ تعديل: ظل أعمق + Glow ذهبي خفيف */
+  box-shadow:
+    0 10px 25px rgba(0,0,0,.35),
+    0 0 18px rgba(245,158,11,.18);
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 1002;
+  cursor: pointer;
+  user-select: none;
+
+  text-align: center;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 900;
+  font-size: 11px;
+  line-height: 1.05;
+  color: #fbbf24; /* نص ذهبي */
+
+  /* حركة ظهور/اختفاء ناعمة */
+  opacity: 0;
+  transform: translateY(8px) scale(.96);
+  transition: opacity .35s ease, transform .35s ease, filter .35s ease;
+}
+
+.floating-ramadan-btn.show{
+  display: flex;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ✅ تعديل: Hover لطيف (إذا على موبايل مو ضروري بس حلو على الديسكتوب) */
+.floating-ramadan-btn:hover{
+  filter: brightness(1.08);
+}
+/* 🔴🔴🔴 RAMADAN IMSAKIYA END 🔴🔴🔴 */
+
+
 </style>
 </head>
 <body>
@@ -7121,6 +7179,13 @@ body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(4) .ornament::after{
     <span>جديد</span>
     <div class="new-items-count"></div>
 </div>
+
+
+<!-- 🟢🟢🟢 RAMADAN IMSAKIYA START 🟢🟢🟢 -->
+<div id="ramadanFloatingBtn" class="floating-ramadan-btn" title="امساكية شهر رمضان">
+  <span>امساكية<br>رمضان</span>
+</div>
+<!-- 🔴🔴🔴 RAMADAN IMSAKIYA END 🔴🔴🔴 -->
 
 <!-- النافذة المنبثقة للعناصر الجديدة -->
 <div id="newItemsModal">
@@ -7745,6 +7810,62 @@ let touchStartTime; // لتتبع وقت بدء اللمس
 floatingBtn.style.left = "20px";
 floatingBtn.style.bottom = "50px";
 
+// 🟢🟢🟢 RAMADAN IMSAKIYA START 🟢🟢🟢
+const ramadanBtn = document.getElementById("ramadanFloatingBtn");
+
+if (ramadanBtn && floatingBtn) {
+  ramadanBtn.addEventListener("click", () => {
+    window.location.href = "https://ahmed202444.github.io/ramadan-app/";
+  });
+
+  function syncRamadanToNewBtn() {
+    // نفس المكان
+    ramadanBtn.style.left = floatingBtn.style.left || "20px";
+    ramadanBtn.style.bottom = floatingBtn.style.bottom || "50px";
+
+    // ✅ نفس الأبعاد بالضبط (width/height) من زر جديد
+    const cs = window.getComputedStyle(floatingBtn);
+    ramadanBtn.style.width = cs.width;
+    ramadanBtn.style.height = cs.height;
+
+    // نضبط حجم الخط حسب حجم الدائرة
+    const size = parseFloat(cs.width) || 60;
+    ramadanBtn.style.fontSize = Math.max(9, Math.round(size * 0.18)) + "px";
+  }
+
+  let showRamadan = false;
+
+  setInterval(() => {
+    syncRamadanToNewBtn();
+    showRamadan = !showRamadan;
+
+    if (showRamadan) {
+      // ✨ اختفاء ناعم لزر "جديد"
+      floatingBtn.classList.add("smooth-hide");
+
+      // بعد ما تخلص حركة الاختفاء، نخفيه فعلياً ونطلع الامساكية
+      setTimeout(() => {
+        floatingBtn.style.display = "none";
+
+        ramadanBtn.style.display = "flex";
+        requestAnimationFrame(() => ramadanBtn.classList.add("show"));
+      }, 360);
+
+    } else {
+      // ✨ اختفاء ناعم للامساكية
+      ramadanBtn.classList.remove("show");
+
+      setTimeout(() => {
+        ramadanBtn.style.display = "none";
+
+        // رجّع زر "جديد" وطلّعه بنعومة
+        floatingBtn.style.display = "flex";
+        requestAnimationFrame(() => floatingBtn.classList.remove("smooth-hide"));
+      }, 380);
+    }
+  }, 5000);
+}
+// 🔴🔴🔴 RAMADAN IMSAKIYA END 🔴🔴🔴
 
 // تحديث القيم الأولية بناءً على الموقع الفعلي
 const updateInitialPosition = () => {
