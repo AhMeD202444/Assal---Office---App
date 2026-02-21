@@ -7120,15 +7120,13 @@ body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(4) .ornament::after{
   height: 60px;
   border-radius: 50%;
 
-  /* ✅ تعديل: خلفية رمضانية أشيك + لمعة خفيفة */
+  /* ✅ خلفية رمضانية + لمعة خفيفة */
   background:
     radial-gradient(circle at 30% 25%, rgba(245,158,11,.30), rgba(245,158,11,0) 45%),
     linear-gradient(135deg, #0b1220, #111827);
 
-  /* ✅ تعديل: إطار ذهبي أنعم */
   border: 1px solid rgba(245, 158, 11, .60);
 
-  /* ✅ تعديل: ظل أعمق + Glow ذهبي خفيف */
   box-shadow:
     0 10px 25px rgba(0,0,0,.35),
     0 0 18px rgba(245,158,11,.18);
@@ -7139,19 +7137,28 @@ body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(4) .ornament::after{
 
   z-index: 1002;
   cursor: pointer;
-  user-select: none;
 
   text-align: center;
   font-family: 'Cairo', sans-serif;
   font-weight: 900;
   font-size: 11px;
   line-height: 1.05;
-  color: #fbbf24; /* نص ذهبي */
+  color: #fbbf24;
 
   /* حركة ظهور/اختفاء ناعمة */
   opacity: 0;
   transform: translateY(8px) scale(.96);
   transition: opacity .35s ease, transform .35s ease, filter .35s ease;
+
+  /* ✅ NEW: منع التحديد/الهايلايت + لمس مرتب مثل باقي الأزرار */
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+
+  -webkit-tap-highlight-color: transparent;  /* يشيل مربع اللمس الأزرق */
+  -webkit-touch-callout: none;               /* يمنع منيو الضغط المطول على iOS */
+  touch-action: manipulation;                /* يقلل تأخير/زووم الدبل تاب */
+  outline: none;                             /* يشيل outline الافتراضي */
 }
 
 .floating-ramadan-btn.show{
@@ -7160,12 +7167,17 @@ body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(4) .ornament::after{
   transform: translateY(0) scale(1);
 }
 
-/* ✅ تعديل: Hover لطيف (إذا على موبايل مو ضروري بس حلو على الديسكتوب) */
+/* Hover لطيف */
 .floating-ramadan-btn:hover{
   filter: brightness(1.08);
 }
-/* 🔴🔴🔴 RAMADAN IMSAKIYA END 🔴🔴🔴 */
 
+/* ✅ NEW: إذا صار focus من كيبورد/موبايل لا يطلع إطار مزعج */
+.floating-ramadan-btn:focus,
+.floating-ramadan-btn:active{
+  outline: none;
+}
+/* 🔴🔴🔴 RAMADAN IMSAKIYA END 🔴🔴🔴 */
 
 </style>
 </head>
