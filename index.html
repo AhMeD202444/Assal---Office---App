@@ -7109,6 +7109,7 @@ body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(4) .ornament::after{
 }
 /* ===================== RAMADAN CRESCENT ORNAMENT END ===================== */
 
+
 /* 🟢🟢🟢 RAMADAN IMSAKIYA START 🟢🟢🟢 */
 .floating-ramadan-btn{
   position: fixed;
@@ -7150,15 +7151,18 @@ body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(4) .ornament::after{
   transform: translateY(8px) scale(.96);
   transition: opacity .35s ease, transform .35s ease, filter .35s ease;
 
-  /* ✅ NEW: منع التحديد/الهايلايت + لمس مرتب مثل باقي الأزرار */
+  /* ✅ منع التحديد/الهايلايت + لمس مرتب */
   user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
 
-  -webkit-tap-highlight-color: transparent;  /* يشيل مربع اللمس الأزرق */
-  -webkit-touch-callout: none;               /* يمنع منيو الضغط المطول على iOS */
-  touch-action: manipulation;                /* يقلل تأخير/زووم الدبل تاب */
-  outline: none;                             /* يشيل outline الافتراضي */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  outline: none;
+
+  /* ✅ NEW: يخلي ضغط الزر يبين فوراً */
+  will-change: transform;
 }
 
 .floating-ramadan-btn.show{
@@ -7172,9 +7176,14 @@ body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(4) .ornament::after{
   filter: brightness(1.08);
 }
 
-/* ✅ NEW: إذا صار focus من كيبورد/موبايل لا يطلع إطار مزعج */
-.floating-ramadan-btn:focus,
+/* ✅ NEW: زوم بسيط وقت الضغط (حتى ما يصير "ميت") */
 .floating-ramadan-btn:active{
+  transform: translateY(0) scale(.92) !important; /* تقدر تخليه 0.95 إذا تريد أهدى */
+  filter: brightness(1.12);
+}
+
+/* لا يطلع outline */
+.floating-ramadan-btn:focus{
   outline: none;
 }
 /* 🔴🔴🔴 RAMADAN IMSAKIYA END 🔴🔴🔴 */
