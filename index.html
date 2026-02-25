@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
     <title>Phone Parts Pro</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
@@ -7246,6 +7246,63 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 
 /* 🔴🔴🔴 RAMADAN IMSAKIYA END 🔴🔴🔴 */
 
+
+
+/* ===== WebView / Mobile Fixes (Paste at end of your CSS) ===== */
+
+/* غيّر القيم حسب ارتفاع الهيدر/الفوتر الحقيقي عندك */
+:root{
+  --headerH: 40px;
+  --footerH: 70px;
+  --app-height: 100%;
+}
+
+/* ارتفاعات صحيحة */
+html, body{
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* حل مشكلة 100vh بالموبايل */
+body{
+  min-height: var(--app-height);
+  /* خلي محتوى الصفحة ما يندس تحت الهيدر/الفوتر */
+  padding-top: calc(var(--headerH) + env(safe-area-inset-top));
+  padding-bottom: calc(var(--footerH) + env(safe-area-inset-bottom));
+  /* مهم: لا تخلّي body يسوي توسيط للمحتوى */
+  display: block !important;
+}
+
+/* الهيدر: ثابت بس يحسب safe-area */
+.header{
+  position: fixed;
+  top: env(safe-area-inset-top);
+  left: 0;
+  right: 0;
+  height: var(--headerH);
+  z-index: 9999;
+}
+
+/* الفوتر: ثابت بس يحسب safe-area */
+.footer{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: env(safe-area-inset-bottom);
+  height: var(--footerH);
+  z-index: 9999;
+}
+
+/* لو عندك شريط بحث/زر عائم يغطي، زيد المساحة هنا */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body{
+    padding-bottom: calc(var(--footerH) + env(safe-area-inset-bottom));
+    padding-top: calc(var(--headerH) + env(safe-area-inset-top));
+  }
+}
+/* ===== End Fixes ===== */
+
 </style>
 </head>
 <body>
@@ -12588,7 +12645,11 @@ async function renderSponsorAd(){
     }
   });
 
-
+function setAppHeight(){
+    document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+  }
+  window.addEventListener('resize', setAppHeight);
+  setAppHeight();
 
 
 </script>
