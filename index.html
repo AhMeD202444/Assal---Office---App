@@ -223,22 +223,22 @@
 /* تأثيرات الدخول والخروج */
 @keyframes slideDownModal {
     0% {
-        transform: translate(-50%, -100%);
+        transform: translate(-50%, -56%) scale(0.96);
         opacity: 0;
     }
     100% {
-        transform: translate(-50%, 0);
+        transform: translate(-50%, -50%) scale(1);
         opacity: 1;
     }
 }
 
 @keyframes slideUpModal {
     0% {
-        transform: translate(-50%, 0);
+        transform: translate(-50%, -50%) scale(1);
         opacity: 1;
     }
     100% {
-        transform: translate(-50%, -100%);
+        transform: translate(-50%, -56%) scale(0.96);
         opacity: 0;
     }
 }
@@ -1379,9 +1379,8 @@ h1 {
     padding: 0;
     border-radius: 10px;
     border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    place-items: center;
     overflow: hidden;
     isolation: isolate;
     background: linear-gradient(135deg, #5A6388, #4A5275);
@@ -1423,9 +1422,10 @@ h1 {
 }
 
 .header-brand-letter {
-    position: relative;
+    position: absolute;
+    inset: 0;
     z-index: 2;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     font-size: 17px;
@@ -1434,7 +1434,9 @@ h1 {
     color: #ffffff;
     letter-spacing: 0;
     text-shadow: 0 1px 3px rgba(0,0,0,0.30);
-    transform: translateY(0);
+    transform: translateY(1px);
+    padding: 0;
+    margin: 0;
 }
 
 .header-brand-wave,
@@ -7708,6 +7710,34 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 
 
 
+
+
+/* ===== توسيط عمودي أنيق للنوافذ ===== */
+#contactModal,
+#offersModal,
+#newItemsModal{
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translate(-50%, -50%) !important;
+  max-height: min(86dvh, 820px);
+}
+
+#contactModal,
+#offersModal{
+  overflow: hidden;
+}
+
+#newItemsModal .modal-content,
+#offersModal .offers-content,
+#contactModal{
+  overscroll-behavior: contain;
+}
+
+/* منع اللمس خارج أي نافذة تعتمد على الـ overlay */
+#overlay{
+  touch-action: none;
+}
+
 </style>
 </head>
 <body>
@@ -8710,15 +8740,17 @@ document.addEventListener("DOMContentLoaded", () => {
     updateAdminWholesaleBtn();
     updateStatsBtn();
     initFirebaseStats();
+    hardBlockOutsideModalTouch();
 });
 
 document.addEventListener("click", function (e) {
     const modal = document.getElementById("statsModal");
     if (!modal) return;
     if (e.target === modal) {
-        closeStatsModal();
+        e.preventDefault();
+        e.stopPropagation();
     }
-});
+}, true);
 // ================================================================
 
       
@@ -12865,6 +12897,24 @@ function blockOverlayClicks(e){
   e.preventDefault();
   e.stopImmediatePropagation();
   return false;
+}
+
+function hardBlockOutsideModalTouch(){
+  const overlay = document.getElementById("overlay");
+  if (!overlay || overlay.dataset.blocked === "1") return;
+
+  const stop = (e) => {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    e.stopPropagation();
+    return false;
+  };
+
+  ["click","pointerdown","pointerup","touchstart","touchend","mousedown","mouseup"].forEach(evt => {
+    overlay.addEventListener(evt, stop, true);
+  });
+
+  overlay.dataset.blocked = "1";
 }
 
 function openContactModal(){
