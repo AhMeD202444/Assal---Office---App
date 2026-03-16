@@ -223,22 +223,22 @@
 /* تأثيرات الدخول والخروج */
 @keyframes slideDownModal {
     0% {
-        transform: translate(-50%, -56%) scale(0.96);
+        transform: translate(-50%, -100%);
         opacity: 0;
     }
     100% {
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate(-50%, 0);
         opacity: 1;
     }
 }
 
 @keyframes slideUpModal {
     0% {
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate(-50%, 0);
         opacity: 1;
     }
     100% {
-        transform: translate(-50%, -56%) scale(0.96);
+        transform: translate(-50%, -100%);
         opacity: 0;
     }
 }
@@ -1379,8 +1379,9 @@ h1 {
     padding: 0;
     border-radius: 10px;
     border: none;
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
     isolation: isolate;
     background: linear-gradient(135deg, #5A6388, #4A5275);
@@ -1422,10 +1423,9 @@ h1 {
 }
 
 .header-brand-letter {
-    position: absolute;
-    inset: 0;
+    position: relative;
     z-index: 2;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 17px;
@@ -1434,9 +1434,7 @@ h1 {
     color: #ffffff;
     letter-spacing: 0;
     text-shadow: 0 1px 3px rgba(0,0,0,0.30);
-    transform: translateY(1px);
-    padding: 0;
-    margin: 0;
+    transform: translateY(0);
 }
 
 .header-brand-wave,
@@ -7712,30 +7710,60 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 
 
 
-/* ===== توسيط عمودي أنيق للنوافذ ===== */
-#contactModal,
-#offersModal,
-#newItemsModal{
-  top: 50% !important;
-  bottom: auto !important;
-  transform: translate(-50%, -50%) !important;
-  max-height: min(86dvh, 820px);
+/* ===== STATS BACKDROP EXACT MATCH FOR ALL MODALS ===== */
+#overlay,
+.cart-modal,
+#adModal{
+    background: rgba(2,8,23,.62) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
 }
 
-#contactModal,
-#offersModal{
-  overflow: hidden;
-}
-
-#newItemsModal .modal-content,
-#offersModal .offers-content,
-#contactModal{
-  overscroll-behavior: contain;
-}
-
-/* منع اللمس خارج أي نافذة تعتمد على الـ overlay */
 #overlay{
-  touch-action: none;
+    z-index: 9998 !important;
+    display: none;
+}
+
+.cart-modal,
+#adModal{
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+/* keep cart shell centered within same dark backdrop */
+.cart-shell{
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: min(980px, calc(100% - 20px));
+    max-height: min(86dvh, 760px);
+}
+
+/* the three modals that use #overlay should keep their cards above it */
+#newItemsModal,
+#offersModal,
+#contactModal{
+    z-index: 10000 !important;
+}
+
+/* mobile: same exact darkness as stats modal too */
+@media (max-width: 768px){
+  #overlay,
+  .cart-modal,
+  #adModal{
+    background: rgba(2,8,23,.62) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+  }
+
+  .cart-shell{
+    width: min(100%, 440px);
+    max-height: min(86dvh, 760px);
+    border-radius: 26px;
+  }
 }
 
 </style>
@@ -8282,6 +8310,7 @@ body.ramadan-mode .ramadan-decor .ornament::before{
         </div>
         <div>
           <h3>إحصائيات التطبيق</h3>
+          <p>قراءة مباشرة من Firebase مع تحديث فوري للأرقام</p>
         </div>
       </div>
 
@@ -8740,17 +8769,15 @@ document.addEventListener("DOMContentLoaded", () => {
     updateAdminWholesaleBtn();
     updateStatsBtn();
     initFirebaseStats();
-    hardBlockOutsideModalTouch();
 });
 
 document.addEventListener("click", function (e) {
     const modal = document.getElementById("statsModal");
     if (!modal) return;
     if (e.target === modal) {
-        e.preventDefault();
-        e.stopPropagation();
+        closeStatsModal();
     }
-}, true);
+});
 // ================================================================
 
       
@@ -12897,24 +12924,6 @@ function blockOverlayClicks(e){
   e.preventDefault();
   e.stopImmediatePropagation();
   return false;
-}
-
-function hardBlockOutsideModalTouch(){
-  const overlay = document.getElementById("overlay");
-  if (!overlay || overlay.dataset.blocked === "1") return;
-
-  const stop = (e) => {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    e.stopPropagation();
-    return false;
-  };
-
-  ["click","pointerdown","pointerup","touchstart","touchend","mousedown","mouseup"].forEach(evt => {
-    overlay.addEventListener(evt, stop, true);
-  });
-
-  overlay.dataset.blocked = "1";
 }
 
 function openContactModal(){
