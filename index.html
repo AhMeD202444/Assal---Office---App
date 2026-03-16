@@ -1362,12 +1362,13 @@ h1 {
     z-index: 2000;
 }
 
-/* لوكو الهيدر - في اليمين */
+/* لوكو الهيدر - نفس ستايل أزرار الهيدر */
 .header-title {
     order: 1;
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    flex: 0 0 auto;
 }
 
 .header-brand-logo {
@@ -1375,22 +1376,17 @@ h1 {
     width: 34px;
     height: 34px;
     min-width: 34px;
+    padding: 0;
     border-radius: 10px;
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
     overflow: hidden;
     isolation: isolate;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
-      linear-gradient(135deg, #5A6388, #4A5275);
-    border: 1px solid rgba(255,255,255,0.10);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.08),
-      0 2px 4px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: linear-gradient(135deg, #5A6388, #4A5275);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    flex: 0 0 34px;
 }
 
 .header-brand-logo::before {
@@ -1398,7 +1394,7 @@ h1 {
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(140deg, rgba(255,255,255,0.16), transparent 38%, transparent 62%, rgba(255,255,255,0.05));
+      linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03) 52%, rgba(255,255,255,0));
     pointer-events: none;
     z-index: 0;
 }
@@ -1406,38 +1402,39 @@ h1 {
 .header-brand-logo::after {
     content: "";
     position: absolute;
-    top: -38%;
-    left: -78%;
-    width: 52%;
-    height: 180%;
+    top: -42%;
+    left: -82%;
+    width: 54%;
+    height: 190%;
     transform: rotate(18deg);
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(255,255,255,0.02) 18%,
-      rgba(255,255,255,0.22) 50%,
-      rgba(255,255,255,0.03) 82%,
+      rgba(255,255,255,0.00) 18%,
+      rgba(255,255,255,0.23) 50%,
+      rgba(255,255,255,0.02) 82%,
       transparent 100%
     );
-    filter: blur(2px);
+    filter: blur(1.6px);
     opacity: 0;
     z-index: 1;
     pointer-events: none;
-    animation: headerLogoGlassShine 5.2s ease-in-out infinite;
+    animation: headerLogoGlassShine 5.8s ease-in-out infinite;
 }
 
 .header-brand-letter {
     position: relative;
     z-index: 2;
-    font-size: 20px;
-    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    font-weight: 800;
     line-height: 1;
-    letter-spacing: 0.3px;
-    color: #f8fbff;
-    text-shadow:
-      0 1px 4px rgba(0,0,0,0.25),
-      0 0 8px rgba(255,255,255,0.08);
-    transform: translateY(-1px);
+    color: #ffffff;
+    letter-spacing: 0;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.30);
+    transform: translateY(0);
 }
 
 .header-brand-wave,
@@ -7646,12 +7643,14 @@ body.ramadan-mode .ramadan-decor .ornament::before{
         margin-inline-start: 6px;
     }
     .header-brand-logo {
-        width: 48px;
-        height: 48px;
-        border-radius: 16px;
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        flex-basis: 38px;
+        border-radius: 10px;
     }
     .header-brand-letter {
-        font-size: 29px;
+        font-size: 19px;
     }
     .header-buttons {
         gap: 4px;
@@ -7826,7 +7825,7 @@ body.ramadan-mode .ramadan-decor .ornament::before{
  
  <header class="header">
     <div class="header-title" aria-label="A Logo">
-      <div class="header-brand-logo" title="A Logo">
+      <div class="header-brand-logo" role="img" aria-label="A Logo">
         <span class="header-brand-letter">A</span>
       </div>
     </div>
@@ -8253,7 +8252,6 @@ body.ramadan-mode .ramadan-decor .ornament::before{
         </div>
         <div>
           <h3>إحصائيات التطبيق</h3>
-          <p>قراءة مباشرة من Firebase مع تحديث فوري للأرقام</p>
         </div>
       </div>
 
