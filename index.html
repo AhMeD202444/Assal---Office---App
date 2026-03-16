@@ -7243,6 +7243,409 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 
 /* 🔴🔴🔴 RAMADAN IMSAKIYA END 🔴🔴🔴 */
 
+
+
+
+/* ===== نافذة الإحصائيات ===== */
+.stats-modal{
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.62);
+    backdrop-filter: blur(10px);
+    z-index: 20000;
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) 10px;
+}
+
+.stats-modal.show{
+    display: flex;
+    animation: statsFadeIn .22s ease;
+}
+
+.stats-shell{
+    width: min(100%, 430px);
+    max-width: 430px;
+    max-height: calc(100dvh - 20px);
+    border-radius: 22px;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    background:
+      radial-gradient(circle at top right, rgba(67,206,162,.18), transparent 35%),
+      radial-gradient(circle at bottom left, rgba(24,90,157,.20), transparent 35%),
+      linear-gradient(135deg, rgba(17,24,39,.98), rgba(10,14,23,.98));
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    position: relative;
+}
+
+.stats-top{
+    padding: 18px 18px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: linear-gradient(180deg, rgba(10,14,23,.96), rgba(10,14,23,.82));
+    backdrop-filter: blur(10px);
+}
+
+.stats-title{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stats-icon{
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+    box-shadow: 0 8px 20px rgba(24,90,157,.35);
+    font-size: 20px;
+}
+
+.stats-title h3{
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.stats-title p{
+    margin: 3px 0 0;
+    font-size: 12px;
+    color: rgba(255,255,255,.7);
+}
+
+.stats-close{
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 18px rgba(255,75,43,.28);
+}
+
+.stats-body{
+    padding: 12px 18px 20px;
+}
+
+.stats-grid{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.stats-card{
+    position: relative;
+    border-radius: 18px;
+    padding: 16px 16px 14px;
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.stats-card-head{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.stats-card-label{
+    font-size: 13px;
+    color: rgba(255,255,255,.78);
+}
+
+.stats-mini-icon{
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(67,206,162,.25), rgba(24,90,157,.25));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8ce8ca;
+    font-size: 15px;
+}
+
+.stats-value{
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 6px;
+    letter-spacing: .5px;
+}
+
+.stats-sub{
+    font-size: 12px;
+    color: rgba(255,255,255,.58);
+}
+
+.stats-loading,
+.stats-error{
+    text-align: center;
+    padding: 18px 10px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+.stats-loading i{
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #8ce8ca;
+}
+
+.stats-error{
+    color: #ffd5d5;
+}
+
+.stats-error i{
+    color: #ff8f8f;
+    margin-left: 8px;
+}
+
+.stats-footer{
+    margin-top: 14px;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,.5);
+}
+
+.stats-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.stats-card--wide{
+    grid-column: 1 / -1;
+}
+
+.stats-badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    color: rgba(255,255,255,.82);
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.07);
+}
+
+.stats-device-box{
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(67,206,162,.10), rgba(24,90,157,.12));
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+.stats-device-label{
+    font-size: 12px;
+    color: rgba(255,255,255,.68);
+    margin-bottom: 6px;
+}
+
+.stats-device-code{
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #fff;
+    direction: ltr;
+}
+
+.stats-tiny{
+    margin-top: 6px;
+    font-size: 11px;
+    color: rgba(255,255,255,.52);
+}
+
+@media (max-width: 520px){
+    .stats-modal{
+        align-items: flex-end;
+        padding: 8px;
+    }
+
+    .stats-shell{
+        width: 100%;
+        max-width: 100%;
+        max-height: min(88dvh, 760px);
+        border-radius: 22px 22px 18px 18px;
+    }
+
+    .stats-top{
+        padding: 14px 14px 8px;
+        align-items: flex-start;
+    }
+
+    .stats-title{
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .stats-icon{
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 18px;
+        flex: 0 0 42px;
+    }
+
+    .stats-title h3{
+        font-size: 17px;
+        line-height: 1.3;
+    }
+
+    .stats-title p{
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .stats-close{
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+    }
+
+    .stats-body{
+        padding: 10px 14px 16px;
+    }
+
+    .stats-grid{
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .stats-card{
+        padding: 14px 14px 12px;
+        border-radius: 16px;
+    }
+
+    .stats-value{
+        font-size: 24px;
+    }
+
+    .stats-device-code{
+        font-size: 15px;
+        word-break: break-all;
+    }
+
+    .stats-badge{
+        width: 100%;
+        justify-content: center;
+    }
+
+    .stats-error-actions{
+        flex-direction: column;
+    }
+
+    .stats-retry-btn,
+    .stats-close-secondary{
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@keyframes statsFadeIn{
+    from{ opacity:0; transform: scale(.98); }
+    to{ opacity:1; transform: scale(1); }
+}
+
+.stats-error-box{
+    text-align: center;
+    padding: 22px 18px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.stats-error-icon{
+    width: 66px;
+    height: 66px;
+    margin: 0 auto 14px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(255,65,108,.20), rgba(255,75,43,.22));
+    border: 1px solid rgba(255,255,255,.08);
+    color: #ff9d9d;
+    font-size: 28px;
+    box-shadow: 0 10px 25px rgba(255,75,43,.18);
+}
+
+.stats-error-title{
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.stats-error-text{
+    font-size: 13px;
+    line-height: 1.8;
+    color: rgba(255,255,255,.72);
+    margin-bottom: 18px;
+}
+
+.stats-error-actions{
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.stats-retry-btn,
+.stats-close-secondary{
+    border: none;
+    border-radius: 14px;
+    padding: 11px 16px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: .2s ease;
+}
+
+.stats-retry-btn{
+    color: #fff;
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+    box-shadow: 0 10px 22px rgba(24,90,157,.25);
+}
+
+.stats-retry-btn:hover,
+.stats-close-secondary:hover{
+    transform: translateY(-1px);
+}
+
+.stats-close-secondary{
+    color: #fff;
+    background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+
+
+
 </style>
 </head>
 <body>
@@ -7386,6 +7789,15 @@ body.ramadan-mode .ramadan-decor .ornament::before{
         title="اتصل بينا"
         aria-label="اتصل بينا">
   <i class="fas fa-phone"></i>
+</button>
+
+<button class="header-btn header-icon-btn"
+        id="statsBtn"
+        onclick="openStatsModal()"
+        title="إحصائيات"
+        aria-label="إحصائيات"
+        style="display:none;">
+  <i class="fas fa-chart-column"></i>
 </button>
 
   
@@ -7765,15 +8177,102 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 
 
 
+<div id="statsModal" class="stats-modal" aria-hidden="true">
+  <div class="stats-shell">
+    <div class="stats-top">
+      <div class="stats-title">
+        <div class="stats-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <div>
+          <h3>إحصائيات التطبيق</h3>
+          <p>لوحة مختصرة خاصة بإدارة مكتب عسل</p>
+        </div>
+      </div>
 
+      <button class="stats-close" type="button" onclick="closeStatsModal()" aria-label="إغلاق">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="stats-body" id="statsBody">
+      <div class="stats-loading">
+        <i class="fas fa-spinner fa-spin"></i>
+        <div>جاري تحميل الإحصائيات...</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <footer>
   <p>جميع الحقوق محفوظة © مكتب عسل 2026</p>
 </footer>
 
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getDatabase,
+    ref,
+    get,
+    set,
+    runTransaction,
+    onDisconnect
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDY-ZPogbPPNTWavB-zn5Z24yXjz2AL4T8",
+    authDomain: "assal-app-stats.firebaseapp.com",
+    databaseURL: "https://assal-app-stats-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "assal-app-stats",
+    storageBucket: "assal-app-stats.firebasestorage.app",
+    messagingSenderId: "93855149206",
+    appId: "1:93855149206:web:a8449da9ede8965f5b26b7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  window.firebaseDB = { db, ref, get, set, runTransaction, onDisconnect };
+</script>
+
 
 
     <script>
+      
+      
+      window.testFirebaseConnection = async function () {
+    try {
+        if (!window.firebaseDB || !window.firebaseDB.db) {
+            alert("firebaseDB مو جاهز");
+            return;
+        }
+
+        const { db, ref, set, get } = window.firebaseDB;
+
+        await set(ref(db, "testConnection"), {
+            status: "connected",
+            time: Date.now()
+        });
+
+        const snap = await get(ref(db, "testConnection"));
+
+        if (snap.exists()) {
+            alert("تم الربط بنجاح");
+            console.log("Firebase test data:", snap.val());
+        } else {
+            alert("ما انكتبت البيانات");
+        }
+    } catch (err) {
+        console.error("Firebase test error:", err);
+        alert("فشل الربط");
+    }
+};
+      
+      
+      
+      
+      
+      
 // ================== صلاحية كادر مكتب عسل (أدمن) ==================
 // ⚠️ غيّر كلمة الأدمن هنا (لا تخليها نفس 112233)
 const ADMIN_PASSWORD = "778899"; 
@@ -7792,8 +8291,10 @@ function isAdminUser() {
 function setAdminUser(isAdmin) {
     if (isAdmin) localStorage.setItem(ADMIN_FLAG_KEY, "true");
     else localStorage.removeItem(ADMIN_FLAG_KEY);
+
     updateAdminCompatBtn();
     updateAdminWholesaleBtn();
+    updateStatsBtn();
 }
 
 function updateAdminCompatBtn() {
@@ -7833,7 +8334,328 @@ function openSimilaritesPage() {
     window.location.href = "similarites.html";
 }
 
-document.addEventListener("DOMContentLoaded", () => { updateAdminCompatBtn(); updateAdminWholesaleBtn(); });
+function updateStatsBtn() {
+    const btn = document.getElementById("statsBtn");
+    if (!btn) return;
+    btn.style.display = isAdminUser() ? "inline-flex" : "none";
+}
+
+window.openStatsModal = async function () {
+    try {
+        if (!isAdminUser()) {
+            showStaffOnlyPopup();
+            return;
+        }
+
+        const modal = document.getElementById("statsModal");
+        const body = document.getElementById("statsBody");
+        if (!modal || !body) return;
+
+        modal.classList.add("show");
+        modal.style.display = "flex";
+        modal.setAttribute("aria-hidden", "false");
+
+        body.innerHTML = `
+          <div class="stats-loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <div>جاري تحميل الإحصائيات...</div>
+          </div>
+        `;
+
+        if (!window.firebaseDB || !window.firebaseDB.db) {
+            throw new Error("Firebase not ready");
+        }
+
+        const { db, ref, get } = window.firebaseDB;
+        const today = getTodayKey();
+        const myDeviceCode = getDeviceCode();
+
+        const [totalSnap, dailyStatsSnap, dailyVisitorsSnap, presenceSnap, visitsTodaySnap, devicesSnap] = await Promise.all([
+            get(ref(db, "stats/totalVisits")),
+            get(ref(db, `stats/daily/${today}`)),
+            get(ref(db, `dailyVisitors/${today}`)),
+            get(ref(db, "presence")),
+            get(ref(db, `visits/${today}`)),
+            get(ref(db, "devices"))
+        ]);
+
+        const dailyStats = dailyStatsSnap.exists() ? (dailyStatsSnap.val() || {}) : {};
+        const dailyVisitors = dailyVisitorsSnap.exists() ? (dailyVisitorsSnap.val() || {}) : {};
+        const presence = presenceSnap.exists() ? (presenceSnap.val() || {}) : {};
+        const visitsToday = visitsTodaySnap.exists() ? (visitsTodaySnap.val() || {}) : {};
+        const devices = devicesSnap.exists() ? (devicesSnap.val() || {}) : {};
+
+        const totalVisits = totalSnap.exists()
+            ? Number(totalSnap.val()) || 0
+            : 0;
+        const totalVisitsSafe = totalVisits || 0;
+        const todayVisits = Number(dailyStats.visits) || Object.keys(visitsToday).length || 0;
+        const uniqueDevicesToday = Number(dailyStats.uniqueDevices) || Object.keys(dailyVisitors).length || 0;
+        const totalDevices = Object.keys(devices).length || 0;
+
+        const now = Date.now();
+        const onlineNow = Object.values(presence).filter(item =>
+            item && item.lastSeen && (now - item.lastSeen) < 70000
+        ).length;
+
+        body.innerHTML = `
+          <div class="stats-grid">
+            <div class="stats-card">
+              <div class="stats-card-head">
+                <div class="stats-card-label">زيارات اليوم</div>
+                <div class="stats-mini-icon"><i class="fas fa-calendar-day"></i></div>
+              </div>
+              <div class="stats-value">${todayVisits}</div>
+              <div class="stats-sub">كل مرة يتم فيها فتح التطبيق تُحسب زيارة مستقلة</div>
+              <div class="stats-badge"><i class="fas fa-bolt"></i>يتم احتسابها مع كل دخول</div>
+            </div>
+
+            <div class="stats-card">
+              <div class="stats-card-head">
+                <div class="stats-card-label">الأونلاين الآن</div>
+                <div class="stats-mini-icon"><i class="fas fa-signal"></i></div>
+              </div>
+              <div class="stats-value">${onlineNow}</div>
+              <div class="stats-sub">عدد الجلسات المتصلة خلال آخر دقيقة تقريبًا</div>
+              <div class="stats-badge"><i class="fas fa-circle"></i>مباشر</div>
+            </div>
+
+            <div class="stats-card">
+              <div class="stats-card-head">
+                <div class="stats-card-label">الأجهزة الفريدة اليوم</div>
+                <div class="stats-mini-icon"><i class="fas fa-mobile-screen"></i></div>
+              </div>
+              <div class="stats-value">${uniqueDevicesToday}</div>
+              <div class="stats-sub">عدد الأجهزة المختلفة التي دخلت اليوم</div>
+              <div class="stats-badge"><i class="fas fa-fingerprint"></i>تعريف دائم لكل جهاز</div>
+            </div>
+
+            <div class="stats-card">
+              <div class="stats-card-head">
+                <div class="stats-card-label">الزيارات الكلية</div>
+                <div class="stats-mini-icon"><i class="fas fa-chart-pie"></i></div>
+              </div>
+              <div class="stats-value">${totalVisitsSafe}</div>
+              <div class="stats-sub">إجمالي كل مرات فتح التطبيق منذ بداية التتبع</div>
+              <div class="stats-badge"><i class="fas fa-layer-group"></i>تراكمي</div>
+            </div>
+
+            <div class="stats-card">
+              <div class="stats-card-head">
+                <div class="stats-card-label">إجمالي الأجهزة المسجلة</div>
+                <div class="stats-mini-icon"><i class="fas fa-laptop-mobile"></i></div>
+              </div>
+              <div class="stats-value">${totalDevices}</div>
+              <div class="stats-sub">كل جهاز ياخذ معرّف ثابت مستقل داخل قاعدة البيانات</div>
+              <div class="stats-badge"><i class="fas fa-network-wired"></i>مشترك بين كل الأجهزة</div>
+            </div>
+
+            <div class="stats-card stats-card--wide">
+              <div class="stats-card-head">
+                <div class="stats-card-label">عنوان جهازك الحالي</div>
+                <div class="stats-mini-icon"><i class="fas fa-id-badge"></i></div>
+              </div>
+              <div class="stats-device-box">
+                <div class="stats-device-label">معرّف ثابت لهذا الجهاز داخل النظام</div>
+                <div class="stats-device-code">${myDeviceCode}</div>
+                <div class="stats-tiny">يبقى ثابتًا لهذا الجهاز، بينما كل دخول جديد يُحتسب زيارة جديدة أيضًا.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="stats-footer">
+            آخر تحديث: ${new Date().toLocaleString("ar-IQ")}
+          </div>
+        `;
+    } catch (err) {
+        console.error("openStatsModal:", err);
+
+        const modal = document.getElementById("statsModal");
+        const body = document.getElementById("statsBody");
+
+        if (modal && body) {
+            modal.classList.add("show");
+            modal.style.display = "flex";
+            modal.setAttribute("aria-hidden", "false");
+            body.innerHTML = `
+              <div class="stats-error-box">
+                <div class="stats-error-icon">
+                  <i class="fas fa-circle-exclamation"></i>
+                </div>
+
+                <div class="stats-error-title">تعذّر جلب الإحصائيات</div>
+                <div class="stats-error-text">
+                  صار خلل أثناء قراءة البيانات من السيرفر.
+                  تأكد من ربط Firebase أو جرّب مرة ثانية.
+                </div>
+
+                <div class="stats-error-actions">
+                  <button class="stats-retry-btn" onclick="openStatsModal()">
+                    <i class="fas fa-rotate-right"></i>
+                    إعادة المحاولة
+                  </button>
+
+                  <button class="stats-close-secondary" onclick="closeStatsModal()">
+                    <i class="fas fa-xmark"></i>
+                    إغلاق
+                  </button>
+                </div>
+              </div>
+            `;
+        } else {
+            alert("صار خطأ بجلب الإحصائيات");
+        }
+    }
+};
+
+window.closeStatsModal = function () {
+    const modal = document.getElementById("statsModal");
+    if (!modal) return;
+    modal.classList.remove("show");
+    modal.style.display = "none";
+    modal.setAttribute("aria-hidden", "true");
+};
+
+function getVisitorId() {
+    let id = localStorage.getItem("visitor_id");
+    if (!id) {
+        if (window.crypto && crypto.randomUUID) {
+            id = "v_" + crypto.randomUUID().replace(/-/g, "");
+        } else {
+            id = "v_" + Math.random().toString(36).slice(2) + Date.now();
+        }
+        localStorage.setItem("visitor_id", id);
+    }
+    return id;
+}
+
+const CURRENT_SESSION_ID = (() => {
+    if (window.crypto && crypto.randomUUID) {
+        return "s_" + crypto.randomUUID().replace(/-/g, "");
+    }
+    return "s_" + Math.random().toString(36).slice(2) + Date.now();
+})();
+
+function getSessionId() {
+    return CURRENT_SESSION_ID;
+}
+
+function getDeviceCode() {
+    const visitorId = getVisitorId().replace(/^v_/, "");
+    return "DEV-" + visitorId.slice(-10).toUpperCase();
+}
+
+function getTodayKey() {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+}
+
+async function initFirebaseStats() {
+    try {
+        if (!window.firebaseDB || !window.firebaseDB.db) {
+            console.warn("Firebase not ready");
+            return;
+        }
+
+        const { db, ref, get, set, runTransaction, onDisconnect } = window.firebaseDB;
+
+        const visitorId = getVisitorId();
+        const sessionId = getSessionId();
+        const deviceCode = getDeviceCode();
+        const today = getTodayKey();
+        const now = Date.now();
+
+        // نسجل الجهاز ضمن قائمة الأجهزة المعروفة
+        const deviceRef = ref(db, `devices/${visitorId}`);
+        const deviceSnap = await get(deviceRef);
+        const existingDevice = deviceSnap.exists() ? (deviceSnap.val() || {}) : {};
+        await set(deviceRef, {
+            deviceCode,
+            firstSeen: existingDevice.firstSeen || now,
+            lastSeen: now,
+            lastVisitAt: now
+        });
+
+        // كل فتح جديد للتطبيق = زيارة جديدة
+        const visitRef = ref(db, `visits/${today}/${sessionId}`);
+        await set(visitRef, {
+            visitorId,
+            deviceCode,
+            openedAt: now
+        });
+
+        await runTransaction(ref(db, `stats/daily/${today}/visits`), (current) => {
+            return (Number(current) || 0) + 1;
+        });
+
+        await runTransaction(ref(db, `stats/totalVisits`), (current) => {
+            return (Number(current) || 0) + 1;
+        });
+
+        // تسجيل الجهاز الفريد لليوم مرة واحدة فقط
+        const dailyVisitorRef = ref(db, `dailyVisitors/${today}/${visitorId}`);
+        const dailySnap = await get(dailyVisitorRef);
+
+        if (!dailySnap.exists()) {
+            await set(dailyVisitorRef, {
+                firstVisitAt: now,
+                deviceCode
+            });
+
+            await runTransaction(ref(db, `stats/daily/${today}/uniqueDevices`), (current) => {
+                return (Number(current) || 0) + 1;
+            });
+        }
+
+        // presence لكل جلسة، مو لكل جهاز فقط
+        const presenceRef = ref(db, `presence/${sessionId}`);
+        await onDisconnect(presenceRef).remove();
+
+        await set(presenceRef, {
+            visitorId,
+            deviceCode,
+            online: true,
+            enteredAt: now,
+            lastSeen: now
+        });
+
+        setInterval(async () => {
+            try {
+                await set(presenceRef, {
+                    visitorId,
+                    deviceCode,
+                    online: true,
+                    enteredAt: now,
+                    lastSeen: Date.now()
+                });
+            } catch (e) {
+                console.warn("presence heartbeat error", e);
+            }
+        }, 25000);
+
+    } catch (err) {
+        console.error("initFirebaseStats:", err);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    updateAdminCompatBtn();
+    updateAdminWholesaleBtn();
+    updateStatsBtn();
+    initFirebaseStats();
+});
+
+document.addEventListener("click", function (e) {
+    const modal = document.getElementById("statsModal");
+    if (!modal) return;
+    if (e.target === modal) {
+        closeStatsModal();
+    }
+});
+
 // ================================================================
 
       
