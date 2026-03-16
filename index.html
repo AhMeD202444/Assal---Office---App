@@ -1362,18 +1362,106 @@ h1 {
     z-index: 2000;
 }
 
-/* نص مكتب عسل - في اليمين */
+/* لوكو الهيدر - في اليمين */
 .header-title {
-    font-family: 'Cairo', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: #A3BFFA; /* اللون الأصلي محتفظ به */
-    text-shadow: 0 1px 2px rgba(163, 191, 250, 0.4);
-    letter-spacing: 0.5px;
-    order: 1; /* جعله في اليمين */
+    order: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
-/* حاوية الأزرار - في اليسار */
+.header-brand-logo {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
+      linear-gradient(135deg, #5A6388, #4A5275);
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 2px 4px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.header-brand-logo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(140deg, rgba(255,255,255,0.16), transparent 38%, transparent 62%, rgba(255,255,255,0.05));
+    pointer-events: none;
+    z-index: 0;
+}
+
+.header-brand-logo::after {
+    content: "";
+    position: absolute;
+    top: -38%;
+    left: -78%;
+    width: 52%;
+    height: 180%;
+    transform: rotate(18deg);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,255,255,0.02) 18%,
+      rgba(255,255,255,0.22) 50%,
+      rgba(255,255,255,0.03) 82%,
+      transparent 100%
+    );
+    filter: blur(2px);
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+    animation: headerLogoGlassShine 5.2s ease-in-out infinite;
+}
+
+.header-brand-letter {
+    position: relative;
+    z-index: 2;
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.3px;
+    color: #f8fbff;
+    text-shadow:
+      0 1px 4px rgba(0,0,0,0.25),
+      0 0 8px rgba(255,255,255,0.08);
+    transform: translateY(-1px);
+}
+
+.header-brand-wave,
+.header-brand-glow {
+    display: none;
+}
+
+@keyframes headerLogoGlassShine {
+    0%, 72%, 100% {
+        left: -78%;
+        opacity: 0;
+    }
+    79% {
+        opacity: 0.32;
+    }
+    89% {
+        left: 122%;
+        opacity: 0.88;
+    }
+    93% {
+        opacity: 0.18;
+    }
+}
+
 .header-buttons {
     display: flex;
     gap: 6px;
@@ -7253,10 +7341,10 @@ body.ramadan-mode .ramadan-decor .ornament::before{
     display: none;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,.62);
+    background: rgba(2,8,23,.62);
     backdrop-filter: blur(10px);
     z-index: 20000;
-    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) 10px;
+    padding: max(18px, env(safe-area-inset-top)) 14px max(18px, env(safe-area-inset-bottom));
 }
 
 .stats-modal.show{
@@ -7265,82 +7353,109 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 }
 
 .stats-shell{
-    width: min(100%, 430px);
-    max-width: 430px;
-    max-height: calc(100dvh - 20px);
-    border-radius: 22px;
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
+    width: min(100%, 440px);
+    max-height: min(86dvh, 760px);
+    overflow: hidden;
+    overflow-y: auto;
+    border-radius: 26px;
     background:
-      radial-gradient(circle at top right, rgba(67,206,162,.18), transparent 35%),
-      radial-gradient(circle at bottom left, rgba(24,90,157,.20), transparent 35%),
-      linear-gradient(135deg, rgba(17,24,39,.98), rgba(10,14,23,.98));
+      radial-gradient(circle at top right, rgba(67,206,162,.20), transparent 35%),
+      radial-gradient(circle at bottom left, rgba(24,90,157,.24), transparent 35%),
+      linear-gradient(145deg, rgba(10,18,35,.99), rgba(5,12,28,.98));
     border: 1px solid rgba(255,255,255,.08);
     box-shadow: 0 20px 60px rgba(0,0,0,.45);
     color: #fff;
     font-family: 'Cairo', sans-serif;
     position: relative;
+    overscroll-behavior: contain;
+}
+
+.stats-shell::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background: linear-gradient(180deg, rgba(255,255,255,.05), transparent 20%, transparent 80%, rgba(255,255,255,.04));
 }
 
 .stats-top{
-    padding: 18px 18px 10px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 16px 16px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background: linear-gradient(180deg, rgba(10,14,23,.96), rgba(10,14,23,.82));
+    background: linear-gradient(180deg, rgba(4,10,24,.95), rgba(4,10,24,.78));
     backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,.06);
 }
 
 .stats-title{
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
 .stats-icon{
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #43cea2, #185a9d);
+    background: linear-gradient(135deg, #54e2c6, #1f7fd6);
     box-shadow: 0 8px 20px rgba(24,90,157,.35);
-    font-size: 20px;
+    font-size: 21px;
 }
 
 .stats-title h3{
     margin: 0;
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.2;
 }
 
 .stats-title p{
-    margin: 3px 0 0;
-    font-size: 12px;
+    margin: 4px 0 0;
+    font-size: 11.5px;
     color: rgba(255,255,255,.7);
+    line-height: 1.6;
 }
 
+.stats-top-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.stats-refresh,
 .stats-close{
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     border: none;
     border-radius: 50%;
     cursor: pointer;
     color: #fff;
-    background: linear-gradient(135deg, #ff416c, #ff4b2b);
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 18px rgba(255,75,43,.28);
+    box-shadow: 0 8px 18px rgba(0,0,0,.22);
+}
+
+.stats-refresh{
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+}
+
+.stats-close{
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
 }
 
 .stats-body{
-    padding: 12px 18px 20px;
+    padding: 14px 14px 18px;
 }
 
 .stats-grid{
@@ -7351,9 +7466,9 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 
 .stats-card{
     position: relative;
-    border-radius: 18px;
-    padding: 16px 16px 14px;
-    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    border-radius: 20px;
+    padding: 15px;
+    background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
     border: 1px solid rgba(255,255,255,.08);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
 }
@@ -7363,17 +7478,19 @@ body.ramadan-mode .ramadan-decor .ornament::before{
     align-items: center;
     justify-content: space-between;
     margin-bottom: 12px;
+    gap: 8px;
 }
 
 .stats-card-label{
-    font-size: 13px;
-    color: rgba(255,255,255,.78);
+    font-size: 14px;
+    color: rgba(255,255,255,.9);
 }
 
 .stats-mini-icon{
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 13px;
     background: linear-gradient(135deg, rgba(67,206,162,.25), rgba(24,90,157,.25));
     display: flex;
     align-items: center;
@@ -7383,16 +7500,34 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 }
 
 .stats-value{
-    font-size: 28px;
-    font-weight: 800;
-    line-height: 1;
-    margin-bottom: 6px;
-    letter-spacing: .5px;
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 8px;
+    letter-spacing: .3px;
 }
 
 .stats-sub{
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: rgba(255,255,255,.64);
+}
+
+.stats-chip{
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    color: rgba(255,255,255,.8);
     font-size: 12px;
-    color: rgba(255,255,255,.58);
+    font-weight: 700;
 }
 
 .stats-loading,
@@ -7410,160 +7545,12 @@ body.ramadan-mode .ramadan-decor .ornament::before{
     color: #8ce8ca;
 }
 
-.stats-error{
-    color: #ffd5d5;
-}
-
-.stats-error i{
-    color: #ff8f8f;
-    margin-left: 8px;
-}
-
 .stats-footer{
     margin-top: 14px;
     text-align: center;
-    font-size: 11px;
-    color: rgba(255,255,255,.5);
-}
-
-.stats-grid{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.stats-card--wide{
-    grid-column: 1 / -1;
-}
-
-.stats-badge{
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 8px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    color: rgba(255,255,255,.82);
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.07);
-}
-
-.stats-device-box{
-    margin-top: 14px;
-    padding: 14px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, rgba(67,206,162,.10), rgba(24,90,157,.12));
-    border: 1px solid rgba(255,255,255,.08);
-}
-
-.stats-device-label{
-    font-size: 12px;
-    color: rgba(255,255,255,.68);
-    margin-bottom: 6px;
-}
-
-.stats-device-code{
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    color: #fff;
-    direction: ltr;
-}
-
-.stats-tiny{
-    margin-top: 6px;
-    font-size: 11px;
-    color: rgba(255,255,255,.52);
-}
-
-@media (max-width: 520px){
-    .stats-modal{
-        align-items: flex-end;
-        padding: 8px;
-    }
-
-    .stats-shell{
-        width: 100%;
-        max-width: 100%;
-        max-height: min(88dvh, 760px);
-        border-radius: 22px 22px 18px 18px;
-    }
-
-    .stats-top{
-        padding: 14px 14px 8px;
-        align-items: flex-start;
-    }
-
-    .stats-title{
-        gap: 10px;
-        min-width: 0;
-    }
-
-    .stats-icon{
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        font-size: 18px;
-        flex: 0 0 42px;
-    }
-
-    .stats-title h3{
-        font-size: 17px;
-        line-height: 1.3;
-    }
-
-    .stats-title p{
-        font-size: 11px;
-        line-height: 1.6;
-    }
-
-    .stats-close{
-        width: 36px;
-        height: 36px;
-        flex: 0 0 36px;
-    }
-
-    .stats-body{
-        padding: 10px 14px 16px;
-    }
-
-    .stats-grid{
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .stats-card{
-        padding: 14px 14px 12px;
-        border-radius: 16px;
-    }
-
-    .stats-value{
-        font-size: 24px;
-    }
-
-    .stats-device-code{
-        font-size: 15px;
-        word-break: break-all;
-    }
-
-    .stats-badge{
-        width: 100%;
-        justify-content: center;
-    }
-
-    .stats-error-actions{
-        flex-direction: column;
-    }
-
-    .stats-retry-btn,
-    .stats-close-secondary{
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-@keyframes statsFadeIn{
-    from{ opacity:0; transform: scale(.98); }
-    to{ opacity:1; transform: scale(1); }
+    font-size: 11.5px;
+    color: rgba(255,255,255,.55);
+    line-height: 1.8;
 }
 
 .stats-error-box{
@@ -7633,7 +7620,9 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 }
 
 .stats-retry-btn:hover,
-.stats-close-secondary:hover{
+.stats-close-secondary:hover,
+.stats-close:hover,
+.stats-refresh:hover{
     transform: translateY(-1px);
 }
 
@@ -7641,6 +7630,80 @@ body.ramadan-mode .ramadan-decor .ornament::before{
     color: #fff;
     background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
     border: 1px solid rgba(255,255,255,.08);
+}
+
+@keyframes statsFadeIn{
+    from{ opacity:0; transform: scale(.98); }
+    to{ opacity:1; transform: scale(1); }
+}
+
+@media (max-width: 520px){
+    .header{
+        height: 54px;
+        padding: 0 10px;
+    }
+    .header-title {
+        margin-inline-start: 6px;
+    }
+    .header-brand-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+    }
+    .header-brand-letter {
+        font-size: 29px;
+    }
+    .header-buttons {
+        gap: 4px;
+    }
+    .header-btn.header-icon-btn,
+    .header-btn.header-cart-btn {
+        min-width: 38px;
+        min-height: 38px;
+    }
+    .stats-shell{
+        width: min(100%, 96vw);
+        max-height: min(84dvh, 720px);
+        border-radius: 22px;
+    }
+    .stats-top{
+        padding: 14px 12px 10px;
+        gap: 8px;
+    }
+    .stats-title h3{
+        font-size: 17px;
+    }
+    .stats-title p{
+        font-size: 10.8px;
+    }
+    .stats-icon{
+        width: 44px;
+        height: 44px;
+        flex-basis: 44px;
+    }
+    .stats-refresh,
+    .stats-close{
+        width: 38px;
+        height: 38px;
+    }
+    .stats-body{
+        padding: 12px;
+    }
+    .stats-card{
+        padding: 14px;
+        border-radius: 18px;
+    }
+    .stats-value{
+        font-size: 29px;
+    }
+    .stats-sub{
+        font-size: 12px;
+    }
+    .stats-chip{
+        min-height: 40px;
+        font-size: 11.5px;
+        padding: 9px 12px;
+    }
 }
 
 
@@ -7762,7 +7825,11 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 
  
  <header class="header">
-    <div class="header-title">مكتب عسل</div>
+    <div class="header-title" aria-label="A Logo">
+      <div class="header-brand-logo" title="A Logo">
+        <span class="header-brand-letter">A</span>
+      </div>
+    </div>
    
    
    <div class="header-buttons">
@@ -8186,13 +8253,18 @@ body.ramadan-mode .ramadan-decor .ornament::before{
         </div>
         <div>
           <h3>إحصائيات التطبيق</h3>
-          <p>لوحة مختصرة خاصة بإدارة مكتب عسل</p>
+          <p>قراءة مباشرة من Firebase مع تحديث فوري للأرقام</p>
         </div>
       </div>
 
-      <button class="stats-close" type="button" onclick="closeStatsModal()" aria-label="إغلاق">
-        <i class="fas fa-times"></i>
-      </button>
+      <div class="stats-top-actions">
+        <button class="stats-refresh" type="button" onclick="refreshStatsFromFirebase()" aria-label="تحديث الإحصائيات" title="تحديث الإحصائيات">
+          <i class="fas fa-rotate"></i>
+        </button>
+        <button class="stats-close" type="button" onclick="closeStatsModal()" aria-label="إغلاق">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
     </div>
 
     <div class="stats-body" id="statsBody">
@@ -8340,209 +8412,22 @@ function updateStatsBtn() {
     btn.style.display = isAdminUser() ? "inline-flex" : "none";
 }
 
-window.openStatsModal = async function () {
-    try {
-        if (!isAdminUser()) {
-            showStaffOnlyPopup();
-            return;
-        }
-
-        const modal = document.getElementById("statsModal");
-        const body = document.getElementById("statsBody");
-        if (!modal || !body) return;
-
-        modal.classList.add("show");
-        modal.style.display = "flex";
-        modal.setAttribute("aria-hidden", "false");
-
-        body.innerHTML = `
-          <div class="stats-loading">
-            <i class="fas fa-spinner fa-spin"></i>
-            <div>جاري تحميل الإحصائيات...</div>
-          </div>
-        `;
-
-        if (!window.firebaseDB || !window.firebaseDB.db) {
-            throw new Error("Firebase not ready");
-        }
-
-        const { db, ref, get } = window.firebaseDB;
-        const today = getTodayKey();
-        const myDeviceCode = getDeviceCode();
-
-        const [totalSnap, dailyStatsSnap, dailyVisitorsSnap, presenceSnap, visitsTodaySnap, devicesSnap] = await Promise.all([
-            get(ref(db, "stats/totalVisits")),
-            get(ref(db, `stats/daily/${today}`)),
-            get(ref(db, `dailyVisitors/${today}`)),
-            get(ref(db, "presence")),
-            get(ref(db, `visits/${today}`)),
-            get(ref(db, "devices"))
-        ]);
-
-        const dailyStats = dailyStatsSnap.exists() ? (dailyStatsSnap.val() || {}) : {};
-        const dailyVisitors = dailyVisitorsSnap.exists() ? (dailyVisitorsSnap.val() || {}) : {};
-        const presence = presenceSnap.exists() ? (presenceSnap.val() || {}) : {};
-        const visitsToday = visitsTodaySnap.exists() ? (visitsTodaySnap.val() || {}) : {};
-        const devices = devicesSnap.exists() ? (devicesSnap.val() || {}) : {};
-
-        const totalVisits = totalSnap.exists()
-            ? Number(totalSnap.val()) || 0
-            : 0;
-        const totalVisitsSafe = totalVisits || 0;
-        const todayVisits = Number(dailyStats.visits) || Object.keys(visitsToday).length || 0;
-        const uniqueDevicesToday = Number(dailyStats.uniqueDevices) || Object.keys(dailyVisitors).length || 0;
-        const totalDevices = Object.keys(devices).length || 0;
-
-        const now = Date.now();
-        const onlineNow = Object.values(presence).filter(item =>
-            item && item.lastSeen && (now - item.lastSeen) < 70000
-        ).length;
-
-        body.innerHTML = `
-          <div class="stats-grid">
-            <div class="stats-card">
-              <div class="stats-card-head">
-                <div class="stats-card-label">زيارات اليوم</div>
-                <div class="stats-mini-icon"><i class="fas fa-calendar-day"></i></div>
-              </div>
-              <div class="stats-value">${todayVisits}</div>
-              <div class="stats-sub">كل مرة يتم فيها فتح التطبيق تُحسب زيارة مستقلة</div>
-              <div class="stats-badge"><i class="fas fa-bolt"></i>يتم احتسابها مع كل دخول</div>
-            </div>
-
-            <div class="stats-card">
-              <div class="stats-card-head">
-                <div class="stats-card-label">الأونلاين الآن</div>
-                <div class="stats-mini-icon"><i class="fas fa-signal"></i></div>
-              </div>
-              <div class="stats-value">${onlineNow}</div>
-              <div class="stats-sub">عدد الجلسات المتصلة خلال آخر دقيقة تقريبًا</div>
-              <div class="stats-badge"><i class="fas fa-circle"></i>مباشر</div>
-            </div>
-
-            <div class="stats-card">
-              <div class="stats-card-head">
-                <div class="stats-card-label">الأجهزة الفريدة اليوم</div>
-                <div class="stats-mini-icon"><i class="fas fa-mobile-screen"></i></div>
-              </div>
-              <div class="stats-value">${uniqueDevicesToday}</div>
-              <div class="stats-sub">عدد الأجهزة المختلفة التي دخلت اليوم</div>
-              <div class="stats-badge"><i class="fas fa-fingerprint"></i>تعريف دائم لكل جهاز</div>
-            </div>
-
-            <div class="stats-card">
-              <div class="stats-card-head">
-                <div class="stats-card-label">الزيارات الكلية</div>
-                <div class="stats-mini-icon"><i class="fas fa-chart-pie"></i></div>
-              </div>
-              <div class="stats-value">${totalVisitsSafe}</div>
-              <div class="stats-sub">إجمالي كل مرات فتح التطبيق منذ بداية التتبع</div>
-              <div class="stats-badge"><i class="fas fa-layer-group"></i>تراكمي</div>
-            </div>
-
-            <div class="stats-card">
-              <div class="stats-card-head">
-                <div class="stats-card-label">إجمالي الأجهزة المسجلة</div>
-                <div class="stats-mini-icon"><i class="fas fa-laptop-mobile"></i></div>
-              </div>
-              <div class="stats-value">${totalDevices}</div>
-              <div class="stats-sub">كل جهاز ياخذ معرّف ثابت مستقل داخل قاعدة البيانات</div>
-              <div class="stats-badge"><i class="fas fa-network-wired"></i>مشترك بين كل الأجهزة</div>
-            </div>
-
-            <div class="stats-card stats-card--wide">
-              <div class="stats-card-head">
-                <div class="stats-card-label">عنوان جهازك الحالي</div>
-                <div class="stats-mini-icon"><i class="fas fa-id-badge"></i></div>
-              </div>
-              <div class="stats-device-box">
-                <div class="stats-device-label">معرّف ثابت لهذا الجهاز داخل النظام</div>
-                <div class="stats-device-code">${myDeviceCode}</div>
-                <div class="stats-tiny">يبقى ثابتًا لهذا الجهاز، بينما كل دخول جديد يُحتسب زيارة جديدة أيضًا.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="stats-footer">
-            آخر تحديث: ${new Date().toLocaleString("ar-IQ")}
-          </div>
-        `;
-    } catch (err) {
-        console.error("openStatsModal:", err);
-
-        const modal = document.getElementById("statsModal");
-        const body = document.getElementById("statsBody");
-
-        if (modal && body) {
-            modal.classList.add("show");
-            modal.style.display = "flex";
-            modal.setAttribute("aria-hidden", "false");
-            body.innerHTML = `
-              <div class="stats-error-box">
-                <div class="stats-error-icon">
-                  <i class="fas fa-circle-exclamation"></i>
-                </div>
-
-                <div class="stats-error-title">تعذّر جلب الإحصائيات</div>
-                <div class="stats-error-text">
-                  صار خلل أثناء قراءة البيانات من السيرفر.
-                  تأكد من ربط Firebase أو جرّب مرة ثانية.
-                </div>
-
-                <div class="stats-error-actions">
-                  <button class="stats-retry-btn" onclick="openStatsModal()">
-                    <i class="fas fa-rotate-right"></i>
-                    إعادة المحاولة
-                  </button>
-
-                  <button class="stats-close-secondary" onclick="closeStatsModal()">
-                    <i class="fas fa-xmark"></i>
-                    إغلاق
-                  </button>
-                </div>
-              </div>
-            `;
-        } else {
-            alert("صار خطأ بجلب الإحصائيات");
-        }
-    }
-};
-
-window.closeStatsModal = function () {
-    const modal = document.getElementById("statsModal");
-    if (!modal) return;
-    modal.classList.remove("show");
-    modal.style.display = "none";
-    modal.setAttribute("aria-hidden", "true");
-};
-
-function getVisitorId() {
-    let id = localStorage.getItem("visitor_id");
+function getDeviceId() {
+    let id = localStorage.getItem("device_id");
     if (!id) {
-        if (window.crypto && crypto.randomUUID) {
-            id = "v_" + crypto.randomUUID().replace(/-/g, "");
-        } else {
-            id = "v_" + Math.random().toString(36).slice(2) + Date.now();
-        }
-        localStorage.setItem("visitor_id", id);
+        id = "DEV-" + Math.random().toString(36).slice(2, 8).toUpperCase() + Date.now().toString(36).slice(-4).toUpperCase();
+        localStorage.setItem("device_id", id);
     }
     return id;
 }
 
-const CURRENT_SESSION_ID = (() => {
-    if (window.crypto && crypto.randomUUID) {
-        return "s_" + crypto.randomUUID().replace(/-/g, "");
-    }
-    return "s_" + Math.random().toString(36).slice(2) + Date.now();
-})();
-
 function getSessionId() {
-    return CURRENT_SESSION_ID;
-}
-
-function getDeviceCode() {
-    const visitorId = getVisitorId().replace(/^v_/, "");
-    return "DEV-" + visitorId.slice(-10).toUpperCase();
+    let sid = sessionStorage.getItem("session_id");
+    if (!sid) {
+        sid = "SES-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 8).toUpperCase();
+        sessionStorage.setItem("session_id", sid);
+    }
+    return sid;
 }
 
 function getTodayKey() {
@@ -8553,89 +8438,270 @@ function getTodayKey() {
     return `${y}-${m}-${day}`;
 }
 
-async function initFirebaseStats() {
-    try {
-        if (!window.firebaseDB || !window.firebaseDB.db) {
-            console.warn("Firebase not ready");
-            return;
-        }
+function showStatsLoading() {
+    const modal = document.getElementById("statsModal");
+    const body = document.getElementById("statsBody");
+    if (!modal || !body) return;
 
-        const { db, ref, get, set, runTransaction, onDisconnect } = window.firebaseDB;
+    modal.classList.add("show");
+    modal.style.display = "flex";
+    modal.setAttribute("aria-hidden", "false");
+    body.innerHTML = `
+      <div class="stats-loading">
+        <i class="fas fa-spinner fa-spin"></i>
+        <div>جاري جلب الإحصائيات من Firebase...</div>
+      </div>
+    `;
+}
 
-        const visitorId = getVisitorId();
-        const sessionId = getSessionId();
-        const deviceCode = getDeviceCode();
-        const today = getTodayKey();
-        const now = Date.now();
+async function registerVisitInFirebase() {
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
 
-        // نسجل الجهاز ضمن قائمة الأجهزة المعروفة
-        const deviceRef = ref(db, `devices/${visitorId}`);
-        const deviceSnap = await get(deviceRef);
-        const existingDevice = deviceSnap.exists() ? (deviceSnap.val() || {}) : {};
+    const { db, ref, get, set, runTransaction, onDisconnect } = window.firebaseDB;
+    const today = getTodayKey();
+    const deviceId = getDeviceId();
+    const sessionId = getSessionId();
+    const now = Date.now();
+
+    const pageVisitKey = "visit_recorded_" + today + "_" + sessionId;
+    if (!sessionStorage.getItem(pageVisitKey)) {
+        const visitId = "VIS-" + now.toString(36).toUpperCase() + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+        await set(ref(db, `visits/${today}/${visitId}`), {
+            deviceId,
+            sessionId,
+            timestamp: now,
+            ua: navigator.userAgent || "unknown"
+        });
+
+        await runTransaction(ref(db, "stats/totalVisits"), current => (current || 0) + 1);
+        await runTransaction(ref(db, `stats/daily/${today}/visits`), current => (current || 0) + 1);
+
+        sessionStorage.setItem(pageVisitKey, "1");
+    }
+
+    const deviceRef = ref(db, `devices/${deviceId}`);
+    const deviceSnap = await get(deviceRef);
+    if (!deviceSnap.exists()) {
         await set(deviceRef, {
-            deviceCode,
-            firstSeen: existingDevice.firstSeen || now,
+            firstSeen: now,
             lastSeen: now,
-            lastVisitAt: now
+            createdAt: now,
+            ua: navigator.userAgent || "unknown"
         });
+        await runTransaction(ref(db, "stats/totalDevices"), current => (current || 0) + 1);
+    } else {
+        const old = deviceSnap.val() || {};
+        await set(deviceRef, { ...old, lastSeen: now, ua: navigator.userAgent || old.ua || "unknown" });
+    }
 
-        // كل فتح جديد للتطبيق = زيارة جديدة
-        const visitRef = ref(db, `visits/${today}/${sessionId}`);
-        await set(visitRef, {
-            visitorId,
-            deviceCode,
-            openedAt: now
-        });
+    const dailyDeviceRef = ref(db, `dailyVisitors/${today}/${deviceId}`);
+    const dailyDeviceSnap = await get(dailyDeviceRef);
+    if (!dailyDeviceSnap.exists()) {
+        await set(dailyDeviceRef, { joinedAt: now, deviceId });
+        await runTransaction(ref(db, `stats/daily/${today}/uniqueDevices`), current => (current || 0) + 1);
+    }
 
-        await runTransaction(ref(db, `stats/daily/${today}/visits`), (current) => {
-            return (Number(current) || 0) + 1;
-        });
+    const presenceRef = ref(db, `presence/${sessionId}`);
+    await onDisconnect(presenceRef).remove();
+    await set(presenceRef, { deviceId, sessionId, online: true, lastSeen: now });
 
-        await runTransaction(ref(db, `stats/totalVisits`), (current) => {
-            return (Number(current) || 0) + 1;
-        });
-
-        // تسجيل الجهاز الفريد لليوم مرة واحدة فقط
-        const dailyVisitorRef = ref(db, `dailyVisitors/${today}/${visitorId}`);
-        const dailySnap = await get(dailyVisitorRef);
-
-        if (!dailySnap.exists()) {
-            await set(dailyVisitorRef, {
-                firstVisitAt: now,
-                deviceCode
-            });
-
-            await runTransaction(ref(db, `stats/daily/${today}/uniqueDevices`), (current) => {
-                return (Number(current) || 0) + 1;
-            });
-        }
-
-        // presence لكل جلسة، مو لكل جهاز فقط
-        const presenceRef = ref(db, `presence/${sessionId}`);
-        await onDisconnect(presenceRef).remove();
-
-        await set(presenceRef, {
-            visitorId,
-            deviceCode,
-            online: true,
-            enteredAt: now,
-            lastSeen: now
-        });
-
+    if (!window.__presenceHeartbeatStarted) {
+        window.__presenceHeartbeatStarted = true;
         setInterval(async () => {
             try {
-                await set(presenceRef, {
-                    visitorId,
-                    deviceCode,
+                if (!window.firebaseDB || !window.firebaseDB.db) return;
+                const { db, ref, set } = window.firebaseDB;
+                await set(ref(db, `presence/${getSessionId()}`), {
+                    deviceId: getDeviceId(),
+                    sessionId: getSessionId(),
                     online: true,
-                    enteredAt: now,
                     lastSeen: Date.now()
                 });
             } catch (e) {
                 console.warn("presence heartbeat error", e);
             }
         }, 25000);
+    }
+}
 
+async function fetchStatsSnapshot() {
+    if (!window.firebaseDB || !window.firebaseDB.db) {
+        throw new Error("Firebase غير جاهز");
+    }
+
+    const { db, ref, get } = window.firebaseDB;
+    const today = getTodayKey();
+
+    const [statsSnap, visitsTodaySnap, dailyVisitorsSnap, presenceSnap, devicesSnap] = await Promise.all([
+        get(ref(db, "stats")),
+        get(ref(db, `visits/${today}`)),
+        get(ref(db, `dailyVisitors/${today}`)),
+        get(ref(db, "presence")),
+        get(ref(db, "devices"))
+    ]);
+
+    const stats = statsSnap.exists() ? statsSnap.val() : {};
+    const visitsTodayObj = visitsTodaySnap.exists() ? visitsTodaySnap.val() : {};
+    const dailyVisitorsObj = dailyVisitorsSnap.exists() ? dailyVisitorsSnap.val() : {};
+    const presenceObj = presenceSnap.exists() ? presenceSnap.val() : {};
+    const devicesObj = devicesSnap.exists() ? devicesSnap.val() : {};
+
+    const dailyStats = (stats.daily && stats.daily[today]) ? stats.daily[today] : {};
+    const totalVisits = Number(stats.totalVisits || 0);
+    const todayVisits = Number(dailyStats.visits || Object.keys(visitsTodayObj).length || 0);
+    const uniqueDevicesToday = Number(dailyStats.uniqueDevices || Object.keys(dailyVisitorsObj).length || 0);
+    const totalDevices = Number(stats.totalDevices || Object.keys(devicesObj).length || 0);
+
+    const now = Date.now();
+    const onlineNow = Object.values(presenceObj).filter(item => item && item.lastSeen && (now - item.lastSeen) < 70000).length;
+
+    return {
+        totalVisits,
+        todayVisits,
+        uniqueDevicesToday,
+        totalDevices,
+        onlineNow,
+        currentDeviceId: getDeviceId(),
+        updatedAt: new Date().toLocaleString("ar-IQ")
+    };
+}
+
+function renderStatsContent(data) {
+    const body = document.getElementById("statsBody");
+    if (!body) return;
+
+    body.innerHTML = `
+      <div class="stats-grid">
+        <div class="stats-card">
+          <div class="stats-card-head">
+            <div class="stats-card-label">زيارات اليوم</div>
+            <div class="stats-mini-icon"><i class="fas fa-calendar-day"></i></div>
+          </div>
+          <div class="stats-value">${data.todayVisits}</div>
+          <div class="stats-sub">كل مرة فتح للتطبيق بهذا اليوم تنحسب زيارة مستقلة داخل Firebase.</div>
+          <div class="stats-chip"><i class="fas fa-arrow-rotate-right"></i> يومي</div>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-card-head">
+            <div class="stats-card-label">الأجهزة الفريدة اليوم</div>
+            <div class="stats-mini-icon"><i class="fas fa-mobile-screen-button"></i></div>
+          </div>
+          <div class="stats-value">${data.uniqueDevicesToday}</div>
+          <div class="stats-sub">عدد الأجهزة المختلفة التي دخلت اليوم ولو مرة واحدة.</div>
+          <div class="stats-chip"><i class="fas fa-network-wired"></i> فريد يومياً</div>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-card-head">
+            <div class="stats-card-label">الأونلاين الآن</div>
+            <div class="stats-mini-icon"><i class="fas fa-signal"></i></div>
+          </div>
+          <div class="stats-value">${data.onlineNow}</div>
+          <div class="stats-sub">الجلسات المتصلة خلال آخر دقيقة تقريباً عبر جميع الأجهزة.</div>
+          <div class="stats-chip"><i class="fas fa-broadcast-tower"></i> مباشر</div>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-card-head">
+            <div class="stats-card-label">الزيارات الكلية</div>
+            <div class="stats-mini-icon"><i class="fas fa-chart-pie"></i></div>
+          </div>
+          <div class="stats-value">${data.totalVisits}</div>
+          <div class="stats-sub">إجمالي كل مرات فتح التطبيق منذ بداية التتبع.</div>
+          <div class="stats-chip"><i class="fas fa-layer-group"></i> تراكمي</div>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-card-head">
+            <div class="stats-card-label">إجمالي الأجهزة المسجلة</div>
+            <div class="stats-mini-icon"><i class="fas fa-server"></i></div>
+          </div>
+          <div class="stats-value">${data.totalDevices}</div>
+          <div class="stats-sub">كل جهاز ياخذ معرف ثابت مستقل داخل قاعدة البيانات.</div>
+          <div class="stats-chip"><i class="fas fa-link"></i> مشترك بين كل الأجهزة</div>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-card-head">
+            <div class="stats-card-label">عنوان جهازك الحالي</div>
+            <div class="stats-mini-icon"><i class="fas fa-id-badge"></i></div>
+          </div>
+          <div class="stats-value" style="font-size:20px;line-height:1.5;word-break:break-all;">${data.currentDeviceId}</div>
+          <div class="stats-sub">هذا معرف ثابت لهذا الجهاز داخل النظام، بينما كل فتح جديد يحتسب زيارة جديدة أيضاً.</div>
+          <div class="stats-chip"><i class="fas fa-fingerprint"></i> ثابت لهذا الجهاز</div>
+        </div>
+      </div>
+
+      <div class="stats-footer">آخر تحديث: ${data.updatedAt}</div>
+    `;
+}
+
+function renderStatsError(message) {
+    const modal = document.getElementById("statsModal");
+    const body = document.getElementById("statsBody");
+    if (!modal || !body) return;
+
+    modal.classList.add("show");
+    modal.style.display = "flex";
+    modal.setAttribute("aria-hidden", "false");
+    body.innerHTML = `
+      <div class="stats-error-box">
+        <div class="stats-error-icon">
+          <i class="fas fa-circle-exclamation"></i>
+        </div>
+        <div class="stats-error-title">تعذّر جلب الإحصائيات</div>
+        <div class="stats-error-text">${message || "صار خلل أثناء قراءة البيانات من Firebase. جرّب التحديث مرة ثانية."}</div>
+        <div class="stats-error-actions">
+          <button class="stats-retry-btn" onclick="refreshStatsFromFirebase()">
+            <i class="fas fa-rotate-right"></i>
+            إعادة المحاولة
+          </button>
+          <button class="stats-close-secondary" onclick="closeStatsModal()">
+            <i class="fas fa-xmark"></i>
+            إغلاق
+          </button>
+        </div>
+      </div>
+    `;
+}
+
+window.refreshStatsFromFirebase = async function () {
+    try {
+        showStatsLoading();
+        const data = await fetchStatsSnapshot();
+        renderStatsContent(data);
+    } catch (err) {
+        console.error("refreshStatsFromFirebase:", err);
+        renderStatsError("ما قدرنا نجيب البيانات الآن من Firebase. تأكد من الإنترنت أو أعد المحاولة.");
+    }
+};
+
+window.openStatsModal = async function () {
+    if (!isAdminUser()) {
+        alert("هذه الخاصية حصراً للإدمن");
+        return;
+    }
+    showStatsLoading();
+    await window.refreshStatsFromFirebase();
+};
+
+window.closeStatsModal = function () {
+    const modal = document.getElementById("statsModal");
+    if (!modal) return;
+    modal.classList.remove("show");
+    modal.style.display = "none";
+    modal.setAttribute("aria-hidden", "true");
+};
+
+async function initFirebaseStats() {
+    try {
+        if (!window.firebaseDB || !window.firebaseDB.db) {
+            console.warn("Firebase not ready");
+            return;
+        }
+        await registerVisitInFirebase();
     } catch (err) {
         console.error("initFirebaseStats:", err);
     }
@@ -8655,7 +8721,6 @@ document.addEventListener("click", function (e) {
         closeStatsModal();
     }
 });
-
 // ================================================================
 
       
