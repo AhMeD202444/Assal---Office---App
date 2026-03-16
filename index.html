@@ -7729,17 +7729,19 @@ body.ramadan-mode .ramadan-decor .ornament::before{
     display: none;
     align-items: center;
     justify-content: center;
+    padding: 14px;
+    box-sizing: border-box;
 }
 
-/* keep cart shell centered within same dark backdrop */
 .cart-shell{
     position: relative !important;
     top: auto !important;
     bottom: auto !important;
     left: auto !important;
     transform: none !important;
-    width: min(980px, calc(100% - 20px));
-    max-height: min(86dvh, 760px);
+    width: min(980px, calc(100% - 24px));
+    max-height: min(88dvh, 760px);
+    margin: 0 auto !important;
 }
 
 /* the three modals that use #overlay should keep their cards above it */
@@ -7759,10 +7761,36 @@ body.ramadan-mode .ramadan-decor .ornament::before{
     -webkit-backdrop-filter: blur(10px) !important;
   }
 
+  .cart-modal{
+    padding: 12px !important;
+  }
+
   .cart-shell{
-    width: min(100%, 440px);
-    max-height: min(86dvh, 760px);
-    border-radius: 26px;
+    width: min(100%, 460px) !important;
+    max-height: min(90dvh, 760px) !important;
+    border-radius: 24px !important;
+    overflow: hidden !important;
+  }
+
+  .cart-top{
+    padding: 14px 14px 10px !important;
+  }
+
+  .cart-body{
+    padding: 10px !important;
+  }
+
+  .cart-bottom{
+    padding: 10px !important;
+  }
+
+  .cart-actions{
+    gap: 8px !important;
+  }
+
+  .cart-btn{
+    min-height: 48px !important;
+    font-size: 15px !important;
   }
 }
 
@@ -8310,7 +8338,6 @@ body.ramadan-mode .ramadan-decor .ornament::before{
         </div>
         <div>
           <h3>إحصائيات التطبيق</h3>
-          <p>قراءة مباشرة من Firebase مع تحديث فوري للأرقام</p>
         </div>
       </div>
 
@@ -11620,17 +11647,26 @@ function renderCart(){
 
 /* فتح/غلق */
 function openCart(){
-  document.getElementById("cartModal").style.display = "block";
-  document.getElementById("cartModal").setAttribute("aria-hidden","false");
+  const cart = document.getElementById("cartModal");
+  if (!cart) return;
+
+  cart.style.display = "flex";
+  cart.setAttribute("aria-hidden","false");
+
   const ov = document.getElementById("overlay");
-  if(ov) ov.style.display = "block";
+  if (ov) ov.style.display = "none";
+
   renderCart();
 }
 function closeCart(){
-  document.getElementById("cartModal").style.display = "none";
-  document.getElementById("cartModal").setAttribute("aria-hidden","true");
+  const cart = document.getElementById("cartModal");
+  if (!cart) return;
+
+  cart.style.display = "none";
+  cart.setAttribute("aria-hidden","true");
+
   const ov = document.getElementById("overlay");
-  if(ov) ov.style.display = "none";
+  if (ov) ov.style.display = "none";
 }
 
 /* Events */
@@ -11640,7 +11676,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   document.getElementById("openCartBtn")?.addEventListener("click", openCart);
   document.getElementById("closeCartBtn")?.addEventListener("click", closeCart);
-  document.getElementById("overlay")?.addEventListener("click", closeCart);
 
   document.getElementById("cartDiscount")?.addEventListener("input", renderCart);
 
