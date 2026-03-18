@@ -7094,7 +7094,7 @@ body.modal-lock{
     background: rgba(2, 8, 23, .62);
     backdrop-filter: blur(10px);
     z-index: 20040;
-    padding: 16px;
+    padding: max(16px, env(safe-area-inset-top, 0px) + 10px) 14px max(16px, env(safe-area-inset-bottom, 0px) + 10px);
     overscroll-behavior: contain;
     -webkit-tap-highlight-color: transparent;
 }
@@ -7107,8 +7107,8 @@ body.modal-lock{
 
 .request-shell,
 .request-admin-shell{
-    width: min(100%, 430px);
-    max-height: min(86vh, 760px);
+    width: min(100%, 920px);
+    max-height: min(86dvh, 760px);
     overflow: hidden;
     border-radius: 24px;
     background:
@@ -7120,11 +7120,22 @@ body.modal-lock{
     color: #fff;
     font-family: 'Cairo', sans-serif;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
+
+.request-shell{
+    width: min(100%, 420px);
+    max-height: min(86dvh, 640px);
+    border-radius: 26px;
+    box-shadow: 0 22px 70px rgba(0,0,0,.52);
+}
+
 
 .request-top,
 .request-admin-top{
-    padding: 18px 18px 12px;
+    padding: 16px 16px 10px;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -7155,14 +7166,14 @@ body.modal-lock{
 .request-title h3,
 .request-admin-title h3{
     margin:0;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
 }
 
 .request-title p,
 .request-admin-title p{
     margin:3px 0 0;
-    font-size:12px;
+    font-size:11px;
     color: rgba(255,255,255,.68);
 }
 
@@ -7170,6 +7181,9 @@ body.modal-lock{
 .request-admin-close{
     width: 40px;
     height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    aspect-ratio: 1 / 1;
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -7192,14 +7206,17 @@ body.modal-lock{
 }
 
 .request-body{
-    padding: 16px 18px 20px;
+    flex: 1;
+    min-height: 0;
+    padding: 14px 14px 20px;
     overflow-y: auto;
-    max-height: calc(86vh - 90px);
+    overscroll-behavior: contain;
+    scroll-padding-bottom: 24px;
 }
 
 .request-grid{
     display:grid;
-    gap:14px;
+    gap:12px;
 }
 
 .request-field{
@@ -7217,12 +7234,12 @@ body.modal-lock{
 .request-textarea{
     width: 100%;
     border: 1px solid rgba(255,255,255,.08);
-    border-radius: 18px;
+    border-radius: 16px;
     background: linear-gradient(135deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
     color: #fff;
     font-family: 'Cairo', sans-serif;
-    font-size: 15px;
-    padding: 14px 15px;
+    font-size: 14px;
+    padding: 12px 13px;
     outline: none;
     transition: border-color .2s ease, box-shadow .2s ease, transform .15s ease;
     -webkit-tap-highlight-color: transparent;
@@ -7237,7 +7254,7 @@ body.modal-lock{
     box-shadow: 0 0 0 3px rgba(56,189,248,.12);
 }
 .request-textarea{
-    min-height: 112px;
+    min-height: 92px;
     resize: vertical;
 }
 
@@ -7267,6 +7284,222 @@ body.modal-lock{
     opacity:.7;
     cursor:not-allowed;
 }
+.request-submit-btn{
+    min-height: 48px;
+    justify-content: center;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+}
+.request-admin-top-actions,
+.request-track-top-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.request-view-tabs{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px;
+    border-radius:16px;
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+.request-view-tab{
+    min-width:74px;
+    height:38px;
+    padding:0 14px;
+    border:none;
+    border-radius:12px;
+    background:transparent;
+    color:rgba(255,255,255,.78);
+    font-family:'Cairo', sans-serif;
+    font-size:13px;
+    font-weight:800;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    position:relative;
+    overflow:hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+.request-view-tab.is-active{
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+    color:#fff;
+    box-shadow: 0 10px 20px rgba(24,90,157,.24);
+}
+.request-view-tab:not(.is-active):hover{
+    color:#fff;
+    background: rgba(255,255,255,.05);
+}
+.request-circle-icon{
+    flex:0 0 40px;
+    width:40px;
+    height:40px;
+    min-height:40px;
+    border:none;
+    border-radius:50%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+    color:#fff;
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+.request-admin-refresh,
+.request-track-refresh{
+    padding: 0;
+}
+.request-admin-refresh,
+.request-track-refresh{
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+}
+.request-admin-archive-toggle,
+.request-track-archive-toggle{
+    background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+    border:1px solid rgba(255,255,255,.08);
+    color:#fff;
+    box-shadow: 0 12px 22px rgba(0,0,0,.22);
+}
+.request-admin-refresh.is-active,
+.request-admin-archive-toggle.is-active,
+.request-track-refresh.is-active,
+.request-track-archive-toggle.is-active{
+    box-shadow: 0 0 0 3px rgba(56,189,248,.14), 0 12px 22px rgba(0,0,0,.22);
+    filter: brightness(1.06);
+}
+.request-panel{
+    display:none !important;
+}
+.request-panel.is-active{
+    display:grid !important;
+}
+.request-admin-list.request-panel,
+.request-track-list.request-panel{
+    display:none !important;
+}
+.request-admin-list.request-panel.is-active,
+.request-track-list.request-panel.is-active{
+    display:grid !important;
+}
+.request-inline-note{
+    margin-top: 8px;
+    font-size: 11px;
+    color: rgba(255,255,255,.54);
+    text-align:center;
+}
+.request-track-refresh{
+    border:none;
+    color:#fff;
+    box-shadow: 0 12px 22px rgba(24,90,157,.22);
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+.request-toast{
+    position: absolute;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%) scale(.94);
+    width: min(calc(100% - 34px), 320px);
+    display:none;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:12px;
+    padding: 20px 18px 18px;
+    border-radius: 26px;
+    background:
+      radial-gradient(circle at top right, rgba(56,189,248,.22), transparent 40%),
+      radial-gradient(circle at bottom left, rgba(16,185,129,.18), transparent 36%),
+      linear-gradient(145deg, rgba(6,12,24,.985), rgba(12,22,42,.97));
+    border: 1px solid rgba(255,255,255,.11);
+    box-shadow: 0 28px 80px rgba(0,0,0,.56), inset 0 1px 0 rgba(255,255,255,.06);
+    color:#fff;
+    z-index: 21050;
+    font-family:'Cairo', sans-serif;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    pointer-events:none;
+    overflow:hidden;
+}
+.request-modal .request-shell{
+    position: relative;
+}
+.request-toast::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    background: linear-gradient(180deg, rgba(255,255,255,.08), transparent 28%, transparent 78%, rgba(255,255,255,.04));
+    pointer-events:none;
+}
+.request-toast::after{
+    content:"";
+    position:absolute;
+    inset: 1px;
+    border-radius:inherit;
+    border:1px solid rgba(255,255,255,.05);
+    pointer-events:none;
+}
+.request-toast.show{
+    display:flex;
+    animation: requestToastIn .34s cubic-bezier(.22,1,.36,1) forwards;
+}
+.request-toast.is-success .request-toast-icon{
+    background: linear-gradient(135deg, rgba(16,185,129,.24), rgba(16,185,129,.08));
+    color:#d1fae5;
+}
+.request-toast.is-loading .request-toast-icon{
+    background: linear-gradient(135deg, rgba(56,189,248,.24), rgba(56,189,248,.08));
+    color:#d9f6ff;
+}
+.request-toast.is-error .request-toast-icon{
+    background: linear-gradient(135deg, rgba(239,68,68,.24), rgba(239,68,68,.08));
+    color:#fee2e2;
+}
+.request-toast-icon{
+    width: 62px;
+    height: 62px;
+    flex:0 0 62px;
+    border-radius: 22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 24px;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 16px 34px rgba(0,0,0,.22);
+    position: relative;
+    z-index:1;
+}
+.request-toast-text{
+    min-width:0;
+    position: relative;
+    z-index:1;
+}
+.request-toast-title{
+    font-size:17px;
+    font-weight:900;
+    margin-bottom:5px;
+    letter-spacing:.1px;
+}
+.request-toast-sub{
+    font-size:12.6px;
+    color: rgba(255,255,255,.78);
+    line-height:1.8;
+}
+@keyframes requestToastIn{
+    from{ opacity:0; transform: translate(-50%, -50%) scale(.90); }
+    to{ opacity:1; transform: translate(-50%, -50%) scale(1); }
+}
+
 
 .request-helper{
     margin-top: 6px;
@@ -7296,13 +7529,19 @@ body.modal-lock{
 }
 
 .request-admin-body{
-    padding: 12px 16px 18px;
+    flex: 1;
+    min-height: 0;
+    padding: 14px 18px 38px;
     overflow-y: auto;
-    max-height: calc(86vh - 86px);
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scroll-padding-bottom: 46px;
+    -webkit-overflow-scrolling: touch;
 }
 .request-admin-list{
     display:grid;
-    gap: 12px;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 .request-admin-card{
     border-radius: 18px;
@@ -7310,6 +7549,7 @@ body.modal-lock{
     background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
     border: 1px solid rgba(255,255,255,.08);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    margin-bottom: 2px;
 }
 .request-admin-card-head{
     display:flex;
@@ -7346,20 +7586,252 @@ body.modal-lock{
     border:1px solid rgba(255,255,255,.08);
     color: rgba(255,255,255,.76);
 }
+
+.request-close,
+.request-admin-close,
+.request-track-close{
+    flex: 0 0 40px;
+}
+.request-header-badge.user-badge{
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+}
+.request-track-modal{
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2, 8, 23, .62);
+    backdrop-filter: blur(10px);
+    z-index: 20042;
+    padding: 16px;
+    overscroll-behavior: contain;
+    -webkit-tap-highlight-color: transparent;
+}
+.request-track-modal.show{ display:flex; animation: statsFadeIn .22s ease; }
+.request-track-shell{
+    width: min(100%, 920px);
+    max-height: min(88vh, 780px);
+    overflow: hidden;
+    border-radius: 24px;
+    background:
+      radial-gradient(circle at top right, rgba(56,189,248,.18), transparent 35%),
+      radial-gradient(circle at bottom left, rgba(24,90,157,.20), transparent 35%),
+      linear-gradient(135deg, rgba(17,24,39,.98), rgba(10,14,23,.98));
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    position: relative;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+}
+.request-track-top{
+    padding: 18px 18px 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.request-track-title{ display:flex; align-items:center; gap:12px; }
+.request-track-icon{
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+    box-shadow: 0 8px 20px rgba(24,90,157,.35);
+    font-size: 20px;
+}
+.request-track-title h3{ margin:0; font-size:20px; font-weight:800; }
+.request-track-title p{ margin:3px 0 0; font-size:12px; color:rgba(255,255,255,.68); }
+.request-track-close{
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 8px 18px rgba(255,75,43,.28);
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .15s ease, filter .2s ease;
+}
+.request-track-close:active,
+.request-track-send:active,
+.request-admin-send:active,
+.request-admin-done:active,
+.request-track-clear:active{
+    transform: scale(.96);
+}
+.request-track-body{
+    flex:1;
+    min-height:0;
+    padding: 14px 18px 38px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    scroll-padding-bottom:46px;
+    -webkit-overflow-scrolling: touch;
+}
+.request-track-list{ display:grid; gap:14px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.request-thread-card{
+    border-radius: 18px;
+    padding: 14px;
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    margin-bottom: 2px;
+}
+.request-thread-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:10px; }
+.request-thread-id{ font-size:15px; font-weight:800; }
+.request-thread-time{ font-size:11px; color:rgba(255,255,255,.6); }
+.request-thread-status{ display:inline-flex; align-items:center; gap:6px; font-size:11px; padding:4px 10px; border-radius:999px; }
+.request-thread-status.new{ background:rgba(56,189,248,.16); color:#d9f6ff; border:1px solid rgba(56,189,248,.20); }
+.request-thread-status.processing{ background:rgba(245,158,11,.14); color:#fde68a; border:1px solid rgba(245,158,11,.18); }
+.request-thread-status.processed{ background:rgba(16,185,129,.14); color:#d1fae5; border:1px solid rgba(16,185,129,.18); }
+.request-thread-main{ font-size:14px; line-height:1.8; color:rgba(255,255,255,.88); margin-bottom:10px; }
+.request-messages{ display:grid; gap:8px; margin-top:10px; }
+.request-message{
+    padding: 10px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    line-height: 1.7;
+    border: 1px solid rgba(255,255,255,.06);
+}
+.request-message.customer{ background: rgba(56,189,248,.11); }
+.request-message.admin{ background: rgba(16,185,129,.10); }
+.request-message.system{ background: rgba(255,255,255,.06); color: rgba(255,255,255,.82); }
+.request-message-head{ display:flex; justify-content:space-between; gap:8px; margin-bottom:6px; font-size:11px; color:rgba(255,255,255,.58); }
+.request-thread-actions,
+.request-admin-card-actions{ display:grid; gap:10px; margin-top:12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.request-thread-actions.is-stack{
+    grid-template-columns: 1fr;
+}
+.request-thread-actions.is-stack .request-track-input{
+    min-height: 92px;
+}
+.request-thread-actions.is-stack .request-track-send{
+    width: 100%;
+}
+.request-track-input,
+.request-admin-reply-input{
+    width:100%;
+    min-height:74px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+    color:#fff;
+    font-family:'Cairo', sans-serif;
+    font-size:14px;
+    padding:12px 13px;
+    resize: vertical;
+    outline:none;
+}
+.request-track-input:focus,
+.request-admin-reply-input:focus{ border-color: rgba(56,189,248,.4); box-shadow: 0 0 0 3px rgba(56,189,248,.12); }
+.request-track-send,
+.request-admin-send,
+.request-admin-done,
+.request-track-clear{
+    width: 100%;
+    border:none;
+    border-radius: 16px;
+    padding: 12px 14px;
+    cursor:pointer;
+    font-family:'Cairo', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color:#fff;
+    position: relative;
+    overflow:hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+.request-track-send,
+.request-admin-send{ background: linear-gradient(135deg, #43cea2, #185a9d); box-shadow: 0 12px 22px rgba(24,90,157,.22); }
+.request-admin-done{ background: linear-gradient(135deg, #10b981, #0f766e); box-shadow: 0 12px 22px rgba(15,118,110,.22); }
+.request-track-clear{ background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.06)); border:1px solid rgba(255,255,255,.08); }
+.request-track-empty{ text-align:center; padding: 22px 14px; border-radius:18px; background: rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); color: rgba(255,255,255,.76); }
+.request-admin-card textarea{ margin-top:10px; }
+.request-admin-meta{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.request-admin-chip{ font-size:11px; padding:4px 10px; border-radius:999px; background: rgba(255,255,255,.08); color: rgba(255,255,255,.75); }
+@media (max-width: 720px){
+    .request-track-shell{ width:min(100%,100%); max-height:min(86dvh,780px); border-radius:22px; }
+    .request-title h3, .request-admin-title h3, .request-track-title h3{ font-size:18px; }
+    .request-admin-list, .request-track-list{ grid-template-columns:1fr; }
+    .request-view-tab{ min-width:64px; padding:0 10px; font-size:12px; }
+    .request-toast{ width:min(88vw, 280px); }
+}
 @media (max-width: 520px){
     .floating-request-admin-btn{
         width: 46px;
         height: 46px;
     }
     .request-shell,
-    .request-admin-shell{
+    .request-admin-shell,
+    .request-track-shell{
         width: min(100%, 100%);
-        max-height: min(88vh, 760px);
+        max-height: min(88dvh, 760px);
         border-radius: 22px;
     }
+    .request-shell{
+        width: min(100%, 100%);
+        max-height: min(84dvh, 620px);
+    }
+    .request-admin-body,
+    .request-track-body{
+        padding: 12px 12px 34px;
+    }
+    .request-track-list,
+    .request-admin-list{
+        gap: 12px;
+    }
+    .request-toast{
+        width: min(calc(100% - 26px), 300px);
+        padding: 18px 16px 16px;
+    }
+    .request-top,
+    .request-admin-top,
+    .request-track-top{
+        padding: 14px 14px 10px;
+        gap: 10px;
+    }
+    .request-body,
+    .request-admin-body,
+    .request-track-body{
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-bottom: 22px;
+    }
     .request-title h3,
-    .request-admin-title h3{
-        font-size: 18px;
+    .request-admin-title h3,
+    .request-track-title h3{
+        font-size: 17px;
+    }
+    .request-icon,
+    .request-admin-icon,
+    .request-track-icon,
+    .request-close,
+    .request-admin-close,
+    .request-track-close,
+    .request-circle-icon{
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        min-height: 42px;
+    }
+    .request-view-tabs{
+        gap: 4px;
+        padding: 3px;
     }
 }
 
@@ -8101,6 +8573,15 @@ body.modal-lock{
 </button>
 
 <button class="header-btn header-cart-btn"
+        id="requestUserHeaderBtn"
+        type="button"
+        title="متابعة طلبي"
+        aria-label="متابعة طلبي">
+  <i class="fas fa-comments"></i>
+  <span class="header-cart-badge request-header-badge user-badge" id="requestUserCount" style="display:none;">0</span>
+</button>
+
+<button class="header-btn header-cart-btn"
         id="requestAdminHeaderBtn"
         type="button"
         title="متابعة الطلبات"
@@ -8474,12 +8955,18 @@ body.modal-lock{
         </div>
 
         <div class="request-helper">
-          يتم إرسال الطلب إلى السيرفر مباشرة ضمن مسار مستقل وما يأثر على الإحصائيات نهائياً.
+          ينرسل الطلب مباشرة لمسار مستقل بدون ما يأثر على الإحصائيات.
         </div>
-
-        <div id="requestStatusBox" class="request-status" aria-live="polite"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<div id="requestToast" class="request-toast" aria-live="polite">
+  <div class="request-toast-icon"><i class="fas fa-circle-notch fa-spin"></i></div>
+  <div class="request-toast-text">
+    <div class="request-toast-title">جاري الإرسال</div>
+    <div class="request-toast-sub">نرسل طلبك إلى السيرفر...</div>
   </div>
 </div>
 
@@ -8489,14 +8976,21 @@ body.modal-lock{
       <div class="request-admin-title">
         <div class="request-admin-icon"><i class="fas fa-inbox"></i></div>
         <div>
-          <h3>طلبات المواد</h3>
-          <p>آخر الطلبات المرسلة من الزبائن</p>
+          <h3>طلبات </h3>
+         
         </div>
       </div>
-      <div class="stats-top-actions">
-        <button class="request-admin-refresh" type="button" onclick="loadMaterialRequests()" aria-label="تحديث الطلبات" title="تحديث الطلبات" style="max-width:120px;">
+      <div class="request-admin-top-actions">
+        <div class="request-view-tabs" role="tablist" aria-label="تبويبات طلبات المواد">
+          <button id="requestAdminActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchAdminRequestView('active')" aria-label="الطلبات" title="الطلبات">
+            <i class="fas fa-list-ul"></i><span>طلبات</span>
+          </button>
+          <button id="requestAdminArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAdminRequestView('archive')" aria-label="الأرشيف" title="الأرشيف">
+            <i class="fas fa-box-archive"></i><span>أرشيف</span>
+          </button>
+        </div>
+        <button id="requestAdminRefreshBtn" class="request-admin-refresh request-circle-icon" type="button" onclick="loadMaterialRequests()" aria-label="تحديث" title="تحديث">
           <i class="fas fa-rotate"></i>
-          تحديث
         </button>
         <button class="request-admin-close" type="button" onclick="closeRequestAdminModal()" aria-label="إغلاق">
           <i class="fas fa-times"></i>
@@ -8505,8 +8999,51 @@ body.modal-lock{
     </div>
 
     <div class="request-admin-body">
-      <div id="requestAdminList" class="request-admin-list">
+      <div id="requestAdminActivePanel" class="request-admin-list request-panel is-active">
         <div class="request-admin-empty">جاري تحميل الطلبات...</div>
+      </div>
+      <div id="requestAdminArchivePanel" class="request-admin-list request-panel">
+        <div class="request-admin-empty">جاري تحميل أرشيف الطلبات...</div>
+      </div>
+      <div class="request-inline-note">الطلبات التي يتم تعليمها "تمت المعالجة" تنتقل إلى الأرشيف.</div>
+    </div>
+  </div>
+</div>
+
+
+<div id="requestTrackModal" class="request-track-modal" aria-hidden="true">
+  <div class="request-track-shell" role="dialog" aria-modal="true" aria-label="متابعة الطلبات">
+    <div class="request-track-top">
+      <div class="request-track-title">
+        <div class="request-track-icon"><i class="fas fa-comments"></i></div>
+        <div>
+          <h3>الطلبات </h3>
+
+        </div>
+      </div>
+      <div class="request-track-top-actions">
+        <div class="request-view-tabs" role="tablist" aria-label="تبويبات متابعة الطلبات">
+          <button id="requestTrackActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchTrackRequestView('active')" aria-label="طلباتي" title="طلباتي">
+            <i class="fas fa-list-ul"></i><span>طلبات</span>
+          </button>
+          <button id="requestTrackArchiveTabBtn" class="request-view-tab" type="button" onclick="switchTrackRequestView('archive')" aria-label="أرشيف طلباتي" title="أرشيف طلباتي">
+            <i class="fas fa-box-archive"></i><span>أرشيف</span>
+          </button>
+        </div>
+        <button id="requestTrackRefreshBtn" class="request-track-refresh request-circle-icon" type="button" onclick="loadCustomerRequests()" aria-label="تحديث" title="تحديث">
+          <i class="fas fa-rotate"></i>
+        </button>
+        <button class="request-track-close" type="button" onclick="closeRequestTrackModal()" aria-label="إغلاق">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+    <div class="request-track-body">
+      <div id="requestTrackActivePanel" class="request-track-list request-panel is-active">
+        <div class="request-track-empty">جاري تحميل طلباتك...</div>
+      </div>
+      <div id="requestTrackArchivePanel" class="request-track-list request-panel">
+        <div class="request-track-empty">جاري تحميل أرشيف طلباتك...</div>
       </div>
     </div>
   </div>
@@ -8554,6 +9091,8 @@ body.modal-lock{
     ref,
     get,
     set,
+    update,
+    remove,
     runTransaction,
     onDisconnect
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -8571,7 +9110,7 @@ body.modal-lock{
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  window.firebaseDB = { db, ref, get, set, runTransaction, onDisconnect };
+  window.firebaseDB = { db, ref, get, set, update, remove, runTransaction, onDisconnect };
 </script>
 
 
@@ -8978,6 +9517,31 @@ function setRequestStatus(message, type) {
     box.textContent = message;
 }
 
+function escapeHtml(value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+}
+
+function getCurrentRequestThreadCount(requests) {
+    const deviceId = getDeviceId();
+    return (requests || []).filter(r => r && r.deviceId === deviceId).length;
+}
+
+function getUnreadCustomerCount(requests) {
+    const deviceId = getDeviceId();
+    let count = 0;
+    (requests || []).forEach(req => {
+        if (!req || req.deviceId !== deviceId) return;
+        const messages = Object.values(req.messages || {});
+        count += messages.filter(m => (m.senderRole === "admin" || m.senderRole === "system") && !m.seenByCustomer).length;
+    });
+    return count;
+}
+
 window.openRequestModal = function () {
     const modal = document.getElementById("requestModal");
     if (!modal) return;
@@ -8986,7 +9550,10 @@ window.openRequestModal = function () {
     document.body.classList.add("modal-lock");
     setTimeout(() => {
         const first = document.getElementById("requestNameInput");
-        if (first) first.focus();
+        if (first) {
+            first.focus();
+            first.select();
+        }
     }, 60);
 };
 
@@ -9006,39 +9573,144 @@ window.closeRequestAdminModal = function () {
     document.body.classList.remove("modal-lock");
 };
 
+window.closeRequestTrackModal = function () {
+    const modal = document.getElementById("requestTrackModal");
+    if (!modal) return;
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-lock");
+};
+
+async function getAllMaterialRequests() {
+    if (!window.firebaseDB || !window.firebaseDB.db) return [];
+    const { db, ref, get } = window.firebaseDB;
+    const snap = await get(ref(db, "materialRequests"));
+    const data = snap.exists() ? snap.val() : {};
+    return Object.values(data || {}).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
 window.refreshMaterialRequestCount = async function () {
-    const badge = document.getElementById("requestAdminCount");
-    if (!badge) return;
-    if (!window.firebaseDB || !window.firebaseDB.db) {
-        badge.textContent = "0";
-        return;
-    }
+    const adminBadge = document.getElementById("requestAdminCount");
+    const userBadge = document.getElementById("requestUserCount");
     try {
-        const { db, ref, get } = window.firebaseDB;
-        const snap = await get(ref(db, "materialRequests"));
-        const data = snap.exists() ? snap.val() : {};
-        const count = Object.keys(data || {}).length;
-        badge.textContent = String(count);
-        badge.style.display = count > 0 ? "flex" : "none";
+        const arr = await getAllMaterialRequests();
+        if (adminBadge) {
+            const activeAdminCount = arr.filter(r => r && !r.archivedForAdmin).length;
+            adminBadge.textContent = String(activeAdminCount);
+            adminBadge.style.display = activeAdminCount > 0 ? "flex" : "none";
+        }
+        if (userBadge) {
+            const deviceId = getDeviceId();
+            const visibleForCustomer = arr.filter(r => r && r.deviceId === deviceId && !r.customerDeleted);
+            const unread = visibleForCustomer.reduce((count, req) => {
+                const msgs = Object.values(req.messages || {});
+                return count + msgs.filter(m => (m.senderRole === "admin" || m.senderRole === "system") && !m.seenByCustomer).length;
+            }, 0);
+            userBadge.textContent = String(unread);
+            userBadge.style.display = unread > 0 ? "flex" : "none";
+        }
     } catch (err) {
         console.error("refreshMaterialRequestCount:", err);
-        badge.textContent = "0";
-        badge.style.display = "none";
+        if (adminBadge) { adminBadge.textContent = "0"; adminBadge.style.display = "none"; }
+        if (userBadge) { userBadge.textContent = "0"; userBadge.style.display = "none"; }
     }
 };
+
+let currentAdminRequestView = 'active';
+let currentTrackRequestView = 'active';
+
+function setRequestViewButtons() {
+    const adminRefreshBtn = document.getElementById('requestAdminRefreshBtn');
+    const adminActiveTab = document.getElementById('requestAdminActiveTabBtn');
+    const adminArchiveTab = document.getElementById('requestAdminArchiveTabBtn');
+    const trackRefreshBtn = document.getElementById('requestTrackRefreshBtn');
+    const trackActiveTab = document.getElementById('requestTrackActiveTabBtn');
+    const trackArchiveTab = document.getElementById('requestTrackArchiveTabBtn');
+
+    if (adminActiveTab) adminActiveTab.classList.toggle('is-active', currentAdminRequestView === 'active');
+    if (adminArchiveTab) adminArchiveTab.classList.toggle('is-active', currentAdminRequestView === 'archive');
+    if (trackActiveTab) trackActiveTab.classList.toggle('is-active', currentTrackRequestView === 'active');
+    if (trackArchiveTab) trackArchiveTab.classList.toggle('is-active', currentTrackRequestView === 'archive');
+    if (adminRefreshBtn) adminRefreshBtn.classList.remove('is-active');
+    if (trackRefreshBtn) trackRefreshBtn.classList.remove('is-active');
+
+    const adminActivePanel = document.getElementById('requestAdminActivePanel');
+    const adminArchivePanel = document.getElementById('requestAdminArchivePanel');
+    const trackActivePanel = document.getElementById('requestTrackActivePanel');
+    const trackArchivePanel = document.getElementById('requestTrackArchivePanel');
+
+    if (adminActivePanel) adminActivePanel.classList.toggle('is-active', currentAdminRequestView === 'active');
+    if (adminArchivePanel) adminArchivePanel.classList.toggle('is-active', currentAdminRequestView === 'archive');
+    if (trackActivePanel) trackActivePanel.classList.toggle('is-active', currentTrackRequestView === 'active');
+    if (trackArchivePanel) trackArchivePanel.classList.toggle('is-active', currentTrackRequestView === 'archive');
+}
+
+window.switchAdminRequestView = async function(view) {
+    currentAdminRequestView = view === 'archive' ? 'archive' : 'active';
+    setRequestViewButtons();
+    await loadMaterialRequests();
+};
+
+window.switchTrackRequestView = async function(view) {
+    currentTrackRequestView = view === 'archive' ? 'archive' : 'active';
+    setRequestViewButtons();
+    await loadCustomerRequests();
+};
+
+let requestToastTimer = null;
+
+function showRequestToast(type, title, sub) {
+    const toast = document.getElementById('requestToast');
+    if (!toast) return;
+    const icon = toast.querySelector('.request-toast-icon');
+    const titleEl = toast.querySelector('.request-toast-title');
+    const subEl = toast.querySelector('.request-toast-sub');
+    clearTimeout(requestToastTimer);
+    toast.className = 'request-toast show is-' + type;
+    if (titleEl) titleEl.textContent = title || '';
+    if (subEl) subEl.textContent = sub || '';
+    if (icon) {
+        icon.innerHTML = type === 'loading'
+            ? '<i class="fas fa-circle-notch fa-spin"></i>'
+            : (type === 'success'
+                ? '<i class="fas fa-check"></i>'
+                : '<i class="fas fa-triangle-exclamation"></i>');
+    }
+}
+function hideRequestToast(delay = 0) {
+    const toast = document.getElementById('requestToast');
+    if (!toast) return;
+    clearTimeout(requestToastTimer);
+    requestToastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+    }, delay);
+}
 
 window.openRequestAdminModal = async function () {
     if (!isAdminUser()) {
         alert("هذه الخاصية حصراً للإدمن");
         return;
     }
+    currentAdminRequestView = 'active';
     const modal = document.getElementById("requestAdminModal");
     if (!modal) return;
     modal.classList.add("show");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-lock");
+    setRequestViewButtons();
     await refreshMaterialRequestCount();
     await loadMaterialRequests();
+};
+
+window.openRequestTrackModal = async function () {
+    currentTrackRequestView = 'active';
+    const modal = document.getElementById("requestTrackModal");
+    if (!modal) return;
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-lock");
+    setRequestViewButtons();
+    await loadCustomerRequests();
 };
 
 window.submitMaterialRequest = async function () {
@@ -9052,40 +9724,75 @@ window.submitMaterialRequest = async function () {
     const item = (itemInput?.value || "").trim();
 
     if (!name || !phone || !item) {
-        setRequestStatus("يرجى ملء الاسم ورقم الهاتف وطلب المادة قبل الإرسال.", "error");
+        showRequestToast('error', 'بيانات ناقصة', 'يرجى ملء الاسم ورقم الهاتف وطلب المادة.');
+        hideRequestToast(3200);
         return;
     }
 
     if (!window.firebaseDB || !window.firebaseDB.db) {
-        setRequestStatus("ربط Firebase غير جاهز حالياً. جرّب مرة ثانية.", "error");
+        showRequestToast('error', 'Firebase غير جاهز', 'جرّب مرة ثانية بعد لحظات.');
+        hideRequestToast(3200);
         return;
     }
 
     try {
         submitBtn.disabled = true;
-        setRequestStatus("جاري إرسال الطلب...", "success");
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال';
+        const sendingStartedAt = Date.now();
+        showRequestToast('loading', 'جاري إرسال الطلب', 'لحظات ونثبت طلبك بشكل آمن داخل السيرفر...');
 
         const { db, ref, set } = window.firebaseDB;
-        const requestId = "REQ-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+        const now = Date.now();
+        const requestId = "REQ-" + now.toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+        const firstMsgId = "MSG-" + now.toString(36).toUpperCase();
+        const deviceId = getDeviceId();
 
         await set(ref(db, `materialRequests/${requestId}`), {
             id: requestId,
             name,
             phone,
             item,
-            deviceId: getDeviceId(),
-            createdAt: Date.now(),
-            status: "new"
+            deviceId,
+            createdAt: now,
+            updatedAt: now,
+            status: "new",
+            customerDeleted: false,
+            customerArchived: false,
+            archivedForAdmin: false,
+            messages: {
+                [firstMsgId]: {
+                    id: firstMsgId,
+                    senderRole: "customer",
+                    text: `طلب مادة: ${item}`,
+                    createdAt: now,
+                    seenByAdmin: false,
+                    seenByCustomer: true
+                }
+            }
         });
 
-        setRequestStatus("تم إرسال الطلب بنجاح. راح نراجع طلبك بأسرع وقت.", "success");
-        await refreshMaterialRequestCount();
+        const loadingElapsed = Date.now() - sendingStartedAt;
+        const minLoadingDuration = 1600;
+        if (loadingElapsed < minLoadingDuration) {
+            await new Promise(resolve => setTimeout(resolve, minLoadingDuration - loadingElapsed));
+        }
+        if (nameInput) nameInput.value = "";
+        if (phoneInput) phoneInput.value = "";
         if (itemInput) itemInput.value = "";
+        showRequestToast('success', 'تم إرسال الطلب', 'وصلنا طلبك بنجاح، وراح نراجعه بأقرب وقت.');
+        hideRequestToast(1350);
+        await refreshMaterialRequestCount();
+        setTimeout(() => {
+            const first = document.getElementById("requestNameInput");
+            if (first) first.focus();
+        }, 120);
     } catch (err) {
         console.error("submitMaterialRequest:", err);
-        setRequestStatus("فشل إرسال الطلب حالياً. تأكد من الإنترنت أو أعد المحاولة.", "error");
+        showRequestToast('error', 'تعذّر الإرسال', 'تأكد من الإنترنت أو جرّب مرة ثانية.');
+        hideRequestToast(2200);
     } finally {
         submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب';
     }
 };
 
@@ -9098,46 +9805,266 @@ function formatRequestTime(ts) {
     }
 }
 
-window.loadMaterialRequests = async function () {
-    const list = document.getElementById("requestAdminList");
-    if (!list) return;
+async function markMessagesSeenForCustomer(requestId, req) {
+    if (!window.firebaseDB || !window.firebaseDB.db || !req) return;
+    const { db, ref, update } = window.firebaseDB;
+    const updates = {};
+    Object.values(req.messages || {}).forEach(msg => {
+        if ((msg.senderRole === "admin" || msg.senderRole === "system") && !msg.seenByCustomer) {
+            updates[`materialRequests/${requestId}/messages/${msg.id}/seenByCustomer`] = true;
+        }
+    });
+    if (Object.keys(updates).length) await update(ref(db), updates);
+}
 
+window.sendCustomerReply = async function (requestId) {
+    const input = document.getElementById(`requestTrackReply_${requestId}`);
+    const text = (input?.value || "").trim();
+    if (!text) return;
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
+    const { db, ref, update } = window.firebaseDB;
+    const now = Date.now();
+    const msgId = "MSG-" + now.toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2,5).toUpperCase();
+    await update(ref(db), {
+        [`materialRequests/${requestId}/messages/${msgId}`]: {
+            id: msgId,
+            senderRole: "customer",
+            text,
+            createdAt: now,
+            seenByAdmin: false,
+            seenByCustomer: true
+        },
+        [`materialRequests/${requestId}/updatedAt`]: now,
+        [`materialRequests/${requestId}/status`]: 'processing'
+    });
+    if (input) input.value = "";
+    await loadCustomerRequests();
+    await refreshMaterialRequestCount();
+};
+
+window.archiveCustomerRequest = async function (requestId) {
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
+    const { db, ref, update } = window.firebaseDB;
+    await update(ref(db), {
+        [`materialRequests/${requestId}/customerArchived`]: true,
+        [`materialRequests/${requestId}/updatedAt`]: Date.now()
+    });
+    await loadCustomerRequests();
+    await refreshMaterialRequestCount();
+};
+
+window.deleteCustomerArchivedRequest = async function (requestId) {
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
+    const { db, ref, update } = window.firebaseDB;
+    await update(ref(db), {
+        [`materialRequests/${requestId}/customerDeleted`]: true,
+        [`materialRequests/${requestId}/updatedAt`]: Date.now()
+    });
+    await loadCustomerRequests();
+    await refreshMaterialRequestCount();
+};
+
+window.loadCustomerRequests = async function () {
+    const activeList = document.getElementById("requestTrackActivePanel");
+    const archiveList = document.getElementById("requestTrackArchivePanel");
+    if (!activeList || !archiveList) return;
     if (!window.firebaseDB || !window.firebaseDB.db) {
-        list.innerHTML = '<div class="request-admin-empty">Firebase غير جاهز حالياً.</div>';
+        activeList.innerHTML = '<div class="request-track-empty">Firebase غير جاهز حالياً.</div>';
+        archiveList.innerHTML = '<div class="request-track-empty">Firebase غير جاهز حالياً.</div>';
         return;
     }
-
-    list.innerHTML = '<div class="request-admin-empty">جاري تحميل الطلبات...</div>';
-
+    activeList.innerHTML = currentTrackRequestView === 'active' ? '<div class="request-track-empty">جاري تحميل طلباتك...</div>' : '';
+    archiveList.innerHTML = currentTrackRequestView === 'archive' ? '<div class="request-track-empty">جاري تحميل أرشيف طلباتك...</div>' : '';
     try {
-        const { db, ref, get } = window.firebaseDB;
-        const snap = await get(ref(db, "materialRequests"));
-        const data = snap.exists() ? snap.val() : {};
-        const arr = Object.values(data || {}).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-        const badge = document.getElementById("requestAdminCount");
-        if (badge) {
-            badge.textContent = String(arr.length);
-            badge.style.display = arr.length > 0 ? "flex" : "none";
+        const deviceId = getDeviceId();
+        const allRequests = (await getAllMaterialRequests()).filter(req => req && req.deviceId === deviceId && !req.customerDeleted);
+        for (const req of allRequests) {
+            await markMessagesSeenForCustomer(req.id, req);
         }
+        const refreshed = (await getAllMaterialRequests()).filter(req => req && req.deviceId === deviceId && !req.customerDeleted);
+        const activeRequests = refreshed.filter(req => !req.customerArchived);
+        const archiveRequests = refreshed.filter(req => !!req.customerArchived);
 
-        if (!arr.length) {
-            list.innerHTML = '<div class="request-admin-empty">لا توجد طلبات مواد حالياً.</div>';
-            return;
-        }
+        const renderCustomerCard = (req, archived = false) => {
+            const msgs = Object.values(req.messages || {}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+            const statusClass = req.status === 'processed' ? 'processed' : (req.status === 'processing' ? 'processing' : 'new');
+            const statusText = req.status === 'processed' ? 'تمت المعالجة' : (req.status === 'processing' ? 'قيد المتابعة' : 'جديد');
+            const messagesHtml = msgs.map(msg => `
+                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}">
+                  <div class="request-message-head">
+                    <span>${msg.senderRole === 'customer' ? 'أنت' : (msg.senderRole === 'admin' ? 'الإدارة' : 'النظام')}</span>
+                    <span>${formatRequestTime(msg.createdAt)}</span>
+                  </div>
+                  <div>${escapeHtml(msg.text || '')}</div>
+                </div>
+            `).join('');
+            const actions = archived ? `
+                <div class="request-thread-actions">
+                  <button class="request-track-clear" type="button" onclick="deleteCustomerArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف من جهازي</button>
+                </div>` : (req.status !== 'processed' ? `
+                <div class="request-thread-actions is-stack">
+                  <textarea id="requestTrackReply_${escapeHtml(req.id)}" class="request-track-input" placeholder="اكتب ردك أو أي توضيح إضافي..."></textarea>
+                  <button class="request-track-send" type="button" onclick="sendCustomerReply('${escapeHtml(req.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button>
+                </div>` : `
+                <div class="request-thread-actions">
+                  <button class="request-track-clear" type="button" onclick="archiveCustomerRequest('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة الطلب</button>
+                </div>`);
+            return `
+              <div class="request-thread-card">
+                <div class="request-thread-head">
+                  <div>
+                    <div class="request-thread-id">${escapeHtml(req.id)}</div>
+                    <div class="request-thread-time">${formatRequestTime(req.createdAt)}</div>
+                  </div>
+                  <div class="request-thread-status ${statusClass}">${statusText}</div>
+                </div>
+                <div class="request-thread-main"><strong>المادة:</strong> ${escapeHtml(req.item || '-')}</div>
+                <div class="request-messages">${messagesHtml}</div>
+                ${actions}
+              </div>`;
+        };
 
-        list.innerHTML = arr.map(req => `
-          <div class="request-admin-card">
-            <div class="request-admin-card-head">
-              <div class="request-admin-name">${(req.name || "بدون اسم")}</div>
-              <div class="request-admin-time">${formatRequestTime(req.createdAt)}</div>
-            </div>
-            <div class="request-admin-phone"><i class="fas fa-phone"></i>${(req.phone || "-")}</div>
-            <div class="request-admin-item"><i class="fas fa-box"></i>${(req.item || "-")}</div>
-          </div>
-        `).join("");
+        activeList.innerHTML = activeRequests.length
+            ? activeRequests.map(req => renderCustomerCard(req, false)).join('')
+            : '<div class="request-track-empty">ما عندك طلب حاليا تكدر تطلب طلب جديد من زر طلب.</div>';
+
+        archiveList.innerHTML = archiveRequests.length
+            ? archiveRequests.map(req => renderCustomerCard(req, true)).join('')
+            : '<div class="request-track-empty">أرشيف طلباتك فارغ حالياً.</div>';
+
+        setRequestViewButtons();
+        await refreshMaterialRequestCount();
+    } catch (err) {
+        console.error('loadCustomerRequests:', err);
+        activeList.innerHTML = '<div class="request-track-empty">تعذّر جلب طلباتك حالياً.</div>';
+        archiveList.innerHTML = '<div class="request-track-empty">تعذّر جلب الأرشيف حالياً.</div>';
+    }
+};
+
+window.sendAdminReply = async function (requestId) {
+    const input = document.getElementById(`requestAdminReply_${requestId}`);
+    const text = (input?.value || '').trim();
+    if (!text || !window.firebaseDB || !window.firebaseDB.db) return;
+    const { db, ref, update } = window.firebaseDB;
+    const now = Date.now();
+    const msgId = "MSG-" + now.toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2,5).toUpperCase();
+    await update(ref(db), {
+        [`materialRequests/${requestId}/messages/${msgId}`]: {
+            id: msgId,
+            senderRole: 'admin',
+            text,
+            createdAt: now,
+            seenByAdmin: true,
+            seenByCustomer: false
+        },
+        [`materialRequests/${requestId}/updatedAt`]: now,
+        [`materialRequests/${requestId}/status`]: 'processing'
+    });
+    if (input) input.value = '';
+    await loadMaterialRequests();
+    await refreshMaterialRequestCount();
+};
+
+window.markRequestProcessed = async function (requestId) {
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
+    const { db, ref, update } = window.firebaseDB;
+    const now = Date.now();
+    const msgId = "MSG-" + now.toString(36).toUpperCase() + "-DONE";
+    await update(ref(db), {
+        [`materialRequests/${requestId}/messages/${msgId}`]: {
+            id: msgId,
+            senderRole: 'system',
+            text: 'تمت معالجة الطلب. إذا تحتاج شيء ثاني تگدر ترسل طلب جديد.',
+            createdAt: now,
+            seenByAdmin: true,
+            seenByCustomer: false
+        },
+        [`materialRequests/${requestId}/updatedAt`]: now,
+        [`materialRequests/${requestId}/status`]: 'processed',
+        [`materialRequests/${requestId}/archivedForAdmin`]: true
+    });
+    await loadMaterialRequests();
+    await refreshMaterialRequestCount();
+};
+
+window.deleteAdminArchivedRequest = async function (requestId) {
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
+    const { db, ref, remove } = window.firebaseDB;
+    await remove(ref(db, `materialRequests/${requestId}`));
+    await loadMaterialRequests();
+    await refreshMaterialRequestCount();
+};
+
+window.loadMaterialRequests = async function () {
+    const activeList = document.getElementById("requestAdminActivePanel");
+    const archiveList = document.getElementById("requestAdminArchivePanel");
+    if (!activeList || !archiveList) return;
+    if (!window.firebaseDB || !window.firebaseDB.db) {
+        activeList.innerHTML = '<div class="request-admin-empty">Firebase غير جاهز حالياً.</div>';
+        archiveList.innerHTML = '<div class="request-admin-empty">Firebase غير جاهز حالياً.</div>';
+        return;
+    }
+    activeList.innerHTML = currentAdminRequestView === 'active' ? '<div class="request-admin-empty">جاري تحميل الطلبات...</div>' : '';
+    archiveList.innerHTML = currentAdminRequestView === 'archive' ? '<div class="request-admin-empty">جاري تحميل أرشيف الطلبات...</div>' : '';
+    try {
+        const arr = await getAllMaterialRequests();
+        const activeRequests = arr.filter(req => req && !req.archivedForAdmin);
+        const archiveRequests = arr.filter(req => req && !!req.archivedForAdmin);
+
+        const renderAdminCard = (req, archived = false) => {
+            const msgs = Object.values(req.messages || {}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+            const statusClass = req.status === 'processed' ? 'processed' : (req.status === 'processing' ? 'processing' : 'new');
+            const statusText = archived ? 'في الأرشيف' : (req.status === 'processed' ? 'تمت المعالجة' : (req.status === 'processing' ? 'قيد المتابعة' : 'جديد'));
+            const messagesHtml = msgs.map(msg => `
+                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}">
+                  <div class="request-message-head">
+                    <span>${msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'الإدارة' : 'النظام')}</span>
+                    <span>${formatRequestTime(msg.createdAt)}</span>
+                  </div>
+                  <div>${escapeHtml(msg.text || '')}</div>
+                </div>
+            `).join('');
+            return `
+              <div class="request-admin-card">
+                <div class="request-admin-card-head">
+                  <div>
+                    <div class="request-admin-name">${escapeHtml(req.name || 'بدون اسم')}</div>
+                    <div class="request-admin-time">${formatRequestTime(req.createdAt)}</div>
+                  </div>
+                  <div class="request-thread-status ${statusClass}">${statusText}</div>
+                </div>
+                <div class="request-admin-meta">
+                  <span class="request-admin-chip">${escapeHtml(req.id || '')}</span>
+                  <span class="request-admin-chip">${escapeHtml(req.deviceId || '')}</span>
+                </div>
+                <div class="request-admin-phone"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</div>
+                <div class="request-admin-item"><i class="fas fa-box"></i>${escapeHtml(req.item || '-')}</div>
+                <div class="request-messages">${messagesHtml}</div>
+                ${archived ? `
+                <div class="request-admin-card-actions">
+                  <button class="request-track-clear" type="button" onclick="deleteAdminArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button>
+                </div>` : `
+                <textarea id="requestAdminReply_${escapeHtml(req.id)}" class="request-admin-reply-input" placeholder="اكتب رد للإدارة على هذا الطلب..."></textarea>
+                <div class="request-admin-card-actions">
+                  <button class="request-admin-send" type="button" onclick="sendAdminReply('${escapeHtml(req.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button>
+                  <button class="request-admin-done" type="button" onclick="markRequestProcessed('${escapeHtml(req.id)}')"><i class="fas fa-check-double"></i> تمّت المعالجة</button>
+                </div>`}
+              </div>`;
+        };
+
+        activeList.innerHTML = activeRequests.length
+            ? activeRequests.map(req => renderAdminCard(req, false)).join('')
+            : '<div class="request-admin-empty">لا توجد طلبات مواد حالياً.</div>';
+
+        archiveList.innerHTML = archiveRequests.length
+            ? archiveRequests.map(req => renderAdminCard(req, true)).join('')
+            : '<div class="request-admin-empty">أرشيف الطلبات فارغ حالياً.</div>';
+
+        setRequestViewButtons();
     } catch (err) {
         console.error("loadMaterialRequests:", err);
-        list.innerHTML = '<div class="request-admin-empty">تعذّر جلب الطلبات حالياً.</div>';
+        activeList.innerHTML = '<div class="request-admin-empty">تعذّر جلب الطلبات حالياً.</div>';
+        archiveList.innerHTML = '<div class="request-admin-empty">تعذّر جلب الأرشيف حالياً.</div>';
     }
 };
 
@@ -9160,10 +10087,17 @@ document.addEventListener("DOMContentLoaded", () => {
     updateRequestAdminHeaderBtn();
     updateRequestAdminFloatingBtn();
     syncRequestButtonsToNewBtn();
+    setRequestViewButtons();
     initFirebaseStats();
     refreshMaterialRequestCount();
 
+    const requestUserHeaderBtn = document.getElementById("requestUserHeaderBtn");
     const requestHeaderBtn = document.getElementById("requestAdminHeaderBtn");
+    if (requestUserHeaderBtn) {
+        requestUserHeaderBtn.addEventListener("click", () => {
+            openRequestTrackModal();
+        });
+    }
     if (requestHeaderBtn) {
         requestHeaderBtn.addEventListener("click", () => {
             if (!isAdminUser()) return;
@@ -9173,8 +10107,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const requestShell = document.querySelector("#requestModal .request-shell");
     const requestAdminShell = document.querySelector("#requestAdminModal .request-admin-shell");
+    const requestTrackShell = document.querySelector("#requestTrackModal .request-track-shell");
     if (requestShell) requestShell.addEventListener("click", e => e.stopPropagation());
     if (requestAdminShell) requestAdminShell.addEventListener("click", e => e.stopPropagation());
+    if (requestTrackShell) requestTrackShell.addEventListener("click", e => e.stopPropagation());
 });
 
 // ================================================================
