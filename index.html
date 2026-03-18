@@ -4147,6 +4147,16 @@ footer {
   z-index: 3;
 }
 
+#requestAdminHeaderBtn{
+  background: radial-gradient(circle at top left, rgba(192,132,252,.32), rgba(15,23,42,.2));
+}
+#requestAdminHeaderBtn i{
+  font-size: 12px;
+}
+.request-header-badge{
+  background: linear-gradient(135deg, #1f2937, #111827);
+}
+
 /* ===== Overlay (اذا مو موجود عندك) ===== */
 .overlay{
   position: fixed;
@@ -6952,403 +6962,407 @@ footer p{
   --ram-glow: rgba(251,191,36,.35);
 }
 
-/* فعّلها بإضافة class="ramadan-mode" على الـ body */
-body.ramadan-mode::before{
-  content:"";
-  position: fixed;
-  inset: 0;
-  pointer-events:none;
-  z-index: 0;
-  background:
-    radial-gradient(1000px 540px at 10% 8%, rgba(34,197,94,.14), transparent 55%),
-    radial-gradient(900px 520px at 90% 12%, rgba(245,158,11,.14), transparent 60%),
-    radial-gradient(700px 380px at 50% 0%, rgba(251,191,36,.10), transparent 55%);
-  mix-blend-mode: screen;
-  opacity: .9;
+
+/* ===== طلب مادة العائم ===== */
+.floating-request-btn,
+.floating-request-admin-btn{
+    position: fixed;
+    bottom: 50px;
+    left: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1002;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+    outline: none;
+    will-change: transform, opacity;
+    transition: opacity .32s ease, transform .32s ease, filter .25s ease, box-shadow .25s ease;
+    text-align: center;
+    font-family: 'Cairo', sans-serif;
+    overflow: hidden;
+    isolation: isolate;
+    box-shadow:
+      0 10px 25px rgba(0,0,0,.35),
+      0 0 18px rgba(41, 182, 246, .14);
 }
 
-/* الحامل العلوي: نخليه تحت الهيدر (الهيدر عندك 40px) */
-.ramadan-decor{
-  position: fixed;
-  top: 40px;              /* مهم: تحت الهيدر */
-  left: 0;
-  width: 100%;
-  height: 150px;
-  pointer-events: none;
-  z-index: 1;          /* تحت الهيدر (الهيدر 2000) */
-  overflow: visible;
-  filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+.floating-request-btn{
+    background:
+      radial-gradient(circle at 30% 25%, rgba(56,189,248,.28), rgba(56,189,248,0) 44%),
+      linear-gradient(135deg, #0b1220, #111827);
+    border: 1px solid rgba(56, 189, 248, .58);
+    color: #8ae8ff;
+    font-weight: 900;
+    font-size: 13px;
+    line-height: 1.05;
 }
 
-.ramadan-decor::after{
-  /* ضباب/هالة خفيفة حتى يصير “فخم” */
-  content:"";
-  position:absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 140px;
-  background: linear-gradient(to bottom, rgba(2,6,23,.55), transparent);
-  opacity: .55;
+.floating-request-btn::before,
+.floating-request-admin-btn::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.03) 52%, rgba(255,255,255,0));
+    pointer-events:none;
+    z-index:0;
 }
 
-/* كل تعليقة */
-.ramadan-decor .hanger{
-  position: absolute;
-  top: 0;
-  left: calc(var(--x) * 1%);
-  transform: translateX(-50%);
-  transform-origin: top center;
+.floating-request-btn::after,
+.floating-request-admin-btn::after{
+    content:"";
+    position:absolute;
+    top:-42%;
+    left:-82%;
+    width:54%;
+    height:190%;
+    transform:rotate(18deg);
+    background:linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,255,255,0.00) 18%,
+      rgba(255,255,255,0.23) 50%,
+      rgba(255,255,255,0.02) 82%,
+      transparent 100%
+    );
+    filter:blur(1.6px);
+    opacity:0;
+    z-index:1;
+    pointer-events:none;
+    animation: headerLogoGlassShine 2.6s linear infinite;
 }
 
-/* الخيط */
-.ramadan-decor .string{
-  width: 2px;
-  height: calc(var(--len) * 0.2px);
-  background: linear-gradient(to bottom, rgba(255,255,255,.42), var(--ram-string));
-  border-radius: 2px;
-  margin: 0 auto;
-  position: relative;
+.floating-request-btn > span,
+.floating-request-admin-btn > i{
+    position:relative;
+    z-index:2;
 }
 
-/* عقدة صغيرة */
-.ramadan-decor .string::after{
-  content:"";
-  position:absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.20);
-  box-shadow: 0 0 10px rgba(255,255,255,.18);
+.floating-request-btn.show,
+.floating-request-admin-btn.show{
+    display:flex;
+    opacity:1;
+    transform:translateY(0) scale(1);
 }
 
-/* القطعة (هلال/نجمة) */
-.ramadan-decor .ornament{
-  margin-top: 10px;
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border-radius: 14px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 16px 30px rgba(0,0,0,.35);
-  position: relative;
+.floating-request-btn:hover,
+.floating-request-admin-btn:hover{
+    filter:brightness(1.08);
 }
 
-.ramadan-decor .ornament::before{
-  /* لمعة تتحرك */
-  content:"";
-  position:absolute;
-  inset:-35%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
-  transform: translateX(-35%) rotate(14deg);
-  animation: ramShine 3.2s ease-in-out infinite;
-  pointer-events:none;
+.floating-request-btn:active,
+.floating-request-admin-btn:active{
+    transform:translateY(0) scale(.93) !important;
+    filter:brightness(1.12);
 }
 
-@keyframes ramShine{
-  0%{ opacity:0; transform: translateX(-40%) rotate(14deg); }
-  20%{ opacity:.6; }
-  60%{ opacity:.25; }
-  100%{ opacity:0; transform: translateX(40%) rotate(14deg); }
+.floating-request-admin-btn{
+    width: 50px;
+    height: 50px;
+    left: 92px;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(16,185,129,.28), rgba(16,185,129,0) 44%),
+      linear-gradient(135deg, #0b1220, #111827);
+    border: 1px solid rgba(16,185,129,.62);
+    color: #86efac;
+    font-size: 18px;
+    box-shadow:
+      0 10px 25px rgba(0,0,0,.35),
+      0 0 18px rgba(16,185,129,.14);
 }
 
-/* ألوان حسب النوع */
-.ramadan-decor .ornament.gold{
-  border-color: rgba(251,191,36,.30);
-  box-shadow: 0 18px 38px rgba(0,0,0,.38), 0 0 22px var(--ram-glow);
-}
-.ramadan-decor .ornament.green{
-  border-color: rgba(34,197,94,.28);
-  box-shadow: 0 18px 38px rgba(0,0,0,.38), 0 0 18px rgba(34,197,94,.18);
+/* ===== نوافذ طلب المادة ===== */
+body.modal-lock{
+    overflow: hidden !important;
+    touch-action: none;
 }
 
-/* SVG داخل */
-.ramadan-decor svg{
-  width: 28px;
-  height: 28px;
-  filter: drop-shadow(0 0 10px rgba(251,191,36,.25));
+.request-modal,
+.request-admin-modal{
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2, 8, 23, .62);
+    backdrop-filter: blur(10px);
+    z-index: 20040;
+    padding: 16px;
+    overscroll-behavior: contain;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* وميض نجوم صغير */
-@keyframes ramTwinkle{
-  0%,100%{ opacity:.55; transform: scale(1); }
-  50%{ opacity: 1; transform: scale(1.06); }
-}
-.ramadan-decor .spark{
-  position:absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.85);
-  box-shadow: 0 0 16px rgba(255,255,255,.35), 0 0 26px rgba(251,191,36,.25);
-  animation: ramTwinkle 1.6s ease-in-out infinite;
-  opacity: .8;
+.request-modal.show,
+.request-admin-modal.show{
+    display: flex;
+    animation: statsFadeIn .22s ease;
 }
 
-/* نقاط سباركل موزّعة */
-.ramadan-decor .spark.s1{ top: 18px; left: 12%; animation-delay: .1s; }
-.ramadan-decor .spark.s2{ top: 44px; left: 28%; animation-delay: .6s; }
-.ramadan-decor .spark.s3{ top: 22px; left: 52%; animation-delay: .2s; }
-.ramadan-decor .spark.s4{ top: 50px; left: 72%; animation-delay: .9s; }
-.ramadan-decor .spark.s5{ top: 14px; left: 86%; animation-delay: .4s; }
-
-/* إذا المستخدم مفعّل تقليل الحركة */
-@media (prefers-reduced-motion: reduce){
-  .ramadan-decor .ornament::before,
-  .ramadan-decor .spark{
-    animation: none !important;
-  }
+.request-shell,
+.request-admin-shell{
+    width: min(100%, 430px);
+    max-height: min(86vh, 760px);
+    overflow: hidden;
+    border-radius: 24px;
+    background:
+      radial-gradient(circle at top right, rgba(56,189,248,.18), transparent 35%),
+      radial-gradient(circle at bottom left, rgba(24,90,157,.20), transparent 35%),
+      linear-gradient(135deg, rgba(17,24,39,.98), rgba(10,14,23,.98));
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    position: relative;
 }
 
-/* =========================
-   RAMADAN DECOR MOTION (isolated)
-   احذفه بعد رمضان بدون ما يأثر
-========================= */
-
-body.ramadan-mode .ramadan-decor .hanger{
-  will-change: transform;
-  animation: ramHangerSway 5.6s ease-in-out infinite;
+.request-top,
+.request-admin-top{
+    padding: 18px 18px 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
 }
 
-/* اختلافات بسيطة حتى تصير Premium وما تصير “كلها نفس الحركة” */
-body.ramadan-mode .ramadan-decor .hanger:nth-of-type(1){ animation-duration: 6.2s; animation-delay: -1.1s; }
-body.ramadan-mode .ramadan-decor .hanger:nth-of-type(2){ animation-duration: 7.0s; animation-delay: -2.6s; }
-body.ramadan-mode .ramadan-decor .hanger:nth-of-type(3){ animation-duration: 5.4s; animation-delay: -0.7s; }
-body.ramadan-mode .ramadan-decor .hanger:nth-of-type(4){ animation-duration: 6.8s; animation-delay: -3.1s; }
-body.ramadan-mode .ramadan-decor .hanger:nth-of-type(5){ animation-duration: 5.9s; animation-delay: -1.9s; }
-
-/* مهم جداً: لازم نحافظ على translateX(-50%) لأن عندك بالـ .hanger أصلاً */
-@keyframes ramHangerSway{
-  0%,100% { transform: translateX(-50%) rotate(-3.2deg) translateY(0); }
-  50%     { transform: translateX(-50%) rotate( 3.2deg) translateY(1px); }
+.request-title,
+.request-admin-title{
+    display:flex;
+    align-items:center;
+    gap:12px;
 }
 
-/* احترام تقليل الحركة */
-@media (prefers-reduced-motion: reduce){
-  body.ramadan-mode .ramadan-decor .hanger{ animation: none !important; }
+.request-icon,
+.request-admin-icon{
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+    box-shadow: 0 8px 20px rgba(24,90,157,.35);
+    font-size: 20px;
 }
 
-/* ===================== RAMADAN WORDMARK ORNAMENT START ===================== */
-/* يحوّل hanger 1/3/5 إلى كتابة "رمضان كريم" داخل القطعة بدل (المسجد/النجمة) */
-
-/* خط عربي أنيق (شغل مصممين) */
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Aref+Ruqaa+Ink:wght@400;700&family=Noto+Kufi+Arabic:wght@500;700&display=swap");
-
-/* اخفي الـSVG القديم بس على hangers 1/3/5 (حتى الهلال 2/4 يبقى شغّال) */
-body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(1) .ornament svg,
-body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(3) .ornament svg,
-body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(5) .ornament svg{
-  display: none !important;
+.request-title h3,
+.request-admin-title h3{
+    margin:0;
+    font-size: 20px;
+    font-weight: 800;
 }
 
-/* النص داخل القطعة */
-body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(1) .ornament::after,
-body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(3) .ornament::after,
-body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(5) .ornament::after{
-  content: "رمضان\Aكريم";
-  white-space: pre;                 /* حتى \A تنزل سطر */
-  display: grid;
-  place-items: center;
-  text-align: center;
-
-  width: 100%;
-  height: 100%;
-
-  /* بريميوم: خط + وزن */
-  font-family: "Cairo", "Aref Ruqaa Ink", "Noto Kufi Arabic", system-ui, sans-serif;
-  font-weight: 800;                 /* بولد */
-  line-height: 1.02;
-  font-size: 13px;                  /* مضبوط على 44×44 */
-  letter-spacing: -0.2px;
-
-  /* تدرّج ذهبي (default للـgold) */
-  background: linear-gradient(135deg,
-    rgba(251,191,36,.98),
-    rgba(245,158,11,.92)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-
-  /* عمق خفيف حتى يطلع “مصممين” */
-  text-shadow: 0 10px 18px rgba(0,0,0,.22);
+.request-title p,
+.request-admin-title p{
+    margin:3px 0 0;
+    font-size:12px;
+    color: rgba(255,255,255,.68);
 }
 
-/* إذا القطعة خضراء (hanger 3/5 عندك green) نخلي التدرّج أخضر */
-body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(3) .ornament.green::after,
-body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(5) .ornament.green::after{
-  background: linear-gradient(135deg,
-    rgba(34,197,94,.98),
-    rgba(16,185,129,.90)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.request-close,
+.request-admin-close{
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #fff;
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 8px 18px rgba(255,75,43,.28);
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .15s ease, filter .2s ease;
+}
+.request-close:active,
+.request-admin-close:active,
+.request-submit-btn:active,
+.request-admin-refresh:active{
+    transform: scale(.96);
 }
 
-/* للموبايل: أصغر شوي حتى ما يزحم */
-@media (max-width: 480px){
-  body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(1) .ornament::after,
-  body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(3) .ornament::after,
-  body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(5) .ornament::after{
+.request-body{
+    padding: 16px 18px 20px;
+    overflow-y: auto;
+    max-height: calc(86vh - 90px);
+}
+
+.request-grid{
+    display:grid;
+    gap:14px;
+}
+
+.request-field{
+    display:grid;
+    gap:8px;
+}
+
+.request-label{
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,.88);
+}
+
+.request-input,
+.request-textarea{
+    width: 100%;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    font-size: 15px;
+    padding: 14px 15px;
+    outline: none;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.request-input::placeholder,
+.request-textarea::placeholder{
+    color: rgba(255,255,255,.42);
+}
+.request-input:focus,
+.request-textarea:focus{
+    border-color: rgba(56,189,248,.4);
+    box-shadow: 0 0 0 3px rgba(56,189,248,.12);
+}
+.request-textarea{
+    min-height: 112px;
+    resize: vertical;
+}
+
+.request-actions{
+    display:flex;
+    gap:10px;
+    margin-top: 4px;
+}
+.request-submit-btn,
+.request-admin-refresh{
+    flex:1;
+    border:none;
+    border-radius: 16px;
+    padding: 13px 16px;
+    cursor:pointer;
+    font-family:'Cairo', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, #43cea2, #185a9d);
+    box-shadow: 0 12px 22px rgba(24,90,157,.22);
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+.request-submit-btn[disabled]{
+    opacity:.7;
+    cursor:not-allowed;
+}
+
+.request-helper{
+    margin-top: 6px;
     font-size: 12px;
-  }
+    color: rgba(255,255,255,.62);
+    line-height: 1.8;
 }
 
-/* ===================== RAMADAN WORDMARK ORNAMENT END ===================== */
-
-
-/* ===================== RAMADAN CRESCENT ORNAMENT START ===================== */
-/* الهلال للحلقات 2/4: انحف + نفس اللون + بدون هلالين/ابيض */
-
-/* اخفي الـSVG القديم للهلال حتى ما يصير هلالين */
-body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(2) .ornament svg,
-body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(4) .ornament svg{
-  display: none !important;
+.request-status{
+    margin-top: 12px;
+    border-radius: 16px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.8;
+    display:none;
+}
+.request-status.show{ display:block; }
+.request-status.success{
+    background: linear-gradient(135deg, rgba(16,185,129,.18), rgba(16,185,129,.06));
+    border:1px solid rgba(16,185,129,.22);
+    color:#d1fae5;
+}
+.request-status.error{
+    background: linear-gradient(135deg, rgba(239,68,68,.18), rgba(239,68,68,.06));
+    border:1px solid rgba(239,68,68,.22);
+    color:#fee2e2;
 }
 
-/* ثبّت اللون حتى currentColor ما يصير ابيض */
-body.ramadan-mode .ramadan-decor .ornament.gold{ color: rgba(251,191,36,.95) !important; }
-body.ramadan-mode .ramadan-decor .ornament.green{ color: rgba(34,197,94,.95) !important; }
-
-/* ارسم الهلال بـ ::after */
-body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(2) .ornament::after,
-body.ramadan-mode .ramadan-decor > .hanger:nth-of-type(4) .ornament::after{
-  content:"" !important;
-  width: 28px !important;
-  height: 28px !important;
-  display: block !important;
-
-  background: currentColor !important;
-
-  /* هلال أنحف شوي */
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M14.25 3.45a9.05 9.05 0 1 0 0 17.1a7.25 7.25 0 1 1 0-17.1Zm0 2.85a6.6 6.6 0 1 0 0 12.2a5.15 5.15 0 1 1 0-12.2Z'/%3E%3C/svg%3E") center/contain no-repeat !important;
-          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M14.25 3.45a9.05 9.05 0 1 0 0 17.1a7.25 7.25 0 1 1 0-17.1Zm0 2.85a6.6 6.6 0 1 0 0 12.2a5.15 5.15 0 1 1 0-12.2Z'/%3E%3C/svg%3E") center/contain no-repeat !important;
+.request-admin-body{
+    padding: 12px 16px 18px;
+    overflow-y: auto;
+    max-height: calc(86vh - 86px);
 }
-/* ===================== RAMADAN CRESCENT ORNAMENT END ===================== */
-
-
-/* 🟢🟢🟢 RAMADAN IMSAKIYA START 🟢🟢🟢 */
-.floating-ramadan-btn{
-  position: fixed;
-  bottom: 50px;
-  left: 20px;
-
-  /* الحجم راح ينضبط من JS حتى يصير نفس دائرة (جديد) */
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-
-  /* ✅ خلفية رمضانية + لمعة خفيفة */
-  background:
-    radial-gradient(circle at 30% 25%, rgba(245,158,11,.30), rgba(245,158,11,0) 45%),
-    linear-gradient(135deg, #0b1220, #111827);
-
-  border: 1px solid rgba(245, 158, 11, .60);
-
-  box-shadow:
-    0 10px 25px rgba(0,0,0,.35),
-    0 0 18px rgba(245,158,11,.18);
-
-  display: none;
-  align-items: center;
-  justify-content: center;
-
-  z-index: 1002;
-  cursor: pointer;
-
-  text-align: center;
-  font-family: 'Cairo', sans-serif;
-  font-weight: 900;
-  font-size: 11px;
-  line-height: 1.05;
-  color: #fbbf24;
-
-  /* حركة ظهور/اختفاء ناعمة */
-  opacity: 0;
-  transform: translateY(8px) scale(.96);
-  transition: opacity .35s ease, transform .35s ease, filter .35s ease;
-
-  /* ✅ منع التحديد/الهايلايت + لمس مرتب */
-  user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-  touch-action: manipulation;
-  outline: none;
-
-  /* ✅ NEW: يخلي ضغط الزر يبين فوراً */
-  will-change: transform;
+.request-admin-list{
+    display:grid;
+    gap: 12px;
+}
+.request-admin-card{
+    border-radius: 18px;
+    padding: 14px;
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+.request-admin-card-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:10px;
+}
+.request-admin-name{
+    font-size: 18px;
+    font-weight: 800;
+}
+.request-admin-time{
+    font-size: 11px;
+    color: rgba(255,255,255,.6);
+    white-space: nowrap;
+}
+.request-admin-phone,
+.request-admin-item{
+    font-size: 14px;
+    color: rgba(255,255,255,.86);
+    line-height:1.8;
+}
+.request-admin-phone i,
+.request-admin-item i{
+    margin-left: 8px;
+    color: #8ce8ca;
+}
+.request-admin-empty{
+    text-align:center;
+    padding: 22px 14px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    color: rgba(255,255,255,.76);
+}
+@media (max-width: 520px){
+    .floating-request-admin-btn{
+        width: 46px;
+        height: 46px;
+    }
+    .request-shell,
+    .request-admin-shell{
+        width: min(100%, 100%);
+        max-height: min(88vh, 760px);
+        border-radius: 22px;
+    }
+    .request-title h3,
+    .request-admin-title h3{
+        font-size: 18px;
+    }
 }
 
-.floating-ramadan-btn.show{
-  display: flex;
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-/* Hover لطيف */
-.floating-ramadan-btn:hover{
-  filter: brightness(1.08);
-}
-
-/* ✅ NEW: زوم بسيط وقت الضغط (حتى ما يصير "ميت") */
-.floating-ramadan-btn:active{
-  transform: translateY(0) scale(.92) !important; /* تقدر تخليه 0.95 إذا تريد أهدى */
-  filter: brightness(1.12);
-}
-
-/* لا يطلع outline */
-.floating-ramadan-btn:focus{
-  outline: none;
-}
-
-/* === KILL RAMADAN GLOW (minimal override) === */
-body.ramadan-mode .ramadan-decor{ filter: none !important; }
-
-body.ramadan-mode .ramadan-decor .ornament.gold,
-body.ramadan-mode .ramadan-decor .ornament.green{
-  box-shadow: 0 18px 38px rgba(0,0,0,.38) !important; /* بدون glow */
-}
-
-body.ramadan-mode .ramadan-decor svg{
-  filter: none !important;
-}
-
-body.ramadan-mode .ramadan-decor .string::after,
-body.ramadan-mode .ramadan-decor .spark{
-  box-shadow: none !important;
-}
-
-/* إذا تريد تلغي لمعة الحركة (مو شرط للوهج) */
-body.ramadan-mode .ramadan-decor .ornament::before{
-  display:none !important;
-}
-
-/* Ramadan glow OFF فقط */
-body.ramadan-mode .ramadan-decor{ filter:none !important; }
-body.ramadan-mode .ramadan-decor svg{ filter:none !important; }
-body.ramadan-mode .ramadan-decor .ornament.gold,
-body.ramadan-mode .ramadan-decor .ornament.green{
-  box-shadow: 0 18px 38px rgba(0,0,0,.38) !important;
-}
-body.ramadan-mode .ramadan-decor .spark,
-body.ramadan-mode .ramadan-decor .string::after{
-  box-shadow:none !important;
-}
-body.ramadan-mode .ramadan-decor .ornament::before{
-  display:none !important;
-}
-
-
-/* 🔴🔴🔴 RAMADAN IMSAKIYA END 🔴🔴🔴 */
 
 
 
@@ -7741,6 +7755,9 @@ body.ramadan-mode .ramadan-decor .ornament::before{
     .header-cart-btn i {
         font-size: 12px;
     }
+    #requestAdminHeaderBtn i{
+        font-size: 11px;
+    }
     .header-cart-badge{
         top: -8px;
         right: -9px;
@@ -7941,11 +7958,13 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 </div>
 
 
-<!-- 🟢🟢🟢 RAMADAN IMSAKIYA START 🟢🟢🟢 -->
-<div id="ramadanFloatingBtn" class="floating-ramadan-btn" title="امساكية شهر رمضان">
-  <span>امساكية<br>رمضان</span>
+<div id="requestFloatingBtn" class="floating-request-btn" title="طلب مادة">
+  <span>طلب</span>
 </div>
-<!-- 🔴🔴🔴 RAMADAN IMSAKIYA END 🔴🔴🔴 -->
+
+<button id="requestAdminFloatingBtn" class="floating-request-admin-btn" type="button" title="طلبات المواد" aria-label="طلبات المواد" style="display:none;">
+  <i class="fas fa-inbox"></i>
+</button>
 
 <!-- النافذة المنبثقة للعناصر الجديدة -->
 <div id="newItemsModal">
@@ -8081,6 +8100,16 @@ body.ramadan-mode .ramadan-decor .ornament::before{
   <i class="fas fa-chart-column"></i>
 </button>
 
+<button class="header-btn header-cart-btn"
+        id="requestAdminHeaderBtn"
+        type="button"
+        title="متابعة الطلبات"
+        aria-label="متابعة الطلبات"
+        style="display:none;">
+  <i class="fas fa-clipboard-list"></i>
+  <span class="header-cart-badge request-header-badge" id="requestAdminCount" style="display:none;">0</span>
+</button>
+
 <button class="header-btn header-icon-btn contact-btn"
         onclick="openContactModal()"
         title="اتصل بينا"
@@ -8098,69 +8127,7 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 
 
 
-<!-- Ramadan Decor (under header) -->
-<div class="ramadan-decor" id="ramadanDecor" aria-hidden="true">
-  <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span><span class="spark s4"></span><span class="spark s5"></span>
 
-  <!-- hanger 1: star -->
-  <div class="hanger" style="--x: 14; --len: 78;">
-    <div class="string"></div>
-    <div class="ornament gold">
-      <!-- star svg -->
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M12 2.6l2.8 6 6.6.6-5 4.3 1.5 6.4-5.9-3.4-5.9 3.4 1.5-6.4-5-4.3 6.6-.6L12 2.6z"
-              fill="rgba(251,191,36,.95)"/>
-      </svg>
-    </div>
-  </div>
-
-  <!-- hanger 2: crescent -->
-  <div class="hanger" style="--x: 32; --len: 92;">
-    <div class="string"></div>
-    <div class="ornament gold">
-      <!-- crescent svg -->
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M15.6 2.8c-1.7 1.2-2.9 3.3-2.9 5.9 0 3.7 2.5 6.8 6 7.6-1.3 2.9-4.2 4.9-7.7 4.9-4.7 0-8.5-3.8-8.5-8.5 0-4.2 3.1-7.8 7.2-8.4 2.2-.3 4.3.2 5.9 1.5z"
-              fill="rgba(251,191,36,.95)"/>
-      </svg>
-    </div>
-  </div>
-
-  <!-- hanger 3: star -->
-  <div class="hanger" style="--x: 50; --len: 70;">
-    <div class="string"></div>
-    <div class="ornament green">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M12 2.6l2.8 6 6.6.6-5 4.3 1.5 6.4-5.9-3.4-5.9 3.4 1.5-6.4-5-4.3 6.6-.6L12 2.6z"
-              fill="rgba(34,197,94,.95)"/>
-      </svg>
-    </div>
-  </div>
-
-  <!-- hanger 4: crescent -->
-  <div class="hanger" style="--x: 68; --len: 96;">
-    <div class="string"></div>
-    <div class="ornament gold">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M15.6 2.8c-1.7 1.2-2.9 3.3-2.9 5.9 0 3.7 2.5 6.8 6 7.6-1.3 2.9-4.2 4.9-7.7 4.9-4.7 0-8.5-3.8-8.5-8.5 0-4.2 3.1-7.8 7.2-8.4 2.2-.3 4.3.2 5.9 1.5z"
-              fill="rgba(251,191,36,.95)"/>
-      </svg>
-    </div>
-  </div>
-
-  <!-- hanger 5: star -->
-  <div class="hanger" style="--x: 86; --len: 76;">
-    <div class="string"></div>
-    <div class="ornament green">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M12 2.6l2.8 6 6.6.6-5 4.3 1.5 6.4-5.9-3.4-5.9 3.4 1.5-6.4-5-4.3 6.6-.6L12 2.6z"
-              fill="rgba(34,197,94,.95)"/>
-      </svg>
-    </div>
-  </div>
-</div>
-
- 
 <!-- يبقى الـ overlay مثل ما هو -->
 <div id="overlay"></div>
 
@@ -8466,6 +8433,85 @@ body.ramadan-mode .ramadan-decor .ornament::before{
 
 
 
+
+<div id="requestModal" class="request-modal" aria-hidden="true">
+  <div class="request-shell" role="dialog" aria-modal="true" aria-label="طلب مادة">
+    <div class="request-top">
+      <div class="request-title">
+        <div class="request-icon"><i class="fas fa-box-open"></i></div>
+        <div>
+          <h3>طلب مادة</h3>
+          <p>اكتب طلبك ورقمك واحنه نراجع الطلب بأسرع وقت</p>
+        </div>
+      </div>
+      <button class="request-close" type="button" onclick="closeRequestModal()" aria-label="إغلاق">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="request-body">
+      <div class="request-grid">
+        <div class="request-field">
+          <label class="request-label" for="requestNameInput">اسم الشخص</label>
+          <input id="requestNameInput" class="request-input" type="text" maxlength="60" placeholder="اكتب الاسم الكامل">
+        </div>
+
+        <div class="request-field">
+          <label class="request-label" for="requestPhoneInput">رقم الهاتف</label>
+          <input id="requestPhoneInput" class="request-input" type="tel" maxlength="20" placeholder="مثال: 07xxxxxxxxx" dir="ltr">
+        </div>
+
+        <div class="request-field">
+          <label class="request-label" for="requestItemInput">طلب المادة</label>
+          <textarea id="requestItemInput" class="request-textarea" placeholder="مثال: شاشة آيفون 11 أو بطارية سامسونگ A32"></textarea>
+        </div>
+
+        <div class="request-actions">
+          <button id="requestSubmitBtn" class="request-submit-btn" type="button" onclick="submitMaterialRequest()">
+            <i class="fas fa-paper-plane"></i>
+            إرسال الطلب
+          </button>
+        </div>
+
+        <div class="request-helper">
+          يتم إرسال الطلب إلى السيرفر مباشرة ضمن مسار مستقل وما يأثر على الإحصائيات نهائياً.
+        </div>
+
+        <div id="requestStatusBox" class="request-status" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="requestAdminModal" class="request-admin-modal" aria-hidden="true">
+  <div class="request-admin-shell" role="dialog" aria-modal="true" aria-label="طلبات المواد">
+    <div class="request-admin-top">
+      <div class="request-admin-title">
+        <div class="request-admin-icon"><i class="fas fa-inbox"></i></div>
+        <div>
+          <h3>طلبات المواد</h3>
+          <p>آخر الطلبات المرسلة من الزبائن</p>
+        </div>
+      </div>
+      <div class="stats-top-actions">
+        <button class="request-admin-refresh" type="button" onclick="loadMaterialRequests()" aria-label="تحديث الطلبات" title="تحديث الطلبات" style="max-width:120px;">
+          <i class="fas fa-rotate"></i>
+          تحديث
+        </button>
+        <button class="request-admin-close" type="button" onclick="closeRequestAdminModal()" aria-label="إغلاق">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="request-admin-body">
+      <div id="requestAdminList" class="request-admin-list">
+        <div class="request-admin-empty">جاري تحميل الطلبات...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="statsModal" class="stats-modal" aria-hidden="true">
   <div class="stats-shell">
     <div class="stats-top">
@@ -8588,6 +8634,8 @@ function setAdminUser(isAdmin) {
     updateAdminCompatBtn();
     updateAdminWholesaleBtn();
     updateStatsBtn();
+    updateRequestAdminHeaderBtn();
+    updateRequestAdminFloatingBtn();
 }
 
 function updateAdminCompatBtn() {
@@ -8629,6 +8677,12 @@ function openSimilaritesPage() {
 
 function updateStatsBtn() {
     const btn = document.getElementById("statsBtn");
+    if (!btn) return;
+    btn.style.display = isAdminUser() ? "inline-flex" : "none";
+}
+
+function updateRequestAdminHeaderBtn() {
+    const btn = document.getElementById("requestAdminHeaderBtn");
     if (!btn) return;
     btn.style.display = isAdminUser() ? "inline-flex" : "none";
 }
@@ -8916,6 +8970,177 @@ window.closeStatsModal = function () {
     modal.setAttribute("aria-hidden", "true");
 };
 
+
+function setRequestStatus(message, type) {
+    const box = document.getElementById("requestStatusBox");
+    if (!box) return;
+    box.className = "request-status show " + (type || "");
+    box.textContent = message;
+}
+
+window.openRequestModal = function () {
+    const modal = document.getElementById("requestModal");
+    if (!modal) return;
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-lock");
+    setTimeout(() => {
+        const first = document.getElementById("requestNameInput");
+        if (first) first.focus();
+    }, 60);
+};
+
+window.closeRequestModal = function () {
+    const modal = document.getElementById("requestModal");
+    if (!modal) return;
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-lock");
+};
+
+window.closeRequestAdminModal = function () {
+    const modal = document.getElementById("requestAdminModal");
+    if (!modal) return;
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-lock");
+};
+
+window.refreshMaterialRequestCount = async function () {
+    const badge = document.getElementById("requestAdminCount");
+    if (!badge) return;
+    if (!window.firebaseDB || !window.firebaseDB.db) {
+        badge.textContent = "0";
+        return;
+    }
+    try {
+        const { db, ref, get } = window.firebaseDB;
+        const snap = await get(ref(db, "materialRequests"));
+        const data = snap.exists() ? snap.val() : {};
+        const count = Object.keys(data || {}).length;
+        badge.textContent = String(count);
+        badge.style.display = count > 0 ? "flex" : "none";
+    } catch (err) {
+        console.error("refreshMaterialRequestCount:", err);
+        badge.textContent = "0";
+        badge.style.display = "none";
+    }
+};
+
+window.openRequestAdminModal = async function () {
+    if (!isAdminUser()) {
+        alert("هذه الخاصية حصراً للإدمن");
+        return;
+    }
+    const modal = document.getElementById("requestAdminModal");
+    if (!modal) return;
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("modal-lock");
+    await refreshMaterialRequestCount();
+    await loadMaterialRequests();
+};
+
+window.submitMaterialRequest = async function () {
+    const nameInput = document.getElementById("requestNameInput");
+    const phoneInput = document.getElementById("requestPhoneInput");
+    const itemInput = document.getElementById("requestItemInput");
+    const submitBtn = document.getElementById("requestSubmitBtn");
+
+    const name = (nameInput?.value || "").trim();
+    const phone = (phoneInput?.value || "").trim();
+    const item = (itemInput?.value || "").trim();
+
+    if (!name || !phone || !item) {
+        setRequestStatus("يرجى ملء الاسم ورقم الهاتف وطلب المادة قبل الإرسال.", "error");
+        return;
+    }
+
+    if (!window.firebaseDB || !window.firebaseDB.db) {
+        setRequestStatus("ربط Firebase غير جاهز حالياً. جرّب مرة ثانية.", "error");
+        return;
+    }
+
+    try {
+        submitBtn.disabled = true;
+        setRequestStatus("جاري إرسال الطلب...", "success");
+
+        const { db, ref, set } = window.firebaseDB;
+        const requestId = "REQ-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+
+        await set(ref(db, `materialRequests/${requestId}`), {
+            id: requestId,
+            name,
+            phone,
+            item,
+            deviceId: getDeviceId(),
+            createdAt: Date.now(),
+            status: "new"
+        });
+
+        setRequestStatus("تم إرسال الطلب بنجاح. راح نراجع طلبك بأسرع وقت.", "success");
+        await refreshMaterialRequestCount();
+        if (itemInput) itemInput.value = "";
+    } catch (err) {
+        console.error("submitMaterialRequest:", err);
+        setRequestStatus("فشل إرسال الطلب حالياً. تأكد من الإنترنت أو أعد المحاولة.", "error");
+    } finally {
+        submitBtn.disabled = false;
+    }
+};
+
+function formatRequestTime(ts) {
+    try {
+        if (!ts) return "";
+        return new Date(ts).toLocaleString("ar-IQ");
+    } catch {
+        return "";
+    }
+}
+
+window.loadMaterialRequests = async function () {
+    const list = document.getElementById("requestAdminList");
+    if (!list) return;
+
+    if (!window.firebaseDB || !window.firebaseDB.db) {
+        list.innerHTML = '<div class="request-admin-empty">Firebase غير جاهز حالياً.</div>';
+        return;
+    }
+
+    list.innerHTML = '<div class="request-admin-empty">جاري تحميل الطلبات...</div>';
+
+    try {
+        const { db, ref, get } = window.firebaseDB;
+        const snap = await get(ref(db, "materialRequests"));
+        const data = snap.exists() ? snap.val() : {};
+        const arr = Object.values(data || {}).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        const badge = document.getElementById("requestAdminCount");
+        if (badge) {
+            badge.textContent = String(arr.length);
+            badge.style.display = arr.length > 0 ? "flex" : "none";
+        }
+
+        if (!arr.length) {
+            list.innerHTML = '<div class="request-admin-empty">لا توجد طلبات مواد حالياً.</div>';
+            return;
+        }
+
+        list.innerHTML = arr.map(req => `
+          <div class="request-admin-card">
+            <div class="request-admin-card-head">
+              <div class="request-admin-name">${(req.name || "بدون اسم")}</div>
+              <div class="request-admin-time">${formatRequestTime(req.createdAt)}</div>
+            </div>
+            <div class="request-admin-phone"><i class="fas fa-phone"></i>${(req.phone || "-")}</div>
+            <div class="request-admin-item"><i class="fas fa-box"></i>${(req.item || "-")}</div>
+          </div>
+        `).join("");
+    } catch (err) {
+        console.error("loadMaterialRequests:", err);
+        list.innerHTML = '<div class="request-admin-empty">تعذّر جلب الطلبات حالياً.</div>';
+    }
+};
+
 async function initFirebaseStats() {
     try {
         if (!window.firebaseDB || !window.firebaseDB.db) {
@@ -8932,16 +9157,26 @@ document.addEventListener("DOMContentLoaded", () => {
     updateAdminCompatBtn();
     updateAdminWholesaleBtn();
     updateStatsBtn();
+    updateRequestAdminHeaderBtn();
+    updateRequestAdminFloatingBtn();
+    syncRequestButtonsToNewBtn();
     initFirebaseStats();
+    refreshMaterialRequestCount();
+
+    const requestHeaderBtn = document.getElementById("requestAdminHeaderBtn");
+    if (requestHeaderBtn) {
+        requestHeaderBtn.addEventListener("click", () => {
+            if (!isAdminUser()) return;
+            openRequestAdminModal();
+        });
+    }
+
+    const requestShell = document.querySelector("#requestModal .request-shell");
+    const requestAdminShell = document.querySelector("#requestAdminModal .request-admin-shell");
+    if (requestShell) requestShell.addEventListener("click", e => e.stopPropagation());
+    if (requestAdminShell) requestAdminShell.addEventListener("click", e => e.stopPropagation());
 });
 
-document.addEventListener("click", function (e) {
-    const modal = document.getElementById("statsModal");
-    if (!modal) return;
-    if (e.target === modal) {
-        closeStatsModal();
-    }
-});
 // ================================================================
 
       
@@ -8994,62 +9229,70 @@ let touchStartTime; // لتتبع وقت بدء اللمس
 floatingBtn.style.left = "20px";
 floatingBtn.style.bottom = "50px";
 
-// 🟢🟢🟢 RAMADAN IMSAKIYA START 🟢🟢🟢
-const ramadanBtn = document.getElementById("ramadanFloatingBtn");
+// ===== طلب مادة العائم =====
+const requestFloatingBtn = document.getElementById("requestFloatingBtn");
+const requestAdminFloatingBtn = document.getElementById("requestAdminFloatingBtn");
 
-if (ramadanBtn && floatingBtn) {
-  ramadanBtn.addEventListener("click", () => {
-    window.location.href = "https://ahmed202444.github.io/ramadan-app/";
-  });
+function syncRequestButtonsToNewBtn() {
+  if (!requestFloatingBtn || !floatingBtn) return;
+  requestFloatingBtn.style.left = floatingBtn.style.left || "20px";
+  requestFloatingBtn.style.bottom = floatingBtn.style.bottom || "50px";
 
-  function syncRamadanToNewBtn() {
-    // نفس المكان
-    ramadanBtn.style.left = floatingBtn.style.left || "20px";
-    ramadanBtn.style.bottom = floatingBtn.style.bottom || "50px";
+  const cs = window.getComputedStyle(floatingBtn);
+  requestFloatingBtn.style.width = cs.width;
+  requestFloatingBtn.style.height = cs.height;
 
-    // ✅ نفس الأبعاد بالضبط (width/height) من زر جديد
-    const cs = window.getComputedStyle(floatingBtn);
-    ramadanBtn.style.width = cs.width;
-    ramadanBtn.style.height = cs.height;
+  const size = parseFloat(cs.width) || 60;
+  requestFloatingBtn.style.fontSize = Math.max(11, Math.round(size * 0.22)) + "px";
 
-    // نضبط حجم الخط حسب حجم الدائرة
-    const size = parseFloat(cs.width) || 60;
-    ramadanBtn.style.fontSize = Math.max(9, Math.round(size * 0.18)) + "px";
+  if (requestAdminFloatingBtn) {
+    requestAdminFloatingBtn.style.bottom = requestFloatingBtn.style.bottom || "50px";
+    requestAdminFloatingBtn.style.left = ((parseFloat(requestFloatingBtn.style.left) || 20) + (parseFloat(cs.width) || 60) + 12) + "px";
+  }
+}
+
+function updateRequestAdminFloatingBtn() {
+  if (!requestAdminFloatingBtn) return;
+  requestAdminFloatingBtn.style.display = "none";
+  requestAdminFloatingBtn.classList.remove("show");
+}
+
+if (requestFloatingBtn && floatingBtn) {
+  requestFloatingBtn.addEventListener("click", () => openRequestModal());
+  if (requestAdminFloatingBtn) {
+    requestAdminFloatingBtn.addEventListener("click", () => {
+      if (!isAdminUser || !isAdminUser()) return;
+      openRequestAdminModal();
+    });
   }
 
-  let showRamadan = false;
-
+  let showRequest = false;
   setInterval(() => {
-    syncRamadanToNewBtn();
-    showRamadan = !showRamadan;
+    syncRequestButtonsToNewBtn();
+    showRequest = !showRequest;
 
-    if (showRamadan) {
-      // ✨ اختفاء ناعم لزر "جديد"
+    if (showRequest) {
       floatingBtn.classList.add("smooth-hide");
-
-      // بعد ما تخلص حركة الاختفاء، نخفيه فعلياً ونطلع الامساكية
       setTimeout(() => {
         floatingBtn.style.display = "none";
-
-        ramadanBtn.style.display = "flex";
-        requestAnimationFrame(() => ramadanBtn.classList.add("show"));
+        requestFloatingBtn.style.display = "flex";
+        requestFloatingBtn.classList.add("show");
+        updateRequestAdminFloatingBtn();
       }, 360);
-
     } else {
-      // ✨ اختفاء ناعم للامساكية
-      ramadanBtn.classList.remove("show");
+      requestFloatingBtn.classList.remove("show");
+      if (requestAdminFloatingBtn) requestAdminFloatingBtn.classList.remove("show");
 
       setTimeout(() => {
-        ramadanBtn.style.display = "none";
-
-        // رجّع زر "جديد" وطلّعه بنعومة
+        requestFloatingBtn.style.display = "none";
+        if (requestAdminFloatingBtn) requestAdminFloatingBtn.style.display = "none";
         floatingBtn.style.display = "flex";
         requestAnimationFrame(() => floatingBtn.classList.remove("smooth-hide"));
       }, 380);
     }
   }, 5000);
 }
-// 🔴🔴🔴 RAMADAN IMSAKIYA END 🔴🔴🔴
+
 
 // تحديث القيم الأولية بناءً على الموقع الفعلي
 const updateInitialPosition = () => {
@@ -13662,48 +13905,6 @@ async function renderSponsorAd(){
 
   return { maybeShow, showByKey, close };
 })();
-
-
-
-  // فعّل مود رمضان (تقدر تخليها شرط بتاريخ/زر)
-  document.body.classList.add("ramadan-mode");
-
-  // حركة احترافية ناعمة للعلّاقات
-  window.addEventListener("load", () => {
-    const root = document.getElementById("ramadanDecor");
-    if (!root) return;
-
-    // إذا المستخدم مفعّل reduce motion لا نحرك
-    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    // GSAP موجود عندك بالـ head
-    if (window.gsap){
-      const hangers = root.querySelectorAll(".hanger");
-      hangers.forEach((h, i) => {
-        const dur = 2.6 + (i % 3) * 0.35;
-        const ang = 4 + (i % 4);
-        gsap.to(h, {
-          rotation: (i % 2 ? ang : -ang),
-          duration: dur,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1,
-          transformOrigin: "top center"
-        });
-
-        // “نَفَس” خفيف للقطعة نفسها
-        const o = h.querySelector(".ornament");
-        if (o){
-          gsap.to(o, { y: 2.5, duration: 1.8 + (i%3)*0.25, yoyo:true, repeat:-1, ease:"sine.inOut" });
-          gsap.to(o, { filter: "drop-shadow(0 0 16px rgba(251,191,36,.35))", duration: 2.2, yoyo:true, repeat:-1, ease:"sine.inOut" });
-        }
-      });
-    }
-  });
-
-
-
-
 </script>
    
       
