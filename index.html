@@ -2629,13 +2629,12 @@ footer {
     padding: 22px 22px 18px;
     width: min(420px, 92vw);
     background:
-        radial-gradient(circle at top left, rgba(56, 189, 248, 0.20), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.18), transparent 55%),
-        rgba(15, 23, 42, 0.98);
-    box-shadow:
-        0 30px 80px rgba(15, 23, 42, 0.95),
-        0 0 0 1px rgba(51, 65, 85, 0.85);
-    backdrop-filter: blur(22px);
+        radial-gradient(circle at top right, rgba(56,189,248,.18), transparent 35%),
+        radial-gradient(circle at bottom left, rgba(24,90,157,.20), transparent 35%),
+        linear-gradient(135deg, rgba(17,24,39,.98), rgba(10,14,23,.98));
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+    backdrop-filter: blur(18px);
     color: #e5e7eb;
     font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     text-align: center;
@@ -4549,6 +4548,15 @@ footer {
 
 .swal2-container {
   z-index: 30000 !important;
+}
+
+.swal2-container.request-like-backdrop,
+.swal2-container.swal2-backdrop-show{
+  backdrop-filter: blur(10px);
+}
+
+.swal2-container.swal2-backdrop-show .swal2-backdrop{
+  backdrop-filter: blur(10px);
 }
 
 
@@ -7079,9 +7087,57 @@ footer p{
 }
 
 /* ===== نوافذ طلب المادة ===== */
+html.modal-lock,
 body.modal-lock{
     overflow: hidden !important;
-    touch-action: none;
+    touch-action: none !important;
+    overscroll-behavior: none !important;
+}
+
+body.modal-lock{
+    position: relative;
+}
+
+/* تجميد فعلي للخلفية أثناء أي نافذة/رسالة */
+body.modal-lock > *:not(.request-modal):not(.request-admin-modal):not(.request-track-modal):not(.stats-modal):not(.swal2-container){
+    pointer-events: none !important;
+}
+
+body.modal-lock .floating-new-btn,
+body.modal-lock .floating-request-btn,
+body.modal-lock .floating-request-admin-btn,
+body.modal-lock .scroll-top-btn,
+body.modal-lock .header-tech-strip,
+body.modal-lock .promo-popup,
+body.modal-lock #promoPopup,
+body.modal-lock .maintenance-toggle,
+body.modal-lock .offer-banner,
+body.modal-lock .ad-theme,
+body.modal-lock .ad-theme-dua,
+body.modal-lock .ad-theme-ramadan{
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+body.modal-lock *{
+    animation-play-state: paused !important;
+    caret-color: transparent;
+}
+
+body.modal-lock .request-modal,
+body.modal-lock .request-admin-modal,
+body.modal-lock .request-track-modal,
+body.modal-lock .stats-modal,
+body.modal-lock .swal2-container,
+body.modal-lock .request-modal *,
+body.modal-lock .request-admin-modal *,
+body.modal-lock .request-track-modal *,
+body.modal-lock .stats-modal *,
+body.modal-lock .swal2-container *{
+    animation-play-state: running !important;
+    pointer-events: auto;
+    caret-color: auto;
 }
 
 .request-modal,
@@ -8530,6 +8586,71 @@ body.modal-lock{
   }
 }
 
+
+
+/* ===== FINAL TUNING: stats/contact width + vertical centering ===== */
+@media (min-width: 821px){
+  .stats-shell{
+    width: min(920px, calc(100% - 28px)) !important;
+    border-radius: 24px !important;
+  }
+  .stats-body{
+    padding: 18px 18px 20px !important;
+  }
+  .stats-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+  .stats-card{
+    min-height: 168px;
+    padding: 18px !important;
+  }
+  .stats-value{
+    font-size: 36px !important;
+  }
+  .stats-sub{
+    font-size: 13px !important;
+  }
+
+  #contactModal{
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: min(920px, calc(100% - 28px)) !important;
+    max-height: min(86dvh, 760px) !important;
+    overflow-y: auto !important;
+    border-radius: 24px !important;
+    padding: 18px !important;
+  }
+  #contactModal::-webkit-scrollbar{ display:none; }
+  #contactModal{ scrollbar-width:none; -ms-overflow-style:none; }
+
+  .cart-modal{
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 14px !important;
+  }
+  .cart-shell{
+    width: min(980px, calc(100% - 24px)) !important;
+    max-height: min(86dvh, 760px) !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* keep centered look on phone too */
+@media (max-width: 820px){
+  #contactModal{
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: min(100%, calc(100% - 20px)) !important;
+    max-height: min(86dvh, 760px) !important;
+    overflow-y: auto !important;
+  }
+  #contactModal::-webkit-scrollbar{ display:none; }
+  #contactModal{ scrollbar-width:none; -ms-overflow-style:none; }
+}
+
 </style>
 </head>
 <body>
@@ -9374,6 +9495,7 @@ function showStatsLoading() {
     modal.classList.add("show");
     modal.style.display = "flex";
     modal.setAttribute("aria-hidden", "false");
+    syncGlobalModalLock();
     body.innerHTML = `
       <div class="stats-loading">
         <i class="fas fa-spinner fa-spin"></i>
@@ -9621,6 +9743,7 @@ window.closeStatsModal = function () {
     modal.classList.remove("show");
     modal.style.display = "none";
     modal.setAttribute("aria-hidden", "true");
+    syncGlobalModalLock();
 };
 
 
@@ -9764,12 +9887,30 @@ async function markMessagesSeenForAdmin(requestId, req) {
     if (Object.keys(updates).length) await update(ref(db), updates);
 }
 
+function syncGlobalModalLock() {
+    const openCustomModal = !!document.querySelector(
+        '.request-modal.show, .request-admin-modal.show, .request-track-modal.show, .stats-modal.show'
+    );
+    const openSwal = !!document.querySelector('.swal2-container.swal2-backdrop-show');
+    const shouldLock = openCustomModal || openSwal;
+    document.documentElement.classList.toggle('modal-lock', shouldLock);
+    document.body.classList.toggle('modal-lock', shouldLock);
+}
+
+const globalLockObserver = new MutationObserver(() => syncGlobalModalLock());
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.body) {
+        globalLockObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+    }
+    syncGlobalModalLock();
+});
+
 window.openRequestModal = function () {
     const modal = document.getElementById("requestModal");
     if (!modal) return;
     modal.classList.add("show");
     modal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("modal-lock");
+    syncGlobalModalLock();
     clearTimeout(requestSubmitFeedbackTimer);
     setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
 };
@@ -9780,7 +9921,7 @@ window.closeRequestModal = function () {
     if (!modal) return;
     modal.classList.remove("show");
     modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("modal-lock");
+    syncGlobalModalLock();
 };
 
 window.closeRequestAdminModal = function () {
@@ -9788,7 +9929,7 @@ window.closeRequestAdminModal = function () {
     if (!modal) return;
     modal.classList.remove("show");
     modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("modal-lock");
+    syncGlobalModalLock();
 };
 
 window.closeRequestTrackModal = function () {
@@ -9796,7 +9937,7 @@ window.closeRequestTrackModal = function () {
     if (!modal) return;
     modal.classList.remove("show");
     modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("modal-lock");
+    syncGlobalModalLock();
 };
 
 async function getAllMaterialRequests() {
@@ -9914,7 +10055,7 @@ window.openRequestAdminModal = async function () {
     if (!modal) return;
     modal.classList.add("show");
     modal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("modal-lock");
+    syncGlobalModalLock();
     setRequestViewButtons();
     await refreshMaterialRequestCount();
     await loadMaterialRequests();
@@ -9926,7 +10067,7 @@ window.openRequestTrackModal = async function () {
     if (!modal) return;
     modal.classList.add("show");
     modal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("modal-lock");
+    syncGlobalModalLock();
     setRequestViewButtons();
     await loadCustomerRequests();
 };
@@ -11554,9 +11695,12 @@ function showExitLikeAlert({ icon = "fas fa-exclamation-circle", title = "تنب
     allowOutsideClick: true,
     allowEscapeKey: true,
     customClass: {
+      container: 'request-like-backdrop',
       popup: 'swal2-popup exit-popup animate__animated animate__zoomIn',
       confirmButton: 'exit-confirm'
     },
+    didOpen: () => syncGlobalModalLock(),
+    willClose: () => setTimeout(syncGlobalModalLock, 0),
     hideClass: {
       popup: 'animate__animated animate__zoomOut'
     }
@@ -12976,8 +13120,11 @@ async function refreshData() {
         allowOutsideClick: false,
         backdrop: 'rgba(2, 6, 23, 0.82)',   // ✅ طبقة ظلال قوية على الخلفية
         customClass: {
+            container: 'request-like-backdrop',
             popup: 'update-dialog animate__animated animate__fadeInDown'
-        }
+        },
+        didOpen: () => syncGlobalModalLock(),
+        willClose: () => setTimeout(syncGlobalModalLock, 0)
     });
 
     // نخلي المستخدم يحس أن أكو "شغل" حتى لو الملف قرأ بسرعة
@@ -13027,8 +13174,11 @@ async function refreshData() {
         allowOutsideClick: false,
         backdrop: 'rgba(2, 6, 23, 0.82)',   // نفس طبقة الظلال
         customClass: {
+            container: 'request-like-backdrop',
             popup: 'update-success-dialog animate__animated animate__fadeInUp'
         },
+        didOpen: () => syncGlobalModalLock(),
+        willClose: () => setTimeout(syncGlobalModalLock, 0),
         // ملاحظة: ما نستخدم timer هنا، نتحكم يدويًا بالوقت تحت
         didOpen: () => {
             setTimeout(() => {
