@@ -7758,9 +7758,10 @@ body.modal-lock{
 .request-message.system{ background: rgba(255,255,255,.06); color: rgba(255,255,255,.82); }
 .request-message{ position: relative; overflow: hidden; }
 .request-message.has-fresh-reply{
-    border-color: rgba(103,232,249,.34);
-    background-image: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
-    animation: requestFreshGlow 2.6s ease-in-out infinite;
+    border-color: rgba(103,232,249,.42);
+    background-image: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+    box-shadow: inset 0 0 0 1px rgba(125,211,252,.10), 0 8px 24px rgba(56,189,248,.10);
+    animation: requestFreshGlow 2.8s ease-in-out infinite;
 }
 .request-message.has-fresh-reply::before{
     content:"";
@@ -7768,22 +7769,21 @@ body.modal-lock{
     inset:0;
     border-radius: inherit;
     pointer-events:none;
-    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,0) 38%, rgba(56,189,248,.08) 72%, rgba(255,255,255,0));
-    opacity:.85;
+    background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,0) 34%, rgba(56,189,248,.12) 68%, rgba(255,255,255,0));
+    opacity:.92;
 }
 .request-message.has-fresh-reply::after{
     content:"";
     position:absolute;
-    top:8px;
-    right:-26px;
-    width:54px;
-    height:54px;
-    border-radius:50%;
+    top:-1px;
+    right:-22px;
+    width:52px;
+    height: calc(100% + 2px);
     pointer-events:none;
-    background: radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(125,211,252,.95) 20%, rgba(56,189,248,.45) 42%, rgba(56,189,248,0) 72%);
+    background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.92) 38%, rgba(125,211,252,.95) 54%, rgba(56,189,248,0) 76%);
+    opacity:.95;
     filter: blur(.4px);
-    box-shadow: 0 0 18px rgba(56,189,248,.34);
-    animation: requestFreshPulse 2.2s linear infinite;
+    animation: requestFreshSweep 2.4s linear infinite;
 }
 .request-message-status{ display:inline-flex; align-items:center; gap:3px; font-size:11px; }
 .request-message-status .is-blue{ color:#53b8ff; }
@@ -7844,6 +7844,12 @@ body.modal-lock{
 .request-meta-badges{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
 .request-meta-badge{ display:inline-flex; align-items:center; gap:7px; padding:8px 12px; border-radius:999px; background: linear-gradient(135deg, rgba(56,189,248,.12), rgba(255,255,255,.06)); border:1px solid rgba(255,255,255,.08); color: rgba(255,255,255,.9); font-size:13px; line-height:1.2; }
 .request-meta-badge i{ color:#8ce8ca; }
+@keyframes requestFreshSweep{
+    0%{ transform: translateX(-120%); opacity:0; }
+    12%{ opacity:.95; }
+    58%{ opacity:.95; }
+    100%{ transform: translateX(155%); opacity:0; }
+}
 @media (max-width: 720px){
     .request-track-shell{ width:min(100%,100%); max-height:min(86dvh,780px); border-radius:22px; }
     .request-title h3, .request-admin-title h3, .request-track-title h3{ font-size:18px; }
@@ -9700,6 +9706,49 @@ function scrollRequestMessageBoxesToBottom(root) {
     const scope = root && root.querySelectorAll ? root : document;
     scope.querySelectorAll('.request-messages').forEach(box => {
         box.scrollTop = box.scrollHeight;
+        requestAnimationFrame(() => {
+            box.scrollTop = box.scrollHeight;
+            setTimeout(() => { box.scrollTop = box.scrollHeight; }, 60);
+        });
+    });
+}
+
+function attachRequestScrollRelay(root) {
+    const scope = root && root.querySelectorAll ? root : document;
+    scope.querySelectorAll('.request-messages').forEach(box => {
+        if (box.dataset.relayBound === '1') return;
+        box.dataset.relayBound = '1';
+
+        let touchStartY = 0;
+
+        box.addEventListener('wheel', function(e){
+            const parent = box.closest('.request-track-body, .request-admin-body');
+            if (!parent) return;
+            const atTop = box.scrollTop <= 0;
+            const atBottom = Math.ceil(box.scrollTop + box.clientHeight) >= box.scrollHeight;
+            if ((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBottom)) {
+                parent.scrollTop += e.deltaY;
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        box.addEventListener('touchstart', function(e){
+            if (e.touches && e.touches[0]) touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        box.addEventListener('touchmove', function(e){
+            const parent = box.closest('.request-track-body, .request-admin-body');
+            if (!parent || !e.touches || !e.touches[0]) return;
+            const currentY = e.touches[0].clientY;
+            const delta = touchStartY - currentY;
+            const atTop = box.scrollTop <= 0;
+            const atBottom = Math.ceil(box.scrollTop + box.clientHeight) >= box.scrollHeight;
+            if ((delta < 0 && atTop) || (delta > 0 && atBottom)) {
+                parent.scrollTop += delta;
+                touchStartY = currentY;
+                e.preventDefault();
+            }
+        }, { passive: false });
     });
 }
 
@@ -10046,7 +10095,11 @@ window.loadCustomerRequests = async function () {
     try {
         const deviceId = getDeviceId();
         const allRequests = (await getAllMaterialRequests()).filter(req => req && req.deviceId === deviceId && !req.customerDeleted);
+        const freshCustomerMap = {};
         for (const req of allRequests) {
+            const msgs = Object.values(req.messages || {}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+            const latestUnread = [...msgs].reverse().find(msg => (msg.senderRole === 'admin' || msg.senderRole === 'system') && !msg.seenByCustomer);
+            freshCustomerMap[req.id] = latestUnread ? latestUnread.id : null;
             await markMessagesSeenForCustomer(req.id, req);
         }
         const refreshed = (await getAllMaterialRequests()).filter(req => req && req.deviceId === deviceId && !req.customerDeleted);
@@ -10055,11 +10108,11 @@ window.loadCustomerRequests = async function () {
 
         const renderCustomerCard = (req, archived = false) => {
             const msgs = Object.values(req.messages || {}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
-            const latestMsg = msgs[msgs.length - 1] || null;
+            const freshMsgId = freshCustomerMap[req.id] || null;
             const statusClass = req.status === 'processed' ? 'processed' : (req.status === 'processing' ? 'processing' : 'new');
             const statusText = req.status === 'processed' ? 'تمت المعالجة' : (req.status === 'processing' ? 'قيد المتابعة' : 'جديد');
             const messagesHtml = msgs.map(msg => {
-                const freshClass = latestMsg && latestMsg.id === msg.id && (msg.senderRole === 'admin' || msg.senderRole === 'system') && !msg.seenByCustomer ? ' has-fresh-reply' : '';
+                const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
                 return `
                 <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
                   <div class="request-message-head">
@@ -10107,6 +10160,8 @@ window.loadCustomerRequests = async function () {
             : '<div class="request-track-empty">أرشيف طلباتك فارغ حالياً.</div>';
 
         setRequestViewButtons();
+        attachRequestScrollRelay(document.getElementById('requestTrackModal'));
+        attachRequestScrollRelay(document.getElementById('requestAdminModal'));
         setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('requestTrackModal')), 40);
         setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('requestAdminModal')), 40);
         await refreshMaterialRequestCount();
@@ -10184,7 +10239,11 @@ window.loadMaterialRequests = async function () {
     archiveList.innerHTML = currentAdminRequestView === 'archive' ? '<div class="request-admin-empty">جاري تحميل أرشيف الطلبات...</div>' : '';
     try {
         const arr0 = await getAllMaterialRequests();
+        const freshAdminMap = {};
         for (const req of arr0.filter(r => r && !r.archivedForAdmin)) {
+            const msgs = Object.values(req.messages || {}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+            const latestUnread = [...msgs].reverse().find(msg => msg.senderRole === 'customer' && !msg.seenByAdmin);
+            freshAdminMap[req.id] = latestUnread ? latestUnread.id : null;
             await markMessagesSeenForAdmin(req.id, req);
         }
         const arr = await getAllMaterialRequests();
@@ -10193,11 +10252,11 @@ window.loadMaterialRequests = async function () {
 
         const renderAdminCard = (req, archived = false) => {
             const msgs = Object.values(req.messages || {}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
-            const latestMsg = msgs[msgs.length - 1] || null;
+            const freshMsgId = freshAdminMap[req.id] || null;
             const statusClass = req.status === 'processed' ? 'processed' : (req.status === 'processing' ? 'processing' : 'new');
             const statusText = archived ? 'في الأرشيف' : (req.status === 'processed' ? 'تمت المعالجة' : (req.status === 'processing' ? 'قيد المتابعة' : 'جديد'));
             const messagesHtml = msgs.map(msg => {
-                const freshClass = latestMsg && latestMsg.id === msg.id && msg.senderRole === 'customer' && !msg.seenByAdmin ? ' has-fresh-reply' : '';
+                const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
                 return `
                 <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
                   <div class="request-message-head">
@@ -10246,6 +10305,7 @@ window.loadMaterialRequests = async function () {
             : '<div class="request-admin-empty">أرشيف الطلبات فارغ حالياً.</div>';
 
         setRequestViewButtons();
+        attachRequestScrollRelay(document.getElementById('requestAdminModal'));
         setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('requestAdminModal')), 40);
     } catch (err) {
         console.error("loadMaterialRequests:", err);
