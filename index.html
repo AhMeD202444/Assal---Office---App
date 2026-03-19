@@ -7253,94 +7253,15 @@ body.modal-lock{
     border-color: rgba(56,189,248,.4);
     box-shadow: 0 0 0 3px rgba(56,189,248,.12);
 }
-
-.request-input.is-invalid,
-.request-textarea.is-invalid{
-    border-color: rgba(239,68,68,.55) !important;
-    box-shadow: 0 0 0 3px rgba(239,68,68,.14) !important;
-}
-.request-submit-btn.is-loading,
-.request-submit-btn.is-success,
-.request-submit-btn.is-error,
-.request-submit-btn.is-warning{
-    pointer-events:none;
-}
-.request-submit-btn.is-loading{ background: linear-gradient(135deg, #2563eb, #0891b2); }
-.request-submit-btn.is-success{ background: linear-gradient(135deg, #10b981, #0f766e); }
-.request-submit-btn.is-error,
-.request-submit-btn.is-warning{ background: linear-gradient(135deg, #ef4444, #dc2626); }
-.request-admin-phone,
-.request-admin-item,
-.request-thread-phone,
-.request-thread-item{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    margin-bottom:10px;
-}
-.request-info-badge{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    padding:8px 12px;
-    border-radius:999px;
-    background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
-    border:1px solid rgba(255,255,255,.08);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
-    color: rgba(255,255,255,.9);
-    font-size:12px;
-    line-height:1.3;
-}
-.request-info-badge i{ color:#8ce8ca; }
-.request-info-badge strong{ color:#fff; font-weight:800; }
-.request-messages{
-    display:grid;
-    gap:8px;
-    margin-top:10px;
-    max-height: 318px;
-    overflow-y:auto;
-    padding-inline-end: 4px;
-    scroll-behavior:smooth;
-}
-.request-messages::-webkit-scrollbar{ width:6px; }
-.request-messages::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.16); border-radius:10px; }
-.request-message{
-    position:relative;
-    padding: 10px 12px;
-    border-radius: 16px;
-    font-size: 13px;
-    line-height: 1.7;
-    border: 1px solid rgba(255,255,255,.06);
-    overflow:hidden;
-}
-.request-message-head-main{ display:flex; align-items:center; gap:6px; }
-.request-message-checks{ display:inline-flex; align-items:center; gap:2px; font-size:11px; }
-.request-message.customer .request-message-checks{ color: rgba(255,255,255,.82); }
-.request-message.admin .request-message-checks{ color: #60a5fa; }
-.request-message.is-fresh::after{
-    content:"";
-    position:absolute;
-    top:8px;
-    bottom:8px;
-    inset-inline-end:0;
-    width:3px;
-    border-radius:999px;
-    background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.9), rgba(255,255,255,0));
-    box-shadow: 0 0 14px rgba(96,165,250,.65);
-    animation: requestFreshGlow 1.5s linear infinite;
-}
-.request-message.admin.is-fresh::after{ background: linear-gradient(180deg, rgba(96,165,250,0), rgba(96,165,250,1), rgba(96,165,250,0)); }
-.request-message.customer.is-fresh::after{ background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.96), rgba(255,255,255,0)); }
-@keyframes requestFreshGlow{
-    0%{ transform: translateY(-105%); opacity:0; }
-    15%{ opacity:1; }
-    60%{ opacity:1; }
-    100%{ transform: translateY(105%); opacity:0; }
-}
-
 .request-textarea{
     min-height: 92px;
     resize: vertical;
+}
+.request-field.has-error .request-label{ color:#ffd5d5; }
+.request-input.is-invalid,
+.request-textarea.is-invalid{
+    border-color: rgba(239,68,68,.34);
+    box-shadow: 0 0 0 3px rgba(239,68,68,.10);
 }
 
 .request-actions{
@@ -7366,8 +7287,20 @@ body.modal-lock{
     -webkit-tap-highlight-color: transparent;
 }
 .request-submit-btn[disabled]{
-    opacity:.7;
+    opacity:.82;
     cursor:not-allowed;
+}
+.request-submit-btn.is-busy{
+    background: linear-gradient(135deg, #1f9fd8, #185a9d);
+}
+.request-submit-btn.is-success{
+    background: linear-gradient(135deg, #17c98a, #118f77);
+}
+.request-submit-btn.is-warning{
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+.request-submit-btn.is-error{
+    background: linear-gradient(135deg, #ff5f6d, #ff3f55);
 }
 .request-submit-btn{
     min-height: 48px;
@@ -7580,9 +7513,23 @@ body.modal-lock{
     color: rgba(255,255,255,.78);
     line-height:1.8;
 }
+@keyframes requestErrorBlink{
+    0%, 100%{ box-shadow: 0 0 0 rgba(255,75,43,0); filter:none; }
+    50%{ box-shadow: 0 0 0 4px rgba(255,75,43,.22), 0 0 18px rgba(255,75,43,.30); filter:saturate(1.1); }
+}
 @keyframes requestToastIn{
     from{ opacity:0; transform: translate(-50%, -50%) scale(.90); }
     to{ opacity:1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes requestFreshPulse{
+    0%{ opacity:.15; transform: translateX(-12px); }
+    50%{ opacity:1; transform: translateX(12px); }
+    100%{ opacity:.15; transform: translateX(34px); }
+}
+@keyframes requestFreshGlow{
+    0%{ box-shadow: 0 0 0 rgba(56,189,248,0), inset 0 0 0 rgba(255,255,255,0); }
+    50%{ box-shadow: 0 0 18px rgba(56,189,248,.22), inset 0 0 24px rgba(255,255,255,.03); }
+    100%{ box-shadow: 0 0 0 rgba(56,189,248,0), inset 0 0 0 rgba(255,255,255,0); }
 }
 
 
@@ -7785,7 +7732,20 @@ body.modal-lock{
 .request-thread-status.processing{ background:rgba(245,158,11,.14); color:#fde68a; border:1px solid rgba(245,158,11,.18); }
 .request-thread-status.processed{ background:rgba(16,185,129,.14); color:#d1fae5; border:1px solid rgba(16,185,129,.18); }
 .request-thread-main{ font-size:14px; line-height:1.8; color:rgba(255,255,255,.88); margin-bottom:10px; }
-.request-messages{ display:grid; gap:8px; margin-top:10px; }
+.request-messages{
+    display:grid;
+    gap:8px;
+    margin-top:10px;
+    max-height: 252px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-left: 2px;
+    padding-right: 2px;
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
+}
+.request-messages::-webkit-scrollbar{ width: 6px; }
+.request-messages::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.18); border-radius: 999px; }
 .request-message{
     padding: 10px 12px;
     border-radius: 16px;
@@ -7796,6 +7756,38 @@ body.modal-lock{
 .request-message.customer{ background: rgba(56,189,248,.11); }
 .request-message.admin{ background: rgba(16,185,129,.10); }
 .request-message.system{ background: rgba(255,255,255,.06); color: rgba(255,255,255,.82); }
+.request-message{ position: relative; overflow: hidden; }
+.request-message.has-fresh-reply{
+    border-color: rgba(103,232,249,.34);
+    background-image: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.01));
+    animation: requestFreshGlow 2.6s ease-in-out infinite;
+}
+.request-message.has-fresh-reply::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius: inherit;
+    pointer-events:none;
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,0) 38%, rgba(56,189,248,.08) 72%, rgba(255,255,255,0));
+    opacity:.85;
+}
+.request-message.has-fresh-reply::after{
+    content:"";
+    position:absolute;
+    top:8px;
+    right:-26px;
+    width:54px;
+    height:54px;
+    border-radius:50%;
+    pointer-events:none;
+    background: radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(125,211,252,.95) 20%, rgba(56,189,248,.45) 42%, rgba(56,189,248,0) 72%);
+    filter: blur(.4px);
+    box-shadow: 0 0 18px rgba(56,189,248,.34);
+    animation: requestFreshPulse 2.2s linear infinite;
+}
+.request-message-status{ display:inline-flex; align-items:center; gap:3px; font-size:11px; }
+.request-message-status .is-blue{ color:#53b8ff; }
+.request-message-status .is-soft{ color:rgba(255,255,255,.58); }
 .request-message-head{ display:flex; justify-content:space-between; gap:8px; margin-bottom:6px; font-size:11px; color:rgba(255,255,255,.58); }
 .request-thread-actions,
 .request-admin-card-actions{ display:grid; gap:10px; margin-top:12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -7848,7 +7840,10 @@ body.modal-lock{
 .request-track-empty{ text-align:center; padding: 22px 14px; border-radius:18px; background: rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); color: rgba(255,255,255,.76); }
 .request-admin-card textarea{ margin-top:10px; }
 .request-admin-meta{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
-.request-admin-chip{ font-size:11px; padding:4px 10px; border-radius:999px; background: rgba(255,255,255,.08); color: rgba(255,255,255,.75); }
+.request-admin-chip{ font-size:11px; padding:5px 10px; border-radius:999px; background: rgba(255,255,255,.08); color: rgba(255,255,255,.80); display:inline-flex; align-items:center; gap:6px; }
+.request-meta-badges{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.request-meta-badge{ display:inline-flex; align-items:center; gap:7px; padding:8px 12px; border-radius:999px; background: linear-gradient(135deg, rgba(56,189,248,.12), rgba(255,255,255,.06)); border:1px solid rgba(255,255,255,.08); color: rgba(255,255,255,.9); font-size:13px; line-height:1.2; }
+.request-meta-badge i{ color:#8ce8ca; }
 @media (max-width: 720px){
     .request-track-shell{ width:min(100%,100%); max-height:min(86dvh,780px); border-radius:22px; }
     .request-title h3, .request-admin-title h3, .request-track-title h3{ font-size:18px; }
@@ -9052,7 +9047,7 @@ body.modal-lock{
 
         <div class="request-field">
           <label class="request-label" for="requestPhoneInput">رقم الهاتف</label>
-          <input id="requestPhoneInput" class="request-input" type="tel" maxlength="11" inputmode="numeric" autocomplete="tel" placeholder="مثال: 07712345678" dir="ltr">
+          <input id="requestPhoneInput" class="request-input" type="tel" maxlength="11" inputmode="numeric" placeholder="مثال: 07712345678" dir="ltr" autocomplete="tel" oninput="sanitizeRequestPhone(this)">
         </div>
 
         <div class="request-field">
@@ -9655,15 +9650,83 @@ function getUnreadCustomerCount(requests) {
     return count;
 }
 
+
+let requestSubmitFeedbackTimer = null;
+let requestSubmitting = false;
+
+function sanitizeRequestPhone(input) {
+    if (!input) return;
+    input.value = String(input.value || '').replace(/\D+/g, '').slice(0, 11);
+}
+
+function isValidIraqMobile(phone) {
+    return /^(077|078|075)\d{8}$/.test(String(phone || '').trim());
+}
+
+function isPotentialIraqMobile(phone) {
+    const value = String(phone || '').trim();
+    if (!value) return true;
+    if (!/^\d+$/.test(value)) return false;
+    if (value.length > 11) return false;
+    const allowedStarts = ['0', '07', '075', '077', '078'];
+    return allowedStarts.some(prefix => prefix.startsWith(value) || value.startsWith(prefix));
+}
+
+function setRequestSubmitState(type = 'idle', title = 'إرسال الطلب', icon = 'fa-paper-plane') {
+    const btn = document.getElementById('requestSubmitBtn');
+    if (!btn) return;
+    btn.classList.remove('is-busy', 'is-success', 'is-warning', 'is-error');
+    btn.disabled = type === 'busy';
+    if (type === 'busy') btn.classList.add('is-busy');
+    if (type === 'success') btn.classList.add('is-success');
+    if (type === 'warning') btn.classList.add('is-warning');
+    if (type === 'error') btn.classList.add('is-error');
+    btn.innerHTML = `<i class="fas ${icon}"></i> ${title}`;
+}
+
+function flashRequestSubmitState(type, title, icon, timeout = 1800) {
+    clearTimeout(requestSubmitFeedbackTimer);
+    setRequestSubmitState(type, title, icon);
+    requestSubmitFeedbackTimer = setTimeout(() => {
+        setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+    }, timeout);
+}
+
+function renderMessageChecks(msg, viewer) {
+    return '';
+}
+
+function scrollRequestMessageBoxesToBottom(root) {
+    const scope = root && root.querySelectorAll ? root : document;
+    scope.querySelectorAll('.request-messages').forEach(box => {
+        box.scrollTop = box.scrollHeight;
+    });
+}
+
+async function markMessagesSeenForAdmin(requestId, req) {
+    if (!window.firebaseDB || !window.firebaseDB.db || !req) return;
+    const { db, ref, update } = window.firebaseDB;
+    const updates = {};
+    Object.values(req.messages || {}).forEach(msg => {
+        if (msg.senderRole === "customer" && !msg.seenByAdmin) {
+            updates[`materialRequests/${requestId}/messages/${msg.id}/seenByAdmin`] = true;
+        }
+    });
+    if (Object.keys(updates).length) await update(ref(db), updates);
+}
+
 window.openRequestModal = function () {
     const modal = document.getElementById("requestModal");
     if (!modal) return;
     modal.classList.add("show");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-lock");
+    clearTimeout(requestSubmitFeedbackTimer);
+    setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
 };
 
 window.closeRequestModal = function () {
+    if (requestSubmitting) return;
     const modal = document.getElementById("requestModal");
     if (!modal) return;
     modal.classList.remove("show");
@@ -9819,115 +9882,39 @@ window.openRequestTrackModal = async function () {
     await loadCustomerRequests();
 };
 
-
-function sanitizeIraqiPhone(value) {
-    return String(value || '').replace(/\D+/g, '').slice(0, 11);
-}
-
-function isValidIraqiPhone(value) {
-    return /^(077|078|075)\d{8}$/.test(String(value || '').trim());
-}
-
-function setRequestSubmitState(type, title, sub = '') {
-    const submitBtn = document.getElementById('requestSubmitBtn');
-    if (!submitBtn) return;
-    submitBtn.classList.remove('is-loading', 'is-success', 'is-error', 'is-warning');
-    if (type) submitBtn.classList.add(`is-${type}`);
-    const iconMap = {
-        idle: '<i class="fas fa-paper-plane"></i>',
-        loading: '<i class="fas fa-circle-notch fa-spin"></i>',
-        success: '<i class="fas fa-check-circle"></i>',
-        error: '<i class="fas fa-triangle-exclamation"></i>',
-        warning: '<i class="fas fa-circle-exclamation"></i>'
-    };
-    submitBtn.innerHTML = `
-      <span class="request-submit-label">${iconMap[type] || iconMap.idle} ${title}</span>
-      ${sub ? `<small class="request-submit-sub">${sub}</small>` : ''}
-    `;
-}
-
-function resetRequestSubmitState() {
-    const submitBtn = document.getElementById('requestSubmitBtn');
-    if (!submitBtn) return;
-    submitBtn.disabled = false;
-    setRequestSubmitState('idle', 'إرسال الطلب');
-    submitBtn.classList.remove('is-loading', 'is-success', 'is-error', 'is-warning');
-}
-
-function clearRequestValidation() {
-    ['requestNameInput', 'requestPhoneInput', 'requestItemInput'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove('is-invalid');
-    });
-}
-
-function buildMessageChecksHtml(msg) {
-    if (!msg || msg.senderRole !== 'admin') return '<span class="request-message-checks"><i class="fas fa-check"></i></span>';
-    return msg.seenByCustomer
-        ? '<span class="request-message-checks"><i class="fas fa-check"></i><i class="fas fa-check"></i></span>'
-        : '<span class="request-message-checks"><i class="fas fa-check"></i></span>';
-}
-
-function getFreshMessageIdForViewer(msgs, viewerRole) {
-    const list = (msgs || []).slice().sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
-    if (!list.length) return null;
-    const last = list[list.length - 1];
-    if (viewerRole === 'admin' && last.senderRole === 'customer') return last.id || null;
-    if (viewerRole === 'customer' && (last.senderRole === 'admin' || last.senderRole === 'system')) return last.id || null;
-    return null;
-}
-
-function scrollMessagesToLatest(scopeEl) {
-    if (!scopeEl) return;
-    requestAnimationFrame(() => {
-        scopeEl.querySelectorAll('.request-messages').forEach(box => {
-            box.scrollTop = box.scrollHeight;
-        });
-    });
-}
-
-
 window.submitMaterialRequest = async function () {
     const nameInput = document.getElementById("requestNameInput");
     const phoneInput = document.getElementById("requestPhoneInput");
     const itemInput = document.getElementById("requestItemInput");
-    const submitBtn = document.getElementById("requestSubmitBtn");
 
     const name = (nameInput?.value || "").trim();
-    const phone = sanitizeIraqiPhone(phoneInput?.value || "");
+    const phone = (phoneInput?.value || "").trim();
     const item = (itemInput?.value || "").trim();
-    if (phoneInput) phoneInput.value = phone;
-    clearRequestValidation();
+
+    [nameInput, phoneInput, itemInput].forEach(el => el && el.classList.remove('is-invalid'));
 
     if (!name || !phone || !item) {
         if (!name && nameInput) nameInput.classList.add('is-invalid');
         if (!phone && phoneInput) phoneInput.classList.add('is-invalid');
         if (!item && itemInput) itemInput.classList.add('is-invalid');
-        submitBtn.disabled = true;
-        setRequestSubmitState('warning', 'يرجى ملء الاستمارة أولاً');
-        setTimeout(() => resetRequestSubmitState(), 1800);
+        flashRequestSubmitState('warning', 'يرجى ملء الاستمارة أولاً', 'fa-triangle-exclamation', 1800);
         return;
     }
 
-    if (!isValidIraqiPhone(phone)) {
+    if (!isValidIraqMobile(phone)) {
         if (phoneInput) phoneInput.classList.add('is-invalid');
-        submitBtn.disabled = true;
-        setRequestSubmitState('error', 'يرجى إدخال رقم صحيح', 'يبدأ بـ 077 أو 078 أو 075 ويتكوّن من 11 رقماً');
-        setTimeout(() => resetRequestSubmitState(), 2300);
+        flashRequestSubmitState('error', 'يرجى إدخال رقم صحيح', 'fa-ban', 2200);
         return;
     }
 
     if (!window.firebaseDB || !window.firebaseDB.db) {
-        submitBtn.disabled = true;
-        setRequestSubmitState('error', 'السيرفر غير جاهز', 'جرّب مرة ثانية بعد لحظات');
-        setTimeout(() => resetRequestSubmitState(), 2200);
+        flashRequestSubmitState('error', 'Firebase غير جاهز', 'fa-plug-circle-xmark', 2200);
         return;
     }
 
     try {
-        submitBtn.disabled = true;
-        setRequestSubmitState('loading', 'جاري الإرسال', 'لحظات ونثبت طلبك بشكل آمن');
-        const sendingStartedAt = Date.now();
+        requestSubmitting = true;
+        setRequestSubmitState('busy', 'جاري الإرسال', 'fa-spinner fa-spin');
 
         const { db, ref, set } = window.firebaseDB;
         const now = Date.now();
@@ -9959,25 +9946,21 @@ window.submitMaterialRequest = async function () {
             }
         });
 
-        const loadingElapsed = Date.now() - sendingStartedAt;
-        const minLoadingDuration = 1700;
-        if (loadingElapsed < minLoadingDuration) {
-            await new Promise(resolve => setTimeout(resolve, minLoadingDuration - loadingElapsed));
-        }
-
-        setRequestSubmitState('success', 'تم الإرسال بنجاح');
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        setRequestSubmitState('success', 'تم الإرسال بنجاح', 'fa-circle-check');
         if (nameInput) nameInput.value = "";
         if (phoneInput) phoneInput.value = "";
         if (itemInput) itemInput.value = "";
         await refreshMaterialRequestCount();
         setTimeout(() => {
-            resetRequestSubmitState();
+            requestSubmitting = false;
             closeRequestModal();
-        }, 900);
+            setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+        }, 950);
     } catch (err) {
         console.error("submitMaterialRequest:", err);
-        setRequestSubmitState('error', 'تعذّر الإرسال', 'تأكد من الإنترنت أو جرّب مرة ثانية');
-        setTimeout(() => resetRequestSubmitState(), 2200);
+        requestSubmitting = false;
+        flashRequestSubmitState('error', 'تعذّر الإرسال', 'fa-circle-xmark', 2200);
     }
 };
 
@@ -10072,23 +10055,23 @@ window.loadCustomerRequests = async function () {
 
         const renderCustomerCard = (req, archived = false) => {
             const msgs = Object.values(req.messages || {}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+            const latestMsg = msgs[msgs.length - 1] || null;
             const statusClass = req.status === 'processed' ? 'processed' : (req.status === 'processing' ? 'processing' : 'new');
             const statusText = req.status === 'processed' ? 'تمت المعالجة' : (req.status === 'processing' ? 'قيد المتابعة' : 'جديد');
-            const freshMessageId = getFreshMessageIdForViewer(msgs, 'customer');
             const messagesHtml = msgs.map(msg => {
-                const isFresh = freshMessageId && msg.id === freshMessageId;
+                const freshClass = latestMsg && latestMsg.id === msg.id && (msg.senderRole === 'admin' || msg.senderRole === 'system') && !msg.seenByCustomer ? ' has-fresh-reply' : '';
                 return `
-                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')} ${isFresh ? 'is-fresh' : ''}">
+                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
                   <div class="request-message-head">
-                    <span class="request-message-head-main"><span>${msg.senderRole === 'customer' ? 'أنت' : (msg.senderRole === 'admin' ? 'الإدارة' : 'النظام')}</span>${buildMessageChecksHtml(msg)}</span>
-                    <span>${formatRequestTime(msg.createdAt)}</span>
+                    <span>${msg.senderRole === 'customer' ? 'أنت' : (msg.senderRole === 'admin' ? 'الإدارة' : 'النظام')}</span>
+                    <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'customer')}</span>
                   </div>
                   <div>${escapeHtml(msg.text || '')}</div>
                 </div>`;
             }).join('');
             const actions = archived ? `
                 <div class="request-thread-actions">
-                  <button class="request-track-clear" type="button" onclick="deleteCustomerArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف من جهازي</button>
+                  <button class="request-track-clear" type="button" onclick="deleteCustomerArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف الطلب </button>
                 </div>` : (req.status !== 'processed' ? `
                 <div class="request-thread-actions is-stack">
                   <textarea id="requestTrackReply_${escapeHtml(req.id)}" class="request-track-input" placeholder="اكتب ردك أو أي توضيح إضافي..."></textarea>
@@ -10102,13 +10085,13 @@ window.loadCustomerRequests = async function () {
                 <div class="request-thread-head">
                   <div>
                     <div class="request-thread-id">${escapeHtml(req.id)}</div>
-                    <div class="request-thread-time">${formatRequestTime(req.createdAt)}</div>
+                    <div class="request-thread-time">${formatRequestTime(req.updatedAt || req.createdAt)}</div>
                   </div>
                   <div class="request-thread-status ${statusClass}">${statusText}</div>
                 </div>
-                <div class="request-thread-item">
-                  <span class="request-info-badge"><i class="fas fa-box"></i><strong>المادة</strong> ${escapeHtml(req.item || '-')}</span>
-                  <span class="request-info-badge"><i class="fas fa-phone"></i><strong>الهاتف</strong> ${escapeHtml(req.phone || '-')}</span>
+                <div class="request-meta-badges">
+                  <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
+                  <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(req.item || '-')}</span>
                 </div>
                 <div class="request-messages">${messagesHtml}</div>
                 ${actions}
@@ -10124,10 +10107,8 @@ window.loadCustomerRequests = async function () {
             : '<div class="request-track-empty">أرشيف طلباتك فارغ حالياً.</div>';
 
         setRequestViewButtons();
-        scrollMessagesToLatest(activeList);
-        scrollMessagesToLatest(archiveList);
-        scrollMessagesToLatest(activeList);
-        scrollMessagesToLatest(archiveList);
+        setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('requestTrackModal')), 40);
+        setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('requestAdminModal')), 40);
         await refreshMaterialRequestCount();
     } catch (err) {
         console.error('loadCustomerRequests:', err);
@@ -10202,22 +10183,26 @@ window.loadMaterialRequests = async function () {
     activeList.innerHTML = currentAdminRequestView === 'active' ? '<div class="request-admin-empty">جاري تحميل الطلبات...</div>' : '';
     archiveList.innerHTML = currentAdminRequestView === 'archive' ? '<div class="request-admin-empty">جاري تحميل أرشيف الطلبات...</div>' : '';
     try {
+        const arr0 = await getAllMaterialRequests();
+        for (const req of arr0.filter(r => r && !r.archivedForAdmin)) {
+            await markMessagesSeenForAdmin(req.id, req);
+        }
         const arr = await getAllMaterialRequests();
         const activeRequests = arr.filter(req => req && !req.archivedForAdmin);
         const archiveRequests = arr.filter(req => req && !!req.archivedForAdmin);
 
         const renderAdminCard = (req, archived = false) => {
             const msgs = Object.values(req.messages || {}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+            const latestMsg = msgs[msgs.length - 1] || null;
             const statusClass = req.status === 'processed' ? 'processed' : (req.status === 'processing' ? 'processing' : 'new');
             const statusText = archived ? 'في الأرشيف' : (req.status === 'processed' ? 'تمت المعالجة' : (req.status === 'processing' ? 'قيد المتابعة' : 'جديد'));
-            const freshMessageId = getFreshMessageIdForViewer(msgs, 'admin');
             const messagesHtml = msgs.map(msg => {
-                const isFresh = freshMessageId && msg.id === freshMessageId;
+                const freshClass = latestMsg && latestMsg.id === msg.id && msg.senderRole === 'customer' && !msg.seenByAdmin ? ' has-fresh-reply' : '';
                 return `
-                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')} ${isFresh ? 'is-fresh' : ''}">
+                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
                   <div class="request-message-head">
-                    <span class="request-message-head-main"><span>${msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'الإدارة' : 'النظام')}</span>${buildMessageChecksHtml(msg)}</span>
-                    <span>${formatRequestTime(msg.createdAt)}</span>
+                    <span>${msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'الإدارة' : 'النظام')}</span>
+                    <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'admin')}</span>
                   </div>
                   <div>${escapeHtml(msg.text || '')}</div>
                 </div>`;
@@ -10227,17 +10212,17 @@ window.loadMaterialRequests = async function () {
                 <div class="request-admin-card-head">
                   <div>
                     <div class="request-admin-name">${escapeHtml(req.name || 'بدون اسم')}</div>
-                    <div class="request-admin-time">${formatRequestTime(req.createdAt)}</div>
+                    <div class="request-admin-time">${formatRequestTime(req.updatedAt || req.createdAt)}</div>
                   </div>
                   <div class="request-thread-status ${statusClass}">${statusText}</div>
                 </div>
                 <div class="request-admin-meta">
-                  <span class="request-admin-chip">${escapeHtml(req.id || '')}</span>
-                  <span class="request-admin-chip">${escapeHtml(req.deviceId || '')}</span>
+                  <span class="request-admin-chip"><i class="fas fa-hashtag"></i>${escapeHtml(req.id || '')}</span>
+                  <span class="request-admin-chip"><i class="fas fa-mobile-screen"></i>${escapeHtml(req.deviceId || '')}</span>
                 </div>
-                <div class="request-admin-item">
-                  <span class="request-info-badge"><i class="fas fa-phone"></i><strong>الهاتف</strong> ${escapeHtml(req.phone || '-')}</span>
-                  <span class="request-info-badge"><i class="fas fa-box"></i><strong>المادة</strong> ${escapeHtml(req.item || '-')}</span>
+                <div class="request-meta-badges">
+                  <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
+                  <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(req.item || '-')}</span>
                 </div>
                 <div class="request-messages">${messagesHtml}</div>
                 ${archived ? `
@@ -10261,6 +10246,7 @@ window.loadMaterialRequests = async function () {
             : '<div class="request-admin-empty">أرشيف الطلبات فارغ حالياً.</div>';
 
         setRequestViewButtons();
+        setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('requestAdminModal')), 40);
     } catch (err) {
         console.error("loadMaterialRequests:", err);
         activeList.innerHTML = '<div class="request-admin-empty">تعذّر جلب الطلبات حالياً.</div>';
@@ -10281,6 +10267,25 @@ async function initFirebaseStats() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    const requestPhoneInput = document.getElementById('requestPhoneInput');
+    if (requestPhoneInput) {
+        requestPhoneInput.addEventListener('input', function(){
+            sanitizeRequestPhone(this);
+            const value = (this.value || '').trim();
+            if (!value) {
+                this.classList.remove('is-invalid');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                return;
+            }
+            if (!isPotentialIraqMobile(value) || (value.length === 11 && !isValidIraqMobile(value))) {
+                this.classList.add('is-invalid');
+                setRequestSubmitState('error', 'الرقم خطأ', 'fa-circle-exclamation');
+            } else {
+                this.classList.remove('is-invalid');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+            }
+        });
+    }
     updateAdminCompatBtn();
     updateAdminWholesaleBtn();
     updateStatsBtn();
@@ -10288,21 +10293,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateRequestAdminFloatingBtn();
     syncRequestButtonsToNewBtn();
     setRequestViewButtons();
-    resetRequestSubmitState();
-    const requestPhoneInput = document.getElementById('requestPhoneInput');
-    if (requestPhoneInput) {
-        requestPhoneInput.addEventListener('input', (e) => {
-            e.target.value = sanitizeIraqiPhone(e.target.value);
-            if (e.target.value.length <= 3) return;
-            if (/^(077|078|075)/.test(e.target.value)) {
-                e.target.classList.remove('is-invalid');
-            }
-        });
-    }
-    ['requestNameInput','requestItemInput'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', () => el.classList.remove('is-invalid'));
-    });
     initFirebaseStats();
     refreshMaterialRequestCount();
 
@@ -10749,6 +10739,25 @@ function renderOffers(list){
 
 /* بحث داخل العروض */
 document.addEventListener("DOMContentLoaded", () => {
+    const requestPhoneInput = document.getElementById('requestPhoneInput');
+    if (requestPhoneInput) {
+        requestPhoneInput.addEventListener('input', function(){
+            sanitizeRequestPhone(this);
+            const value = (this.value || '').trim();
+            if (!value) {
+                this.classList.remove('is-invalid');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                return;
+            }
+            if (!isPotentialIraqMobile(value) || (value.length === 11 && !isValidIraqMobile(value))) {
+                this.classList.add('is-invalid');
+                setRequestSubmitState('error', 'الرقم خطأ', 'fa-circle-exclamation');
+            } else {
+                this.classList.remove('is-invalid');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+            }
+        });
+    }
     const input = document.getElementById("offersSearchInput");
     if (!input) return;
 
@@ -11409,6 +11418,25 @@ function showMaintenancePopup() {
 
 // إغلاق النافذة أو الإعلان عند الضغط على الخلفية الضبابية
 document.addEventListener("DOMContentLoaded", () => {
+    const requestPhoneInput = document.getElementById('requestPhoneInput');
+    if (requestPhoneInput) {
+        requestPhoneInput.addEventListener('input', function(){
+            sanitizeRequestPhone(this);
+            const value = (this.value || '').trim();
+            if (!value) {
+                this.classList.remove('is-invalid');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                return;
+            }
+            if (!isPotentialIraqMobile(value) || (value.length === 11 && !isValidIraqMobile(value))) {
+                this.classList.add('is-invalid');
+                setRequestSubmitState('error', 'الرقم خطأ', 'fa-circle-exclamation');
+            } else {
+                this.classList.remove('is-invalid');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+            }
+        });
+    }
     const overlay = document.getElementById("overlay");
     if (!overlay) return;
 
@@ -12690,6 +12718,25 @@ function searchWholesaleItems(queryRaw) {
 
 /* تفعيل اقتراحات أسعار الجملة من نفس حقل البحث */
 document.addEventListener("DOMContentLoaded", () => {
+    const requestPhoneInput = document.getElementById('requestPhoneInput');
+    if (requestPhoneInput) {
+        requestPhoneInput.addEventListener('input', function(){
+            sanitizeRequestPhone(this);
+            const value = (this.value || '').trim();
+            if (!value) {
+                this.classList.remove('is-invalid');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                return;
+            }
+            if (!isPotentialIraqMobile(value) || (value.length === 11 && !isValidIraqMobile(value))) {
+                this.classList.add('is-invalid');
+                setRequestSubmitState('error', 'الرقم خطأ', 'fa-circle-exclamation');
+            } else {
+                this.classList.remove('is-invalid');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+            }
+        });
+    }
   
   
   // ✅ NEW: إذا أدمن فعّل زر الجملة (شيل disabled)
@@ -14115,6 +14162,25 @@ async function showImagePreview(url, filename){
 
 
 document.addEventListener("DOMContentLoaded", () => {
+    const requestPhoneInput = document.getElementById('requestPhoneInput');
+    if (requestPhoneInput) {
+        requestPhoneInput.addEventListener('input', function(){
+            sanitizeRequestPhone(this);
+            const value = (this.value || '').trim();
+            if (!value) {
+                this.classList.remove('is-invalid');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                return;
+            }
+            if (!isPotentialIraqMobile(value) || (value.length === 11 && !isValidIraqMobile(value))) {
+                this.classList.add('is-invalid');
+                setRequestSubmitState('error', 'الرقم خطأ', 'fa-circle-exclamation');
+            } else {
+                this.classList.remove('is-invalid');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+            }
+        });
+    }
   const imgBtn = document.getElementById("printImgBtn");
   if(!imgBtn) return;
 
@@ -14357,6 +14423,25 @@ async function checkoutPDF(){
 
 
 document.addEventListener("DOMContentLoaded", () => {
+    const requestPhoneInput = document.getElementById('requestPhoneInput');
+    if (requestPhoneInput) {
+        requestPhoneInput.addEventListener('input', function(){
+            sanitizeRequestPhone(this);
+            const value = (this.value || '').trim();
+            if (!value) {
+                this.classList.remove('is-invalid');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                return;
+            }
+            if (!isPotentialIraqMobile(value) || (value.length === 11 && !isValidIraqMobile(value))) {
+                this.classList.add('is-invalid');
+                setRequestSubmitState('error', 'الرقم خطأ', 'fa-circle-exclamation');
+            } else {
+                this.classList.remove('is-invalid');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+            }
+        });
+    }
   const btn = document.getElementById("printPdfBtn");
   if (!btn) return console.error("❌ زر PDF غير موجود: printPdfBtn");
 
