@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Phone Parts Pro</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
@@ -9029,6 +9029,78 @@ body.modal-lock .swal2-container *{
     .customer-profile-submit{min-height:50px;border-radius:16px;}
 }
 
+
+
+/* ===== Balanced vertical spacing fix ===== */
+html, body {
+  min-height: 100%;
+}
+
+body {
+  display: block !important;
+  min-height: 100svh !important;
+  box-sizing: border-box;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 44px + 14px) !important;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px + 14px) !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  overflow-x: hidden;
+}
+
+.container {
+  width: min(92%, 800px) !important;
+  max-width: 800px !important;
+  margin: 0 auto !important;
+  padding-top: 18px !important;
+  padding-bottom: 18px !important;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 44px + 12px) !important;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px + 12px) !important;
+  }
+
+  .container {
+    width: 95% !important;
+    margin: 0 auto !important;
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 44px + 10px) !important;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 40px + 10px) !important;
+  }
+
+  .container {
+    width: calc(100% - 16px) !important;
+    margin: 0 auto !important;
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+  }
+}
+
+#results {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+footer {
+  height: 40px !important;
+  bottom: env(safe-area-inset-bottom, 0px) !important;
+}
+
+.floating-new-btn {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 40px + 12px) !important;
+}
+
+.scroll-to-top {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 40px + 12px) !important;
+}
+
 </style>
 </head>
 <body>
@@ -17270,47 +17342,6 @@ async function renderSponsorAd(){
   .invoice-messages{ max-height: 286px; min-height: auto; overflow-y:auto; overflow-x:hidden; display:grid; gap:8px; margin-top:8px; padding:2px 2px 0 2px; align-content:start; scroll-behavior:smooth; overscroll-behavior:contain; }
   .invoice-draft-title,.invoice-sent-title,.invoice-admin-name{ font-size:16px; }
 }
-
-/* === Balanced vertical spacing + safe bottom === */
-:root{
-  --app-header-h: 44px;
-  --app-footer-h: 40px;
-  --app-v-gap: 12px;
-  --app-safe-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-html, body{
-  min-height: 100%;
-}
-
-body{
-  display: block !important;
-  justify-content: flex-start !important;
-  align-items: stretch !important;
-  box-sizing: border-box !important;
-  padding-top: calc(var(--app-header-h) + var(--app-v-gap)) !important;
-  padding-bottom: calc(var(--app-footer-h) + var(--app-v-gap) + var(--app-safe-bottom)) !important;
-}
-
-.container{
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-}
-
-footer{
-  bottom: var(--app-safe-bottom) !important;
-}
-
-.scroll-to-top{
-  bottom: calc(var(--app-footer-h) + var(--app-v-gap) + var(--app-safe-bottom) + 8px) !important;
-}
-
-.floating-request-btn,
-.floating-request-admin-btn,
-.floating-new-btn{
-  bottom: calc(var(--app-footer-h) + var(--app-v-gap) + var(--app-safe-bottom) + 2px) !important;
-}
-
 </style>
 <script>
 (function(){
