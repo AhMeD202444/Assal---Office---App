@@ -9029,71 +9029,6 @@ body.modal-lock .swal2-container *{
     .customer-profile-submit{min-height:50px;border-radius:16px;}
 }
 
-
-
-/* ===== SAFE AREA / SYSTEM NAVIGATION FIX ===== */
-:root{
-  --safe-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
-  --footer-height-fixed: 40px;
-  --footer-gap-fixed: 8px;
-  --bottom-reserve-fixed: calc(var(--safe-bottom) + var(--footer-height-fixed) + var(--footer-gap-fixed));
-  --vertical-shell-gap: 12px;
-}
-
-html, body{
-  min-height: 100%;
-  overflow-x: hidden !important;
-}
-
-body{
-  padding-bottom: 0 !important;
-}
-
-.container{
-  margin-top: var(--vertical-shell-gap) !important;
-  margin-bottom: var(--vertical-shell-gap) !important;
-  padding-bottom: 18px !important;
-  min-height: auto !important;
-}
-
-.main-content,
-.content-wrapper,
-.page-content,
-.items-container,
-.products-container,
-.products-grid,
-.cards-container,
-.cards-grid,
-#app,
-#mainContent{
-  padding-bottom: calc(var(--bottom-reserve-fixed) + 14px) !important;
-}
-
-footer{
-  bottom: var(--safe-bottom) !important;
-}
-
-.scroll-to-top,
-.scroll-up-btn,
-.back-to-top,
-.go-top,
-.scroll-btn,
-.floating-new-btn,
-.floating-request-btn,
-.floating-request-admin-btn{
-  bottom: calc(var(--safe-bottom) + 48px) !important;
-}
-
-#newItemsModal{
-  bottom: calc(var(--safe-bottom) + 54px) !important;
-}
-
-@supports not (padding: max(0px)) {
-  :root{
-    --safe-bottom: 8px;
-  }
-}
-
 </style>
 </head>
 <body>
@@ -17335,6 +17270,47 @@ async function renderSponsorAd(){
   .invoice-messages{ max-height: 286px; min-height: auto; overflow-y:auto; overflow-x:hidden; display:grid; gap:8px; margin-top:8px; padding:2px 2px 0 2px; align-content:start; scroll-behavior:smooth; overscroll-behavior:contain; }
   .invoice-draft-title,.invoice-sent-title,.invoice-admin-name{ font-size:16px; }
 }
+
+/* === Balanced vertical spacing + safe bottom === */
+:root{
+  --app-header-h: 44px;
+  --app-footer-h: 40px;
+  --app-v-gap: 12px;
+  --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body{
+  min-height: 100%;
+}
+
+body{
+  display: block !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  box-sizing: border-box !important;
+  padding-top: calc(var(--app-header-h) + var(--app-v-gap)) !important;
+  padding-bottom: calc(var(--app-footer-h) + var(--app-v-gap) + var(--app-safe-bottom)) !important;
+}
+
+.container{
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+footer{
+  bottom: var(--app-safe-bottom) !important;
+}
+
+.scroll-to-top{
+  bottom: calc(var(--app-footer-h) + var(--app-v-gap) + var(--app-safe-bottom) + 8px) !important;
+}
+
+.floating-request-btn,
+.floating-request-admin-btn,
+.floating-new-btn{
+  bottom: calc(var(--app-footer-h) + var(--app-v-gap) + var(--app-safe-bottom) + 2px) !important;
+}
+
 </style>
 <script>
 (function(){
