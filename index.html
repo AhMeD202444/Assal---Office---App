@@ -9033,10 +9033,11 @@ body.modal-lock .swal2-container *{
 
 /* ===== SAFE AREA / SYSTEM NAVIGATION FIX ===== */
 :root{
-  --safe-bottom: max(env(safe-area-inset-bottom, 0px), 18px);
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
   --footer-height-fixed: 40px;
-  --footer-gap-fixed: 14px;
+  --footer-gap-fixed: 8px;
   --bottom-reserve-fixed: calc(var(--safe-bottom) + var(--footer-height-fixed) + var(--footer-gap-fixed));
+  --vertical-shell-gap: 12px;
 }
 
 html, body{
@@ -9045,10 +9046,16 @@ html, body{
 }
 
 body{
-  padding-bottom: var(--bottom-reserve-fixed) !important;
+  padding-bottom: 0 !important;
 }
 
-.container,
+.container{
+  margin-top: var(--vertical-shell-gap) !important;
+  margin-bottom: var(--vertical-shell-gap) !important;
+  padding-bottom: 18px !important;
+  min-height: auto !important;
+}
+
 .main-content,
 .content-wrapper,
 .page-content,
@@ -9059,7 +9066,7 @@ body{
 .cards-grid,
 #app,
 #mainContent{
-  padding-bottom: max(var(--bottom-reserve-fixed), 92px) !important;
+  padding-bottom: calc(var(--bottom-reserve-fixed) + 14px) !important;
 }
 
 footer{
@@ -9074,16 +9081,16 @@ footer{
 .floating-new-btn,
 .floating-request-btn,
 .floating-request-admin-btn{
-  bottom: calc(var(--safe-bottom) + 52px) !important;
+  bottom: calc(var(--safe-bottom) + 48px) !important;
 }
 
 #newItemsModal{
-  bottom: calc(var(--safe-bottom) + 60px) !important;
+  bottom: calc(var(--safe-bottom) + 54px) !important;
 }
 
 @supports not (padding: max(0px)) {
   :root{
-    --safe-bottom: 18px;
+    --safe-bottom: 8px;
   }
 }
 
