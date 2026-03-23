@@ -10247,8 +10247,7 @@ function showStaffOnlyPopup() {
 }
 
 function openSimilaritesPage() {
-  
-    window.location.href = "similarites.html";
+    window.location.href = (window.buildVersionedAppUrl ? window.buildVersionedAppUrl('similarites.html') : 'similarites.html');
 }
 
 function updateStatsBtn() {
@@ -14177,13 +14176,13 @@ document.addEventListener("DOMContentLoaded", toggleScrollToTopButton);
 
 
 function openToolsPage() {
-    window.location.href = 'tools.html'; // استبدل 'tools.html' بالرابط إلى الصفحة الجديدة
+    window.location.href = (window.buildVersionedAppUrl ? window.buildVersionedAppUrl('tools.html') : 'tools.html');
 }
 
 
  // دالة لتحويل المستخدم إلى صفحة lcd.html
         function openLCDPage() {
-            window.location.href = 'lcd.html';
+            window.location.href = (window.buildVersionedAppUrl ? window.buildVersionedAppUrl('lcd.html') : 'lcd.html');
         }
 
 
@@ -16041,7 +16040,7 @@ function startPromoCountdown(){
 function goToSimilaritesFromPromo(){
   closePopup();
   setTimeout(() => {
-    window.location.href = 'similarites.html';
+    window.location.href = (window.buildVersionedAppUrl ? window.buildVersionedAppUrl('similarites.html') : 'similarites.html');
   }, 650);
 }
 
@@ -17801,6 +17800,65 @@ async function renderSponsorAd(){
     const versionCode = detected.value ? 0 : APP_UPDATE_CONFIG.fallbackCurrentVersionCode;
     return { versionName, versionCode, source: detected.source };
   }
+
+  function getPreferredVersionKey(){
+    const keys = Array.isArray(APP_UPDATE_CONFIG.acceptedVersionKeys)
+      ? APP_UPDATE_CONFIG.acceptedVersionKeys
+      : ['appv', 'appVersion', 'version'];
+    return keys[0] || 'appv';
+  }
+
+  function getDetectedVersionValue(){
+    const detected = extractVersionFromLocation();
+    return String((detected && detected.value) || '').trim();
+  }
+
+  function buildVersionedUrl(url){
+    const versionValue = getDetectedVersionValue();
+    if (!versionValue) return url;
+    const keys = Array.isArray(APP_UPDATE_CONFIG.acceptedVersionKeys)
+      ? APP_UPDATE_CONFIG.acceptedVersionKeys
+      : ['appv', 'appVersion', 'version'];
+    const preferredKey = getPreferredVersionKey();
+
+    try {
+      const targetUrl = new URL(url, window.location.href);
+      const isHttp = /^https?:$/i.test(targetUrl.protocol);
+      if (!isHttp) return url;
+      for (const key of keys) {
+        targetUrl.searchParams.delete(key);
+      }
+      targetUrl.searchParams.set(preferredKey, versionValue);
+      return targetUrl.toString();
+    } catch (_) {
+      const hashIndex = String(url).indexOf('#');
+      const rawUrl = hashIndex >= 0 ? String(url).slice(0, hashIndex) : String(url);
+      const rawHash = hashIndex >= 0 ? String(url).slice(hashIndex) : '';
+      const separator = rawUrl.includes('?') ? '&' : '?';
+      return rawUrl + separator + preferredKey + '=' + encodeURIComponent(versionValue) + rawHash;
+    }
+  }
+
+  window.getDetectedAppVersionValue = getDetectedVersionValue;
+  window.buildVersionedAppUrl = buildVersionedUrl;
+  window.navigateWithDetectedAppVersion = function(url){
+    window.location.href = buildVersionedUrl(url);
+  };
+
+  document.addEventListener('click', function(event){
+    const anchor = event.target && event.target.closest ? event.target.closest('a[href]') : null;
+    if (!anchor) return;
+    if (anchor.hasAttribute('download')) return;
+    const href = (anchor.getAttribute('href') || '').trim();
+    if (!href || href.startsWith('#') || /^javascript:/i.test(href) || /^(tel|mailto|sms|intent):/i.test(href)) return;
+    try {
+      const normalized = new URL(href, window.location.href);
+      if (normalized.origin !== window.location.origin) return;
+      anchor.setAttribute('href', buildVersionedUrl(normalized.toString()));
+    } catch (_) {
+      anchor.setAttribute('href', buildVersionedUrl(href));
+    }
+  }, true);
 
   function needsUpdate(current, remote){
     if (current?.versionName && remote?.versionName) {
