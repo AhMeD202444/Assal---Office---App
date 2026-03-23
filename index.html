@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Phone Parts Pro</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
@@ -9099,6 +9099,128 @@ footer {
 
 .scroll-to-top {
   bottom: calc(env(safe-area-inset-bottom, 0px) + 40px + 12px) !important;
+}
+
+
+/* ===== Final vertical centering + equal top/bottom spacing ===== */
+:root{
+  --app-header-h: 44px;
+  --app-footer-h: 40px;
+  --app-v-gap: 12px;
+  --app-top-safe: calc(env(safe-area-inset-top, 0px) + var(--app-header-h) + var(--app-v-gap));
+  --app-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + var(--app-footer-h) + var(--app-v-gap));
+  --app-stage-h: calc(100dvh - var(--app-top-safe) - var(--app-bottom-safe));
+}
+
+html, body{
+  min-height: 100dvh !important;
+}
+
+body{
+  padding-top: var(--app-top-safe) !important;
+  padding-bottom: var(--app-bottom-safe) !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.container{
+  margin: 0 auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+}
+
+#results,
+.results,
+.results-container{
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* footer stays above system buttons */
+footer{
+  height: var(--app-footer-h) !important;
+  bottom: env(safe-area-inset-bottom, 0px) !important;
+}
+
+/* keep floating buttons untouched in their visual positions */
+.floating-new-btn{
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--app-footer-h) + 10px) !important;
+}
+.scroll-to-top{
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--app-footer-h) + 10px) !important;
+}
+
+/* all app overlays get equal safe padding above and below */
+.request-modal,
+.request-admin-modal,
+.request-track-modal,
+.stats-modal,
+.customer-profile-modal{
+  padding-top: var(--app-top-safe) !important;
+  padding-bottom: var(--app-bottom-safe) !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* centered modal shells */
+.request-shell,
+.request-admin-shell,
+.request-track-shell,
+.stats-shell,
+.customer-profile-shell,
+.invoice-track-shell,
+.invoice-admin-shell{
+  margin: 0 auto !important;
+  max-height: calc(100dvh - var(--app-top-safe) - var(--app-bottom-safe)) !important;
+}
+
+/* custom fixed windows */
+#newItemsModal{
+  top: 50% !important;
+  bottom: auto !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: calc(100% - 20px) !important;
+  max-height: calc(100dvh - var(--app-top-safe) - var(--app-bottom-safe)) !important;
+  height: auto !important;
+}
+
+#promoPopup{
+  top: 50% !important;
+  bottom: auto !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  max-height: calc(100dvh - var(--app-top-safe) - var(--app-bottom-safe)) !important;
+}
+
+/* SweetAlert windows truly centered */
+.swal2-container{
+  padding-top: var(--app-top-safe) !important;
+  padding-bottom: var(--app-bottom-safe) !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.swal2-popup,
+.swal2-popup.activation-popup{
+  margin: 0 auto !important;
+}
+
+/* phones */
+@media (max-width: 480px){
+  :root{
+    --app-v-gap: 10px;
+  }
+  .container{
+    width: calc(100% - 16px) !important;
+  }
+}
+
+/* tablets */
+@media (min-width: 481px) and (max-width: 768px){
+  :root{
+    --app-v-gap: 11px;
+  }
 }
 
 </style>
