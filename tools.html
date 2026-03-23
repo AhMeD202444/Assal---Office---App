@@ -5094,8 +5094,36 @@ Swal.fire({
 
 
 
+    
+function getAppVersionParam() {
+  const params = new URLSearchParams(window.location.search);
+  const appv = (params.get("appv") || "").trim();
+  return appv || "";
+}
+
+function buildVersionedUrl(url) {
+  try {
+    const target = new URL(url, window.location.href);
+    const appv = getAppVersionParam();
+    if (appv) target.searchParams.set("appv", appv);
+    return target.toString();
+  } catch (e) {
+    const appv = getAppVersionParam();
+    if (!appv) return url;
+    const hasQuery = url.includes("?");
+    const hasAppv = /([?&])appv=/.test(url);
+    if (hasAppv) return url;
+    return url + (hasQuery ? "&" : "?") + "appv=" + encodeURIComponent(appv);
+  }
+}
+
+function navigatePreservingAppVersion(url) {
+  window.location.href = buildVersionedUrl(url);
+}
+
+
     // ===== Buttons =====
-    document.getElementById("backBtn").addEventListener("click", () => window.location.href = "index.html");
+    document.getElementById("backBtn").addEventListener("click", () => navigatePreservingAppVersion("index.html"));
 
     document.getElementById("refreshBtn").addEventListener("click", () => {
   GT_reloadFlow({ duration: 2800 });
@@ -5215,4 +5243,3 @@ Swal.fire({
   </script>
 </body>
 </html>
-
