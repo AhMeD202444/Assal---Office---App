@@ -1773,8 +1773,36 @@ async function refreshData(){
 }
 
 
+
+    function getDetectedAppVersion() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("appv") || "";
+    }
+
+    function buildVersionedAppUrl(url) {
+      try {
+        const currentVersion = getDetectedAppVersion();
+        if (!currentVersion) return url;
+
+        const target = new URL(url, window.location.href);
+        target.searchParams.set("appv", currentVersion);
+        return target.toString();
+      } catch (e) {
+        const currentVersion = getDetectedAppVersion();
+        if (!currentVersion) return url;
+        const hasQuery = url.includes("?");
+        const hasAppv = /([?&])appv=/.test(url);
+        if (hasAppv) return url;
+        return url + (hasQuery ? "&" : "?") + "appv=" + encodeURIComponent(currentVersion);
+      }
+    }
+
+    function navigateWithDetectedAppVersion(url) {
+      window.location.href = buildVersionedAppUrl(url);
+    }
+
     function goBack() {
-      window.location.href = "index.html";
+      navigateWithDetectedAppVersion("index.html");
     }
 
     function scrollToTop() {
