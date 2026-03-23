@@ -4116,7 +4116,7 @@ function fireLoginStyle(opts = {}) {
   }
 });
 
-            window.location.href = 'index.html';
+            navigatePreservingAppVersion('index.html');
             return;
         }
 
@@ -4127,7 +4127,7 @@ function fireLoginStyle(opts = {}) {
                 while (true) {
                     const password = await showPasswordPrompt();
                     if (!password) {
-                        window.location.href = 'index.html';
+                        navigatePreservingAppVersion('index.html');
                         break;
                     }
                     const success = await verifyPassword(password, db);
@@ -4138,7 +4138,7 @@ function fireLoginStyle(opts = {}) {
             while (true) {
                 const password = await showPasswordPrompt();
                 if (!password) {
-                    window.location.href = 'index.html';
+                    navigatePreservingAppVersion('index.html');
                     break;
                 }
                 const success = await verifyPassword(password, db);
@@ -4370,8 +4370,37 @@ function removeFromNotes(index) {
 
 
 
+    
+    function getAppVersionParam() {
+        const params = new URLSearchParams(window.location.search);
+        return (params.get('appv') || '').trim();
+    }
+
+    function buildVersionedUrl(url) {
+        const appv = getAppVersionParam();
+        if (!appv) return url;
+
+        const hasQuery = url.includes('?');
+        const hasHash = url.includes('#');
+        let base = url;
+        let hash = '';
+
+        if (hasHash) {
+            const parts = url.split('#');
+            base = parts.shift();
+            hash = '#' + parts.join('#');
+        }
+
+        const separator = base.includes('?') ? '&' : '?';
+        return `${base}${separator}appv=${encodeURIComponent(appv)}${hash}`;
+    }
+
+    function navigatePreservingAppVersion(url) {
+        window.location.href = buildVersionedUrl(url);
+    }
+
     function goBack() {
-        window.location.href = "index.html";
+        navigatePreservingAppVersion("index.html");
     }
 
     function scrollToTop() {
