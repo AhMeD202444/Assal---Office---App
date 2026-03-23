@@ -9094,6 +9094,122 @@ footer{
   }
 }
 
+
+
+/* ===== Ahmed: vertical centering between fixed header/footer ===== */
+:root{
+  --app-header-height: 44px;
+  --app-footer-height: 40px;
+  --app-center-gap: 12px;
+  --app-safe-top: env(safe-area-inset-top, 0px);
+  --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --app-top-bound: calc(var(--app-header-height) + var(--app-center-gap) + var(--app-safe-top));
+  --app-bottom-bound: calc(var(--app-footer-height) + var(--app-center-gap) + var(--app-safe-bottom));
+  --app-live-height: calc(100dvh - var(--app-top-bound) - var(--app-bottom-bound));
+}
+
+body{
+  min-height: 100dvh !important;
+  padding-top: var(--app-top-bound) !important;
+  padding-bottom: var(--app-bottom-bound) !important;
+  justify-content: center !important;
+}
+
+.container{
+  margin: 0 auto !important;
+}
+
+/* النوافذ اللي تتموضع مباشرة داخل مساحة العمل */
+#newItemsModal,
+#offersModal,
+#contactModal{
+  top: 50% !important;
+  bottom: auto !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  max-height: var(--app-live-height) !important;
+}
+
+#contactModal{
+  overflow: auto;
+}
+
+#newItemsModal .modal-content,
+#offersModal .offers-content{
+  min-height: 0;
+}
+
+.cart-shell{
+  top: 50% !important;
+  bottom: auto !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  max-height: var(--app-live-height) !important;
+}
+
+/* النوافذ المبنية على overlay:flex */
+.request-modal,
+.request-admin-modal,
+.request-track-modal,
+.stats-modal,
+.customer-profile-modal,
+.customers-admin-modal,
+.activation-overlay,
+#adModal{
+  align-items: center !important;
+  padding-top: var(--app-top-bound) !important;
+  padding-bottom: var(--app-bottom-bound) !important;
+}
+
+.request-shell,
+.request-admin-shell,
+.request-track-shell,
+.stats-shell,
+.customer-profile-shell,
+.customers-admin-shell,
+.activation-dialog,
+#adModal .ad-shell,
+#promoPopup{
+  max-height: var(--app-live-height) !important;
+}
+
+/* الحفاظ على نافذة الإعلان داخل نفس المساحة المتوازنة */
+#promoPopup,
+#promoPopup.alert-shell{
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+/* إعادة تعريف حركة نافذة العناصر الجديدة حتى تبقى متوسطة بعد التعديل */
+@keyframes slideDownModal {
+  0% {
+    transform: translate(-50%, -70%);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpModal {
+  0% {
+    transform: translate(-50%, -50%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -70%);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 768px){
+  :root{
+    --app-center-gap: 8px;
+  }
+}
+
 </style>
 </head>
 <body>
