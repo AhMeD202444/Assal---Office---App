@@ -17736,7 +17736,12 @@ async function renderSponsorAd(){
     installUrl: null,
     objectUrl: null,
     progressTimer: null,
-    started: false
+    started: false,
+    simulatedPercent: 0,
+    simulatedStartAt: 0,
+    simulatedDurationMs: 0,
+    completionReady: false,
+    installShown: false
   };
 
   function isAndroidLikeEnvironment(){
@@ -17794,25 +17799,61 @@ async function renderSponsorAd(){
   }
 
   function showInstallSection(){
+    if (updateState.installShown) return;
+    updateState.installShown = true;
     const installBtn = document.getElementById('appUpdateInstallBtn');
     const hint = document.getElementById('appUpdateInstallHint');
     if (installBtn) installBtn.style.display = 'inline-flex';
     if (hint) hint.style.display = 'block';
   }
 
+  function getExpectedDownloadDurationMs(){
+    const fallbackApkSizeKb = 1798;
+    const fallbackSpeedKbPerSec = 220;
+    const expectedSeconds = fallbackApkSizeKb / fallbackSpeedKbPerSec;
+    return Math.max(7800, Math.round(expectedSeconds * 1000));
+  }
+
   function startSimulatedProgress(){
     clearInterval(updateState.progressTimer);
-    let virtualPercent = 3;
-    updateProgressUI(virtualPercent, 'جاري تهيئة تنزيل التحديث...');
+    updateState.simulatedPercent = 2;
+    updateState.simulatedStartAt = Date.now();
+    updateState.simulatedDurationMs = getExpectedDownloadDurationMs();
+    updateState.completionReady = false;
+    updateState.installShown = false;
+    updateProgressUI(updateState.simulatedPercent, 'جاري تهيئة تنزيل التحديث...');
     updateState.progressTimer = setInterval(() => {
-      virtualPercent = Math.min(92, virtualPercent + (virtualPercent < 30 ? 5 : (virtualPercent < 70 ? 3 : 1)));
-      updateProgressUI(virtualPercent, 'جاري تنزيل ملف التحديث...');
-    }, 260);
+      const elapsed = Date.now() - updateState.simulatedStartAt;
+      const ratio = Math.min(1, elapsed / updateState.simulatedDurationMs);
+      const eased = 1 - Math.pow(1 - ratio, 1.55);
+      const visualPercent = Math.min(updateState.completionReady ? 100 : 96, Math.max(updateState.simulatedPercent, 2 + (eased * 94)));
+      updateState.simulatedPercent = visualPercent;
+      updateProgressUI(visualPercent, ratio < 0.12 ? 'جاري تهيئة تنزيل التحديث...' : 'جاري تنزيل ملف التحديث...');
+      if (updateState.completionReady && ratio >= 1) {
+        stopSimulatedProgress();
+        updateProgressUI(100, 'اكتمل التنزيل بنجاح. اضغط على زر التحديث الآن.');
+        showInstallSection();
+        setDownloadButtonState(true, '<i class="fas fa-check-circle"></i><span>اكتمل التنزيل</span>');
+      }
+    }, 120);
   }
 
   function stopSimulatedProgress(){
     clearInterval(updateState.progressTimer);
     updateState.progressTimer = null;
+  }
+
+  function finalizeProgressAndShowInstall(successText, buttonHtml){
+    updateState.completionReady = true;
+    const elapsed = Date.now() - updateState.simulatedStartAt;
+    const remaining = Math.max(0, updateState.simulatedDurationMs - elapsed);
+    window.setTimeout(() => {
+      stopSimulatedProgress();
+      updateProgressUI(100, successText);
+      showInstallSection();
+      setDownloadButtonState(true, buttonHtml);
+      updateState.started = false;
+    }, remaining);
   }
 
   function setDownloadButtonState(disabled, text){
@@ -17876,39 +17917,27 @@ async function renderSponsorAd(){
       };
 
       xhr.onload = function(){
-        stopSimulatedProgress();
         if (xhr.status >= 200 && xhr.status < 300 && xhr.response) {
           const blob = xhr.response;
           updateState.objectUrl = URL.createObjectURL(blob);
           updateState.installUrl = updateState.objectUrl;
-          updateProgressUI(100, 'اكتمل التنزيل بنجاح. اضغط على زر التحديث الآن.');
+          finalizeProgressAndShowInstall('اكتمل التنزيل بنجاح. اضغط على زر التحديث الآن.', '<i class="fas fa-check-circle"></i><span>اكتمل التنزيل</span>');
         } else {
           updateState.installUrl = apkUrl;
-          updateProgressUI(100, 'تم تجهيز رابط التحديث. اضغط على زر التحديث الآن.');
+          finalizeProgressAndShowInstall('تم تجهيز رابط التحديث. اضغط على زر التحديث الآن.', '<i class="fas fa-link"></i><span>الرابط جاهز</span>');
         }
-        showInstallSection();
-        updateState.started = false;
-        setDownloadButtonState(true, '<i class="fas fa-check-circle"></i><span>اكتمل التنزيل</span>');
       };
 
       xhr.onerror = function(){
-        stopSimulatedProgress();
         updateState.installUrl = apkUrl;
-        updateProgressUI(100, 'تم تجهيز رابط التحديث. اضغط على زر التحديث الآن.');
-        showInstallSection();
-        updateState.started = false;
-        setDownloadButtonState(true, '<i class="fas fa-link"></i><span>الرابط جاهز</span>');
+        finalizeProgressAndShowInstall('تم تجهيز رابط التحديث. اضغط على زر التحديث الآن.', '<i class="fas fa-link"></i><span>الرابط جاهز</span>');
       };
 
       xhr.send();
     } catch (err) {
       console.error('downloadUpdateApk error:', err);
-      stopSimulatedProgress();
       updateState.installUrl = apkUrl;
-      updateProgressUI(100, 'تم تجهيز رابط التحديث. اضغط على زر التحديث الآن.');
-      showInstallSection();
-      updateState.started = false;
-      setDownloadButtonState(true, '<i class="fas fa-link"></i><span>الرابط جاهز</span>');
+      finalizeProgressAndShowInstall('تم تجهيز رابط التحديث. اضغط على زر التحديث الآن.', '<i class="fas fa-link"></i><span>الرابط جاهز</span>');
     }
   }
 
@@ -17943,17 +17972,33 @@ async function renderSponsorAd(){
     const style = document.createElement('style');
     style.id = 'forceUpdateStyles';
     style.textContent = `
-      .swal2-container.force-update-container { backdrop-filter: blur(10px); background: rgba(2, 10, 26, 0.72) !important; }
+      .swal2-container.force-update-container {
+        backdrop-filter: blur(10px);
+        background: rgba(2, 10, 26, 0.72) !important;
+        padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)) !important;
+        box-sizing: border-box;
+      }
       .swal2-popup.force-update-popup {
         width: min(92vw, 520px) !important;
+        max-width: 520px !important;
+        max-height: calc(100dvh - max(24px, env(safe-area-inset-top)) - max(24px, env(safe-area-inset-bottom))) !important;
         border-radius: 32px !important;
         padding: 0 !important;
+        margin: 0 auto !important;
         background: linear-gradient(180deg, rgba(9,17,40,.98), rgba(5,10,25,.98)) !important;
         color: #fff !important;
         box-shadow: 0 30px 90px rgba(0,0,0,.45), 0 0 0 1px rgba(83,177,255,.14) inset !important;
-        overflow: hidden !important;
+        overflow: hidden auto !important;
+        box-sizing: border-box !important;
       }
-      .force-update-shell { padding: 26px 22px 22px; text-align: center; font-family: 'Cairo', 'Tajawal', sans-serif; }
+      .force-update-shell {
+        padding: 26px 22px 22px;
+        text-align: center;
+        font-family: 'Cairo', 'Tajawal', sans-serif;
+        max-height: calc(100dvh - max(24px, env(safe-area-inset-top)) - max(24px, env(safe-area-inset-bottom)));
+        overflow-y: auto;
+        box-sizing: border-box;
+      }
       .force-update-badge {
         display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px;
         background: rgba(67,206,162,.14); border: 1px solid rgba(67,206,162,.34); color: #8ef0cf;
@@ -17995,11 +18040,30 @@ async function renderSponsorAd(){
       .force-update-btn.success { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 16px 30px rgba(22,163,74,.28); }
       .force-update-hint { margin-top: 14px; color: rgba(255,255,255,.66); font-size: 12px; line-height: 1.9; }
       @media (max-width: 520px){
-        .force-update-shell { padding: 22px 16px 18px; }
-        .force-update-title { font-size: 25px; }
-        .force-update-text { font-size: 15px; }
-        .force-update-version-card strong { font-size: 21px; }
-        .force-update-btn { font-size: 16px; padding: 15px 16px; }
+        .swal2-container.force-update-container {
+          padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) !important;
+        }
+        .swal2-popup.force-update-popup {
+          width: min(96vw, 420px) !important;
+          border-radius: 24px !important;
+          max-height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom))) !important;
+        }
+        .force-update-shell {
+          padding: 18px 14px 16px;
+          max-height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom)));
+        }
+        .force-update-badge { margin-bottom: 12px; font-size: 12px; padding: 7px 13px; }
+        .force-update-icon { width: 68px; height: 68px; margin-bottom: 12px; font-size: 28px; border-radius: 22px; }
+        .force-update-title { font-size: 21px; margin-bottom: 8px; }
+        .force-update-text { font-size: 14px; line-height: 1.7; margin-bottom: 14px; }
+        .force-update-versions { gap: 10px; margin-bottom: 14px; }
+        .force-update-version-card { border-radius: 16px; padding: 12px 10px; }
+        .force-update-version-card strong { font-size: 18px; }
+        .force-update-progress-wrap { padding: 12px; border-radius: 16px; margin-bottom: 14px; }
+        .force-update-progress-head { font-size: 12px; gap: 8px; }
+        .force-update-progress-track { height: 10px; }
+        .force-update-btn { font-size: 15px; padding: 13px 14px; border-radius: 15px; }
+        .force-update-hint { margin-top: 10px; font-size: 11px; line-height: 1.75; }
       }
     `;
     document.head.appendChild(style);
@@ -18023,6 +18087,7 @@ async function renderSponsorAd(){
       allowEscapeKey: false,
       showConfirmButton: false,
       showCloseButton: false,
+      heightAuto: false,
       didOpen: () => {
         const downloadBtn = document.getElementById('appUpdateDownloadBtn');
         const installBtn = document.getElementById('appUpdateInstallBtn');
