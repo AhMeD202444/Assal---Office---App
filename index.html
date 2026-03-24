@@ -10133,36 +10133,106 @@ footer{
     return String(token || '').replace(/[.#$\[\]/]/g, '_');
   }
 
+  function getCurrentPushRole() {
+    try {
+      return (typeof isAdminUser === 'function' && isAdminUser()) ? 'admin' : 'customer';
+    } catch (_) {
+      return 'customer';
+    }
+  }
+
+  function getCurrentPushDeviceId() {
+    try {
+      if (typeof getDeviceId === 'function') return getDeviceId();
+    } catch (_) {}
+    try {
+      let id = localStorage.getItem('device_id');
+      if (!id) {
+        id = 'DEV-' + Math.random().toString(36).slice(2, 8).toUpperCase() + Date.now().toString(36).slice(-4).toUpperCase();
+        localStorage.setItem('device_id', id);
+      }
+      return id;
+    } catch (_) {
+      return 'WEB-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+    }
+  }
+
   async function saveFcmToken(token) {
     if (!token) return;
-
     const tokenKey = normalizeTokenKey(token);
-    const tokenRef = ref(db, `fcmTokens/web/${tokenKey}`);
+    const now = Date.now();
+    const role = getCurrentPushRole();
+    const deviceId = getCurrentPushDeviceId();
+    const legacyRef = ref(db, `fcmTokens/web/${tokenKey}`);
+    const rootRef = ref(db, `fcmTokens/all/${tokenKey}`);
+    const adminRef = ref(db, `fcmTokens/byRole/admin/${tokenKey}`);
+    const customerRef = ref(db, `fcmTokens/byRole/customers/${deviceId}/${tokenKey}`);
+    const activeRoleRef = role === 'admin' ? adminRef : customerRef;
+    const staleRoleRef = role === 'admin' ? customerRef : adminRef;
+
     const payload = {
       token,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      tokenKey,
+      role,
+      deviceId,
+      isAdmin: role === 'admin',
+      createdAt: now,
+      updatedAt: now,
       userAgent: navigator.userAgent || '',
       platform: navigator.platform || '',
       language: navigator.language || '',
-      app: 'Assal Office App'
+      app: 'Assal Office App',
+      appVersion: (typeof getAppVersionFromUrl === 'function' ? getAppVersionFromUrl() : null) || '1.0'
     };
 
     try {
-      const existing = await get(tokenRef);
+      const existing = await get(rootRef);
       if (existing.exists()) {
-        await update(tokenRef, {
-          updatedAt: payload.updatedAt,
-          userAgent: payload.userAgent,
-          platform: payload.platform,
-          language: payload.language
-        });
-      } else {
-        await set(tokenRef, payload);
+        const prev = existing.val() || {};
+        payload.createdAt = prev.createdAt || now;
       }
-      console.log('FCM token saved successfully');
+      await set(rootRef, payload);
+      await set(activeRoleRef, payload);
+      try { await remove(staleRoleRef); } catch (_) {}
+      try { await remove(legacyRef); } catch (_) {}
+      console.log('FCM token saved successfully for role:', role, 'deviceId:', deviceId);
     } catch (err) {
       console.error('Failed to save FCM token:', err);
+    }
+  }
+
+  async function refreshCurrentFcmTokenRegistration() {
+    try {
+      const token = window.firebaseMessaging?.token;
+      if (!token) return;
+      await saveFcmToken(token);
+    } catch (err) {
+      console.error('Failed to refresh current FCM token registration:', err);
+    }
+  }
+
+  async function queuePushNotificationEvent(eventType, payload = {}) {
+    if (!window.firebaseDB || !window.firebaseDB.db) return null;
+    const { db, ref, set } = window.firebaseDB;
+    const now = Date.now();
+    const eventId = 'PUSH-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+    const data = {
+      id: eventId,
+      type: eventType,
+      createdAt: now,
+      status: 'pending',
+      source: 'web',
+      actorRole: getCurrentPushRole(),
+      actorDeviceId: getCurrentPushDeviceId(),
+      appVersion: (typeof getAppVersionFromUrl === 'function' ? getAppVersionFromUrl() : null) || '1.0',
+      ...payload
+    };
+    try {
+      await set(ref(db, `notificationQueue/${eventId}`), data);
+      return data;
+    } catch (err) {
+      console.error('Failed to queue push notification event:', err);
+      return null;
     }
   }
 
@@ -10303,6 +10373,10 @@ function setAdminUser(isAdmin) {
     updateCustomersAdminHeaderBtn();
     updateRequestAdminHeaderBtn();
     updateRequestAdminFloatingBtn();
+
+    if (typeof refreshCurrentFcmTokenRegistration === 'function') {
+        refreshCurrentFcmTokenRegistration().catch(err => console.error('Failed to refresh push role binding:', err));
+    }
 }
 
 function updateAdminCompatBtn() {
@@ -11172,6 +11246,16 @@ window.submitMaterialRequest = async function () {
             }
         });
 
+        await queuePushNotificationEvent('material_request_created', {
+            requestId,
+            targetRole: 'admin',
+            customerName: name,
+            customerPhone: phone,
+            item,
+            title: 'طلب مادة جديد',
+            body: `${name} طلب المادة: ${item}`
+        });
+
         await new Promise(resolve => setTimeout(resolve, 1200));
         setRequestSubmitState('success', 'تم الإرسال بنجاح', 'fa-circle-check');
         if (nameInput) nameInput.value = "";
@@ -11353,9 +11437,21 @@ window.sendAdminReply = async function (requestId) {
     const input = document.getElementById(`requestAdminReply_${requestId}`);
     const text = (input?.value || '').trim();
     if (!text || !window.firebaseDB || !window.firebaseDB.db) return;
-    const { db, ref, update } = window.firebaseDB;
+    const { db, ref, update, get } = window.firebaseDB;
     const now = Date.now();
     const msgId = "MSG-" + now.toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2,5).toUpperCase();
+    let targetDeviceId = '';
+    let customerName = '';
+    try {
+        const snap = await get(ref(db, `materialRequests/${requestId}`));
+        if (snap.exists()) {
+            const req = snap.val() || {};
+            targetDeviceId = String(req.deviceId || '');
+            customerName = String(req.name || '');
+        }
+    } catch (err) {
+        console.error('Failed to read material request before admin reply:', err);
+    }
     await update(ref(db), {
         [`materialRequests/${requestId}/messages/${msgId}`]: {
             id: msgId,
@@ -11368,6 +11464,14 @@ window.sendAdminReply = async function (requestId) {
         [`materialRequests/${requestId}/updatedAt`]: now,
         [`materialRequests/${requestId}/status`]: 'processing'
     });
+    await queuePushNotificationEvent('material_request_admin_reply', {
+        requestId,
+        targetRole: 'customer',
+        targetDeviceId,
+        customerName,
+        title: 'رد جديد على طلب المادة',
+        body: text
+    });
     if (input) input.value = '';
     await loadMaterialRequests();
     await refreshMaterialRequestCount();
@@ -11375,9 +11479,21 @@ window.sendAdminReply = async function (requestId) {
 
 window.markRequestProcessed = async function (requestId) {
     if (!window.firebaseDB || !window.firebaseDB.db) return;
-    const { db, ref, update } = window.firebaseDB;
+    const { db, ref, update, get } = window.firebaseDB;
     const now = Date.now();
     const msgId = "MSG-" + now.toString(36).toUpperCase() + "-DONE";
+    let targetDeviceId = '';
+    let customerName = '';
+    try {
+        const snap = await get(ref(db, `materialRequests/${requestId}`));
+        if (snap.exists()) {
+            const req = snap.val() || {};
+            targetDeviceId = String(req.deviceId || '');
+            customerName = String(req.name || '');
+        }
+    } catch (err) {
+        console.error('Failed to read material request before processing:', err);
+    }
     await update(ref(db), {
         [`materialRequests/${requestId}/messages/${msgId}`]: {
             id: msgId,
@@ -11390,6 +11506,14 @@ window.markRequestProcessed = async function (requestId) {
         [`materialRequests/${requestId}/updatedAt`]: now,
         [`materialRequests/${requestId}/status`]: 'processed',
         [`materialRequests/${requestId}/archivedForAdmin`]: true
+    });
+    await queuePushNotificationEvent('material_request_processed', {
+        requestId,
+        targetRole: 'customer',
+        targetDeviceId,
+        customerName,
+        title: 'تمت معالجة الطلب',
+        body: 'تمت معالجة طلبك. إذا تحتاج شيء ثاني تگدر ترسل طلب جديد.'
     });
     await loadMaterialRequests();
     await refreshMaterialRequestCount();
@@ -17084,6 +17208,15 @@ async function renderSponsorAd(){
         note, discount, subtotal, total, createdAt:now, updatedAt:now, status:'pending', customerArchived:false, adminArchived:false, customerDeleted:false,
         messages:{ [msgId]: { id:msgId, senderRole:'customer', text: note ? `فاتورة جديدة\n${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCustomer:true } }
       });
+      await queuePushNotificationEvent('invoice_created', {
+        invoiceId: id,
+        targetRole: 'admin',
+        customerName: String(profile.name || '').trim() || 'بدون اسم',
+        customerPhone: String(profile.phone || '').trim(),
+        targetDeviceId: '',
+        title: 'فاتورة جديدة',
+        body: `فاتورة جديدة من ${String(profile.name || '').trim() || 'زبون'} بقيمة ${total}`
+      });
       cart = []; saveCart();
     setPendingInvoiceCreateNewId('');
       setPendingInvoiceCreateNewId('');
@@ -17124,6 +17257,12 @@ async function renderSponsorAd(){
       [`${INVOICE_PATH}/${id}/cancelledByCustomer`]: true,
       [`${INVOICE_PATH}/${id}/updatedAt`]: now
     });
+    await queuePushNotificationEvent('invoice_cancelled_by_customer', {
+      invoiceId: id,
+      targetRole: 'admin',
+      title: 'إلغاء فاتورة',
+      body: 'تم إلغاء الفاتورة من قبل الزبون'
+    });
     currentInvoiceTrackView = 'active';
     await loadCustomerInvoices();
     await refreshInvoiceCounts();
@@ -17146,6 +17285,12 @@ async function renderSponsorAd(){
     const now = Date.now(); const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,5).toUpperCase();
     const { db, ref, update } = window.firebaseDB;
     await update(ref(db), { [`${INVOICE_PATH}/${id}/messages/${msgId}`]: { id:msgId, senderRole:'customer', text, createdAt:now, seenByAdmin:false, seenByCustomer:true }, [`${INVOICE_PATH}/${id}/updatedAt`]: now, [`${INVOICE_PATH}/${id}/status`]: 'pending' });
+    await queuePushNotificationEvent('invoice_customer_reply', {
+      invoiceId: id,
+      targetRole: 'admin',
+      title: 'رد جديد على الفاتورة',
+      body: text
+    });
     if (input) input.value=''; await loadCustomerInvoices(); await refreshInvoiceCounts();
   };
   window.sendAdminInvoiceReply = async function(id){
@@ -17153,15 +17298,43 @@ async function renderSponsorAd(){
     const input = document.getElementById(`invoiceAdminReply_${id}`);
     const text = (input?.value || '').trim(); if (!text) return;
     const now = Date.now(); const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,5).toUpperCase();
-    const { db, ref, update } = window.firebaseDB;
+    const { db, ref, update, get } = window.firebaseDB;
+    let targetDeviceId = '';
+    let customerName = '';
+    try {
+      const snap = await get(ref(db, `${INVOICE_PATH}/${id}`));
+      if (snap.exists()) {
+        const inv = snap.val() || {};
+        targetDeviceId = String(inv.deviceId || '');
+        customerName = String(inv.customerName || '');
+      }
+    } catch (err) { console.error('Failed to read invoice before admin reply:', err); }
     await update(ref(db), { [`${INVOICE_PATH}/${id}/messages/${msgId}`]: { id:msgId, senderRole:'admin', text, createdAt:now, seenByAdmin:true, seenByCustomer:false }, [`${INVOICE_PATH}/${id}/updatedAt`]: now, [`${INVOICE_PATH}/${id}/status`]: 'pending' });
+    await queuePushNotificationEvent('invoice_admin_reply', {
+      invoiceId: id,
+      targetRole: 'customer',
+      targetDeviceId,
+      customerName,
+      title: 'رد جديد على الفاتورة',
+      body: text
+    });
     if (input) input.value=''; await loadAdminInvoices(); await refreshInvoiceCounts();
   };
   window.markInvoicePrepared = async function(id){
     if (!window.firebaseDB || !window.firebaseDB.db) return;
-    const { db, ref, update } = window.firebaseDB;
+    const { db, ref, update, get } = window.firebaseDB;
     const now = Date.now();
     const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,5).toUpperCase();
+    let targetDeviceId = '';
+    let customerName = '';
+    try {
+      const snap = await get(ref(db, `${INVOICE_PATH}/${id}`));
+      if (snap.exists()) {
+        const inv = snap.val() || {};
+        targetDeviceId = String(inv.deviceId || '');
+        customerName = String(inv.customerName || '');
+      }
+    } catch (err) { console.error('Failed to read invoice before prepared update:', err); }
     await update(ref(db), {
       [`${INVOICE_PATH}/${id}/updatedAt`]: now,
       [`${INVOICE_PATH}/${id}/status`]: 'prepared',
@@ -17173,6 +17346,14 @@ async function renderSponsorAd(){
         seenByAdmin: true,
         seenByCustomer: false
       }
+    });
+    await queuePushNotificationEvent('invoice_prepared', {
+      invoiceId: id,
+      targetRole: 'customer',
+      targetDeviceId,
+      customerName,
+      title: 'تم تجهيز الفاتورة',
+      body: 'تم تجهيز الفاتورة وإغلاقها.'
     });
     currentInvoiceAdminView = 'active';
     if (typeof setInvoiceViewButtons === 'function') setInvoiceViewButtons();
