@@ -2900,13 +2900,17 @@ footer {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     z-index: 20040;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.22s ease;
-    padding: max(16px, env(safe-area-inset-top, 0px) + 10px) 14px max(16px, env(safe-area-inset-bottom, 0px) + 10px);
+    padding:
+        max(14px, env(safe-area-inset-top, 0px) + 12px)
+        14px
+        max(14px, env(safe-area-inset-bottom, 0px) + 12px);
+    overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-tap-highlight-color: transparent;
 }
@@ -2920,7 +2924,9 @@ footer {
 /* 🧊 صندوق المودال – تصميم ناعم وعالمي */
 .activation-dialog {
     width: min(100%, 420px);
-    max-height: min(86dvh, 640px);
+    min-height: auto;
+    max-height: none;
+    margin: auto 0;
     background:
       radial-gradient(circle at top right, rgba(56,189,248,.18), transparent 35%),
       radial-gradient(circle at bottom left, rgba(24,90,157,.20), transparent 35%),
@@ -2939,7 +2945,7 @@ footer {
     flex-direction: column;
     align-items: center;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* لمعة خفيفة تتحرك داخل النافذة */
@@ -3059,6 +3065,7 @@ footer {
     margin-top: 6px;
     margin-bottom: 10px;
     max-width: 360px;
+    width: 100%;
     position: relative;
     z-index: 1;
 }
@@ -3085,6 +3092,7 @@ footer {
     background: radial-gradient(circle at top, rgba(15, 23, 42, 0.4), #020617);
     border: 1px solid rgba(148, 163, 184, 0.45);
     padding-inline: 10px;
+    min-height: 48px;
     box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.9), 0 0 22px rgba(56, 189, 248, 0.18);
     transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
@@ -3095,8 +3103,8 @@ footer {
     outline: none;
     background: transparent;
     color: #f9fafb;
-    font-size: 14px;
-    padding: 9px 4px 9px 0;
+    font-size: 16px;
+    padding: 11px 4px 11px 0;
     font-family: 'Cairo', sans-serif;
     text-align: center;
 }
@@ -3136,10 +3144,10 @@ footer {
 
 /* رسالة الخطأ تحت الحقل */
 .activation-error {
-    min-height: 20px;
+    min-height: 22px;
     font-size: 12px;
     color: #f97373;
-    margin-top: 6px;
+    margin-top: 8px;
 }
 
 /* الفوتر والأزرار */
@@ -3150,6 +3158,7 @@ footer {
     margin-top: 12px;
     position: relative;
     z-index: 1;
+    flex-wrap: wrap;
 }
 
 .activation-btn {
@@ -3206,6 +3215,9 @@ footer {
         0 0 0 1px rgba(34, 197, 94, 0.7),
         0 24px 80px rgba(34, 197, 94, 0.5);
     animation: activation-pop 0.45s ease-out;
+    padding-top: 26px;
+    padding-bottom: 24px;
+    overflow: visible;
 }
 
 @keyframes activation-pop {
@@ -3218,9 +3230,11 @@ footer {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
     padding-top: 4px;
-    padding-bottom: 2px;
+    padding-bottom: 4px;
 }
 
 
@@ -3308,15 +3322,17 @@ footer {
 
 
 .activation-success-title {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     color: #bbf7d0;
+    line-height: 1.4;
 }
 
 .activation-success-text {
-    font-size: 13px;
+    font-size: 14px;
     color: #d1fae5;
     max-width: 320px;
+    line-height: 1.7;
 }
 
 
@@ -4026,27 +4042,38 @@ footer {
     position: fixed !important;
     inset: 0 !important;
     width: 100vw !important;
-    height: 100dvh !important;
+    min-height: 100dvh !important;
+    height: auto !important;
     z-index: 999999 !important;
     background: rgba(2, 8, 23, .62) !important;
     isolation: isolate;
     -webkit-backdrop-filter: blur(10px) !important;
     backdrop-filter: blur(10px) !important;
+    align-items: flex-start !important;
+    overflow-y: auto !important;
     overscroll-behavior: contain;
+    padding-top: max(10px, env(safe-area-inset-top, 0px) + 8px) !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 0px) + 8px) !important;
   }
 
   /* ✅ خَلّي النافذة طبقة مستقرة */
   #activation-overlay .activation-dialog{
+    width: min(100%, 400px) !important;
+    margin: 0 auto !important;
+    max-height: none !important;
+    overflow: visible !important;
     transform: translate3d(0,0,0);
     will-change: transform;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     contain: layout paint;
+    border-radius: 22px !important;
+    padding: 18px 16px 16px !important;
   }
 
   /* ✅ امنع قفزة التخطيط لما يظهر الخطأ */
   #activation-overlay #activation-error-row{
-    min-height: 18px;
+    min-height: 22px;
   }
 
   /* ✅ اهتزاز 3D يقلل الفلاش */
@@ -4086,6 +4113,33 @@ footer {
     box-shadow: none !important;
     transition: border 0.15s ease, background 0.15s ease !important;
   }
+
+  #activation-overlay .activation-btn {
+    width: 100%;
+    max-width: 100%;
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  #activation-overlay .activation-success-icon {
+    width: 78px;
+    height: 78px;
+  }
+
+  #activation-overlay .activation-success-inner {
+    width: 56px;
+    height: 56px;
+    font-size: 26px;
+  }
+
+  #activation-overlay .activation-success-title {
+    font-size: 18px;
+  }
+
+  #activation-overlay .activation-success-text {
+    font-size: 13px;
+    line-height: 1.7;
+  }
 }
 
 
@@ -4093,8 +4147,8 @@ footer {
   /* يمنع المتصفح يسوي highlight/وميض وقت اللمس */
   #activation-overlay * { -webkit-tap-highlight-color: transparent; }
 
-  /* يقفل أي سكرول داخل الأوفرلاي ويسوي طبقة ثابتة */
-  #activation-overlay { touch-action: none; }
+  /* يسمح بحركة عمودية فقط ويمنع التخبيص */
+  #activation-overlay { touch-action: pan-y; }
 
   /* يطفي أي outline افتراضي ممكن يسبب ومضة */
   #activation-overlay input:focus { outline: none !important; }
@@ -12427,24 +12481,55 @@ async function showActivationPopup() {
         const cancelBtn     = document.getElementById('activation-cancel-btn');
         const toggleBtn     = overlay.querySelector('.activation-toggle-password');
 
-        const focusNoScroll = () => {
-            setTimeout(() => {
-                try {
-                    passwordInput.focus({ preventScroll: true });
-                } catch (e) {
-                    passwordInput.focus();
-                }
-            }, 50);
+        let viewportHandlersBound = false;
+
+        const updateActivationLayout = () => {
+            const overlayEl = document.getElementById('activation-overlay');
+            const dialogEl  = overlayEl ? overlayEl.querySelector('.activation-dialog') : null;
+            if (!overlayEl || !dialogEl) return;
+
+            const vv = window.visualViewport;
+            const viewportHeight = vv ? vv.height : window.innerHeight;
+            const offsetTop = vv ? vv.offsetTop : 0;
+            const keyboardOpen = window.innerHeight - viewportHeight > 120;
+
+            overlayEl.style.height = `${viewportHeight}px`;
+            overlayEl.style.paddingTop = `${Math.max(10, offsetTop + 10)}px`;
+            overlayEl.style.paddingBottom = '10px';
+
+            if (keyboardOpen) {
+                dialogEl.style.marginTop = '0';
+                dialogEl.style.marginBottom = 'auto';
+            } else {
+                dialogEl.style.marginTop = 'auto';
+                dialogEl.style.marginBottom = 'auto';
+            }
         };
+
+        const bindViewportHandlers = () => {
+            if (viewportHandlersBound) return;
+            viewportHandlersBound = true;
+
+            updateActivationLayout();
+
+            window.addEventListener('resize', updateActivationLayout);
+
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', updateActivationLayout);
+                window.visualViewport.addEventListener('scroll', updateActivationLayout);
+            }
+        };
+
+        bindViewportHandlers();
 
         const setError = (msg) => {
             errorRow.textContent = msg || '';
             dialog.classList.remove('is-shaking');
             if (msg) {
-                // نعيد تشغيل أنيميشن الاهتزاز
                 void dialog.offsetWidth;
                 dialog.classList.add('is-shaking');
             }
+            updateActivationLayout();
         };
 
         // زر العين – إظهار/إخفاء كلمة المرور
@@ -12454,7 +12539,7 @@ async function showActivationPopup() {
             toggleBtn.innerHTML = isPassword
                 ? '<i class="fa-regular fa-eye-slash"></i>'
                 : '<i class="fa-regular fa-eye"></i>';
-            focusNoScroll(); // ✅ بدل focus العادي
+            updateActivationLayout();
         });
 
         // زر تأكيد الدخول
@@ -12463,22 +12548,18 @@ async function showActivationPopup() {
 
             if (!value) {
                 setError('رجاءً اكتب كلمة المرور أولاً.');
-                focusNoScroll(); // ✅ بدل focus العادي
                 return;
             }
 
             // نفس كلمة المرور القديمة بالضبط
             if (value === '112233' || value === ADMIN_PASSWORD) {
-                // ✅ تفعيل التطبيق
                 localStorage.setItem('isActivated', 'true');
-                // ✅ تفعيل وضع الكادر حسب كلمة المرور
                 setAdminUser(value === ADMIN_PASSWORD);
 
                 setError('');
                 dialog.classList.remove('is-shaking');
-
-                // 🎉 عرض شاشة نجاح عالمية داخل نفس النافذة
                 dialog.classList.add('is-success');
+
                 dialog.innerHTML = `
                     <div class="activation-success" dir="rtl">
                         <div class="activation-success-icon">
@@ -12494,12 +12575,17 @@ async function showActivationPopup() {
                     </div>
                 `;
 
-                // بعد الأنيميشن نعيد تحميل الصفحة
+                try {
+                    passwordInput.blur();
+                } catch (e) {}
+
+                requestAnimationFrame(updateActivationLayout);
+                setTimeout(updateActivationLayout, 80);
+
                 setTimeout(() => {
                     overlay.classList.remove('is-open');
                     if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock();
 
-                    // ✅ فتح السكرول قبل الريلود
                     document.documentElement.style.overflow = '';
                     document.body.style.overflow = '';
 
@@ -12508,16 +12594,15 @@ async function showActivationPopup() {
                     }, 150);
                 }, 1600);
             } else {
-                // كلمة مرور خاطئة
                 setError('كلمة المرور غير صحيحة. تأكد منها وجرب مرة ثانية.');
                 passwordInput.select();
+                updateActivationLayout();
             }
         });
 
         // زر إغلاق التطبيق (نفس فكرة "لازم تفعّل")
         cancelBtn.addEventListener('click', () => {
             setError('لا يمكنك استخدام التطبيق بدون تفعيل. راجع مكتب عسل للحصول على كلمة المرور.');
-            focusNoScroll(); // ✅ بدل focus العادي
         });
 
         // إنتر = تأكيد
@@ -12527,13 +12612,21 @@ async function showActivationPopup() {
                 confirmBtn.click();
             }
         });
+
+        passwordInput.addEventListener('focus', () => {
+            requestAnimationFrame(updateActivationLayout);
+            setTimeout(updateActivationLayout, 120);
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            setTimeout(updateActivationLayout, 80);
+        });
     }
 
     // كل مرة ننادي showActivationPopup نعرض النافذة
     overlay.classList.add('is-open');
     if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock();
 
-    // ✅ قفل السكرول أول ما تنفتح النافذة
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
@@ -12543,16 +12636,24 @@ async function showActivationPopup() {
     if (error) error.textContent = '';
     if (input) {
         input.value = '';
-
-        // ✅ فوكس بدون سكرول لتقليل وميض الموبايل
-        setTimeout(() => {
-            try {
-                input.focus({ preventScroll: true });
-            } catch (e) {
-                input.focus();
-            }
-        }, 50);
+        input.blur();
     }
+
+    const refreshActivationLayout = () => {
+        const vv = window.visualViewport;
+        const dialog = overlay ? overlay.querySelector('.activation-dialog') : null;
+        const viewportHeight = vv ? vv.height : window.innerHeight;
+
+        overlay.style.height = `${viewportHeight}px`;
+
+        if (dialog) {
+            dialog.style.marginTop = 'auto';
+            dialog.style.marginBottom = 'auto';
+        }
+    };
+
+    requestAnimationFrame(refreshActivationLayout);
+    setTimeout(refreshActivationLayout, 120);
 }
 
 
