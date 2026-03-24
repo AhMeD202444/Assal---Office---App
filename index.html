@@ -10236,77 +10236,202 @@ footer{
     }
   }
 
-  async function initPushNotifications() {
+  let pushRegistrationPromise = null;
+  let pushForegroundListenerBound = false;
+  let pushPromptVisible = false;
+
+  async function getPushServiceWorkerRegistration() {
+    if (pushRegistrationPromise) return pushRegistrationPromise;
+    pushRegistrationPromise = (async () => {
+      const registration = await navigator.serviceWorker.register(FIREBASE_SW_PATH, { scope: '/Assal---Office---App/' });
+      console.log('Firebase messaging service worker registered:', registration.scope);
+      return registration;
+    })();
+    return pushRegistrationPromise;
+  }
+
+  async function bindForegroundPushListener(messaging) {
+    if (pushForegroundListenerBound) return;
+    pushForegroundListenerBound = true;
+    onMessage(messaging, (payload) => {
+      console.log('Foreground push message received:', payload);
+
+      const title = payload?.notification?.title || 'إشعار جديد';
+      const body = payload?.notification?.body || '';
+      const icon = payload?.notification?.icon || '/Assal---Office---App/images/logo.png';
+
+      if (Notification.permission === 'granted') {
+        new Notification(title, { body, icon });
+      }
+    });
+  }
+
+  async function completePushRegistration(registration) {
+    const messaging = getMessaging(app);
+    const token = await getToken(messaging, {
+      vapidKey: FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: registration
+    });
+
+    if (!token) {
+      console.log('No FCM registration token available.');
+      return false;
+    }
+
+    window.firebaseMessaging = {
+      messaging,
+      token,
+      registration,
+      getToken: () => token
+    };
+
+    await saveFcmToken(token);
+    await bindForegroundPushListener(messaging);
+    return true;
+  }
+
+  async function initPushNotifications(options = {}) {
     try {
+      const { forcePrompt = false } = options;
       const supported = await isSupported().catch(() => false);
       if (!supported) {
         console.log('Firebase Messaging is not supported in this browser.');
-        return;
+        return false;
       }
 
       if (!('serviceWorker' in navigator)) {
         console.log('Service Worker not supported.');
-        return;
+        return false;
       }
 
       if (!('Notification' in window)) {
         console.log('Notifications not supported.');
-        return;
+        return false;
       }
 
-      const registration = await navigator.serviceWorker.register(FIREBASE_SW_PATH, { scope: '/Assal---Office---App/' });
-      console.log('Firebase messaging service worker registered:', registration.scope);
-
+      const registration = await getPushServiceWorkerRegistration();
       let permission = Notification.permission;
-      if (permission === 'default') {
+
+      if (permission === 'default' && forcePrompt) {
         permission = await Notification.requestPermission();
       }
 
       if (permission !== 'granted') {
         console.log('Notification permission not granted.');
-        return;
+        return false;
       }
 
-      const messaging = getMessaging(app);
-      const token = await getToken(messaging, {
-        vapidKey: FIREBASE_VAPID_KEY,
-        serviceWorkerRegistration: registration
-      });
-
-      if (!token) {
-        console.log('No FCM registration token available.');
-        return;
-      }
-
-      window.firebaseMessaging = {
-        messaging,
-        token,
-        registration,
-        getToken: () => token
-      };
-
-      await saveFcmToken(token);
-
-      onMessage(messaging, (payload) => {
-        console.log('Foreground push message received:', payload);
-
-        const title = payload?.notification?.title || 'إشعار جديد';
-        const body = payload?.notification?.body || '';
-        const icon = payload?.notification?.icon || '/Assal---Office---App/images/logo.png';
-
-        if (Notification.permission === 'granted') {
-          new Notification(title, { body, icon });
-        }
-      });
+      return await completePushRegistration(registration);
     } catch (error) {
       console.error('Error initializing push notifications:', error);
+      return false;
+    }
+  }
+
+  async function showPushPermissionPrompt() {
+    if (pushPromptVisible) return;
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'default') return;
+
+    pushPromptVisible = true;
+    try {
+      const result = await Swal.fire({
+        showConfirmButton: true,
+        showCancelButton: true,
+        reverseButtons: true,
+        buttonsStyling: false,
+        background: 'transparent',
+        color: '#fff',
+        allowOutsideClick: false,
+        allowEscapeKey: true,
+        customClass: {
+          popup: 'customer-confirm-popup',
+          actions: 'customer-confirm-actions',
+          confirmButton: 'ban',
+          cancelButton: 'archive',
+          denyButton: 'swal2-hidden'
+        },
+        confirmButtonText: 'تفعيل الإشعارات',
+        cancelButtonText: 'لاحقًا',
+        html: `
+          <div class="customer-confirm-wrap" style="padding-top:24px;">
+            <div class="customer-confirm-icon ban"><i class="fas fa-bell"></i></div>
+            <h3 class="customer-confirm-title">تفعيل الإشعارات</h3>
+            <p class="customer-confirm-text">فعّل الإشعارات حتى توصلك الطلبات والردود الجديدة فورًا.</p>
+            <div style="display:grid; gap:10px; margin-top:16px; text-align:right;">
+              <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:12px 14px; font-family:'Cairo',sans-serif; color:#e5e7eb; font-size:15px;">
+                <i class="fas fa-box-open" style="color:#43cea2; margin-left:8px;"></i> طلبات المواد الجديدة
+              </div>
+              <div style="background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:12px 14px; font-family:'Cairo',sans-serif; color:#e5e7eb; font-size:15px;">
+                <i class="fas fa-file-invoice" style="color:#43cea2; margin-left:8px;"></i> الفواتير والردود والتحديثات
+              </div>
+            </div>
+          </div>
+        `
+      });
+
+      if (result.isConfirmed) {
+        Swal.close();
+        await new Promise(resolve => setTimeout(resolve, 180));
+        const ok = await initPushNotifications({ forcePrompt: true });
+
+        if (ok) {
+          await Swal.fire({
+            showConfirmButton: false,
+            timer: 1600,
+            background: 'transparent',
+            color: '#fff',
+            customClass: {
+              popup: 'customer-confirm-popup',
+              htmlContainer: 'swal2-html-container'
+            },
+            html: `
+              <div class="customer-confirm-wrap" style="padding-top:24px;">
+                <div class="customer-confirm-icon ban"><i class="fas fa-check"></i></div>
+                <h3 class="customer-confirm-title">تم التفعيل</h3>
+                <p class="customer-confirm-text">هسه توصلك الإشعارات داخل التطبيق.</p>
+              </div>
+            `
+          });
+        } else if (Notification.permission === 'denied') {
+          await Swal.fire({
+            showConfirmButton: true,
+            buttonsStyling: false,
+            background: 'transparent',
+            color: '#fff',
+            customClass: {
+              popup: 'customer-confirm-popup',
+              actions: 'customer-confirm-actions',
+              confirmButton: 'archive'
+            },
+            confirmButtonText: 'موافق',
+            html: `
+              <div class="customer-confirm-wrap" style="padding-top:24px;">
+                <div class="customer-confirm-icon delete"><i class="fas fa-bell-slash"></i></div>
+                <h3 class="customer-confirm-title">الإشعارات متوقفة</h3>
+                <p class="customer-confirm-text">تم رفض إذن الإشعارات. فعلها من إعدادات المتصفح أو التطبيق.</p>
+              </div>
+            `
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to show push permission prompt:', err);
+    } finally {
+      pushPromptVisible = false;
     }
   }
 
   window.initPushNotifications = initPushNotifications;
+  window.showPushPermissionPrompt = showPushPermissionPrompt;
 
-  window.addEventListener('load', () => {
-    initPushNotifications();
+  window.addEventListener('load', async () => {
+    const alreadyReady = await initPushNotifications();
+    if (!alreadyReady && Notification.permission === 'default') {
+      setTimeout(() => {
+        showPushPermissionPrompt();
+      }, 900);
+    }
   }, { once: true });
 </script>
 
