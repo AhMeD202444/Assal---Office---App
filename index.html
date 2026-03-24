@@ -4049,7 +4049,8 @@ footer {
     isolation: isolate;
     -webkit-backdrop-filter: blur(10px) !important;
     backdrop-filter: blur(10px) !important;
-    align-items: flex-start !important;
+    align-items: center !important;
+    justify-content: center !important;
     overflow-y: auto !important;
     overscroll-behavior: contain;
     padding-top: max(10px, env(safe-area-inset-top, 0px) + 8px) !important;
@@ -4059,7 +4060,7 @@ footer {
   /* ✅ خَلّي النافذة طبقة مستقرة */
   #activation-overlay .activation-dialog{
     width: min(100%, 400px) !important;
-    margin: 0 auto !important;
+    margin: auto !important;
     max-height: none !important;
     overflow: visible !important;
     transform: translate3d(0,0,0);
@@ -4114,11 +4115,22 @@ footer {
     transition: border 0.15s ease, background 0.15s ease !important;
   }
 
-  #activation-overlay .activation-btn {
+  #activation-overlay .activation-footer {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    gap: 8px !important;
     width: 100%;
-    max-width: 100%;
+  }
+
+  #activation-overlay .activation-btn {
+    width: auto !important;
+    max-width: none !important;
     min-height: 44px;
     font-size: 14px;
+    flex: 1 1 0;
+    white-space: nowrap;
   }
 
   #activation-overlay .activation-success-icon {
@@ -12492,10 +12504,13 @@ async function showActivationPopup() {
             const viewportHeight = vv ? vv.height : window.innerHeight;
             const offsetTop = vv ? vv.offsetTop : 0;
             const keyboardOpen = window.innerHeight - viewportHeight > 120;
+            const baseInset = Math.max(10, offsetTop + 10);
 
             overlayEl.style.height = `${viewportHeight}px`;
-            overlayEl.style.paddingTop = `${Math.max(10, offsetTop + 10)}px`;
-            overlayEl.style.paddingBottom = '10px';
+            overlayEl.style.paddingTop = `${baseInset}px`;
+            overlayEl.style.paddingBottom = `${baseInset}px`;
+            overlayEl.style.alignItems = keyboardOpen ? 'flex-start' : 'center';
+            overlayEl.style.justifyContent = keyboardOpen ? 'flex-start' : 'center';
 
             if (keyboardOpen) {
                 dialogEl.style.marginTop = '0';
