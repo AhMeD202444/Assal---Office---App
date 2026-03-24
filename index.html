@@ -10036,9 +10036,137 @@ footer{
     }
   }
 
+  async function requestNativeNotificationPermission() {
+    if (typeof Notification === 'undefined') return 'unsupported';
+    try {
+      if (Notification.permission === 'granted') return 'granted';
+      if (Notification.permission === 'denied') return 'denied';
+      return await Notification.requestPermission();
+    } catch (err) {
+      console.error('Notification permission request failed:', err);
+      return 'error';
+    }
+  }
+
+  function getCurrentPushRoleBucket() {
+    return getCurrentPushRole() === 'admin' ? 'admins' : 'customers';
+  }
+
+  async function findBestWebPushTokenForCurrentDevice() {
+    if (!window.firebaseDB || !window.firebaseDB.db) return null;
+    const { db, ref, get } = window.firebaseDB;
+    try {
+      const snap = await get(ref(db, 'fcmTokens/web'));
+      if (!snap.exists()) return null;
+      const raw = snap.val() || {};
+      const ua = String(navigator.userAgent || '');
+      const platformHints = [
+        /iphone/i.test(ua) ? 'iphone' : '',
+        /android/i.test(ua) ? 'android' : '',
+        /ipad/i.test(ua) ? 'ipad' : '',
+        /mac/i.test(ua) ? 'mac' : ''
+      ].filter(Boolean);
+
+      const rows = Object.entries(raw).map(([key, value]) => ({ key, ...(value || {}) }));
+      const scored = rows.map(row => {
+        let score = 0;
+        const rowUa = String(row.userAgent || '');
+        const rowPlatform = String(row.platform || '').toLowerCase();
+        const rowApp = String(row.app || '');
+        if (rowUa && rowUa === ua) score += 100;
+        else if (rowUa && ua && (rowUa.includes(ua) || ua.includes(rowUa))) score += 60;
+        if (platformHints.some(h => rowPlatform.includes(h))) score += 20;
+        if (/assal/i.test(rowApp)) score += 15;
+        if (row.updatedAt) score += Math.min(10, Number(String(row.updatedAt).slice(-2)) || 0);
+        return { ...row, _score: score };
+      }).filter(row => row.token);
+
+      scored.sort((a, b) => {
+        const scoreDiff = (b._score || 0) - (a._score || 0);
+        if (scoreDiff !== 0) return scoreDiff;
+        return (Number(b.updatedAt || b.createdAt || 0) - Number(a.updatedAt || a.createdAt || 0));
+      });
+
+      return scored[0] || null;
+    } catch (err) {
+      console.error('Failed to inspect fcmTokens/web:', err);
+      return null;
+    }
+  }
+
+  async function syncCurrentPushRegistration() {
+    if (!window.firebaseDB || !window.firebaseDB.db) return { ok: false, reason: 'firebase-not-ready' };
+    const { db, ref, set, update } = window.firebaseDB;
+    const permission = await requestNativeNotificationPermission();
+    const role = getCurrentPushRole();
+    const roleBucket = getCurrentPushRoleBucket();
+    const deviceId = getCurrentPushDeviceId();
+    const now = Date.now();
+    const tokenRow = await findBestWebPushTokenForCurrentDevice();
+
+    const payload = {
+      deviceId,
+      role,
+      roleBucket,
+      permission,
+      app: tokenRow?.app || document.title || 'Assal App',
+      platform: tokenRow?.platform || navigator.platform || 'unknown',
+      language: tokenRow?.language || (navigator.language || 'ar'),
+      userAgent: String(navigator.userAgent || ''),
+      token: tokenRow?.token || '',
+      tokenKey: tokenRow?.key || '',
+      createdAt: tokenRow?.createdAt || now,
+      updatedAt: now,
+      source: 'web-app'
+    };
+
+    try {
+      await update(ref(db), {
+        [`devices/${deviceId}/pushRole`]: role,
+        [`devices/${deviceId}/pushPermission`]: permission,
+        [`devices/${deviceId}/pushTokenKey`]: payload.tokenKey || '',
+        [`devices/${deviceId}/pushUpdatedAt`]: now,
+        [`devices/${deviceId}/pushPlatform`]: payload.platform || 'unknown'
+      });
+
+      await set(ref(db, `fcmTokens/byRole/${roleBucket}/${deviceId}`), payload);
+
+      if (payload.tokenKey) {
+        await update(ref(db), {
+          [`fcmTokens/all/${payload.tokenKey}/deviceId`]: deviceId,
+          [`fcmTokens/all/${payload.tokenKey}/role`]: role,
+          [`fcmTokens/all/${payload.tokenKey}/updatedAt`]: now,
+          [`fcmTokens/web/${payload.tokenKey}/deviceId`]: deviceId,
+          [`fcmTokens/web/${payload.tokenKey}/role`]: role,
+          [`fcmTokens/web/${payload.tokenKey}/updatedAt`]: now
+        });
+      }
+
+      return { ok: true, payload };
+    } catch (err) {
+      console.error('Failed to sync push registration:', err);
+      return { ok: false, reason: err?.message || String(err) };
+    }
+  }
+
   window.queuePushNotificationEvent = queuePushNotificationEvent;
-  window.initPushNotifications = async () => false;
-  window.showPushPermissionPrompt = async () => false;
+  window.syncCurrentPushRegistration = syncCurrentPushRegistration;
+  window.initPushNotifications = async function () {
+    return await syncCurrentPushRegistration();
+  };
+  window.showPushPermissionPrompt = async function () {
+    const permission = await requestNativeNotificationPermission();
+    if (permission === 'granted') return await syncCurrentPushRegistration();
+    return { ok: false, permission };
+  };
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) setTimeout(() => { window.syncCurrentPushRegistration?.(); }, 1200);
+  });
+  window.addEventListener('load', () => {
+    setTimeout(() => { window.initPushNotifications?.(); }, 1800);
+    setTimeout(() => { window.syncCurrentPushRegistration?.(); }, 6000);
+  });
 </script>
 
 
