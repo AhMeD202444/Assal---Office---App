@@ -2617,7 +2617,7 @@ footer {
 .swal2-popup.update-dialog,
 .swal2-popup.update-success-dialog {
     border-radius: 24px;
-    padding: 22px 22px 18px;
+    padding: 20px 22px 20px;
     width: min(420px, 92vw);
     background:
         radial-gradient(circle at top right, rgba(56,189,248,.18), transparent 35%),
@@ -2934,10 +2934,10 @@ footer {
     border-radius: 26px;
     border: 1px solid rgba(255,255,255,.08);
     box-shadow: 0 22px 70px rgba(0,0,0,.52);
-    padding: 22px 22px 18px;
+    padding: 20px 22px 20px;
     color: #e5e7eb;
     font-family: 'Cairo', sans-serif;
-    transform: translateY(18px) scale(0.96);
+    transform: translateY(calc(18px + var(--activation-open-shift, 0px))) scale(0.96);
     opacity: 0;
     transition: transform 0.28s ease, opacity 0.28s ease, box-shadow 0.28s ease;
     text-align: center;
@@ -2977,7 +2977,7 @@ footer {
 
 /* حركة دخول بسيطة */
 .activation-overlay.is-open .activation-dialog {
-    transform: translateY(0) scale(1);
+    transform: translateY(var(--activation-open-shift, -24px)) scale(1);
     opacity: 1;
 }
 
@@ -4069,7 +4069,32 @@ footer {
     -webkit-backface-visibility: hidden;
     contain: layout paint;
     border-radius: 22px !important;
-    padding: 18px 16px 16px !important;
+    padding: 18px 16px 18px !important;
+  }
+
+  #activation-overlay .activation-header,
+  #activation-overlay .activation-body,
+  #activation-overlay .activation-footer{
+    width: 100%;
+    max-width: 340px;
+    margin-inline: auto;
+  }
+
+  #activation-overlay .activation-logo{
+    margin-bottom: 10px !important;
+  }
+
+  #activation-overlay .activation-header{
+    margin-bottom: 10px;
+  }
+
+  #activation-overlay .activation-body{
+    margin-top: 0 !important;
+    margin-bottom: 12px !important;
+  }
+
+  #activation-overlay .activation-text{
+    margin-bottom: 16px !important;
   }
 
   /* ✅ امنع قفزة التخطيط لما يظهر الخطأ */
@@ -12505,12 +12530,14 @@ async function showActivationPopup() {
             const offsetTop = vv ? vv.offsetTop : 0;
             const keyboardOpen = window.innerHeight - viewportHeight > 120;
             const baseInset = Math.max(10, offsetTop + 10);
+            const visualLift = keyboardOpen ? '0px' : '-24px';
 
             overlayEl.style.height = `${viewportHeight}px`;
             overlayEl.style.paddingTop = `${baseInset}px`;
             overlayEl.style.paddingBottom = `${baseInset}px`;
             overlayEl.style.alignItems = keyboardOpen ? 'flex-start' : 'center';
             overlayEl.style.justifyContent = keyboardOpen ? 'flex-start' : 'center';
+            dialogEl.style.setProperty('--activation-open-shift', visualLift);
 
             if (keyboardOpen) {
                 dialogEl.style.marginTop = '0';
@@ -12660,10 +12687,13 @@ async function showActivationPopup() {
         const viewportHeight = vv ? vv.height : window.innerHeight;
 
         overlay.style.height = `${viewportHeight}px`;
+        overlay.style.paddingTop = '10px';
+        overlay.style.paddingBottom = '10px';
 
         if (dialog) {
             dialog.style.marginTop = 'auto';
             dialog.style.marginBottom = 'auto';
+            dialog.style.setProperty('--activation-open-shift', '-24px');
         }
     };
 
