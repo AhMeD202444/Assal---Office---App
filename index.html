@@ -10253,11 +10253,34 @@ footer{
     }
   }
 
+
+  window.syncDeviceContextToNative = function () {
+    try {
+      const deviceId = String((typeof getCurrentPushDeviceId === 'function' ? getCurrentPushDeviceId() : (typeof getDeviceId === 'function' ? getDeviceId() : '')) || '').trim();
+      const role = String((typeof getCurrentPushRole === 'function' ? getCurrentPushRole() : ((typeof isAdminUser === 'function' && isAdminUser()) ? 'admin' : 'customer')) || 'customer').trim();
+      if (!deviceId) return { ok: false, reason: 'missing-device-id' };
+
+      if (window.Android && typeof window.Android.saveDeviceContext === 'function') {
+        window.Android.saveDeviceContext(deviceId, role || 'customer');
+      }
+      if (window.Android && typeof window.Android.syncNativeTokenNow === 'function') {
+        setTimeout(() => {
+          try { window.Android.syncNativeTokenNow(); } catch (e) { console.error('syncNativeTokenNow failed:', e); }
+        }, 350);
+      }
+      return { ok: true, deviceId, role };
+    } catch (e) {
+      console.error('syncDeviceContextToNative error:', e);
+      return { ok: false, reason: e?.message || String(e) };
+    }
+  };
+
   window.queuePushNotificationEvent = queuePushNotificationEvent;
   window.saveNativePushToken = saveNativePushToken;
   window.syncCurrentPushRegistration = syncCurrentPushRegistration;
   window.refreshCurrentFcmTokenRegistration = syncCurrentPushRegistration;
   window.initPushNotifications = async function () {
+    try { window.syncDeviceContextToNative?.(); } catch (_) {}
     const nativeToken = (() => { try { return localStorage.getItem('assal_native_push_token') || ''; } catch (_) { return ''; } })();
     if (nativeToken) {
       try {
@@ -10269,15 +10292,20 @@ footer{
     return await syncCurrentPushRegistration();
   };
   window.showPushPermissionPrompt = async function () {
+    try { window.syncDeviceContextToNative?.(); } catch (_) {}
     const permission = await requestNativeNotificationPermission();
     if (permission === 'granted') return await syncCurrentPushRegistration();
     return { ok: false, permission };
   };
 
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) setTimeout(() => { window.syncCurrentPushRegistration?.(); }, 1200);
+    if (!document.hidden) {
+      setTimeout(() => { window.syncDeviceContextToNative?.(); }, 600);
+      setTimeout(() => { window.syncCurrentPushRegistration?.(); }, 1200);
+    }
   });
   window.addEventListener('load', () => {
+    setTimeout(() => { window.syncDeviceContextToNative?.(); }, 1200);
     setTimeout(() => { window.initPushNotifications?.(); }, 1800);
     setTimeout(() => { window.syncCurrentPushRegistration?.(); }, 6000);
   });
@@ -10347,6 +10375,14 @@ function setAdminUser(isAdmin) {
     updateRequestAdminHeaderBtn();
     updateRequestAdminFloatingBtn();
 
+    try {
+        if (typeof window.syncDeviceContextToNative === 'function') {
+            window.syncDeviceContextToNative();
+        }
+    } catch (err) {
+        console.error('Failed to sync native device context:', err);
+    }
+
     if (typeof refreshCurrentFcmTokenRegistration === 'function') {
         refreshCurrentFcmTokenRegistration().catch(err => console.error('Failed to refresh push role binding:', err));
     }
@@ -10405,6 +10441,13 @@ function getDeviceId() {
     if (!id) {
         id = "DEV-" + Math.random().toString(36).slice(2, 8).toUpperCase() + Date.now().toString(36).slice(-4).toUpperCase();
         localStorage.setItem("device_id", id);
+        try {
+            if (typeof window.syncDeviceContextToNative === 'function') {
+                setTimeout(() => { window.syncDeviceContextToNative(); }, 200);
+            }
+        } catch (err) {
+            console.error('Failed to sync generated device id to native:', err);
+        }
     }
     return id;
 }
