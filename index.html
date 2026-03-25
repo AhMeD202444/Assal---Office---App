@@ -11336,9 +11336,11 @@ window.sendCustomerReply = async function (requestId) {
     const text = (input?.value || "").trim();
     if (!text) return;
     if (!window.firebaseDB || !window.firebaseDB.db) return;
+
     const { db, ref, update } = window.firebaseDB;
     const now = Date.now();
     const msgId = "MSG-" + now.toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2,5).toUpperCase();
+
     await update(ref(db), {
         [`materialRequests/${requestId}/messages/${msgId}`]: {
             id: msgId,
@@ -11351,6 +11353,14 @@ window.sendCustomerReply = async function (requestId) {
         [`materialRequests/${requestId}/updatedAt`]: now,
         [`materialRequests/${requestId}/status`]: 'processing'
     });
+
+    await queuePushNotificationEvent('material_request_customer_reply', {
+        requestId,
+        targetRole: 'admin',
+        title: 'رد جديد من الزبون على الطلب',
+        body: text
+    });
+
     if (input) input.value = "";
     await loadCustomerRequests();
     await refreshMaterialRequestCount();
