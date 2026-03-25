@@ -10094,6 +10094,80 @@ footer{
     }
   }
 
+  async function getExistingPushBinding(deviceId, roleBucket) {
+    if (!window.firebaseDB || !window.firebaseDB.db) return null;
+    const { db, ref, get } = window.firebaseDB;
+    try {
+      const snap = await get(ref(db, `fcmTokens/byRole/${roleBucket}/${deviceId}`));
+      return snap.exists() ? (snap.val() || null) : null;
+    } catch (err) {
+      console.error('Failed to read existing push binding:', err);
+      return null;
+    }
+  }
+
+  async function saveNativePushToken(token, extra = {}) {
+    if (!window.firebaseDB || !window.firebaseDB.db) return { ok: false, reason: 'firebase-not-ready' };
+    const cleanToken = String(token || '').trim();
+    if (!cleanToken) return { ok: false, reason: 'empty-token' };
+
+    const { db, ref, set, update, get } = window.firebaseDB;
+    const role = String(extra.role || getCurrentPushRole() || 'customer');
+    const roleBucket = role === 'admin' ? 'admins' : 'customers';
+    const deviceId = String(extra.deviceId || getCurrentPushDeviceId() || '').trim();
+    const now = Date.now();
+    const existing = await getExistingPushBinding(deviceId, roleBucket);
+    const tokenKey = normalizeTokenKey(cleanToken);
+
+    const payload = {
+      ...(existing || {}),
+      deviceId,
+      role,
+      roleBucket,
+      permission: 'granted',
+      app: String(extra.app || existing?.app || document.title || 'Assal App'),
+      platform: String(extra.platform || existing?.platform || 'Android'),
+      language: String(extra.language || existing?.language || navigator.language || 'ar'),
+      userAgent: String(extra.userAgent || existing?.userAgent || navigator.userAgent || ''),
+      token: cleanToken,
+      tokenKey,
+      createdAt: Number(existing?.createdAt || now),
+      updatedAt: now,
+      source: 'native-app'
+    };
+
+    try {
+      const updates = {
+        [`devices/${deviceId}/pushRole`]: role,
+        [`devices/${deviceId}/pushPermission`]: 'granted',
+        [`devices/${deviceId}/pushTokenKey`]: tokenKey,
+        [`devices/${deviceId}/pushUpdatedAt`]: now,
+        [`devices/${deviceId}/pushPlatform`]: payload.platform,
+        [`devices/${deviceId}/pushSource`]: 'native-app',
+        [`fcmTokens/all/${tokenKey}`]: payload,
+        [`fcmTokens/native/${deviceId}`]: payload
+      };
+
+      await update(ref(db), updates);
+      await set(ref(db, `fcmTokens/byRole/${roleBucket}/${deviceId}`), payload);
+
+      try {
+        const otherRoleBucket = roleBucket === 'admins' ? 'customers' : 'admins';
+        const otherSnap = await get(ref(db, `fcmTokens/byRole/${otherRoleBucket}/${deviceId}`));
+        if (otherSnap.exists()) {
+          const { remove } = window.firebaseDB;
+          await remove(ref(db, `fcmTokens/byRole/${otherRoleBucket}/${deviceId}`));
+        }
+      } catch (_) {}
+
+      try { localStorage.setItem('assal_native_push_token', cleanToken); } catch (_) {}
+      return { ok: true, payload };
+    } catch (err) {
+      console.error('Failed to save native push token:', err);
+      return { ok: false, reason: err?.message || String(err) };
+    }
+  }
+
   async function syncCurrentPushRegistration() {
     if (!window.firebaseDB || !window.firebaseDB.db) return { ok: false, reason: 'firebase-not-ready' };
     const { db, ref, set, update } = window.firebaseDB;
@@ -10103,6 +10177,31 @@ footer{
     const deviceId = getCurrentPushDeviceId();
     const now = Date.now();
     const tokenRow = await findBestWebPushTokenForCurrentDevice();
+    const existingBinding = await getExistingPushBinding(deviceId, roleBucket);
+
+    if (existingBinding?.source === 'native-app' && existingBinding?.token) {
+      const nativePayload = {
+        ...existingBinding,
+        role,
+        roleBucket,
+        deviceId,
+        updatedAt: now
+      };
+      try {
+        await update(ref(db), {
+          [`devices/${deviceId}/pushRole`]: role,
+          [`devices/${deviceId}/pushPermission`]: permission,
+          [`devices/${deviceId}/pushTokenKey`]: nativePayload.tokenKey || '',
+          [`devices/${deviceId}/pushUpdatedAt`]: now,
+          [`devices/${deviceId}/pushPlatform`]: nativePayload.platform || 'Android',
+          [`devices/${deviceId}/pushSource`]: 'native-app'
+        });
+        await set(ref(db, `fcmTokens/byRole/${roleBucket}/${deviceId}`), nativePayload);
+        return { ok: true, payload: nativePayload, preservedNative: true };
+      } catch (err) {
+        console.error('Failed to preserve native push binding:', err);
+      }
+    }
 
     const payload = {
       deviceId,
@@ -10126,7 +10225,8 @@ footer{
         [`devices/${deviceId}/pushPermission`]: permission,
         [`devices/${deviceId}/pushTokenKey`]: payload.tokenKey || '',
         [`devices/${deviceId}/pushUpdatedAt`]: now,
-        [`devices/${deviceId}/pushPlatform`]: payload.platform || 'unknown'
+        [`devices/${deviceId}/pushPlatform`]: payload.platform || 'unknown',
+        [`devices/${deviceId}/pushSource`]: payload.source
       });
 
       await set(ref(db, `fcmTokens/byRole/${roleBucket}/${deviceId}`), payload);
@@ -10135,10 +10235,14 @@ footer{
         await update(ref(db), {
           [`fcmTokens/all/${payload.tokenKey}/deviceId`]: deviceId,
           [`fcmTokens/all/${payload.tokenKey}/role`]: role,
+          [`fcmTokens/all/${payload.tokenKey}/roleBucket`]: roleBucket,
           [`fcmTokens/all/${payload.tokenKey}/updatedAt`]: now,
+          [`fcmTokens/all/${payload.tokenKey}/source`]: 'web-app',
           [`fcmTokens/web/${payload.tokenKey}/deviceId`]: deviceId,
           [`fcmTokens/web/${payload.tokenKey}/role`]: role,
-          [`fcmTokens/web/${payload.tokenKey}/updatedAt`]: now
+          [`fcmTokens/web/${payload.tokenKey}/roleBucket`]: roleBucket,
+          [`fcmTokens/web/${payload.tokenKey}/updatedAt`]: now,
+          [`fcmTokens/web/${payload.tokenKey}/source`]: 'web-app'
         });
       }
 
@@ -10150,8 +10254,18 @@ footer{
   }
 
   window.queuePushNotificationEvent = queuePushNotificationEvent;
+  window.saveNativePushToken = saveNativePushToken;
   window.syncCurrentPushRegistration = syncCurrentPushRegistration;
+  window.refreshCurrentFcmTokenRegistration = syncCurrentPushRegistration;
   window.initPushNotifications = async function () {
+    const nativeToken = (() => { try { return localStorage.getItem('assal_native_push_token') || ''; } catch (_) { return ''; } })();
+    if (nativeToken) {
+      try {
+        await saveNativePushToken(nativeToken);
+      } catch (err) {
+        console.error('Failed to sync cached native token:', err);
+      }
+    }
     return await syncCurrentPushRegistration();
   };
   window.showPushPermissionPrompt = async function () {
