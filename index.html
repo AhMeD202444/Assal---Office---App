@@ -10029,10 +10029,30 @@ footer{
     };
     try {
       await set(ref(db, `notificationQueue/${eventId}`), data);
+      setTimeout(() => {
+        try { triggerNotificationQueueProcessing(); } catch (e) { console.error('triggerNotificationQueueProcessing failed:', e); }
+      }, 300);
       return data;
     } catch (err) {
       console.error('Failed to queue push notification event:', err);
       return null;
+    }
+  }
+
+
+  async function triggerNotificationQueueProcessing() {
+    try {
+      await fetch('https://purple-frog-c3b8.ahmed-al-bayatii-90.workers.dev/process-notification-queue-public', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: '{}'
+      });
+      return true;
+    } catch (err) {
+      console.error('Failed to trigger notification queue processing:', err);
+      return false;
     }
   }
 
