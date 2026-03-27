@@ -18299,6 +18299,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     setTimeout(()=>{ try{ root && root.querySelectorAll('.invoice-messages').forEach(box=>{ box.scrollTop = box.scrollHeight; }); }catch(_){ } }, 90);
   }
 
+
   function cssEscapeSafe(value){
     const raw = String(value == null ? '' : value);
     if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(raw);
@@ -18377,6 +18378,8 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
         openTarget,
         role: pick('role') || pick('userRole') || pick('targetRole'),
         view: pick('view') || pick('panel'),
+        eventId: pick('eventId'),
+        messageId: pick('messageId'),
         source: 'url'
       });
     } catch (_) {
@@ -18398,6 +18401,8 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
         openTarget,
         role: pick('role') || pick('userRole') || pick('targetRole'),
         view: pick('view') || pick('panel'),
+        eventId: pick('eventId'),
+        messageId: pick('messageId'),
         source: 'url'
       });
     } catch (_) {
@@ -18408,15 +18413,39 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
   function clearNotificationLaunchFromLocation(){
     try {
       const url = new URL(window.location.href);
-      ['invoiceId','invoice','inv','requestId','request','req','openTarget','target','role','userRole','targetRole','view','panel'].forEach(key => url.searchParams.delete(key));
-      if (url.hash) {
-        const hashParams = new URLSearchParams(url.hash.replace(/^#/, ''));
-        ['invoiceId','invoice','inv','requestId','request','req','openTarget','target','role','userRole','targetRole','view','panel'].forEach(key => hashParams.delete(key));
-        const nextHash = hashParams.toString();
+      ['openTarget','target','invoiceId','invoice','inv','requestId','request','req','role','userRole','targetRole','view','panel','eventId','messageId']
+        .forEach(key => url.searchParams.delete(key));
+      const hashRaw = String(url.hash || '').replace(/^#/, '');
+      if (hashRaw) {
+        const hash = new URLSearchParams(hashRaw);
+        ['openTarget','target','invoiceId','invoice','inv','requestId','request','req','role','userRole','targetRole','view','panel','eventId','messageId']
+          .forEach(key => hash.delete(key));
+        const nextHash = hash.toString();
         url.hash = nextHash ? `#${nextHash}` : '';
       }
       window.history.replaceState({}, '', url.toString());
     } catch (_) {}
+  }
+
+  function getNativePendingNotificationPayload(){
+    try {
+      if (window.__nativePendingNotificationPayload && typeof window.__nativePendingNotificationPayload === 'object') {
+        return window.__nativePendingNotificationPayload;
+      }
+    } catch (_) {}
+    try {
+      const raw = localStorage.getItem('__nativePendingNotificationPayload');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function clearNativePendingNotificationPayload(){
+    try { delete window.__nativePendingNotificationPayload; } catch (_) {}
+    try { localStorage.removeItem('__nativePendingNotificationPayload'); } catch (_) {}
   }
 
   function focusInvoiceCard(card){
@@ -18461,30 +18490,46 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     return { panelId: '', card: null };
   }
 
-  async function ensureInvoiceViewForLaunch(context, view){
+  async function ensureInvoiceViewForLaunch(context, view, forceReload = false){
     const desiredView = view === 'archive' ? 'archive' : 'active';
     if (context === 'admin') {
       if (typeof window.openInvoiceAdminModal === 'function') await window.openInvoiceAdminModal();
       if (typeof window.switchInvoiceAdminView === 'function') await window.switchInvoiceAdminView(desiredView);
       else if (typeof window.loadAdminInvoices === 'function') await window.loadAdminInvoices();
+      if (forceReload && typeof window.loadAdminInvoices === 'function') await window.loadAdminInvoices();
     } else {
       if (typeof window.openCart === 'function') await window.openCart();
       if (typeof window.switchInvoiceTrackView === 'function') await window.switchInvoiceTrackView(desiredView);
       else if (typeof window.loadCustomerInvoices === 'function') await window.loadCustomerInvoices();
+      if (forceReload && typeof window.loadCustomerInvoices === 'function') await window.loadCustomerInvoices();
     }
   }
 
-  async function ensureRequestViewForLaunch(context, view){
+  async function ensureRequestViewForLaunch(context, view, forceReload = false){
     const desiredView = view === 'archive' ? 'archive' : 'active';
     if (context === 'admin') {
       if (typeof window.openRequestAdminModal === 'function') await window.openRequestAdminModal();
       if (typeof window.switchAdminRequestView === 'function') await window.switchAdminRequestView(desiredView);
       else if (typeof window.loadMaterialRequests === 'function') await window.loadMaterialRequests();
+      if (forceReload && typeof window.loadMaterialRequests === 'function') await window.loadMaterialRequests();
     } else {
       if (typeof window.openRequestTrackModal === 'function') await window.openRequestTrackModal();
       if (typeof window.switchTrackRequestView === 'function') await window.switchTrackRequestView(desiredView);
       else if (typeof window.loadCustomerRequests === 'function') await window.loadCustomerRequests();
+      if (forceReload && typeof window.loadCustomerRequests === 'function') await window.loadCustomerRequests();
     }
+  }
+
+  function resolveInvoiceLaunchView(info, context, invoice){
+    if (info.preferredView === 'archive' || info.preferredView === 'active') return info.preferredView;
+    if (!invoice) return 'active';
+    return (context === 'admin' ? !!invoice.adminArchived : !!invoice.customerArchived) ? 'archive' : 'active';
+  }
+
+  function resolveRequestLaunchView(info, context, requestRecord){
+    if (info.preferredView === 'archive' || info.preferredView === 'active') return info.preferredView;
+    if (!requestRecord) return 'active';
+    return (context === 'admin' ? !!requestRecord.archivedForAdmin : !!requestRecord.customerArchived) ? 'archive' : 'active';
   }
 
   async function locateAndFocusInvoiceCard(invoiceId, context, preferredView){
@@ -18520,12 +18565,15 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     const currentContext = (typeof isAdminUser === 'function' && isAdminUser()) ? 'admin' : 'customer';
     const context = info.roleHint === 'admin' || info.roleHint === 'customer' ? info.roleHint : currentContext;
     const invoice = await getInvoiceRecordById(info.invoiceId);
-    const preferredView = info.preferredView === 'archive' || info.preferredView === 'active'
-      ? info.preferredView
-      : (invoice ? ((context === 'admin' ? !!invoice.adminArchived : !!invoice.customerArchived) ? 'archive' : 'active') : 'active');
+    const preferredView = resolveInvoiceLaunchView(info, context, invoice);
 
-    await ensureInvoiceViewForLaunch(context, preferredView);
-    const card = await locateAndFocusInvoiceCard(info.invoiceId, context, preferredView);
+    await ensureInvoiceViewForLaunch(context, preferredView, attemptIndex > 0);
+    let card = await locateAndFocusInvoiceCard(info.invoiceId, context, preferredView);
+    if (!card) {
+      const oppositeView = preferredView === 'archive' ? 'active' : 'archive';
+      await ensureInvoiceViewForLaunch(context, oppositeView, attemptIndex > 0);
+      card = await locateAndFocusInvoiceCard(info.invoiceId, context, oppositeView);
+    }
     if (card) {
       window.__assalLastOpenedInvoiceFromNotification = {
         invoiceId: info.invoiceId,
@@ -18536,7 +18584,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       return true;
     }
 
-    const retryDelays = [220, 520, 1000, 1700];
+    const retryDelays = [240, 650, 1200, 2200, 3400, 4800, 6500];
     if (attemptIndex < retryDelays.length) {
       await pause(retryDelays[attemptIndex]);
       return openInvoiceLaunchInternal(info, attemptIndex + 1);
@@ -18553,12 +18601,15 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     const currentContext = (typeof isAdminUser === 'function' && isAdminUser()) ? 'admin' : 'customer';
     const context = info.roleHint === 'admin' || info.roleHint === 'customer' ? info.roleHint : currentContext;
     const requestRecord = await getMaterialRequestRecordById(info.requestId);
-    const preferredView = info.preferredView === 'archive' || info.preferredView === 'active'
-      ? info.preferredView
-      : (requestRecord ? ((context === 'admin' ? !!requestRecord.archivedForAdmin : !!requestRecord.customerArchived) ? 'archive' : 'active') : 'active');
+    const preferredView = resolveRequestLaunchView(info, context, requestRecord);
 
-    await ensureRequestViewForLaunch(context, preferredView);
-    const card = await locateAndFocusRequestCard(info.requestId, context, preferredView);
+    await ensureRequestViewForLaunch(context, preferredView, attemptIndex > 0);
+    let card = await locateAndFocusRequestCard(info.requestId, context, preferredView);
+    if (!card) {
+      const oppositeView = preferredView === 'archive' ? 'active' : 'archive';
+      await ensureRequestViewForLaunch(context, oppositeView, attemptIndex > 0);
+      card = await locateAndFocusRequestCard(info.requestId, context, oppositeView);
+    }
     if (card) {
       window.__assalLastOpenedRequestFromNotification = {
         requestId: info.requestId,
@@ -18569,7 +18620,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       return true;
     }
 
-    const retryDelays = [220, 520, 1000, 1700];
+    const retryDelays = [240, 650, 1200, 2200, 3400, 4800, 6500];
     if (attemptIndex < retryDelays.length) {
       await pause(retryDelays[attemptIndex]);
       return openRequestLaunchInternal(info, attemptIndex + 1);
@@ -18582,41 +18633,91 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
   window.openInvoiceFromNative = async function(invoiceId, options = {}){
     const payload = parseInvoiceLaunchPayload(invoiceId, options);
     const ok = await openInvoiceLaunchInternal(payload, 0);
-    if (ok && payload.source === 'url') clearNotificationLaunchFromLocation();
+    if (ok) {
+      if (payload.source === 'url') clearNotificationLaunchFromLocation();
+      clearNativePendingNotificationPayload();
+    }
     return ok;
   };
 
   window.openRequestFromNative = async function(requestId, options = {}){
     const payload = parseRequestLaunchPayload(requestId, options);
     const ok = await openRequestLaunchInternal(payload, 0);
-    if (ok && payload.source === 'url') clearNotificationLaunchFromLocation();
+    if (ok) {
+      if (payload.source === 'url') clearNotificationLaunchFromLocation();
+      clearNativePendingNotificationPayload();
+    }
     return ok;
   };
 
-  window.handleNotificationOpenTarget = async function(payload = {}){
+  function buildNotificationLaunchSignature(payload = {}){
+    const target = normalizeNotificationOpenTarget(payload.openTarget || payload.target || (payload.requestId ? 'request' : 'invoice')) || 'home';
+    const mainId = String(payload.invoiceId || payload.requestId || payload.id || '').trim();
+    const eventId = String(payload.eventId || payload.messageId || payload.queueId || payload.notificationRequestCode || '').trim();
+    return [target, mainId, eventId].join('|');
+  }
+
+  let notificationOpenChain = Promise.resolve();
+  let lastHandledNotificationSignature = '';
+  let lastHandledNotificationAt = 0;
+
+  async function handleNotificationOpenTargetInternal(payload = {}){
     const target = normalizeNotificationOpenTarget(payload?.openTarget || payload?.target || (payload?.requestId ? 'request' : 'invoice'));
+    const signature = buildNotificationLaunchSignature(payload);
+    const now = Date.now();
+
+    if (signature && signature === lastHandledNotificationSignature && (now - lastHandledNotificationAt) < 4000) {
+      return true;
+    }
+
+    let ok = false;
     if (target === 'request') {
       const info = parseRequestLaunchPayload(payload);
-      return window.openRequestFromNative(info.requestId, info);
-    }
-    if (target === 'invoice') {
+      ok = await window.openRequestFromNative(info.requestId, info);
+    } else if (target === 'invoice') {
       const info = parseInvoiceLaunchPayload(payload);
-      return window.openInvoiceFromNative(info.invoiceId, info);
+      ok = await window.openInvoiceFromNative(info.invoiceId, info);
     }
-    return false;
+
+    if (ok) {
+      lastHandledNotificationSignature = signature;
+      lastHandledNotificationAt = now;
+    }
+    return ok;
+  }
+
+  window.handleNotificationOpenTarget = async function(payload = {}){
+    notificationOpenChain = notificationOpenChain
+      .catch(() => false)
+      .then(() => handleNotificationOpenTargetInternal(payload));
+    return notificationOpenChain;
   };
+
+  function schedulePendingNotificationLaunch(payload, delay = 220){
+    if (!payload || (!payload.invoiceId && !payload.requestId)) return;
+    setTimeout(() => {
+      try { window.handleNotificationOpenTarget(payload); } catch (err) { console.error('schedulePendingNotificationLaunch:', err); }
+    }, delay);
+  }
+
+  window.addEventListener('native-notification-target', (event) => {
+    const payload = (event && event.detail && typeof event.detail === 'object') ? event.detail : getNativePendingNotificationPayload();
+    schedulePendingNotificationLaunch(payload, 120);
+  });
 
   const pendingLaunch = parseInvoiceLaunchFromLocation()
     || parseRequestLaunchFromLocation()
+    || getNativePendingNotificationPayload()
     || window.__assalPendingInvoiceLaunch
     || window.__assalPendingRequestLaunch
     || null;
 
   if (pendingLaunch && (pendingLaunch.invoiceId || pendingLaunch.requestId)) {
-    const boot = () => setTimeout(() => { window.handleNotificationOpenTarget(pendingLaunch); }, 260);
+    const boot = () => schedulePendingNotificationLaunch(pendingLaunch, 260);
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
     else boot();
   }
+
 
   window.loadCustomerInvoices = async function(){
     const active = document.getElementById('invoiceTrackActivePanel');
@@ -19657,6 +19758,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     setTimeout(()=>{ try{ root && root.querySelectorAll('.invoice-messages').forEach(box=>{ box.scrollTop = box.scrollHeight; }); }catch(_){ } }, 90);
   }
 
+
   function cssEscapeSafe(value){
     const raw = String(value == null ? '' : value);
     if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(raw);
@@ -19735,6 +19837,8 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
         openTarget,
         role: pick('role') || pick('userRole') || pick('targetRole'),
         view: pick('view') || pick('panel'),
+        eventId: pick('eventId'),
+        messageId: pick('messageId'),
         source: 'url'
       });
     } catch (_) {
@@ -19756,6 +19860,8 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
         openTarget,
         role: pick('role') || pick('userRole') || pick('targetRole'),
         view: pick('view') || pick('panel'),
+        eventId: pick('eventId'),
+        messageId: pick('messageId'),
         source: 'url'
       });
     } catch (_) {
@@ -19766,15 +19872,39 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
   function clearNotificationLaunchFromLocation(){
     try {
       const url = new URL(window.location.href);
-      ['invoiceId','invoice','inv','requestId','request','req','openTarget','target','role','userRole','targetRole','view','panel'].forEach(key => url.searchParams.delete(key));
-      if (url.hash) {
-        const hashParams = new URLSearchParams(url.hash.replace(/^#/, ''));
-        ['invoiceId','invoice','inv','requestId','request','req','openTarget','target','role','userRole','targetRole','view','panel'].forEach(key => hashParams.delete(key));
-        const nextHash = hashParams.toString();
+      ['openTarget','target','invoiceId','invoice','inv','requestId','request','req','role','userRole','targetRole','view','panel','eventId','messageId']
+        .forEach(key => url.searchParams.delete(key));
+      const hashRaw = String(url.hash || '').replace(/^#/, '');
+      if (hashRaw) {
+        const hash = new URLSearchParams(hashRaw);
+        ['openTarget','target','invoiceId','invoice','inv','requestId','request','req','role','userRole','targetRole','view','panel','eventId','messageId']
+          .forEach(key => hash.delete(key));
+        const nextHash = hash.toString();
         url.hash = nextHash ? `#${nextHash}` : '';
       }
       window.history.replaceState({}, '', url.toString());
     } catch (_) {}
+  }
+
+  function getNativePendingNotificationPayload(){
+    try {
+      if (window.__nativePendingNotificationPayload && typeof window.__nativePendingNotificationPayload === 'object') {
+        return window.__nativePendingNotificationPayload;
+      }
+    } catch (_) {}
+    try {
+      const raw = localStorage.getItem('__nativePendingNotificationPayload');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function clearNativePendingNotificationPayload(){
+    try { delete window.__nativePendingNotificationPayload; } catch (_) {}
+    try { localStorage.removeItem('__nativePendingNotificationPayload'); } catch (_) {}
   }
 
   function focusInvoiceCard(card){
@@ -19819,30 +19949,46 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     return { panelId: '', card: null };
   }
 
-  async function ensureInvoiceViewForLaunch(context, view){
+  async function ensureInvoiceViewForLaunch(context, view, forceReload = false){
     const desiredView = view === 'archive' ? 'archive' : 'active';
     if (context === 'admin') {
       if (typeof window.openInvoiceAdminModal === 'function') await window.openInvoiceAdminModal();
       if (typeof window.switchInvoiceAdminView === 'function') await window.switchInvoiceAdminView(desiredView);
       else if (typeof window.loadAdminInvoices === 'function') await window.loadAdminInvoices();
+      if (forceReload && typeof window.loadAdminInvoices === 'function') await window.loadAdminInvoices();
     } else {
       if (typeof window.openCart === 'function') await window.openCart();
       if (typeof window.switchInvoiceTrackView === 'function') await window.switchInvoiceTrackView(desiredView);
       else if (typeof window.loadCustomerInvoices === 'function') await window.loadCustomerInvoices();
+      if (forceReload && typeof window.loadCustomerInvoices === 'function') await window.loadCustomerInvoices();
     }
   }
 
-  async function ensureRequestViewForLaunch(context, view){
+  async function ensureRequestViewForLaunch(context, view, forceReload = false){
     const desiredView = view === 'archive' ? 'archive' : 'active';
     if (context === 'admin') {
       if (typeof window.openRequestAdminModal === 'function') await window.openRequestAdminModal();
       if (typeof window.switchAdminRequestView === 'function') await window.switchAdminRequestView(desiredView);
       else if (typeof window.loadMaterialRequests === 'function') await window.loadMaterialRequests();
+      if (forceReload && typeof window.loadMaterialRequests === 'function') await window.loadMaterialRequests();
     } else {
       if (typeof window.openRequestTrackModal === 'function') await window.openRequestTrackModal();
       if (typeof window.switchTrackRequestView === 'function') await window.switchTrackRequestView(desiredView);
       else if (typeof window.loadCustomerRequests === 'function') await window.loadCustomerRequests();
+      if (forceReload && typeof window.loadCustomerRequests === 'function') await window.loadCustomerRequests();
     }
+  }
+
+  function resolveInvoiceLaunchView(info, context, invoice){
+    if (info.preferredView === 'archive' || info.preferredView === 'active') return info.preferredView;
+    if (!invoice) return 'active';
+    return (context === 'admin' ? !!invoice.adminArchived : !!invoice.customerArchived) ? 'archive' : 'active';
+  }
+
+  function resolveRequestLaunchView(info, context, requestRecord){
+    if (info.preferredView === 'archive' || info.preferredView === 'active') return info.preferredView;
+    if (!requestRecord) return 'active';
+    return (context === 'admin' ? !!requestRecord.archivedForAdmin : !!requestRecord.customerArchived) ? 'archive' : 'active';
   }
 
   async function locateAndFocusInvoiceCard(invoiceId, context, preferredView){
@@ -19878,12 +20024,15 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     const currentContext = (typeof isAdminUser === 'function' && isAdminUser()) ? 'admin' : 'customer';
     const context = info.roleHint === 'admin' || info.roleHint === 'customer' ? info.roleHint : currentContext;
     const invoice = await getInvoiceRecordById(info.invoiceId);
-    const preferredView = info.preferredView === 'archive' || info.preferredView === 'active'
-      ? info.preferredView
-      : (invoice ? ((context === 'admin' ? !!invoice.adminArchived : !!invoice.customerArchived) ? 'archive' : 'active') : 'active');
+    const preferredView = resolveInvoiceLaunchView(info, context, invoice);
 
-    await ensureInvoiceViewForLaunch(context, preferredView);
-    const card = await locateAndFocusInvoiceCard(info.invoiceId, context, preferredView);
+    await ensureInvoiceViewForLaunch(context, preferredView, attemptIndex > 0);
+    let card = await locateAndFocusInvoiceCard(info.invoiceId, context, preferredView);
+    if (!card) {
+      const oppositeView = preferredView === 'archive' ? 'active' : 'archive';
+      await ensureInvoiceViewForLaunch(context, oppositeView, attemptIndex > 0);
+      card = await locateAndFocusInvoiceCard(info.invoiceId, context, oppositeView);
+    }
     if (card) {
       window.__assalLastOpenedInvoiceFromNotification = {
         invoiceId: info.invoiceId,
@@ -19894,7 +20043,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       return true;
     }
 
-    const retryDelays = [220, 520, 1000, 1700];
+    const retryDelays = [240, 650, 1200, 2200, 3400, 4800, 6500];
     if (attemptIndex < retryDelays.length) {
       await pause(retryDelays[attemptIndex]);
       return openInvoiceLaunchInternal(info, attemptIndex + 1);
@@ -19911,12 +20060,15 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     const currentContext = (typeof isAdminUser === 'function' && isAdminUser()) ? 'admin' : 'customer';
     const context = info.roleHint === 'admin' || info.roleHint === 'customer' ? info.roleHint : currentContext;
     const requestRecord = await getMaterialRequestRecordById(info.requestId);
-    const preferredView = info.preferredView === 'archive' || info.preferredView === 'active'
-      ? info.preferredView
-      : (requestRecord ? ((context === 'admin' ? !!requestRecord.archivedForAdmin : !!requestRecord.customerArchived) ? 'archive' : 'active') : 'active');
+    const preferredView = resolveRequestLaunchView(info, context, requestRecord);
 
-    await ensureRequestViewForLaunch(context, preferredView);
-    const card = await locateAndFocusRequestCard(info.requestId, context, preferredView);
+    await ensureRequestViewForLaunch(context, preferredView, attemptIndex > 0);
+    let card = await locateAndFocusRequestCard(info.requestId, context, preferredView);
+    if (!card) {
+      const oppositeView = preferredView === 'archive' ? 'active' : 'archive';
+      await ensureRequestViewForLaunch(context, oppositeView, attemptIndex > 0);
+      card = await locateAndFocusRequestCard(info.requestId, context, oppositeView);
+    }
     if (card) {
       window.__assalLastOpenedRequestFromNotification = {
         requestId: info.requestId,
@@ -19927,7 +20079,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       return true;
     }
 
-    const retryDelays = [220, 520, 1000, 1700];
+    const retryDelays = [240, 650, 1200, 2200, 3400, 4800, 6500];
     if (attemptIndex < retryDelays.length) {
       await pause(retryDelays[attemptIndex]);
       return openRequestLaunchInternal(info, attemptIndex + 1);
@@ -19940,41 +20092,91 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
   window.openInvoiceFromNative = async function(invoiceId, options = {}){
     const payload = parseInvoiceLaunchPayload(invoiceId, options);
     const ok = await openInvoiceLaunchInternal(payload, 0);
-    if (ok && payload.source === 'url') clearNotificationLaunchFromLocation();
+    if (ok) {
+      if (payload.source === 'url') clearNotificationLaunchFromLocation();
+      clearNativePendingNotificationPayload();
+    }
     return ok;
   };
 
   window.openRequestFromNative = async function(requestId, options = {}){
     const payload = parseRequestLaunchPayload(requestId, options);
     const ok = await openRequestLaunchInternal(payload, 0);
-    if (ok && payload.source === 'url') clearNotificationLaunchFromLocation();
+    if (ok) {
+      if (payload.source === 'url') clearNotificationLaunchFromLocation();
+      clearNativePendingNotificationPayload();
+    }
     return ok;
   };
 
-  window.handleNotificationOpenTarget = async function(payload = {}){
+  function buildNotificationLaunchSignature(payload = {}){
+    const target = normalizeNotificationOpenTarget(payload.openTarget || payload.target || (payload.requestId ? 'request' : 'invoice')) || 'home';
+    const mainId = String(payload.invoiceId || payload.requestId || payload.id || '').trim();
+    const eventId = String(payload.eventId || payload.messageId || payload.queueId || payload.notificationRequestCode || '').trim();
+    return [target, mainId, eventId].join('|');
+  }
+
+  let notificationOpenChain = Promise.resolve();
+  let lastHandledNotificationSignature = '';
+  let lastHandledNotificationAt = 0;
+
+  async function handleNotificationOpenTargetInternal(payload = {}){
     const target = normalizeNotificationOpenTarget(payload?.openTarget || payload?.target || (payload?.requestId ? 'request' : 'invoice'));
+    const signature = buildNotificationLaunchSignature(payload);
+    const now = Date.now();
+
+    if (signature && signature === lastHandledNotificationSignature && (now - lastHandledNotificationAt) < 4000) {
+      return true;
+    }
+
+    let ok = false;
     if (target === 'request') {
       const info = parseRequestLaunchPayload(payload);
-      return window.openRequestFromNative(info.requestId, info);
-    }
-    if (target === 'invoice') {
+      ok = await window.openRequestFromNative(info.requestId, info);
+    } else if (target === 'invoice') {
       const info = parseInvoiceLaunchPayload(payload);
-      return window.openInvoiceFromNative(info.invoiceId, info);
+      ok = await window.openInvoiceFromNative(info.invoiceId, info);
     }
-    return false;
+
+    if (ok) {
+      lastHandledNotificationSignature = signature;
+      lastHandledNotificationAt = now;
+    }
+    return ok;
+  }
+
+  window.handleNotificationOpenTarget = async function(payload = {}){
+    notificationOpenChain = notificationOpenChain
+      .catch(() => false)
+      .then(() => handleNotificationOpenTargetInternal(payload));
+    return notificationOpenChain;
   };
+
+  function schedulePendingNotificationLaunch(payload, delay = 220){
+    if (!payload || (!payload.invoiceId && !payload.requestId)) return;
+    setTimeout(() => {
+      try { window.handleNotificationOpenTarget(payload); } catch (err) { console.error('schedulePendingNotificationLaunch:', err); }
+    }, delay);
+  }
+
+  window.addEventListener('native-notification-target', (event) => {
+    const payload = (event && event.detail && typeof event.detail === 'object') ? event.detail : getNativePendingNotificationPayload();
+    schedulePendingNotificationLaunch(payload, 120);
+  });
 
   const pendingLaunch = parseInvoiceLaunchFromLocation()
     || parseRequestLaunchFromLocation()
+    || getNativePendingNotificationPayload()
     || window.__assalPendingInvoiceLaunch
     || window.__assalPendingRequestLaunch
     || null;
 
   if (pendingLaunch && (pendingLaunch.invoiceId || pendingLaunch.requestId)) {
-    const boot = () => setTimeout(() => { window.handleNotificationOpenTarget(pendingLaunch); }, 260);
+    const boot = () => schedulePendingNotificationLaunch(pendingLaunch, 260);
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
     else boot();
   }
+
 
   window.loadCustomerInvoices = async function(){
     const active = document.getElementById('invoiceTrackActivePanel');
