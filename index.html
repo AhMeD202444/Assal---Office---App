@@ -10011,6 +10011,47 @@ footer{
     }
   }
 
+
+  function normalizeCustomerPhoneForNotification(value) {
+    return String(value || '').replace(/\D+/g, '');
+  }
+
+  function normalizeCustomerNameForNotification(value) {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9؀-ۿ]+/gi, '_')
+      .replace(/^_+|_+$/g, '');
+  }
+
+  function buildCustomerNotificationGroupId(customerName = '', customerPhone = '', deviceId = '') {
+    const phonePart = normalizeCustomerPhoneForNotification(customerPhone);
+    const devicePart = normalizeCustomerNameForNotification(deviceId);
+    const namePart = normalizeCustomerNameForNotification(customerName);
+    const stablePart = phonePart || devicePart || namePart || 'unknown_customer';
+    return `customer_${stablePart}`;
+  }
+
+  function buildAdminCustomerNotificationPayload({ customerName = '', customerPhone = '', deviceId = '', body = '', extraData = {} } = {}) {
+    const safeName = String(customerName || '').trim() || 'بدون اسم';
+    const safePhone = String(customerPhone || '').trim();
+    const safeDeviceId = String(deviceId || '').trim();
+    const safeBody = String(body || '').trim();
+    return {
+      customerName: safeName,
+      customerPhone: safePhone,
+      title: safeName,
+      body: safeBody,
+      data: {
+        customerGroupId: buildCustomerNotificationGroupId(safeName, safePhone, safeDeviceId),
+        ...extraData
+      }
+    };
+  }
+
+  window.buildCustomerNotificationGroupId = buildCustomerNotificationGroupId;
+  window.buildAdminCustomerNotificationPayload = buildAdminCustomerNotificationPayload;
+
   async function queuePushNotificationEvent(eventType, payload = {}) {
     if (!window.firebaseDB || !window.firebaseDB.db) return null;
     const { db, ref, set } = window.firebaseDB;
@@ -11285,11 +11326,13 @@ window.submitMaterialRequest = async function () {
         await queuePushNotificationEvent('material_request_created', {
             requestId,
             targetRole: 'admin',
-            customerName: name,
-            customerPhone: phone,
             item,
-            title: 'طلب مادة جديد',
-            body: `${name} طلب المادة: ${item}`
+            ...window.buildAdminCustomerNotificationPayload({
+                customerName: name,
+                customerPhone: phone,
+                deviceId,
+                body: `طلب مادة: ${item}`
+            })
         });
 
         await new Promise(resolve => setTimeout(resolve, 1200));
@@ -11337,9 +11380,24 @@ window.sendCustomerReply = async function (requestId) {
     if (!text) return;
     if (!window.firebaseDB || !window.firebaseDB.db) return;
 
-    const { db, ref, update } = window.firebaseDB;
+    const { db, ref, update, get } = window.firebaseDB;
     const now = Date.now();
     const msgId = "MSG-" + now.toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2,5).toUpperCase();
+    let customerName = 'بدون اسم';
+    let customerPhone = '';
+    let customerDeviceId = getDeviceId();
+
+    try {
+        const snap = await get(ref(db, `materialRequests/${requestId}`));
+        if (snap.exists()) {
+            const req = snap.val() || {};
+            customerName = String(req.name || '').trim() || 'بدون اسم';
+            customerPhone = String(req.phone || '').trim();
+            customerDeviceId = String(req.deviceId || '').trim() || customerDeviceId;
+        }
+    } catch (err) {
+        console.error('Failed to read material request before customer reply:', err);
+    }
 
     await update(ref(db), {
         [`materialRequests/${requestId}/messages/${msgId}`]: {
@@ -11357,8 +11415,12 @@ window.sendCustomerReply = async function (requestId) {
     await queuePushNotificationEvent('material_request_customer_reply', {
         requestId,
         targetRole: 'admin',
-        title: 'رد جديد من الزبون على الطلب',
-        body: text
+        ...window.buildAdminCustomerNotificationPayload({
+            customerName,
+            customerPhone,
+            deviceId: customerDeviceId,
+            body: text
+        })
     });
 
     if (input) input.value = "";
@@ -14755,6 +14817,35 @@ function moneyIQD(n){
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " د.ع";
 }
 
+function getInvoiceCustomerIdentity(inv = {}){
+  return {
+    customerName: String(inv.customerName || '').trim() || 'بدون اسم',
+    customerPhone: String(inv.customerPhone || '').trim(),
+    deviceId: String(inv.deviceId || '').trim() || (typeof getDeviceId === 'function' ? getDeviceId() : '')
+  };
+}
+
+async function notifyAdminAboutCustomerInvoiceChange(invoiceId, inv = {}, body = '', extraData = {}){
+  try {
+    if (!invoiceId || typeof window.queuePushNotificationEvent !== 'function' || typeof window.buildAdminCustomerNotificationPayload !== 'function') {
+      return null;
+    }
+    const customerIdentity = getInvoiceCustomerIdentity(inv);
+    return await window.queuePushNotificationEvent('invoice_customer_reply', {
+      invoiceId,
+      targetRole: 'admin',
+      ...window.buildAdminCustomerNotificationPayload({
+        ...customerIdentity,
+        body,
+        extraData
+      })
+    });
+  } catch (err) {
+    console.error('notifyAdminAboutCustomerInvoiceChange:', err);
+    return null;
+  }
+}
+
 const PENDING_INVOICE_CREATE_NEW_UNTIL_KEY = 'assal_pending_invoice_create_new_until';
 function getPendingInvoiceCreateNewUntil(){
   try {
@@ -14858,8 +14949,14 @@ async function addToCart({name, category, price, img}){
         if (res.isConfirmed) {
           const items = Array.isArray(target.items) ? target.items.map(it => ({...it})) : [];
           const found = items.find(x => x.id === id);
+          const wasExistingItem = !!found;
           if (found) found.qty = Math.min(99, Number(found.qty||0) + 1);
           else items.push({ ...payload });
+          const affectedItem = wasExistingItem ? found : items.find(x => x.id === id) || payload;
+          const affectedQty = Math.max(1, Number(affectedItem?.qty || 1));
+          const actionText = wasExistingItem
+            ? `قام الزبون بزيادة كمية "${name}" إلى ${affectedQty}.`
+            : `قام الزبون بإضافة "${name}" إلى الفاتورة.`;
           const total = items.reduce((s,it)=> s + (Number(it.price)||0) * (Number(it.qty)||0), 0);
           const now = Date.now();
           const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-ADD';
@@ -14867,14 +14964,22 @@ async function addToCart({name, category, price, img}){
             [`salesInvoices/${target.id}/items`]: items,
             [`salesInvoices/${target.id}/total`]: total,
             [`salesInvoices/${target.id}/updatedAt`]: now,
+            [`salesInvoices/${target.id}/status`]: 'pending',
             [`salesInvoices/${target.id}/messages/${msgId}`]: {
               id: msgId,
-              senderRole: 'system',
-              text: 'تم تعديل الفاتورة وإضافة ايتم جديد لها.',
+              senderRole: 'customer',
+              text: actionText,
               createdAt: now,
               seenByAdmin: false,
               seenByCustomer: true
             }
+          });
+          await notifyAdminAboutCustomerInvoiceChange(target.id, { ...target, items, total }, actionText, {
+            invoiceAction: wasExistingItem ? 'increase_item_from_catalog' : 'add_item_from_catalog',
+            itemId: id,
+            itemName: name,
+            itemQty: affectedQty,
+            invoiceTotal: total
           });
           setPendingInvoiceCreateNewUntil(0);
           if (typeof window.loadCustomerInvoices === 'function') await window.loadCustomerInvoices();
@@ -17247,21 +17352,31 @@ async function renderSponsorAd(){
       const now = Date.now();
       const id = 'INV-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
       const msgId = 'MSG-' + now.toString(36).toUpperCase();
+      const deviceId = getDeviceId();
+      const customerName = String(profile.name || '').trim() || 'بدون اسم';
+      const customerPhone = String(profile.phone || '').trim();
+      const customerAddress = String(profile.address || '').trim();
+      const invoiceNotificationBody = note
+        ? `فاتورة جديدة - ${note}`
+        : `فاتورة جديدة بقيمة ${typeof moneyIQD === 'function' ? moneyIQD(total) : total}`;
       const { db, ref, set } = window.firebaseDB;
       await set(ref(db, `${INVOICE_PATH}/${id}`), {
-        id, deviceId:getDeviceId(), customerName:String(profile.name || '').trim() || 'بدون اسم', customerPhone:String(profile.phone || '').trim(), customerAddress:String(profile.address || '').trim(),
+        id, deviceId, customerName, customerPhone, customerAddress,
         items: cart.map(it=>({ id:it.id, name:it.name, category:it.category, qty:Number(it.qty)||0, price:Number(it.price)||0, img:it.img||'' })),
         note, discount, subtotal, total, createdAt:now, updatedAt:now, status:'pending', customerArchived:false, adminArchived:false, customerDeleted:false,
-        messages:{ [msgId]: { id:msgId, senderRole:'customer', text: note ? `فاتورة جديدة\n${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCustomer:true } }
+        messages:{ [msgId]: { id:msgId, senderRole:'customer', text: note ? `فاتورة جديدة
+${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCustomer:true } }
       });
       await queuePushNotificationEvent('invoice_created', {
         invoiceId: id,
         targetRole: 'admin',
-        customerName: String(profile.name || '').trim() || 'بدون اسم',
-        customerPhone: String(profile.phone || '').trim(),
         targetDeviceId: '',
-        title: 'فاتورة جديدة',
-        body: `فاتورة جديدة من ${String(profile.name || '').trim() || 'زبون'} بقيمة ${total}`
+        ...window.buildAdminCustomerNotificationPayload({
+          customerName,
+          customerPhone,
+          deviceId,
+          body: invoiceNotificationBody
+        })
       });
       cart = []; saveCart();
     setPendingInvoiceCreateNewId('');
@@ -17296,7 +17411,21 @@ async function renderSponsorAd(){
     if (!ok.isConfirmed) return;
     const now = Date.now();
     const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-CANCEL';
-    const { db, ref, update } = window.firebaseDB;
+    const { db, ref, update, get } = window.firebaseDB;
+    let customerName = 'بدون اسم';
+    let customerPhone = '';
+    let customerDeviceId = getDeviceId();
+    try {
+      const snap = await get(ref(db, `${INVOICE_PATH}/${id}`));
+      if (snap.exists()) {
+        const inv = snap.val() || {};
+        customerName = String(inv.customerName || '').trim() || 'بدون اسم';
+        customerPhone = String(inv.customerPhone || '').trim();
+        customerDeviceId = String(inv.deviceId || '').trim() || customerDeviceId;
+      }
+    } catch (err) {
+      console.error('Failed to read invoice before cancellation:', err);
+    }
     await update(ref(db), {
       [`${INVOICE_PATH}/${id}/messages/${msgId}`]: { id:msgId, senderRole:'system', text:'تم الغاء الفاتورة من قبل الزبون', createdAt:now, seenByAdmin:false, seenByCustomer:true },
       [`${INVOICE_PATH}/${id}/status`]: 'cancelled',
@@ -17306,8 +17435,12 @@ async function renderSponsorAd(){
     await queuePushNotificationEvent('invoice_cancelled_by_customer', {
       invoiceId: id,
       targetRole: 'admin',
-      title: 'إلغاء فاتورة',
-      body: 'تم إلغاء الفاتورة من قبل الزبون'
+      ...window.buildAdminCustomerNotificationPayload({
+        customerName,
+        customerPhone,
+        deviceId: customerDeviceId,
+        body: 'تم إلغاء الفاتورة من قبل الزبون'
+      })
     });
     currentInvoiceTrackView = 'active';
     await loadCustomerInvoices();
@@ -17329,13 +17462,31 @@ async function renderSponsorAd(){
     const input = document.getElementById(`invoiceTrackReply_${id}`);
     const text = (input?.value || '').trim(); if (!text) return;
     const now = Date.now(); const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,5).toUpperCase();
-    const { db, ref, update } = window.firebaseDB;
+    const { db, ref, update, get } = window.firebaseDB;
+    let customerName = 'بدون اسم';
+    let customerPhone = '';
+    let customerDeviceId = getDeviceId();
+    try {
+      const snap = await get(ref(db, `${INVOICE_PATH}/${id}`));
+      if (snap.exists()) {
+        const inv = snap.val() || {};
+        customerName = String(inv.customerName || '').trim() || 'بدون اسم';
+        customerPhone = String(inv.customerPhone || '').trim();
+        customerDeviceId = String(inv.deviceId || '').trim() || customerDeviceId;
+      }
+    } catch (err) {
+      console.error('Failed to read invoice before customer reply:', err);
+    }
     await update(ref(db), { [`${INVOICE_PATH}/${id}/messages/${msgId}`]: { id:msgId, senderRole:'customer', text, createdAt:now, seenByAdmin:false, seenByCustomer:true }, [`${INVOICE_PATH}/${id}/updatedAt`]: now, [`${INVOICE_PATH}/${id}/status`]: 'pending' });
     await queuePushNotificationEvent('invoice_customer_reply', {
       invoiceId: id,
       targetRole: 'admin',
-      title: 'رد جديد على الفاتورة',
-      body: text
+      ...window.buildAdminCustomerNotificationPayload({
+        customerName,
+        customerPhone,
+        deviceId: customerDeviceId,
+        body: text
+      })
     });
     if (input) input.value=''; await loadCustomerInvoices(); await refreshInvoiceCounts();
   };
@@ -17432,7 +17583,62 @@ async function renderSponsorAd(){
     const now = Date.now();
     const msgId = `MSG-${now.toString(36).toUpperCase()}-${Math.random().toString(36).slice(2,5).toUpperCase()}`;
     const role = actor === 'customer' ? 'customer' : 'admin';
-    const text = role === 'customer' ? 'قام الزبون بتعديل عناصر الفاتورة.' : 'تم تعديل عناصر الفاتورة من الإدارة.';
+
+    const beforeMap = new Map(currentItems.map(it => [String(it.id || ''), { ...it }]));
+    const afterMap = new Map(cleaned.map(it => [String(it.id || ''), { ...it }]));
+    const changedIds = Array.from(new Set([...beforeMap.keys(), ...afterMap.keys()]));
+    let text = role === 'customer' ? 'قام الزبون بتعديل عناصر الفاتورة.' : 'تم تعديل عناصر الفاتورة من الإدارة.';
+    let actionCode = role === 'customer' ? 'customer_items_updated' : 'admin_items_updated';
+    let affectedItemId = '';
+    let affectedItemName = '';
+    let affectedItemQty = '';
+
+    for (const changedId of changedIds) {
+      const beforeItem = beforeMap.get(changedId);
+      const afterItem = afterMap.get(changedId);
+      if (!beforeItem && afterItem) {
+        affectedItemId = String(afterItem.id || changedId || '');
+        affectedItemName = String(afterItem.name || 'هذا المنتج');
+        affectedItemQty = String(Number(afterItem.qty || 0) || 1);
+        actionCode = role === 'customer' ? 'customer_added_item' : 'admin_added_item';
+        text = role === 'customer'
+          ? `قام الزبون بإضافة "${affectedItemName}" إلى الفاتورة.`
+          : `تمت إضافة "${affectedItemName}" إلى الفاتورة من الإدارة.`;
+        break;
+      }
+      if (beforeItem && !afterItem) {
+        affectedItemId = String(beforeItem.id || changedId || '');
+        affectedItemName = String(beforeItem.name || 'هذا المنتج');
+        affectedItemQty = '0';
+        actionCode = role === 'customer' ? 'customer_removed_item' : 'admin_removed_item';
+        text = role === 'customer'
+          ? `قام الزبون بحذف "${affectedItemName}" من الفاتورة.`
+          : `تم حذف "${affectedItemName}" من الفاتورة من الإدارة.`;
+        break;
+      }
+      if (beforeItem && afterItem) {
+        const beforeQty = Number(beforeItem.qty || 0);
+        const afterQty = Number(afterItem.qty || 0);
+        if (beforeQty !== afterQty) {
+          affectedItemId = String(afterItem.id || beforeItem.id || changedId || '');
+          affectedItemName = String(afterItem.name || beforeItem.name || 'هذا المنتج');
+          affectedItemQty = String(afterQty);
+          if (afterQty > beforeQty) {
+            actionCode = role === 'customer' ? 'customer_increased_item_qty' : 'admin_increased_item_qty';
+            text = role === 'customer'
+              ? `قام الزبون بزيادة كمية "${affectedItemName}" إلى ${afterQty}.`
+              : `تمت زيادة كمية "${affectedItemName}" إلى ${afterQty} من الإدارة.`;
+          } else {
+            actionCode = role === 'customer' ? 'customer_decreased_item_qty' : 'admin_decreased_item_qty';
+            text = role === 'customer'
+              ? `قام الزبون بتقليل كمية "${affectedItemName}" إلى ${afterQty}.`
+              : `تم تقليل كمية "${affectedItemName}" إلى ${afterQty} من الإدارة.`;
+          }
+          break;
+        }
+      }
+    }
+
     await update(ref(db), {
       [`${INVOICE_PATH}/${invoiceId}/items`]: cleaned,
       [`${INVOICE_PATH}/${invoiceId}/total`]: nextTotal,
@@ -17447,6 +17653,17 @@ async function renderSponsorAd(){
         seenByCustomer: role === 'customer'
       }
     });
+
+    if (role === 'customer') {
+      await notifyAdminAboutCustomerInvoiceChange(invoiceId, inv, text, {
+        invoiceAction: actionCode,
+        itemId: affectedItemId,
+        itemName: affectedItemName,
+        itemQty: affectedItemQty,
+        invoiceTotal: nextTotal
+      });
+    }
+
     updateVisibleAdminInvoiceCard(invoiceId, cleaned, nextTotal);
     await refreshInvoiceCounts();
   }
