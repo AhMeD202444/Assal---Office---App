@@ -10032,49 +10032,19 @@ footer{
     return `customer_${stablePart}`;
   }
 
-  function toSafeFcmDataMap(value = {}) {
-    const source = (value && typeof value === 'object' && !Array.isArray(value)) ? value : {};
-    const mapped = {};
-    Object.entries(source).forEach(([key, rawValue]) => {
-      if (rawValue === undefined || rawValue === null) return;
-      if (typeof rawValue === 'string') {
-        mapped[key] = rawValue;
-        return;
-      }
-      if (typeof rawValue === 'number' || typeof rawValue === 'boolean') {
-        mapped[key] = String(rawValue);
-        return;
-      }
-      try {
-        mapped[key] = JSON.stringify(rawValue);
-      } catch (_) {
-        mapped[key] = String(rawValue);
-      }
-    });
-    return mapped;
-  }
-
   function buildAdminCustomerNotificationPayload({ customerName = '', customerPhone = '', deviceId = '', body = '', extraData = {} } = {}) {
     const safeName = String(customerName || '').trim() || 'بدون اسم';
     const safePhone = String(customerPhone || '').trim();
     const safeDeviceId = String(deviceId || '').trim();
     const safeBody = String(body || '').trim();
-    const normalizedExtraData = toSafeFcmDataMap(extraData);
-    const customerGroupId = normalizedExtraData.customerGroupId || buildCustomerNotificationGroupId(safeName, safePhone, safeDeviceId);
-
     return {
       customerName: safeName,
       customerPhone: safePhone,
       title: safeName,
       body: safeBody,
       data: {
-        ...normalizedExtraData,
-        customerGroupId,
-        customerName: safeName,
-        customerPhone: safePhone,
-        deviceId: safeDeviceId,
-        title: safeName,
-        body: safeBody
+        customerGroupId: buildCustomerNotificationGroupId(safeName, safePhone, safeDeviceId),
+        ...extraData
       }
     };
   }
@@ -10087,32 +10057,6 @@ footer{
     const { db, ref, set } = window.firebaseDB;
     const now = Date.now();
     const eventId = 'PUSH-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
-    const originalPayloadData = toSafeFcmDataMap(payload && payload.data);
-    const enrichedPayloadData = {
-      ...originalPayloadData
-    };
-
-    const mirroredFields = {
-      eventId,
-      type: eventType,
-      createdAt: now,
-      targetRole: payload && payload.targetRole,
-      title: payload && payload.title,
-      body: payload && payload.body,
-      customerName: payload && payload.customerName,
-      customerPhone: payload && payload.customerPhone,
-      deviceId: payload && payload.deviceId,
-      targetDeviceId: payload && payload.targetDeviceId,
-      invoiceId: payload && payload.invoiceId,
-      requestId: payload && payload.requestId,
-      item: payload && payload.item
-    };
-
-    Object.entries(mirroredFields).forEach(([key, value]) => {
-      if (value === undefined || value === null || value === '') return;
-      enrichedPayloadData[key] = String(value);
-    });
-
     const data = {
       id: eventId,
       type: eventType,
@@ -10122,8 +10066,7 @@ footer{
       actorRole: getCurrentPushRole(),
       actorDeviceId: getCurrentPushDeviceId(),
       appVersion: (typeof getAppVersionFromUrl === 'function' ? getAppVersionFromUrl() : null) || '1.0',
-      ...payload,
-      data: enrichedPayloadData
+      ...payload
     };
     try {
       await set(ref(db, `notificationQueue/${eventId}`), data);
