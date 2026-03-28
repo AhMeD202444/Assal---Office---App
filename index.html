@@ -7808,6 +7808,11 @@ body.modal-lock .swal2-container *{
 .request-thread-actions.is-stack .request-track-send{
     width: 100%;
 }
+.request-thread-actions.single-center,
+.request-admin-card-actions.single-center{
+    grid-template-columns: minmax(0, 320px);
+    justify-content: center;
+}
 .request-track-input,
 .request-admin-reply-input{
     width:100%;
@@ -8350,7 +8355,7 @@ body.modal-lock .swal2-container *{
         font-size: 12px;
     }
     #requestAdminHeaderBtn i{
-        font-size: 11px;
+        font-size: 12px;
     }
     .header-cart-badge{
         top: -8px;
@@ -8741,18 +8746,19 @@ body.modal-lock .swal2-container *{
 .customer-confirm-actions .swal2-cancel{
   margin:0 !important;
   flex:1 1 0 !important;
-  width:calc(50% - 5px) !important;
-  max-width:calc(50% - 5px) !important;
+  width:auto !important;
+  max-width:none !important;
   min-width:0 !important;
   min-height:46px !important;
   border:none !important;
   border-radius:16px !important;
   font-family:'Cairo',sans-serif !important;
-  font-size:14px !important;
+  font-size:13.5px !important;
   font-weight:800 !important;
   display:inline-flex !important;
   align-items:center !important;
   justify-content:center !important;
+  text-align:center !important;
   gap:8px;
   box-sizing:border-box !important;
   white-space:nowrap !important;
@@ -8776,15 +8782,236 @@ body.modal-lock .swal2-container *{
   background: linear-gradient(135deg,#f59e0b,#b45309) !important;
   color:#fff !important;
 }
-.customer-confirm-actions .swal2-deny.delete{
-  background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.08)) !important;
+.customer-confirm-actions .swal2-deny.create-new{
+  background: linear-gradient(135deg, #2563eb, #0f766e) !important;
   color:#fff !important;
+  cursor:pointer !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  box-shadow: 0 12px 24px rgba(37,99,235,.24) !important;
+  transition: transform .16s ease, box-shadow .18s ease, filter .18s ease, outline-color .18s ease !important;
+  outline: 0 solid transparent !important;
 }
-.swal2-popup.customer-confirm-popup .swal2-deny,
+.customer-confirm-actions .swal2-deny.create-new:hover,
+.customer-confirm-actions .swal2-deny.create-new:focus-visible{
+  filter: brightness(1.08) !important;
+  transform: translateY(-1px) scale(1.01) !important;
+  box-shadow: 0 16px 30px rgba(37,99,235,.30) !important;
+  outline: 2px solid rgba(96,165,250,.22) !important;
+}
+.customer-confirm-actions .swal2-deny.create-new:active{
+  transform: scale(.97) !important;
+  filter: brightness(.98) !important;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,.18), 0 8px 18px rgba(37,99,235,.20) !important;
+}
+.swal2-popup.customer-confirm-popup .swal2-deny.create-new{
+  display:inline-flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
 .swal2-popup.customer-confirm-popup .swal2-deny.swal2-hidden,
 .invoice-confirm-popup.swal2-popup .swal2-deny.swal2-hidden{
   display:none !important;
 }
+
+/* ===== Elegant global top toast ===== */
+.elegant-top-toast{
+  position: fixed;
+  top: 56px;
+  left: 50%;
+  transform: translate(-50%, -10px) scale(.97);
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  min-width: 176px;
+  min-height: 58px;
+  padding: 0;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(245,158,11,.12), transparent 34%),
+    radial-gradient(circle at 82% 20%, rgba(37,99,235,.14), transparent 36%),
+    linear-gradient(135deg, rgba(7,12,25,.985), rgba(14,23,42,.985));
+  border: 1px solid rgba(255,255,255,.09);
+  box-shadow: 0 18px 36px rgba(2,6,23,.34), inset 0 1px 0 rgba(255,255,255,.05);
+  color: #fff;
+  font-family: 'Cairo', sans-serif;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 30050;
+  overflow: hidden;
+  backdrop-filter: blur(14px) saturate(132%);
+  -webkit-backdrop-filter: blur(14px) saturate(132%);
+}
+.elegant-top-toast.show{
+  animation: elegantTopToastIn .24s cubic-bezier(.22,1,.36,1) forwards;
+}
+.elegant-top-toast.hide{
+  animation: elegantTopToastOut .18s ease forwards;
+}
+.elegant-top-toast::before{
+  content:'';
+  position:absolute;
+  inset: 1px;
+  border-radius: 19px;
+  border: 1px solid rgba(255,255,255,.05);
+  pointer-events:none;
+}
+.elegant-top-toast::after{
+  content:'';
+  position:absolute;
+  inset: auto auto -14px 50%;
+  width: 62%;
+  height: 24px;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(37,99,235,.18), transparent 72%);
+  filter: blur(10px);
+  opacity: .8;
+  pointer-events:none;
+}
+.elegant-top-toast.is-success::after{
+  background: radial-gradient(circle, rgba(16,185,129,.22), transparent 72%);
+}
+.elegant-top-toast.is-error::after{
+  background: radial-gradient(circle, rgba(239,68,68,.20), transparent 72%);
+}
+.elegant-top-toast.is-warning::after{
+  background: radial-gradient(circle, rgba(249,115,22,.20), transparent 72%);
+}
+.elegant-top-toast-inner{
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 14px 18px 16px;
+}
+.elegant-top-toast-icon{
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 10px 18px rgba(2,6,23,.16);
+}
+.elegant-top-toast.is-success .elegant-top-toast-icon{
+  background: linear-gradient(135deg, rgba(16,185,129,.30), rgba(5,150,105,.16));
+  color: #d1fae5;
+}
+.elegant-top-toast.is-info .elegant-top-toast-icon{
+  background: linear-gradient(135deg, rgba(59,130,246,.28), rgba(37,99,235,.14));
+  color: #dbeafe;
+}
+.elegant-top-toast.is-error .elegant-top-toast-icon{
+  background: linear-gradient(135deg, rgba(239,68,68,.26), rgba(190,24,93,.14));
+  color: #ffe4e6;
+}
+.elegant-top-toast.is-warning .elegant-top-toast-icon{
+  background: linear-gradient(135deg, rgba(251,191,36,.28), rgba(249,115,22,.16));
+  color: #fff7d6;
+}
+.elegant-top-toast-content{
+  min-width: 0;
+  flex: 1 1 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.elegant-top-toast-title{
+  margin: 0;
+  width: 100%;
+  font-family: 'Cairo', sans-serif;
+  font-size: 14.5px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
+.elegant-top-toast-sub{
+  display:none !important;
+}
+.elegant-top-toast-progress-track{
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  width: calc(100% - 34px);
+  height: 4px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: linear-gradient(90deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.18);
+}
+.elegant-top-toast-progress{
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  transform-origin: right center;
+  animation: elegantTopToastProgress linear forwards;
+  background: linear-gradient(90deg, #60a5fa, #2563eb);
+}
+.elegant-top-toast.is-success .elegant-top-toast-progress{
+  background: linear-gradient(90deg, #34d399, #10b981);
+}
+.elegant-top-toast.is-info .elegant-top-toast-progress{
+  background: linear-gradient(90deg, #60a5fa, #2563eb);
+}
+.elegant-top-toast.is-error .elegant-top-toast-progress{
+  background: linear-gradient(90deg, #fb7185, #ef4444);
+}
+.elegant-top-toast.is-warning .elegant-top-toast-progress{
+  background: linear-gradient(90deg, #fbbf24, #f97316);
+}
+@keyframes elegantTopToastIn{
+  from{ opacity:0; transform:translate(-50%, -10px) scale(.97); }
+  to{ opacity:1; transform:translate(-50%, 0) scale(1); }
+}
+@keyframes elegantTopToastOut{
+  from{ opacity:1; transform:translate(-50%, 0) scale(1); }
+  to{ opacity:0; transform:translate(-50%, -8px) scale(.985); }
+}
+@keyframes elegantTopToastProgress{
+  from{ transform: scaleX(1); opacity: 1; }
+  to{ transform: scaleX(0); opacity: .94; }
+}
+@media (max-width: 640px){
+  .elegant-top-toast{
+    top: 54px;
+    width: max-content;
+    max-width: calc(100vw - 16px);
+    min-width: 162px;
+    min-height: 56px;
+    border-radius: 19px;
+  }
+  .elegant-top-toast-inner{
+    gap: 9px;
+    min-height: 56px;
+    padding: 13px 16px 15px;
+  }
+  .elegant-top-toast-icon{
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 11px;
+    font-size: 11px;
+  }
+  .elegant-top-toast-title{
+    font-size: 13.5px;
+  }
+  .elegant-top-toast-progress-track{
+    width: calc(100% - 30px);
+    bottom: 7px;
+  }
+}
+
 .swal2-popup.customer-mini-toast{
   width:auto !important;
   min-width: 240px !important;
@@ -8817,7 +9044,7 @@ body.modal-lock .swal2-container *{
 @media (max-width: 480px){
   .swal2-popup.customer-confirm-popup{ width:min(94vw, 94vw) !important; border-radius:22px !important; }
   .swal2-popup.customer-confirm-popup .swal2-actions.customer-confirm-actions{flex-direction:row !important; flex-wrap:nowrap !important; gap:10px !important;}
-  .customer-confirm-actions .swal2-confirm, .customer-confirm-actions .swal2-deny, .customer-confirm-actions .swal2-cancel{flex:1 1 0 !important; width:calc(50% - 5px) !important; max-width:calc(50% - 5px) !important;}
+  .customer-confirm-actions .swal2-confirm, .customer-confirm-actions .swal2-deny, .customer-confirm-actions .swal2-cancel{flex:1 1 0 !important; width:auto !important; max-width:none !important; font-size:12.5px !important; padding-inline:8px !important;}
   .customer-confirm-wrap{ padding:20px 16px 14px; }
   .customer-confirm-title{ font-size:20px; }
   .customer-confirm-text{ font-size:13px; }
@@ -9338,8 +9565,8 @@ footer{
         title="متابعة الطلبات"
         aria-label="متابعة الطلبات"
         style="display:none;">
-  <i class="fas fa-clipboard-list"></i>
-  <span class="header-cart-badge request-header-badge" id="requestAdminCount" style="display:none;">0</span>
+  <i class="fas fa-box-open"></i>
+  <span class="header-cart-badge request-header-badge user-badge" id="requestAdminCount" style="display:none;">0</span>
 </button>
  
 <button class="header-btn header-cart-btn"
@@ -10434,6 +10661,7 @@ function setAdminUser(isAdmin) {
     updateStatsBtn();
     updateCustomersAdminHeaderBtn();
     updateRequestAdminHeaderBtn();
+    updateRequestCustomerEntryPoints();
     updateRequestAdminFloatingBtn();
 
     try {
@@ -10495,6 +10723,16 @@ function updateRequestAdminHeaderBtn() {
     const btn = document.getElementById("requestAdminHeaderBtn");
     if (!btn) return;
     btn.style.display = isAdminUser() ? "inline-flex" : "none";
+}
+
+function updateRequestCustomerEntryPoints() {
+    const headerBtn = document.getElementById('requestUserHeaderBtn');
+    if (headerBtn) headerBtn.style.display = isAdminUser() ? 'none' : 'inline-flex';
+    const floatingBtn = document.getElementById('requestFloatingBtn');
+    if (floatingBtn && isAdminUser()) {
+        floatingBtn.style.display = 'none';
+        floatingBtn.classList.remove('show');
+    }
 }
 
 function getDeviceId() {
@@ -11232,6 +11470,65 @@ function hideRequestToast(delay = 0) {
     }, delay);
 }
 
+
+let elegantTopToastTimer = null;
+let elegantTopToastHideCleanupTimer = null;
+function showElegantTopToast(message, type = 'success', duration = 2600, subText = '') {
+    const titleText = String(message || '').trim();
+    if (!titleText) return;
+
+    let toast = document.getElementById('elegantTopToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'elegantTopToast';
+        toast.className = 'elegant-top-toast';
+        document.body.appendChild(toast);
+    }
+
+    const safeType = ['success', 'info', 'error', 'warning'].includes(String(type || '').trim()) ? String(type).trim() : 'success';
+    const iconMap = {
+        success: 'fa-check',
+        info: 'fa-cart-shopping',
+        error: 'fa-triangle-exclamation',
+        warning: 'fa-bell'
+    };
+    const effectiveDuration = Math.max(2200, Number(duration) || 2600);
+
+    clearTimeout(elegantTopToastTimer);
+    clearTimeout(elegantTopToastHideCleanupTimer);
+
+    toast.classList.remove('show', 'hide', 'is-success', 'is-info', 'is-error', 'is-warning');
+    toast.className = 'elegant-top-toast is-' + safeType;
+    const toastWidth = Math.max(176, Math.min(window.innerWidth - 24, (titleText.length * 10) + 92));
+    toast.style.width = toastWidth + 'px';
+    toast.innerHTML = `
+      <div class="elegant-top-toast-inner">
+        <div class="elegant-top-toast-icon"><i class="fas ${iconMap[safeType] || 'fa-check'}"></i></div>
+        <div class="elegant-top-toast-content">
+          <div class="elegant-top-toast-title" title="${escapeHtml(titleText)}">${escapeHtml(titleText)}</div>
+        </div>
+      </div>
+      <div class="elegant-top-toast-progress-track">
+        <div class="elegant-top-toast-progress" style="animation-duration:${effectiveDuration}ms"></div>
+      </div>
+    `;
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+    });
+
+    elegantTopToastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+        elegantTopToastHideCleanupTimer = setTimeout(() => {
+            toast.classList.remove('hide');
+        }, 260);
+    }, effectiveDuration);
+}
+window.showElegantTopToast = showElegantTopToast;
+
 window.openRequestAdminModal = async function () {
     if (!isAdminUser()) {
         alert("هذه الخاصية حصراً للإدمن");
@@ -11492,15 +11789,15 @@ window.loadCustomerRequests = async function () {
                 </div>`;
             }).join('');
             const actions = archived ? `
-                <div class="request-thread-actions">
+                <div class="request-thread-actions single-center">
                   <button class="request-track-clear" type="button" onclick="deleteCustomerArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف الطلب </button>
                 </div>` : (req.status !== 'processed' ? `
                 <div class="request-thread-actions is-stack">
                   <textarea id="requestTrackReply_${escapeHtml(req.id)}" class="request-track-input" placeholder="اكتب ردك أو أي توضيح إضافي..."></textarea>
                   <button class="request-track-send" type="button" onclick="sendCustomerReply('${escapeHtml(req.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button>
                 </div>` : `
-                <div class="request-thread-actions">
-                  <button class="request-track-clear" type="button" onclick="archiveCustomerRequest('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة الطلب</button>
+                <div class="request-thread-actions single-center">
+                  <button class="request-track-clear" type="button" onclick="archiveCustomerRequest('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button>
                 </div>`);
             return `
               <div class="request-thread-card">
@@ -11625,6 +11922,7 @@ window.markRequestProcessed = async function (requestId) {
     });
     await loadMaterialRequests();
     await refreshMaterialRequestCount();
+    if (typeof window.showElegantTopToast === 'function') window.showElegantTopToast('تمت معالجة الطلب', 'success', 2600);
 };
 
 window.deleteAdminArchivedRequest = async function (requestId) {
@@ -11694,7 +11992,7 @@ window.loadMaterialRequests = async function () {
                 </div>
                 <div class="request-messages">${messagesHtml}</div>
                 ${archived ? `
-                <div class="request-admin-card-actions">
+                <div class="request-admin-card-actions single-center">
                   <button class="request-track-clear" type="button" onclick="deleteAdminArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button>
                 </div>` : `
                 <textarea id="requestAdminReply_${escapeHtml(req.id)}" class="request-admin-reply-input" placeholder="اكتب رد للإدارة على هذا الطلب..."></textarea>
@@ -11932,6 +12230,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateStatsBtn();
     updateCustomersAdminHeaderBtn();
     updateRequestAdminHeaderBtn();
+    updateRequestCustomerEntryPoints();
     updateRequestAdminFloatingBtn();
     syncRequestButtonsToNewBtn();
     setRequestViewButtons();
@@ -12061,6 +12360,19 @@ if (requestFloatingBtn && floatingBtn) {
   let showRequest = false;
   setInterval(() => {
     syncRequestButtonsToNewBtn();
+
+    if (isAdminUser()) {
+      floatingBtn.style.display = "flex";
+      floatingBtn.classList.remove("smooth-hide");
+      requestFloatingBtn.style.display = "none";
+      requestFloatingBtn.classList.remove("show");
+      if (requestAdminFloatingBtn) {
+        requestAdminFloatingBtn.style.display = "none";
+        requestAdminFloatingBtn.classList.remove("show");
+      }
+      return;
+    }
+
     showRequest = !showRequest;
 
     if (showRequest) {
@@ -13546,7 +13858,7 @@ function displayResults(results) {
             const itemName = (item["Item Name"] || item["Item"] || "بدون اسم").toString();
             const effectivePriceRaw = discountPriceRaw || originalPriceRaw;
             const effectivePrice = parseFloat(String(effectivePriceRaw || "").replace(/,/g, "")) || 0;
-            const canAddToCart = effectivePrice > 0;
+            const canAddToCart = effectivePrice > 0 && !(typeof isAdminUser === 'function' && isAdminUser());
 
             htmlContent += `
                 <div class="result-card">
@@ -14866,9 +15178,15 @@ function hasPendingInvoiceCreateNewCooldown(){
   if (until) setPendingInvoiceCreateNewUntil(0);
   return false;
 }
+if (!Array.isArray(cart) || !cart.length) {
+  setPendingInvoiceCreateNewUntil(0);
+}
 function saveCart(){
   window.cart = cart;
   localStorage.setItem("assal_cart", JSON.stringify(cart));
+  if (!Array.isArray(cart) || !cart.length) {
+    setPendingInvoiceCreateNewUntil(0);
+  }
   updateCartHeader();
   renderCart();
   if (typeof window.loadCustomerInvoices === "function") {
@@ -14904,24 +15222,120 @@ async function addToCart({name, category, price, img}){
     else cart.push({ ...payload });
     saveCart();
   };
+  const showAddedToast = (message = 'تمت الإضافة إلى السلة', type = 'success', duration = 2300) => {
+    if (typeof window.showElegantTopToast === 'function') {
+      window.showElegantTopToast(message, type, duration);
+    }
+  };
+  let db = null, ref = null, get = null, update = null;
+  const appendItemToServerInvoice = async (target, options = {}) => {
+    if (!(target && target.id)) return false;
+    const {
+      preparedLabel = false,
+      keepPreparedStatus = false
+    } = options;
+    const items = Array.isArray(target.items) ? target.items.map(it => ({...it})) : [];
+    const found = items.find(x => x.id === id);
+    const wasExistingItem = !!found;
+    if (found) found.qty = Math.min(99, Number(found.qty || 0) + 1);
+    else items.push({ ...payload });
+    const affectedItem = wasExistingItem ? found : (items.find(x => x.id === id) || payload);
+    const affectedQty = Math.max(1, Number(affectedItem?.qty || 1));
+    const total = items.reduce((s,it)=> s + (Number(it.price)||0) * (Number(it.qty)||0), 0);
+    const now = Date.now();
+    const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-ADD';
+    const actionText = preparedLabel
+      ? (wasExistingItem
+          ? `قام الزبون بزيادة كمية "${name}" في الفاتورة الجاهزة إلى ${affectedQty}.`
+          : `قام الزبون بإضافة "${name}" إلى الفاتورة الجاهزة.`)
+      : (wasExistingItem
+          ? `قام الزبون بزيادة كمية "${name}" إلى ${affectedQty}.`
+          : `قام الزبون بإضافة "${name}" إلى الفاتورة.`);
+    const nextStatus = keepPreparedStatus ? 'prepared' : 'pending';
+
+    await update(ref(db), {
+      [`salesInvoices/${target.id}/items`]: items,
+      [`salesInvoices/${target.id}/total`]: total,
+      [`salesInvoices/${target.id}/updatedAt`]: now,
+      [`salesInvoices/${target.id}/status`]: nextStatus,
+      [`salesInvoices/${target.id}/messages/${msgId}`]: {
+        id: msgId,
+        senderRole: 'customer',
+        text: actionText,
+        createdAt: now,
+        seenByAdmin: false,
+        seenByCustomer: true
+      }
+    });
+
+    await notifyAdminAboutCustomerInvoiceChange(target.id, { ...target, items, total, status: nextStatus }, actionText, {
+      invoiceAction: wasExistingItem ? 'increase_item_from_catalog' : 'add_item_from_catalog',
+      itemId: id,
+      itemName: name,
+      itemQty: affectedQty,
+      invoiceTotal: total,
+      targetInvoiceStatus: nextStatus
+    });
+
+    setPendingInvoiceCreateNewUntil(0);
+    if (typeof window.loadCustomerInvoices === 'function') await window.loadCustomerInvoices();
+    if (typeof window.refreshInvoiceCounts === 'function') await window.refreshInvoiceCounts();
+    showAddedToast(preparedLabel ? 'تمت الإضافة إلى الفاتورة الجاهزة' : 'تمت الإضافة إلى السلة');
+    return true;
+  };
 
   try {
     if (window.firebaseDB && window.firebaseDB.db && typeof getDeviceId === 'function') {
-      const { db, ref, get, update } = window.firebaseDB;
+      ({ db, ref, get, update } = window.firebaseDB);
       const snap = await get(ref(db, 'salesInvoices'));
       const raw = snap.exists() ? (snap.val() || {}) : {};
       const deviceId = getDeviceId();
-      const pending = Object.entries(raw)
+
+      const openInvoices = Object.entries(raw)
         .map(([iid, value]) => ({ id:iid, ...(value || {}) }))
-        .filter(inv => inv && inv.deviceId === deviceId && !inv.customerArchived && !inv.customerDeleted && !inv.adminArchived && inv.status !== 'cancelled' && inv.status !== 'prepared')
+        .filter(inv => inv
+          && inv.deviceId === deviceId
+          && !inv.customerArchived
+          && !inv.customerDeleted
+          && !inv.adminArchived
+          && !inv.cancelledByCustomer
+          && inv.status !== 'cancelled')
         .sort((a,b)=> (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
 
-      if (pending.length) {
-        const target = pending[0];
+      const preparedInvoices = openInvoices.filter(inv => inv.status === 'prepared');
+      const pendingInvoices = openInvoices.filter(inv => inv.status !== 'prepared');
+      const hasReadyDraftInvoice = Array.isArray(cart) && cart.length > 0;
+
+      if (hasReadyDraftInvoice) {
+        addPayloadToDraftCart();
+        if (typeof window.refreshInvoiceDraftOnly === 'function') window.refreshInvoiceDraftOnly();
+        showAddedToast('تمت الإضافة إلى الفاتورة الجاهزة للإرسال', 'success', 2300);
+        return;
+      }
+
+      if (preparedInvoices.length) {
+        const targetPrepared = preparedInvoices[0];
+        await appendItemToServerInvoice(targetPrepared, {
+          preparedLabel: true,
+          keepPreparedStatus: true
+        });
+        return;
+      }
+
+      if (pendingInvoices.length) {
+        const target = pendingInvoices[0];
+        const pendingCount = pendingInvoices.length;
+        const pendingTitle = pendingCount > 1
+          ? `يوجد ${pendingCount} فواتير قيد المتابعة`
+          : 'يوجد فاتورة قيد المراجعة';
+        const pendingText = pendingCount > 1
+          ? 'هل تريد الإضافة على آخر فاتورة أو إنشاء فاتورة جديدة؟'
+          : 'هل تريد الإضافة عليها أو إنشاء فاتورة جديدة؟';
 
         if (hasPendingInvoiceCreateNewCooldown()) {
           addPayloadToDraftCart();
           if (typeof window.refreshInvoiceDraftOnly === 'function') window.refreshInvoiceDraftOnly();
+          showAddedToast('تمت الإضافة إلى الفاتورة الجاهزة للإرسال', 'success', 2300);
           return;
         }
 
@@ -14929,61 +15343,27 @@ async function addToCart({name, category, price, img}){
           background: 'transparent',
           showConfirmButton: true,
           showDenyButton: true,
-          showCancelButton: false,
+          showCancelButton: true,
           reverseButtons: true,
           focusConfirm: true,
           allowOutsideClick: true,
           allowEscapeKey: true,
           confirmButtonText: 'إضافة',
           denyButtonText: 'أنشئ فاتورة',
+          cancelButtonText: 'إلغاء',
           buttonsStyling: false,
           customClass: {
             popup: 'customer-confirm-popup',
             actions: 'customer-confirm-actions',
             confirmButton: 'ban',
-            denyButton: 'delete'
+            denyButton: 'create-new',
+            cancelButton: 'archive'
           },
-          html: `<div class="customer-confirm-wrap"><div class="customer-confirm-icon ban"><i class="fas fa-file-circle-plus"></i></div><h3 class="customer-confirm-title">لديك فاتورة قيد المراجعة</h3><p class="customer-confirm-text">تضيف هذا الايتم عليها لو تنشئ فاتورة جديدة؟</p></div>`
+          html: `<div class="customer-confirm-wrap"><div class="customer-confirm-icon ban"><i class="fas fa-file-circle-plus"></i></div><h3 class="customer-confirm-title">${escapeHtml(pendingTitle)}</h3><p class="customer-confirm-text">${escapeHtml(pendingText)}</p></div>`
         });
 
         if (res.isConfirmed) {
-          const items = Array.isArray(target.items) ? target.items.map(it => ({...it})) : [];
-          const found = items.find(x => x.id === id);
-          const wasExistingItem = !!found;
-          if (found) found.qty = Math.min(99, Number(found.qty||0) + 1);
-          else items.push({ ...payload });
-          const affectedItem = wasExistingItem ? found : items.find(x => x.id === id) || payload;
-          const affectedQty = Math.max(1, Number(affectedItem?.qty || 1));
-          const actionText = wasExistingItem
-            ? `قام الزبون بزيادة كمية "${name}" إلى ${affectedQty}.`
-            : `قام الزبون بإضافة "${name}" إلى الفاتورة.`;
-          const total = items.reduce((s,it)=> s + (Number(it.price)||0) * (Number(it.qty)||0), 0);
-          const now = Date.now();
-          const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-ADD';
-          await update(ref(db), {
-            [`salesInvoices/${target.id}/items`]: items,
-            [`salesInvoices/${target.id}/total`]: total,
-            [`salesInvoices/${target.id}/updatedAt`]: now,
-            [`salesInvoices/${target.id}/status`]: 'pending',
-            [`salesInvoices/${target.id}/messages/${msgId}`]: {
-              id: msgId,
-              senderRole: 'customer',
-              text: actionText,
-              createdAt: now,
-              seenByAdmin: false,
-              seenByCustomer: true
-            }
-          });
-          await notifyAdminAboutCustomerInvoiceChange(target.id, { ...target, items, total }, actionText, {
-            invoiceAction: wasExistingItem ? 'increase_item_from_catalog' : 'add_item_from_catalog',
-            itemId: id,
-            itemName: name,
-            itemQty: affectedQty,
-            invoiceTotal: total
-          });
-          setPendingInvoiceCreateNewUntil(0);
-          if (typeof window.loadCustomerInvoices === 'function') await window.loadCustomerInvoices();
-          if (typeof window.refreshInvoiceCounts === 'function') await window.refreshInvoiceCounts();
+          await appendItemToServerInvoice(target);
           return;
         }
 
@@ -14991,16 +15371,7 @@ async function addToCart({name, category, price, img}){
           setPendingInvoiceCreateNewUntil(Date.now() + (5 * 60 * 1000));
           addPayloadToDraftCart();
           if (typeof window.refreshInvoiceDraftOnly === 'function') window.refreshInvoiceDraftOnly();
-          await Swal.fire({
-            toast: true,
-            position: 'top',
-            timer: 1400,
-            timerProgressBar: true,
-            showConfirmButton: false,
-            icon: 'success',
-            title: 'تم إنشاء فاتورة جديدة',
-            customClass: { popup: 'customer-mini-toast' }
-          });
+          showAddedToast('تم إنشاء فاتورة جديدة', 'info', 2400);
           return;
         }
 
@@ -15014,6 +15385,7 @@ async function addToCart({name, category, price, img}){
   }
 
   addPayloadToDraftCart();
+  showAddedToast();
 }
 
 function calcTotals(){
@@ -17208,7 +17580,7 @@ async function renderSponsorAd(){
         </div>
         <div class="invoice-actions">
           <button class="invoice-btn send" type="button" onclick="sendCurrentInvoice()"><i class="fas fa-paper-plane"></i> إرسال</button>
-          <button class="invoice-btn archive" type="button" onclick="archiveCurrentDraftInvoice()"><i class="fas fa-box-archive"></i> أرشفة</button>
+          <button class="invoice-btn archive" type="button" onclick="archiveCurrentDraftInvoice()"><i class="fas fa-ban"></i> إلغاء الفاتورة</button>
         </div>
       </div>`;
   }
@@ -17279,15 +17651,13 @@ async function renderSponsorAd(){
       const all = (await getAllInvoices()).filter(inv => inv && inv.deviceId===deviceId && !inv.customerDeleted);
       const activeInvoices = all.filter(inv => !inv.customerArchived);
       const archiveInvoices = all.filter(inv => !!inv.customerArchived);
-      active.innerHTML = buildDraftCard() + (activeInvoices.length ? activeInvoices.map(inv=>`<div class="invoice-sent-card"><div class="invoice-sent-head"><div><div class="invoice-sent-title">${escapeHtml(inv.id)}</div><div class="invoice-sent-sub">${formatRequestTime(inv.updatedAt || inv.createdAt)}</div></div><div class="invoice-status-badge ${(inv.cancelledByCustomer || inv.status==='cancelled')?'archived':(inv.status==='prepared'?'prepared':'pending')}"><i class="fas ${(inv.cancelledByCustomer || inv.status==='cancelled')?'fa-ban':(inv.status==='prepared'?'fa-check-double':'fa-hourglass-half')}"></i>${(inv.cancelledByCustomer || inv.status==='cancelled')?'تم الالغاء':(inv.status==='prepared'?'تم التجهيز':'قيد المراجعة')}</div></div>${buildInvoiceMetaBadges(inv)}${buildInvoiceItemsMini(inv,'customer')}<div class="invoice-totals"><div class="invoice-total-row grand"><span>الإجمالي</span><strong>${moneyIQD(inv.total || 0)}</strong></div></div>${inv.note?`<div class="invoice-note-box"><div class="request-label">ملاحظة الفاتورة</div><div class="invoice-note-input" style="min-height:auto;">${escapeHtml(inv.note)}</div></div>`:''}${buildInvoiceMessages(inv.messages, freshMap[inv.id]||null)}${(inv.status!=='prepared' && !(inv.cancelledByCustomer || inv.status==='cancelled'))?`<div class="invoice-admin-card-actions stack"><textarea id="invoiceTrackReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب ردك أو استفسارك على هاي الفاتورة..."></textarea><button class="request-track-send" type="button" onclick="sendCustomerInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button><button class="invoice-action-btn delete" type="button" onclick="cancelCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-ban"></i> إلغاء الفاتورة</button></div>`:((inv.cancelledByCustomer || inv.status==='cancelled')?`<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة</div><div class="sub" style="margin-bottom:10px">تم إشعار الإدارة بإلغاء الطلب، ويمكنك أرشفة الفاتورة الآن.</div><div class="invoice-admin-card-actions"><button class="invoice-action-btn archive" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button></div></div>`:`<div class="invoice-admin-card-actions"><button class="request-track-clear" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة</button></div>`)}</div>`).join('') : '');
+      active.innerHTML = buildDraftCard() + (activeInvoices.length ? activeInvoices.map(inv=>`<div class="invoice-sent-card"><div class="invoice-sent-head"><div><div class="invoice-sent-title">${escapeHtml(inv.id)}</div><div class="invoice-sent-sub">${formatRequestTime(inv.updatedAt || inv.createdAt)}</div></div><div class="invoice-status-badge ${(inv.cancelledByCustomer || inv.status==='cancelled')?'archived':(inv.status==='prepared'?'prepared':'pending')}"><i class="fas ${(inv.cancelledByCustomer || inv.status==='cancelled')?'fa-ban':(inv.status==='prepared'?'fa-check-double':'fa-hourglass-half')}"></i>${(inv.cancelledByCustomer || inv.status==='cancelled')?'تم الالغاء':(inv.status==='prepared'?'تم التجهيز':'قيد المراجعة')}</div></div>${buildInvoiceMetaBadges(inv)}${buildInvoiceItemsMini(inv,'customer')}<div class="invoice-totals"><div class="invoice-total-row grand"><span>الإجمالي</span><strong>${moneyIQD(inv.total || 0)}</strong></div></div>${inv.note?`<div class="invoice-note-box"><div class="request-label">ملاحظة الفاتورة</div><div class="invoice-note-input" style="min-height:auto;">${escapeHtml(inv.note)}</div></div>`:''}${buildInvoiceMessages(inv.messages, freshMap[inv.id]||null)}${(inv.status!=='prepared' && !(inv.cancelledByCustomer || inv.status==='cancelled'))?`<div class="invoice-admin-card-actions stack"><textarea id="invoiceTrackReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب ردك أو استفسارك على هاي الفاتورة..."></textarea><button class="request-track-send" type="button" onclick="sendCustomerInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button><button class="invoice-action-btn delete" type="button" onclick="cancelCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-ban"></i> إلغاء الفاتورة</button></div>`:((inv.cancelledByCustomer || inv.status==='cancelled')?`<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة</div><div class="sub" style="margin-bottom:10px">تم إشعار الإدارة بإلغاء الطلب، ويمكنك أرشفة الفاتورة الآن.</div><div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn archive" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button></div></div>`:`<div class="invoice-admin-card-actions single-center"><button class="request-track-clear" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة</button></div>`)}</div>`).join('') : '');
       if (!cart.length && !activeInvoices.length) {
-        active.innerHTML = '<div class="invoice-empty">لا توجد فواتير حالياً.</div>';
-      } else if (!cart.length && activeInvoices.length) {
-        active.innerHTML = '<div class="invoice-inline-state" style="margin-bottom:12px"><div class="title">فاتورة قيد المتابعة</div><div class="sub">بانتظار متابعة الإدارة.</div></div>' + active.innerHTML;
+        active.innerHTML = '<div class="invoice-empty">لا توجد فواتير مستلمة في الوقت الحالي.</div>';
       }
       archive.innerHTML = (archiveInvoices.length || invoiceDraftArchives.length)
-        ? archiveInvoices.map(inv=>`<div class="invoice-sent-card"><div class="invoice-sent-head"><div><div class="invoice-sent-title">${escapeHtml(inv.id)}</div><div class="invoice-sent-sub">${formatRequestTime(inv.updatedAt || inv.createdAt)}</div></div><div class="invoice-status-badge prepared"><i class="fas fa-box-archive"></i> أرشيف</div></div>${buildInvoiceMetaBadges(inv)}${buildInvoiceItemsMini(inv)}${buildInvoiceMessages(inv.messages, null)}<div class="invoice-admin-card-actions"><button class="request-track-clear" type="button" onclick="deleteCustomerArchivedInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف</button></div></div>`).join('') +
-          invoiceDraftArchives.map(inv=>`<div class="invoice-sent-card"><div class="invoice-sent-head"><div><div class="invoice-sent-title">مسودة مؤرشفة</div><div class="invoice-sent-sub">${formatRequestTime(inv.archivedAt)}</div></div><div class="invoice-status-badge prepared"><i class="fas fa-box-archive"></i> أرشيف</div></div>${buildInvoiceItemsMini(inv)}${inv.note?`<div class="invoice-note-box"><div class="request-label">ملاحظة الفاتورة</div><div class="invoice-note-input" style="min-height:auto;">${escapeHtml(inv.note)}</div></div>`:''}<div class="invoice-admin-card-actions"><button class="request-track-clear" type="button" onclick="deleteDraftArchive('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف</button></div></div>`).join('')
+        ? archiveInvoices.map(inv=>`<div class="invoice-sent-card"><div class="invoice-sent-head"><div><div class="invoice-sent-title">${escapeHtml(inv.id)}</div><div class="invoice-sent-sub">${formatRequestTime(inv.updatedAt || inv.createdAt)}</div></div><div class="invoice-status-badge prepared"><i class="fas fa-box-archive"></i> أرشيف</div></div>${buildInvoiceMetaBadges(inv)}${buildInvoiceItemsMini(inv)}${buildInvoiceMessages(inv.messages, null)}<div class="invoice-admin-card-actions single-center"><button class="request-track-clear" type="button" onclick="deleteCustomerArchivedInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف</button></div></div>`).join('') +
+          invoiceDraftArchives.map(inv=>`<div class="invoice-sent-card"><div class="invoice-sent-head"><div><div class="invoice-sent-title">مسودة مؤرشفة</div><div class="invoice-sent-sub">${formatRequestTime(inv.archivedAt)}</div></div><div class="invoice-status-badge prepared"><i class="fas fa-box-archive"></i> أرشيف</div></div>${buildInvoiceItemsMini(inv)}${inv.note?`<div class="invoice-note-box"><div class="request-label">ملاحظة الفاتورة</div><div class="invoice-note-input" style="min-height:auto;">${escapeHtml(inv.note)}</div></div>`:''}<div class="invoice-admin-card-actions single-center"><button class="request-track-clear" type="button" onclick="deleteDraftArchive('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف</button></div></div>`).join('')
         : '<div class="invoice-empty">أرشيف الفواتير فارغ حالياً.</div>';
       setInvoiceViewButtons();
       attachRequestScrollRelay(document.getElementById('cartModal'));
@@ -17329,7 +17699,7 @@ async function renderSponsorAd(){
                   : `<textarea id="invoiceAdminReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب رد للإدارة على هذه الفاتورة..."></textarea><div class="invoice-admin-card-actions stack"><button class="request-admin-send" type="button" onclick="sendAdminInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال</button><button class="request-admin-done" type="button" onclick="markInvoicePrepared('${escapeHtml(inv.id)}')"><i class="fas fa-check-double"></i> تم التجهيز</button></div>`));
         return `<div class="request-admin-card invoice-sent-card" data-invoice-id="${escapeHtml(inv.id)}"><div class="request-admin-card-head"><div><div class="request-admin-name">${escapeHtml(inv.customerName || 'بدون اسم')}</div><div class="request-admin-time">${formatRequestTime(inv.updatedAt || inv.createdAt)}</div></div><div class="invoice-status-badge ${badgeClass}"><i class="fas ${badgeIcon}"></i>${badgeText}</div></div>${buildInvoiceMetaBadges(inv)}<div class="invoice-meta-badges"><span class="invoice-meta-badge"><i class="fas fa-mobile-screen"></i>${escapeHtml(inv.deviceId||'')}</span><span class="invoice-meta-badge"><i class="fas fa-money-bill-wave"></i>${moneyIQD(inv.total)}</span></div><div class="invoice-items-wrap">${buildInvoiceItemsMini(inv, canEditItems)}</div><div class="invoice-totals"><div class="invoice-total-row grand"><span>الإجمالي</span><strong class="invoice-total-value">${moneyIQD(inv.total || 0)}</strong></div></div>${inv.note?`<div class="invoice-note-box"><div class="request-label">ملاحظة الزبون</div><div class="invoice-note-input" style="min-height:auto;">${escapeHtml(inv.note)}</div></div>`:''}${buildInvoiceMessages(inv.messages, freshMap[inv.id]||null)}${actionsHtml}</div>`;
       };
-      active.innerHTML = activeInvoices.length ? activeInvoices.map(inv=>renderAdmin(inv,false)).join('') : '<div class="invoice-empty">لا توجد فواتير مرسلة حالياً.</div>';
+      active.innerHTML = activeInvoices.length ? activeInvoices.map(inv=>renderAdmin(inv,false)).join('') : '<div class="invoice-empty">لا توجد فواتير مستلمة في الوقت الحالي.</div>';
       archive.innerHTML = archiveInvoices.length ? archiveInvoices.map(inv=>renderAdmin(inv,true)).join('') : '<div class="invoice-empty">أرشيف الفواتير فارغ حالياً.</div>';
       setInvoiceViewButtons();
       attachRequestScrollRelay(document.getElementById('invoiceAdminModal'));
@@ -17391,7 +17761,25 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
 
   window.archiveCurrentDraftInvoice = async function(){
     if (!cart.length) return;
-    const ok = await invoiceActionSwal('archive','أرشفة الفاتورة الحالية','سيتم نقل محتوى السلة الحالي إلى تبويب الأرشيف عندك فقط بدون إرساله للإدارة.');
+    const ok = await Swal.fire({
+      showConfirmButton: true,
+      showCancelButton: true,
+      showDenyButton: false,
+      reverseButtons: true,
+      buttonsStyling: false,
+      background: 'transparent',
+      color: '#fff',
+      customClass: {
+        popup: 'customer-confirm-popup',
+        actions: 'customer-confirm-actions',
+        confirmButton: 'delete',
+        cancelButton: 'archive',
+        denyButton: 'swal2-hidden'
+      },
+      confirmButtonText: 'إلغاء الفاتورة',
+      cancelButtonText: 'رجوع',
+      html: `<div class="customer-confirm-wrap"><div class="customer-confirm-icon delete"><i class="fas fa-ban"></i></div><h3 class="customer-confirm-title">إلغاء الفاتورة الحالية</h3><p class="customer-confirm-text">سيتم نقل هذه الفاتورة مباشرة إلى تبويب الأرشيف عندك فقط، بدون إرسالها إلى الإدارة.</p></div>`
+    });
     if (!ok.isConfirmed) return;
     const subtotal = cart.reduce((s,it)=> s + (Number(it.price)||0)*(Number(it.qty)||0), 0);
     const discount = 0;
@@ -17399,15 +17787,32 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     invoiceDraftArchives.unshift({ id:'DRAFT-'+Date.now(), archivedAt:Date.now(), items: JSON.parse(JSON.stringify(cart)), note:getInvoiceNote(), subtotal, discount, total });
     setInvoiceDraftArchives(invoiceDraftArchives);
     cart = []; saveCart();
-    currentInvoiceTrackView = 'archive';
     await loadCustomerInvoices();
   };
   window.deleteDraftArchive = async function(id){ const ok = await invoiceActionSwal('delete','حذف المسودة المؤرشفة','سيتم حذف هذه المسودة المؤرشفة نهائيًا من جهازك.'); if (!ok.isConfirmed) return; setInvoiceDraftArchives(invoiceDraftArchives.filter(x=>x.id!==id)); await loadCustomerInvoices(); };
-  window.archiveCustomerInvoice = async function(id){ if (!window.firebaseDB || !window.firebaseDB.db) return; const ok = await invoiceActionSwal('archive','أرشفة الفاتورة','سيتم نقل الفاتورة إلى تبويب الأرشيف عندك.'); if (!ok.isConfirmed) return; const { db, ref, update } = window.firebaseDB; await update(ref(db, `${INVOICE_PATH}/${id}`), { customerArchived:true, updatedAt:Date.now() }); currentInvoiceTrackView='archive'; await loadCustomerInvoices(); };
-  window.deleteCustomerArchivedInvoice = async function(id){ if (!window.firebaseDB || !window.firebaseDB.db) return; const ok = await invoiceActionSwal('delete','حذف الفاتورة من جهتك','سيتم حذف الفاتورة من جهة الزبون فقط.'); if (!ok.isConfirmed) return; const { db, ref, update } = window.firebaseDB; await update(ref(db, `${INVOICE_PATH}/${id}`), { customerDeleted:true, updatedAt:Date.now() }); await loadCustomerInvoices(); };
+  window.archiveCustomerInvoice = async function(id){ if (!window.firebaseDB || !window.firebaseDB.db) return; const ok = await invoiceActionSwal('archive','أرشفة الفاتورة','سيتم نقل الفاتورة إلى تبويب الأرشيف عندك.'); if (!ok.isConfirmed) return; const { db, ref, update } = window.firebaseDB; await update(ref(db, `${INVOICE_PATH}/${id}`), { customerArchived:true, updatedAt:Date.now() }); await loadCustomerInvoices(); await refreshInvoiceCounts(); };
+  window.deleteCustomerArchivedInvoice = async function(id){ if (!window.firebaseDB || !window.firebaseDB.db) return; const ok = await invoiceActionSwal('delete','حذف الفاتورة من جهتك','سيتم حذف الفاتورة من جهة الزبون فقط.'); if (!ok.isConfirmed) return; const { db, ref, update } = window.firebaseDB; await update(ref(db, `${INVOICE_PATH}/${id}`), { customerDeleted:true, updatedAt:Date.now() }); await loadCustomerInvoices(); await refreshInvoiceCounts(); };
   window.cancelCustomerInvoice = async function(id){
     if (!window.firebaseDB || !window.firebaseDB.db) return;
-    const ok = await invoiceActionSwal('delete','هل تريد حذف الفاتورة؟','سيتم إلغاء الفاتورة الحالية وإشعار الإدارة بذلك.');
+    const ok = await Swal.fire({
+      showConfirmButton: true,
+      showCancelButton: true,
+      showDenyButton: false,
+      reverseButtons: true,
+      buttonsStyling: false,
+      background: 'transparent',
+      color: '#fff',
+      customClass: {
+        popup: 'customer-confirm-popup',
+        actions: 'customer-confirm-actions',
+        confirmButton: 'delete',
+        cancelButton: 'archive',
+        denyButton: 'swal2-hidden'
+      },
+      confirmButtonText: 'إلغاء الفاتورة',
+      cancelButtonText: 'رجوع',
+      html: `<div class="customer-confirm-wrap"><div class="customer-confirm-icon delete"><i class="fas fa-ban"></i></div><h3 class="customer-confirm-title">هل تريد إلغاء الفاتورة؟</h3><p class="customer-confirm-text">سيتم إلغاء الفاتورة الحالية ونقلها تلقائياً إلى تبويب الأرشيف عندك مع إشعار الإدارة بذلك.</p></div>`
+    });
     if (!ok.isConfirmed) return;
     const now = Date.now();
     const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-CANCEL';
@@ -17430,6 +17835,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       [`${INVOICE_PATH}/${id}/messages/${msgId}`]: { id:msgId, senderRole:'system', text:'تم الغاء الفاتورة من قبل الزبون', createdAt:now, seenByAdmin:false, seenByCustomer:true },
       [`${INVOICE_PATH}/${id}/status`]: 'cancelled',
       [`${INVOICE_PATH}/${id}/cancelledByCustomer`]: true,
+      [`${INVOICE_PATH}/${id}/customerArchived`]: true,
       [`${INVOICE_PATH}/${id}/updatedAt`]: now
     });
     await queuePushNotificationEvent('invoice_cancelled_by_customer', {
@@ -17442,7 +17848,6 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
         body: 'تم إلغاء الفاتورة من قبل الزبون'
       })
     });
-    currentInvoiceTrackView = 'active';
     await loadCustomerInvoices();
     await refreshInvoiceCounts();
   };
@@ -17452,7 +17857,6 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     if (!ok.isConfirmed) return;
     const { db, ref, update } = window.firebaseDB;
     await update(ref(db, `${INVOICE_PATH}/${id}`), { adminArchived:true, updatedAt:Date.now() });
-    currentInvoiceAdminView = 'archive';
     await loadAdminInvoices();
     await refreshInvoiceCounts();
   };
@@ -18036,6 +18440,11 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
 .request-track-clear{
   border-radius:18px !important;
 }
+.invoice-admin-card-actions.single-center,
+.invoice-actions.single-center{
+  grid-template-columns: minmax(0, 320px);
+  justify-content: center;
+}
 
 @media (max-width: 900px){
   .invoice-meta-badges{ grid-template-columns:1fr; }
@@ -18159,20 +18568,50 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     }).join('')}</div>`;
   }
 
-  function draftCard(activeInvoicesCount){
+  function draftCard(activeInvoices = []){
+    const invoices = Array.isArray(activeInvoices) ? activeInvoices : [];
+    const cancelledCount = invoices.filter(inv => !!inv && (!!inv.cancelledByCustomer || inv.status === 'cancelled')).length;
+    const preparedCount = invoices.filter(inv => !!inv && inv.status === 'prepared').length;
+    const actionableCount = invoices.filter(inv => !!inv && inv.status !== 'prepared' && !(inv.cancelledByCustomer || inv.status === 'cancelled')).length;
+
     if (!Array.isArray(window.cart) || !window.cart.length) {
-      if (activeInvoicesCount > 0) {
-        return `<div class="invoice-inline-state"><div class="title">يوجد سلة قيد التجهيز والمتابعة من الإدارة</div><div class="sub">الفاتورة الحالية مرسلة بالفعل. تقدر تراجعها وتتابع الردود إلى أن تكتمل، وبعدها تضيف مواد جديدة لسلة أخرى.</div></div>`;
+      if (invoices.length > 0) {
+        if (actionableCount > 0) {
+          const title = actionableCount === 1
+            ? 'يوجد فاتورة قيد المراجعة'
+            : `يوجد ${actionableCount} فواتير قيد المتابعة`;
+          const sub = actionableCount === 1
+            ? 'الفاتورة الحالية ما زالت مفتوحة. تقدر تراجعها وتتابع الردود أو تبدأ فاتورة جديدة عند الحاجة.'
+            : 'توجد أكثر من فاتورة مفتوحة حالياً. تقدر تراجعها وتتابع الردود أو تبدأ فاتورة جديدة عند الحاجة.';
+          return `<div class="invoice-inline-state"><div class="title">${title}</div><div class="sub">${sub}</div></div>`;
+        }
+
+        if (cancelledCount === invoices.length) {
+          const title = cancelledCount === 1 ? 'لقد تم إلغاء الفاتورة' : 'تم إلغاء الفواتير';
+          const sub = cancelledCount === 1
+            ? 'الفاتورة الحالية ملغاة، وتقدر تنقلها إلى الأرشيف أو تبدأ فاتورة جديدة.'
+            : 'كل الفواتير الحالية ملغاة، وتقدر تنقلها إلى الأرشيف أو تبدأ فاتورة جديدة.';
+          return `<div class="invoice-inline-state"><div class="title">${title}</div><div class="sub">${sub}</div></div>`;
+        }
+
+        if (preparedCount === invoices.length) {
+          const title = preparedCount === 1 ? 'تم تجهيز الفاتورة' : `تم تجهيز ${preparedCount} فواتير`;
+          const sub = preparedCount === 1
+            ? 'الفاتورة الحالية جاهزة، وتقدر أرشفتها أو تبدأ فاتورة جديدة.'
+            : 'كل الفواتير الحالية جاهزة، وتقدر أرشفتها أو تبدأ فاتورة جديدة.';
+          return `<div class="invoice-inline-state"><div class="title">${title}</div><div class="sub">${sub}</div></div>`;
+        }
       }
       return `<div class="invoice-empty">السلة فارغة حالياً 🙃<div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,.6)">أضف مواد من النتائج حتى تبعث فاتورة جديدة.</div></div>`;
     }
+
     const subtotal = window.cart.reduce((s,it)=> s + (Number(it.price)||0)*(Number(it.qty)||0), 0);
     const total = subtotal;
     return `<div class="invoice-draft-card">
       <div class="invoice-draft-head">
         <div>
           <div class="invoice-draft-title">فاتورة جديدة</div>
-          <div class="invoice-draft-sub">راجع المواد، أضف ملاحظتك، ثم أرسلها أو انقلها إلى الأرشيف المحلي.</div>
+          <div class="invoice-draft-sub">راجع المواد، أضف ملاحظتك، ثم أرسلها أو ألغِها وتحويلها إلى الأرشيف المحلي.</div>
         </div>
         <div class="invoice-status-badge pending"><i class="fas fa-paper-plane"></i> جاهزة للإرسال</div>
       </div>
@@ -18186,7 +18625,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       </div>
       <div class="invoice-actions">
         <button class="invoice-btn send" type="button" onclick="sendCurrentInvoice()"><i class="fas fa-paper-plane"></i> إرسال</button>
-        <button class="invoice-btn archive" type="button" onclick="archiveCurrentDraftInvoice()"><i class="fas fa-box-archive"></i> أرشفة</button>
+        <button class="invoice-btn archive" type="button" onclick="archiveCurrentDraftInvoice()"><i class="fas fa-ban"></i> إلغاء الفاتورة</button>
       </div>
     </div>`;
   }
@@ -18197,12 +18636,12 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     const statusText = archived ? 'في الأرشيف' : (cancelled ? 'تم الالغاء' : (inv.status==='prepared' ? 'تم التجهيز' : 'قيد المراجعة'));
     const itemMode = archived ? 'view' : ((inv.status !== 'prepared' && !cancelled) ? 'customer-edit' : 'view');
     const buttons = archived
-      ? `<div class="invoice-admin-card-actions"><button class="invoice-action-btn delete" type="button" onclick="deleteCustomerArchivedInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div>`
+      ? `<div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn delete" type="button" onclick="deleteCustomerArchivedInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div>`
       : (cancelled
-          ? `<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة</div><div class="sub" style="margin-bottom:10px">تم إشعار الإدارة بإلغاء الطلب، ويمكنك أرشفة الفاتورة الآن.</div><div class="invoice-admin-card-actions"><button class="invoice-action-btn archive" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الطلب</button></div></div>`
+          ? `<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة</div><div class="sub" style="margin-bottom:10px">تم إشعار الإدارة بإلغاء الطلب، ويمكنك أرشفة الفاتورة الآن.</div><div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn archive" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button></div></div>`
           : (inv.status!=='prepared'
               ? `<div class="invoice-admin-card-actions stack invoice-reply-stack"><textarea id="invoiceTrackReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب ردك أو استفسارك على هذه الفاتورة..."></textarea><button class="invoice-action-btn send" type="button" onclick="sendCustomerInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button><button class="invoice-action-btn delete customer-cancel-invoice-btn" type="button" onclick="cancelCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-ban"></i> إلغاء الفاتورة</button></div>`
-              : `<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم تجهيز الفاتورة</div><div class="sub" style="margin-bottom:10px">تم التجهيز، يمكن أرشفة الطلب وبدء فاتورة جديدة.</div><div class="invoice-admin-card-actions"><button class="invoice-action-btn archive" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الآن</button></div></div>`));
+              : `<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم تجهيز الفاتورة</div><div class="sub" style="margin-bottom:10px">تم التجهيز، يمكن أرشفة الطلب وبدء فاتورة جديدة.</div><div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn archive" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الآن</button></div></div>`));
     return `<div class="invoice-sent-card">
       <div class="invoice-sent-head">
         <div>
@@ -18239,7 +18678,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       ${invoiceItems(inv, itemMode, inv.id)}
       ${inv.note ? `<div class="invoice-note-box"><div class="invoice-note-label">ملاحظة الزبون</div><div class="invoice-note-view">${escapeHtml(inv.note)}</div></div>` : ''}
       ${invoiceMessages(inv.messages, freshMsgId || null)}
-      ${archived ? `<div class="invoice-admin-card-actions"><button class="invoice-action-btn delete" type="button" onclick="deleteAdminArchivedInvoiceRecord('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div>` : (cancelled ? `<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة من الزبون</div><div class="sub" style="margin-bottom:10px">يمكنك الآن أرشفة الفاتورة أو حذفها لاحقًا من الأرشيف.</div><div class="invoice-admin-card-actions"><button class="invoice-action-btn archive" type="button" onclick="archiveAdminCancelledInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button></div></div>` : `<div class="invoice-admin-card-actions stack"><textarea id="invoiceAdminReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب رد الإدارة على هذه الفاتورة..."></textarea><div class="invoice-admin-card-actions"><button class="invoice-action-btn send" type="button" onclick="sendAdminInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال</button><button class="invoice-action-btn done" type="button" onclick="markInvoicePrepared('${escapeHtml(inv.id)}')"><i class="fas fa-check-double"></i> تم التجهيز</button></div></div>`)}
+      ${archived ? `<div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn delete" type="button" onclick="deleteAdminArchivedInvoiceRecord('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div>` : (cancelled ? `<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة من الزبون</div><div class="sub" style="margin-bottom:10px">يمكنك الآن أرشفة الفاتورة أو حذفها لاحقًا من الأرشيف.</div><div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn archive" type="button" onclick="archiveAdminCancelledInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button></div></div>` : `<div class="invoice-admin-card-actions stack"><textarea id="invoiceAdminReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب رد الإدارة على هذه الفاتورة..."></textarea><div class="invoice-admin-card-actions"><button class="invoice-action-btn send" type="button" onclick="sendAdminInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال</button><button class="invoice-action-btn done" type="button" onclick="markInvoicePrepared('${escapeHtml(inv.id)}')"><i class="fas fa-check-double"></i> تم التجهيز</button></div></div>`)}
     </div>`;
   }
 
@@ -18269,8 +18708,8 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       const all = (await getAllInvoicesFresh()).filter(inv => inv && inv.deviceId===deviceId && !inv.customerDeleted);
       const activeInvoices = all.filter(inv => !inv.customerArchived);
       const archiveInvoices = all.filter(inv => !!inv.customerArchived);
-      active.innerHTML = draftCard(activeInvoices.length) + activeInvoices.map(inv=>customerInvoiceCard(inv, freshMap[inv.id], false)).join('');
-      if (!window.cart?.length && !activeInvoices.length) active.innerHTML = '<div class="invoice-empty">لا توجد سلة أو فواتير حالياً. أضف مواد من النتائج حتى تبدأ فاتورة جديدة.</div>';
+      active.innerHTML = draftCard(activeInvoices) + activeInvoices.map(inv=>customerInvoiceCard(inv, freshMap[inv.id], false)).join('');
+      if (!window.cart?.length && !activeInvoices.length) active.innerHTML = '<div class="invoice-empty">لا توجد فواتير مستلمة في الوقت الحالي.</div>';
       const drafts = getDraftArchives();
       archive.innerHTML = (archiveInvoices.length || drafts.length)
         ? archiveInvoices.map(inv=>customerInvoiceCard(inv, null, true)).join('') +
@@ -18300,7 +18739,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       const all = await getAllInvoicesFresh();
       const activeInvoices = all.filter(inv => inv && !inv.adminArchived);
       const archiveInvoices = all.filter(inv => inv && !!inv.adminArchived);
-      active.innerHTML = activeInvoices.length ? activeInvoices.map(inv=>adminInvoiceCard(inv, freshMap[inv.id], false)).join('') : '<div class="invoice-empty">لا توجد فواتير مرسلة حالياً.</div>';
+      active.innerHTML = activeInvoices.length ? activeInvoices.map(inv=>adminInvoiceCard(inv, freshMap[inv.id], false)).join('') : '<div class="invoice-empty">لا توجد فواتير مستلمة في الوقت الحالي.</div>';
       archive.innerHTML = archiveInvoices.length ? archiveInvoices.map(inv=>adminInvoiceCard(inv, null, true)).join('') : '<div class="invoice-empty">أرشيف الفواتير فارغ حالياً.</div>';
       scrollInvoicePanels(document.getElementById('invoiceAdminModal'));
       if (typeof window.refreshInvoiceCounts === 'function') await window.refreshInvoiceCounts();
