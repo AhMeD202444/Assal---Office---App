@@ -8710,10 +8710,6 @@ body.modal-lock .swal2-container *{
 .customer-confirm-icon.delete{
   background: linear-gradient(135deg,#ff416c,#ff4b2b);
 }
-.swal2-popup.customer-confirm-popup .swal2-deny.delete,
-.swal2-popup.customer-confirm-popup .swal2-cancel.archive{
-  min-width: 150px !important;
-}
 .swal2-popup.customer-confirm-popup .swal2-cancel.archive{
   background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.08)) !important;
   color: #fff !important;
@@ -8745,25 +8741,40 @@ body.modal-lock .swal2-container *{
 .customer-confirm-actions .swal2-deny,
 .customer-confirm-actions .swal2-cancel{
   margin:0 !important;
-  flex:1 1 0 !important;
-  width:auto !important;
-  max-width:none !important;
-  min-width:0 !important;
-  min-height:46px !important;
+  flex:0 0 118px !important;
+  width:118px !important;
+  max-width:118px !important;
+  min-width:118px !important;
+  min-height:40px !important;
+  padding:0 10px !important;
   border:none !important;
-  border-radius:16px !important;
+  border-radius:14px !important;
   font-family:'Cairo',sans-serif !important;
-  font-size:13.5px !important;
+  font-size:12.5px !important;
   font-weight:800 !important;
   display:inline-flex !important;
   align-items:center !important;
   justify-content:center !important;
   text-align:center !important;
-  gap:8px;
+  gap:6px;
   box-sizing:border-box !important;
   white-space:nowrap !important;
-  box-shadow: 0 14px 28px rgba(0,0,0,.20);
+  box-shadow: 0 10px 22px rgba(0,0,0,.18);
   transition: transform .15s ease, filter .2s ease !important;
+}
+.swal2-popup.invoice-pending-popup .swal2-actions.customer-confirm-actions{
+  justify-content:center !important;
+  gap:14px !important;
+}
+.swal2-popup.invoice-pending-popup .swal2-actions.customer-confirm-actions .swal2-confirm,
+.swal2-popup.invoice-pending-popup .swal2-actions.customer-confirm-actions .swal2-deny{
+  flex:0 0 118px !important;
+  width:118px !important;
+  max-width:118px !important;
+  min-width:118px !important;
+}
+.swal2-popup.invoice-pending-popup .swal2-actions.customer-confirm-actions .swal2-cancel{
+  display:none !important;
 }
 .customer-confirm-actions .swal2-confirm:hover,
 .customer-confirm-actions .swal2-deny:hover,
@@ -8811,6 +8822,41 @@ body.modal-lock .swal2-container *{
 .swal2-popup.customer-confirm-popup .swal2-deny.swal2-hidden,
 .invoice-confirm-popup.swal2-popup .swal2-deny.swal2-hidden{
   display:none !important;
+}
+.swal2-popup.customer-confirm-popup .swal2-close.customer-close-x{
+  position:absolute !important;
+  top:14px !important;
+  right:14px !important;
+  left:auto !important;
+  width:38px !important;
+  height:38px !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:none !important;
+  border-radius:50% !important;
+  background: linear-gradient(135deg, #7a0f16, #3f070c) !important;
+  color:#fff !important;
+  font-size:0 !important;
+  line-height:1 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  box-shadow: 0 10px 22px rgba(63,7,12,.32), inset 0 1px 0 rgba(255,255,255,.10) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+  transition: transform .16s ease, filter .2s ease, box-shadow .2s ease !important;
+}
+.swal2-popup.customer-confirm-popup .swal2-close.customer-close-x:hover{
+  transform: translateY(-1px) scale(1.04) !important;
+  filter: brightness(1.08) !important;
+  box-shadow: 0 14px 28px rgba(63,7,12,.38), inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+.swal2-popup.customer-confirm-popup .swal2-close.customer-close-x:active{
+  transform: scale(.95) !important;
+  filter: brightness(.96) !important;
+}
+.swal2-popup.customer-confirm-popup .swal2-close.customer-close-x i{
+  font-size:18px !important;
+  pointer-events:none !important;
 }
 
 /* ===== Elegant global top toast ===== */
@@ -9044,7 +9090,7 @@ body.modal-lock .swal2-container *{
 @media (max-width: 480px){
   .swal2-popup.customer-confirm-popup{ width:min(94vw, 94vw) !important; border-radius:22px !important; }
   .swal2-popup.customer-confirm-popup .swal2-actions.customer-confirm-actions{flex-direction:row !important; flex-wrap:nowrap !important; gap:10px !important;}
-  .customer-confirm-actions .swal2-confirm, .customer-confirm-actions .swal2-deny, .customer-confirm-actions .swal2-cancel{flex:1 1 0 !important; width:auto !important; max-width:none !important; font-size:12.5px !important; padding-inline:8px !important;}
+  .customer-confirm-actions .swal2-confirm, .customer-confirm-actions .swal2-deny, .customer-confirm-actions .swal2-cancel{flex:0 0 108px !important; width:108px !important; max-width:108px !important; min-width:108px !important; font-size:12px !important; padding-inline:6px !important;} .swal2-popup.invoice-pending-popup .swal2-actions.customer-confirm-actions .swal2-confirm, .swal2-popup.invoice-pending-popup .swal2-actions.customer-confirm-actions .swal2-deny{flex:0 0 108px !important; width:108px !important; max-width:108px !important; min-width:108px !important;} .swal2-popup.invoice-pending-popup .swal2-actions.customer-confirm-actions .swal2-cancel{display:none !important;}
   .customer-confirm-wrap{ padding:20px 16px 14px; }
   .customer-confirm-title{ font-size:20px; }
   .customer-confirm-text{ font-size:13px; }
@@ -9397,6 +9443,42 @@ footer{
   }
   body{
     min-height: 100vh !important;
+  }
+}
+
+
+/* === final-confirm-buttons-unified === */
+.swal2-popup.customer-confirm-popup .swal2-actions.customer-confirm-actions .swal2-confirm,
+.swal2-popup.customer-confirm-popup .swal2-actions.customer-confirm-actions .swal2-deny,
+.swal2-popup.customer-confirm-popup .swal2-actions.customer-confirm-actions .swal2-cancel{
+  flex: 0 0 118px !important;
+  width: 118px !important;
+  min-width: 118px !important;
+  max-width: 118px !important;
+}
+.swal2-popup.customer-confirm-popup .swal2-confirm.delete,
+.swal2-popup.customer-confirm-popup .swal2-confirm.ban,
+.swal2-popup.customer-confirm-popup .swal2-cancel.archive,
+.swal2-popup.customer-confirm-popup .swal2-deny.create-new,
+.swal2-popup.customer-confirm-popup .swal2-deny.delete{
+  flex: 0 0 118px !important;
+  width: 118px !important;
+  min-width: 118px !important;
+  max-width: 118px !important;
+}
+@media (max-width: 480px){
+  .swal2-popup.customer-confirm-popup .swal2-actions.customer-confirm-actions .swal2-confirm,
+  .swal2-popup.customer-confirm-popup .swal2-actions.customer-confirm-actions .swal2-deny,
+  .swal2-popup.customer-confirm-popup .swal2-actions.customer-confirm-actions .swal2-cancel,
+  .swal2-popup.customer-confirm-popup .swal2-confirm.delete,
+  .swal2-popup.customer-confirm-popup .swal2-confirm.ban,
+  .swal2-popup.customer-confirm-popup .swal2-cancel.archive,
+  .swal2-popup.customer-confirm-popup .swal2-deny.create-new,
+  .swal2-popup.customer-confirm-popup .swal2-deny.delete{
+    flex: 0 0 108px !important;
+    width: 108px !important;
+    min-width: 108px !important;
+    max-width: 108px !important;
   }
 }
 
@@ -10652,6 +10734,10 @@ function isAdminUser() {
     return localStorage.getItem(ADMIN_FLAG_KEY) === "true";
 }
 
+function canAccessStats() {
+    return isAdminUser() || localStorage.getItem('isActivated') === 'true';
+}
+
 function setAdminUser(isAdmin) {
     if (isAdmin) localStorage.setItem(ADMIN_FLAG_KEY, "true");
     else localStorage.removeItem(ADMIN_FLAG_KEY);
@@ -10716,7 +10802,7 @@ function openSimilaritesPage() {
 function updateStatsBtn() {
     const btn = document.getElementById("statsBtn");
     if (!btn) return;
-    btn.style.display = isAdminUser() ? "inline-flex" : "none";
+    btn.style.display = canAccessStats() ? "inline-flex" : "none";
 }
 
 function updateRequestAdminHeaderBtn() {
@@ -11010,8 +11096,8 @@ window.refreshStatsFromFirebase = async function () {
 };
 
 window.openStatsModal = async function () {
-    if (!isAdminUser()) {
-        alert("هذه الخاصية حصراً للإدمن");
+    if (!canAccessStats()) {
+        alert("هذه الخاصية تتطلب تسجيل الدخول أولاً");
         return;
     }
     showStatsLoading();
@@ -15343,21 +15429,26 @@ async function addToCart({name, category, price, img}){
           background: 'transparent',
           showConfirmButton: true,
           showDenyButton: true,
-          showCancelButton: true,
+          showCancelButton: false,
+          cancelButtonText: '',
+          showCloseButton: true,
+          closeButtonHtml: '<i class="fas fa-xmark"></i>',
           reverseButtons: true,
           focusConfirm: true,
           allowOutsideClick: true,
           allowEscapeKey: true,
           confirmButtonText: 'إضافة',
           denyButtonText: 'أنشئ فاتورة',
-          cancelButtonText: 'إلغاء',
           buttonsStyling: false,
           customClass: {
-            popup: 'customer-confirm-popup',
-            actions: 'customer-confirm-actions',
+            popup: 'customer-confirm-popup invoice-pending-popup',
+            actions: 'customer-confirm-actions invoice-pending-actions',
             confirmButton: 'ban',
             denyButton: 'create-new',
-            cancelButton: 'archive'
+            closeButton: 'customer-close-x'
+          },
+          didOpen: (popup) => {
+            popup.querySelectorAll('.swal2-cancel').forEach(btn => btn.remove());
           },
           html: `<div class="customer-confirm-wrap"><div class="customer-confirm-icon ban"><i class="fas fa-file-circle-plus"></i></div><h3 class="customer-confirm-title">${escapeHtml(pendingTitle)}</h3><p class="customer-confirm-text">${escapeHtml(pendingText)}</p></div>`
         });
@@ -17939,10 +18030,11 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     await update(ref(db), {
       [`${INVOICE_PATH}/${id}/updatedAt`]: now,
       [`${INVOICE_PATH}/${id}/status`]: 'prepared',
+      [`${INVOICE_PATH}/${id}/adminArchived`]: true,
       [`${INVOICE_PATH}/${id}/messages/${msgId}`]: {
         id: msgId,
         senderRole: 'system',
-        text: 'تم تجهيز الفاتورة وإغلاقها، بإمكانك أرشفتها وحذفها لاحقًا.',
+        text: 'تم تجهيز الفاتورة ونقلها تلقائياً إلى أرشيف الإدارة.',
         createdAt: now,
         seenByAdmin: true,
         seenByCustomer: false
@@ -17956,7 +18048,6 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       title: 'تم تجهيز الفاتورة',
       body: 'تم تجهيز الفاتورة وإغلاقها.'
     });
-    currentInvoiceAdminView = 'active';
     if (typeof setInvoiceViewButtons === 'function') setInvoiceViewButtons();
     await loadAdminInvoices();
     await loadCustomerInvoices();
