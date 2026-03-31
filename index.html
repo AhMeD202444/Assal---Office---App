@@ -10720,9 +10720,22 @@ footer{
       
       
 // ================== صلاحية كادر مكتب عسل (أدمن) ==================
-// ⚠️ غيّر كلمة الأدمن هنا (لا تخليها نفس 112233)
-const ADMIN_PASSWORD = "778899"; 
+// ⚠️ غيّر كلمات الكادر هنا (لا تخليها نفس 112233)
+const ADMIN_PASSWORD = "r778899";
+const LEGACY_ADMIN_PASSWORD = "778899";
 const ADMIN_FLAG_KEY = "isAdmin";
+const ADMIN_LOGIN_VERSION_KEY = "adminLoginVersion";
+const ADMIN_LOGIN_VERSION = "2026-03-31-branch-admins-v1";
+const ADMIN_ACCOUNT_CODE_KEY = "adminAccountCode";
+const ADMIN_ACCOUNT_LABEL_KEY = "adminAccountLabel";
+const ADMIN_WHOLESALE_ACCESS_KEY = "adminWholesaleAllowed";
+
+const ADMIN_ACCOUNTS = {
+    r778899: { code: 'r778899', label: 'مكتب عسل فرع بعقوبة', canUseWholesale: true },
+    t778899: { code: 't778899', label: 'مكتب عسل فرع التحرير', canUseWholesale: false },
+    h778899: { code: 'h778899', label: 'مكتب عسل فرع الحي', canUseWholesale: false },
+    b778899: { code: 'b778899', label: 'مكتب عسل فرع بلدروز', canUseWholesale: false }
+};
 
 // ملف التوافقات (Google Sheet)
 const dropboxSimilaritesFile = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRRZZFGe3dDXCCb9L5HtgpnXoj-H6kvqWeMS_tvYyWAL2VqpJh64rCMqRpoTaMw3v9fdazd5fWB5E2d/pub?output=xlsx" + "&t=" + new Date().getTime();
@@ -10734,13 +10747,87 @@ function isAdminUser() {
     return localStorage.getItem(ADMIN_FLAG_KEY) === "true";
 }
 
+function getAdminAccountCode() {
+    return (localStorage.getItem(ADMIN_ACCOUNT_CODE_KEY) || '').trim();
+}
+
+function getAdminAccountLabel() {
+    return (localStorage.getItem(ADMIN_ACCOUNT_LABEL_KEY) || '').trim();
+}
+
+function canUseWholesalePrices() {
+    return isAdminUser() && localStorage.getItem(ADMIN_WHOLESALE_ACCESS_KEY) === 'true';
+}
+
+function getAdminAccountByPassword(password) {
+    const value = String(password || '').trim();
+    return ADMIN_ACCOUNTS[value] || null;
+}
+
+function clearAdminAccessProfile() {
+    localStorage.removeItem(ADMIN_ACCOUNT_CODE_KEY);
+    localStorage.removeItem(ADMIN_ACCOUNT_LABEL_KEY);
+    localStorage.removeItem(ADMIN_WHOLESALE_ACCESS_KEY);
+    localStorage.removeItem(ADMIN_LOGIN_VERSION_KEY);
+}
+
+function setAdminAccessProfile(profile) {
+    if (!profile) {
+        clearAdminAccessProfile();
+        return;
+    }
+
+    const code = String(profile.code || '').trim();
+    const label = String(profile.label || '').trim();
+    const canUseWholesale = profile.canUseWholesale === true;
+
+    if (code) localStorage.setItem(ADMIN_ACCOUNT_CODE_KEY, code);
+    else localStorage.removeItem(ADMIN_ACCOUNT_CODE_KEY);
+
+    if (label) localStorage.setItem(ADMIN_ACCOUNT_LABEL_KEY, label);
+    else localStorage.removeItem(ADMIN_ACCOUNT_LABEL_KEY);
+
+    localStorage.setItem(ADMIN_WHOLESALE_ACCESS_KEY, canUseWholesale ? 'true' : 'false');
+    localStorage.setItem(ADMIN_LOGIN_VERSION_KEY, ADMIN_LOGIN_VERSION);
+}
+
+function enforceLegacyAdminReactivation() {
+    if (!isAdminUser()) return;
+
+    const savedVersion = (localStorage.getItem(ADMIN_LOGIN_VERSION_KEY) || '').trim();
+    const savedCode = getAdminAccountCode();
+    const isLegacyAdminSession = !savedVersion || savedVersion !== ADMIN_LOGIN_VERSION || !savedCode || savedCode === LEGACY_ADMIN_PASSWORD;
+
+    if (!isLegacyAdminSession) return;
+
+    localStorage.removeItem('isActivated');
+    localStorage.removeItem(ADMIN_FLAG_KEY);
+    clearAdminAccessProfile();
+    sessionStorage.setItem('forcedActivationReason', 'admin_password_upgrade');
+}
+
 function canAccessStats() {
     return isAdminUser() || localStorage.getItem('isActivated') === 'true';
 }
 
-function setAdminUser(isAdmin) {
-    if (isAdmin) localStorage.setItem(ADMIN_FLAG_KEY, "true");
-    else localStorage.removeItem(ADMIN_FLAG_KEY);
+function setAdminUser(isAdmin, profile = null) {
+    if (isAdmin) {
+        localStorage.setItem(ADMIN_FLAG_KEY, "true");
+
+        if (profile) {
+            setAdminAccessProfile(profile);
+        } else {
+            if (!localStorage.getItem(ADMIN_LOGIN_VERSION_KEY)) {
+                localStorage.setItem(ADMIN_LOGIN_VERSION_KEY, ADMIN_LOGIN_VERSION);
+            }
+            if (!localStorage.getItem(ADMIN_WHOLESALE_ACCESS_KEY)) {
+                localStorage.setItem(ADMIN_WHOLESALE_ACCESS_KEY, 'true');
+            }
+        }
+    } else {
+        localStorage.removeItem(ADMIN_FLAG_KEY);
+        clearAdminAccessProfile();
+    }
 
     updateAdminCompatBtn();
     updateAdminWholesaleBtn();
@@ -10775,9 +10862,13 @@ function updateAdminCompatBtn() {
 function updateAdminWholesaleBtn() {
     const btn = document.getElementById("adminWholesaleBtn");
     if (!btn) return;
-    const ok = isAdminUser();
+    const isStaff = isAdminUser();
+    const ok = canUseWholesalePrices();
     btn.disabled = !ok;
     btn.classList.toggle("is-disabled", !ok);
+    btn.title = !isStaff
+        ? "هذه الخاصية حصرا لكادر مكتب عسل"
+        : (ok ? "أسعار الجملة" : "هذا الحساب لا يملك صلاحية أسعار الجملة");
     if (!ok) {
         btn.classList.remove("is-active");
         isWholesaleMode = false;
@@ -12989,6 +13080,8 @@ let promoAlreadyShown = sessionStorage.getItem('promoShown') === 'true';
 
 window.onload = function() {
 
+    enforceLegacyAdminReactivation();
+
     // ✅ إذا الصيانة مطفية: امسح bypass + رجّع التفعيل إذا كان محفوظ قبل الصيانة
     if (!maintenanceLock) {
         clearMaintenanceBypass();
@@ -13063,6 +13156,8 @@ async function showActivationPopup() {
     if (localStorage.getItem('isActivated') === 'true') {
         return;
     }
+
+    const forcedReason = sessionStorage.getItem('forcedActivationReason');
 
     let overlay = document.getElementById('activation-overlay');
 
@@ -13204,6 +13299,11 @@ async function showActivationPopup() {
             updateActivationLayout();
         };
 
+        if (forcedReason === 'admin_password_upgrade') {
+            setError('تم تحديث أكواد الكادر. يرجى تسجيل الدخول من جديد بالكود الجديد.');
+            sessionStorage.removeItem('forcedActivationReason');
+        }
+
         // زر العين – إظهار/إخفاء كلمة المرور
         toggleBtn.addEventListener('click', () => {
             const isPassword = passwordInput.type === 'password';
@@ -13217,16 +13317,27 @@ async function showActivationPopup() {
         // زر تأكيد الدخول
         confirmBtn.addEventListener('click', () => {
             const value = (passwordInput.value || '').trim();
+            const adminAccount = getAdminAccountByPassword(value);
 
             if (!value) {
                 setError('رجاءً اكتب كلمة المرور أولاً.');
                 return;
             }
 
-            // نفس كلمة المرور القديمة بالضبط
-            if (value === '112233' || value === ADMIN_PASSWORD) {
+            if (value === LEGACY_ADMIN_PASSWORD) {
+                setError('هذا الكود تم إلغاؤه. استخدم الكود الجديد الخاص بالفرع.');
+                passwordInput.select();
+                updateActivationLayout();
+                return;
+            }
+
+            if (value === '112233' || adminAccount) {
                 localStorage.setItem('isActivated', 'true');
-                setAdminUser(value === ADMIN_PASSWORD);
+                if (adminAccount) {
+                    setAdminUser(true, adminAccount);
+                } else {
+                    setAdminUser(false);
+                }
 
                 setError('');
                 dialog.classList.remove('is-shaking');
@@ -13473,10 +13584,12 @@ function showMaintenancePopup() {
     // ✅ خليه يعتبر نفسه مفعل
     localStorage.setItem('isActivated', 'true');
 
-    // ✅ خليه كادر/أدمن حتى يفتح التوافقات
-    localStorage.setItem('isAdmin', 'true'); 
-    // أو إذا عندك دالة جاهزة:
-    // setAdminUser(true);
+    // ✅ خليه كادر/أدمن حتى يفتح التوافقات بدون تغيير أي role أو مسارات
+    setAdminUser(true, {
+      code: 'maintenance-admin',
+      label: 'كادر الصيانة',
+      canUseWholesale: true
+    });
 
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
@@ -14615,7 +14728,17 @@ function toggleWholesaleMode() {
         return;
     }
 
-    // ✅ NEW: إذا الزر متعطل بالـ HTML نشيله للأدمن حتى يشتغل اللون والضغط
+    if (!canUseWholesalePrices()) {
+        showExitLikeAlert({
+            icon: "fas fa-user-lock",
+            title: "وصول محدود",
+            message: "هذا الحساب لا يملك صلاحية أسعار الجملة",
+            confirmText: "موافق"
+        });
+        return;
+    }
+
+    // ✅ NEW: إذا الزر متعطل بالـ HTML نشيله للأدمن المصرح له حتى يشتغل اللون والضغط
     btn.disabled = false;
 
     isWholesaleMode = !isWholesaleMode;
@@ -14851,9 +14974,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   
   
-  // ✅ NEW: إذا أدمن فعّل زر الجملة (شيل disabled)
+  // ✅ NEW: إذا هذا الأدمن عنده صلاحية الجملة فقط نفعّل الزر
     const wholesaleBtn = document.getElementById("adminWholesaleBtn");
-    if (wholesaleBtn && isAdminUser()) {
+    if (wholesaleBtn && canUseWholesalePrices()) {
         wholesaleBtn.disabled = false;
     }
   
