@@ -4486,6 +4486,81 @@ footer {
   transform: translate(-50%, -100%) scale(1);
 }
 
+.result-card-mini-actions{
+  position:absolute;
+  top:10px;
+  left:10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  z-index:4;
+}
+.result-card-mini-actions .add-mini,
+.result-card-mini-actions .availability-mini{
+  position:static;
+  top:auto;
+  left:auto;
+  margin:0;
+}
+.availability-mini{
+  width:34px;
+  height:34px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.16);
+  background:linear-gradient(135deg, rgba(59,130,246,.62), rgba(14,165,233,.26));
+  color:#fff;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  box-shadow:0 10px 25px rgba(0,0,0,.35);
+  backdrop-filter:blur(10px);
+  transition: transform .15s ease, filter .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.availability-mini:hover{ transform: translateY(-1px); }
+.availability-mini:active{ transform: scale(.96); }
+.availability-mini:focus-visible{
+  outline:2px solid rgba(125,211,252,.75);
+  outline-offset:2px;
+}
+.availability-mini.sent{
+  border-color: rgba(34,197,94,.35);
+  background:linear-gradient(135deg, rgba(34,197,94,.65), rgba(16,185,129,.24));
+  box-shadow:0 12px 28px rgba(34,197,94,.18), 0 10px 25px rgba(0,0,0,.35);
+}
+.availability-mini.sent i{ animation:addPop .35s ease; }
+.availability-mini::after{
+  content:"تم الإرسال";
+  position:absolute;
+  left:50%;
+  top:-10px;
+  transform:translate(-50%, -100%) scale(.96);
+  opacity:0;
+  pointer-events:none;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+  color:#fff;
+  background:rgba(2,6,23,.78);
+  border:1px solid rgba(255,255,255,.14);
+  backdrop-filter: blur(10px);
+  white-space:nowrap;
+}
+.availability-mini.sent::after{
+  opacity:1;
+  transform:translate(-50%, -100%) scale(1);
+}
+.availability-response-btn{ min-width: 140px; }
+.request-inline-note.availability-note{
+  margin-top: 12px;
+  color: #cbd5e1;
+}
+@media (max-width: 520px){
+  .result-card-mini-actions .add-mini,
+  .result-card-mini-actions .availability-mini{ width:38px; height:38px; border-radius:16px; }
+  .availability-response-btn{ min-width: 120px; }
+}
+
 @keyframes addPop{
   0%{ transform: scale(.85) rotate(-6deg); }
   60%{ transform: scale(1.15) rotate(0deg); }
@@ -9642,6 +9717,15 @@ footer{
 </button>
 
 <button class="header-btn header-cart-btn"
+        id="availabilityUserHeaderBtn"
+        type="button"
+        title="متابعة التوفر"
+        aria-label="متابعة التوفر">
+  <i class="fas fa-circle-question"></i>
+  <span class="header-cart-badge request-header-badge user-badge" id="availabilityUserCount" style="display:none;">0</span>
+</button>
+
+<button class="header-btn header-cart-btn"
         id="requestAdminHeaderBtn"
         type="button"
         title="متابعة الطلبات"
@@ -9649,6 +9733,16 @@ footer{
         style="display:none;">
   <i class="fas fa-box-open"></i>
   <span class="header-cart-badge request-header-badge user-badge" id="requestAdminCount" style="display:none;">0</span>
+</button>
+ 
+<button class="header-btn header-cart-btn"
+        id="availabilityAdminHeaderBtn"
+        type="button"
+        title="استعلامات التوفر"
+        aria-label="استعلامات التوفر"
+        style="display:none;">
+  <i class="fas fa-circle-question"></i>
+  <span class="header-cart-badge request-header-badge user-badge" id="availabilityAdminCount" style="display:none;">0</span>
 </button>
  
 <button class="header-btn header-cart-btn"
@@ -10148,6 +10242,82 @@ footer{
       </div>
       <div id="requestTrackArchivePanel" class="request-track-list request-panel">
         <div class="request-track-empty">جاري تحميل أرشيف طلباتك...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="availabilityAdminModal" class="request-admin-modal" aria-hidden="true">
+  <div class="request-admin-shell" role="dialog" aria-modal="true" aria-label="استعلامات التوفر">
+    <div class="request-admin-top">
+      <div class="request-admin-title">
+        <div class="request-admin-icon"><i class="fas fa-circle-question"></i></div>
+        <div>
+          <h3>استعلامات التوفر</h3>
+        </div>
+      </div>
+      <div class="request-admin-top-actions">
+        <div class="request-view-tabs" role="tablist" aria-label="تبويبات استعلامات التوفر">
+          <button id="availabilityAdminActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchAvailabilityAdminView('active')" aria-label="استعلامات التوفر" title="استعلامات التوفر">
+            <i class="fas fa-list-ul"></i><span>توفر</span>
+          </button>
+          <button id="availabilityAdminArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAvailabilityAdminView('archive')" aria-label="أرشيف استعلامات التوفر" title="أرشيف استعلامات التوفر">
+            <i class="fas fa-box-archive"></i><span>أرشيف</span>
+          </button>
+        </div>
+        <button id="availabilityAdminRefreshBtn" class="request-admin-refresh request-circle-icon" type="button" onclick="loadAvailabilityRequests()" aria-label="تحديث" title="تحديث">
+          <i class="fas fa-rotate"></i>
+        </button>
+        <button class="request-admin-close" type="button" onclick="closeAvailabilityAdminModal()" aria-label="إغلاق">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="request-admin-body">
+      <div id="availabilityAdminActivePanel" class="request-admin-list request-panel is-active">
+        <div class="request-admin-empty">جاري تحميل استعلامات التوفر...</div>
+      </div>
+      <div id="availabilityAdminArchivePanel" class="request-admin-list request-panel">
+        <div class="request-admin-empty">جاري تحميل أرشيف التوفر...</div>
+      </div>
+      <div class="request-inline-note availability-note">كل الفروع تستلم نفس الاستعلام، وكل رد ينرسل للزبون باسم الفرع الحالي.</div>
+    </div>
+  </div>
+</div>
+
+<div id="availabilityTrackModal" class="request-track-modal" aria-hidden="true">
+  <div class="request-track-shell" role="dialog" aria-modal="true" aria-label="متابعة استعلامات التوفر">
+    <div class="request-track-top">
+      <div class="request-track-title">
+        <div class="request-track-icon"><i class="fas fa-circle-question"></i></div>
+        <div>
+          <h3>متابعة التوفر</h3>
+        </div>
+      </div>
+      <div class="request-track-top-actions">
+        <div class="request-view-tabs" role="tablist" aria-label="تبويبات متابعة التوفر">
+          <button id="availabilityTrackActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchAvailabilityTrackView('active')" aria-label="استعلامات التوفر" title="استعلامات التوفر">
+            <i class="fas fa-list-ul"></i><span>توفر</span>
+          </button>
+          <button id="availabilityTrackArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAvailabilityTrackView('archive')" aria-label="أرشيف التوفر" title="أرشيف التوفر">
+            <i class="fas fa-box-archive"></i><span>أرشيف</span>
+          </button>
+        </div>
+        <button id="availabilityTrackRefreshBtn" class="request-track-refresh request-circle-icon" type="button" onclick="loadCustomerAvailabilityRequests()" aria-label="تحديث" title="تحديث">
+          <i class="fas fa-rotate"></i>
+        </button>
+        <button class="request-track-close" type="button" onclick="closeAvailabilityTrackModal()" aria-label="إغلاق">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+    <div class="request-track-body">
+      <div id="availabilityTrackActivePanel" class="request-track-list request-panel is-active">
+        <div class="request-track-empty">جاري تحميل الاستعلامات...</div>
+      </div>
+      <div id="availabilityTrackArchivePanel" class="request-track-list request-panel">
+        <div class="request-track-empty">جاري تحميل الأرشيف...</div>
       </div>
     </div>
   </div>
@@ -11987,7 +12157,7 @@ window.loadCustomerRequests = async function () {
                 </div>
                 <div class="request-meta-badges">
                   <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
-                  <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(req.item || '-')}</span>
+                  <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(buildAvailabilityItemLabel(req.item || '', req.category || '') || '-')}</span>
                 </div>
                 <div class="request-messages">${messagesHtml}</div>
                 ${actions}
@@ -12165,7 +12335,7 @@ window.loadMaterialRequests = async function () {
                 </div>
                 <div class="request-meta-badges">
                   <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
-                  <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(req.item || '-')}</span>
+                  <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(buildAvailabilityItemLabel(req.item || '', req.category || '') || '-')}</span>
                 </div>
                 <div class="request-messages">${messagesHtml}</div>
                 ${archived ? `
@@ -14058,10 +14228,11 @@ function displayResults(results) {
             const effectivePriceRaw = discountPriceRaw || originalPriceRaw;
             const effectivePrice = parseFloat(String(effectivePriceRaw || "").replace(/,/g, "")) || 0;
             const canAddToCart = effectivePrice > 0 && !(typeof isAdminUser === 'function' && isAdminUser());
+            const canRequestAvailability = !(typeof isAdminUser === 'function' && isAdminUser());
+            const miniActions = [];
 
-            htmlContent += `
-                <div class="result-card">
-                    ${canAddToCart ? `
+            if (canAddToCart) {
+                miniActions.push(`
                         <button class="add-mini"
                             type="button"
                             title="اضف للسلة"
@@ -14071,8 +14242,24 @@ function displayResults(results) {
                             data-img="${imgSrc}">
                             <i class="fas fa-cart-plus"></i>
                         </button>
-                    ` : ''}
+                `);
+            }
 
+            if (canRequestAvailability) {
+                miniActions.push(`
+                        <button class="availability-mini"
+                            type="button"
+                            title="استعلام التوفر"
+                            data-name="${encodeURIComponent(itemName)}"
+                            data-category="${encodeURIComponent(currentCategory)}">
+                            <i class="fas fa-circle-question"></i>
+                        </button>
+                `);
+            }
+
+            htmlContent += `
+                <div class="result-card">
+                    ${miniActions.length ? `<div class="result-card-mini-actions">${miniActions.join('')}</div>` : ''}
                     <img src="${imgSrc}" alt="Item Image">
                     <h4>${itemName}</h4>
                     ${priceHtml}
@@ -15706,8 +15893,17 @@ document.addEventListener("DOMContentLoaded", ()=>{
     if(act === "rm")  removeItem(id);
   });
 
-  // زر الإضافة الصغير داخل النتائج (بدون onclick داخل HTML)
-  document.getElementById("results")?.addEventListener("click", (e)=>{
+  // أزرار الكارت الصغير داخل النتائج (بدون onclick داخل HTML)
+  document.getElementById("results")?.addEventListener("click", async (e)=>{
+    const availabilityBtn = e.target.closest(".availability-mini");
+    if (availabilityBtn) {
+      await submitAvailabilityRequest(
+        decodeURIComponent(availabilityBtn.dataset.name || ""),
+        decodeURIComponent(availabilityBtn.dataset.category || "")
+      );
+      return;
+    }
+
     const b = e.target.closest(".add-mini");
     if(!b) return;
     addToCart({
@@ -19450,6 +19646,638 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       console.error('Force update check failed:', err);
     }
   }
+
+
+  /* ================== استعلامات التوفر ================== */
+  const AVAILABILITY_REQUEST_PATH = 'availabilityRequests';
+  let currentAvailabilityAdminView = 'active';
+  let currentAvailabilityTrackView = 'active';
+
+  async function getAllAvailabilityRequests() {
+    if (!window.firebaseDB || !window.firebaseDB.db) return [];
+    const { db, ref, get } = window.firebaseDB;
+    const snap = await get(ref(db, AVAILABILITY_REQUEST_PATH));
+    const data = snap.exists() ? snap.val() : {};
+    return Object.values(data || {}).sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+  }
+
+  async function getCustomerProfileForAvailability() {
+    if (!window.firebaseDB || !window.firebaseDB.db) return {};
+    const { db, ref, get } = window.firebaseDB;
+    const snap = await get(ref(db, `customerProfiles/${getDeviceId()}`));
+    return snap.exists() ? (snap.val() || {}) : {};
+  }
+
+  function updateAvailabilityAdminHeaderBtn() {
+    const btn = document.getElementById('availabilityAdminHeaderBtn');
+    if (!btn) return;
+    btn.style.display = isAdminUser() ? 'inline-flex' : 'none';
+  }
+
+  function updateAvailabilityCustomerEntryPoints() {
+    const btn = document.getElementById('availabilityUserHeaderBtn');
+    if (!btn) return;
+    btn.style.display = isAdminUser() ? 'none' : 'inline-flex';
+  }
+
+  window.refreshAvailabilityRequestCount = async function () {
+    const adminBadge = document.getElementById('availabilityAdminCount');
+    const userBadge = document.getElementById('availabilityUserCount');
+    try {
+      const arr = await getAllAvailabilityRequests();
+      if (adminBadge) {
+        const activeAdminCount = arr.filter(r => r && !r.archivedForAdmin).length;
+        adminBadge.textContent = String(activeAdminCount);
+        adminBadge.style.display = activeAdminCount > 0 ? 'flex' : 'none';
+      }
+      if (userBadge) {
+        const deviceId = getDeviceId();
+        const visibleForCustomer = arr.filter(r => r && r.deviceId === deviceId && !r.customerDeleted);
+        const unread = visibleForCustomer.reduce((count, req) => {
+          const msgs = Object.values(req.messages || {});
+          return count + msgs.filter(m => m.senderRole === 'admin' && !m.seenByCustomer).length;
+        }, 0);
+        userBadge.textContent = String(unread);
+        userBadge.style.display = unread > 0 ? 'flex' : 'none';
+      }
+    } catch (err) {
+      console.error('refreshAvailabilityRequestCount:', err);
+      if (adminBadge) { adminBadge.textContent = '0'; adminBadge.style.display = 'none'; }
+      if (userBadge) { userBadge.textContent = '0'; userBadge.style.display = 'none'; }
+    }
+  };
+
+  function setAvailabilityViewButtons() {
+    const adminRefreshBtn = document.getElementById('availabilityAdminRefreshBtn');
+    const adminActiveTab = document.getElementById('availabilityAdminActiveTabBtn');
+    const adminArchiveTab = document.getElementById('availabilityAdminArchiveTabBtn');
+    const trackRefreshBtn = document.getElementById('availabilityTrackRefreshBtn');
+    const trackActiveTab = document.getElementById('availabilityTrackActiveTabBtn');
+    const trackArchiveTab = document.getElementById('availabilityTrackArchiveTabBtn');
+
+    if (adminActiveTab) adminActiveTab.classList.toggle('is-active', currentAvailabilityAdminView === 'active');
+    if (adminArchiveTab) adminArchiveTab.classList.toggle('is-active', currentAvailabilityAdminView === 'archive');
+    if (trackActiveTab) trackActiveTab.classList.toggle('is-active', currentAvailabilityTrackView === 'active');
+    if (trackArchiveTab) trackArchiveTab.classList.toggle('is-active', currentAvailabilityTrackView === 'archive');
+    if (adminRefreshBtn) adminRefreshBtn.classList.remove('is-active');
+    if (trackRefreshBtn) trackRefreshBtn.classList.remove('is-active');
+
+    const adminActivePanel = document.getElementById('availabilityAdminActivePanel');
+    const adminArchivePanel = document.getElementById('availabilityAdminArchivePanel');
+    const trackActivePanel = document.getElementById('availabilityTrackActivePanel');
+    const trackArchivePanel = document.getElementById('availabilityTrackArchivePanel');
+
+    if (adminActivePanel) adminActivePanel.classList.toggle('is-active', currentAvailabilityAdminView === 'active');
+    if (adminArchivePanel) adminArchivePanel.classList.toggle('is-active', currentAvailabilityAdminView === 'archive');
+    if (trackActivePanel) trackActivePanel.classList.toggle('is-active', currentAvailabilityTrackView === 'active');
+    if (trackArchivePanel) trackArchivePanel.classList.toggle('is-active', currentAvailabilityTrackView === 'archive');
+  }
+
+  window.switchAvailabilityAdminView = async function (view) {
+    currentAvailabilityAdminView = view === 'archive' ? 'archive' : 'active';
+    setAvailabilityViewButtons();
+    await loadAvailabilityRequests();
+  };
+
+  window.switchAvailabilityTrackView = async function (view) {
+    currentAvailabilityTrackView = view === 'archive' ? 'archive' : 'active';
+    setAvailabilityViewButtons();
+    await loadCustomerAvailabilityRequests();
+  };
+
+  window.openAvailabilityAdminModal = async function () {
+    if (!isAdminUser()) {
+      alert('هذه الخاصية حصراً للإدمن');
+      return;
+    }
+    currentAvailabilityAdminView = 'active';
+    const modal = document.getElementById('availabilityAdminModal');
+    if (!modal) return;
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    syncGlobalModalLock();
+    setAvailabilityViewButtons();
+    await refreshAvailabilityRequestCount();
+    await loadAvailabilityRequests();
+  };
+
+  window.closeAvailabilityAdminModal = function () {
+    const modal = document.getElementById('availabilityAdminModal');
+    if (!modal) return;
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    syncGlobalModalLock();
+  };
+
+  window.openAvailabilityTrackModal = async function () {
+    currentAvailabilityTrackView = 'active';
+    const modal = document.getElementById('availabilityTrackModal');
+    if (!modal) return;
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    syncGlobalModalLock();
+    setAvailabilityViewButtons();
+    await loadCustomerAvailabilityRequests();
+  };
+
+  window.closeAvailabilityTrackModal = function () {
+    const modal = document.getElementById('availabilityTrackModal');
+    if (!modal) return;
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    syncGlobalModalLock();
+  };
+
+  async function markAvailabilityMessagesSeenForAdmin(requestId, req) {
+    if (!window.firebaseDB || !window.firebaseDB.db || !req) return;
+    const { db, ref, update } = window.firebaseDB;
+    const updates = {};
+    Object.values(req.messages || {}).forEach(msg => {
+      if (msg.senderRole === 'customer' && !msg.seenByAdmin) {
+        updates[`${AVAILABILITY_REQUEST_PATH}/${requestId}/messages/${msg.id}/seenByAdmin`] = true;
+      }
+    });
+    if (Object.keys(updates).length) await update(ref(db), updates);
+  }
+
+  async function markAvailabilityMessagesSeenForCustomer(requestId, req) {
+    if (!window.firebaseDB || !window.firebaseDB.db || !req) return;
+    const { db, ref, update } = window.firebaseDB;
+    const updates = {};
+    Object.values(req.messages || {}).forEach(msg => {
+      if (msg.senderRole === 'admin' && !msg.seenByCustomer) {
+        updates[`${AVAILABILITY_REQUEST_PATH}/${requestId}/messages/${msg.id}/seenByCustomer`] = true;
+      }
+    });
+    if (Object.keys(updates).length) await update(ref(db), updates);
+  }
+
+  function buildAvailabilityItemLabel(itemName, itemCategory = '') {
+    const safeItemName = String(itemName || '').trim();
+    const safeCategory = String(itemCategory || '').trim();
+    if (!safeCategory) return safeItemName;
+
+    const normalizedItem = safeItemName.replace(/\s+/g, ' ').toLowerCase();
+    const normalizedCategory = safeCategory.replace(/\s+/g, ' ').toLowerCase();
+    if (!safeItemName) return safeCategory;
+    if (normalizedItem === normalizedCategory) return safeItemName;
+
+    return `${safeCategory} - ${safeItemName}`;
+  }
+
+  function buildAvailabilityQuestionText(itemName, itemCategory = '') {
+    const itemLabel = buildAvailabilityItemLabel(itemName, itemCategory);
+    return `هل مادة ${itemLabel || String(itemName || '').trim()} متوفرة لديكم؟`;
+  }
+
+  function buildAvailabilityReplyText(state, branchLabel, itemName = '', itemCategory = '') {
+    const safeBranch = String(branchLabel || '').trim() || 'مكتب عسل';
+    const itemLabel = buildAvailabilityItemLabel(itemName, itemCategory);
+    const itemPrefix = itemLabel ? `المادة ${itemLabel} ` : 'المادة ';
+    return state === 'available'
+      ? `${itemPrefix}متوفرة في ${safeBranch}`
+      : `${itemPrefix}غير متوفرة في ${safeBranch}`;
+  }
+
+  window.submitAvailabilityRequest = async function (itemName, itemCategory = '') {
+    const safeItemName = String(itemName || '').trim();
+    const safeCategory = String(itemCategory || '').trim();
+    if (!safeItemName) return false;
+
+    if (isAdminUser()) {
+      if (typeof window.showElegantTopToast === 'function') {
+        window.showElegantTopToast('هذا الزر مخصص للزبون فقط', 'warning', 2400);
+      }
+      return false;
+    }
+
+    if (!window.firebaseDB || !window.firebaseDB.db) {
+      if (typeof window.showElegantTopToast === 'function') {
+        window.showElegantTopToast('Firebase غير جاهز حالياً', 'error', 2600);
+      }
+      return false;
+    }
+
+    try {
+      const profile = await getCustomerProfileForAvailability();
+      const customerName = String(profile.name || '').trim();
+      const customerPhone = String(profile.phone || '').trim();
+      const customerAddress = String(profile.address || '').trim();
+      const deviceId = getDeviceId();
+
+      if (!customerName || !customerPhone || !customerAddress) {
+        openCustomerProfileModal(profile || {});
+        if (typeof window.showElegantTopToast === 'function') {
+          window.showElegantTopToast('سجل بياناتك أولاً حتى نرسل الاستعلام', 'warning', 3000);
+        }
+        return false;
+      }
+
+      const { db, ref, set } = window.firebaseDB;
+      const now = Date.now();
+      const requestId = 'AVL-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+      const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-ASK';
+      const availabilityItemLabel = buildAvailabilityItemLabel(safeItemName, safeCategory);
+      const questionText = buildAvailabilityQuestionText(safeItemName, safeCategory);
+
+      await set(ref(db, `${AVAILABILITY_REQUEST_PATH}/${requestId}`), {
+        id: requestId,
+        deviceId,
+        name: customerName,
+        phone: customerPhone,
+        address: customerAddress,
+        item: safeItemName,
+        itemLabel: availabilityItemLabel,
+        category: safeCategory,
+        status: 'new',
+        createdAt: now,
+        updatedAt: now,
+        archivedForAdmin: false,
+        customerArchived: false,
+        customerDeleted: false,
+        lastAvailabilityStatus: 'pending',
+        messages: {
+          [msgId]: {
+            id: msgId,
+            senderRole: 'customer',
+            text: questionText,
+            createdAt: now,
+            seenByAdmin: false,
+            seenByCustomer: true
+          }
+        }
+      });
+
+      await queuePushNotificationEvent('availability_request_created', {
+        requestId,
+        targetRole: 'admin',
+        item: safeItemName,
+        itemLabel: availabilityItemLabel,
+        category: safeCategory,
+        requestKind: 'availability',
+        ...window.buildAdminCustomerNotificationPayload({
+          customerName,
+          customerPhone,
+          deviceId,
+          body: questionText,
+          extraData: {
+            item: safeItemName,
+            itemLabel: availabilityItemLabel,
+            category: safeCategory,
+            customerAddress,
+            requestKind: 'availability'
+          }
+        }),
+        title: 'استعلام توفر جديد'
+      });
+
+      await refreshAvailabilityRequestCount();
+      if (document.getElementById('availabilityTrackModal')?.classList.contains('show')) {
+        await loadCustomerAvailabilityRequests();
+      }
+      if (typeof window.showElegantTopToast === 'function') {
+        window.showElegantTopToast('تم إرسال استعلام التوفر', 'success', 2600);
+      }
+      return true;
+    } catch (err) {
+      console.error('submitAvailabilityRequest:', err);
+      if (typeof window.showElegantTopToast === 'function') {
+        window.showElegantTopToast('تعذّر إرسال الاستعلام', 'error', 2600);
+      }
+      return false;
+    }
+  };
+
+  window.archiveAvailabilityRequestForCustomer = async function (requestId) {
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
+    const { db, ref, update } = window.firebaseDB;
+    await update(ref(db), {
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/customerArchived`]: true,
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/updatedAt`]: Date.now()
+    });
+    await loadCustomerAvailabilityRequests();
+    await refreshAvailabilityRequestCount();
+  };
+
+  window.deleteCustomerArchivedAvailabilityRequest = async function (requestId) {
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
+    const { db, ref, remove } = window.firebaseDB;
+    await remove(ref(db, `${AVAILABILITY_REQUEST_PATH}/${requestId}`));
+    await loadCustomerAvailabilityRequests();
+    await refreshAvailabilityRequestCount();
+  };
+
+  window.archiveAvailabilityRequestForAdmin = async function (requestId) {
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
+    const { db, ref, update } = window.firebaseDB;
+    await update(ref(db), {
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/archivedForAdmin`]: true,
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/updatedAt`]: Date.now()
+    });
+    await loadAvailabilityRequests();
+    await refreshAvailabilityRequestCount();
+  };
+
+  window.deleteAdminArchivedAvailabilityRequest = async function (requestId) {
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
+    const { db, ref, remove } = window.firebaseDB;
+    await remove(ref(db, `${AVAILABILITY_REQUEST_PATH}/${requestId}`));
+    await loadAvailabilityRequests();
+    await refreshAvailabilityRequestCount();
+  };
+
+  window.sendAvailabilityAnswer = async function (requestId, state) {
+    if (!window.firebaseDB || !window.firebaseDB.db || !isAdminUser()) return;
+    const safeState = state === 'available' ? 'available' : 'unavailable';
+    const { db, ref, update, get } = window.firebaseDB;
+    const now = Date.now();
+    const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-' + safeState.toUpperCase();
+    let targetDeviceId = '';
+    let customerName = '';
+    let customerPhone = '';
+    let itemName = '';
+    let itemCategory = '';
+    let itemLabel = '';
+    try {
+      const snap = await get(ref(db, `${AVAILABILITY_REQUEST_PATH}/${requestId}`));
+      if (snap.exists()) {
+        const req = snap.val() || {};
+        targetDeviceId = String(req.deviceId || '').trim();
+        customerName = String(req.name || '').trim();
+        customerPhone = String(req.phone || '').trim();
+        itemName = String(req.item || '').trim();
+        itemCategory = String(req.category || '').trim();
+        itemLabel = String(req.itemLabel || '').trim() || buildAvailabilityItemLabel(itemName, itemCategory);
+      }
+    } catch (err) {
+      console.error('Failed to read availability request before reply:', err);
+    }
+
+    const branchLabel = getAdminAccountLabel() || 'مكتب عسل';
+    const replyText = buildAvailabilityReplyText(safeState, branchLabel, itemName, itemCategory);
+
+    await update(ref(db), {
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/messages/${msgId}`]: {
+        id: msgId,
+        senderRole: 'admin',
+        text: replyText,
+        createdAt: now,
+        seenByAdmin: true,
+        seenByCustomer: false,
+        branchLabel,
+        availabilityState: safeState
+      },
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/updatedAt`]: now,
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/status`]: 'answered',
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/lastAvailabilityStatus`]: safeState,
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/lastAnsweredByBranch`]: branchLabel,
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/customerArchived`]: false
+    });
+
+    await queuePushNotificationEvent('availability_request_admin_reply', {
+      requestId,
+      targetRole: 'customer',
+      targetDeviceId,
+      customerName,
+      customerPhone,
+      title: 'رد على استعلام التوفر',
+      body: replyText,
+      item: itemName,
+      itemLabel,
+      category: itemCategory,
+      requestKind: 'availability',
+      data: {
+        customerGroupId: buildCustomerNotificationGroupId(customerName, customerPhone, targetDeviceId),
+        customerPhone,
+        item: itemName,
+        itemLabel,
+        category: itemCategory,
+        branchLabel,
+        availabilityStatus: safeState,
+        requestKind: 'availability'
+      }
+    });
+
+    await loadAvailabilityRequests();
+    await refreshAvailabilityRequestCount();
+    if (typeof window.showElegantTopToast === 'function') {
+      window.showElegantTopToast('تمت الإجابة', 'success', 2400);
+    }
+  };
+
+  window.loadCustomerAvailabilityRequests = async function () {
+    const activeList = document.getElementById('availabilityTrackActivePanel');
+    const archiveList = document.getElementById('availabilityTrackArchivePanel');
+    if (!activeList || !archiveList) return;
+    if (!window.firebaseDB || !window.firebaseDB.db) {
+      activeList.innerHTML = '<div class="request-track-empty">Firebase غير جاهز حالياً.</div>';
+      archiveList.innerHTML = '<div class="request-track-empty">Firebase غير جاهز حالياً.</div>';
+      return;
+    }
+
+    activeList.innerHTML = currentAvailabilityTrackView === 'active' ? '<div class="request-track-empty">جاري تحميل استعلاماتك...</div>' : '';
+    archiveList.innerHTML = currentAvailabilityTrackView === 'archive' ? '<div class="request-track-empty">جاري تحميل الأرشيف...</div>' : '';
+
+    try {
+      const deviceId = getDeviceId();
+      const allRequests = (await getAllAvailabilityRequests()).filter(req => req && req.deviceId === deviceId && !req.customerDeleted);
+      const freshCustomerMap = {};
+
+      for (const req of allRequests) {
+        const msgs = Object.values(req.messages || {}).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        const latestUnread = [...msgs].reverse().find(msg => msg.senderRole === 'admin' && !msg.seenByCustomer);
+        freshCustomerMap[req.id] = latestUnread ? latestUnread.id : null;
+        await markAvailabilityMessagesSeenForCustomer(req.id, req);
+      }
+
+      const refreshed = (await getAllAvailabilityRequests()).filter(req => req && req.deviceId === deviceId && !req.customerDeleted);
+      const activeRequests = refreshed.filter(req => !req.customerArchived);
+      const archiveRequests = refreshed.filter(req => !!req.customerArchived);
+
+      const renderCustomerCard = (req, archived = false) => {
+        const msgs = Object.values(req.messages || {}).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        const freshMsgId = freshCustomerMap[req.id] || null;
+        const statusClass = req.status === 'answered' ? 'processed' : 'new';
+        const statusText = req.status === 'answered' ? 'تم الرد' : 'بانتظار الرد';
+        const messagesHtml = msgs.map(msg => {
+          const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
+          const senderLabel = msg.senderRole === 'customer'
+            ? 'أنت'
+            : (String(msg.branchLabel || '').trim() || 'الإدارة');
+          return `
+            <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
+              <div class="request-message-head">
+                <span>${escapeHtml(senderLabel)}</span>
+                <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'customer')}</span>
+              </div>
+              <div>${escapeHtml(msg.text || '')}</div>
+            </div>`;
+        }).join('');
+        const hasAdminReply = msgs.some(msg => msg.senderRole === 'admin');
+        const actions = archived
+          ? `<div class="request-thread-actions single-center"><button class="request-track-clear" type="button" onclick="deleteCustomerArchivedAvailabilityRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div>`
+          : (hasAdminReply
+            ? `<div class="request-thread-actions single-center"><button class="request-track-clear" type="button" onclick="archiveAvailabilityRequestForCustomer('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة الاستعلام</button></div>`
+            : '');
+        return `
+          <div class="request-thread-card">
+            <div class="request-thread-head">
+              <div>
+                <div class="request-thread-id">${escapeHtml(req.id)}</div>
+                <div class="request-thread-time">${formatRequestTime(req.updatedAt || req.createdAt)}</div>
+              </div>
+              <div class="request-thread-status ${statusClass}">${statusText}</div>
+            </div>
+            <div class="request-meta-badges">
+              <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(buildAvailabilityItemLabel(req.item || '', req.category || '') || '-')}</span>
+              <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
+            </div>
+            <div class="request-messages">${messagesHtml}</div>
+            ${actions}
+          </div>`;
+      };
+
+      activeList.innerHTML = activeRequests.length
+        ? activeRequests.map(req => renderCustomerCard(req, false)).join('')
+        : '<div class="request-track-empty">ما عندك استعلامات توفر حالياً.</div>';
+
+      archiveList.innerHTML = archiveRequests.length
+        ? archiveRequests.map(req => renderCustomerCard(req, true)).join('')
+        : '<div class="request-track-empty">أرشيف التوفر فارغ حالياً.</div>';
+
+      setAvailabilityViewButtons();
+      attachRequestScrollRelay(document.getElementById('availabilityTrackModal'));
+      setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('availabilityTrackModal')), 40);
+      await refreshAvailabilityRequestCount();
+    } catch (err) {
+      console.error('loadCustomerAvailabilityRequests:', err);
+      activeList.innerHTML = '<div class="request-track-empty">تعذّر جلب استعلاماتك حالياً.</div>';
+      archiveList.innerHTML = '<div class="request-track-empty">تعذّر جلب الأرشيف حالياً.</div>';
+    }
+  };
+
+  window.loadAvailabilityRequests = async function () {
+    const activeList = document.getElementById('availabilityAdminActivePanel');
+    const archiveList = document.getElementById('availabilityAdminArchivePanel');
+    if (!activeList || !archiveList) return;
+    if (!window.firebaseDB || !window.firebaseDB.db) {
+      activeList.innerHTML = '<div class="request-admin-empty">Firebase غير جاهز حالياً.</div>';
+      archiveList.innerHTML = '<div class="request-admin-empty">Firebase غير جاهز حالياً.</div>';
+      return;
+    }
+
+    activeList.innerHTML = currentAvailabilityAdminView === 'active' ? '<div class="request-admin-empty">جاري تحميل استعلامات التوفر...</div>' : '';
+    archiveList.innerHTML = currentAvailabilityAdminView === 'archive' ? '<div class="request-admin-empty">جاري تحميل أرشيف التوفر...</div>' : '';
+
+    try {
+      const arr0 = await getAllAvailabilityRequests();
+      const freshAdminMap = {};
+      for (const req of arr0.filter(r => r && !r.archivedForAdmin)) {
+        const msgs = Object.values(req.messages || {}).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        const latestUnread = [...msgs].reverse().find(msg => msg.senderRole === 'customer' && !msg.seenByAdmin);
+        freshAdminMap[req.id] = latestUnread ? latestUnread.id : null;
+        await markAvailabilityMessagesSeenForAdmin(req.id, req);
+      }
+
+      const arr = await getAllAvailabilityRequests();
+      const activeRequests = arr.filter(req => req && !req.archivedForAdmin);
+      const archiveRequests = arr.filter(req => req && !!req.archivedForAdmin);
+
+      const renderAdminCard = (req, archived = false) => {
+        const msgs = Object.values(req.messages || {}).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        const freshMsgId = freshAdminMap[req.id] || null;
+        const statusClass = req.status === 'answered' ? 'processed' : 'new';
+        const statusText = archived ? 'في الأرشيف' : (req.status === 'answered' ? 'تم الرد' : 'جديد');
+        const messagesHtml = msgs.map(msg => {
+          const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
+          const senderLabel = msg.senderRole === 'customer'
+            ? 'الزبون'
+            : (String(msg.branchLabel || '').trim() || 'الإدارة');
+          return `
+            <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
+              <div class="request-message-head">
+                <span>${escapeHtml(senderLabel)}</span>
+                <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'admin')}</span>
+              </div>
+              <div>${escapeHtml(msg.text || '')}</div>
+            </div>`;
+        }).join('');
+        return `
+          <div class="request-admin-card">
+            <div class="request-admin-card-head">
+              <div>
+                <div class="request-admin-name">${escapeHtml(req.name || 'بدون اسم')}</div>
+                <div class="request-admin-time">${formatRequestTime(req.updatedAt || req.createdAt)}</div>
+              </div>
+              <div class="request-thread-status ${statusClass}">${statusText}</div>
+            </div>
+            <div class="request-admin-meta">
+              <span class="request-admin-chip"><i class="fas fa-hashtag"></i>${escapeHtml(req.id || '')}</span>
+              <span class="request-admin-chip"><i class="fas fa-mobile-screen"></i>${escapeHtml(req.deviceId || '')}</span>
+            </div>
+            <div class="request-meta-badges">
+              <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
+              <span class="request-meta-badge"><i class="fas fa-location-dot"></i>${escapeHtml(req.address || '-')}</span>
+              <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(buildAvailabilityItemLabel(req.item || '', req.category || '') || '-')}</span>
+            </div>
+            <div class="request-messages">${messagesHtml}</div>
+            ${archived ? `
+              <div class="request-admin-card-actions single-center">
+                <button class="request-track-clear" type="button" onclick="deleteAdminArchivedAvailabilityRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button>
+              </div>` : `
+              <div class="request-admin-card-actions">
+                <button class="request-admin-send availability-response-btn" type="button" onclick="sendAvailabilityAnswer('${escapeHtml(req.id)}','available')"><i class="fas fa-circle-check"></i> متوفر</button>
+                <button class="request-admin-done availability-response-btn" type="button" onclick="sendAvailabilityAnswer('${escapeHtml(req.id)}','unavailable')"><i class="fas fa-circle-xmark"></i> غير متوفر</button>
+                <button class="request-track-clear" type="button" onclick="archiveAvailabilityRequestForAdmin('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة</button>
+              </div>`}
+          </div>`;
+      };
+
+      activeList.innerHTML = activeRequests.length
+        ? activeRequests.map(req => renderAdminCard(req, false)).join('')
+        : '<div class="request-admin-empty">لا توجد استعلامات توفر حالياً.</div>';
+
+      archiveList.innerHTML = archiveRequests.length
+        ? archiveRequests.map(req => renderAdminCard(req, true)).join('')
+        : '<div class="request-admin-empty">أرشيف التوفر فارغ حالياً.</div>';
+
+      setAvailabilityViewButtons();
+      attachRequestScrollRelay(document.getElementById('availabilityAdminModal'));
+      setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('availabilityAdminModal')), 40);
+      await refreshAvailabilityRequestCount();
+    } catch (err) {
+      console.error('loadAvailabilityRequests:', err);
+      activeList.innerHTML = '<div class="request-admin-empty">تعذّر جلب استعلامات التوفر حالياً.</div>';
+      archiveList.innerHTML = '<div class="request-admin-empty">تعذّر جلب الأرشيف حالياً.</div>';
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateAvailabilityAdminHeaderBtn();
+    updateAvailabilityCustomerEntryPoints();
+    refreshAvailabilityRequestCount();
+
+    document.getElementById('availabilityUserHeaderBtn')?.addEventListener('click', () => {
+      openAvailabilityTrackModal();
+    });
+
+    document.getElementById('availabilityAdminHeaderBtn')?.addEventListener('click', () => {
+      if (!isAdminUser()) return;
+      openAvailabilityAdminModal();
+    });
+
+    const availabilityAdminShell = document.querySelector('#availabilityAdminModal .request-admin-shell');
+    const availabilityTrackShell = document.querySelector('#availabilityTrackModal .request-track-shell');
+    if (availabilityAdminShell) availabilityAdminShell.addEventListener('click', e => e.stopPropagation());
+    if (availabilityTrackShell) availabilityTrackShell.addEventListener('click', e => e.stopPropagation());
+
+    document.getElementById('availabilityAdminModal')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeAvailabilityAdminModal();
+    });
+    document.getElementById('availabilityTrackModal')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeAvailabilityTrackModal();
+    });
+  });
 
   window.addEventListener('load', () => {
     setTimeout(runForceUpdateCheck, APP_UPDATE_CONFIG.checkDelayMs);
