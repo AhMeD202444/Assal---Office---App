@@ -4550,7 +4550,7 @@ footer {
   opacity:1;
   transform:translate(-50%, -100%) scale(1);
 }
-.availability-response-btn{ min-width: 140px; }
+.availability-response-btn{ min-width: 0; }
 .request-inline-note.availability-note{
   margin-top: 12px;
   color: #cbd5e1;
@@ -4558,7 +4558,7 @@ footer {
 @media (max-width: 520px){
   .result-card-mini-actions .add-mini,
   .result-card-mini-actions .availability-mini{ width:38px; height:38px; border-radius:16px; }
-  .availability-response-btn{ min-width: 120px; }
+  .availability-response-btn{ min-width: 0; }
 }
 
 @keyframes addPop{
@@ -7925,6 +7925,9 @@ body.modal-lock .swal2-container *{
 .request-admin-send{ background: linear-gradient(135deg, #43cea2, #185a9d); box-shadow: 0 12px 22px rgba(24,90,157,.22); }
 .request-admin-done{ background: linear-gradient(135deg, #10b981, #0f766e); box-shadow: 0 12px 22px rgba(15,118,110,.22); }
 .request-track-clear{ background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.06)); border:1px solid rgba(255,255,255,.08); }
+.request-track-clear.archive-btn,
+.request-track-clear.availability-archive-btn{ background: linear-gradient(135deg, #38bdf8, #2563eb); border:1px solid rgba(147,197,253,.26); box-shadow: 0 12px 24px rgba(37,99,235,.20); }
+.request-track-clear.delete-btn{ background: linear-gradient(135deg, #7f1d1d, #b91c1c); border:1px solid rgba(248,113,113,.18); box-shadow: 0 12px 24px rgba(127,29,29,.24); }
 .request-track-empty{ text-align:center; padding: 22px 14px; border-radius:18px; background: rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); color: rgba(255,255,255,.76); }
 .request-admin-card textarea{ margin-top:10px; }
 .request-admin-meta{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
@@ -7932,6 +7935,100 @@ body.modal-lock .swal2-container *{
 .request-meta-badges{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
 .request-meta-badge{ display:inline-flex; align-items:center; gap:7px; padding:8px 12px; border-radius:999px; background: linear-gradient(135deg, rgba(56,189,248,.12), rgba(255,255,255,.06)); border:1px solid rgba(255,255,255,.08); color: rgba(255,255,255,.9); font-size:13px; line-height:1.2; }
 .request-meta-badge i{ color:#8ce8ca; }
+.availability-compact-card{
+    padding: 12px;
+    border-radius: 16px;
+}
+.availability-compact-head{
+    margin-bottom: 8px;
+    gap: 10px;
+}
+.availability-card-title{
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 1.45;
+    margin-bottom: 8px;
+    color: #fff;
+    word-break: break-word;
+}
+.availability-compact-badges{
+    margin-bottom: 8px;
+    gap: 6px;
+}
+.availability-compact-badges .request-meta-badge{
+    font-size: 12px;
+    padding: 7px 10px;
+}
+.availability-request-messages{
+    gap: 6px;
+    margin-top: 6px;
+    max-height: 190px;
+}
+.availability-request-message{
+    padding: 8px 10px;
+    border-radius: 14px;
+}
+.availability-request-message .request-message-head{
+    margin-bottom: 4px;
+    font-size: 10px;
+}
+.availability-message-body{
+    display: grid;
+    gap: 6px;
+}
+.availability-msg-item{
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.45;
+    word-break: break-word;
+}
+.availability-msg-sub{
+    font-size: 13px;
+    line-height: 1.65;
+    color: rgba(255,255,255,.88);
+}
+.availability-msg-sub.is-admin-reply{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    width:100%;
+}
+.availability-reply-prefix{
+    flex:1 1 auto;
+    min-width:0;
+    text-align:right;
+}
+.availability-branch-pill{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    margin:0;
+    background: linear-gradient(135deg, rgba(37,99,235,.92), rgba(14,165,233,.82));
+    border: 1px solid rgba(147,197,253,.32);
+    color: #eff8ff;
+    font-weight: 900;
+    text-align:center;
+    white-space:nowrap;
+    box-shadow: 0 10px 22px rgba(37,99,235,.18);
+    flex:0 0 auto;
+}
+.request-admin-card-actions.availability-actions-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+}
+.request-admin-card-actions.availability-actions-grid .availability-archive-btn{
+    grid-column: 1 / -1;
+}
+@media (max-width: 520px){
+  .availability-card-title{ font-size: 14px; }
+  .availability-msg-item{ font-size: 14px; }
+  .availability-msg-sub{ font-size: 12px; }
+  .availability-request-messages{ max-height: 168px; }
+}
 @keyframes requestFreshSweep{
     0%{ transform: translateX(-120%); opacity:0; }
     12%{ opacity:.95; }
@@ -8741,7 +8838,7 @@ body.modal-lock .swal2-container *{
 .customers-admin-action{ border:none; border-radius:14px; min-height:42px; cursor:pointer; color:#fff; font-family:'Cairo',sans-serif; font-size:13px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px; transition: transform .16s ease, filter .2s ease; -webkit-tap-highlight-color: transparent; }
 .customers-admin-action.ban{ background: linear-gradient(135deg,#f59e0b,#b45309); box-shadow: 0 10px 22px rgba(180,83,9,.22); }
 .customers-admin-action.unban{ background: linear-gradient(135deg,#10b981,#0f766e); box-shadow: 0 10px 22px rgba(15,118,110,.22); }
-.customers-admin-action.delete{ background: linear-gradient(135deg,#ff416c,#ff4b2b); box-shadow: 0 10px 22px rgba(255,75,43,.22); }
+.customers-admin-action.delete{ background: linear-gradient(135deg,#7f1d1d,#b91c1c); box-shadow: 0 10px 22px rgba(127,29,29,.24); }
 .customers-admin-empty{ text-align:center; color:rgba(255,255,255,.72); background: rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:28px 14px; }
 
 
@@ -8786,10 +8883,13 @@ body.modal-lock .swal2-container *{
   background: linear-gradient(135deg,#ff416c,#ff4b2b);
 }
 .swal2-popup.customer-confirm-popup .swal2-cancel.archive{
-  background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.08)) !important;
+  background: linear-gradient(135deg, #38bdf8, #2563eb) !important;
   color: #fff !important;
-  border: 1px solid rgba(255,255,255,.10) !important;
-  box-shadow: 0 10px 22px rgba(2,6,23,.18) !important;
+  border: 1px solid rgba(147,197,253,.26) !important;
+  box-shadow: 0 12px 24px rgba(37,99,235,.22) !important;
+}
+.swal2-popup.customer-confirm-popup:not(.invoice-pending-popup) .swal2-deny{
+  display:none !important;
 }
 .customer-confirm-title{
   font-size:22px; font-weight:800; line-height:1.35; color:#fff; margin:0 0 8px;
@@ -8867,6 +8967,11 @@ body.modal-lock .swal2-container *{
 .customer-confirm-actions .swal2-confirm.ban{
   background: linear-gradient(135deg,#f59e0b,#b45309) !important;
   color:#fff !important;
+}
+.customer-confirm-actions .swal2-confirm.delete{
+  background: linear-gradient(135deg,#7f1d1d,#b91c1c) !important;
+  color:#fff !important;
+  box-shadow: 0 12px 24px rgba(127,29,29,.24) !important;
 }
 .customer-confirm-actions .swal2-deny.create-new{
   background: linear-gradient(135deg, #2563eb, #0f766e) !important;
@@ -10925,6 +11030,29 @@ function getAdminAccountLabel() {
     return (localStorage.getItem(ADMIN_ACCOUNT_LABEL_KEY) || '').trim();
 }
 
+function normalizeAvailabilityBranchKey(value = '') {
+    return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '_')
+        .replace(/[^a-z0-9_\-؀-ۿ]+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'admin';
+}
+
+function getCurrentAvailabilityAdminBranchKey() {
+    return normalizeAvailabilityBranchKey(getAdminAccountLabel() || getAdminAccountCode() || 'admin');
+}
+
+function isAvailabilityArchivedForBranch(req, branchKey = getCurrentAvailabilityAdminBranchKey()) {
+    if (!req) return false;
+    const map = req.archivedForBranches && typeof req.archivedForBranches === 'object' ? req.archivedForBranches : null;
+    if (map && Object.prototype.hasOwnProperty.call(map, branchKey)) {
+        return !!map[branchKey];
+    }
+    return !!req.archivedForAdmin;
+}
+
 function canUseWholesalePrices() {
     return isAdminUser() && localStorage.getItem(ADMIN_WHOLESALE_ACCESS_KEY) === 'true';
 }
@@ -12137,14 +12265,14 @@ window.loadCustomerRequests = async function () {
             }).join('');
             const actions = archived ? `
                 <div class="request-thread-actions single-center">
-                  <button class="request-track-clear" type="button" onclick="deleteCustomerArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف الطلب </button>
+                  <button class="request-track-clear delete-btn" type="button" onclick="deleteCustomerArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف الطلب </button>
                 </div>` : (req.status !== 'processed' ? `
                 <div class="request-thread-actions is-stack">
                   <textarea id="requestTrackReply_${escapeHtml(req.id)}" class="request-track-input" placeholder="اكتب ردك أو أي توضيح إضافي..."></textarea>
                   <button class="request-track-send" type="button" onclick="sendCustomerReply('${escapeHtml(req.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button>
                 </div>` : `
                 <div class="request-thread-actions single-center">
-                  <button class="request-track-clear" type="button" onclick="archiveCustomerRequest('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button>
+                  <button class="request-track-clear archive-btn" type="button" onclick="archiveCustomerRequest('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button>
                 </div>`);
             return `
               <div class="request-thread-card">
@@ -12157,7 +12285,7 @@ window.loadCustomerRequests = async function () {
                 </div>
                 <div class="request-meta-badges">
                   <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
-                  <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(buildAvailabilityItemLabel(req.item || '', req.category || '') || '-')}</span>
+                  <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(req.item || '-')}</span>
                 </div>
                 <div class="request-messages">${messagesHtml}</div>
                 ${actions}
@@ -12335,12 +12463,12 @@ window.loadMaterialRequests = async function () {
                 </div>
                 <div class="request-meta-badges">
                   <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
-                  <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(buildAvailabilityItemLabel(req.item || '', req.category || '') || '-')}</span>
+                  <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(req.item || '-')}</span>
                 </div>
                 <div class="request-messages">${messagesHtml}</div>
                 ${archived ? `
                 <div class="request-admin-card-actions single-center">
-                  <button class="request-track-clear" type="button" onclick="deleteAdminArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button>
+                  <button class="request-track-clear delete-btn" type="button" onclick="deleteAdminArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button>
                 </div>` : `
                 <textarea id="requestAdminReply_${escapeHtml(req.id)}" class="request-admin-reply-input" placeholder="اكتب رد للإدارة على هذا الطلب..."></textarea>
                 <div class="request-admin-card-actions">
@@ -12509,7 +12637,10 @@ function buildCustomerConfirmDialog(kind, actionText, descriptionText){
             <h3 class="customer-confirm-title">${title}</h3>
             <p class="customer-confirm-text">${descriptionText}</p>
           </div>
-        `
+        `,
+        didOpen: (popup) => {
+            popup.querySelectorAll('.swal2-deny, .swal2-deny.create-new').forEach(btn => btn.remove());
+        }
     });
 }
 
@@ -18061,7 +18192,7 @@ async function renderSponsorAd(){
       const all = (await getAllInvoices()).filter(inv => inv && inv.deviceId===deviceId && !inv.customerDeleted);
       const activeInvoices = all.filter(inv => !inv.customerArchived);
       const archiveInvoices = all.filter(inv => !!inv.customerArchived);
-      active.innerHTML = buildDraftCard() + (activeInvoices.length ? activeInvoices.map(inv=>`<div class="invoice-sent-card"><div class="invoice-sent-head"><div><div class="invoice-sent-title">${escapeHtml(inv.id)}</div><div class="invoice-sent-sub">${formatRequestTime(inv.updatedAt || inv.createdAt)}</div></div><div class="invoice-status-badge ${(inv.cancelledByCustomer || inv.status==='cancelled')?'archived':(inv.status==='prepared'?'prepared':'pending')}"><i class="fas ${(inv.cancelledByCustomer || inv.status==='cancelled')?'fa-ban':(inv.status==='prepared'?'fa-check-double':'fa-hourglass-half')}"></i>${(inv.cancelledByCustomer || inv.status==='cancelled')?'تم الالغاء':(inv.status==='prepared'?'تم التجهيز':'قيد المراجعة')}</div></div>${buildInvoiceMetaBadges(inv)}${buildInvoiceItemsMini(inv,'customer')}<div class="invoice-totals"><div class="invoice-total-row grand"><span>الإجمالي</span><strong>${moneyIQD(inv.total || 0)}</strong></div></div>${inv.note?`<div class="invoice-note-box"><div class="request-label">ملاحظة الفاتورة</div><div class="invoice-note-input" style="min-height:auto;">${escapeHtml(inv.note)}</div></div>`:''}${buildInvoiceMessages(inv.messages, freshMap[inv.id]||null)}${(inv.status!=='prepared' && !(inv.cancelledByCustomer || inv.status==='cancelled'))?`<div class="invoice-admin-card-actions stack"><textarea id="invoiceTrackReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب ردك أو استفسارك على هاي الفاتورة..."></textarea><button class="request-track-send" type="button" onclick="sendCustomerInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button><button class="invoice-action-btn delete" type="button" onclick="cancelCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-ban"></i> إلغاء الفاتورة</button></div>`:((inv.cancelledByCustomer || inv.status==='cancelled')?`<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة</div><div class="sub" style="margin-bottom:10px">تم إشعار الإدارة بإلغاء الطلب، ويمكنك أرشفة الفاتورة الآن.</div><div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn archive" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button></div></div>`:`<div class="invoice-admin-card-actions single-center"><button class="request-track-clear" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة</button></div>`)}</div>`).join('') : '');
+      active.innerHTML = buildDraftCard() + (activeInvoices.length ? activeInvoices.map(inv=>`<div class="invoice-sent-card"><div class="invoice-sent-head"><div><div class="invoice-sent-title">${escapeHtml(inv.id)}</div><div class="invoice-sent-sub">${formatRequestTime(inv.updatedAt || inv.createdAt)}</div></div><div class="invoice-status-badge ${(inv.cancelledByCustomer || inv.status==='cancelled')?'archived':(inv.status==='prepared'?'prepared':'pending')}"><i class="fas ${(inv.cancelledByCustomer || inv.status==='cancelled')?'fa-ban':(inv.status==='prepared'?'fa-check-double':'fa-hourglass-half')}"></i>${(inv.cancelledByCustomer || inv.status==='cancelled')?'تم الالغاء':(inv.status==='prepared'?'تم التجهيز':'قيد المراجعة')}</div></div>${buildInvoiceMetaBadges(inv)}${buildInvoiceItemsMini(inv,'customer')}<div class="invoice-totals"><div class="invoice-total-row grand"><span>الإجمالي</span><strong>${moneyIQD(inv.total || 0)}</strong></div></div>${inv.note?`<div class="invoice-note-box"><div class="request-label">ملاحظة الفاتورة</div><div class="invoice-note-input" style="min-height:auto;">${escapeHtml(inv.note)}</div></div>`:''}${buildInvoiceMessages(inv.messages, freshMap[inv.id]||null)}${(inv.status!=='prepared' && !(inv.cancelledByCustomer || inv.status==='cancelled'))?`<div class="invoice-admin-card-actions stack"><textarea id="invoiceTrackReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب ردك أو استفسارك على هاي الفاتورة..."></textarea><button class="request-track-send" type="button" onclick="sendCustomerInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button><button class="invoice-action-btn delete" type="button" onclick="cancelCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-ban"></i> إلغاء الفاتورة</button></div>`:((inv.cancelledByCustomer || inv.status==='cancelled')?`<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة</div><div class="sub" style="margin-bottom:10px">تم إشعار الإدارة بإلغاء الطلب، ويمكنك أرشفة الفاتورة الآن.</div><div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn archive" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button></div></div>`:`<div class="invoice-admin-card-actions single-center"><button class="request-track-clear archive-btn" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة</button></div>`)}</div>`).join('') : '');
       if (!cart.length && !activeInvoices.length) {
         active.innerHTML = '<div class="invoice-empty">لا توجد فواتير مستلمة في الوقت الحالي.</div>';
       }
@@ -18101,7 +18232,7 @@ async function renderSponsorAd(){
         const badgeIcon = archived ? 'fa-box-archive' : (isCancelled ? 'fa-ban' : (inv.status === 'prepared' ? 'fa-check-double' : 'fa-hourglass-half'));
         const badgeText = archived ? 'في الأرشيف' : (isCancelled ? 'تم الإلغاء' : (inv.status === 'prepared' ? 'تم التجهيز' : 'قيد المتابعة'));
         const actionsHtml = archived
-          ? `<div class="invoice-admin-card-actions"><button class="request-track-clear" type="button" onclick="deleteAdminArchivedInvoiceRecord('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div>`
+          ? `<div class="invoice-admin-card-actions"><button class="request-track-clear delete-btn" type="button" onclick="deleteAdminArchivedInvoiceRecord('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div>`
           : (isCancelled
               ? `<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة</div><div class="sub" style="margin-bottom:10px">أُلغيَت من قبل الزبون، ويمكنك أرشفتها الآن.</div><div class="invoice-admin-card-actions"><button class="invoice-action-btn archive" type="button" onclick="archiveAdminCancelledInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button></div></div>`
               : (inv.status === 'prepared'
@@ -18763,9 +18894,9 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
 .invoice-btn.send,
 .invoice-action-btn.send{ background:linear-gradient(135deg,#43cea2,#185a9d); box-shadow:0 14px 28px rgba(24,90,157,.22); }
 .invoice-btn.archive,
-.invoice-action-btn.archive{ background:linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.07)); border:1px solid rgba(255,255,255,.08); }
+.invoice-action-btn.archive{ background:linear-gradient(135deg,#38bdf8,#2563eb); border:1px solid rgba(147,197,253,.26); box-shadow:0 14px 28px rgba(37,99,235,.22); }
 .invoice-action-btn.done{ background:linear-gradient(135deg,#18c29c,#0f9f86); box-shadow:0 14px 28px rgba(15,159,134,.18); }
-.invoice-action-btn.delete{ background:linear-gradient(135deg,#ff416c,#ff4b2b); box-shadow:0 14px 28px rgba(255,75,43,.18); }
+.invoice-action-btn.delete{ background:linear-gradient(135deg,#7f1d1d,#b91c1c); border:1px solid rgba(248,113,113,.18); box-shadow:0 14px 28px rgba(127,29,29,.24); }
 .customer-cancel-invoice-btn{ width:100%; min-height:52px; }
 
 .invoice-empty,
@@ -19686,7 +19817,8 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     try {
       const arr = await getAllAvailabilityRequests();
       if (adminBadge) {
-        const activeAdminCount = arr.filter(r => r && !r.archivedForAdmin).length;
+        const branchKey = getCurrentAvailabilityAdminBranchKey();
+        const activeAdminCount = arr.filter(r => r && !isAvailabilityArchivedForBranch(r, branchKey)).length;
         adminBadge.textContent = String(activeAdminCount);
         adminBadge.style.display = activeAdminCount > 0 ? 'flex' : 'none';
       }
@@ -19812,31 +19944,63 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     if (Object.keys(updates).length) await update(ref(db), updates);
   }
 
-  function buildAvailabilityItemLabel(itemName, itemCategory = '') {
-    const safeItemName = String(itemName || '').trim();
-    const safeCategory = String(itemCategory || '').trim();
-    if (!safeCategory) return safeItemName;
-
-    const normalizedItem = safeItemName.replace(/\s+/g, ' ').toLowerCase();
-    const normalizedCategory = safeCategory.replace(/\s+/g, ' ').toLowerCase();
-    if (!safeItemName) return safeCategory;
-    if (normalizedItem === normalizedCategory) return safeItemName;
-
-    return `${safeCategory} - ${safeItemName}`;
+  function buildAvailabilityDisplayName(itemName = '', categoryName = '') {
+    const safeItem = String(itemName || '').trim();
+    const safeCategory = String(categoryName || '').trim();
+    if (safeCategory && safeItem) return `${safeCategory} - ${safeItem}`;
+    return safeItem || safeCategory || 'بدون اسم';
   }
 
-  function buildAvailabilityQuestionText(itemName, itemCategory = '') {
-    const itemLabel = buildAvailabilityItemLabel(itemName, itemCategory);
-    return `هل مادة ${itemLabel || String(itemName || '').trim()} متوفرة لديكم؟`;
+  function buildAvailabilityQuestionText(itemName, categoryName = '') {
+    const displayName = buildAvailabilityDisplayName(itemName, categoryName);
+    return `${displayName}\nمتوفرة لديكم؟`;
   }
 
-  function buildAvailabilityReplyText(state, branchLabel, itemName = '', itemCategory = '') {
+  function buildAvailabilityReplyText(state, branchLabel, itemName = '', categoryName = '') {
+    const displayName = buildAvailabilityDisplayName(itemName, categoryName);
     const safeBranch = String(branchLabel || '').trim() || 'مكتب عسل';
-    const itemLabel = buildAvailabilityItemLabel(itemName, itemCategory);
-    const itemPrefix = itemLabel ? `المادة ${itemLabel} ` : 'المادة ';
-    return state === 'available'
-      ? `${itemPrefix}متوفرة في ${safeBranch}`
-      : `${itemPrefix}غير متوفرة في ${safeBranch}`;
+    const actionText = state === 'available' ? 'متوفرة في' : 'غير متوفرة في';
+    return `${displayName}
+${actionText} ${safeBranch}`;
+  }
+
+  function escapeHtmlAndBreaks(value) {
+    return escapeHtml(String(value || '')).replace(/\n/g, '<br>');
+  }
+
+  function renderAvailabilityMessageText(msg, req = {}) {
+    const senderRole = String(msg?.senderRole || '').trim();
+    const itemName = String(msg?.item || req?.item || '').trim();
+    const categoryName = String(msg?.category || req?.category || '').trim();
+    const displayName = buildAvailabilityDisplayName(itemName, categoryName);
+    const branchLabel = String(msg?.branchLabel || '').trim();
+    const availabilityState = String(msg?.availabilityState || '').trim();
+    const rawText = String(msg?.text || '').trim();
+
+    if (senderRole === 'customer') {
+      return `
+        <div class="availability-msg-item">${escapeHtml(displayName || rawText.split(/\n+/)[0] || '-')}</div>
+        <div class="availability-msg-sub">متوفرة لديكم؟</div>
+      `;
+    }
+
+    if (senderRole === 'admin') {
+      const replyPrefix = availabilityState === 'available' ? 'متوفرة في' : 'غير متوفرة في';
+      const replyLine = `${replyPrefix} ${branchLabel || 'مكتب عسل'}`.trim();
+      return `
+        <div class="availability-msg-item">${escapeHtml(displayName || rawText.split(/\n+/)[0] || '-')}</div>
+        <div class="availability-msg-sub">${escapeHtml(replyLine)}</div>
+      `;
+    }
+
+    const lines = rawText.split(/\n+/).map(s => s.trim()).filter(Boolean);
+    if (!lines.length) return `<div class="availability-msg-sub">-</div>`;
+    const firstLine = lines.shift();
+    const rest = lines.join('\n');
+    return `
+      <div class="availability-msg-item">${escapeHtml(firstLine)}</div>
+      ${rest ? `<div class="availability-msg-sub">${escapeHtmlAndBreaks(rest)}</div>` : ''}
+    `;
   }
 
   window.submitAvailabilityRequest = async function (itemName, itemCategory = '') {
@@ -19845,16 +20009,10 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     if (!safeItemName) return false;
 
     if (isAdminUser()) {
-      if (typeof window.showElegantTopToast === 'function') {
-        window.showElegantTopToast('هذا الزر مخصص للزبون فقط', 'warning', 2400);
-      }
       return false;
     }
 
     if (!window.firebaseDB || !window.firebaseDB.db) {
-      if (typeof window.showElegantTopToast === 'function') {
-        window.showElegantTopToast('Firebase غير جاهز حالياً', 'error', 2600);
-      }
       return false;
     }
 
@@ -19867,9 +20025,6 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
 
       if (!customerName || !customerPhone || !customerAddress) {
         openCustomerProfileModal(profile || {});
-        if (typeof window.showElegantTopToast === 'function') {
-          window.showElegantTopToast('سجل بياناتك أولاً حتى نرسل الاستعلام', 'warning', 3000);
-        }
         return false;
       }
 
@@ -19877,7 +20032,6 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       const now = Date.now();
       const requestId = 'AVL-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
       const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-ASK';
-      const availabilityItemLabel = buildAvailabilityItemLabel(safeItemName, safeCategory);
       const questionText = buildAvailabilityQuestionText(safeItemName, safeCategory);
 
       await set(ref(db, `${AVAILABILITY_REQUEST_PATH}/${requestId}`), {
@@ -19887,12 +20041,12 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
         phone: customerPhone,
         address: customerAddress,
         item: safeItemName,
-        itemLabel: availabilityItemLabel,
         category: safeCategory,
         status: 'new',
         createdAt: now,
         updatedAt: now,
         archivedForAdmin: false,
+        archivedForBranches: {},
         customerArchived: false,
         customerDeleted: false,
         lastAvailabilityStatus: 'pending',
@@ -19901,6 +20055,8 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
             id: msgId,
             senderRole: 'customer',
             text: questionText,
+            item: safeItemName,
+            category: safeCategory,
             createdAt: now,
             seenByAdmin: false,
             seenByCustomer: true
@@ -19912,7 +20068,6 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
         requestId,
         targetRole: 'admin',
         item: safeItemName,
-        itemLabel: availabilityItemLabel,
         category: safeCategory,
         requestKind: 'availability',
         ...window.buildAdminCustomerNotificationPayload({
@@ -19922,7 +20077,6 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
           body: questionText,
           extraData: {
             item: safeItemName,
-            itemLabel: availabilityItemLabel,
             category: safeCategory,
             customerAddress,
             requestKind: 'availability'
@@ -19935,15 +20089,9 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       if (document.getElementById('availabilityTrackModal')?.classList.contains('show')) {
         await loadCustomerAvailabilityRequests();
       }
-      if (typeof window.showElegantTopToast === 'function') {
-        window.showElegantTopToast('تم إرسال استعلام التوفر', 'success', 2600);
-      }
       return true;
     } catch (err) {
       console.error('submitAvailabilityRequest:', err);
-      if (typeof window.showElegantTopToast === 'function') {
-        window.showElegantTopToast('تعذّر إرسال الاستعلام', 'error', 2600);
-      }
       return false;
     }
   };
@@ -19970,8 +20118,9 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
   window.archiveAvailabilityRequestForAdmin = async function (requestId) {
     if (!window.firebaseDB || !window.firebaseDB.db) return;
     const { db, ref, update } = window.firebaseDB;
+    const branchKey = getCurrentAvailabilityAdminBranchKey();
     await update(ref(db), {
-      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/archivedForAdmin`]: true,
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/archivedForBranches/${branchKey}`]: true,
       [`${AVAILABILITY_REQUEST_PATH}/${requestId}/updatedAt`]: Date.now()
     });
     await loadAvailabilityRequests();
@@ -19997,7 +20146,6 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     let customerPhone = '';
     let itemName = '';
     let itemCategory = '';
-    let itemLabel = '';
     try {
       const snap = await get(ref(db, `${AVAILABILITY_REQUEST_PATH}/${requestId}`));
       if (snap.exists()) {
@@ -20007,13 +20155,13 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
         customerPhone = String(req.phone || '').trim();
         itemName = String(req.item || '').trim();
         itemCategory = String(req.category || '').trim();
-        itemLabel = String(req.itemLabel || '').trim() || buildAvailabilityItemLabel(itemName, itemCategory);
       }
     } catch (err) {
       console.error('Failed to read availability request before reply:', err);
     }
 
     const branchLabel = getAdminAccountLabel() || 'مكتب عسل';
+    const branchKey = getCurrentAvailabilityAdminBranchKey();
     const replyText = buildAvailabilityReplyText(safeState, branchLabel, itemName, itemCategory);
 
     await update(ref(db), {
@@ -20021,6 +20169,8 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
         id: msgId,
         senderRole: 'admin',
         text: replyText,
+        item: itemName,
+        category: itemCategory,
         createdAt: now,
         seenByAdmin: true,
         seenByCustomer: false,
@@ -20031,6 +20181,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       [`${AVAILABILITY_REQUEST_PATH}/${requestId}/status`]: 'answered',
       [`${AVAILABILITY_REQUEST_PATH}/${requestId}/lastAvailabilityStatus`]: safeState,
       [`${AVAILABILITY_REQUEST_PATH}/${requestId}/lastAnsweredByBranch`]: branchLabel,
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/archivedForBranches/${branchKey}`]: true,
       [`${AVAILABILITY_REQUEST_PATH}/${requestId}/customerArchived`]: false
     });
 
@@ -20043,15 +20194,12 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       title: 'رد على استعلام التوفر',
       body: replyText,
       item: itemName,
-      itemLabel,
       category: itemCategory,
       requestKind: 'availability',
       data: {
         customerGroupId: buildCustomerNotificationGroupId(customerName, customerPhone, targetDeviceId),
         customerPhone,
         item: itemName,
-        itemLabel,
-        category: itemCategory,
         branchLabel,
         availabilityStatus: safeState,
         requestKind: 'availability'
@@ -20099,40 +20247,37 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
         const freshMsgId = freshCustomerMap[req.id] || null;
         const statusClass = req.status === 'answered' ? 'processed' : 'new';
         const statusText = req.status === 'answered' ? 'تم الرد' : 'بانتظار الرد';
+        const itemLabel = buildAvailabilityDisplayName(req.item || '', req.category || '');
         const messagesHtml = msgs.map(msg => {
           const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
           const senderLabel = msg.senderRole === 'customer'
             ? 'أنت'
             : (String(msg.branchLabel || '').trim() || 'الإدارة');
           return `
-            <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
+            <div class="request-message availability-request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
               <div class="request-message-head">
                 <span>${escapeHtml(senderLabel)}</span>
                 <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'customer')}</span>
               </div>
-              <div>${escapeHtml(msg.text || '')}</div>
+              <div class="availability-message-body">${renderAvailabilityMessageText(msg, req)}</div>
             </div>`;
         }).join('');
         const hasAdminReply = msgs.some(msg => msg.senderRole === 'admin');
         const actions = archived
-          ? `<div class="request-thread-actions single-center"><button class="request-track-clear" type="button" onclick="deleteCustomerArchivedAvailabilityRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div>`
+          ? `<div class="request-thread-actions single-center"><button class="request-track-clear delete-btn" type="button" onclick="deleteCustomerArchivedAvailabilityRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div>`
           : (hasAdminReply
-            ? `<div class="request-thread-actions single-center"><button class="request-track-clear" type="button" onclick="archiveAvailabilityRequestForCustomer('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة الاستعلام</button></div>`
+            ? `<div class="request-thread-actions single-center"><button class="request-track-clear archive-btn" type="button" onclick="archiveAvailabilityRequestForCustomer('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة الاستعلام</button></div>`
             : '');
         return `
-          <div class="request-thread-card">
-            <div class="request-thread-head">
+          <div class="request-thread-card availability-compact-card">
+            <div class="request-thread-head availability-compact-head">
               <div>
-                <div class="request-thread-id">${escapeHtml(req.id)}</div>
+                <div class="availability-card-title">${escapeHtml(itemLabel)}</div>
                 <div class="request-thread-time">${formatRequestTime(req.updatedAt || req.createdAt)}</div>
               </div>
               <div class="request-thread-status ${statusClass}">${statusText}</div>
             </div>
-            <div class="request-meta-badges">
-              <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(buildAvailabilityItemLabel(req.item || '', req.category || '') || '-')}</span>
-              <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
-            </div>
-            <div class="request-messages">${messagesHtml}</div>
+            <div class="request-messages availability-request-messages">${messagesHtml}</div>
             ${actions}
           </div>`;
       };
@@ -20170,9 +20315,10 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     archiveList.innerHTML = currentAvailabilityAdminView === 'archive' ? '<div class="request-admin-empty">جاري تحميل أرشيف التوفر...</div>' : '';
 
     try {
+      const currentBranchKey = getCurrentAvailabilityAdminBranchKey();
       const arr0 = await getAllAvailabilityRequests();
       const freshAdminMap = {};
-      for (const req of arr0.filter(r => r && !r.archivedForAdmin)) {
+      for (const req of arr0.filter(r => r && !isAvailabilityArchivedForBranch(r, currentBranchKey))) {
         const msgs = Object.values(req.messages || {}).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
         const latestUnread = [...msgs].reverse().find(msg => msg.senderRole === 'customer' && !msg.seenByAdmin);
         freshAdminMap[req.id] = latestUnread ? latestUnread.id : null;
@@ -20180,55 +20326,51 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       }
 
       const arr = await getAllAvailabilityRequests();
-      const activeRequests = arr.filter(req => req && !req.archivedForAdmin);
-      const archiveRequests = arr.filter(req => req && !!req.archivedForAdmin);
+      const activeRequests = arr.filter(req => req && !isAvailabilityArchivedForBranch(req, currentBranchKey));
+      const archiveRequests = arr.filter(req => req && isAvailabilityArchivedForBranch(req, currentBranchKey));
 
       const renderAdminCard = (req, archived = false) => {
         const msgs = Object.values(req.messages || {}).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
         const freshMsgId = freshAdminMap[req.id] || null;
         const statusClass = req.status === 'answered' ? 'processed' : 'new';
         const statusText = archived ? 'في الأرشيف' : (req.status === 'answered' ? 'تم الرد' : 'جديد');
+        const itemLabel = buildAvailabilityDisplayName(req.item || '', req.category || '');
         const messagesHtml = msgs.map(msg => {
           const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
           const senderLabel = msg.senderRole === 'customer'
             ? 'الزبون'
             : (String(msg.branchLabel || '').trim() || 'الإدارة');
           return `
-            <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
+            <div class="request-message availability-request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
               <div class="request-message-head">
                 <span>${escapeHtml(senderLabel)}</span>
                 <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'admin')}</span>
               </div>
-              <div>${escapeHtml(msg.text || '')}</div>
+              <div class="availability-message-body">${renderAvailabilityMessageText(msg, req)}</div>
             </div>`;
         }).join('');
         return `
-          <div class="request-admin-card">
-            <div class="request-admin-card-head">
+          <div class="request-admin-card availability-compact-card">
+            <div class="request-admin-card-head availability-compact-head">
               <div>
                 <div class="request-admin-name">${escapeHtml(req.name || 'بدون اسم')}</div>
                 <div class="request-admin-time">${formatRequestTime(req.updatedAt || req.createdAt)}</div>
               </div>
               <div class="request-thread-status ${statusClass}">${statusText}</div>
             </div>
-            <div class="request-admin-meta">
-              <span class="request-admin-chip"><i class="fas fa-hashtag"></i>${escapeHtml(req.id || '')}</span>
-              <span class="request-admin-chip"><i class="fas fa-mobile-screen"></i>${escapeHtml(req.deviceId || '')}</span>
-            </div>
-            <div class="request-meta-badges">
+            <div class="availability-card-title">${escapeHtml(itemLabel)}</div>
+            <div class="request-meta-badges availability-compact-badges">
               <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
-              <span class="request-meta-badge"><i class="fas fa-location-dot"></i>${escapeHtml(req.address || '-')}</span>
-              <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(buildAvailabilityItemLabel(req.item || '', req.category || '') || '-')}</span>
             </div>
-            <div class="request-messages">${messagesHtml}</div>
+            <div class="request-messages availability-request-messages">${messagesHtml}</div>
             ${archived ? `
               <div class="request-admin-card-actions single-center">
-                <button class="request-track-clear" type="button" onclick="deleteAdminArchivedAvailabilityRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button>
+                <button class="request-track-clear delete-btn" type="button" onclick="deleteAdminArchivedAvailabilityRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button>
               </div>` : `
-              <div class="request-admin-card-actions">
+              <div class="request-admin-card-actions availability-actions-grid">
                 <button class="request-admin-send availability-response-btn" type="button" onclick="sendAvailabilityAnswer('${escapeHtml(req.id)}','available')"><i class="fas fa-circle-check"></i> متوفر</button>
                 <button class="request-admin-done availability-response-btn" type="button" onclick="sendAvailabilityAnswer('${escapeHtml(req.id)}','unavailable')"><i class="fas fa-circle-xmark"></i> غير متوفر</button>
-                <button class="request-track-clear" type="button" onclick="archiveAvailabilityRequestForAdmin('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة</button>
+                <button class="request-track-clear availability-archive-btn archive-btn" type="button" onclick="archiveAvailabilityRequestForAdmin('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة</button>
               </div>`}
           </div>`;
       };
