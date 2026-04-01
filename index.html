@@ -12397,7 +12397,6 @@ window.markRequestProcessed = async function (requestId) {
     });
     await loadMaterialRequests();
     await refreshMaterialRequestCount();
-    if (typeof window.showElegantTopToast === 'function') window.showElegantTopToast('تمت معالجة الطلب', 'success', 2600);
 };
 
 window.deleteAdminArchivedRequest = async function (requestId) {
@@ -16028,10 +16027,13 @@ document.addEventListener("DOMContentLoaded", ()=>{
   document.getElementById("results")?.addEventListener("click", async (e)=>{
     const availabilityBtn = e.target.closest(".availability-mini");
     if (availabilityBtn) {
-      await submitAvailabilityRequest(
+      const sent = await submitAvailabilityRequest(
         decodeURIComponent(availabilityBtn.dataset.name || ""),
         decodeURIComponent(availabilityBtn.dataset.category || "")
       );
+      if (sent && typeof window.showElegantTopToast === 'function') {
+        window.showElegantTopToast('تم إرسال استعلام التوفر', 'success', 2400);
+      }
       return;
     }
 
@@ -20208,9 +20210,6 @@ ${actionText} ${safeBranch}`;
 
     await loadAvailabilityRequests();
     await refreshAvailabilityRequestCount();
-    if (typeof window.showElegantTopToast === 'function') {
-      window.showElegantTopToast('تمت الإجابة', 'success', 2400);
-    }
   };
 
   window.loadCustomerAvailabilityRequests = async function () {
