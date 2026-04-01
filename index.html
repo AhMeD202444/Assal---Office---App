@@ -19298,7 +19298,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     fallbackCurrentVersionName: '1.0',
     fallbackCurrentVersionCode: 1,
     checkDelayMs: 1400,
-    githubApkDirectUrl: 'https://github.com/AhMeD202444/assal-price-updates/releases/download/v1.1/app-release.apk',
+    githubApkDirectUrl: 'https://github.com/AhMeD202444/assal-price-updates/releases/download/v1.2/app-release.apk',
     acceptedVersionKeys: ['appv', 'appVersion', 'version']
   };
 
@@ -19526,7 +19526,44 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     }
   }
 
+  function hasNativeUpdateBridge(){
+    return !!(window.Android && typeof window.Android.startNativeApkUpdate === 'function');
+  }
+
+  window.onNativeUpdateProgress = function(percent, statusText){
+    showProgressSection();
+    updateProgressUI(Number(percent || 0), statusText || 'جاري تنزيل ملف التحديث...');
+  };
+
+  window.onNativeUpdateReady = function(){
+    updateState.started = false;
+    updateState.installShown = false;
+    updateState.installUrl = updateState.remote?.apkUrl || APP_UPDATE_CONFIG.githubApkDirectUrl;
+    updateProgressUI(100, 'اكتمل التنزيل بنجاح. اضغط على زر التحديث الآن.');
+    showInstallSection();
+    setDownloadButtonState(true, '<i class="fas fa-check-circle"></i><span>اكتمل التنزيل</span>');
+  };
+
+  window.onNativeUpdateError = function(message){
+    console.error('native update error:', message);
+    updateState.started = false;
+    showProgressSection();
+    updateProgressUI(0, message || 'تعذر تنزيل ملف التحديث.');
+    setDownloadButtonState(false, '<i class="fas fa-rotate-right"></i><span>إعادة المحاولة</span>');
+  };
+
   function triggerInstall(){
+    if (window.Android && typeof window.Android.installDownloadedApk === 'function') {
+      try {
+        window.Android.installDownloadedApk();
+        const status = document.getElementById('appUpdateStatusText');
+        if (status) status.textContent = 'جارٍ فتح شاشة التثبيت...';
+        return;
+      } catch (err) {
+        console.error('triggerInstall native error:', err);
+      }
+    }
+
     const url = updateState.installUrl || updateState.remote?.apkUrl || APP_UPDATE_CONFIG.githubApkDirectUrl;
     if (!url) return;
     const a = document.createElement('a');
@@ -19545,18 +19582,31 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
   async function downloadUpdateApk(){
     if (updateState.started) return;
     updateState.started = true;
+    updateState.installShown = false;
     setDownloadButtonState(true, '<i class="fas fa-spinner fa-spin"></i><span>جاري التنزيل...</span>');
     showProgressSection();
-    startSimulatedProgress();
+    updateProgressUI(0, 'جاري تهيئة تنزيل التحديث...');
 
     const apkUrl = updateState.remote?.apkUrl || APP_UPDATE_CONFIG.githubApkDirectUrl;
     if (!apkUrl) {
-      stopSimulatedProgress();
-      updateProgressUI(100, 'تعذر العثور على رابط التحديث.');
+      updateProgressUI(0, 'تعذر العثور على رابط التحديث.');
       setDownloadButtonState(false, '<i class="fas fa-rotate-right"></i><span>إعادة المحاولة</span>');
       updateState.started = false;
       return;
     }
+
+    if (hasNativeUpdateBridge()) {
+      try {
+        cleanupObjectUrl();
+        updateState.installUrl = apkUrl;
+        window.Android.startNativeApkUpdate(String(apkUrl));
+        return;
+      } catch (err) {
+        console.error('downloadUpdateApk native bridge error:', err);
+      }
+    }
+
+    startSimulatedProgress();
 
     try {
       cleanupObjectUrl();
