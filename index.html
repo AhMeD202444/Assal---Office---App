@@ -19833,8 +19833,96 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
 
   /* ================== استعلامات التوفر ================== */
   const AVAILABILITY_REQUEST_PATH = 'availabilityRequests';
+  const AVAILABILITY_REQUEST_DUPLICATE_WINDOW_MS = 60 * 1000;
+  const AVAILABILITY_REQUEST_LOCK_STORAGE_KEY = 'availabilityRequestLocksV1';
+  const pendingAvailabilityRequestKeys = new Set();
   let currentAvailabilityAdminView = 'active';
   let currentAvailabilityTrackView = 'active';
+
+  function normalizeAvailabilityRequestKey(itemName = '', categoryName = '') {
+    return [String(categoryName || '').trim(), String(itemName || '').trim()]
+      .join('||')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function buildAvailabilityRequestLockKey(deviceId = '', itemName = '', categoryName = '') {
+    const devicePart = String(deviceId || '').trim() || 'unknown_device';
+    const itemPart = normalizeAvailabilityRequestKey(itemName, categoryName) || 'unknown_item';
+    return `${devicePart}::${itemPart}`;
+  }
+
+  function readAvailabilityRequestLocks() {
+    try {
+      const raw = localStorage.getItem(AVAILABILITY_REQUEST_LOCK_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (err) {
+      console.warn('Failed to read availability request locks:', err);
+      return {};
+    }
+  }
+
+  function pruneAvailabilityRequestLocks(locks, now = Date.now()) {
+    const cleaned = {};
+    Object.entries(locks || {}).forEach(([key, value]) => {
+      const ts = Number(value) || 0;
+      if (ts && (now - ts) < AVAILABILITY_REQUEST_DUPLICATE_WINDOW_MS) {
+        cleaned[key] = ts;
+      }
+    });
+    return cleaned;
+  }
+
+  function writeAvailabilityRequestLocks(locks) {
+    try {
+      localStorage.setItem(AVAILABILITY_REQUEST_LOCK_STORAGE_KEY, JSON.stringify(locks || {}));
+    } catch (err) {
+      console.warn('Failed to write availability request locks:', err);
+    }
+  }
+
+  function getLocalAvailabilityRequestLockTs(deviceId = '', itemName = '', categoryName = '') {
+    const cleaned = pruneAvailabilityRequestLocks(readAvailabilityRequestLocks());
+    writeAvailabilityRequestLocks(cleaned);
+    return Number(cleaned[buildAvailabilityRequestLockKey(deviceId, itemName, categoryName)]) || 0;
+  }
+
+  function setLocalAvailabilityRequestLock(deviceId = '', itemName = '', categoryName = '', ts = Date.now()) {
+    const cleaned = pruneAvailabilityRequestLocks(readAvailabilityRequestLocks(), Number(ts) || Date.now());
+    cleaned[buildAvailabilityRequestLockKey(deviceId, itemName, categoryName)] = Number(ts) || Date.now();
+    writeAvailabilityRequestLocks(cleaned);
+  }
+
+  function clearLocalAvailabilityRequestLock(deviceId = '', itemName = '', categoryName = '') {
+    const cleaned = pruneAvailabilityRequestLocks(readAvailabilityRequestLocks());
+    delete cleaned[buildAvailabilityRequestLockKey(deviceId, itemName, categoryName)];
+    writeAvailabilityRequestLocks(cleaned);
+  }
+
+  async function findRecentAvailabilityRequest(deviceId = '', itemName = '', categoryName = '', withinMs = AVAILABILITY_REQUEST_DUPLICATE_WINDOW_MS) {
+    const safeDeviceId = String(deviceId || '').trim();
+    const targetKey = normalizeAvailabilityRequestKey(itemName, categoryName);
+    if (!safeDeviceId || !targetKey) return null;
+
+    const minCreatedAt = Date.now() - Math.max(1000, Number(withinMs) || AVAILABILITY_REQUEST_DUPLICATE_WINDOW_MS);
+    const arr = await getAllAvailabilityRequests();
+
+    return arr.find(req => {
+      if (!req) return false;
+      const reqDeviceId = String(req.deviceId || '').trim();
+      const reqKey = normalizeAvailabilityRequestKey(req.item || '', req.category || '');
+      const reqTime = Number(req.createdAt || req.updatedAt || 0);
+      return reqDeviceId === safeDeviceId && reqKey === targetKey && reqTime >= minCreatedAt;
+    }) || null;
+  }
+
+  function showAvailabilityDuplicateToast() {
+    if (typeof window.showElegantTopToast === 'function') {
+      window.showElegantTopToast('تم إرسال الاستعلام مسبقاً', 'warning', 2600);
+    }
+  }
 
   async function getAllAvailabilityRequests() {
     if (!window.firebaseDB || !window.firebaseDB.db) return [];
@@ -20068,20 +20156,49 @@ ${actionText} ${safeBranch}`;
       return false;
     }
 
+    let pendingLockKey = '';
+    let requestStored = false;
+
     try {
       const profile = await getCustomerProfileForAvailability();
       const customerName = String(profile.name || '').trim();
       const customerPhone = String(profile.phone || '').trim();
       const customerAddress = String(profile.address || '').trim();
       const deviceId = getDeviceId();
+      const now = Date.now();
 
       if (!customerName || !customerPhone || !customerAddress) {
         openCustomerProfileModal(profile || {});
         return false;
       }
 
+      pendingLockKey = buildAvailabilityRequestLockKey(deviceId, safeItemName, safeCategory);
+      if (pendingAvailabilityRequestKeys.has(pendingLockKey)) {
+        showAvailabilityDuplicateToast();
+        return false;
+      }
+
+      const localLockTs = getLocalAvailabilityRequestLockTs(deviceId, safeItemName, safeCategory);
+      if (localLockTs && (now - localLockTs) < AVAILABILITY_REQUEST_DUPLICATE_WINDOW_MS) {
+        showAvailabilityDuplicateToast();
+        return false;
+      }
+
+      pendingAvailabilityRequestKeys.add(pendingLockKey);
+
+      const recentRequest = await findRecentAvailabilityRequest(deviceId, safeItemName, safeCategory, AVAILABILITY_REQUEST_DUPLICATE_WINDOW_MS);
+      if (recentRequest) {
+        setLocalAvailabilityRequestLock(
+          deviceId,
+          safeItemName,
+          safeCategory,
+          Number(recentRequest.createdAt || recentRequest.updatedAt || now)
+        );
+        showAvailabilityDuplicateToast();
+        return false;
+      }
+
       const { db, ref, set } = window.firebaseDB;
-      const now = Date.now();
       const requestId = 'AVL-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
       const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-ASK';
       const questionText = buildAvailabilityQuestionText(safeItemName, safeCategory);
@@ -20116,6 +20233,9 @@ ${actionText} ${safeBranch}`;
         }
       });
 
+      requestStored = true;
+      setLocalAvailabilityRequestLock(deviceId, safeItemName, safeCategory, now);
+
       await queuePushNotificationEvent('availability_request_created', {
         requestId,
         targetRole: 'admin',
@@ -20143,8 +20263,13 @@ ${actionText} ${safeBranch}`;
       }
       return true;
     } catch (err) {
+      if (pendingLockKey && !requestStored) {
+        clearLocalAvailabilityRequestLock(getDeviceId(), safeItemName, safeCategory);
+      }
       console.error('submitAvailabilityRequest:', err);
       return false;
+    } finally {
+      if (pendingLockKey) pendingAvailabilityRequestKeys.delete(pendingLockKey);
     }
   };
 
@@ -20189,7 +20314,11 @@ ${actionText} ${safeBranch}`;
 
   window.sendAvailabilityAnswer = async function (requestId, state) {
     if (!window.firebaseDB || !window.firebaseDB.db || !isAdminUser()) return;
-    const safeState = state === 'available' ? 'available' : 'unavailable';
+    if (state !== 'available' && state !== 'unavailable') {
+      console.warn('Invalid availability state:', state, 'requestId:', requestId);
+      return;
+    }
+    const safeState = state;
     const { db, ref, update, get } = window.firebaseDB;
     const now = Date.now();
     const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-' + safeState.toUpperCase();
