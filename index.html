@@ -10210,6 +10210,25 @@ footer{
   #adModal .iqf-btn{ min-width:102px; min-height:46px; padding:9px 14px; }
 }
 
+
+#adModal .iqf-footer--compact{
+  justify-content:center;
+  padding-top:8px;
+}
+#adModal .iqf-footer--compact .iqf-cta{
+  width:100%;
+  justify-content:center;
+}
+#adModal .iqf-footer--compact .iqf-btn{
+  min-width: 128px;
+}
+#adModal .iqf-slide{
+  gap:10px;
+}
+#adModal .iqf-meta{
+  margin-top:8px;
+}
+
 </style>
 </head>
 <body>
@@ -18547,11 +18566,9 @@ function renderInstantInquiryFeature(){
           <i class="fa-solid fa-arrows-left-right"></i>
         </div>
 
-        <div class="iqf-dots" id="iqfDots" aria-label="مؤشر الشرائح"></div>
         <div class="iqf-progress" aria-hidden="true"><div class="iqf-progress-bar" id="iqfProgress"></div></div>
 
-        <div class="iqf-footer">
-          <div class="iqf-note" id="iqfCounter">1 / ${slides.length}</div>
+        <div class="iqf-footer iqf-footer--compact">
           <div class="iqf-cta">
             <button class="ad-btn secondary iqf-btn" id="iqfClose" type="button">
               <i class="fa-regular fa-circle-xmark"></i><span>إغلاق</span>
@@ -18566,10 +18583,8 @@ function renderInstantInquiryFeature(){
   `;
 
   const stage = document.getElementById("iqfStage");
-  const dotsWrap = document.getElementById("iqfDots");
-  const counter = document.getElementById("iqfCounter");
   const progress = document.getElementById("iqfProgress");
-  if (!stage || !dotsWrap || !counter || !progress) return;
+  if (!stage || !progress) return;
 
   stage.innerHTML = slides.map((s, i) => `
     <section class="iqf-slide ${i === 0 ? 'is-active' : ''}" data-index="${i}">
@@ -18583,15 +18598,8 @@ function renderInstantInquiryFeature(){
         <div class="iqf-step"><i class="fa-solid fa-stars"></i> ${s.step}</div>
         <div class="iqf-chip ${i === 2 ? 'is-hot' : ''}"><i class="fa-solid fa-circle-info"></i> ${s.badge}</div>
       </div>
-      <div class="iqf-caption">
-        <h4>${s.title}</h4>
-        <p>${s.text}</p>
-      </div>
-    </section>
-  `).join("");
 
-  dotsWrap.innerHTML = slides.map((_, i) => `
-    <button class="iqf-dot-btn ${i === 0 ? 'is-active' : ''}" type="button" data-go="${i}" aria-label="الشريحة ${i+1}"></button>
+    </section>
   `).join("");
 
   let current = 0;
@@ -18599,13 +18607,10 @@ function renderInstantInquiryFeature(){
   let dragging = false;
 
   const slideEls = Array.from(stage.querySelectorAll(".iqf-slide"));
-  const dotEls = Array.from(dotsWrap.querySelectorAll(".iqf-dot-btn"));
 
   function update(index){
     current = (index + slides.length) % slides.length;
     slideEls.forEach((el, i) => el.classList.toggle("is-active", i === current));
-    dotEls.forEach((el, i) => el.classList.toggle("is-active", i === current));
-    counter.textContent = `${current + 1} / ${slides.length}`;
     progress.style.width = `${((current + 1) / slides.length) * 100}%`;
   }
 
