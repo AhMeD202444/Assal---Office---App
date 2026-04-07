@@ -14101,15 +14101,29 @@ window.onload = function() {
 
 
     if (showPromoPopup && !promoAlreadyShown) {
-        setTimeout(() => {
-            let popup = document.getElementById('promoPopup');
-            popup.style.display = 'flex';
-           popup.style.animation = 'promoPopIn 0.75s cubic-bezier(.2,.8,.2,1) forwards';
+        const openPromoPopupWhenAllowed = (attempt = 0) => {
+            const updateBusy = !!(window.__ASSAL_FORCE_UPDATE_PENDING__ || window.__ASSAL_FORCE_UPDATE_ACTIVE__);
+            if (updateBusy) {
+                if (attempt < 30) {
+                    setTimeout(() => openPromoPopupWhenAllowed(attempt + 1), 350);
+                }
+                return;
+            }
 
-            document.getElementById('overlay').style.display = 'block';
-            try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch (e) {}
-        }, 500);
-        sessionStorage.setItem('promoShown', 'true');
+            setTimeout(() => {
+                let popup = document.getElementById('promoPopup');
+                if (!popup) return;
+                popup.style.display = 'flex';
+                popup.style.animation = 'promoPopIn 0.75s cubic-bezier(.2,.8,.2,1) forwards';
+
+                const overlay = document.getElementById('overlay');
+                if (overlay) overlay.style.display = 'block';
+                try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch (e) {}
+            }, 500);
+            sessionStorage.setItem('promoShown', 'true');
+        };
+
+        openPromoPopupWhenAllowed();
     }
 
     loadExcelFiles().then(result => {
@@ -18815,7 +18829,9 @@ function renderInstantInquiryFeature(){
   let startupAdShown = false;
 
   function hasBlockingModal(){
+    const forceUpdateBusy = !!(window.__ASSAL_FORCE_UPDATE_PENDING__ || window.__ASSAL_FORCE_UPDATE_ACTIVE__);
     return !!(
+      forceUpdateBusy ||
       document.querySelector(".swal2-container.swal2-shown") ||
       document.querySelector(".activation-overlay.is-open") ||
       document.querySelector(".customer-profile-modal.show") ||
@@ -18869,7 +18885,17 @@ function renderInstantInquiryFeature(){
 
 
 window.addEventListener("load", () => {
-  try{ LuxAds.maybeShow(); }catch(e){ console.warn("LuxAds load retry failed", e); }
+  const tryShowStartupAds = (attempt = 0) => {
+    const updateBusy = !!(window.__ASSAL_FORCE_UPDATE_PENDING__ || window.__ASSAL_FORCE_UPDATE_ACTIVE__);
+    if (updateBusy) {
+      if (attempt < 30) {
+        setTimeout(() => tryShowStartupAds(attempt + 1), 350);
+      }
+      return;
+    }
+    try{ LuxAds.maybeShow(); }catch(e){ console.warn("LuxAds load retry failed", e); }
+  };
+  tryShowStartupAds();
 });
 
 document.addEventListener("visibilitychange", () => {
@@ -20201,6 +20227,9 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     acceptedVersionKeys: ['appv', 'appVersion', 'version']
   };
 
+  window.__ASSAL_FORCE_UPDATE_PENDING__ = true;
+  window.__ASSAL_FORCE_UPDATE_ACTIVE__ = false;
+
   let updateState = {
     remote: null,
     current: null,
@@ -20683,6 +20712,19 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     document.head.appendChild(style);
   }
 
+  function dismissStartupPromoForForceUpdate(){
+    try {
+      const promo = document.getElementById('promoPopup');
+      if (promo) {
+        promo.style.animation = 'none';
+        promo.style.display = 'none';
+      }
+      const overlay = document.getElementById('overlay');
+      if (overlay) overlay.style.display = 'none';
+      if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock();
+    } catch (_) {}
+  }
+
   async function showForceUpdateModal(remote, current){
     injectUpdateStyles();
     updateState.remote = remote;
@@ -20690,6 +20732,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     updateState.installUrl = null;
     updateState.started = false;
     cleanupObjectUrl();
+    dismissStartupPromoForForceUpdate();
 
     await Swal.fire({
       html: buildUpdateHtml(remote, current),
@@ -20703,12 +20746,15 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       showCloseButton: false,
       heightAuto: false,
       didOpen: () => {
+        window.__ASSAL_FORCE_UPDATE_PENDING__ = false;
+        window.__ASSAL_FORCE_UPDATE_ACTIVE__ = true;
         const downloadBtn = document.getElementById('appUpdateDownloadBtn');
         const installBtn = document.getElementById('appUpdateInstallBtn');
         if (downloadBtn) downloadBtn.addEventListener('click', downloadUpdateApk);
         if (installBtn) installBtn.addEventListener('click', triggerInstall);
       },
       willClose: () => {
+        window.__ASSAL_FORCE_UPDATE_ACTIVE__ = false;
         stopSimulatedProgress();
       }
     });
@@ -20721,6 +20767,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
   }
 
   async function runForceUpdateCheck(){
+    window.__ASSAL_FORCE_UPDATE_PENDING__ = true;
     try {
       if (!isAndroidLikeEnvironment()) return;
       const current = getCurrentAppVersion();
@@ -20733,9 +20780,14 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       });
       if (needsUpdate(current, remote)) {
         await showForceUpdateModal(remote, current);
+        return;
       }
     } catch (err) {
       console.error('Force update check failed:', err);
+    } finally {
+      if (!window.__ASSAL_FORCE_UPDATE_ACTIVE__) {
+        window.__ASSAL_FORCE_UPDATE_PENDING__ = false;
+      }
     }
   }
 
