@@ -6,6 +6,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Phone Parts Pro</title>
 
+    <script>
+      (function () {
+        function nativeLowEndValue() {
+          try {
+            if (window.Android && typeof window.Android.isLowEndDevice === 'function') {
+              return window.Android.isLowEndDevice();
+            }
+          } catch (_) {}
+          return null;
+        }
+
+        function heuristicLowEndValue() {
+          const cores = Number(navigator.hardwareConcurrency || 0);
+          const mem = Number(navigator.deviceMemory || 0);
+          const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+          const shortEdge = Math.min(window.screen?.width || window.innerWidth || 0, window.screen?.height || window.innerHeight || 0);
+          const smallScreen = shortEdge > 0 && shortEdge <= 480;
+          return !!(
+            reduceMotion ||
+            (cores > 0 && cores <= 4) ||
+            (mem > 0 && mem <= 3) ||
+            (smallScreen && ((cores > 0 && cores <= 6) || (mem > 0 && mem <= 4)))
+          );
+        }
+
+        const nativeValue = nativeLowEndValue();
+        const isLowEnd = nativeValue === true || nativeValue === 'true' || (nativeValue == null && heuristicLowEndValue());
+
+        if (isLowEnd) {
+          document.documentElement.classList.add('low-end-device');
+          document.documentElement.setAttribute('data-device-profile', 'low-end');
+        } else {
+          document.documentElement.setAttribute('data-device-profile', 'standard');
+        }
+
+        window.__ASSAL_LOW_END_DEVICE__ = !!isLowEnd;
+      })();
+    </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
@@ -10250,6 +10289,47 @@ footer{
   display:none !important;
 }
 
+
+/* ===== وضع خفيف للأجهزة الضعيفة ===== */
+html.low-end-device,
+html.low-end-device body {
+    scroll-behavior: auto !important;
+}
+
+html.low-end-device *,
+html.low-end-device *::before,
+html.low-end-device *::after {
+    animation: none !important;
+    transition: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+html.low-end-device .container,
+html.low-end-device .result-card,
+html.low-end-device .category,
+html.low-end-device .header-btn,
+html.low-end-device .scroll-to-top,
+html.low-end-device .swal2-popup,
+html.low-end-device #promoPopup,
+html.low-end-device #newItemsModal,
+html.low-end-device .wholesale-suggestions {
+    box-shadow: none !important;
+}
+
+html.low-end-device .notification-text,
+html.low-end-device h1,
+html.low-end-device .popup-title,
+html.low-end-device .header-brand-letter {
+    text-shadow: none !important;
+}
+
+html.low-end-device .slider,
+html.low-end-device .results-container {
+    scroll-behavior: auto !important;
+}
+
+
 </style>
 </head>
 <body>
@@ -20114,10 +20194,10 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
 (function(){
   const APP_UPDATE_CONFIG = {
     versionJsonUrl: 'https://raw.githubusercontent.com/AhMeD202444/assal-price-updates/main/version.json',
-    fallbackCurrentVersionName: '1.0',
-    fallbackCurrentVersionCode: 1,
+    fallbackCurrentVersionName: '1.3',
+    fallbackCurrentVersionCode: 4,
     checkDelayMs: 1400,
-    githubApkDirectUrl: 'https://github.com/AhMeD202444/assal-price-updates/releases/download/v1.2/app-release.apk',
+    githubApkDirectUrl: 'https://github.com/AhMeD202444/assal-price-updates/releases/download/v1.3/app-release.apk',
     acceptedVersionKeys: ['appv', 'appVersion', 'version']
   };
 
@@ -20305,7 +20385,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       updateProgressUI(visualPercent, ratio < 0.12 ? 'جاري تهيئة تنزيل التحديث...' : 'جاري تنزيل ملف التحديث...');
       if (updateState.completionReady && ratio >= 1) {
         stopSimulatedProgress();
-        updateProgressUI(100, 'اكتمل التنزيل بنجاح. اضغط على زر التحديث الآن.');
+        updateProgressUI(100, 'اكتمل التنزيل بنجاح. إذا لم تفتح شاشة التثبيت تلقائياً اضغط زر التثبيت.');
         showInstallSection();
         setDownloadButtonState(true, '<i class="fas fa-check-circle"></i><span>اكتمل التنزيل</span>');
       }
@@ -20358,7 +20438,17 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     updateState.started = false;
     updateState.installShown = false;
     updateState.installUrl = updateState.remote?.apkUrl || APP_UPDATE_CONFIG.githubApkDirectUrl;
-    updateProgressUI(100, 'اكتمل التنزيل بنجاح. اضغط على زر التحديث الآن.');
+    updateProgressUI(100, 'اكتمل التنزيل بنجاح. إذا لم تفتح شاشة التثبيت تلقائياً اضغط زر التثبيت.');
+    showInstallSection();
+    setDownloadButtonState(true, '<i class="fas fa-check-circle"></i><span>اكتمل التنزيل</span>');
+  };
+
+  window.onNativeUpdateInstallRequired = function(message){
+    updateState.started = false;
+    updateState.installShown = false;
+    updateState.installUrl = updateState.remote?.apkUrl || APP_UPDATE_CONFIG.githubApkDirectUrl;
+    showProgressSection();
+    updateProgressUI(100, message || 'فعّل السماح بالتثبيت من هذا التطبيق ثم اضغط زر التثبيت.');
     showInstallSection();
     setDownloadButtonState(true, '<i class="fas fa-check-circle"></i><span>اكتمل التنزيل</span>');
   };
@@ -20470,8 +20560,8 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       <div class="force-update-shell" dir="rtl">
         <div class="force-update-badge"><i class="fas fa-rocket"></i> تحديث إلزامي</div>
         <div class="force-update-icon"><i class="fas fa-cloud-arrow-down"></i></div>
-        <h2 class="force-update-title">${remote.title || 'يوجد إصدار جديد من التطبيق'}</h2>
-        <p class="force-update-text">${remote.message || 'يرجى تحديث التطبيق للاستمرار.'}</p>
+        <h2 class="force-update-title">${remote.title || 'تحديث إلزامي'}</h2>
+        <p class="force-update-text">${remote.message || 'دعم أجهزة ذات المعالجات الضعيفة'}</p>
         <div class="force-update-versions">
           <div class="force-update-version-card"><span>نسختك الحالية</span><strong>${current.versionName || '1.0'}</strong></div>
           <div class="force-update-version-card active"><span>النسخة المطلوبة</span><strong>${remote.versionName || '-'}</strong></div>
