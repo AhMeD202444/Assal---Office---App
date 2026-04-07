@@ -7119,7 +7119,7 @@ body.modal-lock{
 }
 
 /* تجميد فعلي للخلفية أثناء أي نافذة/رسالة */
-body.modal-lock > *:not(.request-modal):not(.request-admin-modal):not(.request-track-modal):not(.stats-modal):not(.customer-profile-modal):not(.customers-admin-modal):not(.invoice-track-modal):not(.invoice-admin-modal):not(.activation-overlay):not(.swal2-container){
+body.modal-lock > *:not(.request-modal):not(.request-admin-modal):not(.request-track-modal):not(.stats-modal):not(.customer-profile-modal):not(.customers-admin-modal):not(.invoice-track-modal):not(.invoice-admin-modal):not(.activation-overlay):not(.swal2-container):not(#adModal):not(#adOverlay):not(#promoPopup){
     pointer-events: none !important;
 }
 
@@ -7129,7 +7129,6 @@ body.modal-lock .floating-request-admin-btn,
 body.modal-lock .scroll-top-btn,
 body.modal-lock .header-tech-strip,
 body.modal-lock .promo-popup,
-body.modal-lock #promoPopup,
 body.modal-lock .maintenance-toggle,
 body.modal-lock .offer-banner,
 body.modal-lock .ad-theme,
@@ -7155,17 +7154,34 @@ body.modal-lock .invoice-track-modal,
 body.modal-lock .invoice-admin-modal,
 body.modal-lock .activation-overlay,
 body.modal-lock .swal2-container,
+body.modal-lock #adModal,
+body.modal-lock #adOverlay,
+body.modal-lock #promoPopup,
 body.modal-lock .request-modal *,
 body.modal-lock .request-admin-modal *,
 body.modal-lock .request-track-modal *,
 body.modal-lock .stats-modal *,
 body.modal-lock .customer-profile-modal *,
 body.modal-lock .customers-admin-modal *,
+body.modal-lock .invoice-track-modal *,
+body.modal-lock .invoice-admin-modal *,
 body.modal-lock .activation-overlay *,
-body.modal-lock .swal2-container *{
+body.modal-lock .swal2-container *,
+body.modal-lock #adModal *,
+body.modal-lock #promoPopup *{
     animation-play-state: running !important;
-    pointer-events: auto;
+    pointer-events: auto !important;
     caret-color: auto;
+}
+
+body.modal-lock #adModal,
+body.modal-lock #adOverlay,
+body.modal-lock #promoPopup,
+body.modal-lock #adModal *,
+body.modal-lock #promoPopup *{
+    pointer-events: auto !important;
+    touch-action: auto !important;
+    visibility: visible !important;
 }
 
 .request-modal,
@@ -12216,11 +12232,20 @@ async function markMessagesSeenForAdmin(requestId, req) {
 }
 
 function syncGlobalModalLock() {
+    const isShown = (selector) => {
+        const el = document.querySelector(selector);
+        if (!el) return false;
+        const style = window.getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+    };
+
     const openCustomModal = !!document.querySelector(
         '.request-modal.show, .request-admin-modal.show, .request-track-modal.show, .stats-modal.show, .customer-profile-modal.show, .customers-admin-modal.show, .invoice-track-modal.show, .invoice-admin-modal.show, .activation-overlay.is-open'
     );
     const openSwal = !!document.querySelector('.swal2-container.swal2-backdrop-show');
-    const shouldLock = openCustomModal || openSwal;
+    const adOpen = isShown('#adModal') || isShown('#adOverlay');
+    const promoOpen = isShown('#promoPopup');
+    const shouldLock = openCustomModal || openSwal || adOpen || promoOpen;
     document.documentElement.classList.toggle('modal-lock', shouldLock);
     document.body.classList.toggle('modal-lock', shouldLock);
 }
@@ -14002,6 +14027,7 @@ window.onload = function() {
            popup.style.animation = 'promoPopIn 0.75s cubic-bezier(.2,.8,.2,1) forwards';
 
             document.getElementById('overlay').style.display = 'block';
+            try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch (e) {}
         }, 500);
         sessionStorage.setItem('promoShown', 'true');
     }
@@ -14324,6 +14350,7 @@ function closePopup() {
   const overlay = document.getElementById('overlay');
   const newItemsModal = document.getElementById("newItemsModal");
   const offersModal   = document.getElementById("offersModal");
+  if (!popup) return;
 
   popup.style.animation = 'promoPopOut 0.55s ease-in forwards';
 
@@ -14335,6 +14362,8 @@ function closePopup() {
       const isOffersOpen = offersModal && offersModal.style.display === "flex";
       if (!isNewOpen && !isOffersOpen) overlay.style.display = 'none';
     }
+
+    try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch (e) {}
   }, 560);
 }
 
@@ -18087,6 +18116,29 @@ const LuxAds = (() => {
   const bodyEl  = () => document.querySelector("#adModal .ad-body");
   const shell   = () => document.querySelector("#adModal .ad-shell");
   let duaTimer = null;
+  let adCloseInProgress = false;
+
+  function bindPress(el, handler){
+    if (!el || el.dataset.pressBound === "1") return;
+    el.dataset.pressBound = "1";
+
+    let swallowNextClick = false;
+    const run = (e) => {
+      if (e?.type === "click" && swallowNextClick) {
+        swallowNextClick = false;
+        return;
+      }
+      if (e?.type === "touchend" || e?.type === "pointerup") {
+        swallowNextClick = true;
+      }
+      e?.preventDefault?.();
+      handler(e);
+    };
+
+    el.addEventListener("click", run);
+    el.addEventListener("pointerup", run);
+    el.addEventListener("touchend", run, { passive: false });
+  }
 
   const normalize = (v) => String(v || "").trim().toLowerCase();
   const shownKey  = (k) => `lux_ad_shown__${k}`;
@@ -18116,13 +18168,14 @@ function fadeIn(){
   const o = overlay(), m = modal();
   if (!o || !m) return;
 
-  try{ document.body.classList.add("modal-lock"); }catch(e){}
+  adCloseInProgress = false;
 
   // ابدأ بحالة مخفية حتى ما يطلع فلاش
   o.style.opacity = "0";
   o.style.display = "block";
 
   m.style.display = "grid";
+  try{ if (typeof syncGlobalModalLock === "function") syncGlobalModalLock(); }catch(e){}
 
   // ثبّت الشيل قبل الأنيميشن (خصوصاً إذا GSAP مو موجود)
   try{
@@ -18162,9 +18215,15 @@ function fadeIn(){
 
 
   function close(){
+    if (adCloseInProgress) return;
+    adCloseInProgress = true;
+
     safeClearTimers();
     const o = overlay(), m = modal();
-    if (!o || !m) return;
+    if (!o || !m) {
+      adCloseInProgress = false;
+      return;
+    }
 
     // GSAP exit
     try{
@@ -18178,7 +18237,8 @@ function fadeIn(){
       o.style.display = "none";
       m.style.display = "none";
       if (shell()) shell().style.opacity = "";
-      try{ document.body.classList.remove("modal-lock"); }catch(e){}
+      try{ if (typeof syncGlobalModalLock === "function") syncGlobalModalLock(); }catch(e){}
+      adCloseInProgress = false;
     }, 260);
   }
 
@@ -18189,11 +18249,11 @@ function fadeIn(){
     const btn = m.querySelector(".ad-close");
     if (btn && !btn.dataset.bound){
       btn.dataset.bound = "1";
-      btn.addEventListener("click", close);
+      bindPress(btn, close);
     }
     if (!o.dataset.bound){
       o.dataset.bound = "1";
-      o.addEventListener("click", close);
+      bindPress(o, close);
     }
     if (!m.dataset.bound){
       m.dataset.bound = "1";
@@ -18619,8 +18679,8 @@ function renderInstantInquiryFeature(){
     progress.style.width = `${((current + 1) / slides.length) * 100}%`;
   }
 
-  document.getElementById("iqfClose")?.addEventListener("click", close);
-  document.getElementById("iqfDone")?.addEventListener("click", close);
+  bindPress(document.getElementById("iqfClose"), close);
+  bindPress(document.getElementById("iqfDone"), close);
 
   const onStart = (x) => { dragging = true; startX = x; };
   const onEnd = (x) => {
