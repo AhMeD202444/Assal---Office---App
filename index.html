@@ -205,22 +205,6 @@
             safeStorageRemove('assal_force_low_end');
           }
         };
-
-        window.__ASSAL_QUEUE_LIGHT_MODE_TOAST__ = function(message) {
-          try {
-            safeStorageSet('assal_light_mode_pending_toast', String(message || '').trim());
-          } catch (_) {}
-        };
-
-        window.__ASSAL_CONSUME_LIGHT_MODE_TOAST__ = function() {
-          try {
-            const value = safeStorageGet('assal_light_mode_pending_toast');
-            safeStorageRemove('assal_light_mode_pending_toast');
-            return value;
-          } catch (_) {
-            return null;
-          }
-        };
       })();
     </script>
 
@@ -306,7 +290,68 @@ html.low-end-device, html.low-end-device body {
 }
 
 html.low-end-device .news-bar {
-    box-shadow: none !important;
+    display: none !important;
+}
+
+html.low-end-device.manual-light-news .news-bar {
+    display: flex !important;
+    direction: ltr;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+}
+
+html.low-end-device.manual-light-news .breaking-news {
+    order: 0;
+    margin-left: 0;
+    margin-right: 0;
+    min-width: 82px;
+    padding: 6px 16px;
+    font-size: 15px;
+    flex: 0 0 auto;
+}
+
+html.low-end-device.manual-light-news .news-ticker-container {
+    order: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-start;
+    padding: 0 2px 0 0;
+}
+
+html.low-end-device.manual-light-news .news-ticker,
+html.low-end-device.manual-light-news #newsTicker {
+    position: relative !important;
+    animation: none !important;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+    direction: rtl;
+    font-size: 15px;
+    line-height: 1;
+    gap: 0 !important;
+}
+
+@media (max-width: 420px) {
+    html.low-end-device.manual-light-news .news-bar {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+    html.low-end-device.manual-light-news .breaking-news {
+        min-width: 74px;
+        padding: 5px 12px;
+        font-size: 13px;
+    }
+    html.low-end-device.manual-light-news .news-ticker,
+    html.low-end-device.manual-light-news #newsTicker {
+        font-size: 13px;
+    }
 }
 
 html.low-end-device .notification-container {
@@ -923,7 +968,18 @@ html.low-end-device .result-card:hover p {
     clip-path: inset(0 0 0 0 round 25px) !important; /* تأكيد القص الدائري عند الضغط */
 }
 
-
+html, body, .swal2-container, .swal2-popup, #overlay, #promoPopup {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+html:focus, body:focus, .swal2-container:focus, .swal2-popup:focus, #overlay:focus, #promoPopup:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+html.swal2-shown, body.swal2-shown, body.swal2-height-auto {
+    border: none !important;
+    outline: none !important;
+}
 
         /* Reset and basics */
         * {
@@ -1766,8 +1822,8 @@ h1 {
     -webkit-backdrop-filter: blur(10px) !important;
 }
 .assal-debug-popup{
-    width:min(426px, 92vw) !important;
-    max-width:426px !important;
+    width:min(452px, 92vw) !important;
+    max-width:452px !important;
     padding:0 !important;
     border-radius:18px !important;
     overflow:hidden !important;
@@ -1778,27 +1834,26 @@ h1 {
     box-shadow:0 18px 40px rgba(0,0,0,.85) !important;
     backdrop-filter: blur(18px) !important;
     -webkit-backdrop-filter: blur(18px) !important;
-    max-height:min(72vh, 560px) !important;
 }
 .assal-debug-popup .swal2-title{
     margin:0 !important;
-    padding:12px 14px 4px !important;
-    font-size:16px !important;
+    padding:14px 16px 4px !important;
+    font-size:18px !important;
 }
 .assal-debug-popup .swal2-html-container{
     margin:0 !important;
-    padding:0 10px 12px !important;
+    padding:0 12px 14px !important;
     overflow:visible !important;
 }
 .assal-debug-popup .swal2-actions{
     display:none !important;
 }
 .assal-debug-popup .swal2-close{
-    width:30px !important;
-    height:30px !important;
-    min-width:30px !important;
-    min-height:30px !important;
-    margin:10px 10px 0 auto !important;
+    width:34px !important;
+    height:34px !important;
+    min-width:34px !important;
+    min-height:34px !important;
+    margin:12px 12px 0 auto !important;
     border-radius:999px !important;
     color:#fecaca !important;
     background:linear-gradient(135deg,#7f1d1d,#991b1b) !important;
@@ -1825,17 +1880,17 @@ h1 {
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:6px;
-    padding:4px 2px 2px;
+    gap:8px;
+    padding:6px 2px 4px;
     flex-wrap:wrap;
 }
 .assal-debug-badge{
     display:inline-flex;
     align-items:center;
-    gap:6px;
-    padding:5px 9px;
+    gap:7px;
+    padding:7px 12px;
     border-radius:999px;
-    font-size:10px;
+    font-size:12px;
     font-weight:800;
     background:rgba(255,255,255,.06);
     border:1px solid rgba(255,255,255,.08);
@@ -1858,12 +1913,12 @@ h1 {
 .assal-debug-chip{
     display:inline-flex;
     align-items:center;
-    gap:4px;
-    padding:4px 8px;
+    gap:5px;
+    padding:5px 9px;
     border-radius:999px;
     background:rgba(255,255,255,.05);
     border:1px solid rgba(255,255,255,.07);
-    font-size:9px;
+    font-size:10px;
     color:#dbeafe;
 }
 .assal-debug-bars{
@@ -1874,8 +1929,8 @@ h1 {
 .assal-debug-bar-card{
     background:rgba(255,255,255,.04);
     border:1px solid rgba(255,255,255,.07);
-    border-radius:13px;
-    padding:8px 9px;
+    border-radius:14px;
+    padding:10px 11px;
 }
 .assal-debug-bar-head{
     display:flex;
@@ -1885,16 +1940,16 @@ h1 {
     margin-bottom:6px;
 }
 .assal-debug-bar-label{
-    font-size:10px;
-    opacity:.8;
+    font-size:11px;
+    opacity:.84;
 }
 .assal-debug-bar-value{
-    font-size:10px;
+    font-size:12px;
     font-weight:800;
 }
 .assal-debug-bar-track{
     width:100%;
-    height:8px;
+    height:10px;
     border-radius:999px;
     overflow:hidden;
     background:rgba(255,255,255,.07);
@@ -1911,8 +1966,8 @@ h1 {
     background:linear-gradient(90deg, #ef4444, #b91c1c);
 }
 .assal-debug-scroll{
-    height:172px;
-    max-height:172px;
+    height:176px;
+    max-height:176px;
     overflow:auto;
     padding-inline-end:2px;
     display:grid;
@@ -1929,20 +1984,20 @@ h1 {
 }
 .assal-debug-row{
     display:grid;
-    grid-template-columns:86px 1fr;
-    gap:7px;
+    grid-template-columns:96px 1fr;
+    gap:8px;
     align-items:start;
-    padding:7px 9px;
-    border-radius:11px;
+    padding:9px 10px;
+    border-radius:12px;
     background:rgba(255,255,255,.04);
     border:1px solid rgba(255,255,255,.065);
 }
 .assal-debug-key{
-    font-size:10px;
-    opacity:.68;
+    font-size:11px;
+    opacity:.72;
 }
 .assal-debug-val{
-    font-size:11px;
+    font-size:12px;
     font-weight:700;
     word-break:break-word;
 }
@@ -1956,12 +2011,12 @@ h1 {
 .assal-debug-action{
     appearance:none;
     border:none;
-    border-radius:12px;
-    min-height:38px;
-    height:38px;
-    padding:4px 5px;
+    border-radius:13px;
+    min-height:42px;
+    height:42px;
+    padding:5px 6px;
     font-family:'Cairo',sans-serif;
-    font-size:9px;
+    font-size:10px;
     font-weight:800;
     color:#fff;
     cursor:pointer;
@@ -1975,7 +2030,7 @@ h1 {
     box-shadow:0 6px 14px rgba(0,0,0,.16);
     min-width:0;
 }
-.assal-debug-action i{ font-size:11px; }
+.assal-debug-action i{ font-size:13px; }
 .assal-debug-action span{ line-height:1; white-space:nowrap; }
 .assal-debug-action.action-off{
     background:linear-gradient(135deg, #334155, #475569);
@@ -1999,8 +2054,8 @@ h1 {
 }
 @media (max-width: 520px){
     .assal-debug-bars{ grid-template-columns:1fr 1fr; }
-    .assal-debug-row{ grid-template-columns:1fr; gap:2px; }
-    .assal-debug-scroll{ height:112px; max-height:112px; }
+    .assal-debug-row{ grid-template-columns:1fr; gap:3px; }
+    .assal-debug-scroll{ height:154px; max-height:154px; }
 }
 
 
@@ -2323,31 +2378,6 @@ h1 {
     direction: rtl;
     unicode-bidi: plaintext;
     background: transparent !important; /* ✅ إزالة لون الخلفية */
-}
-
-.news-bar.low-end-banner-mode {
-    justify-content: center;
-}
-.news-bar.low-end-banner-mode .news-ticker-container {
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex:1;
-    text-align:center;
-    padding-inline:10px;
-}
-.news-bar.low-end-banner-mode .news-ticker {
-    position:relative !important;
-    inset:auto !important;
-    width:100%;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    white-space:normal;
-    animation:none !important;
-    transform:none !important;
-    margin:0 auto;
-    line-height:1.35;
 }
 
 
@@ -16888,34 +16918,7 @@ async function refreshData() {
 
  let newsInterval = null;
 
-function applyLowEndNewsBanner() {
-  const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
-  const manualMode = diag.manualOverride || 'none';
-  const newsBar = document.querySelector('.news-bar');
-  const breakingNews = document.querySelector('.breaking-news');
-  const ticker = document.getElementById('newsTicker');
-  if (!newsBar || !breakingNews || !ticker) return false;
-
-  if (manualMode === 'on') {
-    newsBar.style.setProperty('display', 'flex', 'important');
-    newsBar.classList.add('low-end-banner-mode');
-    breakingNews.textContent = '⚡ خفيف';
-    ticker.textContent = 'تم تفعيل الوضع الخفيف في هاتفك';
-    ticker.style.animation = 'none';
-    ticker.style.transform = 'none';
-    return true;
-  }
-
-  newsBar.classList.remove('low-end-banner-mode');
-  breakingNews.textContent = '🔥 تقنيات';
-  ticker.style.animation = '';
-  ticker.style.transform = '';
-  newsBar.style.removeProperty('display');
-  return false;
-}
-
 async function fetchTechNews() {
-  if (applyLowEndNewsBanner()) return;
   if (window.__ASSAL_LOW_END_DEVICE__) return;
   // RSS شغال (بديل عن AITnews لأن feed مالته صار مو RSS)
 const FEED = "http://feeds.feedburner.com/arabhardware";
@@ -17022,15 +17025,54 @@ function stopNewsUpdates() {
 }
 
 // التشغيل الأولي والتحكم
-if (applyLowEndNewsBanner()) {
-    stopNewsUpdates();
-} else if (window.__ASSAL_LOW_END_DEVICE__) {
+function applyManualLightNewsBarState() {
+    const root = document.documentElement;
     const newsBar = document.querySelector('.news-bar');
-    if (newsBar) newsBar.style.display = 'none';
-} else {
-    fetchTechNews(); // تحميل أولي
-    startNewsUpdates();
+    const badge = document.querySelector('.breaking-news');
+    const ticker = document.getElementById('newsTicker');
+    const tickerContainer = document.querySelector('.news-ticker-container');
+    const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
+    const manualMode = String(diag.manualOverride || '').toLowerCase();
+
+    root.classList.remove('manual-light-news');
+
+    if (!newsBar || !badge || !ticker) return;
+
+    if (manualMode === 'on') {
+        root.classList.add('manual-light-news');
+        newsBar.style.display = 'flex';
+        badge.textContent = '⚡ خفيف';
+        if (tickerContainer) {
+            tickerContainer.style.justifyContent = 'flex-start';
+        }
+        ticker.textContent = 'تم تفعيل الوضع الخفيف في هاتفك';
+        ticker.title = 'تم تفعيل الوضع الخفيف في هاتفك';
+        ticker.style.animation = 'none';
+        ticker.style.position = 'relative';
+        ticker.style.whiteSpace = 'nowrap';
+        ticker.style.overflow = 'hidden';
+        ticker.style.textOverflow = 'ellipsis';
+        return;
+    }
+
+    badge.textContent = '🔥 تقنيات';
+    ticker.style.animation = '';
+    ticker.style.position = '';
+    ticker.title = '';
+    ticker.style.whiteSpace = '';
+    ticker.style.overflow = '';
+    ticker.style.textOverflow = '';
+
+    if (window.__ASSAL_LOW_END_DEVICE__) {
+        newsBar.style.display = 'none';
+    } else {
+        newsBar.style.display = 'flex';
+        fetchTechNews(); // تحميل أولي
+        startNewsUpdates();
+    }
 }
+applyManualLightNewsBarState();
+window.__ASSAL_APPLY_NEWS_BAR_STATE__ = applyManualLightNewsBarState;
 
 // ربط التحكم مع عرض النتائج
 document.getElementById("results").addEventListener("transitionend", () => {
@@ -22567,7 +22609,7 @@ ${actionText} ${safeBranch}`;
       window.Swal.fire({
         title: 'فحص الأداء',
         html,
-        width: 414,
+        width: 452,
         showConfirmButton: false,
         showCancelButton: false,
         allowOutsideClick: false,
@@ -22584,35 +22626,39 @@ ${actionText} ${safeBranch}`;
               event.preventDefault();
               event.stopPropagation();
               const mode = btn.getAttribute('data-debug-force');
-              const diagRef = window.__ASSAL_LOW_END_DIAGNOSTICS__ || (window.__ASSAL_LOW_END_DIAGNOSTICS__ = {});
 
               if (mode === 'on') {
                 window.__ASSAL_SET_LOW_END_OVERRIDE__('on');
-                diagRef.manualOverride = 'on';
-                try { window.__ASSAL_QUEUE_LIGHT_MODE_TOAST__('تم تفعيل الوضع الخفيف في هاتفك'); } catch (_) {}
               } else if (mode === 'off') {
                 window.__ASSAL_SET_LOW_END_OVERRIDE__('off');
-                diagRef.manualOverride = 'off';
-                try { window.__ASSAL_QUEUE_LIGHT_MODE_TOAST__('تم تعطيل الوضع الخفيف في هاتفك'); } catch (_) {}
               } else if (mode === 'reset') {
                 window.__ASSAL_SET_LOW_END_OVERRIDE__(null);
-                diagRef.manualOverride = 'none';
-                try { window.__ASSAL_QUEUE_LIGHT_MODE_TOAST__('تمت إعادة الوضع التلقائي في هاتفك'); } catch (_) {}
+                try { localStorage.removeItem('assal_force_low_end'); } catch (_) {}
+                try {
+                  document.documentElement.classList.remove('low-end-device', 'manual-light-news');
+                  document.documentElement.setAttribute('data-device-profile', 'standard');
+                } catch (_) {}
+                try {
+                  window.__ASSAL_LOW_END_DEVICE__ = false;
+                  window.__ASSAL_LOW_END_SOURCE__ = 'standard';
+                  if (window.__ASSAL_LOW_END_DIAGNOSTICS__) {
+                    window.__ASSAL_LOW_END_DIAGNOSTICS__.manualOverride = null;
+                  }
+                } catch (_) {}
               }
 
               try { window.updatePerfDebugButtonState(); } catch (_) {}
-              try { applyLowEndNewsBanner(); } catch (_) {}
-              try { window.Swal.close(); } catch (_) {}
+              try { if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') window.__ASSAL_APPLY_NEWS_BAR_STATE__(); } catch (_) {}
 
+              try { window.Swal.close(); } catch (_) {}
               setTimeout(() => {
                 try {
-                  const u = new URL(window.location.href);
-                  u.searchParams.set('_assalui', String(Date.now()));
-                  window.location.replace(u.toString());
+                  const targetUrl = window.location.pathname + window.location.search + window.location.hash;
+                  window.location.replace(targetUrl);
                 } catch (_) {
                   window.location.reload();
                 }
-              }, 70);
+              }, mode === 'reset' ? 90 : 60);
             }, { passive: false });
           });
         }
@@ -22625,13 +22671,7 @@ ${actionText} ${safeBranch}`;
 
   window.addEventListener('load', () => {
     try { window.updatePerfDebugButtonState(); } catch (_) {}
-    try { applyLowEndNewsBanner(); } catch (_) {}
-    try {
-      const pendingToast = window.__ASSAL_CONSUME_LIGHT_MODE_TOAST__ && window.__ASSAL_CONSUME_LIGHT_MODE_TOAST__();
-      if (pendingToast && typeof window.showElegantTopToast === 'function') {
-        window.showElegantTopToast(pendingToast, 'success', 2600);
-      }
-    } catch (_) {}
+    try { if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') window.__ASSAL_APPLY_NEWS_BAR_STATE__(); } catch (_) {}
     setTimeout(runForceUpdateCheck, APP_UPDATE_CONFIG.checkDelayMs);
   });
 })();
