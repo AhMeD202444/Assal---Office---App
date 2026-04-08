@@ -110,6 +110,159 @@
 
         window.__ASSAL_LOW_END_DEVICE__ = !!isLowEnd;
         window.__ASSAL_LOW_END_SOURCE__ = nativeLow ? 'native' : (heuristicLow ? 'heuristic' : (runtimeLow ? 'runtime' : 'standard'));
+        window.__ASSAL_LOW_END_NATIVE_VALUE__ = nativeValue;
+        window.__ASSAL_LOW_END_HEURISTIC__ = !!heuristicLow;
+        window.__ASSAL_LOW_END_RUNTIME__ = !!runtimeLow;
+        window.__ASSAL_LOW_END_SIGNALS__ = signals;
+      })();
+    </script>
+
+    <style>
+      #assalDebugPanel {
+        position: fixed;
+        top: 6px;
+        left: 6px;
+        right: 6px;
+        z-index: 2147483647;
+        background: rgba(0, 0, 0, 0.92);
+        color: #fff;
+        border: 2px solid #43cea2;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        line-height: 1.5;
+        direction: rtl;
+        box-shadow: 0 6px 20px rgba(0,0,0,.45);
+      }
+      #assalDebugPanel button {
+        margin-top: 8px;
+        margin-left: 6px;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      #assalDebugRefresh { background: #43cea2; color: #111; }
+      #assalDebugClose { background: #ff4b2b; color: #fff; }
+      #assalDebugBody { white-space: pre-wrap; word-break: break-word; }
+    </style>
+
+    <script>
+      (function(){
+        window.__ASSAL_DEBUG__ = {
+          triggerAnimationCalls: 0,
+          maybeShowCalls: 0,
+          maybeShowWrapped: false,
+          triggerWrapped: false,
+          lastMaybeShowAt: '',
+          lastTriggerAt: ''
+        };
+
+        function nowLabel(){
+          try { return new Date().toLocaleTimeString(); } catch(_) { return String(Date.now()); }
+        }
+
+        function tryWrapTrigger(){
+          try {
+            if (window.__ASSAL_DEBUG__.triggerWrapped) return true;
+            if (typeof window.triggerAnimation !== 'function') return false;
+            const original = window.triggerAnimation;
+            window.triggerAnimation = function(){
+              window.__ASSAL_DEBUG__.triggerAnimationCalls += 1;
+              window.__ASSAL_DEBUG__.lastTriggerAt = nowLabel();
+              return original.apply(this, arguments);
+            };
+            window.__ASSAL_DEBUG__.triggerWrapped = true;
+            return true;
+          } catch (_) { return false; }
+        }
+
+        function tryWrapAds(){
+          try {
+            if (window.__ASSAL_DEBUG__.maybeShowWrapped) return true;
+            if (!window.LuxAds || typeof window.LuxAds.maybeShow !== 'function') return false;
+            const original = window.LuxAds.maybeShow;
+            window.LuxAds.maybeShow = function(){
+              window.__ASSAL_DEBUG__.maybeShowCalls += 1;
+              window.__ASSAL_DEBUG__.lastMaybeShowAt = nowLabel();
+              return original.apply(this, arguments);
+            };
+            window.__ASSAL_DEBUG__.maybeShowWrapped = true;
+            return true;
+          } catch (_) { return false; }
+        }
+
+        const wrapTimer = setInterval(() => {
+          const a = tryWrapTrigger();
+          const b = tryWrapAds();
+          if (a && b) clearInterval(wrapTimer);
+        }, 50);
+        setTimeout(() => clearInterval(wrapTimer), 15000);
+
+        function createPanel(){
+          if (document.getElementById('assalDebugPanel')) return document.getElementById('assalDebugPanel');
+          const panel = document.createElement('div');
+          panel.id = 'assalDebugPanel';
+          panel.innerHTML = '<div id="assalDebugBody">جاري الفحص...</div><button id="assalDebugRefresh">تحديث القيم</button><button id="assalDebugClose">إخفاء</button>';
+          document.documentElement.appendChild(panel);
+          panel.querySelector('#assalDebugClose').onclick = () => panel.remove();
+          panel.querySelector('#assalDebugRefresh').onclick = () => updatePanel();
+          return panel;
+        }
+
+        function safeStyle(el, prop){
+          try { return el ? getComputedStyle(el)[prop] : 'N/A'; } catch(_) { return 'ERR'; }
+        }
+
+        window.updatePanel = function(){
+          const panel = createPanel();
+          const body = panel.querySelector('#assalDebugBody');
+          const html = document.documentElement;
+          const logo = document.getElementById('logo');
+          const notification = document.getElementById('notification');
+          const promo = document.getElementById('promoPopup');
+          const signals = window.__ASSAL_LOW_END_SIGNALS__ || {};
+          const lines = [
+            'LOW-END = ' + String(!!window.__ASSAL_LOW_END_DEVICE__),
+            'SOURCE = ' + String(window.__ASSAL_LOW_END_SOURCE__),
+            'NATIVE VALUE = ' + String(window.__ASSAL_LOW_END_NATIVE_VALUE__),
+            'HEURISTIC = ' + String(!!window.__ASSAL_LOW_END_HEURISTIC__),
+            'RUNTIME = ' + String(!!window.__ASSAL_LOW_END_RUNTIME__),
+            'HTML CLASS = ' + String(html.classList.contains('low-end-device')),
+            'CORES = ' + String(signals.cores),
+            'MEM = ' + String(signals.mem),
+            'SCREEN = ' + String(signals.shortEdge) + 'x' + String(signals.longEdge),
+            'DPR = ' + String(signals.dpr),
+            'UA HAS HOT20I = ' + /hot\s*20i|x665/i.test(String(signals.ua || '')),
+            'LOGO ANIMATION = ' + safeStyle(logo, 'animationName'),
+            'LOGO TRANSITION = ' + safeStyle(logo, 'transitionProperty'),
+            'NOTIFICATION CLASS SHOW = ' + String(!!(notification && notification.classList.contains('show'))),
+            'NOTIFICATION ANIMATION = ' + safeStyle(notification, 'animationName'),
+            'PROMO DISPLAY = ' + safeStyle(promo, 'display'),
+            'PROMO VISIBLE FLAG = ' + String(!!(promo && promo.style.display && promo.style.display !== 'none')),
+            'LUXADS EXISTS = ' + String(!!window.LuxAds),
+            'MAYBESHOW WRAPPED = ' + String(!!window.__ASSAL_DEBUG__.maybeShowWrapped),
+            'MAYBESHOW CALLS = ' + String(window.__ASSAL_DEBUG__.maybeShowCalls),
+            'LAST MAYBESHOW = ' + String(window.__ASSAL_DEBUG__.lastMaybeShowAt || '-'),
+            'TRIGGER WRAPPED = ' + String(!!window.__ASSAL_DEBUG__.triggerWrapped),
+            'TRIGGER CALLS = ' + String(window.__ASSAL_DEBUG__.triggerAnimationCalls),
+            'LAST TRIGGER = ' + String(window.__ASSAL_DEBUG__.lastTriggerAt || '-')
+          ];
+          body.textContent = lines.join('
+');
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+          createPanel();
+          setTimeout(() => updatePanel(), 50);
+        });
+        window.addEventListener('load', () => {
+          setTimeout(() => updatePanel(), 300);
+          setTimeout(() => updatePanel(), 1800);
+          setTimeout(() => updatePanel(), 5000);
+        });
       })();
     </script>
 
