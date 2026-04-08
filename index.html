@@ -1766,8 +1766,8 @@ h1 {
     -webkit-backdrop-filter: blur(10px) !important;
 }
 .assal-debug-popup{
-    width:min(414px, 92vw) !important;
-    max-width:414px !important;
+    width:min(426px, 92vw) !important;
+    max-width:426px !important;
     padding:0 !important;
     border-radius:18px !important;
     overflow:hidden !important;
@@ -1778,15 +1778,16 @@ h1 {
     box-shadow:0 18px 40px rgba(0,0,0,.85) !important;
     backdrop-filter: blur(18px) !important;
     -webkit-backdrop-filter: blur(18px) !important;
+    max-height:min(72vh, 560px) !important;
 }
 .assal-debug-popup .swal2-title{
     margin:0 !important;
-    padding:10px 14px 2px !important;
+    padding:12px 14px 4px !important;
     font-size:16px !important;
 }
 .assal-debug-popup .swal2-html-container{
     margin:0 !important;
-    padding:0 10px 10px !important;
+    padding:0 10px 12px !important;
     overflow:visible !important;
 }
 .assal-debug-popup .swal2-actions{
@@ -1910,8 +1911,8 @@ h1 {
     background:linear-gradient(90deg, #ef4444, #b91c1c);
 }
 .assal-debug-scroll{
-    height:118px;
-    max-height:118px;
+    height:172px;
+    max-height:172px;
     overflow:auto;
     padding-inline-end:2px;
     display:grid;
@@ -2322,6 +2323,31 @@ h1 {
     direction: rtl;
     unicode-bidi: plaintext;
     background: transparent !important; /* ✅ إزالة لون الخلفية */
+}
+
+.news-bar.low-end-banner-mode {
+    justify-content: center;
+}
+.news-bar.low-end-banner-mode .news-ticker-container {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:1;
+    text-align:center;
+    padding-inline:10px;
+}
+.news-bar.low-end-banner-mode .news-ticker {
+    position:relative !important;
+    inset:auto !important;
+    width:100%;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    white-space:normal;
+    animation:none !important;
+    transform:none !important;
+    margin:0 auto;
+    line-height:1.35;
 }
 
 
@@ -16872,19 +16898,24 @@ function applyLowEndNewsBanner() {
 
   if (manualMode === 'on') {
     newsBar.style.setProperty('display', 'flex', 'important');
+    newsBar.classList.add('low-end-banner-mode');
     breakingNews.textContent = '⚡ خفيف';
     ticker.textContent = 'تم تفعيل الوضع الخفيف في هاتفك';
     ticker.style.animation = 'none';
+    ticker.style.transform = 'none';
     return true;
   }
 
+  newsBar.classList.remove('low-end-banner-mode');
   breakingNews.textContent = '🔥 تقنيات';
   ticker.style.animation = '';
+  ticker.style.transform = '';
   newsBar.style.removeProperty('display');
   return false;
 }
 
 async function fetchTechNews() {
+  if (applyLowEndNewsBanner()) return;
   if (window.__ASSAL_LOW_END_DEVICE__) return;
   // RSS شغال (بديل عن AITnews لأن feed مالته صار مو RSS)
 const FEED = "http://feeds.feedburner.com/arabhardware";
@@ -22553,19 +22584,35 @@ ${actionText} ${safeBranch}`;
               event.preventDefault();
               event.stopPropagation();
               const mode = btn.getAttribute('data-debug-force');
+              const diagRef = window.__ASSAL_LOW_END_DIAGNOSTICS__ || (window.__ASSAL_LOW_END_DIAGNOSTICS__ = {});
+
               if (mode === 'on') {
                 window.__ASSAL_SET_LOW_END_OVERRIDE__('on');
+                diagRef.manualOverride = 'on';
                 try { window.__ASSAL_QUEUE_LIGHT_MODE_TOAST__('تم تفعيل الوضع الخفيف في هاتفك'); } catch (_) {}
               } else if (mode === 'off') {
                 window.__ASSAL_SET_LOW_END_OVERRIDE__('off');
+                diagRef.manualOverride = 'off';
                 try { window.__ASSAL_QUEUE_LIGHT_MODE_TOAST__('تم تعطيل الوضع الخفيف في هاتفك'); } catch (_) {}
               } else if (mode === 'reset') {
                 window.__ASSAL_SET_LOW_END_OVERRIDE__(null);
+                diagRef.manualOverride = 'none';
                 try { window.__ASSAL_QUEUE_LIGHT_MODE_TOAST__('تمت إعادة الوضع التلقائي في هاتفك'); } catch (_) {}
               }
+
               try { window.updatePerfDebugButtonState(); } catch (_) {}
               try { applyLowEndNewsBanner(); } catch (_) {}
-              window.location.reload();
+              try { window.Swal.close(); } catch (_) {}
+
+              setTimeout(() => {
+                try {
+                  const u = new URL(window.location.href);
+                  u.searchParams.set('_assalui', String(Date.now()));
+                  window.location.replace(u.toString());
+                } catch (_) {
+                  window.location.reload();
+                }
+              }, 70);
             }, { passive: false });
           });
         }
