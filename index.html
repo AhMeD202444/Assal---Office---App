@@ -23,11 +23,19 @@
           const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
           const shortEdge = Math.min(window.screen?.width || window.innerWidth || 0, window.screen?.height || window.innerHeight || 0);
           const smallScreen = shortEdge > 0 && shortEdge <= 480;
+          const ua = String(navigator.userAgent || '').toLowerCase();
+          const knownWeakModel = /(hot\s*20i|x665|infinix\s*x665|android\s*go|itel|tecno\s*pop|spark\s*go|a03\s*core|a04\s*core|a04e|c11|c12|c30)/i.test(ua);
+          const constrainedMidLow = (
+            shortEdge > 0 && shortEdge <= 720 &&
+            ((mem > 0 && mem <= 4) || (cores > 0 && cores <= 8))
+          );
           return !!(
+            knownWeakModel ||
             reduceMotion ||
             (cores > 0 && cores <= 4) ||
             (mem > 0 && mem <= 3) ||
-            (smallScreen && ((cores > 0 && cores <= 6) || (mem > 0 && mem <= 4)))
+            (smallScreen && ((cores > 0 && cores <= 6) || (mem > 0 && mem <= 4))) ||
+            constrainedMidLow
           );
         }
 
@@ -47,12 +55,67 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
-    
-    <!-- PDF libs -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+    <script>
+      (function(){
+        const isLowEnd = !!window.__ASSAL_LOW_END_DEVICE__;
+        const GSAP_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js';
+        const HTML2CANVAS_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        const JSPDF_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        const AUTOTABLE_SRC = 'https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js';
+
+        function loadScript(src, test){
+          return new Promise((resolve, reject) => {
+            try {
+              if (typeof test === 'function' && test()) {
+                resolve(true);
+                return;
+              }
+              const existing = document.querySelector('script[data-assal-src="' + src + '"]');
+              if (existing) {
+                existing.addEventListener('load', () => resolve(true), { once:true });
+                existing.addEventListener('error', () => reject(new Error('Failed to load ' + src)), { once:true });
+                return;
+              }
+              const s = document.createElement('script');
+              s.src = src;
+              s.async = false;
+              s.defer = false;
+              s.dataset.assalSrc = src;
+              s.onload = () => resolve(true);
+              s.onerror = () => reject(new Error('Failed to load ' + src));
+              (document.head || document.documentElement).appendChild(s);
+            } catch (err) {
+              reject(err);
+            }
+          });
+        }
+
+        window.__ASSAL_ENSURE_GSAP__ = async function(){
+          await loadScript(GSAP_SRC, () => !!window.gsap);
+          return !!window.gsap;
+        };
+
+        window.__ASSAL_ENSURE_PDF_LIBS__ = async function(){
+          await loadScript(HTML2CANVAS_SRC, () => !!window.html2canvas);
+          await loadScript(JSPDF_SRC, () => !!(window.jspdf && window.jspdf.jsPDF));
+          await loadScript(AUTOTABLE_SRC, () => {
+            try {
+              return !!(window.jspdf && window.jspdf.jsPDF && typeof new window.jspdf.jsPDF().autoTable === 'function');
+            } catch (_) {
+              return false;
+            }
+          });
+          return true;
+        };
+
+        if (!isLowEnd) {
+          document.write('<script src="' + GSAP_SRC + '"><\/script>');
+          document.write('<script src="' + HTML2CANVAS_SRC + '"><\/script>');
+          document.write('<script src="' + JSPDF_SRC + '"><\/script>');
+          document.write('<script src="' + AUTOTABLE_SRC + '"><\/script>');
+        }
+      })();
+    </script>
 
 
 
@@ -65,6 +128,87 @@
 
     <style>
 
+
+/* ===== وضع قوي مخصص للأجهزة الضعيفة فقط ===== */
+html.low-end-device, html.low-end-device body {
+    scroll-behavior: auto !important;
+}
+
+html.low-end-device .news-bar,
+html.low-end-device .notification-container {
+    display: none !important;
+}
+
+html.low-end-device .header-brand-logo::after,
+html.low-end-device .notification,
+html.low-end-device .notification::before,
+html.low-end-device .news-ticker,
+html.low-end-device #closeBtn,
+html.low-end-device .loading-circle,
+html.low-end-device body,
+html.low-end-device .container,
+html.low-end-device .result-card,
+html.low-end-device .category,
+html.low-end-device .category i,
+html.low-end-device .slider-btn,
+html.low-end-device .header-btn,
+html.low-end-device .search-container input,
+html.low-end-device .search-container button,
+html.low-end-device .search-container .clear-btn,
+html.low-end-device .logo-container,
+html.low-end-device .logo-container img {
+    animation: none !important;
+    transition: none !important;
+}
+
+html.low-end-device #overlay,
+html.low-end-device #promoPopup,
+html.low-end-device #newItemsModal,
+html.low-end-device .slider-container,
+html.low-end-device .container,
+html.low-end-device .wholesale-suggestions,
+html.low-end-device .swal2-popup {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+html.low-end-device .floating-new-btn,
+html.low-end-device .new-items-count,
+html.low-end-device .result-card,
+html.low-end-device .category,
+html.low-end-device .slider-btn,
+html.low-end-device .header-btn,
+html.low-end-device .scroll-to-top,
+html.low-end-device .news-bar,
+html.low-end-device .search-container input,
+html.low-end-device .search-container button,
+html.low-end-device .search-container .clear-btn,
+html.low-end-device #promoPopup,
+html.low-end-device #newItemsModal,
+html.low-end-device .container {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    will-change: auto !important;
+}
+
+html.low-end-device .results,
+html.low-end-device .results-container,
+html.low-end-device .request-messages {
+    transform: none !important;
+}
+
+html.low-end-device .result-card:hover,
+html.low-end-device .category:hover,
+html.low-end-device .slider-btn:hover,
+html.low-end-device .header-btn:hover,
+html.low-end-device #promoImage:hover,
+html.low-end-device .logo-container:active,
+html.low-end-device .result-card:hover img,
+html.low-end-device .result-card:hover p {
+    transform: none !important;
+    box-shadow: none !important;
+}
 
 
 /* تنسيق الدائرة العائمة */
@@ -12476,7 +12620,7 @@ window.submitCustomerProfile = async function() {
 
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
-        if (localStorage.getItem('isActivated') === 'true' && !isAdminUser()) {
+        if (!window.__ASSAL_LOW_END_DEVICE__ && localStorage.getItem('isActivated') === 'true' && !isAdminUser()) {
             queueCustomerProfilePrompt();
         }
     }, 800);
@@ -13926,6 +14070,7 @@ floatingBtn.addEventListener("click", (e) => {
 
 
 function triggerAnimation() {
+    if (window.__ASSAL_LOW_END_DEVICE__) return;
     const logo = document.getElementById("logo");
     const notification = document.getElementById("notification");
     const notificationText = document.getElementById("notification-text");
@@ -14054,6 +14199,23 @@ function clearMaintenanceBypass() {
       
  let showPromoPopup = false; // 🔥 يتحكم فقط في النافذة المنبثقة، false = تعطيل النافذة
 let promoAlreadyShown = sessionStorage.getItem('promoShown') === 'true';
+let assalBootDataPromise = null;
+
+function runAssalBootDataLoad() {
+    if (!assalBootDataPromise) {
+        assalBootDataPromise = loadExcelFiles();
+    }
+    return assalBootDataPromise;
+}
+
+function runLowEndDeferred(task, delay = 2600) {
+    if (typeof task !== 'function') return;
+    if (window.requestIdleCallback) {
+        requestIdleCallback(() => setTimeout(task, delay), { timeout: delay + 1200 });
+    } else {
+        setTimeout(task, delay);
+    }
+}
 
 window.onload = function() {
 
@@ -14093,14 +14255,34 @@ window.onload = function() {
     }
 
     // ✅ هنا طبيعي يدخل
-    triggerAnimation();
-    queueCustomerProfilePrompt();
+    if (window.__ASSAL_LOW_END_DEVICE__) {
+        try {
+            const logo = document.getElementById('logo');
+            const notification = document.getElementById('notification');
+            if (logo) {
+                logo.style.animation = 'none';
+                logo.style.opacity = '1';
+            }
+            if (notification) {
+                notification.classList.remove('show');
+                notification.style.animation = 'none';
+                notification.style.opacity = '0';
+            }
+        } catch (_) {}
 
-    // ===== Lux Ads System (Popup Ads) =====
-    LuxAds.maybeShow();
+        runLowEndDeferred(() => {
+            try { queueCustomerProfilePrompt(); } catch (_) {}
+        }, 2400);
+    } else {
+        triggerAnimation();
+        queueCustomerProfilePrompt();
+
+        // ===== Lux Ads System (Popup Ads) =====
+        LuxAds.maybeShow();
+    }
 
 
-    if (showPromoPopup && !promoAlreadyShown) {
+    if (showPromoPopup && !promoAlreadyShown && !window.__ASSAL_LOW_END_DEVICE__) {
         const openPromoPopupWhenAllowed = (attempt = 0) => {
             const updateBusy = !!(window.__ASSAL_FORCE_UPDATE_PENDING__ || window.__ASSAL_FORCE_UPDATE_ACTIVE__);
             if (updateBusy) {
@@ -14126,10 +14308,16 @@ window.onload = function() {
         openPromoPopupWhenAllowed();
     }
 
-    loadExcelFiles().then(result => {
+    runAssalBootDataLoad().then(result => {
         if (result.success) {
             console.log("تم تحميل البيانات بنجاح، جارٍ تحميل العناصر الجديدة.");
-            loadNewItems();
+            if (window.__ASSAL_LOW_END_DEVICE__) {
+                runLowEndDeferred(() => {
+                    try { loadNewItems(); } catch (e) { console.warn('low-end deferred loadNewItems failed', e); }
+                }, 3200);
+            } else {
+                loadNewItems();
+            }
         } else {
             console.warn("فشل تحميل البيانات:", result.message);
         }
@@ -16200,11 +16388,14 @@ async function refreshData() {
 
 
         
-        loadExcelFiles();
+        if (!window.__ASSAL_LOW_END_DEVICE__) {
+            loadExcelFiles();
+        }
 
  let newsInterval = null;
 
 async function fetchTechNews() {
+  if (window.__ASSAL_LOW_END_DEVICE__) return;
   // RSS شغال (بديل عن AITnews لأن feed مالته صار مو RSS)
 const FEED = "http://feeds.feedburner.com/arabhardware";
 
@@ -16285,6 +16476,7 @@ function restartNewsTicker() {
 }
 
 function refreshNewsTicker() {
+    if (window.__ASSAL_LOW_END_DEVICE__) return;
     const resultsContainer = document.getElementById("results");
 
     if (resultsContainer.style.display !== "flex") { // فقط إذا النتائج مو معروضة
@@ -16295,6 +16487,7 @@ function refreshNewsTicker() {
 
 // دوال التحكم بالتحديث
 function startNewsUpdates() {
+    if (window.__ASSAL_LOW_END_DEVICE__) return;
     if (!newsInterval) {
         newsInterval = setInterval(fetchTechNews, 60000); // تحديث كل دقيقة
     }
@@ -16308,8 +16501,13 @@ function stopNewsUpdates() {
 }
 
 // التشغيل الأولي والتحكم
-fetchTechNews(); // تحميل أولي
-startNewsUpdates();
+if (window.__ASSAL_LOW_END_DEVICE__) {
+    const newsBar = document.querySelector('.news-bar');
+    if (newsBar) newsBar.style.display = 'none';
+} else {
+    fetchTechNews(); // تحميل أولي
+    startNewsUpdates();
+}
 
 // ربط التحكم مع عرض النتائج
 document.getElementById("results").addEventListener("transitionend", () => {
@@ -17718,6 +17916,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   imgBtn.addEventListener("click", async ()=>{
     try{
+      if (window.__ASSAL_ENSURE_PDF_LIBS__) await window.__ASSAL_ENSURE_PDF_LIBS__();
       if(!window.html2canvas) throw new Error("html2canvas is not loaded");
       await checkoutImage();
     }catch(e){
@@ -17731,6 +17930,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 async function exportInvoicePDF_AutoTable(filename, {invNo, dateStr, subtotal, discount, total, note}) {
+  if (window.__ASSAL_ENSURE_PDF_LIBS__) await window.__ASSAL_ENSURE_PDF_LIBS__();
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -17792,6 +17992,7 @@ async function exportInvoicePDF_AutoTable(filename, {invNo, dateStr, subtotal, d
 
 
 async function exportInvoicePDF(filename){
+  if (window.__ASSAL_ENSURE_PDF_LIBS__) await window.__ASSAL_ENSURE_PDF_LIBS__();
   const el = document.getElementById("invoiceTemplate");
   if(!el) throw new Error("invoiceTemplate missing");
 
@@ -17981,7 +18182,8 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       console.log("PDF click ✅");
 
-     if (!window.jspdf || !window.jspdf.jsPDF) throw new Error("jsPDF not loaded");
+      if (window.__ASSAL_ENSURE_PDF_LIBS__) await window.__ASSAL_ENSURE_PDF_LIBS__();
+      if (!window.jspdf || !window.jspdf.jsPDF) throw new Error("jsPDF not loaded");
 const t = new window.jspdf.jsPDF();
 if (typeof t.autoTable !== "function") throw new Error("autoTable not loaded (check the script in <head>)");
 
@@ -18885,6 +19087,7 @@ function renderInstantInquiryFeature(){
 
 
 window.addEventListener("load", () => {
+  if (window.__ASSAL_LOW_END_DEVICE__) return;
   const tryShowStartupAds = (attempt = 0) => {
     const updateBusy = !!(window.__ASSAL_FORCE_UPDATE_PENDING__ || window.__ASSAL_FORCE_UPDATE_ACTIVE__);
     if (updateBusy) {
@@ -18899,6 +19102,7 @@ window.addEventListener("load", () => {
 });
 
 document.addEventListener("visibilitychange", () => {
+  if (window.__ASSAL_LOW_END_DEVICE__) return;
   if (!document.hidden) {
     try{ LuxAds.maybeShow(); }catch(e){}
   }
