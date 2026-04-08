@@ -8,6 +8,11 @@
 
     <script>
       (function () {
+        function safeNumber(value) {
+          const n = Number(value);
+          return Number.isFinite(n) ? n : 0;
+        }
+
         function nativeLowEndValue() {
           try {
             if (window.Android && typeof window.Android.isLowEndDevice === 'function') {
@@ -17,30 +22,84 @@
           return null;
         }
 
-        function heuristicLowEndValue() {
-          const cores = Number(navigator.hardwareConcurrency || 0);
-          const mem = Number(navigator.deviceMemory || 0);
-          const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-          const shortEdge = Math.min(window.screen?.width || window.innerWidth || 0, window.screen?.height || window.innerHeight || 0);
-          const smallScreen = shortEdge > 0 && shortEdge <= 480;
+        function getDeviceSignals() {
+          const width = safeNumber(window.screen && window.screen.width) || safeNumber(window.innerWidth);
+          const height = safeNumber(window.screen && window.screen.height) || safeNumber(window.innerHeight);
+          const shortEdge = Math.min(width || 0, height || 0);
+          const longEdge = Math.max(width || 0, height || 0);
+          const cores = safeNumber(navigator.hardwareConcurrency || 0);
+          const mem = safeNumber(navigator.deviceMemory || 0);
+          const dpr = safeNumber(window.devicePixelRatio || 1);
           const ua = String(navigator.userAgent || '').toLowerCase();
-          const knownWeakModel = /(hot\s*20i|x665|infinix\s*x665|android\s*go|itel|tecno\s*pop|spark\s*go|a03\s*core|a04\s*core|a04e|c11|c12|c30)/i.test(ua);
-          const constrainedMidLow = (
-            shortEdge > 0 && shortEdge <= 720 &&
-            ((mem > 0 && mem <= 4) || (cores > 0 && cores <= 8))
+          const android = /android/i.test(ua);
+          const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+          return { width, height, shortEdge, longEdge, cores, mem, dpr, ua, android, reduceMotion };
+        }
+
+        function runtimeLowEndValue(signals) {
+          try {
+            const t0 = performance.now();
+            let acc = 0;
+            for (let i = 0; i < 450000; i++) {
+              acc += (i & 7);
+            }
+            const cpuMs = performance.now() - t0;
+            window.__ASSAL_LOW_END_CPU_BENCH__ = cpuMs;
+            window.__ASSAL_LOW_END_CPU_ACC__ = acc;
+
+            return !!(
+              cpuMs >= 24 ||
+              (
+                signals.android &&
+                signals.shortEdge > 0 && signals.shortEdge <= 412 &&
+                signals.longEdge > 0 && signals.longEdge <= 915 &&
+                signals.cores > 0 && signals.cores <= 8 &&
+                cpuMs >= 15
+              )
+            );
+          } catch (_) {
+            return false;
+          }
+        }
+
+        function heuristicLowEndValue(signals) {
+          const knownWeakModel = /(hot\s*20i|x665|infinix\s*x665|android\s*go|itel|tecno\s*pop|spark\s*go|a03\s*core|a04\s*core|a04e|c11|c12|c30|redmi\s*a1|redmi\s*a2|moto\s*e|galaxy\s*a0[34]e?)/i.test(signals.ua);
+          const compactBudgetAndroid = (
+            signals.android &&
+            signals.shortEdge > 0 && signals.shortEdge <= 412 &&
+            signals.longEdge > 0 && signals.longEdge <= 915
           );
+          const explicitLowSpec = (
+            (signals.cores > 0 && signals.cores <= 4) ||
+            (signals.mem > 0 && signals.mem <= 3)
+          );
+          const likelyEntryLevelAndroid = (
+            compactBudgetAndroid &&
+            (
+              (signals.mem > 0 && signals.mem <= 4 && signals.cores > 0 && signals.cores <= 8) ||
+              (signals.mem === 0 && signals.cores === 8 && signals.dpr <= 2.75)
+            )
+          );
+          const compactMidLow = (
+            compactBudgetAndroid &&
+            signals.cores > 0 && signals.cores <= 6
+          );
+
           return !!(
             knownWeakModel ||
-            reduceMotion ||
-            (cores > 0 && cores <= 4) ||
-            (mem > 0 && mem <= 3) ||
-            (smallScreen && ((cores > 0 && cores <= 6) || (mem > 0 && mem <= 4))) ||
-            constrainedMidLow
+            signals.reduceMotion ||
+            explicitLowSpec ||
+            compactMidLow ||
+            likelyEntryLevelAndroid
           );
         }
 
         const nativeValue = nativeLowEndValue();
-        const isLowEnd = nativeValue === true || nativeValue === 'true' || (nativeValue == null && heuristicLowEndValue());
+        const signals = getDeviceSignals();
+        const heuristicLow = heuristicLowEndValue(signals);
+        const runtimeLow = runtimeLowEndValue(signals);
+        const nativeLow = nativeValue === true || nativeValue === 'true';
+        const isLowEnd = !!(nativeLow || heuristicLow || runtimeLow);
 
         if (isLowEnd) {
           document.documentElement.classList.add('low-end-device');
@@ -50,6 +109,7 @@
         }
 
         window.__ASSAL_LOW_END_DEVICE__ = !!isLowEnd;
+        window.__ASSAL_LOW_END_SOURCE__ = nativeLow ? 'native' : (heuristicLow ? 'heuristic' : (runtimeLow ? 'runtime' : 'standard'));
       })();
     </script>
 
