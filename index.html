@@ -6,11 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Phone Parts Pro</title>
 
-    <script>
+        <script>
       (function () {
         function safeNumber(value) {
           const n = Number(value);
           return Number.isFinite(n) ? n : 0;
+        }
+
+        function safeStorageGet(key) {
+          try { return window.localStorage ? window.localStorage.getItem(key) : null; } catch (_) { return null; }
+        }
+
+        function safeStorageSet(key, value) {
+          try { if (window.localStorage) window.localStorage.setItem(key, value); } catch (_) {}
+        }
+
+        function safeStorageRemove(key) {
+          try { if (window.localStorage) window.localStorage.removeItem(key); } catch (_) {}
         }
 
         function nativeLowEndValue() {
@@ -33,83 +45,161 @@
           const ua = String(navigator.userAgent || '').toLowerCase();
           const android = /android/i.test(ua);
           const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-          return { width, height, shortEdge, longEdge, cores, mem, dpr, ua, android, reduceMotion };
+          const maxTouchPoints = safeNumber(navigator.maxTouchPoints || 0);
+          const pixelArea = safeNumber(width) * safeNumber(height);
+          const compactBudgetAndroid = (
+            android &&
+            shortEdge > 0 && shortEdge <= 430 &&
+            longEdge > 0 && longEdge <= 970
+          );
+          const smallishAndroid = (
+            android &&
+            shortEdge > 0 && shortEdge <= 450 &&
+            longEdge > 0 && longEdge <= 1040
+          );
+          const budgetBrand = /(infinix|itel|tecno|itel_a|itel s|itel p|itel a|itel vision|smart go|android go|lava|mobicel|symphony|umidigi|doogee|blackview|cubot|ulefone|oukitel|redmi a|redmi \d+a|realme c|pova neo|spark go|pop \d|narzo 50a prime)/i.test(ua);
+
+          return {
+            width, height, shortEdge, longEdge, cores, mem, dpr, ua,
+            android, reduceMotion, maxTouchPoints, pixelArea,
+            compactBudgetAndroid, smallishAndroid, budgetBrand
+          };
         }
 
         function runtimeLowEndValue(signals) {
           try {
-            const t0 = performance.now();
-            let acc = 0;
-            for (let i = 0; i < 450000; i++) {
-              acc += (i & 7);
-            }
-            const cpuMs = performance.now() - t0;
-            window.__ASSAL_LOW_END_CPU_BENCH__ = cpuMs;
-            window.__ASSAL_LOW_END_CPU_ACC__ = acc;
+            const benches = [];
+            let sink = 0;
 
-            return !!(
-              cpuMs >= 24 ||
-              (
-                signals.android &&
-                signals.shortEdge > 0 && signals.shortEdge <= 412 &&
-                signals.longEdge > 0 && signals.longEdge <= 915 &&
-                signals.cores > 0 && signals.cores <= 8 &&
-                cpuMs >= 15
-              )
-            );
+            function bench(loopCount, bitMask) {
+              const t0 = performance.now();
+              for (let i = 0; i < loopCount; i++) {
+                sink += (i & bitMask);
+              }
+              return performance.now() - t0;
+            }
+
+            benches.push(bench(250000, 7));
+            benches.push(bench(400000, 15));
+            benches.push(bench(650000, 31));
+
+            const cpuMs = benches.reduce((a, b) => a + b, 0);
+            window.__ASSAL_LOW_END_CPU_BENCH__ = cpuMs;
+            window.__ASSAL_LOW_END_CPU_BENCH_STEPS__ = benches.slice();
+            window.__ASSAL_LOW_END_CPU_ACC__ = sink;
+
+            let score = 0;
+            if (cpuMs >= 28) score = 7;
+            else if (cpuMs >= 20) score = 6;
+            else if (cpuMs >= 14) score = 4;
+            else if (cpuMs >= 9) score = 3;
+            else if (cpuMs >= 6.5) score = 2;
+            else if (cpuMs >= 4.5) score = 1;
+
+            if (signals.compactBudgetAndroid && cpuMs >= 5.5) score += 2;
+            else if (signals.smallishAndroid && cpuMs >= 4.25) score += 1;
+
+            score = Math.min(10, score);
+            return { isLow: score >= 5, score, cpuMs, benches };
           } catch (_) {
-            return false;
+            return { isLow: false, score: 0, cpuMs: 0, benches: [] };
           }
         }
 
         function heuristicLowEndValue(signals) {
-          const knownWeakModel = /(hot\s*20i|x665|infinix\s*x665|android\s*go|itel|tecno\s*pop|spark\s*go|a03\s*core|a04\s*core|a04e|c11|c12|c30|redmi\s*a1|redmi\s*a2|moto\s*e|galaxy\s*a0[34]e?)/i.test(signals.ua);
-          const compactBudgetAndroid = (
-            signals.android &&
-            signals.shortEdge > 0 && signals.shortEdge <= 412 &&
-            signals.longEdge > 0 && signals.longEdge <= 915
-          );
-          const explicitLowSpec = (
-            (signals.cores > 0 && signals.cores <= 4) ||
-            (signals.mem > 0 && signals.mem <= 3)
-          );
-          const likelyEntryLevelAndroid = (
-            compactBudgetAndroid &&
-            (
-              (signals.mem > 0 && signals.mem <= 4 && signals.cores > 0 && signals.cores <= 8) ||
-              (signals.mem === 0 && signals.cores === 8 && signals.dpr <= 2.75)
-            )
-          );
-          const compactMidLow = (
-            compactBudgetAndroid &&
-            signals.cores > 0 && signals.cores <= 6
-          );
+          const knownWeakModel = /(hot\s*10i|hot\s*11\s*(play|2022)?|hot\s*12(\s*(play|i))?|hot\s*20i|x665|x665b|infinix\s*x665|infinix\s*smart|smart\s*[6-9]|smart\s*hd|android\s*go|itel|tecno\s*(pop|spark\s*go|spark\s*8c|spark\s*9c|spark\s*10c)|a0[34](e| core)?|a05|a06|moto\s*e\d*|redmi\s*a[12]|redmi\s*9a|redmi\s*10a|realme\s*c(2|3|11|20|21|30|31|33|35|51|53)\b|nokia\s*c[123]\b|c11|c12|c30)/i.test(signals.ua);
 
-          return !!(
-            knownWeakModel ||
-            signals.reduceMotion ||
-            explicitLowSpec ||
-            compactMidLow ||
-            likelyEntryLevelAndroid
-          );
+          let score = 0;
+
+          if (knownWeakModel) score += 8;
+          if (signals.reduceMotion) score += 2;
+
+          if (signals.mem > 0 && signals.mem <= 3) score += 5;
+          else if (signals.mem > 0 && signals.mem <= 4) score += 3;
+          else if (signals.mem > 0 && signals.mem <= 6 && signals.compactBudgetAndroid) score += 1;
+
+          if (signals.cores > 0 && signals.cores <= 4) score += 4;
+          else if (signals.cores > 0 && signals.cores <= 6) score += 2;
+          else if (signals.cores > 0 && signals.cores <= 8 && signals.compactBudgetAndroid && signals.dpr <= 2.8) score += 1;
+
+          if (signals.compactBudgetAndroid) score += 2;
+          else if (signals.smallishAndroid && signals.dpr <= 2.8) score += 1;
+
+          if (signals.budgetBrand && signals.compactBudgetAndroid) score += 3;
+          else if (signals.budgetBrand && signals.smallishAndroid) score += 2;
+
+          if (signals.mem === 0 && signals.compactBudgetAndroid && signals.cores === 8 && signals.dpr <= 2.85) score += 3;
+          if (signals.maxTouchPoints > 0 && signals.maxTouchPoints <= 5 && signals.compactBudgetAndroid) score += 1;
+
+          score = Math.min(10, score);
+          return { isLow: score >= 6, score, knownWeakModel };
         }
 
+        const manualOverride = safeStorageGet('assal_force_low_end');
         const nativeValue = nativeLowEndValue();
         const signals = getDeviceSignals();
-        const heuristicLow = heuristicLowEndValue(signals);
-        const runtimeLow = runtimeLowEndValue(signals);
+        const heuristicResult = heuristicLowEndValue(signals);
+        const runtimeResult = runtimeLowEndValue(signals);
         const nativeLow = nativeValue === true || nativeValue === 'true';
-        const isLowEnd = !!(nativeLow || heuristicLow || runtimeLow);
+
+        const finalScore = Math.max(
+          nativeLow ? 10 : 0,
+          heuristicResult.score,
+          runtimeResult.score,
+          heuristicResult.score + Math.min(3, Math.floor(runtimeResult.score / 2))
+        );
+
+        const isForcedOn = manualOverride === 'on';
+        const isForcedOff = manualOverride === 'off';
+
+        const isLowEnd = !!(
+          isForcedOn ||
+          (!isForcedOff && (
+            nativeLow ||
+            heuristicResult.score >= 6 ||
+            runtimeResult.score >= 6 ||
+            (heuristicResult.score >= 4 && runtimeResult.score >= 2) ||
+            (signals.budgetBrand && signals.compactBudgetAndroid && heuristicResult.score >= 5)
+          ))
+        );
 
         if (isLowEnd) {
           document.documentElement.classList.add('low-end-device');
           document.documentElement.setAttribute('data-device-profile', 'low-end');
         } else {
+          document.documentElement.classList.remove('low-end-device');
           document.documentElement.setAttribute('data-device-profile', 'standard');
         }
 
         window.__ASSAL_LOW_END_DEVICE__ = !!isLowEnd;
-        window.__ASSAL_LOW_END_SOURCE__ = nativeLow ? 'native' : (heuristicLow ? 'heuristic' : (runtimeLow ? 'runtime' : 'standard'));
+        window.__ASSAL_LOW_END_SOURCE__ =
+          isForcedOn ? 'manual-on' :
+          isForcedOff ? 'manual-off' :
+          nativeLow ? 'native' :
+          (heuristicResult.score >= runtimeResult.score && heuristicResult.score >= 4) ? 'heuristic' :
+          runtimeResult.score >= 4 ? 'runtime' : 'standard';
+
+        window.__ASSAL_LOW_END_DIAGNOSTICS__ = {
+          manualOverride,
+          nativeValue,
+          nativeLow,
+          heuristicLow: !!heuristicResult.isLow,
+          heuristicScore: heuristicResult.score,
+          runtimeLow: !!runtimeResult.isLow,
+          runtimeScore: runtimeResult.score,
+          finalScore,
+          signals,
+          benches: runtimeResult.benches || [],
+          cpuBench: runtimeResult.cpuMs || 0
+        };
+
+        window.__ASSAL_SET_LOW_END_OVERRIDE__ = function(mode) {
+          if (mode === 'on' || mode === 'off') {
+            safeStorageSet('assal_force_low_end', mode);
+          } else {
+            safeStorageRemove('assal_force_low_end');
+          }
+        };
       })();
     </script>
 
@@ -1616,12 +1706,254 @@ h1 {
 }
 
 
+
 .header-btn.debug-btn{
+    position: relative;
     background: linear-gradient(135deg, #0f766e, #0ea5a4);
+    box-shadow: 0 3px 10px rgba(14, 165, 164, 0.35);
+}
+.header-btn.debug-btn::after{
+    content:"";
+    position:absolute;
+    top:5px;
+    right:5px;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#99f6e4;
+    box-shadow:0 0 8px rgba(153,246,228,.9);
 }
 .header-btn.debug-btn:hover{
     background: linear-gradient(135deg, #14b8a6, #0f766e);
+    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.45);
 }
+
+.assal-debug-popup{
+    width:min(560px, 94vw) !important;
+    max-width:560px !important;
+    padding:0 !important;
+    border-radius:22px !important;
+    overflow:hidden !important;
+    background:
+      radial-gradient(circle at top right, rgba(16,185,129,.16), transparent 35%),
+      linear-gradient(135deg, rgba(10,15,27,.98), rgba(14,23,42,.98)) !important;
+    border:1px solid rgba(255,255,255,.08) !important;
+    box-shadow:0 18px 50px rgba(0,0,0,.55) !important;
+}
+.assal-debug-popup .swal2-title{
+    margin:0 !important;
+    padding:20px 20px 8px !important;
+    font-size:24px !important;
+}
+.assal-debug-popup .swal2-html-container{
+    margin:0 !important;
+    padding:0 14px 14px !important;
+    overflow:visible !important;
+}
+.assal-debug-popup .swal2-actions{
+    margin:0 !important;
+    padding:0 14px 16px !important;
+}
+.assal-debug-popup .swal2-confirm{
+    min-width:110px !important;
+}
+.assal-debug-shell{
+    direction:rtl;
+    text-align:right;
+    font-family:'Cairo',sans-serif;
+}
+.assal-debug-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 4px 14px;
+    flex-wrap:wrap;
+}
+.assal-debug-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.08);
+}
+.assal-debug-badge.is-low{
+    background:linear-gradient(135deg, rgba(185,28,28,.25), rgba(239,68,68,.12));
+    border-color:rgba(248,113,113,.28);
+    color:#fecaca;
+}
+.assal-debug-badge.is-standard{
+    background:linear-gradient(135deg, rgba(8,145,178,.22), rgba(6,182,212,.10));
+    border-color:rgba(103,232,249,.24);
+    color:#cffafe;
+}
+.assal-debug-chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
+.assal-debug-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 10px;
+    border-radius:999px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.08);
+    font-size:11px;
+    color:#dbeafe;
+}
+.assal-debug-metrics{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:10px;
+    margin-bottom:12px;
+}
+.assal-debug-card{
+    background:rgba(255,255,255,.055);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:16px;
+    padding:12px;
+}
+.assal-debug-card-title{
+    font-size:12px;
+    opacity:.72;
+    margin-bottom:6px;
+}
+.assal-debug-card-value{
+    font-size:20px;
+    font-weight:800;
+    color:#fff;
+}
+.assal-debug-card-sub{
+    font-size:11px;
+    opacity:.7;
+    margin-top:4px;
+}
+.assal-debug-section-title{
+    font-size:13px;
+    font-weight:800;
+    margin:10px 0 8px;
+    color:#d1fae5;
+}
+.assal-debug-bars{
+    display:grid;
+    gap:10px;
+}
+.assal-debug-bar-card{
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:16px;
+    padding:10px 12px;
+}
+.assal-debug-bar-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:8px;
+}
+.assal-debug-bar-label{
+    font-size:12px;
+    opacity:.82;
+}
+.assal-debug-bar-value{
+    font-size:12px;
+    font-weight:800;
+}
+.assal-debug-bar-track{
+    width:100%;
+    height:10px;
+    border-radius:999px;
+    overflow:hidden;
+    background:rgba(255,255,255,.08);
+}
+.assal-debug-bar-fill{
+    height:100%;
+    border-radius:999px;
+    background:linear-gradient(90deg, #0ea5a4, #22c55e);
+}
+.assal-debug-bar-fill.warn{
+    background:linear-gradient(90deg, #f59e0b, #f97316);
+}
+.assal-debug-bar-fill.danger{
+    background:linear-gradient(90deg, #ef4444, #b91c1c);
+}
+.assal-debug-scroll{
+    max-height:34vh;
+    overflow:auto;
+    padding-inline-end:2px;
+    display:grid;
+    gap:8px;
+}
+.assal-debug-scroll::-webkit-scrollbar{
+    width:8px;
+}
+.assal-debug-scroll::-webkit-scrollbar-thumb{
+    background:linear-gradient(180deg, rgba(34,197,94,.65), rgba(14,165,164,.65));
+    border-radius:999px;
+}
+.assal-debug-scroll::-webkit-scrollbar-track{
+    background:rgba(255,255,255,.05);
+    border-radius:999px;
+}
+.assal-debug-row{
+    display:grid;
+    grid-template-columns:120px 1fr;
+    gap:10px;
+    align-items:start;
+    padding:10px 12px;
+    border-radius:14px;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.07);
+}
+.assal-debug-key{
+    font-size:12px;
+    opacity:.72;
+}
+.assal-debug-val{
+    font-size:13px;
+    font-weight:700;
+    word-break:break-word;
+}
+.assal-debug-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:12px;
+}
+.assal-debug-action{
+    appearance:none;
+    border:none;
+    border-radius:14px;
+    padding:10px 12px;
+    font-family:'Cairo',sans-serif;
+    font-size:12px;
+    font-weight:800;
+    color:#fff;
+    cursor:pointer;
+    background:linear-gradient(135deg, #0f766e, #0ea5a4);
+}
+.assal-debug-action.secondary{
+    background:linear-gradient(135deg, #334155, #475569);
+}
+.assal-debug-action.warn{
+    background:linear-gradient(135deg, #b91c1c, #ef4444);
+}
+@media (max-width: 520px){
+    .assal-debug-metrics{
+        grid-template-columns:1fr;
+    }
+    .assal-debug-row{
+        grid-template-columns:1fr;
+        gap:4px;
+    }
+}
+
 
 /* زر خروج - أحمر غامق */
 .results {
@@ -10752,9 +11084,9 @@ html.low-end-device .results-container {
 
 <button class="header-btn header-icon-btn debug-btn"
         onclick="openPerfDebugModal()"
-        title="فحص الأداء"
-        aria-label="فحص الأداء">
-  <i class="fas fa-stethoscope"></i>
+        title="فحص الأداء الذكي"
+        aria-label="فحص الأداء الذكي">
+  <i class="fas fa-wave-square"></i>
 </button>
 
 <button class="header-btn header-icon-btn contact-btn"
@@ -22002,10 +22334,24 @@ ${actionText} ${safeBranch}`;
         .replace(/>/g, '&gt;');
     }
 
-    let nativeValue = 'no-bridge';
+    function pct(value, max) {
+      const n = Number(value) || 0;
+      const m = Number(max) || 1;
+      return Math.max(0, Math.min(100, (n / m) * 100));
+    }
+
+    function fillClass(value) {
+      if (value >= 7) return 'danger';
+      if (value >= 4) return 'warn';
+      return '';
+    }
+
+    const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
+    const signals = diag.signals || {};
+    let nativeValue = diag.nativeValue;
     try {
-      if (window.Android && typeof window.Android.isLowEndDevice === 'function') {
-        nativeValue = String(window.Android.isLowEndDevice());
+      if ((nativeValue === null || nativeValue === undefined) && window.Android && typeof window.Android.isLowEndDevice === 'function') {
+        nativeValue = window.Android.isLowEndDevice();
       }
     } catch (err) {
       nativeValue = 'error: ' + (err && err.message ? err.message : err);
@@ -22022,56 +22368,131 @@ ${actionText} ${safeBranch}`;
     const overlayDisplay = overlay ? getComputedStyle(overlay).display : 'missing';
     const logoAnimation = logo ? getComputedStyle(logo).animationName : 'missing';
     const notificationClasses = notif ? notif.className : 'missing';
-    const cpuBench = (typeof window.__ASSAL_LOW_END_CPU_BENCH__ !== 'undefined')
-      ? Number(window.__ASSAL_LOW_END_CPU_BENCH__).toFixed(2) + 'ms'
-      : '—';
-    const screenW = (window.screen && window.screen.width) || window.innerWidth || 0;
-    const screenH = (window.screen && window.screen.height) || window.innerHeight || 0;
+    const cpuBench = Number(diag.cpuBench || window.__ASSAL_LOW_END_CPU_BENCH__ || 0);
+    const heurScore = Number(diag.heuristicScore || 0);
+    const runScore = Number(diag.runtimeScore || 0);
+    const finalScore = Number(diag.finalScore || 0);
     const ua = navigator.userAgent || '';
-
     const rows = [
-      ['LOW-END MODE', lowEnd],
-      ['SOURCE', source],
-      ['NATIVE VALUE', nativeValue],
-      ['HTML CLASS', htmlClass],
-      ['CPU BENCH', cpuBench],
-      ['CORES', navigator.hardwareConcurrency || '—'],
-      ['MEM', navigator.deviceMemory || '—'],
-      ['SCREEN', screenW + ' × ' + screenH],
-      ['PROMO DISPLAY', promoDisplay],
-      ['OVERLAY DISPLAY', overlayDisplay],
-      ['LOGO ANIMATION', logoAnimation],
-      ['NOTIFICATION CLASS', notificationClasses],
-      ['UA HAS HOT20I', /(hot\s*20i|x665)/i.test(ua)],
-      ['LUXADS EXISTS', !!(window.LuxAds && typeof window.LuxAds.maybeShow === 'function')]
+      ['الوضع الحالي', lowEnd ? 'LOW-END' : 'STANDARD'],
+      ['المصدر', source],
+      ['قيمة native', nativeValue === null || nativeValue === undefined ? 'no-bridge' : nativeValue],
+      ['manual override', diag.manualOverride || 'none'],
+      ['class low-end-device', htmlClass],
+      ['CPU bench', cpuBench ? cpuBench.toFixed(2) + 'ms' : '—'],
+      ['cores', navigator.hardwareConcurrency || '—'],
+      ['deviceMemory', navigator.deviceMemory || '—'],
+      ['screen', ((window.screen && window.screen.width) || window.innerWidth || 0) + ' × ' + ((window.screen && window.screen.height) || window.innerHeight || 0)],
+      ['compact budget', !!signals.compactBudgetAndroid],
+      ['budget brand', !!signals.budgetBrand],
+      ['UA has hot20i/x665', /(hot\s*20i|x665)/i.test(ua)],
+      ['promo display', promoDisplay],
+      ['overlay display', overlayDisplay],
+      ['logo animation', logoAnimation],
+      ['notification class', notificationClasses],
+      ['LuxAds exists', !!(window.LuxAds && typeof window.LuxAds.maybeShow === 'function')]
     ];
 
     const html = `
-      <div style="text-align:right;font-family:'Cairo',sans-serif">
-        <div style="display:grid;grid-template-columns:1fr;gap:8px;max-height:55vh;overflow:auto">
+      <div class="assal-debug-shell">
+        <div class="assal-debug-top">
+          <div class="assal-debug-badge ${lowEnd ? 'is-low' : 'is-standard'}">
+            <i class="fas ${lowEnd ? 'fa-gauge-simple-high' : 'fa-shield-halved'}"></i>
+            <span>${lowEnd ? 'الوضع الخفيف متفعل' : 'الجهاز محسوب قياسي'}</span>
+          </div>
+          <div class="assal-debug-chip-row">
+            <span class="assal-debug-chip"><i class="fas fa-bolt"></i> المصدر: ${safeText(source)}</span>
+            <span class="assal-debug-chip"><i class="fas fa-microchip"></i> أنوية: ${safeText(navigator.hardwareConcurrency || '—')}</span>
+            <span class="assal-debug-chip"><i class="fas fa-memory"></i> ذاكرة: ${safeText(navigator.deviceMemory || '—')}</span>
+          </div>
+        </div>
+
+        <div class="assal-debug-metrics">
+          <div class="assal-debug-card">
+            <div class="assal-debug-card-title">النتيجة النهائية</div>
+            <div class="assal-debug-card-value">${safeText(finalScore.toFixed ? finalScore.toFixed(1) : finalScore)}/10</div>
+            <div class="assal-debug-card-sub">كلما ارتفعت، زادت فرصة اعتبار الجهاز ضعيف</div>
+          </div>
+          <div class="assal-debug-card">
+            <div class="assal-debug-card-title">اختبار السرعة</div>
+            <div class="assal-debug-card-value">${cpuBench ? safeText(cpuBench.toFixed(2) + 'ms') : '—'}</div>
+            <div class="assal-debug-card-sub">قياس سريع داخل الصفحة لتقدير بطء المعالجة</div>
+          </div>
+        </div>
+
+        <div class="assal-debug-section-title">مخططات القرار</div>
+        <div class="assal-debug-bars">
+          <div class="assal-debug-bar-card">
+            <div class="assal-debug-bar-head">
+              <span class="assal-debug-bar-label">Heuristic score</span>
+              <span class="assal-debug-bar-value">${safeText(heurScore)}/10</span>
+            </div>
+            <div class="assal-debug-bar-track"><div class="assal-debug-bar-fill ${fillClass(heurScore)}" style="width:${pct(heurScore,10)}%"></div></div>
+          </div>
+          <div class="assal-debug-bar-card">
+            <div class="assal-debug-bar-head">
+              <span class="assal-debug-bar-label">Runtime score</span>
+              <span class="assal-debug-bar-value">${safeText(runScore)}/10</span>
+            </div>
+            <div class="assal-debug-bar-track"><div class="assal-debug-bar-fill ${fillClass(runScore)}" style="width:${pct(runScore,10)}%"></div></div>
+          </div>
+          <div class="assal-debug-bar-card">
+            <div class="assal-debug-bar-head">
+              <span class="assal-debug-bar-label">Final score</span>
+              <span class="assal-debug-bar-value">${safeText(finalScore)}/10</span>
+            </div>
+            <div class="assal-debug-bar-track"><div class="assal-debug-bar-fill ${fillClass(finalScore)}" style="width:${pct(finalScore,10)}%"></div></div>
+          </div>
+        </div>
+
+        <div class="assal-debug-section-title">تفاصيل الفحص</div>
+        <div class="assal-debug-scroll">
           ${rows.map(([k,v]) => `
-            <div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 12px">
-              <div style="font-size:12px;opacity:.75;margin-bottom:4px">${safeText(k)}</div>
-              <div style="font-size:14px;font-weight:700;word-break:break-word">${safeText(v)}</div>
+            <div class="assal-debug-row">
+              <div class="assal-debug-key">${safeText(k)}</div>
+              <div class="assal-debug-val">${safeText(v)}</div>
             </div>
           `).join('')}
+        </div>
+
+        <div class="assal-debug-actions">
+          <button type="button" class="assal-debug-action" data-debug-force="on">تفعيل الوضع الخفيف يدوياً</button>
+          <button type="button" class="assal-debug-action secondary" data-debug-force="off">تعطيل الوضع الخفيف يدوياً</button>
+          <button type="button" class="assal-debug-action warn" data-debug-force="reset">إلغاء التفعيل اليدوي</button>
         </div>
       </div>
     `;
 
     if (window.Swal && typeof window.Swal.fire === 'function') {
       window.Swal.fire({
-        title: 'فحص الأداء',
+        title: 'فحص الأداء الذكي',
         html,
-        width: 430,
-        confirmButtonText: 'إغلاق'
+        width: 560,
+        confirmButtonText: 'إغلاق',
+        allowOutsideClick: false,
+        allowEscapeKey: true,
+        showCloseButton: true,
+        focusConfirm: false,
+        customClass: {
+          popup: 'assal-debug-popup'
+        },
+        didOpen: (popup) => {
+          popup.querySelectorAll('[data-debug-force]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              const mode = btn.getAttribute('data-debug-force');
+              if (mode === 'on') window.__ASSAL_SET_LOW_END_OVERRIDE__('on');
+              else if (mode === 'off') window.__ASSAL_SET_LOW_END_OVERRIDE__('off');
+              else window.__ASSAL_SET_LOW_END_OVERRIDE__(null);
+              window.location.reload();
+            });
+          });
+        }
       });
       return;
     }
 
     alert(rows.map(([k, v]) => `${k}: ${v}`).join('\n'));
   };
-
 
   window.addEventListener('load', () => {
     setTimeout(runForceUpdateCheck, APP_UPDATE_CONFIG.checkDelayMs);
