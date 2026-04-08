@@ -295,18 +295,18 @@ html.low-end-device .news-bar {
 
 html.low-end-device.manual-light-news .news-bar {
     display: flex !important;
-    direction: ltr;
+    direction: rtl;
     justify-content: flex-start;
     align-items: center;
     gap: 10px;
-    padding: 8px 12px;
+    padding: 8px 14px;
 }
 
 html.low-end-device.manual-light-news .breaking-news {
-    order: 0;
-    margin-left: 0;
+    order: 2;
+    margin-left: auto;
     margin-right: 0;
-    min-width: 82px;
+    min-width: 84px;
     padding: 6px 16px;
     font-size: 15px;
     flex: 0 0 auto;
@@ -316,8 +316,9 @@ html.low-end-device.manual-light-news .news-ticker-container {
     order: 1;
     flex: 1 1 auto;
     min-width: 0;
-    justify-content: flex-start;
-    padding: 0 2px 0 0;
+    justify-content: center;
+    align-items: center;
+    padding: 0 6px 0 2px;
 }
 
 html.low-end-device.manual-light-news .news-ticker,
@@ -327,15 +328,17 @@ html.low-end-device.manual-light-news #newsTicker {
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     white-space: nowrap !important;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-align: left;
+    text-align: center;
     direction: rtl;
-    font-size: 15px;
+    unicode-bidi: plaintext;
+    font-size: clamp(11px, 3.1vw, 15px);
     line-height: 1;
     gap: 0 !important;
+    margin: 0 auto;
 }
 
 @media (max-width: 420px) {
@@ -344,13 +347,16 @@ html.low-end-device.manual-light-news #newsTicker {
         gap: 8px;
     }
     html.low-end-device.manual-light-news .breaking-news {
-        min-width: 74px;
+        min-width: 72px;
         padding: 5px 12px;
-        font-size: 13px;
+        font-size: 12px;
+    }
+    html.low-end-device.manual-light-news .news-ticker-container {
+        padding: 0 4px 0 2px;
     }
     html.low-end-device.manual-light-news .news-ticker,
     html.low-end-device.manual-light-news #newsTicker {
-        font-size: 13px;
+        font-size: 11px;
     }
 }
 
@@ -978,6 +984,14 @@ html:focus, body:focus, .swal2-container:focus, .swal2-popup:focus, #overlay:foc
 }
 html.swal2-shown, body.swal2-shown, body.swal2-height-auto {
     border: none !important;
+    outline: none !important;
+}
+
+*, *::before, *::after{
+    -webkit-tap-highlight-color: transparent !important;
+}
+*:focus,
+*:focus-visible{
     outline: none !important;
 }
 
@@ -1822,8 +1836,8 @@ h1 {
     -webkit-backdrop-filter: blur(10px) !important;
 }
 .assal-debug-popup{
-    width:min(452px, 92vw) !important;
-    max-width:452px !important;
+    width:min(474px, 94vw) !important;
+    max-width:474px !important;
     padding:0 !important;
     border-radius:18px !important;
     overflow:hidden !important;
@@ -1837,8 +1851,8 @@ h1 {
 }
 .assal-debug-popup .swal2-title{
     margin:0 !important;
-    padding:14px 16px 4px !important;
-    font-size:18px !important;
+    padding:16px 18px 6px !important;
+    font-size:19px !important;
 }
 .assal-debug-popup .swal2-html-container{
     margin:0 !important;
@@ -1874,23 +1888,23 @@ h1 {
     font-family:'Cairo',sans-serif;
     display:flex;
     flex-direction:column;
-    gap:8px;
+    gap:10px;
 }
 .assal-debug-top{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:8px;
-    padding:6px 2px 4px;
+    gap:10px;
+    padding:8px 2px 6px;
     flex-wrap:wrap;
 }
 .assal-debug-badge{
     display:inline-flex;
     align-items:center;
-    gap:7px;
-    padding:7px 12px;
+    gap:8px;
+    padding:8px 14px;
     border-radius:999px;
-    font-size:12px;
+    font-size:13px;
     font-weight:800;
     background:rgba(255,255,255,.06);
     border:1px solid rgba(255,255,255,.08);
@@ -1997,26 +2011,26 @@ h1 {
     opacity:.72;
 }
 .assal-debug-val{
-    font-size:12px;
+    font-size:13px;
     font-weight:700;
     word-break:break-word;
 }
 .assal-debug-actions{
     display:grid;
     grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:6px;
-    margin-top:1px;
+    gap:8px;
+    margin-top:4px;
     overflow:hidden;
 }
 .assal-debug-action{
     appearance:none;
     border:none;
-    border-radius:13px;
-    min-height:42px;
-    height:42px;
-    padding:5px 6px;
+    border-radius:14px;
+    min-height:46px;
+    height:46px;
+    padding:6px 8px;
     font-family:'Cairo',sans-serif;
-    font-size:10px;
+    font-size:11px;
     font-weight:800;
     color:#fff;
     cursor:pointer;
@@ -2030,7 +2044,7 @@ h1 {
     box-shadow:0 6px 14px rgba(0,0,0,.16);
     min-width:0;
 }
-.assal-debug-action i{ font-size:13px; }
+.assal-debug-action i{ font-size:14px; }
 .assal-debug-action span{ line-height:1; white-space:nowrap; }
 .assal-debug-action.action-off{
     background:linear-gradient(135deg, #334155, #475569);
@@ -15369,7 +15383,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const overlay = document.getElementById("overlay");
     if (!overlay) return;
 
-    overlay.addEventListener("click", () => {
+    ["pointerdown","touchstart","mousedown"].forEach((eventName) => {
+        overlay.addEventListener(eventName, (event) => {
+            try { event.preventDefault(); } catch (_) {}
+            try {
+                const el = document.activeElement;
+                if (el && typeof el.blur === "function") el.blur();
+            } catch (_) {}
+        }, { passive: false });
+    });
+
+    overlay.addEventListener("click", (event) => {
+        try { event.preventDefault(); } catch (_) {}
         const modal = document.getElementById("newItemsModal");
         const promo = document.getElementById("promoPopup");
 
@@ -17043,7 +17068,7 @@ function applyManualLightNewsBarState() {
         newsBar.style.display = 'flex';
         badge.textContent = '⚡ خفيف';
         if (tickerContainer) {
-            tickerContainer.style.justifyContent = 'flex-start';
+            tickerContainer.style.justifyContent = 'center';
         }
         ticker.textContent = 'تم تفعيل الوضع الخفيف في هاتفك';
         ticker.title = 'تم تفعيل الوضع الخفيف في هاتفك';
@@ -17052,6 +17077,9 @@ function applyManualLightNewsBarState() {
         ticker.style.whiteSpace = 'nowrap';
         ticker.style.overflow = 'hidden';
         ticker.style.textOverflow = 'ellipsis';
+        ticker.style.textAlign = 'center';
+        ticker.style.justifyContent = 'center';
+        ticker.style.direction = 'rtl';
         return;
     }
 
@@ -17062,6 +17090,9 @@ function applyManualLightNewsBarState() {
     ticker.style.whiteSpace = '';
     ticker.style.overflow = '';
     ticker.style.textOverflow = '';
+    ticker.style.textAlign = '';
+    ticker.style.justifyContent = '';
+    ticker.style.direction = '';
 
     if (window.__ASSAL_LOW_END_DEVICE__) {
         newsBar.style.display = 'none';
@@ -17073,6 +17104,15 @@ function applyManualLightNewsBarState() {
 }
 applyManualLightNewsBarState();
 window.__ASSAL_APPLY_NEWS_BAR_STATE__ = applyManualLightNewsBarState;
+
+['pointerdown','touchstart','mousedown'].forEach((eventName) => {
+    document.addEventListener(eventName, () => {
+        try {
+            const el = document.activeElement;
+            if (el && typeof el.blur === 'function') el.blur();
+        } catch (_) {}
+    }, true);
+});
 
 // ربط التحكم مع عرض النتائج
 document.getElementById("results").addEventListener("transitionend", () => {
@@ -22609,7 +22649,7 @@ ${actionText} ${safeBranch}`;
       window.Swal.fire({
         title: 'فحص الأداء',
         html,
-        width: 452,
+        width: 474,
         showConfirmButton: false,
         showCancelButton: false,
         allowOutsideClick: false,
@@ -22635,12 +22675,30 @@ ${actionText} ${safeBranch}`;
                 window.__ASSAL_SET_LOW_END_OVERRIDE__(null);
                 try { localStorage.removeItem('assal_force_low_end'); } catch (_) {}
                 try {
-                  document.documentElement.classList.remove('low-end-device', 'manual-light-news');
-                  document.documentElement.setAttribute('data-device-profile', 'standard');
-                } catch (_) {}
-                try {
-                  window.__ASSAL_LOW_END_DEVICE__ = false;
-                  window.__ASSAL_LOW_END_SOURCE__ = 'standard';
+                  const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
+                  const signals = diag.signals || {};
+                  const nativeLow = !!diag.nativeLow;
+                  const heuristicScore = Number(diag.heuristicScore || 0);
+                  const runtimeScore = Number(diag.runtimeScore || 0);
+                  const autoLow = !!(
+                    nativeLow ||
+                    heuristicScore >= 6 ||
+                    runtimeScore >= 6 ||
+                    (heuristicScore >= 4 && runtimeScore >= 2) ||
+                    (signals.compactBudgetAndroid && heuristicScore >= 6) ||
+                    (signals.compactBudgetAndroid && heuristicScore >= 5 && runtimeScore >= 1) ||
+                    (signals.budgetBrand && signals.compactBudgetAndroid && heuristicScore >= 5)
+                  );
+
+                  document.documentElement.classList.remove('manual-light-news');
+                  document.documentElement.classList.toggle('low-end-device', autoLow);
+                  document.documentElement.setAttribute('data-device-profile', autoLow ? 'low-end' : 'standard');
+
+                  window.__ASSAL_LOW_END_DEVICE__ = autoLow;
+                  window.__ASSAL_LOW_END_SOURCE__ = autoLow
+                    ? (nativeLow ? 'native' : (heuristicScore >= runtimeScore ? 'heuristic' : 'runtime'))
+                    : 'standard';
+
                   if (window.__ASSAL_LOW_END_DIAGNOSTICS__) {
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.manualOverride = null;
                   }
@@ -22653,12 +22711,14 @@ ${actionText} ${safeBranch}`;
               try { window.Swal.close(); } catch (_) {}
               setTimeout(() => {
                 try {
-                  const targetUrl = window.location.pathname + window.location.search + window.location.hash;
-                  window.location.replace(targetUrl);
+                  const target = new URL(window.location.href);
+                  target.searchParams.delete('_assal_auto');
+                  target.searchParams.set('_assal_auto', String(Date.now()));
+                  window.location.replace(target.toString());
                 } catch (_) {
-                  window.location.reload();
+                  try { window.location.reload(); } catch (__){}
                 }
-              }, mode === 'reset' ? 90 : 60);
+              }, mode === 'reset' ? 130 : 70);
             }, { passive: false });
           });
         }
