@@ -205,6 +205,22 @@
             safeStorageRemove('assal_force_low_end');
           }
         };
+
+        window.__ASSAL_QUEUE_LIGHT_MODE_TOAST__ = function(message) {
+          try {
+            safeStorageSet('assal_light_mode_pending_toast', String(message || '').trim());
+          } catch (_) {}
+        };
+
+        window.__ASSAL_CONSUME_LIGHT_MODE_TOAST__ = function() {
+          try {
+            const value = safeStorageGet('assal_light_mode_pending_toast');
+            safeStorageRemove('assal_light_mode_pending_toast');
+            return value;
+          } catch (_) {
+            return null;
+          }
+        };
       })();
     </script>
 
@@ -290,7 +306,7 @@ html.low-end-device, html.low-end-device body {
 }
 
 html.low-end-device .news-bar {
-    display: none !important;
+    box-shadow: none !important;
 }
 
 html.low-end-device .notification-container {
@@ -1729,39 +1745,44 @@ h1 {
 
 
 .header-btn.debug-btn{
-    background: linear-gradient(135deg, #0f766e, #0ea5a4);
+    background: linear-gradient(135deg, #5A6388, #4A5275);
 }
 .header-btn.debug-btn:hover{
-    background: linear-gradient(135deg, #14b8a6, #0f766e);
+    background: linear-gradient(135deg, #6B7498, #566085);
 }
 .header-btn.debug-btn.is-manual-on{
-    background: linear-gradient(135deg, #166534, #22c55e);
-    box-shadow: 0 0 0 1px rgba(134,239,172,.30), 0 4px 10px rgba(34,197,94,.22);
+    box-shadow: 0 0 0 1px rgba(134,239,172,.26), 0 2px 4px rgba(0,0,0,.2);
 }
 .header-btn.debug-btn.is-manual-off{
-    background: linear-gradient(135deg, #7f1d1d, #b91c1c);
-    box-shadow: 0 0 0 1px rgba(252,165,165,.26), 0 4px 10px rgba(239,68,68,.18);
+    box-shadow: 0 0 0 1px rgba(252,165,165,.24), 0 2px 4px rgba(0,0,0,.2);
 }
 .header-btn.debug-btn.is-auto-low{
-    box-shadow: 0 0 0 1px rgba(94,234,212,.22), 0 4px 10px rgba(13,148,136,.18);
+    box-shadow: 0 0 0 1px rgba(94,234,212,.20), 0 2px 4px rgba(0,0,0,.2);
 }
 
+.assal-debug-container.swal2-backdrop-show{
+    background: rgba(0, 0, 0, 0.62) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+}
 .assal-debug-popup{
-    width:min(438px, 92vw) !important;
-    max-width:438px !important;
+    width:min(414px, 92vw) !important;
+    max-width:414px !important;
     padding:0 !important;
     border-radius:18px !important;
     overflow:hidden !important;
     background:
-      radial-gradient(circle at top right, rgba(16,185,129,.10), transparent 34%),
-      linear-gradient(135deg, rgba(8,13,24,.99), rgba(15,23,42,.98)) !important;
-    border:1px solid rgba(255,255,255,.07) !important;
-    box-shadow:0 16px 42px rgba(0,0,0,.52) !important;
+      radial-gradient(circle at top left, rgba(67, 206, 162, 0.14), transparent 32%),
+      rgba(15, 23, 42, 0.97) !important;
+    border:1px solid rgba(255,255,255,.08) !important;
+    box-shadow:0 18px 40px rgba(0,0,0,.85) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
 }
 .assal-debug-popup .swal2-title{
     margin:0 !important;
-    padding:10px 14px 4px !important;
-    font-size:17px !important;
+    padding:10px 14px 2px !important;
+    font-size:16px !important;
 }
 .assal-debug-popup .swal2-html-container{
     margin:0 !important;
@@ -1772,16 +1793,16 @@ h1 {
     display:none !important;
 }
 .assal-debug-popup .swal2-close{
-    width:32px !important;
-    height:32px !important;
-    min-width:32px !important;
-    min-height:32px !important;
+    width:30px !important;
+    height:30px !important;
+    min-width:30px !important;
+    min-height:30px !important;
     margin:10px 10px 0 auto !important;
     border-radius:999px !important;
     color:#fecaca !important;
     background:linear-gradient(135deg,#7f1d1d,#991b1b) !important;
-    border:1px solid rgba(248,113,113,.26) !important;
-    box-shadow:0 6px 14px rgba(127,29,29,.28) !important;
+    border:1px solid rgba(248,113,113,.28) !important;
+    box-shadow:0 6px 14px rgba(127,29,29,.30) !important;
     transition:transform .16s ease, filter .16s ease !important;
 }
 .assal-debug-popup .swal2-close:hover{
@@ -1804,7 +1825,7 @@ h1 {
     align-items:center;
     justify-content:space-between;
     gap:6px;
-    padding:4px 2px 4px;
+    padding:4px 2px 2px;
     flex-wrap:wrap;
 }
 .assal-debug-badge{
@@ -1846,6 +1867,7 @@ h1 {
 }
 .assal-debug-bars{
     display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
     gap:6px;
 }
 .assal-debug-bar-card{
@@ -1888,8 +1910,8 @@ h1 {
     background:linear-gradient(90deg, #ef4444, #b91c1c);
 }
 .assal-debug-scroll{
-    height:136px;
-    max-height:136px;
+    height:118px;
+    max-height:118px;
     overflow:auto;
     padding-inline-end:2px;
     display:grid;
@@ -1906,7 +1928,7 @@ h1 {
 }
 .assal-debug-row{
     display:grid;
-    grid-template-columns:92px 1fr;
+    grid-template-columns:86px 1fr;
     gap:7px;
     align-items:start;
     padding:7px 9px;
@@ -1928,15 +1950,17 @@ h1 {
     grid-template-columns:repeat(3,minmax(0,1fr));
     gap:6px;
     margin-top:1px;
+    overflow:hidden;
 }
 .assal-debug-action{
     appearance:none;
     border:none;
-    border-radius:13px;
-    min-height:46px;
-    padding:7px 6px;
+    border-radius:12px;
+    min-height:38px;
+    height:38px;
+    padding:4px 5px;
     font-family:'Cairo',sans-serif;
-    font-size:10px;
+    font-size:9px;
     font-weight:800;
     color:#fff;
     cursor:pointer;
@@ -1945,12 +1969,13 @@ h1 {
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:3px;
+    gap:2px;
     border:1px solid rgba(255,255,255,.07);
     box-shadow:0 6px 14px rgba(0,0,0,.16);
+    min-width:0;
 }
-.assal-debug-action i{ font-size:13px; }
-.assal-debug-action span{ line-height:1.1; }
+.assal-debug-action i{ font-size:11px; }
+.assal-debug-action span{ line-height:1; white-space:nowrap; }
 .assal-debug-action.action-off{
     background:linear-gradient(135deg, #334155, #475569);
 }
@@ -1972,9 +1997,11 @@ h1 {
     transform:scale(.97);
 }
 @media (max-width: 520px){
+    .assal-debug-bars{ grid-template-columns:1fr 1fr; }
     .assal-debug-row{ grid-template-columns:1fr; gap:2px; }
-    .assal-debug-scroll{ height:128px; max-height:128px; }
+    .assal-debug-scroll{ height:112px; max-height:112px; }
 }
+
 
 
 /* زر خروج - أحمر غامق */
@@ -16835,6 +16862,28 @@ async function refreshData() {
 
  let newsInterval = null;
 
+function applyLowEndNewsBanner() {
+  const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
+  const manualMode = diag.manualOverride || 'none';
+  const newsBar = document.querySelector('.news-bar');
+  const breakingNews = document.querySelector('.breaking-news');
+  const ticker = document.getElementById('newsTicker');
+  if (!newsBar || !breakingNews || !ticker) return false;
+
+  if (manualMode === 'on') {
+    newsBar.style.setProperty('display', 'flex', 'important');
+    breakingNews.textContent = '⚡ خفيف';
+    ticker.textContent = 'تم تفعيل الوضع الخفيف في هاتفك';
+    ticker.style.animation = 'none';
+    return true;
+  }
+
+  breakingNews.textContent = '🔥 تقنيات';
+  ticker.style.animation = '';
+  newsBar.style.removeProperty('display');
+  return false;
+}
+
 async function fetchTechNews() {
   if (window.__ASSAL_LOW_END_DEVICE__) return;
   // RSS شغال (بديل عن AITnews لأن feed مالته صار مو RSS)
@@ -16942,7 +16991,9 @@ function stopNewsUpdates() {
 }
 
 // التشغيل الأولي والتحكم
-if (window.__ASSAL_LOW_END_DEVICE__) {
+if (applyLowEndNewsBanner()) {
+    stopNewsUpdates();
+} else if (window.__ASSAL_LOW_END_DEVICE__) {
     const newsBar = document.querySelector('.news-bar');
     if (newsBar) newsBar.style.display = 'none';
 } else {
@@ -22422,8 +22473,7 @@ ${actionText} ${safeBranch}`;
       ['التحكم', currentOverride],
       ['المعالج', navigator.hardwareConcurrency || '—'],
       ['الرام', navigator.deviceMemory || '—'],
-      ['الشاشة', screenText],
-      ['النتيجة', finalScore ? (Number(finalScore).toFixed(1) + '/10') : '—']
+      ['الشاشة', screenText]
     ];
 
     const html = `
@@ -22431,36 +22481,28 @@ ${actionText} ${safeBranch}`;
         <div class="assal-debug-top">
           <div class="assal-debug-badge ${lowEnd ? 'is-low' : 'is-standard'}">
             <i class="fas ${lowEnd ? 'fa-feather-pointed' : 'fa-gauge-high'}"></i>
-            <span>${lowEnd ? 'الوضع الخفيف شغال' : 'الوضع القياسي شغال'}</span>
+            <span>${lowEnd ? 'الوضع الخفيف' : 'الوضع القياسي'}</span>
           </div>
           <div class="assal-debug-chip-row">
             <span class="assal-debug-chip"><i class="fas fa-bolt"></i> ${safeText(source)}</span>
-            <span class="assal-debug-chip"><i class="fas fa-microchip"></i> ${safeText(navigator.hardwareConcurrency || '—')}</span>
-            <span class="assal-debug-chip"><i class="fas fa-memory"></i> ${safeText(navigator.deviceMemory || '—')}</span>
+            <span class="assal-debug-chip"><i class="fas fa-sliders"></i> ${safeText(currentOverride === 'none' ? 'تلقائي' : currentOverride)}</span>
           </div>
         </div>
 
         <div class="assal-debug-bars">
           <div class="assal-debug-bar-card">
             <div class="assal-debug-bar-head">
-              <span class="assal-debug-bar-label">Heuristic</span>
-              <span class="assal-debug-bar-value">${safeText(heurScore)}/10</span>
-            </div>
-            <div class="assal-debug-bar-track"><div class="assal-debug-bar-fill ${fillClass(heurScore)}" style="width:${pct(heurScore,10)}%"></div></div>
-          </div>
-          <div class="assal-debug-bar-card">
-            <div class="assal-debug-bar-head">
-              <span class="assal-debug-bar-label">Runtime</span>
-              <span class="assal-debug-bar-value">${safeText(runScore)}/10</span>
-            </div>
-            <div class="assal-debug-bar-track"><div class="assal-debug-bar-fill ${fillClass(runScore)}" style="width:${pct(runScore,10)}%"></div></div>
-          </div>
-          <div class="assal-debug-bar-card">
-            <div class="assal-debug-bar-head">
-              <span class="assal-debug-bar-label">Final</span>
+              <span class="assal-debug-bar-label">النتيجة</span>
               <span class="assal-debug-bar-value">${safeText(finalScore ? Number(finalScore).toFixed(1) : 0)}/10</span>
             </div>
             <div class="assal-debug-bar-track"><div class="assal-debug-bar-fill ${fillClass(finalScore)}" style="width:${pct(finalScore,10)}%"></div></div>
+          </div>
+          <div class="assal-debug-bar-card">
+            <div class="assal-debug-bar-head">
+              <span class="assal-debug-bar-label">السرعة</span>
+              <span class="assal-debug-bar-value">${safeText(cpuBench ? cpuBench.toFixed(1) : 0)}ms</span>
+            </div>
+            <div class="assal-debug-bar-track"><div class="assal-debug-bar-fill ${fillClass(runScore)}" style="width:${pct(runScore,10)}%"></div></div>
           </div>
         </div>
 
@@ -22476,15 +22518,15 @@ ${actionText} ${safeBranch}`;
         <div class="assal-debug-actions">
           <button type="button" class="assal-debug-action action-on${selected('on')}" data-debug-force="on" aria-label="تفعيل الوضع الخفيف">
             <i class="fas fa-feather-pointed"></i>
-            <span>تفعيل</span>
+            <span>خفيف</span>
           </button>
           <button type="button" class="assal-debug-action action-off${selected('off')}" data-debug-force="off" aria-label="تعطيل الوضع الخفيف">
             <i class="fas fa-power-off"></i>
-            <span>تعطيل</span>
+            <span>قياسي</span>
           </button>
           <button type="button" class="assal-debug-action action-reset${selected('none')}" data-debug-force="reset" aria-label="إلغاء الاختيار اليدوي">
             <i class="fas fa-rotate-left"></i>
-            <span>إلغاء</span>
+            <span>تلقائي</span>
           </button>
         </div>
       </div>
@@ -22494,7 +22536,7 @@ ${actionText} ${safeBranch}`;
       window.Swal.fire({
         title: 'فحص الأداء',
         html,
-        width: 438,
+        width: 414,
         showConfirmButton: false,
         showCancelButton: false,
         allowOutsideClick: false,
@@ -22502,18 +22544,29 @@ ${actionText} ${safeBranch}`;
         showCloseButton: true,
         focusConfirm: false,
         customClass: {
-          popup: 'assal-debug-popup'
+          popup: 'assal-debug-popup',
+          container: 'assal-debug-container'
         },
         didOpen: (popup) => {
           popup.querySelectorAll('[data-debug-force]').forEach((btn) => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (event) => {
+              event.preventDefault();
+              event.stopPropagation();
               const mode = btn.getAttribute('data-debug-force');
-              if (mode === 'on') window.__ASSAL_SET_LOW_END_OVERRIDE__('on');
-              else if (mode === 'off') window.__ASSAL_SET_LOW_END_OVERRIDE__('off');
-              else window.__ASSAL_SET_LOW_END_OVERRIDE__(null);
+              if (mode === 'on') {
+                window.__ASSAL_SET_LOW_END_OVERRIDE__('on');
+                try { window.__ASSAL_QUEUE_LIGHT_MODE_TOAST__('تم تفعيل الوضع الخفيف في هاتفك'); } catch (_) {}
+              } else if (mode === 'off') {
+                window.__ASSAL_SET_LOW_END_OVERRIDE__('off');
+                try { window.__ASSAL_QUEUE_LIGHT_MODE_TOAST__('تم تعطيل الوضع الخفيف في هاتفك'); } catch (_) {}
+              } else if (mode === 'reset') {
+                window.__ASSAL_SET_LOW_END_OVERRIDE__(null);
+                try { window.__ASSAL_QUEUE_LIGHT_MODE_TOAST__('تمت إعادة الوضع التلقائي في هاتفك'); } catch (_) {}
+              }
               try { window.updatePerfDebugButtonState(); } catch (_) {}
+              try { applyLowEndNewsBanner(); } catch (_) {}
               window.location.reload();
-            });
+            }, { passive: false });
           });
         }
       });
@@ -22525,6 +22578,13 @@ ${actionText} ${safeBranch}`;
 
   window.addEventListener('load', () => {
     try { window.updatePerfDebugButtonState(); } catch (_) {}
+    try { applyLowEndNewsBanner(); } catch (_) {}
+    try {
+      const pendingToast = window.__ASSAL_CONSUME_LIGHT_MODE_TOAST__ && window.__ASSAL_CONSUME_LIGHT_MODE_TOAST__();
+      if (pendingToast && typeof window.showElegantTopToast === 'function') {
+        window.showElegantTopToast(pendingToast, 'success', 2600);
+      }
+    } catch (_) {}
     setTimeout(runForceUpdateCheck, APP_UPDATE_CONFIG.checkDelayMs);
   });
 })();
