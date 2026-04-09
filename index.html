@@ -16721,17 +16721,37 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-  
-  
-  // ✅ NEW: إذا هذا الأدمن عنده صلاحية الجملة فقط نفعّل الزر
+
+    // ✅ NEW: إذا هذا الأدمن عنده صلاحية الجملة فقط نفعّل الزر
     const wholesaleBtn = document.getElementById("adminWholesaleBtn");
     if (wholesaleBtn && canUseWholesalePrices()) {
         wholesaleBtn.disabled = false;
     }
-  
-  
+
     const input = document.getElementById("searchInput");
     if (!input) return;
+
+    const wholesaleBox = document.getElementById("wholesaleSuggestions");
+    let wholesaleKeepOpenUntil = 0;
+    const markWholesaleInteraction = (extra = 360) => {
+        wholesaleKeepOpenUntil = Math.max(wholesaleKeepOpenUntil, Date.now() + extra);
+    };
+
+    if (wholesaleBox) {
+        wholesaleBox.addEventListener("touchstart", () => markWholesaleInteraction(520), { passive: true });
+        wholesaleBox.addEventListener("touchmove", () => markWholesaleInteraction(520), { passive: true });
+        wholesaleBox.addEventListener("scroll", () => markWholesaleInteraction(520), { passive: true });
+        wholesaleBox.addEventListener("wheel", () => markWholesaleInteraction(420), { passive: true });
+        wholesaleBox.addEventListener("pointerdown", (e) => {
+            if (e.pointerType === "mouse") e.preventDefault();
+            markWholesaleInteraction(420);
+        });
+        wholesaleBox.addEventListener("pointerup", () => markWholesaleInteraction(220));
+        wholesaleBox.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            markWholesaleInteraction(420);
+        });
+    }
 
     input.addEventListener("input", () => {
         if (!isWholesaleMode) return;
@@ -16744,8 +16764,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     input.addEventListener("blur", () => {
-        // نخليها ما تختفي فوراً حتى يلحگ يضغط
-        setTimeout(() => hideWholesaleSuggestions(), 180);
+        setTimeout(() => {
+            const box = document.getElementById("wholesaleSuggestions");
+            const keepOpen = Date.now() < wholesaleKeepOpenUntil;
+            const boxOpen = box && box.style.display === "flex";
+            if (keepOpen && boxOpen) return;
+            hideWholesaleSuggestions();
+        }, 220);
     });
 
     // ✅ NEW: دعم الأسهم + إنتر + اسكيب للاقتراحات
@@ -19008,7 +19033,7 @@ function closeContactModal(){
 const AD_CHOICE = "instant_inquiry_feature"; // <<< الإعلان الجديد مفعل افتراضياً
 
 // خيارات اضافية (اختياري)
-const AD_DELAY_MS = 650;                 // تأخير بسيط بعد التحميل
+const AD_DELAY_MS = 120;                 // تأخير أخف حتى يظهر الإعلان أسرع بدون ما يزعج
 const AD_SHOW_ONCE_PER_SESSION = false;  // هذا الإعلان يطلع بكل مرة يفتح التطبيق
 
 const LuxAds = (() => {
@@ -19664,20 +19689,20 @@ function renderInstantInquiryFeature(){
       if (startupAdShown) return;
 
       if (document.hidden) {
-        setTimeout(() => maybeShow(attempt + 1), 450);
+        setTimeout(() => maybeShow(attempt + 1), 220);
         return;
       }
 
       const overlayBusy = hasBlockingModal();
       if (overlayBusy) {
-        if (attempt < 24) {
-          setTimeout(() => maybeShow(attempt + 1), 450);
+        if (attempt < 18) {
+          setTimeout(() => maybeShow(attempt + 1), 220);
         }
         return;
       }
 
       startupAdShown = true;
-      setTimeout(() => showByKey(key), Math.max(AD_DELAY_MS, 250));
+      setTimeout(() => showByKey(key), Math.max(AD_DELAY_MS, 120));
     };
 
     if (document.readyState === "loading") {
@@ -19691,25 +19716,32 @@ function renderInstantInquiryFeature(){
 })();
 
 
+function tryShowStartupAds(attempt = 0){
+  if (window.__ASSAL_LOW_END_DEVICE__) return;
+  const updateBusy = !!(window.__ASSAL_FORCE_UPDATE_PENDING__ || window.__ASSAL_FORCE_UPDATE_ACTIVE__);
+  if (updateBusy) {
+    if (attempt < 24) {
+      setTimeout(() => tryShowStartupAds(attempt + 1), 220);
+    }
+    return;
+  }
+  try{ LuxAds.maybeShow(); }catch(e){ console.warn("LuxAds load retry failed", e); }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.__ASSAL_LOW_END_DEVICE__) return;
+  setTimeout(() => tryShowStartupAds(0), 120);
+});
+
 window.addEventListener("load", () => {
   if (window.__ASSAL_LOW_END_DEVICE__) return;
-  const tryShowStartupAds = (attempt = 0) => {
-    const updateBusy = !!(window.__ASSAL_FORCE_UPDATE_PENDING__ || window.__ASSAL_FORCE_UPDATE_ACTIVE__);
-    if (updateBusy) {
-      if (attempt < 30) {
-        setTimeout(() => tryShowStartupAds(attempt + 1), 350);
-      }
-      return;
-    }
-    try{ LuxAds.maybeShow(); }catch(e){ console.warn("LuxAds load retry failed", e); }
-  };
-  tryShowStartupAds();
+  setTimeout(() => tryShowStartupAds(0), 80);
 });
 
 document.addEventListener("visibilitychange", () => {
   if (window.__ASSAL_LOW_END_DEVICE__) return;
   if (!document.hidden) {
-    try{ LuxAds.maybeShow(); }catch(e){}
+    setTimeout(() => { try{ LuxAds.maybeShow(); }catch(e){} }, 120);
   }
 });
 
