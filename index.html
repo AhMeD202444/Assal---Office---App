@@ -11144,6 +11144,160 @@ footer{
 }
 </style>
 
+
+<style id="assal-phone-true-center-final">
+/* ===== PHONE TRUE CENTER FINAL ===== */
+:root{
+  --assal-live-vh: 100dvh;
+  --assal-live-header-bottom: 44px;
+  --assal-live-footer-top: calc(100dvh - 40px);
+  --assal-live-header-height: 44px;
+  --assal-live-footer-height: 40px;
+  --assal-live-gap: 8px;
+  --assal-live-top-reserve: calc(var(--assal-live-header-bottom) + var(--assal-live-gap));
+  --assal-live-bottom-reserve: calc(var(--assal-live-footer-height) + var(--assal-live-gap));
+  --assal-live-content-top: var(--assal-live-top-reserve);
+  --assal-live-content-bottom: calc(var(--assal-live-vh) - var(--assal-live-bottom-reserve));
+  --assal-live-usable-height: calc(var(--assal-live-content-bottom) - var(--assal-live-content-top));
+  --assal-live-center-y: calc(var(--assal-live-content-top) + (var(--assal-live-usable-height) / 2));
+}
+
+html,
+body{
+  min-height: var(--assal-live-vh) !important;
+}
+
+body{
+  padding-top: var(--assal-live-top-reserve) !important;
+  padding-bottom: var(--assal-live-bottom-reserve) !important;
+  box-sizing: border-box !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.container{
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+}
+
+footer{
+  bottom: 0 !important;
+}
+
+.scroll-to-top,
+.scroll-up-btn,
+.back-to-top,
+.go-top,
+.scroll-btn,
+.floating-new-btn,
+.floating-request-btn,
+.floating-request-admin-btn{
+  bottom: calc(var(--assal-live-footer-height) + 10px) !important;
+}
+
+/* طبقات النوافذ الكاملة */
+#adModal,
+#cartModal,
+#requestModal,
+#requestAdminModal,
+#requestTrackModal,
+#availabilityAdminModal,
+#availabilityTrackModal,
+#statsModal,
+#customersAdminModal,
+#customerProfileModal,
+#invoiceAdminModal,
+.request-modal,
+.request-admin-modal,
+.request-track-modal,
+.stats-modal,
+.customer-profile-modal,
+.customers-admin-modal,
+.invoice-track-modal,
+.invoice-admin-modal,
+.activation-overlay,
+#maintenance-overlay.activation-overlay,
+#activation-overlay.activation-overlay{
+  box-sizing: border-box !important;
+  padding-top: var(--assal-live-top-reserve) !important;
+  padding-bottom: var(--assal-live-bottom-reserve) !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* أجسام النوافذ داخل الطبقات */
+.update-shell,
+.update-success-shell,
+.request-shell,
+.request-admin-shell,
+.request-track-shell,
+.stats-shell,
+.customer-profile-shell,
+.customers-admin-shell,
+.invoice-track-shell,
+.invoice-admin-shell,
+.activation-dialog,
+#maintenance-overlay .activation-dialog,
+#activation-overlay .activation-dialog,
+#adModal .ad-shell,
+.cart-shell,
+.swal2-popup:not(.swal2-toast){
+  box-sizing: border-box !important;
+  max-height: var(--assal-live-usable-height) !important;
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+}
+
+/* النوافذ المثبتة المباشرة */
+#newItemsModal,
+#offersModal,
+.cart-shell{
+  top: var(--assal-live-top-reserve) !important;
+  bottom: var(--assal-live-bottom-reserve) !important;
+}
+
+/* النوافذ اللي تعتمد على تمركز هندسي */
+#contactModal,
+#promoPopup,
+#promoPopup.alert-shell,
+#promoPopup.promo-gift{
+  top: var(--assal-live-center-y) !important;
+  max-height: var(--assal-live-usable-height) !important;
+}
+
+#contactModal{
+  transform: translate(-50%, -50%) !important;
+  overflow-y: auto !important;
+}
+
+#promoPopup,
+#promoPopup.alert-shell,
+#promoPopup.promo-gift{
+  overflow-y: auto !important;
+}
+
+/* SweetAlert */
+.swal2-container.swal2-center,
+.swal2-container.swal2-backdrop-show{
+  box-sizing: border-box !important;
+  padding-top: var(--assal-live-top-reserve) !important;
+  padding-bottom: var(--assal-live-bottom-reserve) !important;
+}
+
+.swal2-container.swal2-center .swal2-popup:not(.swal2-toast),
+.swal2-container.swal2-backdrop-show .swal2-popup:not(.swal2-toast){
+  max-height: var(--assal-live-usable-height) !important;
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+}
+
+@media (max-width: 768px){
+  :root{
+    --assal-live-gap: 6px;
+  }
+}
+</style>
+
 </head>
 <body>
   
@@ -22916,5 +23070,94 @@ ${actionText} ${safeBranch}`;
     try { if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') window.__ASSAL_APPLY_NEWS_BAR_STATE__(); } catch (_) {}
     setTimeout(runForceUpdateCheck, APP_UPDATE_CONFIG.checkDelayMs);
   });
+})();
+</script>
+
+<script id="assal-phone-true-center-runtime">
+(function(){
+  const root = document.documentElement;
+  const GAP_DESKTOP = 8;
+  const GAP_MOBILE = 6;
+
+  function px(v){
+    return Number.isFinite(v) ? Math.max(0, v) : 0;
+  }
+
+  function viewportHeight(){
+    const vv = window.visualViewport;
+    const vh = vv && Number.isFinite(vv.height) ? vv.height : window.innerHeight;
+    return px(vh || window.innerHeight || document.documentElement.clientHeight || 0);
+  }
+
+  function getRect(selector){
+    try {
+      const el = document.querySelector(selector);
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      if (!rect || !Number.isFinite(rect.top)) return null;
+      return rect;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function applyWindowGeometry(){
+    const vh = viewportHeight();
+    if (!vh) return;
+
+    const headerRect = getRect('.header');
+    const footerRect = getRect('footer');
+    const gap = window.innerWidth <= 768 ? GAP_MOBILE : GAP_DESKTOP;
+
+    const headerBottom = headerRect ? px(headerRect.bottom) : 44;
+    const footerTop = footerRect ? px(footerRect.top) : Math.max(0, vh - 40);
+    const footerHeight = footerRect ? px(vh - footerRect.top) : 40;
+
+    const contentTop = Math.min(vh, headerBottom + gap);
+    const contentBottom = Math.max(contentTop, footerTop - gap);
+    const usableHeight = Math.max(0, contentBottom - contentTop);
+    const centerY = contentTop + (usableHeight / 2);
+    const bottomReserve = Math.max(0, vh - contentBottom);
+
+    root.style.setProperty('--assal-live-vh', vh + 'px');
+    root.style.setProperty('--assal-live-header-bottom', headerBottom + 'px');
+    root.style.setProperty('--assal-live-footer-top', footerTop + 'px');
+    root.style.setProperty('--assal-live-header-height', (headerRect ? px(headerRect.height) : 44) + 'px');
+    root.style.setProperty('--assal-live-footer-height', footerHeight + 'px');
+    root.style.setProperty('--assal-live-gap', gap + 'px');
+    root.style.setProperty('--assal-live-top-reserve', contentTop + 'px');
+    root.style.setProperty('--assal-live-bottom-reserve', bottomReserve + 'px');
+    root.style.setProperty('--assal-live-content-top', contentTop + 'px');
+    root.style.setProperty('--assal-live-content-bottom', contentBottom + 'px');
+    root.style.setProperty('--assal-live-usable-height', usableHeight + 'px');
+    root.style.setProperty('--assal-live-center-y', centerY + 'px');
+  }
+
+  let rafId = 0;
+  function queueApply(){
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      applyWindowGeometry();
+      requestAnimationFrame(applyWindowGeometry);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', queueApply, { once: true });
+  } else {
+    queueApply();
+  }
+  window.addEventListener('load', queueApply);
+  window.addEventListener('resize', queueApply, { passive: true });
+  window.addEventListener('orientationchange', queueApply, { passive: true });
+  window.addEventListener('scroll', queueApply, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', queueApply, { passive: true });
+    window.visualViewport.addEventListener('scroll', queueApply, { passive: true });
+  }
+  setTimeout(queueApply, 60);
+  setTimeout(queueApply, 220);
+  setTimeout(queueApply, 600);
+  window.__assalApplyWindowGeometry = queueApply;
 })();
 </script>
