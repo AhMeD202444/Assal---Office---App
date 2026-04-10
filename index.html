@@ -10994,6 +10994,156 @@ html.low-end-device .results-container {
 
 
 </style>
+
+<style id="assal-perfect-window-centering-fix">
+/* ===== FINAL PERFECT WINDOW CENTERING FIX ===== */
+:root{
+  --assal-header-height: 44px;
+  --assal-footer-height: 40px;
+  --assal-window-gap: 12px;
+  --assal-top-reserve: calc(var(--assal-header-height) + var(--assal-window-gap));
+  --assal-bottom-reserve: calc(var(--assal-footer-height) + var(--assal-window-gap));
+  --assal-center-shift: calc((var(--assal-top-reserve) - var(--assal-bottom-reserve)) / 2);
+  --assal-usable-height: calc(100dvh - var(--assal-top-reserve) - var(--assal-bottom-reserve));
+}
+
+@supports not (height: 100dvh){
+  :root{
+    --assal-usable-height: calc(100vh - var(--assal-top-reserve) - var(--assal-bottom-reserve));
+  }
+}
+
+html, body{
+  min-height: 100dvh !important;
+}
+
+body{
+  box-sizing: border-box !important;
+  padding-top: var(--assal-top-reserve) !important;
+  padding-bottom: var(--assal-bottom-reserve) !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.container{
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+}
+
+footer{
+  bottom: 0 !important;
+}
+
+.scroll-to-top,
+.scroll-up-btn,
+.back-to-top,
+.go-top,
+.scroll-btn,
+.floating-new-btn,
+.floating-request-btn,
+.floating-request-admin-btn{
+  bottom: calc(var(--assal-footer-height) + 10px) !important;
+}
+
+/* ===== Full-screen overlay windows ===== */
+#adModal,
+.request-modal,
+.request-admin-modal,
+.request-track-modal,
+.stats-modal,
+.customer-profile-modal,
+.customers-admin-modal,
+.invoice-track-modal,
+.invoice-admin-modal,
+.activation-overlay,
+#maintenance-overlay.activation-overlay,
+#activation-overlay.activation-overlay{
+  box-sizing: border-box !important;
+  padding-top: var(--assal-top-reserve) !important;
+  padding-bottom: var(--assal-bottom-reserve) !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* ===== Internal shells centered inside the clean viewport ===== */
+.update-shell,
+.update-success-shell,
+.request-shell,
+.request-admin-shell,
+.request-track-shell,
+.stats-shell,
+.customer-profile-shell,
+.customers-admin-shell,
+.invoice-track-shell,
+.invoice-admin-shell,
+.activation-dialog,
+#maintenance-overlay .activation-dialog,
+#activation-overlay .activation-dialog,
+#adModal .ad-shell,
+.swal2-popup:not(.swal2-toast){
+  box-sizing: border-box !important;
+  max-height: var(--assal-usable-height) !important;
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+}
+
+/* ===== Direct fixed windows that should occupy the same top/bottom gap ===== */
+#newItemsModal,
+#offersModal,
+.cart-shell{
+  top: var(--assal-top-reserve) !important;
+  bottom: var(--assal-bottom-reserve) !important;
+}
+
+#newItemsModal,
+#offersModal,
+.cart-shell,
+#contactModal,
+#promoPopup{
+  box-sizing: border-box !important;
+}
+
+/* ===== Windows centered by top:50% should compensate header/footer difference ===== */
+#contactModal,
+#promoPopup,
+#promoPopup.alert-shell,
+#promoPopup.promo-gift{
+  top: calc(50% + var(--assal-center-shift)) !important;
+  max-height: var(--assal-usable-height) !important;
+}
+
+#contactModal{
+  transform: translate(-50%, -50%) !important;
+  overflow-y: auto !important;
+}
+
+#promoPopup,
+#promoPopup.alert-shell,
+#promoPopup.promo-gift{
+  overflow-y: auto !important;
+}
+
+/* ===== SweetAlert centered popups ===== */
+.swal2-container.swal2-center{
+  box-sizing: border-box !important;
+  padding-top: var(--assal-top-reserve) !important;
+  padding-bottom: var(--assal-bottom-reserve) !important;
+}
+
+.swal2-container.swal2-center .swal2-popup:not(.swal2-toast){
+  margin-top: auto !important;
+  margin-bottom: auto !important;
+  max-height: var(--assal-usable-height) !important;
+}
+
+/* ===== Smaller screens: keep the exact same centering logic ===== */
+@media (max-width: 768px){
+  :root{
+    --assal-window-gap: 10px;
+  }
+}
+</style>
+
 </head>
 <body>
   
