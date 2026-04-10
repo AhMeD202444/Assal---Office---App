@@ -10157,12 +10157,12 @@ body.modal-lock #promoPopup *{
 
 
 
-/* ===== SAFE AREA / SYSTEM NAVIGATION FIX ===== */
+/* ===== FOOTER NATURAL BOTTOM / NO SAFE GAP ===== */
 :root{
-  --safe-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  --safe-bottom: 0px;
   --footer-height-fixed: 40px;
   --footer-gap-fixed: 8px;
-  --bottom-reserve-fixed: calc(var(--safe-bottom) + var(--footer-height-fixed) + var(--footer-gap-fixed));
+  --bottom-reserve-fixed: calc(var(--footer-height-fixed) + var(--footer-gap-fixed));
   --vertical-shell-gap: 12px;
 }
 
@@ -10196,7 +10196,7 @@ body{
 }
 
 footer{
-  bottom: var(--safe-bottom) !important;
+  bottom: 0 !important;
 }
 
 .scroll-to-top,
@@ -10207,29 +10207,29 @@ footer{
 .floating-new-btn,
 .floating-request-btn,
 .floating-request-admin-btn{
-  bottom: calc(var(--safe-bottom) + 48px) !important;
+  bottom: calc(var(--footer-height-fixed) + 10px) !important;
 }
 
 #newItemsModal{
-  bottom: calc(var(--safe-bottom) + 54px) !important;
+  bottom: calc(var(--footer-height-fixed) + 14px) !important;
 }
 
 @supports not (padding: max(0px)) {
   :root{
-    --safe-bottom: 8px;
+    --safe-bottom: 0px;
   }
 }
 
 
 
-/* ===== GEOMETRIC VERTICAL CENTERING FIX (header/footer aware) ===== */
+/* ===== GEOMETRIC VERTICAL CENTERING FIX (footer at natural bottom) ===== */
 :root{
-  --geom-safe-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
+  --geom-safe-bottom: 0px;
   --geom-header-height: 44px;
   --geom-footer-height: 40px;
   --geom-edge-gap: 12px;
   --geom-top-reserve: calc(var(--geom-header-height) + var(--geom-edge-gap));
-  --geom-bottom-reserve: calc(var(--geom-footer-height) + var(--geom-safe-bottom) + var(--geom-edge-gap));
+  --geom-bottom-reserve: calc(var(--geom-footer-height) + var(--geom-edge-gap));
   --geom-center-shift: calc((var(--geom-top-reserve) - var(--geom-bottom-reserve)) / 2);
   --geom-usable-height: calc(100dvh - var(--geom-top-reserve) - var(--geom-bottom-reserve));
 }
@@ -10252,7 +10252,7 @@ body{
   margin-bottom: auto !important;
 }
 
-/* نوافذ كاملة الشاشة: خلي التوسيط يصير داخل المساحة الصافية بين الهيدر والفوتر */
+/* نوافذ كاملة الشاشة: التوسيط يكون داخل المساحة الصافية بعد تنزيل الفوتر */
 .cart-modal,
 #adModal,
 .request-modal,
@@ -10316,12 +10316,12 @@ body{
   max-height: var(--geom-usable-height) !important;
 }
 
-/* الفوتر يظل ثابت لكن محسوب مع safe area */
+/* الفوتر بمكانه الطبيعي بدون رفع بسبب safe area */
 footer{
-  bottom: var(--geom-safe-bottom) !important;
+  bottom: 0 !important;
 }
 
-/* الأزرار العائمة تبقى فوق الفوتر الحقيقي */
+/* الأزرار العائمة تبقى فوق الفوتر الطبيعي */
 .scroll-to-top,
 .scroll-up-btn,
 .back-to-top,
@@ -10330,7 +10330,7 @@ footer{
 .floating-new-btn,
 .floating-request-btn,
 .floating-request-admin-btn{
-  bottom: calc(var(--geom-footer-height) + var(--geom-safe-bottom) + 10px) !important;
+  bottom: calc(var(--geom-footer-height) + 10px) !important;
 }
 
 @supports not (height: 100dvh){
