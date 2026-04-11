@@ -4108,6 +4108,54 @@ footer {
 
 }
 
+.static-offer-price-pill{
+    margin: 0;
+    min-width: 132px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 7px 14px;
+    text-align: center;
+}
+
+.static-offer-price-pill .static-offer-label,
+.static-offer-price-pill .static-offer-value{
+    position: static;
+    opacity: 1 !important;
+    display: block;
+    line-height: 1.08;
+    animation: none !important;
+    transform: none !important;
+    white-space: nowrap;
+}
+
+.static-offer-price-pill .static-offer-label{
+    font-size: 10px;
+    font-weight: 800;
+    color: #fee2e2;
+}
+
+.static-offer-price-pill .static-offer-value{
+    font-size: 14px;
+    font-weight: 900;
+    color: #ffffff;
+}
+
+@media (max-width: 480px){
+    .static-offer-price-pill{
+        min-width: 120px;
+        padding: 6px 12px;
+    }
+    .static-offer-price-pill .static-offer-label{
+        font-size: 9px;
+    }
+    .static-offer-price-pill .static-offer-value{
+        font-size: 13px;
+    }
+}
+
 /* ✅ ضبط البادج اللي فيها "سعر واحد فقط" (بدون تخفيض) */
 
 /* هذا يمسك أي p جوّه .result-card ومو هو البادج القديم ولا الجديد */
@@ -5146,6 +5194,27 @@ footer {
 }
 .header-btn.offers-btn:hover{
     background: linear-gradient(135deg, #d97706, #f59e0b);
+}
+
+.header-btn.offers-btn{
+    position: relative;
+    overflow: visible !important;
+    clip-path: none !important;
+}
+
+.header-btn.offers-btn .offers-header-badge{
+    top: -7px;
+    right: -8px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    font-size: 10px;
+    font-weight: 900;
+    color: #fff;
+    background: linear-gradient(135deg, #7f1d1d, #dc2626);
+    border: 1px solid rgba(255,255,255,.24);
+    box-shadow: 0 6px 16px rgba(0,0,0,.30);
+    z-index: 5;
 }
 
 
@@ -11126,6 +11195,7 @@ html.low-end-device .results-container {
   
   <button class="header-btn header-icon-btn offers-btn" onclick="openOffersModal()" title="عروض" aria-label="عروض">
     <i class="fas fa-tags"></i>
+    <span class="header-cart-badge offers-header-badge" id="offersHeaderCount" style="display:none;">0</span>
   </button>
 
   <!-- السلة تبقى مثل ما هي -->
@@ -14031,6 +14101,7 @@ window.confirmDeleteCustomerProfile = async function(deviceId) {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+    try { refreshOffersUiCount(); } catch (_) {}
     const requestPhoneInput = document.getElementById('requestPhoneInput');
     if (requestPhoneInput) {
         requestPhoneInput.addEventListener('input', function(){
@@ -14378,6 +14449,102 @@ function closeNewItemsModal() {
 let isOffersModalOpen = false;
 let offersCache = [];
 
+function isLightOfferModeActive() {
+    const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
+    const manualMode = String(diag.manualOverride || '').toLowerCase();
+    return manualMode === 'on' || (manualMode !== 'off' && !!window.__ASSAL_LOW_END_DEVICE__);
+}
+
+function formatOfferPriceValue(value) {
+    return String(value ?? '').replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function buildOfferPriceHtml(originalPriceRaw, discountPriceRaw) {
+    const hasOriginalPrice = !(originalPriceRaw === undefined || originalPriceRaw === null || String(originalPriceRaw).trim() === '');
+    if (!hasOriginalPrice) return '<p>غير متوفر</p>';
+
+    const originalFormatted = formatOfferPriceValue(originalPriceRaw);
+    const hasDiscountPrice = !(discountPriceRaw === undefined || discountPriceRaw === null || String(discountPriceRaw).trim() === '');
+
+    if (!hasDiscountPrice) {
+        return `<p>${originalFormatted} د.ع</p>`;
+    }
+
+    const discountFormatted = formatOfferPriceValue(discountPriceRaw);
+
+    if (isLightOfferModeActive()) {
+        return `
+            <div class="price-row">
+                <p class="old-price-pill">
+                    <span class="old-price-text">${originalFormatted} د.ع</span>
+                </p>
+                <p class="new-price-pill static-offer-price-pill">
+                    <span class="static-offer-label">عرض خاص</span>
+                    <span class="static-offer-value">${discountFormatted} د.ع</span>
+                </p>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="price-row">
+            <p class="old-price-pill">
+                <span class="old-price-text">${originalFormatted} د.ع</span>
+            </p>
+            <p class="new-price-pill">
+                <span class="new-price-text new-price-label">عرض خاص</span>
+                <span class="new-price-text new-price-value">${discountFormatted} د.ع</span>
+            </p>
+        </div>
+    `;
+}
+
+function getOffersList() {
+    const categories = Object.keys(database || {});
+    const offers = [];
+
+    categories.forEach(category => {
+        const rows = Array.isArray(database?.[category]) ? database[category] : [];
+        rows.forEach(item => {
+            const originalPriceRaw = item["Price"];
+            const discountPriceRaw = item["Discount Price"];
+
+            if (!originalPriceRaw || !discountPriceRaw) return;
+
+            const pNum = parseFloat(String(originalPriceRaw).replace(/,/g,'').trim());
+            const dNum = parseFloat(String(discountPriceRaw).replace(/,/g,'').trim());
+            if (isNaN(pNum) || isNaN(dNum)) return;
+
+            offers.push({
+                item,
+                category,
+                saving: Math.max(0, pNum - dNum)
+            });
+        });
+    });
+
+    offers.sort((a,b) => (b.saving - a.saving));
+    return offers;
+}
+
+function updateOffersHeaderBadge(count) {
+    const badge = document.getElementById("offersHeaderCount");
+    if (!badge) return;
+
+    const safeCount = Math.max(0, Number(count) || 0);
+    badge.textContent = safeCount > 99 ? '99+' : String(safeCount);
+    badge.style.display = safeCount > 0 ? 'flex' : 'none';
+    badge.setAttribute('aria-label', `${safeCount} عرض`);
+}
+
+function refreshOffersUiCount() {
+    try {
+        updateOffersHeaderBadge(getOffersList().length);
+    } catch (_) {
+        updateOffersHeaderBadge(0);
+    }
+}
+
 function openOffersModal(){
     try{
         if (isOffersModalOpen) return;
@@ -14431,35 +14598,11 @@ function loadOffers(){
 
     container.innerHTML = "";
 
-    // نفس فكرة اللستة مالتك (وأضفت LENS + LNES حتى ما نضيع شي)
-    const categories = ["LCD","BATTERY","HOUSING","BACK","CAMERA","CHARGING","BUZZER","FINGER","FLAT LCD","POWER","LENS","VOLUME","SPEAKER","FLAT SPEAKER","HOLLDER","IC","CC","VIBRATION","TOUCH","SIGNAL CABLE"];
-
-    let offers = [];
-
-    categories.forEach(category => {
-        if (!database[category]) return;
-
-        database[category].forEach(item => {
-            const originalPriceRaw = item["Price"];
-            const discountPriceRaw = item["Discount Price"];
-
-            if (!originalPriceRaw || !discountPriceRaw) return;
-
-            const pNum = parseFloat(String(originalPriceRaw).replace(/,/g,'').trim());
-            const dNum = parseFloat(String(discountPriceRaw).replace(/,/g,'').trim());
-            if (isNaN(pNum) || isNaN(dNum)) return;
-
-            const saving = Math.max(0, pNum - dNum);
-            offers.push({ item, category, saving });
-        });
-    });
-
-    // رتب من الأعلى توفيراً
-    offers.sort((a,b) => (b.saving - a.saving));
+    const offers = getOffersList();
 
     offersCache = offers;
-
     chip.textContent = `${offers.length} عرض`;
+    updateOffersHeaderBadge(offers.length);
 
     if (offers.length === 0){
         container.innerHTML = `
@@ -14482,25 +14625,10 @@ function renderOffers(list){
     list.forEach(({item, category, saving}) => {
         const name = item["Item Name"] || item["Item"] || "بدون اسم";
 
-        // نفس تنسيق عرض الأسعار عندك بـ displayResults :contentReference[oaicite:4]{index=4}
-        const originalFormatted = item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        const discountFormatted = item["Discount Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
         const savingFormatted = saving.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
         const iconClass = (typeof getCategoryIcon === "function") ? getCategoryIcon(category) : "fas fa-tag";
-
-        const priceHtml = `
-            <div class="price-row">
-                <p class="old-price-pill">
-                    <span class="old-price-text">${originalFormatted} د.ع</span>
-                </p>
-                <p class="new-price-pill">
-                    <span class="new-price-text new-price-label">عرض خاص</span>
-                    <span class="new-price-text new-price-value">${discountFormatted} د.ع</span>
-                </p>
-            </div>
-        `;
+        const priceHtml = buildOfferPriceHtml(item["Price"], item["Discount Price"]);
 
         html += `
             <div class="offer-card">
@@ -15593,6 +15721,7 @@ async function loadExcelFiles() {
            return { success: false, hasData: false, message: "ملف Excel لا يحتوي على بيانات صالحة." };
         }
 
+        try { refreshOffersUiCount(); } catch (_) {}
         return { success: true, hasData: true };
     } catch (error) {
         console.error("خطأ في تحميل ملف Excel:", error.message, error.stack);
@@ -15754,36 +15883,7 @@ function displayResults(results) {
             // منطق الأسعار
             const originalPriceRaw  = item["Price"];
             const discountPriceRaw  = item["Discount Price"]; // عمود جديد في ملف الإكسل
-
-            let priceHtml = '<p>غير متوفر</p>';
-
-            if (originalPriceRaw) {
-                const originalFormatted = originalPriceRaw
-                    .toString()
-                    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
-                if (discountPriceRaw) {
-                    const discountFormatted = discountPriceRaw
-                        .toString()
-                        .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
-                    // 👉 عند وجود تخفيض: مستطيل السعر القديم + مستطيل السعر الجديد
-                    priceHtml = `
-                        <div class="price-row">
-                            <p class="old-price-pill">
-                                <span class="old-price-text">${originalFormatted} د.ع</span>
-                            </p>
-                            <p class="new-price-pill">
-                                <span class="new-price-text new-price-label">عرض خاص</span>
-                                <span class="new-price-text new-price-value">${discountFormatted} د.ع</span>
-                            </p>
-                        </div>
-                    `;
-                } else {
-                    // 👉 بدون تخفيض: نفس البادج القديم
-                    priceHtml = `<p>${originalFormatted} د.ع</p>`;
-                }
-            }
+            const priceHtml = buildOfferPriceHtml(originalPriceRaw, discountPriceRaw);
 
             /* ===== التعديل فقط: زر اضافة صغير + تحديد السعر الفعلي ===== */
             const itemName = (item["Item Name"] || item["Item"] || "بدون اسم").toString();
@@ -17083,20 +17183,24 @@ function applyManualLightNewsBarState() {
     const tickerContainer = document.querySelector('.news-ticker-container');
     const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
     const manualMode = String(diag.manualOverride || '').toLowerCase();
+    const isManualLight = manualMode === 'on';
+    const isAutoLight = manualMode !== 'off' && !!window.__ASSAL_LOW_END_DEVICE__;
 
     root.classList.remove('manual-light-news');
 
     if (!newsBar || !badge || !ticker) return;
 
-    if (manualMode === 'on') {
+    if (isManualLight || isAutoLight) {
         root.classList.add('manual-light-news');
         newsBar.style.display = 'flex';
-        badge.textContent = '⚡ خفيف';
+        badge.textContent = isManualLight ? '⚡ خفيف' : '⚡ تلقائي';
         if (tickerContainer) {
             tickerContainer.style.justifyContent = 'center';
         }
-        ticker.textContent = 'تم تفعيل الوضع الخفيف في هاتفك';
-        ticker.title = 'تم تفعيل الوضع الخفيف في هاتفك';
+        ticker.textContent = isManualLight
+            ? 'تم تفعيل الوضع الخفيف في هاتفك'
+            : 'تم تفعيل الوضع الخفيف تلقائياً في هاتفك';
+        ticker.title = ticker.textContent;
         ticker.style.animation = 'none';
         ticker.style.position = 'relative';
         ticker.style.whiteSpace = 'nowrap';
@@ -17105,6 +17209,7 @@ function applyManualLightNewsBarState() {
         ticker.style.textAlign = 'center';
         ticker.style.justifyContent = 'center';
         ticker.style.direction = 'rtl';
+        stopNewsUpdates();
         return;
     }
 
@@ -17121,6 +17226,7 @@ function applyManualLightNewsBarState() {
 
     if (window.__ASSAL_LOW_END_DEVICE__) {
         newsBar.style.display = 'none';
+        stopNewsUpdates();
     } else {
         newsBar.style.display = 'flex';
         fetchTechNews(); // تحميل أولي
