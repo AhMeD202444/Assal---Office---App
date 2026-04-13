@@ -20874,6 +20874,198 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
   .invoice-draft-title,.invoice-sent-title,.invoice-admin-name{ font-size:16px; }
 }
 </style>
+
+<style>
+/* =========================================
+   ASSAL OPTICAL CENTERING PATCH (standard mode only)
+   الهدف: توسيط بصري لكل النوافذ بدون لمس الظلال أو البلور
+   ========================================= */
+html:not(.low-end-device){
+  --assal-optical-safe-top: max(12px, calc(env(safe-area-inset-top, 0px) + 12px));
+  --assal-optical-safe-bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+
+  /* offsets نافذة نافذة */
+  --assal-lift-promo: -10px;
+  --assal-lift-new-items: -8px;
+  --assal-lift-offers: -8px;
+  --assal-lift-contact: -7px;
+  --assal-lift-cart: -6px;
+  --assal-lift-ad: -9px;
+  --assal-lift-activation: -9px;
+  --assal-lift-request: -7px;
+  --assal-lift-request-admin: -6px;
+  --assal-lift-request-track: -7px;
+  --assal-lift-stats: -8px;
+  --assal-lift-customer-profile: -7px;
+  --assal-lift-customers-admin: -7px;
+  --assal-lift-invoice-track: -8px;
+  --assal-lift-invoice-admin: -8px;
+  --assal-lift-update: -7px;
+  --assal-lift-update-success: -7px;
+  --assal-lift-swal: -8px;
+}
+
+/* 1) نلغي اعتماد الوضع القياسي على احتساب الهيدر/الفوتر المخفيين بصرياً */
+html:not(.low-end-device) .cart-modal,
+html:not(.low-end-device) #adModal,
+html:not(.low-end-device) .request-modal,
+html:not(.low-end-device) .request-admin-modal,
+html:not(.low-end-device) .request-track-modal,
+html:not(.low-end-device) .stats-modal,
+html:not(.low-end-device) .customer-profile-modal,
+html:not(.low-end-device) .customers-admin-modal,
+html:not(.low-end-device) .invoice-track-modal,
+html:not(.low-end-device) .invoice-admin-modal,
+html:not(.low-end-device) .activation-overlay{
+  padding-top: var(--assal-optical-safe-top) !important;
+  padding-bottom: var(--assal-optical-safe-bottom) !important;
+}
+
+/* 2) النوافذ الثابتة الطويلة */
+html:not(.low-end-device) #newItemsModal{
+  top: var(--assal-optical-safe-top) !important;
+  bottom: var(--assal-optical-safe-bottom) !important;
+  transform: translateX(-50%) translateY(var(--assal-lift-new-items)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) #offersModal{
+  top: var(--assal-optical-safe-top) !important;
+  bottom: var(--assal-optical-safe-bottom) !important;
+  transform: translateX(-50%) translateY(var(--assal-lift-offers)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+/* 3) النوافذ اللي تتمركز عبر top:50% */
+html:not(.low-end-device) #promoPopup{
+  top: calc(50% + var(--assal-lift-promo)) !important;
+}
+
+html:not(.low-end-device) #contactModal{
+  top: calc(50% + var(--assal-lift-contact)) !important;
+  transform: translate(-50%, -50%) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+/* 4) الشِلّات داخل طبقات fullscreen */
+html:not(.low-end-device) .cart-shell{
+  top: auto !important;
+  bottom: auto !important;
+  transform: translateY(var(--assal-lift-cart)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) #adModal .ad-shell{
+  transform: translateY(var(--assal-lift-ad)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) .activation-dialog{
+  transform: translateY(var(--assal-lift-activation)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) .request-shell{
+  transform: translateY(var(--assal-lift-request)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) .request-admin-shell{
+  transform: translateY(var(--assal-lift-request-admin)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) .request-track-shell{
+  transform: translateY(var(--assal-lift-request-track)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) .stats-shell{
+  transform: translateY(var(--assal-lift-stats)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) .customer-profile-shell{
+  transform: translateY(var(--assal-lift-customer-profile)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) .customers-admin-shell{
+  transform: translateY(var(--assal-lift-customers-admin)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) .invoice-track-shell{
+  transform: translateY(var(--assal-lift-invoice-track)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) .invoice-admin-shell{
+  transform: translateY(var(--assal-lift-invoice-admin)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) .update-shell{
+  transform: translateY(var(--assal-lift-update)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+html:not(.low-end-device) .update-success-shell{
+  transform: translateY(var(--assal-lift-update-success)) !important;
+  max-height: calc(100dvh - var(--assal-optical-safe-top) - var(--assal-optical-safe-bottom)) !important;
+}
+
+/* 5) SweetAlert نخليه يطلع شوي لفوك بدون تخريب transform الداخلي للمكتبة */
+html:not(.low-end-device) .swal2-container.swal2-center > .swal2-popup{
+  margin-top: var(--assal-lift-swal) !important;
+}
+
+/* 6) موبايل: نقلل الرفع شوي حتى ما يصير over-correction */
+@media (max-width: 768px){
+  html:not(.low-end-device){
+    --assal-lift-promo: -9px;
+    --assal-lift-new-items: -7px;
+    --assal-lift-offers: -7px;
+    --assal-lift-contact: -6px;
+    --assal-lift-cart: -5px;
+    --assal-lift-ad: -8px;
+    --assal-lift-activation: -8px;
+    --assal-lift-request: -6px;
+    --assal-lift-request-admin: -5px;
+    --assal-lift-request-track: -6px;
+    --assal-lift-stats: -7px;
+    --assal-lift-customer-profile: -6px;
+    --assal-lift-customers-admin: -6px;
+    --assal-lift-invoice-track: -7px;
+    --assal-lift-invoice-admin: -7px;
+    --assal-lift-update: -6px;
+    --assal-lift-update-success: -6px;
+    --assal-lift-swal: -7px;
+  }
+}
+
+/* 7) أمان: بالوضع الخفيف نرجع كلشي طبيعي 1:1 */
+html.low-end-device #newItemsModal,
+html.low-end-device #offersModal,
+html.low-end-device #contactModal,
+html.low-end-device #promoPopup,
+html.low-end-device .cart-shell,
+html.low-end-device #adModal .ad-shell,
+html.low-end-device .activation-dialog,
+html.low-end-device .request-shell,
+html.low-end-device .request-admin-shell,
+html.low-end-device .request-track-shell,
+html.low-end-device .stats-shell,
+html.low-end-device .customer-profile-shell,
+html.low-end-device .customers-admin-shell,
+html.low-end-device .invoice-track-shell,
+html.low-end-device .invoice-admin-shell,
+html.low-end-device .update-shell,
+html.low-end-device .update-success-shell{
+  margin-top: 0 !important;
+}
+</style>
+
 <script>
 (function(){
   if (!window.firebaseDB) return;
