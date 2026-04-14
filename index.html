@@ -174,7 +174,6 @@
           const runtimeVeryWeak = runtimeResult.score >= 7;
 
           const hasStrongHardware =
-            !nativeDecision.hasDecision &&
             !heuristicResult.knownWeakModel &&
             ((memKnown && signals.mem >= 8) || (coresKnown && signals.cores >= 8)) &&
             runtimeResult.score <= 4 &&
@@ -195,38 +194,48 @@
             (signals.reduceMotion ? 0.25 : 0)
           );
 
-          let isLow = false;
-          let source = 'standard';
+          let fallbackLow = false;
+          let fallbackSource = 'standard';
 
-          if (nativeDecision.hasDecision) {
-            isLow = !!nativeDecision.isLow;
-            source = nativeDecision.isLow ? 'native' : 'native-standard';
-          } else if (hasStrongHardware) {
-            isLow = false;
-            source = 'standard';
+          if (hasStrongHardware) {
+            fallbackLow = false;
+            fallbackSource = 'standard';
           } else if (heuristicResult.knownWeakModel && (memLow || coresLow || runtimeSoftWeak || compactBudget)) {
-            isLow = true;
-            source = 'heuristic';
+            fallbackLow = true;
+            fallbackSource = 'heuristic';
           } else if (runtimeVeryWeak && (constrainedHardware || compactBudget)) {
-            isLow = true;
-            source = 'runtime';
+            fallbackLow = true;
+            fallbackSource = 'runtime';
           } else if (memVeryLow && (runtimeSoftWeak || heuristicResult.knownWeakModel || compactBudget)) {
-            isLow = true;
-            source = runtimeResult.score >= heuristicResult.score ? 'runtime' : 'heuristic';
+            fallbackLow = true;
+            fallbackSource = runtimeResult.score >= heuristicResult.score ? 'runtime' : 'heuristic';
           } else if (coresVeryLow && memLow && (runtimeSoftWeak || compactBudget)) {
-            isLow = true;
-            source = runtimeResult.score >= heuristicResult.score ? 'runtime' : 'heuristic';
+            fallbackLow = true;
+            fallbackSource = runtimeResult.score >= heuristicResult.score ? 'runtime' : 'heuristic';
           } else if (fallbackSignalCount >= 3 && (runtimeSoftWeak || constrainedHardware || compactBudget)) {
-            isLow = true;
-            source = runtimeResult.score > heuristicResult.score ? 'runtime' : 'heuristic';
+            fallbackLow = true;
+            fallbackSource = runtimeResult.score > heuristicResult.score ? 'runtime' : 'heuristic';
           } else if (compositeScore >= 7.2 && constrainedHardware && (heuristicResult.score >= 4 || runtimeSoftWeak)) {
-            isLow = true;
-            source = runtimeResult.score > heuristicResult.score ? 'runtime' : 'heuristic';
+            fallbackLow = true;
+            fallbackSource = runtimeResult.score > heuristicResult.score ? 'runtime' : 'heuristic';
+          }
+
+          if (nativeDecision.hasDecision && nativeDecision.isLow) {
+            return {
+              isLow: true,
+              source: 'native',
+              compositeScore,
+              constrainedHardware,
+              compactConstrained,
+              hasStrongHardware,
+              fallbackSignalCount,
+              nativeHasDecision: true
+            };
           }
 
           return {
-            isLow,
-            source,
+            isLow: fallbackLow,
+            source: fallbackLow ? fallbackSource : 'standard',
             compositeScore,
             constrainedHardware,
             compactConstrained,
@@ -245,8 +254,8 @@
         const nativeLow = !!nativeDecision.isLow;
         const autoDecision = decideAutoLowEnd(signals, heuristicResult, runtimeResult, nativeDecision);
 
-        const finalScore = nativeDecision.hasDecision
-          ? (nativeDecision.isLow ? 10 : 0)
+        const finalScore = nativeDecision.isLow
+          ? 10
           : Number((autoDecision.compositeScore || 0).toFixed(1));
 
         const isForcedOn = manualOverride === 'on';
@@ -19235,7 +19244,7 @@ function closeContactModal(){
      "instant_inquiry_feature" => إعلان ميزة الاستعلام الفوري مع معرض صور
 
    ========================================================== */
-const AD_CHOICE = "instant_inquiry_feature"; // <<< الإعلان الجديد مفعل افتراضياً
+const AD_CHOICE = "off"; // <<< الإعلان الجديد مفعل افتراضياً
 
 // خيارات اضافية (اختياري)
 const AD_DELAY_MS = 120;                 // تأخير أخف حتى يظهر الإعلان أسرع بدون ما يزعج
@@ -23009,12 +23018,9 @@ ${actionText} ${safeBranch}`;
       return currentOverride === mode ? ' is-selected' : '';
     }
 
-    const nativeStatus = diag.nativeHasDecision ? (diag.nativeLow ? 'true' : 'false') : '—';
-
     const rows = [
       ['المصدر', source],
-      ['Native raw', nativeValue === null || nativeValue === undefined ? '—' : nativeValue],
-      ['Native normalized', nativeStatus],
+      ['Native', nativeValue === null || nativeValue === undefined ? '—' : nativeValue],
       ['التحكم', currentOverride],
       ['المعالج', navigator.hardwareConcurrency || '—'],
       ['الرام', navigator.deviceMemory || '—'],
@@ -23142,7 +23148,7 @@ ${actionText} ${safeBranch}`;
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.nativeNormalized = nativeDecision.normalized || 'unknown';
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.autoLow = autoLow;
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.autoSource = autoDecision.source || 'standard';
-                    window.__ASSAL_LOW_END_DIAGNOSTICS__.finalScore = nativeDecision.hasDecision ? (nativeDecision.isLow ? 10 : 0) : Number((autoDecision.compositeScore || 0).toFixed(1));
+                    window.__ASSAL_LOW_END_DIAGNOSTICS__.finalScore = nativeDecision.isLow ? 10 : Number((autoDecision.compositeScore || 0).toFixed(1));
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.hasStrongHardware = !!autoDecision.hasStrongHardware;
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.constrainedHardware = !!autoDecision.constrainedHardware;
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.compactConstrained = !!autoDecision.compactConstrained;
