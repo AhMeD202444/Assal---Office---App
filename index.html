@@ -34,6 +34,21 @@
           return null;
         }
 
+        function normalizeNativeLowEndValue(value) {
+          let normalized = value;
+          if (typeof normalized === 'string') normalized = normalized.trim().toLowerCase();
+
+          if (normalized === true || normalized === 'true' || normalized === 1 || normalized === '1') {
+            return { hasDecision: true, isLow: true, raw: value, normalized: 'true' };
+          }
+
+          if (normalized === false || normalized === 'false' || normalized === 0 || normalized === '0') {
+            return { hasDecision: true, isLow: false, raw: value, normalized: 'false' };
+          }
+
+          return { hasDecision: false, isLow: false, raw: value, normalized: 'unknown' };
+        }
+
         function getDeviceSignals() {
           const width = safeNumber(window.screen && window.screen.width) || safeNumber(window.innerWidth);
           const height = safeNumber(window.screen && window.screen.height) || safeNumber(window.innerHeight);
@@ -113,7 +128,7 @@
         }
 
         function heuristicLowEndValue(signals) {
-          const knownWeakModel = /(hot\s*10i|hot\s*11\s*(play|2022)?|hot\s*12(\s*(play|i))?|hot\s*20i|x665|x665b|infinix\s*x665|infinix\s*smart|smart\s*[6-9]|smart\s*hd|android\s*go|itel|tecno\s*(pop|spark\s*go|spark\s*8c|spark\s*9c|spark\s*10c)|a0[34](e| core)?|a05|a06|moto\s*e\d*|redmi\s*a[12]|redmi\s*9a|redmi\s*10a|realme\s*c(2|3|11|20|21|30|31|33|35|51|53)\b|nokia\s*c[123]\b|c11|c12|c30)/i.test(signals.ua);
+          const knownWeakModel = /(hot\s*10i|hot\s*11\s*(play|2022)?|hot\s*12(\s*(play|i))?|hot\s*20i|x665|x665b|infinix\s*x665|infinix\s*smart|smart\s*[6-9]|smart\s*hd|android\s*go|itel|tecno\s*(pop|spark\s*go|spark\s*8c|spark\s*9c|spark\s*10c)|a0[34](e| core)?|a05|a06|moto\s*e\d*|redmi\s*a[12]|redmi\s*9a|redmi\s*10a|realme\s*c(2|3|11|20|21|30|31|33|35|51|53)|nokia\s*c[123]|c11|c12|c30)/i.test(signals.ua);
 
           const memKnown = signals.mem > 0;
           const coresKnown = signals.cores > 0;
@@ -144,51 +159,69 @@
           return { isLow: score >= 6, score, knownWeakModel };
         }
 
-        function decideAutoLowEnd(signals, heuristicResult, runtimeResult, nativeLow) {
+        function decideAutoLowEnd(signals, heuristicResult, runtimeResult, nativeDecision) {
           const memKnown = signals.mem > 0;
           const coresKnown = signals.cores > 0;
-          const constrainedHardware =
-            (memKnown && signals.mem <= 4) ||
-            (coresKnown && signals.cores <= 6);
+          const memLow = memKnown && signals.mem <= 4;
+          const memVeryLow = memKnown && signals.mem <= 3;
+          const coresLow = coresKnown && signals.cores <= 6;
+          const coresVeryLow = coresKnown && signals.cores <= 4;
+          const constrainedHardware = memLow || coresLow;
+          const compactBudget = !!signals.compactBudgetAndroid && !!signals.budgetBrand;
+          const compactConstrained = !!signals.compactBudgetAndroid && constrainedHardware;
+          const runtimeWeak = runtimeResult.score >= 6;
+          const runtimeSoftWeak = runtimeResult.score >= 4;
+          const runtimeVeryWeak = runtimeResult.score >= 7;
 
           const hasStrongHardware =
-            !nativeLow &&
+            !nativeDecision.hasDecision &&
             !heuristicResult.knownWeakModel &&
             ((memKnown && signals.mem >= 8) || (coresKnown && signals.cores >= 8)) &&
             runtimeResult.score <= 4 &&
             !signals.budgetBrand;
 
-          const compactConstrained = !!signals.compactBudgetAndroid && constrainedHardware;
+          const fallbackSignalCount = [
+            heuristicResult.knownWeakModel,
+            memLow,
+            coresLow,
+            runtimeWeak,
+            compactBudget
+          ].filter(Boolean).length;
+
           const compositeScore = Math.min(
             10,
-            (heuristicResult.score * 0.68) +
-            (runtimeResult.score * 0.52) +
-            (signals.reduceMotion ? 0.35 : 0)
+            (heuristicResult.score * 0.55) +
+            (runtimeResult.score * 0.45) +
+            (signals.reduceMotion ? 0.25 : 0)
           );
 
           let isLow = false;
           let source = 'standard';
 
-          if (nativeLow) {
-            isLow = true;
-            source = 'native';
-          } else if (heuristicResult.knownWeakModel && constrainedHardware) {
-            isLow = true;
-            source = 'heuristic';
-          } else if (heuristicResult.score >= 8 && runtimeResult.score >= 3) {
-            isLow = true;
-            source = 'heuristic';
-          } else if (runtimeResult.score >= 7 && heuristicResult.score >= 4 && !hasStrongHardware) {
-            isLow = true;
-            source = 'runtime';
-          } else if (compositeScore >= 6.6 && (constrainedHardware || compactConstrained || signals.budgetBrand)) {
-            isLow = true;
-            source = runtimeResult.score > heuristicResult.score ? 'runtime' : 'heuristic';
-          }
-
-          if (hasStrongHardware && !nativeLow) {
+          if (nativeDecision.hasDecision) {
+            isLow = !!nativeDecision.isLow;
+            source = nativeDecision.isLow ? 'native' : 'native-standard';
+          } else if (hasStrongHardware) {
             isLow = false;
             source = 'standard';
+          } else if (heuristicResult.knownWeakModel && (memLow || coresLow || runtimeSoftWeak || compactBudget)) {
+            isLow = true;
+            source = 'heuristic';
+          } else if (runtimeVeryWeak && (constrainedHardware || compactBudget)) {
+            isLow = true;
+            source = 'runtime';
+          } else if (memVeryLow && (runtimeSoftWeak || heuristicResult.knownWeakModel || compactBudget)) {
+            isLow = true;
+            source = runtimeResult.score >= heuristicResult.score ? 'runtime' : 'heuristic';
+          } else if (coresVeryLow && memLow && (runtimeSoftWeak || compactBudget)) {
+            isLow = true;
+            source = runtimeResult.score >= heuristicResult.score ? 'runtime' : 'heuristic';
+          } else if (fallbackSignalCount >= 3 && (runtimeSoftWeak || constrainedHardware || compactBudget)) {
+            isLow = true;
+            source = runtimeResult.score > heuristicResult.score ? 'runtime' : 'heuristic';
+          } else if (compositeScore >= 7.2 && constrainedHardware && (heuristicResult.score >= 4 || runtimeSoftWeak)) {
+            isLow = true;
+            source = runtimeResult.score > heuristicResult.score ? 'runtime' : 'heuristic';
           }
 
           return {
@@ -197,20 +230,23 @@
             compositeScore,
             constrainedHardware,
             compactConstrained,
-            hasStrongHardware
+            hasStrongHardware,
+            fallbackSignalCount,
+            nativeHasDecision: !!nativeDecision.hasDecision
           };
         }
 
         const manualOverride = safeStorageGet('assal_force_low_end');
         const nativeValue = nativeLowEndValue();
+        const nativeDecision = normalizeNativeLowEndValue(nativeValue);
         const signals = getDeviceSignals();
         const heuristicResult = heuristicLowEndValue(signals);
         const runtimeResult = runtimeLowEndValue(signals);
-        const nativeLow = nativeValue === true || nativeValue === 'true';
-        const autoDecision = decideAutoLowEnd(signals, heuristicResult, runtimeResult, nativeLow);
+        const nativeLow = !!nativeDecision.isLow;
+        const autoDecision = decideAutoLowEnd(signals, heuristicResult, runtimeResult, nativeDecision);
 
-        const finalScore = nativeLow
-          ? 10
+        const finalScore = nativeDecision.hasDecision
+          ? (nativeDecision.isLow ? 10 : 0)
           : Number((autoDecision.compositeScore || 0).toFixed(1));
 
         const isForcedOn = manualOverride === 'on';
@@ -239,6 +275,8 @@
           manualOverride,
           nativeValue,
           nativeLow,
+          nativeHasDecision: !!nativeDecision.hasDecision,
+          nativeNormalized: nativeDecision.normalized,
           heuristicLow: !!heuristicResult.isLow,
           heuristicScore: heuristicResult.score,
           knownWeakModel: !!heuristicResult.knownWeakModel,
@@ -252,10 +290,12 @@
           cpuBench: runtimeResult.cpuMs || 0,
           hasStrongHardware: !!autoDecision.hasStrongHardware,
           constrainedHardware: !!autoDecision.constrainedHardware,
-          compactConstrained: !!autoDecision.compactConstrained
+          compactConstrained: !!autoDecision.compactConstrained,
+          fallbackSignalCount: Number(autoDecision.fallbackSignalCount || 0)
         };
 
         window.__ASSAL_DECIDE_AUTO_LOW_END__ = decideAutoLowEnd;
+        window.__ASSAL_NORMALIZE_NATIVE_LOW_END__ = normalizeNativeLowEndValue;
 
         window.__ASSAL_SET_LOW_END_OVERRIDE__ = function(mode) {
           if (mode === 'on' || mode === 'off') {
@@ -265,7 +305,7 @@
           }
         };
       })();
-    </script>
+    </script>    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -22969,9 +23009,12 @@ ${actionText} ${safeBranch}`;
       return currentOverride === mode ? ' is-selected' : '';
     }
 
+    const nativeStatus = diag.nativeHasDecision ? (diag.nativeLow ? 'true' : 'false') : '—';
+
     const rows = [
       ['المصدر', source],
-      ['Native', nativeValue === null || nativeValue === undefined ? '—' : nativeValue],
+      ['Native raw', nativeValue === null || nativeValue === undefined ? '—' : nativeValue],
+      ['Native normalized', nativeStatus],
       ['التحكم', currentOverride],
       ['المعالج', navigator.hardwareConcurrency || '—'],
       ['الرام', navigator.deviceMemory || '—'],
@@ -23066,7 +23109,12 @@ ${actionText} ${safeBranch}`;
                 try {
                   const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
                   const signals = diag.signals || {};
-                  const nativeLow = !!diag.nativeLow;
+                  const nativeDecision = {
+                    hasDecision: !!diag.nativeHasDecision,
+                    isLow: !!diag.nativeLow,
+                    raw: diag.nativeValue,
+                    normalized: diag.nativeNormalized || (diag.nativeHasDecision ? (diag.nativeLow ? 'true' : 'false') : 'unknown')
+                  };
                   const heuristicResult = {
                     score: Number(diag.heuristicScore || 0),
                     isLow: !!diag.heuristicLow,
@@ -23077,8 +23125,8 @@ ${actionText} ${safeBranch}`;
                     isLow: !!diag.runtimeLow
                   };
                   const autoDecision = typeof window.__ASSAL_DECIDE_AUTO_LOW_END__ === 'function'
-                    ? window.__ASSAL_DECIDE_AUTO_LOW_END__(signals, heuristicResult, runtimeResult, nativeLow)
-                    : { isLow: !!nativeLow, source: nativeLow ? 'native' : 'standard', compositeScore: nativeLow ? 10 : 0, hasStrongHardware: false, constrainedHardware: false, compactConstrained: false };
+                    ? window.__ASSAL_DECIDE_AUTO_LOW_END__(signals, heuristicResult, runtimeResult, nativeDecision)
+                    : { isLow: !!nativeDecision.isLow, source: nativeDecision.isLow ? 'native' : 'standard', compositeScore: nativeDecision.isLow ? 10 : 0, hasStrongHardware: false, constrainedHardware: false, compactConstrained: false, fallbackSignalCount: 0 };
                   const autoLow = !!autoDecision.isLow;
 
                   document.documentElement.classList.remove('manual-light-news');
@@ -23090,12 +23138,15 @@ ${actionText} ${safeBranch}`;
 
                   if (window.__ASSAL_LOW_END_DIAGNOSTICS__) {
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.manualOverride = null;
+                    window.__ASSAL_LOW_END_DIAGNOSTICS__.nativeHasDecision = !!nativeDecision.hasDecision;
+                    window.__ASSAL_LOW_END_DIAGNOSTICS__.nativeNormalized = nativeDecision.normalized || 'unknown';
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.autoLow = autoLow;
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.autoSource = autoDecision.source || 'standard';
-                    window.__ASSAL_LOW_END_DIAGNOSTICS__.finalScore = nativeLow ? 10 : Number((autoDecision.compositeScore || 0).toFixed(1));
+                    window.__ASSAL_LOW_END_DIAGNOSTICS__.finalScore = nativeDecision.hasDecision ? (nativeDecision.isLow ? 10 : 0) : Number((autoDecision.compositeScore || 0).toFixed(1));
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.hasStrongHardware = !!autoDecision.hasStrongHardware;
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.constrainedHardware = !!autoDecision.constrainedHardware;
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.compactConstrained = !!autoDecision.compactConstrained;
+                    window.__ASSAL_LOW_END_DIAGNOSTICS__.fallbackSignalCount = Number(autoDecision.fallbackSignalCount || 0);
                   }
                 } catch (_) {}
               }
