@@ -88,19 +88,25 @@
             window.__ASSAL_LOW_END_CPU_BENCH_STEPS__ = benches.slice();
             window.__ASSAL_LOW_END_CPU_ACC__ = sink;
 
-            let score = 0;
-            if (cpuMs >= 28) score = 7;
-            else if (cpuMs >= 20) score = 6;
-            else if (cpuMs >= 14) score = 4;
-            else if (cpuMs >= 9) score = 3;
-            else if (cpuMs >= 6.5) score = 2;
-            else if (cpuMs >= 4.5) score = 1;
+            const memKnown = signals.mem > 0;
+            const coresKnown = signals.cores > 0;
+            const constrainedHardware =
+              (memKnown && signals.mem <= 4) ||
+              (coresKnown && signals.cores <= 6);
 
-            if (signals.compactBudgetAndroid && cpuMs >= 5.5) score += 2;
-            else if (signals.smallishAndroid && cpuMs >= 4.25) score += 1;
+            let score = 0;
+            if (cpuMs >= 36) score = 7;
+            else if (cpuMs >= 26) score = 6;
+            else if (cpuMs >= 18) score = 4;
+            else if (cpuMs >= 12) score = 3;
+            else if (cpuMs >= 8) score = 2;
+            else if (cpuMs >= 5.5) score = 1;
+
+            if (signals.compactBudgetAndroid && constrainedHardware && cpuMs >= 8) score += 1;
+            else if (signals.smallishAndroid && signals.budgetBrand && cpuMs >= 7) score += 1;
 
             score = Math.min(10, score);
-            return { isLow: score >= 5, score, cpuMs, benches };
+            return { isLow: score >= 6, score, cpuMs, benches };
           } catch (_) {
             return { isLow: false, score: 0, cpuMs: 0, benches: [] };
           }
@@ -109,33 +115,90 @@
         function heuristicLowEndValue(signals) {
           const knownWeakModel = /(hot\s*10i|hot\s*11\s*(play|2022)?|hot\s*12(\s*(play|i))?|hot\s*20i|x665|x665b|infinix\s*x665|infinix\s*smart|smart\s*[6-9]|smart\s*hd|android\s*go|itel|tecno\s*(pop|spark\s*go|spark\s*8c|spark\s*9c|spark\s*10c)|a0[34](e| core)?|a05|a06|moto\s*e\d*|redmi\s*a[12]|redmi\s*9a|redmi\s*10a|realme\s*c(2|3|11|20|21|30|31|33|35|51|53)\b|nokia\s*c[123]\b|c11|c12|c30)/i.test(signals.ua);
 
+          const memKnown = signals.mem > 0;
+          const coresKnown = signals.cores > 0;
           let score = 0;
 
           if (knownWeakModel) score += 8;
-          if (signals.reduceMotion) score += 2;
+          if (signals.reduceMotion) score += 1;
 
-          if (signals.mem > 0 && signals.mem <= 3) score += 5;
-          else if (signals.mem > 0 && signals.mem <= 4) score += 3;
-          else if (signals.mem > 0 && signals.mem <= 6 && signals.compactBudgetAndroid) score += 1;
+          if (memKnown && signals.mem <= 3) score += 5;
+          else if (memKnown && signals.mem <= 4) score += 3;
+          else if (memKnown && signals.mem <= 6 && signals.budgetBrand) score += 1;
 
-          if (signals.cores > 0 && signals.cores <= 4) score += 4;
-          else if (signals.cores > 0 && signals.cores <= 6) score += 2;
-          else if (signals.cores > 0 && signals.cores <= 8 && signals.compactBudgetAndroid && signals.dpr <= 2.8) score += 1;
+          if (coresKnown && signals.cores <= 4) score += 4;
+          else if (coresKnown && signals.cores <= 6) score += 2;
 
-          if (signals.compactBudgetAndroid) score += 3;
-          else if (signals.smallishAndroid && signals.dpr <= 2.8) score += 1;
+          if (signals.compactBudgetAndroid && ((memKnown && signals.mem <= 4) || (coresKnown && signals.cores <= 6))) {
+            score += 2;
+          } else if (signals.smallishAndroid && signals.budgetBrand && signals.dpr <= 2.8) {
+            score += 1;
+          }
 
-          if (signals.compactBudgetAndroid && signals.cores > 0 && signals.cores <= 8 && signals.dpr <= 3) score += 2;
-          if (signals.pixelArea > 0 && signals.pixelArea <= 1100000 && signals.android) score += 1;
+          if (signals.pixelArea > 0 && signals.pixelArea <= 1050000 && signals.android && signals.budgetBrand) score += 1;
 
-          if (signals.budgetBrand && signals.compactBudgetAndroid) score += 3;
-          else if (signals.budgetBrand && signals.smallishAndroid) score += 2;
-
-          if (signals.mem === 0 && signals.compactBudgetAndroid && signals.cores === 8 && signals.dpr <= 2.85) score += 3;
-          if (signals.maxTouchPoints > 0 && signals.maxTouchPoints <= 5 && signals.compactBudgetAndroid) score += 1;
+          if (signals.budgetBrand && signals.compactBudgetAndroid) score += 2;
+          else if (signals.budgetBrand && signals.smallishAndroid) score += 1;
 
           score = Math.min(10, score);
           return { isLow: score >= 6, score, knownWeakModel };
+        }
+
+        function decideAutoLowEnd(signals, heuristicResult, runtimeResult, nativeLow) {
+          const memKnown = signals.mem > 0;
+          const coresKnown = signals.cores > 0;
+          const constrainedHardware =
+            (memKnown && signals.mem <= 4) ||
+            (coresKnown && signals.cores <= 6);
+
+          const hasStrongHardware =
+            !nativeLow &&
+            !heuristicResult.knownWeakModel &&
+            ((memKnown && signals.mem >= 8) || (coresKnown && signals.cores >= 8)) &&
+            runtimeResult.score <= 4 &&
+            !signals.budgetBrand;
+
+          const compactConstrained = !!signals.compactBudgetAndroid && constrainedHardware;
+          const compositeScore = Math.min(
+            10,
+            (heuristicResult.score * 0.68) +
+            (runtimeResult.score * 0.52) +
+            (signals.reduceMotion ? 0.35 : 0)
+          );
+
+          let isLow = false;
+          let source = 'standard';
+
+          if (nativeLow) {
+            isLow = true;
+            source = 'native';
+          } else if (heuristicResult.knownWeakModel && constrainedHardware) {
+            isLow = true;
+            source = 'heuristic';
+          } else if (heuristicResult.score >= 8 && runtimeResult.score >= 3) {
+            isLow = true;
+            source = 'heuristic';
+          } else if (runtimeResult.score >= 7 && heuristicResult.score >= 4 && !hasStrongHardware) {
+            isLow = true;
+            source = 'runtime';
+          } else if (compositeScore >= 6.6 && (constrainedHardware || compactConstrained || signals.budgetBrand)) {
+            isLow = true;
+            source = runtimeResult.score > heuristicResult.score ? 'runtime' : 'heuristic';
+          }
+
+          if (hasStrongHardware && !nativeLow) {
+            isLow = false;
+            source = 'standard';
+          }
+
+          return {
+            isLow,
+            source,
+            compositeScore,
+            constrainedHardware,
+            compactConstrained,
+            hasStrongHardware
+          };
         }
 
         const manualOverride = safeStorageGet('assal_force_low_end');
@@ -144,28 +207,18 @@
         const heuristicResult = heuristicLowEndValue(signals);
         const runtimeResult = runtimeLowEndValue(signals);
         const nativeLow = nativeValue === true || nativeValue === 'true';
+        const autoDecision = decideAutoLowEnd(signals, heuristicResult, runtimeResult, nativeLow);
 
-        const finalScore = Math.max(
-          nativeLow ? 10 : 0,
-          heuristicResult.score,
-          runtimeResult.score,
-          heuristicResult.score + Math.min(3, Math.floor(runtimeResult.score / 2))
-        );
+        const finalScore = nativeLow
+          ? 10
+          : Number((autoDecision.compositeScore || 0).toFixed(1));
 
         const isForcedOn = manualOverride === 'on';
         const isForcedOff = manualOverride === 'off';
 
         const isLowEnd = !!(
           isForcedOn ||
-          (!isForcedOff && (
-            nativeLow ||
-            heuristicResult.score >= 6 ||
-            runtimeResult.score >= 6 ||
-            (heuristicResult.score >= 4 && runtimeResult.score >= 2) ||
-            (signals.compactBudgetAndroid && heuristicResult.score >= 6) ||
-            (signals.compactBudgetAndroid && heuristicResult.score >= 5 && runtimeResult.score >= 1) ||
-            (signals.budgetBrand && signals.compactBudgetAndroid && heuristicResult.score >= 5)
-          ))
+          (!isForcedOff && autoDecision.isLow)
         );
 
         if (isLowEnd) {
@@ -180,9 +233,7 @@
         window.__ASSAL_LOW_END_SOURCE__ =
           isForcedOn ? 'manual-on' :
           isForcedOff ? 'manual-off' :
-          nativeLow ? 'native' :
-          (heuristicResult.score >= runtimeResult.score && heuristicResult.score >= 4) ? 'heuristic' :
-          runtimeResult.score >= 4 ? 'runtime' : 'standard';
+          autoDecision.source;
 
         window.__ASSAL_LOW_END_DIAGNOSTICS__ = {
           manualOverride,
@@ -190,13 +241,21 @@
           nativeLow,
           heuristicLow: !!heuristicResult.isLow,
           heuristicScore: heuristicResult.score,
+          knownWeakModel: !!heuristicResult.knownWeakModel,
           runtimeLow: !!runtimeResult.isLow,
           runtimeScore: runtimeResult.score,
+          autoLow: !!autoDecision.isLow,
+          autoSource: autoDecision.source,
           finalScore,
           signals,
           benches: runtimeResult.benches || [],
-          cpuBench: runtimeResult.cpuMs || 0
+          cpuBench: runtimeResult.cpuMs || 0,
+          hasStrongHardware: !!autoDecision.hasStrongHardware,
+          constrainedHardware: !!autoDecision.constrainedHardware,
+          compactConstrained: !!autoDecision.compactConstrained
         };
+
+        window.__ASSAL_DECIDE_AUTO_LOW_END__ = decideAutoLowEnd;
 
         window.__ASSAL_SET_LOW_END_OVERRIDE__ = function(mode) {
           if (mode === 'on' || mode === 'off') {
@@ -17193,13 +17252,13 @@ function applyManualLightNewsBarState() {
     if (isManualLight || isAutoLight) {
         root.classList.add('manual-light-news');
         newsBar.style.display = 'flex';
-        badge.textContent = isManualLight ? '⚡ خفيف' : '⚡ تلقائي';
+        badge.textContent = isManualLight ? '⚡ خفيف' : '⚡ وضع تلقائي';
         if (tickerContainer) {
             tickerContainer.style.justifyContent = 'center';
         }
         ticker.textContent = isManualLight
             ? 'تم تفعيل الوضع الخفيف في هاتفك'
-            : 'تم تفعيل الوضع الخفيف تلقائياً في هاتفك';
+            : 'وضع تلقائي: تم تفعيل الوضع الخفيف';
         ticker.title = ticker.textContent;
         ticker.style.animation = 'none';
         ticker.style.position = 'relative';
@@ -23008,29 +23067,35 @@ ${actionText} ${safeBranch}`;
                   const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
                   const signals = diag.signals || {};
                   const nativeLow = !!diag.nativeLow;
-                  const heuristicScore = Number(diag.heuristicScore || 0);
-                  const runtimeScore = Number(diag.runtimeScore || 0);
-                  const autoLow = !!(
-                    nativeLow ||
-                    heuristicScore >= 6 ||
-                    runtimeScore >= 6 ||
-                    (heuristicScore >= 4 && runtimeScore >= 2) ||
-                    (signals.compactBudgetAndroid && heuristicScore >= 6) ||
-                    (signals.compactBudgetAndroid && heuristicScore >= 5 && runtimeScore >= 1) ||
-                    (signals.budgetBrand && signals.compactBudgetAndroid && heuristicScore >= 5)
-                  );
+                  const heuristicResult = {
+                    score: Number(diag.heuristicScore || 0),
+                    isLow: !!diag.heuristicLow,
+                    knownWeakModel: !!diag.knownWeakModel
+                  };
+                  const runtimeResult = {
+                    score: Number(diag.runtimeScore || 0),
+                    isLow: !!diag.runtimeLow
+                  };
+                  const autoDecision = typeof window.__ASSAL_DECIDE_AUTO_LOW_END__ === 'function'
+                    ? window.__ASSAL_DECIDE_AUTO_LOW_END__(signals, heuristicResult, runtimeResult, nativeLow)
+                    : { isLow: !!nativeLow, source: nativeLow ? 'native' : 'standard', compositeScore: nativeLow ? 10 : 0, hasStrongHardware: false, constrainedHardware: false, compactConstrained: false };
+                  const autoLow = !!autoDecision.isLow;
 
                   document.documentElement.classList.remove('manual-light-news');
                   document.documentElement.classList.toggle('low-end-device', autoLow);
                   document.documentElement.setAttribute('data-device-profile', autoLow ? 'low-end' : 'standard');
 
                   window.__ASSAL_LOW_END_DEVICE__ = autoLow;
-                  window.__ASSAL_LOW_END_SOURCE__ = autoLow
-                    ? (nativeLow ? 'native' : (heuristicScore >= runtimeScore ? 'heuristic' : 'runtime'))
-                    : 'standard';
+                  window.__ASSAL_LOW_END_SOURCE__ = autoDecision.source || 'standard';
 
                   if (window.__ASSAL_LOW_END_DIAGNOSTICS__) {
                     window.__ASSAL_LOW_END_DIAGNOSTICS__.manualOverride = null;
+                    window.__ASSAL_LOW_END_DIAGNOSTICS__.autoLow = autoLow;
+                    window.__ASSAL_LOW_END_DIAGNOSTICS__.autoSource = autoDecision.source || 'standard';
+                    window.__ASSAL_LOW_END_DIAGNOSTICS__.finalScore = nativeLow ? 10 : Number((autoDecision.compositeScore || 0).toFixed(1));
+                    window.__ASSAL_LOW_END_DIAGNOSTICS__.hasStrongHardware = !!autoDecision.hasStrongHardware;
+                    window.__ASSAL_LOW_END_DIAGNOSTICS__.constrainedHardware = !!autoDecision.constrainedHardware;
+                    window.__ASSAL_LOW_END_DIAGNOSTICS__.compactConstrained = !!autoDecision.compactConstrained;
                   }
                 } catch (_) {}
               }
