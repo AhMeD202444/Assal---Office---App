@@ -6277,6 +6277,44 @@ footer {
    NO-FLICKER MOBILE MODE ✅
    (Popup + Overlay only)
    ========================= */
+@media (min-width: 769px){
+  .request-admin-top-actions .track-switcher-wrap,
+  .request-track-top-actions .track-switcher-wrap{
+    flex:1 1 auto;
+    min-width:0;
+    max-width:none;
+  }
+  .request-admin-top-actions .track-switcher-wrap .request-view-tabs,
+  .request-track-top-actions .track-switcher-wrap .request-view-tabs{
+    width:100%;
+    min-width:0;
+    display:flex;
+  }
+  .request-admin-top-actions .track-switcher-wrap .request-view-tab,
+  .request-track-top-actions .track-switcher-wrap .request-view-tab{
+    flex:1 1 0;
+    min-width:0;
+  }
+  .request-admin-title,
+  .request-track-title{
+    min-width:0;
+    flex:0 1 210px;
+    max-width:210px;
+  }
+  .request-admin-title > div:last-child,
+  .request-track-title > div:last-child{
+    min-width:0;
+  }
+  .request-admin-title h3,
+  .request-track-title h3,
+  .request-admin-title p,
+  .request-track-title p{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
+
 @media (max-width: 768px){
 
   /* 1) الغِ blur نهائياً (هو مصدر الوميض) */
@@ -7998,7 +8036,7 @@ body.modal-lock{
 }
 
 /* تجميد فعلي للخلفية أثناء أي نافذة/رسالة */
-body.modal-lock > *:not(.request-modal):not(.request-admin-modal):not(.request-track-modal):not(.stats-modal):not(.customer-profile-modal):not(.customers-admin-modal):not(.invoice-track-modal):not(.invoice-admin-modal):not(.activation-overlay):not(.swal2-container):not(#adModal):not(#adOverlay):not(#promoPopup){
+body.modal-lock > *:not(.request-modal):not(.request-admin-modal):not(.request-track-modal):not(.stats-modal):not(.customer-profile-modal):not(.customers-admin-modal):not(.customer-blocked-overlay):not(.invoice-track-modal):not(.invoice-admin-modal):not(.activation-overlay):not(.swal2-container):not(#adModal):not(#adOverlay):not(#promoPopup){
     pointer-events: none !important;
 }
 
@@ -8175,7 +8213,7 @@ body.modal-lock #promoPopup *{
     position: relative;
     overflow: hidden;
     -webkit-tap-highlight-color: transparent;
-    transition: transform .15s ease, filter .2s ease;
+    transition: transform .15s ease, filter .2s ease, background .25s ease, box-shadow .25s ease;
 }
 .request-close:active,
 .request-admin-close:active,
@@ -8292,8 +8330,72 @@ body.modal-lock #promoPopup *{
 .request-track-top-actions{
     display:flex;
     align-items:center;
-    gap:6px;
+    gap:8px;
+    min-width:0;
+    flex:1 1 auto;
+    justify-content:flex-end;
+    flex-wrap:nowrap;
 }
+.track-switcher-wrap{
+    flex:1 1 auto;
+    min-width:0;
+    max-width:100%;
+    display:flex;
+    align-items:center;
+}
+.track-tabs-host,
+.track-search-host{
+    width:100%;
+    min-width:0;
+}
+.track-switcher-wrap .request-view-tabs{ width:100%; min-width:0; display:flex; }
+.track-switcher-wrap .request-view-tab{ min-width:0; flex:1 1 0; padding:0 10px; }
+.track-tabs-host.is-hidden{ display:none; }
+.track-search-host{ display:none; }
+.track-search-host.is-active{ display:flex; }
+.track-searchbar{
+    width:100%;
+    min-height:46px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 12px;
+    background:linear-gradient(135deg, rgba(255,255,255,.11), rgba(255,255,255,.05));
+    border:1px solid rgba(255,255,255,.09);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 10px 26px rgba(0,0,0,.16);
+}
+.track-searchback{
+    width:36px;
+    height:36px;
+    min-width:36px;
+    border:none;
+    border-radius:12px;
+    background:rgba(255,255,255,.09);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .16s ease, filter .2s ease;
+}
+.track-searchback:active{ transform:scale(.95); }
+.track-searchicon{
+    color:rgba(255,255,255,.72);
+    font-size:14px;
+}
+.track-searchinput{
+    flex:1;
+    min-width:0;
+    border:none;
+    outline:none;
+    background:transparent;
+    color:#fff;
+    font-family:'Cairo',sans-serif;
+    font-size:13px;
+}
+.track-searchinput::placeholder{ color:rgba(255,255,255,.48); }
 .request-view-tabs{
     display:inline-flex;
     align-items:center;
@@ -8357,6 +8459,21 @@ body.modal-lock #promoPopup *{
 .request-admin-refresh,
 .request-track-refresh{
     background: linear-gradient(135deg, #43cea2, #185a9d);
+    box-shadow: 0 8px 18px rgba(24,90,157,.28);
+}
+.request-admin-refresh.is-search,
+.request-track-refresh.is-search{
+    background: linear-gradient(135deg, #0ea5e9, #7c3aed);
+    box-shadow: 0 12px 26px rgba(79,70,229,.28);
+}
+.request-admin-refresh.is-search::after,
+.request-track-refresh.is-search::after{
+    content:'';
+    position:absolute;
+    inset:1px;
+    border-radius:inherit;
+    border:1px solid rgba(255,255,255,.18);
+    pointer-events:none;
 }
 .request-admin-archive-toggle,
 .request-track-archive-toggle{
@@ -9708,19 +9825,45 @@ body.modal-lock #promoPopup *{
 .customers-admin-title{ display:flex; align-items:center; gap:12px; min-width:0; }
 .customers-admin-icon{ width:48px; height:48px; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:19px; background: linear-gradient(135deg,#43cea2,#185a9d); box-shadow: 0 10px 26px rgba(24,90,157,.3); flex:0 0 auto; }
 .customers-admin-title h3{ margin:0; font-size:18px; font-weight:800; color:#fff; font-family:'Cairo',sans-serif; }
-.customers-admin-top-actions{ display:flex; align-items:center; gap:8px; min-width:0; }
+.customers-admin-top-actions{ display:flex; align-items:center; gap:8px; min-width:0; flex:1 1 auto; justify-content:flex-end; flex-wrap:nowrap; }
+.customers-admin-switcher-wrap{ flex:1 1 auto; min-width:0; max-width:100%; display:flex; align-items:center; }
+.customers-admin-tabs-host,
+.customers-admin-search-host{ width:100%; min-width:0; }
+.customers-admin-switcher-wrap .request-view-tabs{ width:100%; min-width:0; display:flex; }
+.customers-admin-switcher-wrap .request-view-tab{ min-width:0; flex:1 1 0; padding:0 10px; }
+.customers-admin-tabs-host.is-hidden{ display:none; }
+.customers-admin-search-host{ display:none; }
+.customers-admin-search-host.is-active{ display:flex; }
+.customers-admin-searchbar{ width:100%; min-height:46px; border-radius:16px; display:flex; align-items:center; gap:10px; padding:0 12px; background:linear-gradient(135deg, rgba(255,255,255,.11), rgba(255,255,255,.05)); border:1px solid rgba(255,255,255,.09); box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 10px 26px rgba(0,0,0,.16); }
+.customers-admin-searchback{ width:36px; height:36px; min-width:36px; border:none; border-radius:12px; background:rgba(255,255,255,.09); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; -webkit-tap-highlight-color:transparent; transition:transform .16s ease, filter .2s ease; }
+.customers-admin-searchback:active{ transform:scale(.95); }
+.customers-admin-searchicon{ color:rgba(255,255,255,.72); font-size:14px; }
+.customers-admin-searchinput{ flex:1; min-width:0; border:none; outline:none; background:transparent; color:#fff; font-family:'Cairo',sans-serif; font-size:13px; }
+.customers-admin-searchinput::placeholder{ color:rgba(255,255,255,.48); }
 .customers-admin-refresh,
 .customers-admin-close{ width:40px; height:40px; min-width:40px; min-height:40px; aspect-ratio:1/1; border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff; position:relative; overflow:hidden; -webkit-tap-highlight-color: transparent; transition: transform .15s ease, filter .2s ease; }
 .customers-admin-refresh{ background: linear-gradient(135deg,#43cea2,#185a9d); box-shadow: 0 8px 18px rgba(24,90,157,.28); }
+.customers-admin-refresh.is-search{
+  background: linear-gradient(135deg,#0ea5e9,#7c3aed);
+  box-shadow: 0 12px 26px rgba(79,70,229,.28);
+}
+.customers-admin-refresh.is-search::after{
+  content:'';
+  position:absolute;
+  inset:1px;
+  border-radius:inherit;
+  border:1px solid rgba(255,255,255,.18);
+  pointer-events:none;
+}
 .customers-admin-close{ background: linear-gradient(135deg,#ff416c,#ff4b2b); box-shadow: 0 10px 24px rgba(255,75,43,.22); }
 .customers-admin-refresh:active,
 .customers-admin-close:active,
 .customers-admin-action:active{ transform: scale(.96); }
-.customers-admin-body{ padding: 0 18px 18px; overflow:hidden; display:flex; flex-direction:column; gap:12px; }
-.customers-admin-list{ min-height: 240px; max-height: calc(100vh - 240px); overflow-y:auto; padding-right:4px; display:grid; gap:10px; align-content:start; }
+.customers-admin-body{ padding: 14px 18px 18px; overflow:hidden; display:flex; flex-direction:column; gap:12px; }
+.customers-admin-list{ min-height: 240px; max-height: calc(100vh - 240px); overflow-y:auto; padding:6px 4px 2px 0; display:grid; gap:10px; align-content:start; }
 .customers-admin-list::-webkit-scrollbar{ width: 7px; }
 .customers-admin-list::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.14); border-radius:999px; }
-.customers-admin-card{ background: linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:12px 13px; display:grid; gap:10px; box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
+.customers-admin-card{ margin-top:2px; background: linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:12px 13px; display:grid; gap:10px; box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
 .customers-admin-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .customers-admin-name{ font-size:16px; font-weight:800; color:#fff; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .customers-admin-status{ font-size:11px; font-weight:700; padding:5px 10px; border-radius:999px; color:#fff; }
@@ -9736,6 +9879,85 @@ body.modal-lock #promoPopup *{
 .customers-admin-action.unban{ background: linear-gradient(135deg,#10b981,#0f766e); box-shadow: 0 10px 22px rgba(15,118,110,.22); }
 .customers-admin-action.delete{ background: linear-gradient(135deg,#7f1d1d,#b91c1c); box-shadow: 0 10px 22px rgba(127,29,29,.24); }
 .customers-admin-empty{ text-align:center; color:rgba(255,255,255,.72); background: rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:28px 14px; }
+
+.customer-blocked-overlay{
+  position:fixed;
+  inset:0;
+  z-index:999999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:rgba(2,8,23,.62);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+.customer-blocked-overlay.is-open{ display:flex; }
+.customer-blocked-shell{
+  width:min(100%, 390px);
+  border-radius:24px;
+  background:linear-gradient(180deg, rgba(11,18,32,.97), rgba(15,23,42,.94));
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 26px 80px rgba(2,8,23,.48), inset 0 1px 0 rgba(255,255,255,.05);
+  overflow:hidden;
+  text-align:center;
+}
+.customer-blocked-head{
+  padding:24px 22px 10px;
+  display:grid;
+  justify-items:center;
+  gap:14px;
+}
+.customer-blocked-icon{
+  width:58px;
+  height:58px;
+  min-width:58px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:23px;
+  background:linear-gradient(135deg,#ef4444,#991b1b);
+  box-shadow:0 14px 30px rgba(153,27,27,.28);
+}
+.customer-blocked-copy{ min-width:0; }
+.customer-blocked-copy h3{
+  margin:0 0 6px;
+  color:#fff;
+  font-size:20px;
+  font-weight:800;
+  font-family:'Cairo',sans-serif;
+}
+.customer-blocked-copy p{
+  margin:0;
+  color:rgba(255,255,255,.78);
+  font-size:13px;
+  line-height:1.75;
+}
+.customer-blocked-body{
+  padding:0 22px 22px;
+  display:grid;
+  gap:10px;
+}
+.customer-blocked-note{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:rgba(255,255,255,.88);
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:16px;
+  padding:12px 14px;
+  line-height:1.75;
+  text-align:center;
+}
+.customer-blocked-note i{
+  color:#fca5a5;
+  margin-top:0;
+  flex:0 0 auto;
+}
 
 
 /* ===== رسائل تأكيد الزبائن (حظر / حذف) ===== */
@@ -10179,11 +10401,25 @@ body.modal-lock #promoPopup *{
   .customers-admin-shell{ max-height: calc(100vh - 86px); width:min(100%, 100%); border-radius:22px; }
   .customers-admin-top{ padding:14px 14px 10px; justify-content:flex-end; }
   .customers-admin-title{ display:none !important; }
-  .customers-admin-body{ padding:0 12px 12px; }
-  .customers-admin-list{ max-height: calc(100vh - 210px); }
+  .customers-admin-body{ padding:12px 12px 12px; }
+  .customers-admin-list{ max-height: calc(100vh - 210px); padding-top:8px; }
   .customers-admin-meta{ grid-template-columns: 1fr; }
   .customers-admin-chip{ font-size:11.5px; padding:8px 9px; }
   .customers-admin-top-actions{ width:100%; justify-content:flex-end; gap:6px; min-width:0; flex-wrap:nowrap; }
+  .customers-admin-switcher-wrap{ flex:1 1 auto; min-width:0; max-width:100%; order:0; }
+  .customers-admin-switcher-wrap .request-view-tab{ padding:0 8px; gap:6px; }
+  .customers-admin-switcher-wrap .request-view-tab span{ font-size:11px; white-space:nowrap; }
+  .customers-admin-searchbar{ min-height:44px; padding:0 10px; }
+  .track-switcher-wrap{ flex:1 1 auto; min-width:0; max-width:100%; order:0; }
+  .track-switcher-wrap .request-view-tab{ padding:0 8px; gap:6px; }
+  .track-switcher-wrap .request-view-tab span{ font-size:11px; white-space:nowrap; }
+  .track-searchbar{ min-height:44px; padding:0 10px; }
+  .customer-blocked-overlay{ padding:12px; }
+  .customer-blocked-shell{ width:100%; border-radius:22px; }
+  .customer-blocked-head{ padding:18px 18px 10px; justify-items:center; }
+  .customer-blocked-copy h3{ font-size:18px; }
+  .customer-blocked-copy p{ font-size:12px; }
+  .customer-blocked-body{ padding:0 18px 18px; }
 }
 
 .customer-profile-shell{
@@ -10438,6 +10674,7 @@ body{
 .stats-modal,
 .customer-profile-modal,
 .customers-admin-modal,
+.customer-blocked-overlay,
 .invoice-track-modal,
 .invoice-admin-modal,
 .activation-overlay{
@@ -10457,6 +10694,7 @@ body{
 .stats-shell,
 .customer-profile-shell,
 .customers-admin-shell,
+.customer-blocked-shell,
 .invoice-track-shell,
 .invoice-admin-shell,
 .activation-dialog,
@@ -11383,7 +11621,7 @@ html.low-end-device .results-container {
         onclick="openPerfDebugModal()"
         title="فحص الأداء الذكي"
         aria-label="فحص الأداء الذكي">
-  <i class="fas fa-wave-square"></i>
+  <i class="fas fa-stethoscope"></i>
 </button>
 
 <button class="header-btn header-icon-btn contact-btn"
@@ -11676,15 +11914,28 @@ html.low-end-device .results-container {
         </div>
       </div>
       <div class="request-track-top-actions">
-        <div class="request-view-tabs" role="tablist" aria-label="تبويبات الفواتير">
-          <button id="invoiceTrackActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchInvoiceTrackView('active')" aria-label="فاتورة" title="فاتورة">
-            <i class="fas fa-file-lines"></i><span>فاتورة</span>
-          </button>
-          <button id="invoiceTrackArchiveTabBtn" class="request-view-tab" type="button" onclick="switchInvoiceTrackView('archive')" aria-label="أرشيف" title="أرشيف">
-            <i class="fas fa-box-archive"></i><span>أرشيف</span>
-          </button>
+        <div class="track-switcher-wrap">
+          <div id="invoiceTrackTabsHost" class="track-tabs-host">
+            <div class="request-view-tabs" role="tablist" aria-label="تبويبات الفواتير">
+              <button id="invoiceTrackActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchInvoiceTrackView('active')" aria-label="فاتورة" title="فاتورة">
+                <i class="fas fa-file-lines"></i><span>فاتورة</span>
+              </button>
+              <button id="invoiceTrackArchiveTabBtn" class="request-view-tab" type="button" onclick="switchInvoiceTrackView('archive')" aria-label="أرشيف" title="أرشيف">
+                <i class="fas fa-box-archive"></i><span>أرشيف</span>
+              </button>
+            </div>
+          </div>
+          <div id="invoiceTrackSearchHost" class="track-search-host" aria-hidden="true">
+            <div class="track-searchbar">
+              <button class="track-searchback" type="button" onclick="hideTrackSearchBar('invoice')" aria-label="إخفاء البحث" title="إخفاء البحث">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+              <i class="fas fa-search track-searchicon" aria-hidden="true"></i>
+              <input id="invoiceTrackSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب الفواتير الحالي" oninput="applyTrackModalSearch('invoice')" autocomplete="off" dir="rtl">
+            </div>
+          </div>
         </div>
-        <button id="invoiceTrackRefreshBtn" class="request-track-refresh request-circle-icon" type="button" onclick="loadCustomerInvoices()" aria-label="تحديث" title="تحديث">
+        <button id="invoiceTrackRefreshBtn" class="request-track-refresh request-circle-icon" type="button" onclick="handleTrackRotatingAction('invoice')" aria-label="تحديث" title="تحديث" data-mode="refresh">
           <i class="fas fa-rotate"></i>
         </button>
         <button class="request-track-close" type="button" onclick="closeCart()" aria-label="إغلاق">
@@ -11710,15 +11961,28 @@ html.low-end-device .results-container {
         </div>
       </div>
       <div class="request-admin-top-actions">
-        <div class="request-view-tabs" role="tablist" aria-label="تبويبات الفواتير للإدارة">
-          <button id="invoiceAdminActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchInvoiceAdminView('active')" aria-label="فاتورة" title="فاتورة">
-            <i class="fas fa-file-lines"></i><span>فاتورة</span>
-          </button>
-          <button id="invoiceAdminArchiveTabBtn" class="request-view-tab" type="button" onclick="switchInvoiceAdminView('archive')" aria-label="أرشيف" title="أرشيف">
-            <i class="fas fa-box-archive"></i><span>أرشيف</span>
-          </button>
+        <div class="track-switcher-wrap">
+          <div id="invoiceAdminTabsHost" class="track-tabs-host">
+            <div class="request-view-tabs" role="tablist" aria-label="تبويبات الفواتير للإدارة">
+              <button id="invoiceAdminActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchInvoiceAdminView('active')" aria-label="فاتورة" title="فاتورة">
+                <i class="fas fa-file-lines"></i><span>فاتورة</span>
+              </button>
+              <button id="invoiceAdminArchiveTabBtn" class="request-view-tab" type="button" onclick="switchInvoiceAdminView('archive')" aria-label="أرشيف" title="أرشيف">
+                <i class="fas fa-box-archive"></i><span>أرشيف</span>
+              </button>
+            </div>
+          </div>
+          <div id="invoiceAdminSearchHost" class="track-search-host" aria-hidden="true">
+            <div class="track-searchbar">
+              <button class="track-searchback" type="button" onclick="hideTrackSearchBar('invoiceAdmin')" aria-label="إخفاء البحث" title="إخفاء البحث">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+              <i class="fas fa-magnifying-glass track-searchicon"></i>
+              <input id="invoiceAdminSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب الفواتير الحالي" oninput="applyTrackModalSearch('invoiceAdmin')" autocomplete="off" dir="rtl">
+            </div>
+          </div>
         </div>
-        <button id="invoiceAdminRefreshBtn" class="request-admin-refresh request-circle-icon" type="button" onclick="loadAdminInvoices()" aria-label="تحديث" title="تحديث">
+        <button id="invoiceAdminRefreshBtn" class="request-admin-refresh request-circle-icon" type="button" onclick="handleTrackRotatingAction('invoiceAdmin')" aria-label="تحديث" title="تحديث" data-mode="refresh">
           <i class="fas fa-rotate"></i>
         </button>
         <button class="request-admin-close" type="button" onclick="closeInvoiceAdminModal()" aria-label="إغلاق">
@@ -11801,15 +12065,28 @@ html.low-end-device .results-container {
         </div>
       </div>
       <div class="request-admin-top-actions">
-        <div class="request-view-tabs" role="tablist" aria-label="تبويبات طلبات المواد">
-          <button id="requestAdminActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchAdminRequestView('active')" aria-label="الطلبات" title="الطلبات">
-            <i class="fas fa-list-ul"></i><span>طلبات</span>
-          </button>
-          <button id="requestAdminArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAdminRequestView('archive')" aria-label="الأرشيف" title="الأرشيف">
-            <i class="fas fa-box-archive"></i><span>أرشيف</span>
-          </button>
+        <div class="track-switcher-wrap">
+          <div id="requestAdminTabsHost" class="track-tabs-host">
+            <div class="request-view-tabs" role="tablist" aria-label="تبويبات طلبات المواد">
+              <button id="requestAdminActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchAdminRequestView('active')" aria-label="الطلبات" title="الطلبات">
+                <i class="fas fa-list-ul"></i><span>طلبات</span>
+              </button>
+              <button id="requestAdminArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAdminRequestView('archive')" aria-label="الأرشيف" title="الأرشيف">
+                <i class="fas fa-box-archive"></i><span>أرشيف</span>
+              </button>
+            </div>
+          </div>
+          <div id="requestAdminSearchHost" class="track-search-host" aria-hidden="true">
+            <div class="track-searchbar">
+              <button class="track-searchback" type="button" onclick="hideTrackSearchBar('requestAdmin')" aria-label="إخفاء البحث" title="إخفاء البحث">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+              <i class="fas fa-magnifying-glass track-searchicon"></i>
+              <input id="requestAdminSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب الطلبات الحالي" oninput="applyTrackModalSearch('requestAdmin')" autocomplete="off" dir="rtl">
+            </div>
+          </div>
         </div>
-        <button id="requestAdminRefreshBtn" class="request-admin-refresh request-circle-icon" type="button" onclick="loadMaterialRequests()" aria-label="تحديث" title="تحديث">
+        <button id="requestAdminRefreshBtn" class="request-admin-refresh request-circle-icon" type="button" onclick="handleTrackRotatingAction('requestAdmin')" aria-label="تحديث" title="تحديث" data-mode="refresh">
           <i class="fas fa-rotate"></i>
         </button>
         <button class="request-admin-close" type="button" onclick="closeRequestAdminModal()" aria-label="إغلاق">
@@ -11842,15 +12119,28 @@ html.low-end-device .results-container {
         </div>
       </div>
       <div class="request-track-top-actions">
-        <div class="request-view-tabs" role="tablist" aria-label="تبويبات متابعة الطلبات">
-          <button id="requestTrackActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchTrackRequestView('active')" aria-label="طلباتي" title="طلباتي">
-            <i class="fas fa-list-ul"></i><span>طلبات</span>
-          </button>
-          <button id="requestTrackArchiveTabBtn" class="request-view-tab" type="button" onclick="switchTrackRequestView('archive')" aria-label="أرشيف طلباتي" title="أرشيف طلباتي">
-            <i class="fas fa-box-archive"></i><span>أرشيف</span>
-          </button>
+        <div class="track-switcher-wrap">
+          <div id="requestTrackTabsHost" class="track-tabs-host">
+            <div class="request-view-tabs" role="tablist" aria-label="تبويبات متابعة الطلبات">
+              <button id="requestTrackActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchTrackRequestView('active')" aria-label="طلباتي" title="طلباتي">
+                <i class="fas fa-list-ul"></i><span>طلبات</span>
+              </button>
+              <button id="requestTrackArchiveTabBtn" class="request-view-tab" type="button" onclick="switchTrackRequestView('archive')" aria-label="أرشيف طلباتي" title="أرشيف طلباتي">
+                <i class="fas fa-box-archive"></i><span>أرشيف</span>
+              </button>
+            </div>
+          </div>
+          <div id="requestTrackSearchHost" class="track-search-host" aria-hidden="true">
+            <div class="track-searchbar">
+              <button class="track-searchback" type="button" onclick="hideTrackSearchBar('request')" aria-label="إخفاء البحث" title="إخفاء البحث">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+              <i class="fas fa-search track-searchicon" aria-hidden="true"></i>
+              <input id="requestTrackSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب الطلبات الحالي" oninput="applyTrackModalSearch('request')" autocomplete="off" dir="rtl">
+            </div>
+          </div>
         </div>
-        <button id="requestTrackRefreshBtn" class="request-track-refresh request-circle-icon" type="button" onclick="loadCustomerRequests()" aria-label="تحديث" title="تحديث">
+        <button id="requestTrackRefreshBtn" class="request-track-refresh request-circle-icon" type="button" onclick="handleTrackRotatingAction('request')" aria-label="تحديث" title="تحديث" data-mode="refresh">
           <i class="fas fa-rotate"></i>
         </button>
         <button class="request-track-close" type="button" onclick="closeRequestTrackModal()" aria-label="إغلاق">
@@ -11879,15 +12169,28 @@ html.low-end-device .results-container {
         </div>
       </div>
       <div class="request-admin-top-actions">
-        <div class="request-view-tabs" role="tablist" aria-label="تبويبات استعلامات التوفر">
-          <button id="availabilityAdminActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchAvailabilityAdminView('active')" aria-label="استعلامات التوفر" title="استعلامات التوفر">
-            <i class="fas fa-list-ul"></i><span>توفر</span>
-          </button>
-          <button id="availabilityAdminArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAvailabilityAdminView('archive')" aria-label="أرشيف استعلامات التوفر" title="أرشيف استعلامات التوفر">
-            <i class="fas fa-box-archive"></i><span>أرشيف</span>
-          </button>
+        <div class="track-switcher-wrap">
+          <div id="availabilityAdminTabsHost" class="track-tabs-host">
+            <div class="request-view-tabs" role="tablist" aria-label="تبويبات استعلامات التوفر">
+              <button id="availabilityAdminActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchAvailabilityAdminView('active')" aria-label="استعلامات التوفر" title="استعلامات التوفر">
+                <i class="fas fa-list-ul"></i><span>توفر</span>
+              </button>
+              <button id="availabilityAdminArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAvailabilityAdminView('archive')" aria-label="أرشيف استعلامات التوفر" title="أرشيف استعلامات التوفر">
+                <i class="fas fa-box-archive"></i><span>أرشيف</span>
+              </button>
+            </div>
+          </div>
+          <div id="availabilityAdminSearchHost" class="track-search-host" aria-hidden="true">
+            <div class="track-searchbar">
+              <button class="track-searchback" type="button" onclick="hideTrackSearchBar('availabilityAdmin')" aria-label="إخفاء البحث" title="إخفاء البحث">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+              <i class="fas fa-magnifying-glass track-searchicon"></i>
+              <input id="availabilityAdminSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب التوفر الحالي" oninput="applyTrackModalSearch('availabilityAdmin')" autocomplete="off" dir="rtl">
+            </div>
+          </div>
         </div>
-        <button id="availabilityAdminRefreshBtn" class="request-admin-refresh request-circle-icon" type="button" onclick="loadAvailabilityRequests()" aria-label="تحديث" title="تحديث">
+        <button id="availabilityAdminRefreshBtn" class="request-admin-refresh request-circle-icon" type="button" onclick="handleTrackRotatingAction('availabilityAdmin')" aria-label="تحديث" title="تحديث" data-mode="refresh">
           <i class="fas fa-rotate"></i>
         </button>
         <button class="request-admin-close" type="button" onclick="closeAvailabilityAdminModal()" aria-label="إغلاق">
@@ -11918,15 +12221,28 @@ html.low-end-device .results-container {
         </div>
       </div>
       <div class="request-track-top-actions">
-        <div class="request-view-tabs" role="tablist" aria-label="تبويبات متابعة التوفر">
-          <button id="availabilityTrackActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchAvailabilityTrackView('active')" aria-label="استعلامات التوفر" title="استعلامات التوفر">
-            <i class="fas fa-list-ul"></i><span>توفر</span>
-          </button>
-          <button id="availabilityTrackArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAvailabilityTrackView('archive')" aria-label="أرشيف التوفر" title="أرشيف التوفر">
-            <i class="fas fa-box-archive"></i><span>أرشيف</span>
-          </button>
+        <div class="track-switcher-wrap">
+          <div id="availabilityTrackTabsHost" class="track-tabs-host">
+            <div class="request-view-tabs" role="tablist" aria-label="تبويبات متابعة التوفر">
+              <button id="availabilityTrackActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchAvailabilityTrackView('active')" aria-label="استعلامات التوفر" title="استعلامات التوفر">
+                <i class="fas fa-list-ul"></i><span>توفر</span>
+              </button>
+              <button id="availabilityTrackArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAvailabilityTrackView('archive')" aria-label="أرشيف التوفر" title="أرشيف التوفر">
+                <i class="fas fa-box-archive"></i><span>أرشيف</span>
+              </button>
+            </div>
+          </div>
+          <div id="availabilityTrackSearchHost" class="track-search-host" aria-hidden="true">
+            <div class="track-searchbar">
+              <button class="track-searchback" type="button" onclick="hideTrackSearchBar('availability')" aria-label="إخفاء البحث" title="إخفاء البحث">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+              <i class="fas fa-search track-searchicon" aria-hidden="true"></i>
+              <input id="availabilityTrackSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب التوفر الحالي" oninput="applyTrackModalSearch('availability')" autocomplete="off" dir="rtl">
+            </div>
+          </div>
         </div>
-        <button id="availabilityTrackRefreshBtn" class="request-track-refresh request-circle-icon" type="button" onclick="loadCustomerAvailabilityRequests()" aria-label="تحديث" title="تحديث">
+        <button id="availabilityTrackRefreshBtn" class="request-track-refresh request-circle-icon" type="button" onclick="handleTrackRotatingAction('availability')" aria-label="تحديث" title="تحديث" data-mode="refresh">
           <i class="fas fa-rotate"></i>
         </button>
         <button class="request-track-close" type="button" onclick="closeAvailabilityTrackModal()" aria-label="إغلاق">
@@ -11950,7 +12266,7 @@ html.low-end-device .results-container {
     <div class="stats-top">
       <div class="stats-title">
         <div class="stats-icon">
-          <i class="fas fa-chart-line"></i>
+          <i class="fas fa-stethoscope"></i>
         </div>
         <div>
           <h3>إحصائيات التطبيق</h3>
@@ -11990,15 +12306,28 @@ html.low-end-device .results-container {
         </div>
       </div>
       <div class="customers-admin-top-actions">
-        <div class="request-view-tabs" role="tablist" aria-label="تبويبات الزبائن">
-          <button id="customersActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchCustomersView('active')" aria-label="الزبائن" title="الزبائن">
-            <i class="fas fa-address-book"></i><span>الزبائن</span>
-          </button>
-          <button id="customersBlockedTabBtn" class="request-view-tab" type="button" onclick="switchCustomersView('blocked')" aria-label="قائمة الحظر" title="قائمة الحظر">
-            <i class="fas fa-user-lock"></i><span>قائمة الحظر</span>
-          </button>
+        <div id="customersAdminSwitcherWrap" class="customers-admin-switcher-wrap">
+          <div id="customersAdminTabsHost" class="customers-admin-tabs-host">
+            <div class="request-view-tabs" role="tablist" aria-label="تبويبات الزبائن">
+              <button id="customersActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchCustomersView('active')" aria-label="الزبائن" title="الزبائن">
+                <i class="fas fa-address-book"></i><span>الزبائن</span>
+              </button>
+              <button id="customersBlockedTabBtn" class="request-view-tab" type="button" onclick="switchCustomersView('blocked')" aria-label="قائمة الحظر" title="قائمة الحظر">
+                <i class="fas fa-user-lock"></i><span>قائمة الحظر</span>
+              </button>
+            </div>
+          </div>
+          <div id="customersAdminSearchHost" class="customers-admin-search-host" aria-hidden="true">
+            <div class="customers-admin-searchbar">
+              <button class="customers-admin-searchback" type="button" onclick="hideCustomersSearchBar()" aria-label="إخفاء البحث" title="إخفاء البحث">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+              <i class="fas fa-search customers-admin-searchicon" aria-hidden="true"></i>
+              <input id="customersAdminSearchInput" class="customers-admin-searchinput" type="search" placeholder="ابحث بالاسم أو الرقم أو العنوان أو المعرّف" oninput="applyCustomersAdminSearch()" autocomplete="off" dir="rtl">
+            </div>
+          </div>
         </div>
-        <button id="customersAdminRefreshBtn" class="customers-admin-refresh request-circle-icon" type="button" onclick="loadCustomersAdmin()" aria-label="تحديث" title="تحديث">
+        <button id="customersAdminRotateActionBtn" class="customers-admin-refresh request-circle-icon" type="button" onclick="handleCustomersRotatingAction()" aria-label="تحديث الزبائن" title="تحديث الزبائن" data-mode="refresh">
           <i class="fas fa-rotate"></i>
         </button>
         <button class="customers-admin-close" type="button" onclick="closeCustomersAdminModal()" aria-label="إغلاق">
@@ -12052,6 +12381,24 @@ html.low-end-device .results-container {
   </div>
 </div>
 
+<div id="customerBlockedOverlay" class="customer-blocked-overlay" aria-hidden="true">
+  <div class="customer-blocked-shell" role="alertdialog" aria-modal="true" aria-label="تم حظر الحساب">
+    <div class="customer-blocked-head">
+      <div class="customer-blocked-icon"><i class="fas fa-user-slash"></i></div>
+      <div class="customer-blocked-copy">
+        <h3>تم تقييد الحساب</h3>
+        <p>نعتذر، حسابك موقوف حالياً من قبل إدارة مكتب عسل.</p>
+      </div>
+    </div>
+    <div class="customer-blocked-body">
+      <div class="customer-blocked-note">
+        <i class="fas fa-circle-info"></i>
+        <span>يرجى مراجعة الإدارة.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <footer>
   <p>جميع الحقوق محفوظة © مكتب عسل 2026</p>
 </footer>
@@ -12066,7 +12413,8 @@ html.low-end-device .results-container {
     update,
     remove,
     runTransaction,
-    onDisconnect
+    onDisconnect,
+    onValue
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
   const firebaseConfig = {
@@ -12082,7 +12430,7 @@ html.low-end-device .results-container {
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  window.firebaseDB = { db, ref, get, set, update, remove, runTransaction, onDisconnect };
+  window.firebaseDB = { db, ref, get, set, update, remove, runTransaction, onDisconnect, onValue };
 
   function normalizeTokenKey(token) {
     return String(token || '').replace(/[.#$\[\]\/]/g, '_');
@@ -13169,7 +13517,7 @@ function syncGlobalModalLock() {
     };
 
     const openCustomModal = !!document.querySelector(
-        '.request-modal.show, .request-admin-modal.show, .request-track-modal.show, .stats-modal.show, .customer-profile-modal.show, .customers-admin-modal.show, .invoice-track-modal.show, .invoice-admin-modal.show, .activation-overlay.is-open'
+        '.request-modal.show, .request-admin-modal.show, .request-track-modal.show, .stats-modal.show, .customer-profile-modal.show, .customers-admin-modal.show, .customer-blocked-overlay.is-open, .invoice-track-modal.show, .invoice-admin-modal.show, .activation-overlay.show, .activation-overlay.force-show, .swal2-container, #adModal.active, #adOverlay.active, #promoPopup.show, .activation-overlay.is-open'
     );
     const openSwal = !!document.querySelector('.swal2-container.swal2-backdrop-show');
     const adOpen = isShown('#adModal') || isShown('#adOverlay');
@@ -13245,6 +13593,10 @@ async function maybePromptCustomerProfileRegistration() {
     const deviceId = getDeviceId();
     const snap = await get(ref(db, `customerProfiles/${deviceId}`));
     const profile = snap.exists() ? (snap.val() || {}) : null;
+    if (profile && profile.blocked) {
+        applyCustomerBlockedState(profile);
+        return;
+    }
     const isComplete = !!(profile && String(profile.name || '').trim() && String(profile.phone || '').trim() && String(profile.address || '').trim());
     if (!isComplete) openCustomerProfileModal(profile || {});
 }
@@ -13300,6 +13652,10 @@ window.submitCustomerProfile = async function() {
         const pathRef = ref(db, `customerProfiles/${deviceId}`);
         const oldSnap = await get(pathRef);
         const oldVal = oldSnap.exists() ? (oldSnap.val() || {}) : {};
+        if (oldVal.blocked) {
+            applyCustomerBlockedState(oldVal);
+            throw new Error('customer-blocked');
+        }
         const now = Date.now();
         await set(pathRef, {
             ...oldVal,
@@ -13319,11 +13675,24 @@ window.submitCustomerProfile = async function() {
     } catch (err) {
         console.error('submitCustomerProfile:', err);
         customerProfileSubmitting = false;
+        if (String(err?.message || err) === 'customer-blocked') {
+            setCustomerProfileSubmitState('error', 'الحساب محظور حالياً', 'fa-user-lock');
+            return;
+        }
         setCustomerProfileSubmitState('error', 'تعذّر التسجيل', 'fa-circle-xmark');
     }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        if (localStorage.getItem('isActivated') === 'true' && !isAdminUser()) {
+            startCustomerBlockedWatcher();
+            if (typeof window.enforceCustomerBlockedState === 'function') {
+                window.enforceCustomerBlockedState().catch(() => {});
+            }
+        }
+    }, 260);
+
     setTimeout(() => {
         if (!window.__ASSAL_LOW_END_DEVICE__ && localStorage.getItem('isActivated') === 'true' && !isAdminUser()) {
             queueCustomerProfilePrompt();
@@ -13331,7 +13700,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 800);
 });
 
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && localStorage.getItem('isActivated') === 'true' && !isAdminUser() && typeof window.enforceCustomerBlockedState === 'function') {
+        window.enforceCustomerBlockedState().catch(() => {});
+    }
+});
+
+window.addEventListener('focus', () => {
+    if (localStorage.getItem('isActivated') === 'true' && !isAdminUser() && typeof window.enforceCustomerBlockedState === 'function') {
+        window.enforceCustomerBlockedState().catch(() => {});
+    }
+});
+
 window.openRequestModal = function () {
+    if (customerBlockedStateActive) {
+        showCustomerBlockedOverlay({ blocked: true });
+        return;
+    }
     const modal = document.getElementById("requestModal");
     if (!modal) return;
     modal.classList.add("show");
@@ -13355,6 +13740,8 @@ window.closeRequestAdminModal = function () {
     if (!modal) return;
     modal.classList.remove("show");
     modal.setAttribute("aria-hidden", "true");
+    stopTrackRotateAction('requestAdmin');
+    hideTrackSearchBar('requestAdmin', { restartRotate: false });
     syncGlobalModalLock();
 };
 
@@ -13363,6 +13750,8 @@ window.closeRequestTrackModal = function () {
     if (!modal) return;
     modal.classList.remove("show");
     modal.setAttribute("aria-hidden", "true");
+    stopTrackRotateAction('request');
+    hideTrackSearchBar('request', { restartRotate: false });
     syncGlobalModalLock();
 };
 
@@ -13536,24 +13925,36 @@ window.openRequestAdminModal = async function () {
         return;
     }
     currentAdminRequestView = 'active';
+    setTrackSearchVisibility('requestAdmin', false);
+    const trackInput = document.getElementById('requestAdminSearchInput');
+    if (trackInput) trackInput.value = '';
     const modal = document.getElementById("requestAdminModal");
     if (!modal) return;
     modal.classList.add("show");
     modal.setAttribute("aria-hidden", "false");
     syncGlobalModalLock();
     setRequestViewButtons();
+    startTrackRotateAction('requestAdmin');
     await refreshMaterialRequestCount();
     await loadMaterialRequests();
 };
 
 window.openRequestTrackModal = async function () {
+    if (customerBlockedStateActive) {
+        showCustomerBlockedOverlay({ blocked: true });
+        return;
+    }
     currentTrackRequestView = 'active';
+    setTrackSearchVisibility('request', false);
+    const trackInput = document.getElementById('requestTrackSearchInput');
+    if (trackInput) trackInput.value = '';
     const modal = document.getElementById("requestTrackModal");
     if (!modal) return;
     modal.classList.add("show");
     modal.setAttribute("aria-hidden", "false");
     syncGlobalModalLock();
     setRequestViewButtons();
+    startTrackRotateAction('request');
     await loadCustomerRequests();
 };
 
@@ -13827,6 +14228,7 @@ window.loadCustomerRequests = async function () {
             : '<div class="request-track-empty">أرشيف طلباتك فارغ حالياً.</div>';
 
         setRequestViewButtons();
+        applyTrackModalSearch('request');
         attachRequestScrollRelay(document.getElementById('requestTrackModal'));
         attachRequestScrollRelay(document.getElementById('requestAdminModal'));
         setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('requestTrackModal')), 40);
@@ -14012,6 +14414,7 @@ window.loadMaterialRequests = async function () {
             : '<div class="request-admin-empty">أرشيف الطلبات فارغ حالياً.</div>';
 
         setRequestViewButtons();
+        applyTrackModalSearch('requestAdmin');
         attachRequestScrollRelay(document.getElementById('requestAdminModal'));
         setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('requestAdminModal')), 40);
     } catch (err) {
@@ -14035,11 +14438,122 @@ async function initFirebaseStats() {
 
 
 let currentCustomersView = 'active';
+let customersAdminEntriesCache = { active: [], blocked: [] };
+let customersAdminSearchVisible = false;
+let customersAdminRotateMode = 'refresh';
+let customersAdminRotateTimer = null;
+let customerBlockedWatcherStop = null;
+let customerBlockedStateActive = false;
+window.__ASSAL_CUSTOMER_BLOCKED__ = false;
 
 function updateCustomersAdminHeaderBtn() {
     const btn = document.getElementById('customersAdminHeaderBtn');
     if (!btn) return;
     btn.style.display = isAdminUser() ? 'inline-flex' : 'none';
+}
+
+function normalizeCustomersAdminSearchText(value) {
+    return String(value || '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function getCustomersAdminSearchQuery() {
+    const input = document.getElementById('customersAdminSearchInput');
+    return normalizeCustomersAdminSearchText(input?.value || '');
+}
+
+function setCustomersRotateActionMode(mode) {
+    const btn = document.getElementById('customersAdminRotateActionBtn');
+    if (!btn) return;
+    customersAdminRotateMode = mode === 'search' ? 'search' : 'refresh';
+    const icon = btn.querySelector('i');
+    btn.dataset.mode = customersAdminRotateMode;
+    btn.classList.toggle('is-search', customersAdminRotateMode === 'search');
+    btn.setAttribute('aria-label', customersAdminRotateMode === 'search' ? 'بحث داخل التبويب الحالي' : 'تحديث الزبائن');
+    btn.setAttribute('title', customersAdminRotateMode === 'search' ? 'بحث داخل التبويب الحالي' : 'تحديث الزبائن');
+    if (icon) icon.className = customersAdminRotateMode === 'search' ? 'fas fa-magnifying-glass' : 'fas fa-rotate';
+}
+
+function stopCustomersRotateAction() {
+    if (customersAdminRotateTimer) {
+        clearInterval(customersAdminRotateTimer);
+        customersAdminRotateTimer = null;
+    }
+}
+
+function startCustomersRotateAction() {
+    stopCustomersRotateAction();
+    if (customersAdminSearchVisible) {
+        setCustomersRotateActionMode('refresh');
+        return;
+    }
+    setCustomersRotateActionMode('refresh');
+    customersAdminRotateTimer = setInterval(() => {
+        setCustomersRotateActionMode(customersAdminRotateMode === 'refresh' ? 'search' : 'refresh');
+    }, 2000);
+}
+
+function setCustomersSearchVisibility(visible) {
+    const tabsHost = document.getElementById('customersAdminTabsHost');
+    const searchHost = document.getElementById('customersAdminSearchHost');
+    customersAdminSearchVisible = visible === true;
+    if (tabsHost) tabsHost.classList.toggle('is-hidden', customersAdminSearchVisible);
+    if (searchHost) {
+        searchHost.classList.toggle('is-active', customersAdminSearchVisible);
+        searchHost.setAttribute('aria-hidden', customersAdminSearchVisible ? 'false' : 'true');
+    }
+}
+
+function filterCustomersAdminEntries(entries, query) {
+    const normalizedQuery = normalizeCustomersAdminSearchText(query);
+    if (!normalizedQuery) return [...entries];
+    return entries.filter((customer) => {
+        const haystack = normalizeCustomersAdminSearchText([
+            customer?.name,
+            customer?.phone,
+            customer?.address,
+            customer?.deviceId,
+            customer?.id
+        ].join(' '));
+        return haystack.includes(normalizedQuery);
+    });
+}
+
+function renderCustomersAdminList(target, entries, emptyText) {
+    if (!target) return;
+    target.innerHTML = entries.length
+        ? entries.map(item => renderCustomerCard(item)).join('')
+        : `<div class="customers-admin-empty">${emptyText}</div>`;
+}
+
+function renderCustomersAdminPanels() {
+    const activePanel = document.getElementById('customersActivePanel');
+    const blockedPanel = document.getElementById('customersBlockedPanel');
+    if (!activePanel || !blockedPanel) return;
+
+    const query = getCustomersAdminSearchQuery();
+    const searchingActive = customersAdminSearchVisible && currentCustomersView === 'active';
+    const searchingBlocked = customersAdminSearchVisible && currentCustomersView === 'blocked';
+
+    const activeEntries = searchingActive
+        ? filterCustomersAdminEntries(customersAdminEntriesCache.active, query)
+        : [...customersAdminEntriesCache.active];
+    const blockedEntries = searchingBlocked
+        ? filterCustomersAdminEntries(customersAdminEntriesCache.blocked, query)
+        : [...customersAdminEntriesCache.blocked];
+
+    const activeEmpty = searchingActive && query
+        ? 'ماكو نتائج مطابقة داخل قائمة الزبائن.'
+        : 'لا يوجد زبائن مسجلون حاليًا.';
+    const blockedEmpty = searchingBlocked && query
+        ? 'ماكو نتائج مطابقة داخل قائمة الحظر.'
+        : 'قائمة الحظر فارغة حالياً.';
+
+    renderCustomersAdminList(activePanel, activeEntries, activeEmpty);
+    renderCustomersAdminList(blockedPanel, blockedEntries, blockedEmpty);
+    setCustomersViewButtons();
 }
 
 function setCustomersViewButtons() {
@@ -14056,17 +14570,61 @@ function setCustomersViewButtons() {
 window.switchCustomersView = function(view) {
     currentCustomersView = view === 'blocked' ? 'blocked' : 'active';
     setCustomersViewButtons();
+    renderCustomersAdminPanels();
+};
+
+window.showCustomersSearchBar = function() {
+    setCustomersSearchVisibility(true);
+    stopCustomersRotateAction();
+    setCustomersRotateActionMode('refresh');
+    renderCustomersAdminPanels();
+    const input = document.getElementById('customersAdminSearchInput');
+    if (input) {
+        setTimeout(() => {
+            try { input.focus({ preventScroll: true }); } catch (_) { input.focus(); }
+            if (typeof input.select === 'function') input.select();
+        }, 30);
+    }
+};
+
+window.hideCustomersSearchBar = function(options = {}) {
+    const config = options && typeof options === 'object' ? options : {};
+    const input = document.getElementById('customersAdminSearchInput');
+    if (input && !config.preserveQuery) input.value = '';
+    setCustomersSearchVisibility(false);
+    renderCustomersAdminPanels();
+    if (config.restartRotate !== false) startCustomersRotateAction();
+};
+
+window.applyCustomersAdminSearch = function() {
+    renderCustomersAdminPanels();
+};
+
+window.handleCustomersRotatingAction = async function() {
+    if (customersAdminSearchVisible) {
+        await loadCustomersAdmin();
+        return;
+    }
+    if (customersAdminRotateMode === 'search') {
+        showCustomersSearchBar();
+        return;
+    }
+    await loadCustomersAdmin();
 };
 
 window.openCustomersAdminModal = async function() {
     if (!isAdminUser()) return;
     currentCustomersView = 'active';
+    setCustomersSearchVisibility(false);
+    const input = document.getElementById('customersAdminSearchInput');
+    if (input) input.value = '';
     setCustomersViewButtons();
     const modal = document.getElementById('customersAdminModal');
     if (!modal) return;
     modal.classList.add('show');
     modal.setAttribute('aria-hidden', 'false');
     syncGlobalModalLock();
+    startCustomersRotateAction();
     await loadCustomersAdmin();
 };
 
@@ -14075,6 +14633,8 @@ window.closeCustomersAdminModal = function() {
     if (!modal) return;
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden', 'true');
+    stopCustomersRotateAction();
+    hideCustomersSearchBar({ restartRotate: false });
     syncGlobalModalLock();
 };
 
@@ -14114,6 +14674,7 @@ window.loadCustomersAdmin = async function() {
     const blockedPanel = document.getElementById('customersBlockedPanel');
     if (!activePanel || !blockedPanel) return;
     if (!window.firebaseDB || !window.firebaseDB.db) {
+        customersAdminEntriesCache = { active: [], blocked: [] };
         activePanel.innerHTML = '<div class="customers-admin-empty">Firebase غير جاهز حالياً.</div>';
         blockedPanel.innerHTML = '<div class="customers-admin-empty">Firebase غير جاهز حالياً.</div>';
         return;
@@ -14125,17 +14686,114 @@ window.loadCustomersAdmin = async function() {
         const snap = await get(ref(db, 'customerProfiles'));
         const raw = snap.exists() ? (snap.val() || {}) : {};
         const entries = sortCustomerEntries(Object.entries(raw).map(([id, value]) => ({ id, deviceId: id, ...(value || {}) })));
-        const active = entries.filter(item => !item.blocked);
-        const blocked = entries.filter(item => !!item.blocked);
-        activePanel.innerHTML = active.length ? active.map(item => renderCustomerCard(item)).join('') : '<div class="customers-admin-empty">لا يوجد زبائن مسجلون حاليًا.</div>';
-        blockedPanel.innerHTML = blocked.length ? blocked.map(item => renderCustomerCard(item)).join('') : '<div class="customers-admin-empty">قائمة الحظر فارغة حالياً.</div>';
-        setCustomersViewButtons();
+        customersAdminEntriesCache = {
+            active: entries.filter(item => !item.blocked),
+            blocked: entries.filter(item => !!item.blocked)
+        };
+        renderCustomersAdminPanels();
     } catch (err) {
         console.error('loadCustomersAdmin:', err);
+        customersAdminEntriesCache = { active: [], blocked: [] };
         activePanel.innerHTML = '<div class="customers-admin-empty">تعذّر جلب الزبائن حالياً.</div>';
         blockedPanel.innerHTML = '<div class="customers-admin-empty">تعذّر جلب قائمة الحظر حالياً.</div>';
     }
 };
+
+function closeCustomerFacingModalsForBlock() {
+    const closers = [
+        'closeRequestModal',
+        'closeRequestTrackModal',
+        'closeCustomerProfileModal',
+        'closeCustomersAdminModal',
+        'closeAvailabilityTrackModal',
+        'closeInvoiceTrackModal'
+    ];
+    closers.forEach((name) => {
+        try {
+            if (typeof window[name] === 'function') window[name]();
+        } catch (_) {}
+    });
+    try {
+        if (typeof closeCart === 'function') closeCart();
+    } catch (_) {}
+}
+
+function showCustomerBlockedOverlay(profile = {}) {
+    const overlay = document.getElementById('customerBlockedOverlay');
+    if (!overlay) return;
+    const note = overlay.querySelector('.customer-blocked-note span');
+    if (note) {
+        note.textContent = 'يرجى مراجعة الإدارة.';
+    }
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    customerBlockedStateActive = true;
+    window.__ASSAL_CUSTOMER_BLOCKED__ = true;
+    closeCustomerFacingModalsForBlock();
+    syncGlobalModalLock();
+}
+
+function hideCustomerBlockedOverlay() {
+    const overlay = document.getElementById('customerBlockedOverlay');
+    if (!overlay) return;
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden', 'true');
+    customerBlockedStateActive = false;
+    window.__ASSAL_CUSTOMER_BLOCKED__ = false;
+    syncGlobalModalLock();
+}
+
+function applyCustomerBlockedState(profile = {}) {
+    if (isAdminUser() || localStorage.getItem('isActivated') !== 'true') {
+        hideCustomerBlockedOverlay();
+        return false;
+    }
+    if (profile && profile.blocked) {
+        showCustomerBlockedOverlay(profile);
+        return true;
+    }
+    hideCustomerBlockedOverlay();
+    return false;
+}
+
+window.enforceCustomerBlockedState = async function() {
+    if (isAdminUser() || localStorage.getItem('isActivated') !== 'true') {
+        hideCustomerBlockedOverlay();
+        return false;
+    }
+    if (!window.firebaseDB || !window.firebaseDB.db) return customerBlockedStateActive;
+    const { db, ref, get } = window.firebaseDB;
+    const snap = await get(ref(db, `customerProfiles/${getDeviceId()}`));
+    const profile = snap.exists() ? (snap.val() || {}) : {};
+    return applyCustomerBlockedState(profile);
+};
+
+function startCustomerBlockedWatcher(retries = 20) {
+    if (isAdminUser() || localStorage.getItem('isActivated') !== 'true') {
+        hideCustomerBlockedOverlay();
+        return;
+    }
+    if (!window.firebaseDB || !window.firebaseDB.db || typeof window.firebaseDB.onValue !== 'function') {
+        if (retries <= 0) return;
+        setTimeout(() => startCustomerBlockedWatcher(retries - 1), 500);
+        return;
+    }
+    if (customerBlockedWatcherStop) {
+        try { customerBlockedWatcherStop(); } catch (_) {}
+        customerBlockedWatcherStop = null;
+    }
+    const { db, ref, onValue } = window.firebaseDB;
+    customerBlockedWatcherStop = onValue(
+        ref(db, `customerProfiles/${getDeviceId()}`),
+        (snap) => {
+            const profile = snap.exists() ? (snap.val() || {}) : {};
+            applyCustomerBlockedState(profile);
+        },
+        (err) => {
+            console.error('customerBlockedWatcher:', err);
+        }
+    );
+}
 
 function buildCustomerConfirmDialog(kind, actionText, descriptionText){
     const isDelete = kind === 'delete';
@@ -14174,7 +14832,7 @@ window.confirmToggleCustomerBan = async function(deviceId, shouldBlock) {
     const res = await buildCustomerConfirmDialog(
         'ban',
         actionText,
-        shouldBlock ? 'سيُنقل الزبون مباشرة إلى قائمة الحظر ولن يتمكن من استخدام التطبيق من هذا المعرف الفريد.' : 'سيعود الزبون مباشرة إلى قائمة الزبائن ويتم إلغاء منعه من التطبيق.'
+        shouldBlock ? 'سيُنقل الزبون إلى قائمة الحظر ويُمنع من استخدام التطبيق من هذا الجهاز.' : 'سيعود الزبون إلى قائمة الزبائن ويُرفع الحظر عن هذا الجهاز.'
     );
     if (!res.isConfirmed) return;
     try {
@@ -14206,6 +14864,274 @@ window.confirmDeleteCustomerProfile = async function(deviceId) {
         console.error('confirmDeleteCustomerProfile:', err);
         Swal.fire({ title: 'تعذّر حذف الزبون', icon:'error', background:'#0b1220', color:'#fff', confirmButtonColor:'#185a9d' });
     }
+};
+
+const trackSearchState = {
+    request: { visible: false, mode: 'refresh', timer: null },
+    requestAdmin: { visible: false, mode: 'refresh', timer: null },
+    availability: { visible: false, mode: 'refresh', timer: null },
+    availabilityAdmin: { visible: false, mode: 'refresh', timer: null },
+    invoice: { visible: false, mode: 'refresh', timer: null },
+    invoiceAdmin: { visible: false, mode: 'refresh', timer: null }
+};
+
+function getTrackSearchConfig(kind) {
+    const map = {
+        request: {
+            buttonId: 'requestTrackRefreshBtn',
+            tabsHostId: 'requestTrackTabsHost',
+            searchHostId: 'requestTrackSearchHost',
+            inputId: 'requestTrackSearchInput',
+            activePanelId: 'requestTrackActivePanel',
+            archivePanelId: 'requestTrackArchivePanel',
+            loadFn: 'loadCustomerRequests',
+            activeViewGetter: () => currentTrackRequestView,
+            emptyClass: 'request-track-empty',
+            emptyText: {
+                active: 'ماكو نتائج مطابقة داخل تبويب الطلبات.',
+                archive: 'ماكو نتائج مطابقة داخل أرشيف الطلبات.'
+            }
+        },
+        requestAdmin: {
+            buttonId: 'requestAdminRefreshBtn',
+            tabsHostId: 'requestAdminTabsHost',
+            searchHostId: 'requestAdminSearchHost',
+            inputId: 'requestAdminSearchInput',
+            activePanelId: 'requestAdminActivePanel',
+            archivePanelId: 'requestAdminArchivePanel',
+            loadFn: 'loadMaterialRequests',
+            activeViewGetter: () => currentAdminRequestView,
+            emptyClass: 'request-admin-empty',
+            emptyText: {
+                active: 'ماكو نتائج مطابقة داخل تبويب الطلبات.',
+                archive: 'ماكو نتائج مطابقة داخل أرشيف الطلبات.'
+            }
+        },
+        availability: {
+            buttonId: 'availabilityTrackRefreshBtn',
+            tabsHostId: 'availabilityTrackTabsHost',
+            searchHostId: 'availabilityTrackSearchHost',
+            inputId: 'availabilityTrackSearchInput',
+            activePanelId: 'availabilityTrackActivePanel',
+            archivePanelId: 'availabilityTrackArchivePanel',
+            loadFn: 'loadCustomerAvailabilityRequests',
+            activeViewGetter: () => currentAvailabilityTrackView,
+            emptyClass: 'request-track-empty',
+            emptyText: {
+                active: 'ماكو نتائج مطابقة داخل تبويب التوفر.',
+                archive: 'ماكو نتائج مطابقة داخل أرشيف التوفر.'
+            }
+        },
+        availabilityAdmin: {
+            buttonId: 'availabilityAdminRefreshBtn',
+            tabsHostId: 'availabilityAdminTabsHost',
+            searchHostId: 'availabilityAdminSearchHost',
+            inputId: 'availabilityAdminSearchInput',
+            activePanelId: 'availabilityAdminActivePanel',
+            archivePanelId: 'availabilityAdminArchivePanel',
+            loadFn: 'loadAvailabilityRequests',
+            activeViewGetter: () => currentAvailabilityAdminView,
+            emptyClass: 'request-admin-empty',
+            emptyText: {
+                active: 'ماكو نتائج مطابقة داخل تبويب التوفر.',
+                archive: 'ماكو نتائج مطابقة داخل أرشيف التوفر.'
+            }
+        },
+        invoice: {
+            buttonId: 'invoiceTrackRefreshBtn',
+            tabsHostId: 'invoiceTrackTabsHost',
+            searchHostId: 'invoiceTrackSearchHost',
+            inputId: 'invoiceTrackSearchInput',
+            activePanelId: 'invoiceTrackActivePanel',
+            archivePanelId: 'invoiceTrackArchivePanel',
+            loadFn: 'loadCustomerInvoices',
+            activeViewGetter: () => currentInvoiceTrackView,
+            emptyClass: 'invoice-empty',
+            emptyText: {
+                active: 'ماكو نتائج مطابقة داخل تبويب الفواتير.',
+                archive: 'ماكو نتائج مطابقة داخل أرشيف الفواتير.'
+            }
+        },
+        invoiceAdmin: {
+            buttonId: 'invoiceAdminRefreshBtn',
+            tabsHostId: 'invoiceAdminTabsHost',
+            searchHostId: 'invoiceAdminSearchHost',
+            inputId: 'invoiceAdminSearchInput',
+            activePanelId: 'invoiceAdminActivePanel',
+            archivePanelId: 'invoiceAdminArchivePanel',
+            loadFn: 'loadAdminInvoices',
+            activeViewGetter: () => currentInvoiceAdminView,
+            emptyClass: 'invoice-empty',
+            emptyText: {
+                active: 'ماكو نتائج مطابقة داخل تبويب الفواتير.',
+                archive: 'ماكو نتائج مطابقة داخل أرشيف الفواتير.'
+            }
+        }
+    };
+    return map[kind] || null;
+}
+
+function normalizeTrackSearchText(value) {
+    return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function getTrackSearchQuery(kind) {
+    const cfg = getTrackSearchConfig(kind);
+    const input = cfg ? document.getElementById(cfg.inputId) : null;
+    return normalizeTrackSearchText(input?.value || '');
+}
+
+function setTrackRotateActionMode(kind, mode) {
+    const cfg = getTrackSearchConfig(kind);
+    const state = trackSearchState[kind];
+    if (!cfg || !state) return;
+    const btn = document.getElementById(cfg.buttonId);
+    if (!btn) return;
+    state.mode = mode === 'search' ? 'search' : 'refresh';
+    const icon = btn.querySelector('i');
+    btn.dataset.mode = state.mode;
+    btn.classList.toggle('is-search', state.mode === 'search');
+    btn.setAttribute('aria-label', state.mode === 'search' ? 'بحث داخل التبويب الحالي' : 'تحديث');
+    btn.setAttribute('title', state.mode === 'search' ? 'بحث داخل التبويب الحالي' : 'تحديث');
+    if (icon) icon.className = state.mode === 'search' ? 'fas fa-magnifying-glass' : 'fas fa-rotate';
+}
+
+function stopTrackRotateAction(kind) {
+    const state = trackSearchState[kind];
+    if (!state?.timer) return;
+    clearInterval(state.timer);
+    state.timer = null;
+}
+
+function startTrackRotateAction(kind) {
+    const state = trackSearchState[kind];
+    if (!state) return;
+    stopTrackRotateAction(kind);
+    if (state.visible) {
+        setTrackRotateActionMode(kind, 'refresh');
+        return;
+    }
+    setTrackRotateActionMode(kind, 'refresh');
+    state.timer = setInterval(() => {
+        setTrackRotateActionMode(kind, state.mode === 'refresh' ? 'search' : 'refresh');
+    }, 2000);
+}
+
+function setTrackSearchVisibility(kind, visible) {
+    const cfg = getTrackSearchConfig(kind);
+    const state = trackSearchState[kind];
+    if (!cfg || !state) return;
+    const tabsHost = document.getElementById(cfg.tabsHostId);
+    const searchHost = document.getElementById(cfg.searchHostId);
+    state.visible = visible === true;
+    if (tabsHost) tabsHost.classList.toggle('is-hidden', state.visible);
+    if (searchHost) {
+        searchHost.classList.toggle('is-active', state.visible);
+        searchHost.setAttribute('aria-hidden', state.visible ? 'false' : 'true');
+    }
+}
+
+function clearTrackSearchEmpty(panel) {
+    if (!panel) return;
+    panel.querySelectorAll('.track-search-empty').forEach(el => el.remove());
+}
+
+window.applyTrackModalSearch = function(kind) {
+    const cfg = getTrackSearchConfig(kind);
+    const state = trackSearchState[kind];
+    if (!cfg || !state) return;
+    const query = getTrackSearchQuery(kind);
+    const view = typeof cfg.activeViewGetter === 'function' ? cfg.activeViewGetter() : 'active';
+    const activePanel = document.getElementById(cfg.activePanelId);
+    const archivePanel = document.getElementById(cfg.archivePanelId);
+    const panel = view === 'archive' ? archivePanel : activePanel;
+    const otherPanel = view === 'archive' ? activePanel : archivePanel;
+
+    clearTrackSearchEmpty(panel);
+    clearTrackSearchEmpty(otherPanel);
+
+    const resetPanel = (target) => {
+        if (!target) return;
+        [...target.children].forEach((child) => {
+            if (child.classList?.contains('track-search-empty')) return;
+            child.style.display = '';
+        });
+    };
+
+    if (!state.visible) {
+        resetPanel(activePanel);
+        resetPanel(archivePanel);
+        return;
+    }
+
+    resetPanel(panel);
+    if (!panel) return;
+
+    const searchables = [...panel.children].filter((child) => {
+        return !(child.classList?.contains('request-track-empty')
+            || child.classList?.contains('request-admin-empty')
+            || child.classList?.contains('invoice-empty')
+            || child.classList?.contains('track-search-empty'));
+    });
+
+    if (!searchables.length) return;
+
+    let matched = 0;
+    searchables.forEach((child) => {
+        const haystack = normalizeTrackSearchText(child.innerText || child.textContent || '');
+        const isMatch = !query || haystack.includes(query);
+        child.style.display = isMatch ? '' : 'none';
+        if (isMatch) matched += 1;
+    });
+
+    if (query && matched === 0) {
+        const empty = document.createElement('div');
+        empty.className = `${cfg.emptyClass} track-search-empty`;
+        empty.textContent = cfg.emptyText[view] || 'ماكو نتائج مطابقة.';
+        panel.appendChild(empty);
+    }
+};
+
+window.showTrackSearchBar = function(kind) {
+    const cfg = getTrackSearchConfig(kind);
+    if (!cfg) return;
+    setTrackSearchVisibility(kind, true);
+    stopTrackRotateAction(kind);
+    setTrackRotateActionMode(kind, 'refresh');
+    applyTrackModalSearch(kind);
+    const input = document.getElementById(cfg.inputId);
+    if (input) {
+        setTimeout(() => {
+            try { input.focus({ preventScroll: true }); } catch (_) { input.focus(); }
+            if (typeof input.select === 'function') input.select();
+        }, 30);
+    }
+};
+
+window.hideTrackSearchBar = function(kind, options = {}) {
+    const cfg = getTrackSearchConfig(kind);
+    if (!cfg) return;
+    const input = document.getElementById(cfg.inputId);
+    const config = options && typeof options === 'object' ? options : {};
+    if (input && !config.preserveQuery) input.value = '';
+    setTrackSearchVisibility(kind, false);
+    applyTrackModalSearch(kind);
+    if (config.restartRotate !== false) startTrackRotateAction(kind);
+};
+
+window.handleTrackRotatingAction = async function(kind) {
+    const cfg = getTrackSearchConfig(kind);
+    const state = trackSearchState[kind];
+    if (!cfg || !state) return;
+    if (state.visible) {
+        if (typeof window[cfg.loadFn] === 'function') await window[cfg.loadFn]();
+        return;
+    }
+    if (state.mode === 'search') {
+        showTrackSearchBar(kind);
+        return;
+    }
+    if (typeof window[cfg.loadFn] === 'function') await window[cfg.loadFn]();
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -20624,10 +21550,34 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
   function stopInvoiceRealtime(){ if (invoiceRealtimeTimer) { clearInterval(invoiceRealtimeTimer); invoiceRealtimeTimer = null; } }
   function startInvoiceRealtime(kind){ stopInvoiceRealtime(); if (kind === 'admin') return; invoiceRealtimeTimer = setInterval(async ()=>{ try { await refreshInvoiceCounts(); } catch(_){} }, 3500); }
 
-  window.openCart = async function(){ if (!canUseSalesCart()) return; currentInvoiceTrackView='active'; const modal=document.getElementById('cartModal'); if (!modal) return; modal.classList.add('show'); modal.setAttribute('aria-hidden','false'); syncGlobalModalLock(); setInvoiceViewButtons(); startInvoiceRealtime('customer'); await loadCustomerInvoices(); };
-  window.closeCart = function(){ const modal=document.getElementById('cartModal'); if (!modal) return; modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); stopInvoiceRealtime(); syncGlobalModalLock(); };
-  window.openInvoiceAdminModal = async function(){ if (!isAdminUser()) return; currentInvoiceAdminView='active'; const modal=document.getElementById('invoiceAdminModal'); if (!modal) return; modal.classList.add('show'); modal.setAttribute('aria-hidden','false'); syncGlobalModalLock(); setInvoiceViewButtons(); stopInvoiceRealtime(); await loadAdminInvoices(); };
-  window.closeInvoiceAdminModal = function(){ const modal=document.getElementById('invoiceAdminModal'); if (!modal) return; modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); stopInvoiceRealtime(); syncGlobalModalLock(); };
+  window.openCart = async function(){ if (!canUseSalesCart()) return; if (customerBlockedStateActive) { showCustomerBlockedOverlay({ blocked: true }); return; } currentInvoiceTrackView='active'; setTrackSearchVisibility('invoice', false); const trackInput=document.getElementById('invoiceTrackSearchInput'); if (trackInput) trackInput.value=''; const modal=document.getElementById('cartModal'); if (!modal) return; modal.classList.add('show'); modal.setAttribute('aria-hidden','false'); syncGlobalModalLock(); setInvoiceViewButtons(); startTrackRotateAction('invoice'); startInvoiceRealtime('customer'); await loadCustomerInvoices(); };
+  window.closeCart = function(){ const modal=document.getElementById('cartModal'); if (!modal) return; modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); stopTrackRotateAction('invoice'); hideTrackSearchBar('invoice', { restartRotate: false }); stopInvoiceRealtime(); syncGlobalModalLock(); };
+  window.openInvoiceAdminModal = async function(){
+    if (!isAdminUser()) return;
+    currentInvoiceAdminView='active';
+    setTrackSearchVisibility('invoiceAdmin', false);
+    const trackInput=document.getElementById('invoiceAdminSearchInput');
+    if (trackInput) trackInput.value='';
+    const modal=document.getElementById('invoiceAdminModal');
+    if (!modal) return;
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden','false');
+    syncGlobalModalLock();
+    setInvoiceViewButtons();
+    startTrackRotateAction('invoiceAdmin');
+    stopInvoiceRealtime();
+    await loadAdminInvoices();
+  };
+  window.closeInvoiceAdminModal = function(){
+    const modal=document.getElementById('invoiceAdminModal');
+    if (!modal) return;
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden','true');
+    stopTrackRotateAction('invoiceAdmin');
+    hideTrackSearchBar('invoiceAdmin', { restartRotate: false });
+    stopInvoiceRealtime();
+    syncGlobalModalLock();
+  };
 
   document.addEventListener('DOMContentLoaded', ()=>{
     updateCartVisibility(); updateInvoiceAdminHeaderBtn();
@@ -21430,6 +22380,7 @@ html.low-end-device .update-success-shell{
         ? archiveInvoices.map(inv=>customerInvoiceCard(inv, null, true)).join('') +
           drafts.map(inv=>`<div class="invoice-sent-card" data-invoice-id="${escapeHtml(inv.id)}"><div class="invoice-sent-head"><div><div class="invoice-sent-title">مسودة مؤرشفة</div><div class="invoice-sent-sub">${formatRequestTime(inv.archivedAt)}</div></div><div class="invoice-status-badge archived"><i class="fas fa-box-archive"></i> أرشيف</div></div>${invoiceItems(inv)}${inv.note?`<div class="invoice-note-box"><div class="invoice-note-label">ملاحظة الفاتورة</div><div class="invoice-note-view">${escapeHtml(inv.note)}</div></div>`:''}<div class="invoice-admin-card-actions"><button class="invoice-action-btn delete" type="button" onclick="deleteDraftArchive('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div></div>`).join('')
         : '<div class="invoice-empty">أرشيف الفواتير فارغ حالياً.</div>';
+      applyTrackModalSearch('invoice');
       scrollInvoicePanels(document.getElementById('cartModal'));
       if (typeof window.refreshInvoiceCounts === 'function') await window.refreshInvoiceCounts();
     } catch(err){ console.error('loadCustomerInvoices:', err); active.innerHTML='<div class="invoice-empty">تعذّر جلب الفواتير حالياً.</div>'; archive.innerHTML='<div class="invoice-empty">تعذّر جلب الأرشيف حالياً.</div>'; }
@@ -21456,6 +22407,7 @@ html.low-end-device .update-success-shell{
       const archiveInvoices = all.filter(inv => inv && !!inv.adminArchived);
       active.innerHTML = activeInvoices.length ? activeInvoices.map(inv=>adminInvoiceCard(inv, freshMap[inv.id], false)).join('') : '<div class="invoice-empty">لا توجد فواتير مستلمة في الوقت الحالي.</div>';
       archive.innerHTML = archiveInvoices.length ? archiveInvoices.map(inv=>adminInvoiceCard(inv, null, true)).join('') : '<div class="invoice-empty">أرشيف الفواتير فارغ حالياً.</div>';
+      applyTrackModalSearch('invoiceAdmin');
       scrollInvoicePanels(document.getElementById('invoiceAdminModal'));
       if (typeof window.refreshInvoiceCounts === 'function') await window.refreshInvoiceCounts();
     } catch(err){ console.error('loadAdminInvoices:', err); active.innerHTML='<div class="invoice-empty">تعذّر جلب الفواتير حالياً.</div>'; archive.innerHTML='<div class="invoice-empty">تعذّر جلب الأرشيف حالياً.</div>'; }
@@ -22147,6 +23099,19 @@ html.low-end-device .update-success-shell{
     return snap.exists() ? (snap.val() || {}) : {};
   }
 
+  function normalizePhoneForAvailability(value = '') {
+    return String(value || '').replace(/\D+/g, '');
+  }
+
+  async function getCurrentUserAvailabilityBranchKey() {
+    try {
+      const profile = await getCustomerProfileForAvailability();
+      return normalizeAvailabilityBranchKey(profile.address || '');
+    } catch (_) {
+      return normalizeAvailabilityBranchKey('');
+    }
+  }
+
   function updateAvailabilityAdminHeaderBtn() {
     const btn = document.getElementById('availabilityAdminHeaderBtn');
     if (!btn) return;
@@ -22231,12 +23196,16 @@ html.low-end-device .update-success-shell{
       return;
     }
     currentAvailabilityAdminView = 'active';
+    setTrackSearchVisibility('availabilityAdmin', false);
+    const trackInput = document.getElementById('availabilityAdminSearchInput');
+    if (trackInput) trackInput.value = '';
     const modal = document.getElementById('availabilityAdminModal');
     if (!modal) return;
     modal.classList.add('show');
     modal.setAttribute('aria-hidden', 'false');
     syncGlobalModalLock();
     setAvailabilityViewButtons();
+    startTrackRotateAction('availabilityAdmin');
     await refreshAvailabilityRequestCount();
     await loadAvailabilityRequests();
   };
@@ -22246,17 +23215,27 @@ html.low-end-device .update-success-shell{
     if (!modal) return;
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden', 'true');
+    stopTrackRotateAction('availabilityAdmin');
+    hideTrackSearchBar('availabilityAdmin', { restartRotate: false });
     syncGlobalModalLock();
   };
 
   window.openAvailabilityTrackModal = async function () {
+    if (customerBlockedStateActive) {
+      showCustomerBlockedOverlay({ blocked: true });
+      return;
+    }
     currentAvailabilityTrackView = 'active';
+    setTrackSearchVisibility('availability', false);
+    const trackInput = document.getElementById('availabilityTrackSearchInput');
+    if (trackInput) trackInput.value = '';
     const modal = document.getElementById('availabilityTrackModal');
     if (!modal) return;
     modal.classList.add('show');
     modal.setAttribute('aria-hidden', 'false');
     syncGlobalModalLock();
     setAvailabilityViewButtons();
+    startTrackRotateAction('availability');
     await loadCustomerAvailabilityRequests();
   };
 
@@ -22265,6 +23244,8 @@ html.low-end-device .update-success-shell{
     if (!modal) return;
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden', 'true');
+    stopTrackRotateAction('availability');
+    hideTrackSearchBar('availability', { restartRotate: false });
     syncGlobalModalLock();
   };
 
@@ -22677,6 +23658,7 @@ ${actionText} ${safeBranch}`;
         : '<div class="request-track-empty">أرشيف التوفر فارغ حالياً.</div>';
 
       setAvailabilityViewButtons();
+      applyTrackModalSearch('availability');
       attachRequestScrollRelay(document.getElementById('availabilityTrackModal'));
       setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('availabilityTrackModal')), 40);
       await refreshAvailabilityRequestCount();
