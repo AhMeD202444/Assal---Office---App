@@ -14722,7 +14722,7 @@ window.loadCustomerRequests = async function () {
                     <span>${msg.senderRole === 'customer' ? 'أنت' : (msg.senderRole === 'admin' ? 'فريق الدعم' : 'النظام')}</span>
                     <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'customer')}</span>
                   </div>
-                  <div>${escapeHtml(msg.text || '')}</div>
+                  <div class="request-message-body-text">${escapeHtml(msg.text || '')}</div>${renderMessageBranchFooter(msg)}
                 </div>`;
             }).join('');
             const actions = archived ? `
@@ -14783,6 +14783,7 @@ window.sendAdminReply = async function (requestId) {
     const { db, ref, update, get } = window.firebaseDB;
     const now = Date.now();
     const msgId = "MSG-" + now.toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2,5).toUpperCase();
+    const branchLabel = getAdminAccountLabel() || 'مكتب عسل';
     let targetDeviceId = '';
     let customerName = '';
     try {
@@ -14799,6 +14800,7 @@ window.sendAdminReply = async function (requestId) {
         [`materialRequests/${requestId}/messages/${msgId}`]: {
             id: msgId,
             senderRole: 'admin',
+            branchLabel,
             text,
             createdAt: now,
             seenByAdmin: true,
@@ -14907,7 +14909,7 @@ window.loadMaterialRequests = async function () {
                     <span>${msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'فريق الدعم' : 'النظام')}</span>
                     <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'admin')}</span>
                   </div>
-                  <div>${escapeHtml(msg.text || '')}</div>
+                  <div class="request-message-body-text">${escapeHtml(msg.text || '')}</div>${renderMessageBranchFooter(msg)}
                 </div>`;
             }).join('');
             return `
@@ -22111,6 +22113,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     const text = (input?.value || '').trim(); if (!text) return;
     const now = Date.now(); const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,5).toUpperCase();
     const { db, ref, update, get } = window.firebaseDB;
+    const branchLabel = getAdminAccountLabel() || 'مكتب عسل';
     let targetDeviceId = '';
     let customerName = '';
     try {
@@ -22121,7 +22124,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
         customerName = String(inv.customerName || '');
       }
     } catch (err) { console.error('Failed to read invoice before admin reply:', err); }
-    await update(ref(db), { [`${INVOICE_PATH}/${id}/messages/${msgId}`]: { id:msgId, senderRole:'admin', text, createdAt:now, seenByAdmin:true, seenByCustomer:false }, [`${INVOICE_PATH}/${id}/updatedAt`]: now, [`${INVOICE_PATH}/${id}/status`]: 'pending' });
+    await update(ref(db), { [`${INVOICE_PATH}/${id}/messages/${msgId}`]: { id:msgId, senderRole:'admin', branchLabel, text, createdAt:now, seenByAdmin:true, seenByCustomer:false }, [`${INVOICE_PATH}/${id}/updatedAt`]: now, [`${INVOICE_PATH}/${id}/status`]: 'pending' });
     await queuePushNotificationEvent('invoice_admin_reply', {
       invoiceId: id,
       targetRole: 'customer',
@@ -23005,7 +23008,7 @@ html.low-end-device .update-success-shell{
       const cls = escapeHtml(msg.senderRole || 'customer') + (freshMsgId===msg.id ? ' invoice-message-highlight' : '');
       return `<div class="request-message ${cls}">
         <div class="request-message-head"><span>${role}</span><span>${formatRequestTime(msg.createdAt)}</span></div>
-        <div>${escapeHtml(msg.text || '')}</div>
+        <div class="request-message-body-text">${escapeHtml(msg.text || '')}</div>${renderMessageBranchFooter(msg)}
       </div>`;
     }).join('')}</div>`;
   }
@@ -24525,7 +24528,7 @@ ${actionText} ${safeBranch}`;
                 <span>${escapeHtml(senderLabel)}</span>
                 <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'customer')}</span>
               </div>
-              <div class="availability-message-body">${renderAvailabilityMessageText(msg, req)}</div>
+              <div class="availability-message-body">${renderAvailabilityMessageText(msg, req)}</div>${renderMessageBranchFooter(msg)}
             </div>`;
         }).join('');
         const hasAdminReply = msgs.some(msg => msg.senderRole === 'admin');
@@ -24602,7 +24605,7 @@ ${actionText} ${safeBranch}`;
             <span>${escapeHtml(senderLabel)}</span>
             <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'admin')}</span>
           </div>
-          <div class="availability-message-body">${renderAvailabilityMessageText(msg, req)}</div>
+          <div class="availability-message-body">${renderAvailabilityMessageText(msg, req)}</div>${renderMessageBranchFooter(msg)}
         </div>`;
     }).join('');
     return `
@@ -25121,3 +25124,963 @@ ${actionText} ${safeBranch}`;
   });
 })();
 </script>
+<style id="assal-collapsible-card-upgrade-v4">
+.support-collapsible-card{
+  overflow:hidden;
+}
+.support-card-toggle{
+  width:100%;
+  border:0;
+  outline:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:18px;
+  text-align:inherit;
+  color:inherit;
+  background:linear-gradient(180deg, rgba(19,35,67,.22), rgba(8,18,39,.08));
+  transition:background .25s ease, transform .25s ease, box-shadow .25s ease;
+}
+.support-card-toggle:hover{
+  background:linear-gradient(180deg, rgba(24,48,88,.34), rgba(8,18,39,.14));
+}
+.support-card-toggle:active{
+  transform:scale(.997);
+}
+.support-card-toggle-main{
+  min-width:0;
+  flex:1;
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+}
+.support-card-avatar{
+  width:58px;
+  height:58px;
+  flex:0 0 58px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  color:#dff7ff;
+  background:linear-gradient(135deg, rgba(61,209,194,.24), rgba(46,125,235,.26));
+  border:1px solid rgba(110,239,255,.18);
+  box-shadow:0 14px 28px rgba(5,11,28,.28), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.support-card-avatar.admin{
+  background:linear-gradient(135deg, rgba(90,156,255,.26), rgba(31,205,196,.2));
+}
+.support-card-avatar.availability{
+  background:linear-gradient(135deg, rgba(60,196,255,.22), rgba(61,209,194,.22));
+}
+.support-card-avatar.invoice{
+  background:linear-gradient(135deg, rgba(84,184,255,.24), rgba(34,122,236,.28));
+}
+.support-card-toggle-text{
+  min-width:0;
+  flex:1;
+  display:grid;
+  gap:6px;
+}
+.support-card-toggle-title-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.support-card-toggle-title{
+  font-size:21px;
+  font-weight:900;
+  letter-spacing:.2px;
+}
+.support-card-toggle-subtitle{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:rgba(228,243,255,.78);
+  font-size:14px;
+  line-height:1.7;
+}
+.support-card-toggle-meta{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  color:rgba(191,222,255,.68);
+  font-size:12px;
+}
+.support-card-toggle-meta span{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.support-card-mini-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:7px 12px;
+  border-radius:999px;
+  background:rgba(61,209,194,.12);
+  border:1px solid rgba(61,209,194,.18);
+  color:#b9f7ee;
+  font-size:12px;
+  font-weight:800;
+  line-height:1;
+}
+.support-card-toggle-side{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-shrink:0;
+}
+.support-card-toggle-icon{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg, rgba(66,217,191,.22), rgba(42,130,235,.26));
+  border:1px solid rgba(111,231,255,.16);
+  color:#e8fbff;
+  box-shadow:0 12px 26px rgba(4,12,27,.2);
+  transition:transform .25s ease, background .25s ease, box-shadow .25s ease;
+}
+.support-collapsible-card.is-open .support-card-toggle-icon{
+  transform:rotate(180deg);
+  background:linear-gradient(135deg, rgba(66,217,191,.32), rgba(42,130,235,.36));
+  box-shadow:0 16px 30px rgba(4,12,27,.26);
+}
+.support-card-body-shell{
+  display:grid;
+  grid-template-rows:0fr;
+  transition:grid-template-rows .34s ease;
+}
+.support-collapsible-card.is-open .support-card-body-shell{
+  grid-template-rows:1fr;
+}
+.support-card-body{
+  min-height:0;
+  overflow:hidden;
+  padding:0 18px;
+}
+.support-collapsible-card.is-open .support-card-body{
+  padding:0 18px 18px;
+}
+.support-card-body-inner{
+  display:grid;
+  gap:14px;
+  padding-top:16px;
+  border-top:1px solid rgba(97,155,226,.14);
+}
+.support-card-detail-pills{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.support-card-detail-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 14px;
+  border-radius:999px;
+  background:rgba(14,28,56,.56);
+  border:1px solid rgba(111,170,255,.12);
+  color:rgba(230,244,255,.9);
+  font-size:12px;
+  font-weight:700;
+}
+.support-card-body .request-messages,
+.support-card-body .invoice-messages{
+  max-height:340px;
+}
+.support-card-body textarea{
+  resize:vertical;
+}
+.support-collapsible-card.support-card-ready .support-card-body .request-thread-head,
+.support-collapsible-card.support-card-ready .support-card-body .request-admin-card-head,
+.support-collapsible-card.support-card-ready .support-card-body .availability-compact-head,
+.support-collapsible-card.support-card-ready .support-card-body .invoice-sent-head{
+  display:none !important;
+}
+@media (max-width: 720px){
+  .support-card-toggle{
+    align-items:flex-start;
+    gap:12px;
+    padding:15px;
+  }
+  .support-card-toggle-main{
+    gap:12px;
+  }
+  .support-card-avatar{
+    width:50px;
+    height:50px;
+    flex-basis:50px;
+    font-size:21px;
+    border-radius:16px;
+  }
+  .support-card-toggle-side{
+    flex-direction:column;
+    align-items:flex-end;
+  }
+  .support-card-toggle-subtitle{
+    white-space:normal;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+  }
+  .support-card-toggle-title{
+    font-size:18px;
+  }
+  .support-card-toggle-icon{
+    width:38px;
+    height:38px;
+  }
+}
+</style>
+
+<script id="assal-collapsible-card-upgrade-v4-script">
+(function(){
+  if (window.__ASSAL_COLLAPSIBLE_CARDS_V4__) return;
+  window.__ASSAL_COLLAPSIBLE_CARDS_V4__ = true;
+
+  function textOf(node){
+    return String(node && node.textContent ? node.textContent : '').replace(/\s+/g, ' ').trim();
+  }
+
+  function shortText(value, maxLen){
+    const text = String(value || '').replace(/\s+/g, ' ').trim();
+    if (!text) return '';
+    return text.length > maxLen ? text.slice(0, maxLen).trim() + '…' : text;
+  }
+
+  function findLastMessageText(card){
+    const bodies = card.querySelectorAll('.request-message .availability-message-body, .request-message > div:last-child');
+    for (let i = bodies.length - 1; i >= 0; i--) {
+      const text = textOf(bodies[i]);
+      if (text) return text;
+    }
+    return '';
+  }
+
+  function findInvoicePreview(card){
+    const names = Array.from(card.querySelectorAll('.invoice-item-name')).map(textOf).filter(Boolean);
+    const note = textOf(card.querySelector('.invoice-note-view'));
+    if (names.length >= 3) return shortText(names.slice(0, 2).join('، ') + ` +${names.length - 2}`, 120);
+    if (names.length) return shortText(names.join('، '), 120);
+    if (note) return shortText(note, 120);
+    return 'افتح البطاقة حتى تشوف كل تفاصيل الفاتورة.';
+  }
+
+  function buildMetaLine(parts){
+    return parts.filter(Boolean).map(part => `<span>${part}</span>`).join('');
+  }
+
+  function getCardInfo(card){
+    const isInvoiceAdmin = card.classList.contains('invoice-admin-card-shell');
+    const isInvoice = isInvoiceAdmin || card.classList.contains('invoice-sent-card');
+    const isAvailability = card.classList.contains('availability-compact-card');
+    const isAdmin = card.classList.contains('request-admin-card') || isInvoiceAdmin;
+
+    const statusNode = card.querySelector('.invoice-status-badge, .request-thread-status');
+    const statusHtml = statusNode ? statusNode.outerHTML : '';
+    const timeText = textOf(card.querySelector('.request-thread-time, .request-admin-time, .invoice-sent-sub'));
+    const phoneBadgeText = (() => {
+      const badges = Array.from(card.querySelectorAll('.request-meta-badge, .invoice-meta-badge'));
+      const match = badges.find(el => el.querySelector('.fa-phone'));
+      return match ? textOf(match) : '';
+    })();
+    const lastMessage = shortText(findLastMessageText(card), 120);
+    const invoicePreview = shortText(findInvoicePreview(card), 120);
+    const itemCount = card.querySelectorAll('.invoice-item-row').length;
+    const messageCount = card.querySelectorAll('.request-message').length;
+
+    let title = '';
+    let subtitle = '';
+    let mini = '';
+    let icon = 'fa-comments';
+    let avatarClass = '';
+    let metaHtml = '';
+
+    if (isInvoiceAdmin) {
+      title = textOf(card.querySelector('.invoice-admin-name')) || 'فاتورة زبون';
+      subtitle = invoicePreview || 'افتح البطاقة حتى تشوف كامل الفاتورة.';
+      mini = itemCount ? `<span class="support-card-mini-badge"><i class="fas fa-box-open"></i>${itemCount} مادة</span>` : '';
+      icon = 'fa-file-invoice-dollar';
+      avatarClass = 'invoice admin';
+      metaHtml = buildMetaLine([
+        timeText ? `<i class="fas fa-clock"></i>${timeText}` : '',
+        phoneBadgeText ? `<i class="fas fa-phone"></i>${shortText(phoneBadgeText, 40)}` : ''
+      ]);
+    } else if (isInvoice) {
+      title = 'فاتورة المواد';
+      subtitle = invoicePreview || 'افتح البطاقة حتى تشوف كامل الفاتورة.';
+      mini = itemCount ? `<span class="support-card-mini-badge"><i class="fas fa-box-open"></i>${itemCount} مادة</span>` : '';
+      icon = 'fa-file-invoice-dollar';
+      avatarClass = 'invoice';
+      metaHtml = buildMetaLine([
+        timeText ? `<i class="fas fa-clock"></i>${timeText}` : ''
+      ]);
+    } else if (isAvailability && isAdmin) {
+      title = textOf(card.querySelector('.request-admin-name')) || 'استعلام توفر';
+      const itemLabel = textOf(card.querySelector('.availability-card-title'));
+      subtitle = shortText([itemLabel, lastMessage].filter(Boolean).join(' — '), 120) || 'افتح البطاقة حتى تشوف كل تفاصيل الاستعلام.';
+      mini = messageCount ? `<span class="support-card-mini-badge"><i class="fas fa-comments"></i>${messageCount} رسالة</span>` : '';
+      icon = 'fa-store';
+      avatarClass = 'availability admin';
+      metaHtml = buildMetaLine([
+        timeText ? `<i class="fas fa-clock"></i>${timeText}` : '',
+        phoneBadgeText ? `<i class="fas fa-phone"></i>${shortText(phoneBadgeText, 40)}` : ''
+      ]);
+    } else if (isAvailability) {
+      title = textOf(card.querySelector('.availability-card-title')) || 'استعلام توفر';
+      subtitle = lastMessage || 'افتح البطاقة حتى تشوف كل تفاصيل الاستعلام.';
+      mini = messageCount ? `<span class="support-card-mini-badge"><i class="fas fa-comments"></i>${messageCount} رسالة</span>` : '';
+      icon = 'fa-magnifying-glass';
+      avatarClass = 'availability';
+      metaHtml = buildMetaLine([
+        timeText ? `<i class="fas fa-clock"></i>${timeText}` : ''
+      ]);
+    } else if (isAdmin) {
+      title = textOf(card.querySelector('.request-admin-name')) || 'محادثة زبون';
+      subtitle = lastMessage || 'افتح البطاقة حتى تشوف كامل المحادثة.';
+      mini = messageCount ? `<span class="support-card-mini-badge"><i class="fas fa-comments"></i>${messageCount} رسالة</span>` : '';
+      icon = 'fa-user-shield';
+      avatarClass = 'admin';
+      metaHtml = buildMetaLine([
+        timeText ? `<i class="fas fa-clock"></i>${timeText}` : '',
+        phoneBadgeText ? `<i class="fas fa-phone"></i>${shortText(phoneBadgeText, 40)}` : ''
+      ]);
+    } else {
+      title = textOf(card.querySelector('.request-thread-title')) || 'محادثة مع الإدارة';
+      subtitle = lastMessage || 'افتح البطاقة حتى تشوف كامل المحادثة.';
+      mini = messageCount ? `<span class="support-card-mini-badge"><i class="fas fa-comments"></i>${messageCount} رسالة</span>` : '';
+      icon = 'fa-headset';
+      metaHtml = buildMetaLine([
+        timeText ? `<i class="fas fa-clock"></i>${timeText}` : ''
+      ]);
+    }
+
+    const detailPills = [];
+    if (timeText) detailPills.push(`<span class="support-card-detail-pill"><i class="fas fa-history"></i>${timeText}</span>`);
+    if (phoneBadgeText && isAdmin) detailPills.push(`<span class="support-card-detail-pill"><i class="fas fa-phone"></i>${shortText(phoneBadgeText, 50)}</span>`);
+    if (itemCount && isInvoice) detailPills.push(`<span class="support-card-detail-pill"><i class="fas fa-box-open"></i>${itemCount} مادة</span>`);
+    if (messageCount && !isInvoice) detailPills.push(`<span class="support-card-detail-pill"><i class="fas fa-comments"></i>${messageCount} رسالة</span>`);
+
+    return {
+      title,
+      subtitle,
+      mini,
+      metaHtml,
+      statusHtml,
+      detailPillsHtml: detailPills.length ? `<div class="support-card-detail-pills">${detailPills.join('')}</div>` : '',
+      avatarHtml: `<div class="support-card-avatar ${avatarClass}"><i class="fas ${icon}"></i></div>`
+    };
+  }
+
+  function buildToggleHtml(info){
+    return `
+      <button class="support-card-toggle" type="button" aria-expanded="false" onclick="toggleSupportCard(this)">
+        <div class="support-card-toggle-main">
+          ${info.avatarHtml}
+          <div class="support-card-toggle-text">
+            <div class="support-card-toggle-title-row">
+              <div class="support-card-toggle-title">${info.title}</div>
+              ${info.mini}
+            </div>
+            <div class="support-card-toggle-subtitle">${info.subtitle}</div>
+            <div class="support-card-toggle-meta">${info.metaHtml}</div>
+          </div>
+        </div>
+        <div class="support-card-toggle-side">
+          ${info.statusHtml || ''}
+          <span class="support-card-toggle-icon"><i class="fas fa-chevron-down"></i></span>
+        </div>
+      </button>
+    `;
+  }
+
+  window.toggleSupportCard = function(trigger, forceState){
+    const card = trigger && trigger.closest ? trigger.closest('.support-collapsible-card') : null;
+    if (!card) return;
+    const shouldOpen = typeof forceState === 'boolean' ? forceState : !card.classList.contains('is-open');
+
+    if (shouldOpen && card.parentElement) {
+      card.parentElement.querySelectorAll('.support-collapsible-card.is-open').forEach(other => {
+        if (other !== card) {
+          other.classList.remove('is-open');
+          const otherToggle = other.querySelector('.support-card-toggle');
+          if (otherToggle) otherToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    card.classList.toggle('is-open', shouldOpen);
+    const toggle = card.querySelector('.support-card-toggle');
+    if (toggle) toggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+
+    if (shouldOpen) {
+      setTimeout(() => {
+        try {
+          card.querySelectorAll('.request-messages, .invoice-messages').forEach(box => {
+            box.scrollTop = box.scrollHeight;
+          });
+        } catch (_) {}
+      }, 180);
+    }
+  };
+
+  function upgradeCard(card){
+    if (!card || card.classList.contains('support-card-ready')) return;
+
+    const info = getCardInfo(card);
+    const bodyShell = document.createElement('div');
+    bodyShell.className = 'support-card-body-shell';
+
+    const body = document.createElement('div');
+    body.className = 'support-card-body';
+
+    const inner = document.createElement('div');
+    inner.className = 'support-card-body-inner';
+
+    if (info.detailPillsHtml) {
+      const temp = document.createElement('div');
+      temp.innerHTML = info.detailPillsHtml;
+      while (temp.firstChild) inner.appendChild(temp.firstChild);
+    }
+
+    const oldNodes = Array.from(card.childNodes);
+    oldNodes.forEach(node => inner.appendChild(node));
+
+    body.appendChild(inner);
+    bodyShell.appendChild(body);
+
+    card.innerHTML = buildToggleHtml(info);
+    card.appendChild(bodyShell);
+    card.classList.add('support-collapsible-card', 'support-card-ready');
+  }
+
+  window.upgradeSupportCards = function(root){
+    const scope = root && root.querySelectorAll ? root : document;
+    scope.querySelectorAll('.request-thread-card, .request-admin-card, .invoice-sent-card, .invoice-admin-card-shell').forEach(upgradeCard);
+  };
+
+  let frame = null;
+  function scheduleUpgrade(){
+    if (frame) cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => {
+      frame = null;
+      try { window.upgradeSupportCards(document); } catch (_) {}
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scheduleUpgrade, { once: true });
+  } else {
+    scheduleUpgrade();
+  }
+
+  window.addEventListener('load', scheduleUpgrade);
+
+  const observer = new MutationObserver(() => scheduleUpgrade());
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+
+<style id="assal-cairo-and-branch-footer-upgrade">
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+html, body, button, input, textarea, select,
+.support-card-toggle, .support-card-body, .request-message, .request-message *,
+.invoice-messages, .invoice-messages *, .availability-message-body,
+.request-track-modal, .request-admin-modal, .invoice-modal, .support-chat-modal{
+  font-family:'Cairo', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  letter-spacing:0 !important;
+}
+
+.request-message,
+.invoice-messages .request-message,
+.availability-message-body,
+.request-message-head{
+  direction:rtl;
+  text-align:right;
+  unicode-bidi:plaintext;
+  line-height:1.95;
+}
+
+.request-message div,
+.request-message span,
+.invoice-messages .request-message div,
+.invoice-messages .request-message span{
+  letter-spacing:0 !important;
+}
+
+.message-branch-footer{
+  margin-top:8px;
+  padding-top:7px;
+  border-top:1px dashed rgba(119,201,255,.18);
+  color:rgba(188,226,255,.72);
+  font-size:11px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.message-branch-footer i{
+  font-size:10px;
+  color:rgba(101,233,209,.92);
+}
+
+.support-card-toggle-icon{
+  animation:assalChevronPulse 2.2s ease-in-out infinite;
+}
+
+.support-collapsible-card:hover .support-card-toggle-icon{
+  box-shadow:0 0 0 1px rgba(135,244,255,.12), 0 0 18px rgba(72,212,255,.24), 0 0 34px rgba(61,209,194,.16);
+}
+
+.support-collapsible-card.is-open .support-card-toggle-icon{
+  animation:assalChevronGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes assalChevronPulse{
+  0%,100%{
+    transform:translateY(0) scale(1);
+    box-shadow:0 12px 26px rgba(4,12,27,.2), 0 0 0 rgba(61,209,194,0);
+  }
+  50%{
+    transform:translateY(-2px) scale(1.04);
+    box-shadow:0 16px 30px rgba(4,12,27,.26), 0 0 22px rgba(61,209,194,.18);
+  }
+}
+
+@keyframes assalChevronGlow{
+  0%,100%{
+    transform:rotate(180deg) scale(1);
+    box-shadow:0 16px 30px rgba(4,12,27,.26), 0 0 14px rgba(61,209,194,.2);
+  }
+  50%{
+    transform:rotate(180deg) scale(1.08);
+    box-shadow:0 18px 34px rgba(4,12,27,.32), 0 0 26px rgba(61,209,194,.34), 0 0 38px rgba(42,130,235,.18);
+  }
+}
+</style>
+
+<script id="assal-cairo-and-branch-footer-upgrade-script">
+(function(){
+  if (window.__ASSAL_BRANCH_FOOTER_AND_CAIRO_PATCH__) return;
+  window.__ASSAL_BRANCH_FOOTER_AND_CAIRO_PATCH__ = true;
+
+  window.renderMessageBranchFooter = function(msg){
+    if (!msg || msg.senderRole !== 'admin') return '';
+    const branch = String(msg.branchLabel || '').trim();
+    if (!branch) return '';
+    return `<div class="message-branch-footer"><i class="fas fa-store"></i><span>بواسطة: ${escapeHtml(branch)}</span></div>`;
+  };
+
+  function textOf(node){
+    return String(node && node.textContent ? node.textContent : '').replace(/\s+/g, ' ').trim();
+  }
+
+  function applyBranchFooters(root){
+    (root && root.querySelectorAll ? root : document).querySelectorAll('.request-message.admin').forEach(function(box){
+      if (box.dataset.branchFooterReady === '1' || box.querySelector('.message-branch-footer')) {
+        box.dataset.branchFooterReady = '1';
+        return;
+      }
+      let branch = box.getAttribute('data-branch-label') || '';
+      if (!branch) {
+        const senderText = textOf(box.querySelector('.request-message-head span:first-child'));
+        if (senderText && senderText !== 'فريق الدعم' && senderText !== 'الإدارة') {
+          branch = senderText;
+        }
+      }
+      if (!branch) return;
+      const footer = document.createElement('div');
+      footer.className = 'message-branch-footer';
+      footer.innerHTML = `<i class="fas fa-store"></i><span>بواسطة: ${branch}</span>`;
+      box.appendChild(footer);
+      box.dataset.branchFooterReady = '1';
+    });
+  }
+
+  let branchFrame = null;
+  function scheduleBranchFooters(){
+    if (branchFrame) cancelAnimationFrame(branchFrame);
+    branchFrame = requestAnimationFrame(function(){
+      branchFrame = null;
+      applyBranchFooters(document);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', scheduleBranchFooters, { once: true });
+  } else {
+    scheduleBranchFooters();
+  }
+
+  window.addEventListener('load', scheduleBranchFooters);
+  const branchObserver = new MutationObserver(scheduleBranchFooters);
+  branchObserver.observe(document.documentElement, { childList:true, subtree:true });
+})();
+</script>
+
+<style id="assal-message-body-fix-v3">
+.request-message{
+  min-height:auto !important;
+  height:auto !important;
+  max-height:none !important;
+  display:block !important;
+  overflow:visible !important;
+}
+
+.request-message-body-text,
+.availability-message-body,
+.invoice-messages .request-message > .request-message-body-text{
+  display:block !important;
+  width:100% !important;
+  min-height:auto !important;
+  height:auto !important;
+  max-height:none !important;
+  overflow:visible !important;
+  white-space:normal !important;
+  word-break:break-word !important;
+  overflow-wrap:anywhere !important;
+  color:rgba(245,250,255,.96) !important;
+  font-size:14px !important;
+  line-height:1.95 !important;
+  text-align:right !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+
+.request-message-head{
+  display:flex !important;
+  justify-content:space-between !important;
+  align-items:center !important;
+  gap:10px !important;
+  margin-bottom:8px !important;
+}
+
+.request-message-head span:last-child{
+  white-space:nowrap !important;
+  flex-shrink:0 !important;
+}
+
+.request-message-head span:first-child{
+  font-weight:700 !important;
+}
+</style>
+
+<style id="assal-alternating-card-tone-upgrade-v4">
+/* تمييز أنيق بين بطاقة وبطاقة بكل النوافذ */
+.support-collapsible-card,
+.request-thread-card,
+.request-admin-card,
+.availability-thread-card,
+.availability-admin-card,
+.invoice-sent-card,
+.invoice-admin-card,
+#newItemsModal .modal-content .new-item-card{
+  position: relative;
+  isolation: isolate;
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease, background .22s ease;
+}
+
+.support-collapsible-card[data-card-tone="a"],
+.request-thread-card[data-card-tone="a"],
+.request-admin-card[data-card-tone="a"],
+.availability-thread-card[data-card-tone="a"],
+.availability-admin-card[data-card-tone="a"],
+.invoice-sent-card[data-card-tone="a"],
+.invoice-admin-card[data-card-tone="a"],
+#newItemsModal .modal-content .new-item-card[data-card-tone="a"]{
+  background:
+    radial-gradient(circle at top right, rgba(71, 214, 198, 0.10), transparent 40%),
+    linear-gradient(135deg, rgba(14, 35, 74, 0.94), rgba(9, 25, 58, 0.92)) !important;
+  border-color: rgba(94, 201, 226, 0.18) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 12px 28px rgba(3, 10, 30, 0.18) !important;
+}
+
+.support-collapsible-card[data-card-tone="b"],
+.request-thread-card[data-card-tone="b"],
+.request-admin-card[data-card-tone="b"],
+.availability-thread-card[data-card-tone="b"],
+.availability-admin-card[data-card-tone="b"],
+.invoice-sent-card[data-card-tone="b"],
+.invoice-admin-card[data-card-tone="b"],
+#newItemsModal .modal-content .new-item-card[data-card-tone="b"]{
+  background:
+    radial-gradient(circle at top left, rgba(102, 151, 255, 0.10), transparent 42%),
+    linear-gradient(135deg, rgba(18, 33, 63, 0.94), rgba(12, 20, 46, 0.92)) !important;
+  border-color: rgba(122, 160, 255, 0.16) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.025),
+    0 12px 28px rgba(2, 8, 24, 0.18) !important;
+}
+
+.support-collapsible-card[data-card-tone="a"]::before,
+.request-thread-card[data-card-tone="a"]::before,
+.request-admin-card[data-card-tone="a"]::before,
+.availability-thread-card[data-card-tone="a"]::before,
+.availability-admin-card[data-card-tone="a"]::before,
+.invoice-sent-card[data-card-tone="a"]::before,
+.invoice-admin-card[data-card-tone="a"]::before,
+#newItemsModal .modal-content .new-item-card[data-card-tone="a"]::before,
+.support-collapsible-card[data-card-tone="b"]::before,
+.request-thread-card[data-card-tone="b"]::before,
+.request-admin-card[data-card-tone="b"]::before,
+.availability-thread-card[data-card-tone="b"]::before,
+.availability-admin-card[data-card-tone="b"]::before,
+.invoice-sent-card[data-card-tone="b"]::before,
+.invoice-admin-card[data-card-tone="b"]::before,
+#newItemsModal .modal-content .new-item-card[data-card-tone="b"]::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  z-index:-1;
+  opacity:.95;
+}
+
+.support-collapsible-card[data-card-tone="a"]::before,
+.request-thread-card[data-card-tone="a"]::before,
+.request-admin-card[data-card-tone="a"]::before,
+.availability-thread-card[data-card-tone="a"]::before,
+.availability-admin-card[data-card-tone="a"]::before,
+.invoice-sent-card[data-card-tone="a"]::before,
+.invoice-admin-card[data-card-tone="a"]::before,
+#newItemsModal .modal-content .new-item-card[data-card-tone="a"]::before{
+  box-shadow: 0 0 0 1px rgba(71, 214, 198, 0.09), 0 0 32px rgba(66, 202, 189, 0.05);
+}
+
+.support-collapsible-card[data-card-tone="b"]::before,
+.request-thread-card[data-card-tone="b"]::before,
+.request-admin-card[data-card-tone="b"]::before,
+.availability-thread-card[data-card-tone="b"]::before,
+.availability-admin-card[data-card-tone="b"]::before,
+.invoice-sent-card[data-card-tone="b"]::before,
+.invoice-admin-card[data-card-tone="b"]::before,
+#newItemsModal .modal-content .new-item-card[data-card-tone="b"]::before{
+  box-shadow: 0 0 0 1px rgba(122, 160, 255, 0.08), 0 0 32px rgba(89, 126, 220, 0.045);
+}
+
+.support-collapsible-card:hover,
+.request-thread-card:hover,
+.request-admin-card:hover,
+.availability-thread-card:hover,
+.availability-admin-card:hover,
+.invoice-sent-card:hover,
+.invoice-admin-card:hover,
+#newItemsModal .modal-content .new-item-card:hover{
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .support-collapsible-card,
+  .request-thread-card,
+  .request-admin-card,
+  .availability-thread-card,
+  .availability-admin-card,
+  .invoice-sent-card,
+  .invoice-admin-card,
+  #newItemsModal .modal-content .new-item-card{
+    transition:none !important;
+  }
+}
+</style>
+
+<script id="assal-alternating-card-tone-upgrade-script-v4">
+(function(){
+  if (window.__ASSAL_ALTERNATING_CARD_TONE_PATCH__) return;
+  window.__ASSAL_ALTERNATING_CARD_TONE_PATCH__ = true;
+
+  const CARD_SELECTOR = [
+    '.support-collapsible-card',
+    '.request-thread-card',
+    '.request-admin-card',
+    '.availability-thread-card',
+    '.availability-admin-card',
+    '.invoice-sent-card',
+    '.invoice-admin-card',
+    '#newItemsModal .modal-content .new-item-card'
+  ].join(', ');
+
+  function isVisible(el){
+    if (!el) return false;
+    const style = window.getComputedStyle(el);
+    return style.display !== 'none' && style.visibility !== 'hidden';
+  }
+
+  function applyAlternatingCardTones(root){
+    const scope = root && root.querySelectorAll ? root : document;
+    const cards = Array.from(scope.querySelectorAll(CARD_SELECTOR));
+    const parentMap = new Map();
+
+    cards.forEach(function(card){
+      const parent = card.parentElement;
+      if (!parent) return;
+      if (!parentMap.has(parent)) parentMap.set(parent, []);
+      parentMap.get(parent).push(card);
+    });
+
+    parentMap.forEach(function(group){
+      let visibleIndex = 0;
+      group.forEach(function(card){
+        if (!isVisible(card)) return;
+        const tone = (visibleIndex % 2 === 0) ? 'a' : 'b';
+        card.setAttribute('data-card-tone', tone);
+        visibleIndex += 1;
+      });
+    });
+  }
+
+  let frame = null;
+  function scheduleApply(root){
+    if (frame) cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(function(){
+      frame = null;
+      applyAlternatingCardTones(root || document);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ scheduleApply(document); }, { once:true });
+  } else {
+    scheduleApply(document);
+  }
+
+  window.addEventListener('load', function(){ scheduleApply(document); });
+  const observer = new MutationObserver(function(){ scheduleApply(document); });
+  observer.observe(document.documentElement, { childList:true, subtree:true, attributes:true, attributeFilter:['class','style'] });
+})();
+</script>
+
+<style id="assal-alternating-card-tone-override-v5">
+/* نسخة أوضح حتى يبان الفرق بين بطاقة وبطاقة بشكل أنيق */
+.support-collapsible-card[data-card-tone="a"],
+.request-thread-card[data-card-tone="a"],
+.request-admin-card[data-card-tone="a"],
+.availability-thread-card[data-card-tone="a"],
+.availability-admin-card[data-card-tone="a"],
+.invoice-sent-card[data-card-tone="a"],
+.invoice-admin-card[data-card-tone="a"]{
+  background:
+    radial-gradient(circle at top right, rgba(58, 223, 204, 0.16), transparent 34%),
+    linear-gradient(135deg, rgba(14, 43, 96, 0.97), rgba(10, 27, 66, 0.96)) !important;
+  border-color: rgba(77, 218, 210, 0.22) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 14px 30px rgba(5, 15, 35, 0.20),
+    0 0 0 1px rgba(77, 218, 210, 0.06) !important;
+}
+
+.support-collapsible-card[data-card-tone="b"],
+.request-thread-card[data-card-tone="b"],
+.request-admin-card[data-card-tone="b"],
+.availability-thread-card[data-card-tone="b"],
+.availability-admin-card[data-card-tone="b"],
+.invoice-sent-card[data-card-tone="b"],
+.invoice-admin-card[data-card-tone="b"]{
+  background:
+    radial-gradient(circle at top left, rgba(129, 116, 255, 0.16), transparent 36%),
+    linear-gradient(135deg, rgba(31, 36, 92, 0.97), rgba(14, 24, 59, 0.96)) !important;
+  border-color: rgba(135, 129, 255, 0.22) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.035),
+    0 14px 30px rgba(6, 12, 34, 0.20),
+    0 0 0 1px rgba(135, 129, 255, 0.06) !important;
+}
+
+.support-collapsible-card[data-card-tone="a"]::after,
+.request-thread-card[data-card-tone="a"]::after,
+.request-admin-card[data-card-tone="a"]::after,
+.availability-thread-card[data-card-tone="a"]::after,
+.availability-admin-card[data-card-tone="a"]::after,
+.invoice-sent-card[data-card-tone="a"]::after,
+.invoice-admin-card[data-card-tone="a"]::after,
+.support-collapsible-card[data-card-tone="b"]::after,
+.request-thread-card[data-card-tone="b"]::after,
+.request-admin-card[data-card-tone="b"]::after,
+.availability-thread-card[data-card-tone="b"]::after,
+.availability-admin-card[data-card-tone="b"]::after,
+.invoice-sent-card[data-card-tone="b"]::after,
+.invoice-admin-card[data-card-tone="b"]::after{
+  content:"";
+  position:absolute;
+  top:18px;
+  bottom:18px;
+  right:10px;
+  width:4px;
+  border-radius:999px;
+  pointer-events:none;
+  opacity:.9;
+}
+
+.support-collapsible-card[data-card-tone="a"]::after,
+.request-thread-card[data-card-tone="a"]::after,
+.request-admin-card[data-card-tone="a"]::after,
+.availability-thread-card[data-card-tone="a"]::after,
+.availability-admin-card[data-card-tone="a"]::after,
+.invoice-sent-card[data-card-tone="a"]::after,
+.invoice-admin-card[data-card-tone="a"]::after{
+  background:linear-gradient(180deg, rgba(72, 227, 205, 0.95), rgba(38, 137, 235, 0.35));
+  box-shadow:0 0 14px rgba(72, 227, 205, 0.18);
+}
+
+.support-collapsible-card[data-card-tone="b"]::after,
+.request-thread-card[data-card-tone="b"]::after,
+.request-admin-card[data-card-tone="b"]::after,
+.availability-thread-card[data-card-tone="b"]::after,
+.availability-admin-card[data-card-tone="b"]::after,
+.invoice-sent-card[data-card-tone="b"]::after,
+.invoice-admin-card[data-card-tone="b"]::after{
+  background:linear-gradient(180deg, rgba(145, 138, 255, 0.95), rgba(67, 116, 255, 0.35));
+  box-shadow:0 0 14px rgba(145, 138, 255, 0.18);
+}
+
+.support-collapsible-card[data-card-tone="a"] .support-card-toggle{
+  background:linear-gradient(180deg, rgba(18, 49, 99, 0.12), rgba(8, 21, 47, 0.04)) !important;
+}
+
+.support-collapsible-card[data-card-tone="b"] .support-card-toggle{
+  background:linear-gradient(180deg, rgba(39, 45, 97, 0.12), rgba(12, 18, 47, 0.04)) !important;
+}
+
+.support-collapsible-card[data-card-tone="a"] .support-card-avatar{
+  background:linear-gradient(135deg, rgba(60, 220, 196, 0.26), rgba(47, 131, 236, 0.28)) !important;
+  border-color:rgba(110, 238, 225, 0.22) !important;
+}
+
+.support-collapsible-card[data-card-tone="b"] .support-card-avatar{
+  background:linear-gradient(135deg, rgba(123, 118, 255, 0.22), rgba(67, 120, 255, 0.26)) !important;
+  border-color:rgba(154, 150, 255, 0.20) !important;
+}
+
+.support-collapsible-card[data-card-tone="a"] .support-card-toggle-icon{
+  background:linear-gradient(135deg, rgba(63, 225, 198, 0.28), rgba(46, 132, 235, 0.30)) !important;
+}
+
+.support-collapsible-card[data-card-tone="b"] .support-card-toggle-icon{
+  background:linear-gradient(135deg, rgba(128, 121, 255, 0.24), rgba(65, 120, 255, 0.30)) !important;
+}
+
+.support-collapsible-card[data-card-tone="a"] .support-card-mini-badge{
+  background:rgba(61, 209, 194, 0.14) !important;
+  border-color:rgba(61, 209, 194, 0.20) !important;
+}
+
+.support-collapsible-card[data-card-tone="b"] .support-card-mini-badge{
+  background:rgba(126, 124, 255, 0.12) !important;
+  border-color:rgba(126, 124, 255, 0.18) !important;
+}
+</style>
