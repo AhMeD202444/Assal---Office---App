@@ -14726,7 +14726,7 @@ window.loadCustomerRequests = async function () {
             const messagesHtml = msgs.map(msg => {
                 const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
                 return `
-                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
+                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}" data-branch-label="${escapeHtml(String(msg.branchLabel || msg.senderLabel || (typeof getAdminAccountLabel === 'function' ? getAdminAccountLabel() : '') || '').trim())}">
                   <div class="request-message-head">
                     <span>${msg.senderRole === 'customer' ? 'أنت' : (msg.senderRole === 'admin' ? 'فريق الدعم' : 'النظام')}</span>
                     <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'customer')}</span>
@@ -14913,7 +14913,7 @@ window.loadMaterialRequests = async function () {
             const messagesHtml = msgs.map(msg => {
                 const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
                 return `
-                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
+                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}" data-branch-label="${escapeHtml(String(msg.branchLabel || msg.senderLabel || (typeof getAdminAccountLabel === 'function' ? getAdminAccountLabel() : '') || '').trim())}">
                   <div class="request-message-head">
                     <span>${msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'فريق الدعم' : 'النظام')}</span>
                     <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'admin')}</span>
@@ -21776,7 +21776,7 @@ document.addEventListener("visibilitychange", () => {
   function buildInvoiceMessages(messages, freshMsgId){
     const msgs = Object.values(messages || {}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
     if (!msgs.length) return '<div class="invoice-empty" style="padding:12px">ماكو محادثة على هاي الفاتورة حالياً.</div>';
-    return `<div class="invoice-messages request-messages">${msgs.map(msg=>`<div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshMsgId===msg.id?' invoice-message-highlight':''}"><div class="request-message-head"><span>${msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'فريق الدعم' : 'النظام')}</span><span>${formatRequestTime(msg.createdAt)}</span></div><div>${escapeHtml(msg.text||'')}</div></div>`).join('')}</div>`;
+    return `<div class="invoice-messages request-messages">${msgs.map(msg=>`<div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshMsgId===msg.id?' invoice-message-highlight':''}" data-branch-label="${escapeHtml(String(msg.branchLabel || msg.senderLabel || (typeof getAdminAccountLabel === 'function' ? getAdminAccountLabel() : '') || '').trim())}"><div class="request-message-head"><span>${msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'فريق الدعم' : 'النظام')}</span><span>${formatRequestTime(msg.createdAt)}</span></div><div>${escapeHtml(msg.text||'')}</div></div>`).join('')}</div>`;
   }
 
   function buildDraftCard(){
@@ -24537,7 +24537,7 @@ ${actionText} ${safeBranch}`;
                 <span>${escapeHtml(senderLabel)}</span>
                 <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'customer')}</span>
               </div>
-              <div class="availability-message-body">${renderAvailabilityMessageText(msg, req)}</div>${renderMessageBranchFooter(msg)}
+              <div class="availability-message-body">${renderAvailabilityMessageText(msg, req)}</div>
             </div>`;
         }).join('');
         const hasAdminReply = msgs.some(msg => msg.senderRole === 'admin');
@@ -24614,7 +24614,7 @@ ${actionText} ${safeBranch}`;
             <span>${escapeHtml(senderLabel)}</span>
             <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'admin')}</span>
           </div>
-          <div class="availability-message-body">${renderAvailabilityMessageText(msg, req)}</div>${renderMessageBranchFooter(msg)}
+          <div class="availability-message-body">${renderAvailabilityMessageText(msg, req)}</div>
         </div>`;
     }).join('');
     return `
@@ -25688,8 +25688,9 @@ html, body, button, input, textarea, select,
 
   window.renderMessageBranchFooter = function(msg){
     if (!msg || msg.senderRole !== 'admin') return '';
-    const branch = String(msg.branchLabel || '').trim();
-    if (!branch) return '';
+    const fallbackAdminBranch = (typeof getAdminAccountLabel === 'function' ? getAdminAccountLabel() : '');
+    const branch = String(msg.branchLabel || msg.senderLabel || fallbackAdminBranch || '').trim();
+    if (!branch || branch === 'فريق الدعم' || branch === 'الإدارة') return '';
     return `<div class="message-branch-footer"><i class="fas fa-store"></i><span>بواسطة: ${escapeHtml(branch)}</span></div>`;
   };
 
@@ -25699,6 +25700,9 @@ html, body, button, input, textarea, select,
 
   function applyBranchFooters(root){
     (root && root.querySelectorAll ? root : document).querySelectorAll('.request-message.admin').forEach(function(box){
+      if (box.classList.contains('availability-request-message') || box.closest('#availabilityTrackModal') || box.closest('#availabilityAdminModal')) {
+        return;
+      }
       if (box.dataset.branchFooterReady === '1' || box.querySelector('.message-branch-footer')) {
         box.dataset.branchFooterReady = '1';
         return;
