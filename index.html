@@ -314,7 +314,7 @@
           }
         };
       })();
-    </script>    </script>
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -11936,7 +11936,7 @@ html.low-end-device .results-container {
           </div>
         </div>
         <button id="invoiceTrackRefreshBtn" class="request-track-refresh request-circle-icon" type="button" onclick="handleTrackRotatingAction('invoice')" aria-label="تحديث" title="تحديث" data-mode="refresh">
-          <i class="fas fa-rotate"></i>
+          <i class="fas fa-rotate-right"></i>
         </button>
         <button class="request-track-close" type="button" onclick="closeCart()" aria-label="إغلاق">
           <i class="fas fa-times"></i>
@@ -11978,12 +11978,12 @@ html.low-end-device .results-container {
                 <i class="fas fa-arrow-right"></i>
               </button>
               <i class="fas fa-magnifying-glass track-searchicon"></i>
-              <input id="invoiceAdminSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب الفواتير الحالي" oninput="applyTrackModalSearch('invoiceAdmin')" autocomplete="off" dir="rtl">
+              <input id="invoiceAdminSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب الفواتير الحالي" oninput="filterAdminInvoiceSearch(this.value)" onkeyup="filterAdminInvoiceSearch(this.value)" onchange="filterAdminInvoiceSearch(this.value)" onsearch="filterAdminInvoiceSearch(this.value)" autocomplete="off" dir="rtl">
             </div>
           </div>
         </div>
         <button id="invoiceAdminRefreshBtn" class="request-admin-refresh request-circle-icon" type="button" onclick="handleTrackRotatingAction('invoiceAdmin')" aria-label="تحديث" title="تحديث" data-mode="refresh">
-          <i class="fas fa-rotate"></i>
+          <i class="fas fa-rotate-right"></i>
         </button>
         <button class="request-admin-close" type="button" onclick="closeInvoiceAdminModal()" aria-label="إغلاق">
           <i class="fas fa-times"></i>
@@ -12087,7 +12087,7 @@ html.low-end-device .results-container {
           </div>
         </div>
         <button id="requestAdminRefreshBtn" class="request-admin-refresh request-circle-icon" type="button" onclick="handleTrackRotatingAction('requestAdmin')" aria-label="تحديث" title="تحديث" data-mode="refresh">
-          <i class="fas fa-rotate"></i>
+          <i class="fas fa-rotate-right"></i>
         </button>
         <button class="request-admin-close" type="button" onclick="closeRequestAdminModal()" aria-label="إغلاق">
           <i class="fas fa-times"></i>
@@ -12141,7 +12141,7 @@ html.low-end-device .results-container {
           </div>
         </div>
         <button id="requestTrackRefreshBtn" class="request-track-refresh request-circle-icon" type="button" onclick="handleTrackRotatingAction('request')" aria-label="تحديث" title="تحديث" data-mode="refresh">
-          <i class="fas fa-rotate"></i>
+          <i class="fas fa-rotate-right"></i>
         </button>
         <button class="request-track-close" type="button" onclick="closeRequestTrackModal()" aria-label="إغلاق">
           <i class="fas fa-times"></i>
@@ -12186,12 +12186,12 @@ html.low-end-device .results-container {
                 <i class="fas fa-arrow-right"></i>
               </button>
               <i class="fas fa-magnifying-glass track-searchicon"></i>
-              <input id="availabilityAdminSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب التوفر الحالي" oninput="applyTrackModalSearch('availabilityAdmin')" autocomplete="off" dir="rtl">
+              <input id="availabilityAdminSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب التوفر الحالي" oninput="renderAvailabilityAdminPanels()" autocomplete="off" dir="rtl">
             </div>
           </div>
         </div>
         <button id="availabilityAdminRefreshBtn" class="request-admin-refresh request-circle-icon" type="button" onclick="handleTrackRotatingAction('availabilityAdmin')" aria-label="تحديث" title="تحديث" data-mode="refresh">
-          <i class="fas fa-rotate"></i>
+          <i class="fas fa-rotate-right"></i>
         </button>
         <button class="request-admin-close" type="button" onclick="closeAvailabilityAdminModal()" aria-label="إغلاق">
           <i class="fas fa-times"></i>
@@ -12243,7 +12243,7 @@ html.low-end-device .results-container {
           </div>
         </div>
         <button id="availabilityTrackRefreshBtn" class="request-track-refresh request-circle-icon" type="button" onclick="handleTrackRotatingAction('availability')" aria-label="تحديث" title="تحديث" data-mode="refresh">
-          <i class="fas fa-rotate"></i>
+          <i class="fas fa-rotate-right"></i>
         </button>
         <button class="request-track-close" type="button" onclick="closeAvailabilityTrackModal()" aria-label="إغلاق">
           <i class="fas fa-times"></i>
@@ -12275,7 +12275,7 @@ html.low-end-device .results-container {
 
       <div class="stats-top-actions">
         <button class="stats-refresh" type="button" onclick="refreshStatsFromFirebase()" aria-label="تحديث الإحصائيات" title="تحديث الإحصائيات">
-          <i class="fas fa-rotate"></i>
+          <i class="fas fa-rotate-right"></i>
         </button>
         <button class="stats-close" type="button" onclick="closeStatsModal()" aria-label="إغلاق">
           <i class="fas fa-times"></i>
@@ -12328,7 +12328,7 @@ html.low-end-device .results-container {
           </div>
         </div>
         <button id="customersAdminRotateActionBtn" class="customers-admin-refresh request-circle-icon" type="button" onclick="handleCustomersRotatingAction()" aria-label="تحديث الزبائن" title="تحديث الزبائن" data-mode="refresh">
-          <i class="fas fa-rotate"></i>
+          <i class="fas fa-rotate-right"></i>
         </button>
         <button class="customers-admin-close" type="button" onclick="closeCustomersAdminModal()" aria-label="إغلاق">
           <i class="fas fa-times"></i>
@@ -13535,6 +13535,61 @@ document.addEventListener('DOMContentLoaded', () => {
     syncGlobalModalLock();
 });
 
+function blockModalBackdropDismiss(modal) {
+    if (!modal || modal.dataset.outsideDismissLocked === '1') return;
+    const blocker = (e) => {
+        if (e.target !== modal) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+        return false;
+    };
+    ['click', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'pointerdown', 'pointerup'].forEach(type => {
+        modal.addEventListener(type, blocker, true);
+    });
+    modal.dataset.outsideDismissLocked = '1';
+}
+
+function bindModalBackdropDismissLocks() {
+    document.querySelectorAll(`
+        #newItemsModal,
+        #offersModal,
+        #contactModal,
+        #promoPopup,
+        #cartModal,
+        #requestModal,
+        #requestAdminModal,
+        #requestTrackModal,
+        #statsModal,
+        #customerProfileModal,
+        #customersAdminModal,
+        #invoiceAdminModal,
+        #availabilityAdminModal,
+        #availabilityTrackModal,
+        #activationOverlay,
+        #adModal,
+        #adOverlay,
+        .cart-modal,
+        .request-modal,
+        .request-admin-modal,
+        .request-track-modal,
+        .stats-modal,
+        .customer-profile-modal,
+        .customers-admin-modal,
+        .invoice-track-modal,
+        .invoice-admin-modal,
+        .activation-overlay
+    `).forEach(blockModalBackdropDismiss);
+}
+
+const backdropDismissLockObserver = new MutationObserver(() => bindModalBackdropDismissLocks());
+document.addEventListener('DOMContentLoaded', () => {
+    bindModalBackdropDismissLocks();
+    if (document.body) {
+        backdropDismissLockObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+    }
+});
+
 
 let customerProfileSubmitting = false;
 let customerProfilePromptQueued = false;
@@ -14202,7 +14257,7 @@ window.loadCustomerRequests = async function () {
                   <button class="request-track-clear archive-btn" type="button" onclick="archiveCustomerRequest('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button>
                 </div>`);
             return `
-              <div class="request-thread-card" data-request-id="${escapeHtml(req.id)}">
+              <div class="request-thread-card" data-request-id="${escapeHtml(req.id)}" data-track-search="${escapeHtml(safeBuildTrackSearchText('request', { id: req.id, item: req.item, category: '', phone: req.phone, date: req.updatedAt || req.createdAt }))}">
                 <div class="request-thread-head">
                   <div>
                     <div class="request-thread-id">${escapeHtml(req.id)}</div>
@@ -14376,7 +14431,7 @@ window.loadMaterialRequests = async function () {
                 </div>`;
             }).join('');
             return `
-              <div class="request-admin-card" data-request-id="${escapeHtml(req.id)}">
+              <div class="request-admin-card" data-request-id="${escapeHtml(req.id)}" data-track-search="${escapeHtml(safeBuildTrackSearchText('requestAdmin', { id: req.id, owner: req.name, name: req.name, phone: req.phone, date: req.updatedAt || req.createdAt }))}">
                 <div class="request-admin-card-head">
                   <div>
                     <div class="request-admin-name">${escapeHtml(req.name || 'بدون اسم')}</div>
@@ -14473,7 +14528,7 @@ function setCustomersRotateActionMode(mode) {
     btn.classList.toggle('is-search', customersAdminRotateMode === 'search');
     btn.setAttribute('aria-label', customersAdminRotateMode === 'search' ? 'بحث داخل التبويب الحالي' : 'تحديث الزبائن');
     btn.setAttribute('title', customersAdminRotateMode === 'search' ? 'بحث داخل التبويب الحالي' : 'تحديث الزبائن');
-    if (icon) icon.className = customersAdminRotateMode === 'search' ? 'fas fa-magnifying-glass' : 'fas fa-rotate';
+    if (icon) icon.className = customersAdminRotateMode === 'search' ? 'fas fa-magnifying-glass' : 'fas fa-rotate-right';
 }
 
 function stopCustomersRotateAction() {
@@ -14886,6 +14941,7 @@ function getTrackSearchConfig(kind) {
             archivePanelId: 'requestTrackArchivePanel',
             loadFn: 'loadCustomerRequests',
             activeViewGetter: () => currentTrackRequestView,
+            searchEnabled: false,
             emptyClass: 'request-track-empty',
             emptyText: {
                 active: 'ماكو نتائج مطابقة داخل تبويب الطلبات.',
@@ -14901,6 +14957,7 @@ function getTrackSearchConfig(kind) {
             archivePanelId: 'requestAdminArchivePanel',
             loadFn: 'loadMaterialRequests',
             activeViewGetter: () => currentAdminRequestView,
+            searchEnabled: true,
             emptyClass: 'request-admin-empty',
             emptyText: {
                 active: 'ماكو نتائج مطابقة داخل تبويب الطلبات.',
@@ -14916,6 +14973,7 @@ function getTrackSearchConfig(kind) {
             archivePanelId: 'availabilityTrackArchivePanel',
             loadFn: 'loadCustomerAvailabilityRequests',
             activeViewGetter: () => currentAvailabilityTrackView,
+            searchEnabled: false,
             emptyClass: 'request-track-empty',
             emptyText: {
                 active: 'ماكو نتائج مطابقة داخل تبويب التوفر.',
@@ -14931,6 +14989,7 @@ function getTrackSearchConfig(kind) {
             archivePanelId: 'availabilityAdminArchivePanel',
             loadFn: 'loadAvailabilityRequests',
             activeViewGetter: () => currentAvailabilityAdminView,
+            searchEnabled: true,
             emptyClass: 'request-admin-empty',
             emptyText: {
                 active: 'ماكو نتائج مطابقة داخل تبويب التوفر.',
@@ -14946,6 +15005,7 @@ function getTrackSearchConfig(kind) {
             archivePanelId: 'invoiceTrackArchivePanel',
             loadFn: 'loadCustomerInvoices',
             activeViewGetter: () => currentInvoiceTrackView,
+            searchEnabled: false,
             emptyClass: 'invoice-empty',
             emptyText: {
                 active: 'ماكو نتائج مطابقة داخل تبويب الفواتير.',
@@ -14960,7 +15020,8 @@ function getTrackSearchConfig(kind) {
             activePanelId: 'invoiceAdminActivePanel',
             archivePanelId: 'invoiceAdminArchivePanel',
             loadFn: 'loadAdminInvoices',
-            activeViewGetter: () => currentInvoiceAdminView,
+            activeViewGetter: () => (window.currentInvoiceAdminView === 'archive' ? 'archive' : 'active'),
+            searchEnabled: true,
             emptyClass: 'invoice-empty',
             emptyText: {
                 active: 'ماكو نتائج مطابقة داخل تبويب الفواتير.',
@@ -14972,7 +15033,120 @@ function getTrackSearchConfig(kind) {
 }
 
 function normalizeTrackSearchText(value) {
-    return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    return String(value || '')
+        .toLowerCase()
+        .replace(/[أإآٱ]/g, 'ا')
+        .replace(/ى/g, 'ي')
+        .replace(/ة/g, 'ه')
+        .replace(/ؤ/g, 'و')
+        .replace(/ئ/g, 'ي')
+        .replace(/[٠-٩]/g, d => '0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(d)] || d)
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function buildTrackSearchDateTokens(value) {
+    const stamp = Number(value || 0);
+    if (!Number.isFinite(stamp) || stamp <= 0) return '';
+    const date = new Date(stamp);
+    if (Number.isNaN(date.getTime())) return '';
+    const dd = String(date.getDate()).padStart(2, '0');
+    const d = String(date.getDate());
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const m = String(date.getMonth() + 1);
+    const yyyy = String(date.getFullYear());
+    const hh = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    const human = typeof formatRequestTime === 'function' ? formatRequestTime(stamp) : '';
+    return [
+        human,
+        `${dd}/${mm}/${yyyy}`,
+        `${d}/${m}/${yyyy}`,
+        `${yyyy}/${mm}/${dd}`,
+        `${dd}-${mm}-${yyyy}`,
+        `${yyyy}-${mm}-${dd}`,
+        `${dd}/${mm}`,
+        `${d}/${m}`,
+        `${dd}/${mm}/${yyyy} ${hh}:${min}`,
+        `${yyyy}-${mm}-${dd} ${hh}:${min}`,
+        yyyy
+    ].filter(Boolean).join(' ');
+}
+
+function collectTrackSearchParts(parts = []) {
+    return parts
+        .map(part => String(part || '').trim())
+        .filter(Boolean)
+        .join(' ');
+}
+
+function extractInvoiceSearchItems(inv) {
+    const items = inv && Array.isArray(inv.items) ? inv.items : [];
+    if (!items.length) return '';
+    return items.map(item => collectTrackSearchParts([
+        item?.name,
+        item?.category,
+        item?.id,
+        item?.barcode
+    ])).join(' ');
+}
+
+function buildScopedTrackSearchText(kind, payload = {}) {
+    const dateText = buildTrackSearchDateTokens(payload.date || payload.updatedAt || payload.createdAt || 0);
+    if (kind === 'requestAdmin' || kind === 'availabilityAdmin') {
+        return collectTrackSearchParts([
+            payload.owner,
+            payload.name,
+            payload.phone,
+            payload.id,
+            dateText
+        ]);
+    }
+    if (kind === 'invoiceAdmin') {
+        return collectTrackSearchParts([
+            payload.owner,
+            payload.name,
+            payload.phone,
+            payload.item,
+            payload.category,
+            payload.itemsText,
+            payload.note,
+            payload.id,
+            dateText
+        ]);
+    }
+    return collectTrackSearchParts([
+        payload.item,
+        payload.category,
+        payload.itemsText,
+        payload.note,
+        payload.id,
+        dateText
+    ]);
+}
+
+function safeBuildTrackSearchText(kind, payload = {}) {
+    try {
+        return buildScopedTrackSearchText(kind, payload);
+    } catch (err) {
+        console.error('safeBuildTrackSearchText:', kind, err);
+        return collectTrackSearchParts([
+            payload.owner,
+            payload.name,
+            payload.phone,
+            payload.item,
+            payload.category,
+            payload.itemsText,
+            payload.note,
+            payload.id,
+            payload.date
+        ]);
+    }
+}
+
+function isTrackSearchEnabled(kind) {
+    const cfg = getTrackSearchConfig(kind);
+    return !!(cfg && cfg.searchEnabled !== false);
 }
 
 function getTrackSearchQuery(kind) {
@@ -14987,13 +15161,14 @@ function setTrackRotateActionMode(kind, mode) {
     if (!cfg || !state) return;
     const btn = document.getElementById(cfg.buttonId);
     if (!btn) return;
-    state.mode = mode === 'search' ? 'search' : 'refresh';
+    const allowSearch = cfg.searchEnabled !== false;
+    state.mode = allowSearch && mode === 'search' ? 'search' : 'refresh';
     const icon = btn.querySelector('i');
     btn.dataset.mode = state.mode;
-    btn.classList.toggle('is-search', state.mode === 'search');
-    btn.setAttribute('aria-label', state.mode === 'search' ? 'بحث داخل التبويب الحالي' : 'تحديث');
-    btn.setAttribute('title', state.mode === 'search' ? 'بحث داخل التبويب الحالي' : 'تحديث');
-    if (icon) icon.className = state.mode === 'search' ? 'fas fa-magnifying-glass' : 'fas fa-rotate';
+    btn.classList.toggle('is-search', allowSearch && state.mode === 'search');
+    btn.setAttribute('aria-label', allowSearch && state.mode === 'search' ? 'بحث داخل التبويب الحالي' : 'تحديث');
+    btn.setAttribute('title', allowSearch && state.mode === 'search' ? 'بحث داخل التبويب الحالي' : 'تحديث');
+    if (icon) icon.className = allowSearch && state.mode === 'search' ? 'fas fa-magnifying-glass' : 'fas fa-rotate-right';
 }
 
 function stopTrackRotateAction(kind) {
@@ -15005,15 +15180,27 @@ function stopTrackRotateAction(kind) {
 
 function startTrackRotateAction(kind) {
     const state = trackSearchState[kind];
-    if (!state) return;
+    const cfg = getTrackSearchConfig(kind);
+    if (!state || !cfg) return;
     stopTrackRotateAction(kind);
+    if (cfg.searchEnabled === false) {
+        setTrackRotateActionMode(kind, 'refresh');
+        return;
+    }
     if (state.visible) {
         setTrackRotateActionMode(kind, 'refresh');
         return;
     }
+    let nextMode = 'search';
     setTrackRotateActionMode(kind, 'refresh');
     state.timer = setInterval(() => {
-        setTrackRotateActionMode(kind, state.mode === 'refresh' ? 'search' : 'refresh');
+        if (state.visible) {
+            stopTrackRotateAction(kind);
+            setTrackRotateActionMode(kind, 'refresh');
+            return;
+        }
+        setTrackRotateActionMode(kind, nextMode);
+        nextMode = nextMode === 'search' ? 'refresh' : 'search';
     }, 2000);
 }
 
@@ -15023,11 +15210,12 @@ function setTrackSearchVisibility(kind, visible) {
     if (!cfg || !state) return;
     const tabsHost = document.getElementById(cfg.tabsHostId);
     const searchHost = document.getElementById(cfg.searchHostId);
-    state.visible = visible === true;
-    if (tabsHost) tabsHost.classList.toggle('is-hidden', state.visible);
+    const shouldShow = cfg.searchEnabled !== false && visible === true;
+    state.visible = shouldShow;
+    if (tabsHost) tabsHost.classList.toggle('is-hidden', shouldShow);
     if (searchHost) {
-        searchHost.classList.toggle('is-active', state.visible);
-        searchHost.setAttribute('aria-hidden', state.visible ? 'false' : 'true');
+        searchHost.classList.toggle('is-active', shouldShow);
+        searchHost.setAttribute('aria-hidden', shouldShow ? 'false' : 'true');
     }
 }
 
@@ -15036,68 +15224,150 @@ function clearTrackSearchEmpty(panel) {
     panel.querySelectorAll('.track-search-empty').forEach(el => el.remove());
 }
 
-window.applyTrackModalSearch = function(kind) {
-    const cfg = getTrackSearchConfig(kind);
-    const state = trackSearchState[kind];
+window.filterAdminInvoiceSearch = function(rawValue) {
+    const cfg = getTrackSearchConfig('invoiceAdmin');
+    const state = trackSearchState.invoiceAdmin;
     if (!cfg || !state) return;
-    const query = getTrackSearchQuery(kind);
-    const view = typeof cfg.activeViewGetter === 'function' ? cfg.activeViewGetter() : 'active';
+
+    const adminView = typeof getAdminView === 'function'
+        ? getAdminView()
+        : (window.currentInvoiceAdminView === 'archive' ? 'archive' : 'active');
+    const query = normalizeTrackSearchText(rawValue || '');
     const activePanel = document.getElementById(cfg.activePanelId);
     const archivePanel = document.getElementById(cfg.archivePanelId);
-    const panel = view === 'archive' ? archivePanel : activePanel;
-    const otherPanel = view === 'archive' ? activePanel : archivePanel;
+    const currentPanel = adminView === 'archive' ? archivePanel : activePanel;
+    const otherPanel = adminView === 'archive' ? activePanel : archivePanel;
 
-    clearTrackSearchEmpty(panel);
-    clearTrackSearchEmpty(otherPanel);
-
-    const resetPanel = (target) => {
-        if (!target) return;
-        [...target.children].forEach((child) => {
-            if (child.classList?.contains('track-search-empty')) return;
-            child.style.display = '';
+    const resetPanelCards = (panel) => {
+        if (!panel) return;
+        panel.querySelectorAll('.invoice-admin-card-shell').forEach((card) => {
+            card.style.display = '';
         });
+        clearTrackSearchEmpty(panel);
     };
 
-    if (!state.visible) {
-        resetPanel(activePanel);
-        resetPanel(archivePanel);
-        return;
-    }
+    resetPanelCards(activePanel);
+    resetPanelCards(archivePanel);
 
-    resetPanel(panel);
-    if (!panel) return;
+    if (!query) return;
+    if (!currentPanel) return;
 
-    const searchables = [...panel.children].filter((child) => {
-        return !(child.classList?.contains('request-track-empty')
-            || child.classList?.contains('request-admin-empty')
-            || child.classList?.contains('invoice-empty')
-            || child.classList?.contains('track-search-empty'));
-    });
-
-    if (!searchables.length) return;
+    const cards = [...currentPanel.querySelectorAll('.invoice-admin-card-shell')];
+    if (!cards.length) return;
 
     let matched = 0;
-    searchables.forEach((child) => {
-        const haystack = normalizeTrackSearchText(child.innerText || child.textContent || '');
-        const isMatch = !query || haystack.includes(query);
-        child.style.display = isMatch ? '' : 'none';
-        if (isMatch) matched += 1;
+    cards.forEach((card) => {
+        const haystackSource = card.getAttribute('data-track-search') || card.dataset?.trackSearch || card.textContent || '';
+        const haystack = normalizeTrackSearchText(haystackSource);
+        const ok = haystack.includes(query);
+        card.style.display = ok ? '' : 'none';
+        if (ok) matched += 1;
     });
 
-    if (query && matched === 0) {
+    clearTrackSearchEmpty(currentPanel);
+    clearTrackSearchEmpty(otherPanel);
+    if (matched === 0) {
         const empty = document.createElement('div');
         empty.className = `${cfg.emptyClass} track-search-empty`;
-        empty.textContent = cfg.emptyText[view] || 'ماكو نتائج مطابقة.';
-        panel.appendChild(empty);
+        empty.textContent = (cfg.emptyText && cfg.emptyText[adminView === 'archive' ? 'archive' : 'active']) || 'ماكو نتائج مطابقة.';
+        currentPanel.appendChild(empty);
+    }
+};
+
+window.bindInvoiceAdminSearchInput = function() {
+    const input = document.getElementById('invoiceAdminSearchInput');
+    if (!input || input.dataset.boundInvoiceSearch === '1') return;
+    const handler = () => {
+        try { window.filterAdminInvoiceSearch(input.value || ''); } catch (err) { console.error('bindInvoiceAdminSearchInput:', err); }
+    };
+    ['input', 'keyup', 'change', 'search'].forEach((evt) => input.addEventListener(evt, handler));
+    input.dataset.boundInvoiceSearch = '1';
+};
+
+window.applyTrackModalSearch = function(kind) {
+
+    try {
+        if (kind === 'invoiceAdmin' && typeof window.filterAdminInvoiceSearch === 'function') {
+            const cfg0 = getTrackSearchConfig(kind);
+            const input0 = cfg0 ? document.getElementById(cfg0.inputId) : null;
+            window.filterAdminInvoiceSearch(input0?.value || '');
+            return;
+        }
+        const cfg = getTrackSearchConfig(kind);
+        const state = trackSearchState[kind];
+        if (!cfg || !state) return;
+        const query = getTrackSearchQuery(kind);
+        const allowSearch = cfg.searchEnabled !== false;
+        const activePanel = document.getElementById(cfg.activePanelId);
+        const archivePanel = document.getElementById(cfg.archivePanelId);
+        const resetPanel = (target) => {
+            if (!target) return;
+            [...target.children].forEach((child) => {
+                if (child.classList?.contains('track-search-empty')) return;
+                child.style.display = '';
+            });
+        };
+        if (!allowSearch) {
+            clearTrackSearchEmpty(activePanel);
+            clearTrackSearchEmpty(archivePanel);
+            resetPanel(activePanel);
+            resetPanel(archivePanel);
+            return;
+        }
+        const view = typeof cfg.activeViewGetter === 'function' ? cfg.activeViewGetter() : 'active';
+        const panel = view === 'archive' ? archivePanel : activePanel;
+        const otherPanel = view === 'archive' ? activePanel : archivePanel;
+
+        clearTrackSearchEmpty(panel);
+        clearTrackSearchEmpty(otherPanel);
+
+        if (!state.visible) {
+            resetPanel(activePanel);
+            resetPanel(archivePanel);
+            return;
+        }
+
+        resetPanel(panel);
+        if (!panel) return;
+
+        const searchables = [...panel.children].filter((child) => {
+            return !(child.classList?.contains('request-track-empty')
+                || child.classList?.contains('request-admin-empty')
+                || child.classList?.contains('invoice-empty')
+                || child.classList?.contains('track-search-empty'));
+        });
+
+        if (!searchables.length) return;
+
+        let matched = 0;
+        searchables.forEach((child) => {
+            const haystackSource = child.getAttribute('data-track-search') || ((child.dataset && child.dataset.trackSearch) ? child.dataset.trackSearch : '') || child.textContent || child.innerText || '';
+            const haystack = normalizeTrackSearchText(haystackSource);
+            const isMatch = !query || haystack.includes(query);
+            child.style.display = isMatch ? '' : 'none';
+            if (isMatch) matched += 1;
+        });
+
+        if (query && matched === 0) {
+            const empty = document.createElement('div');
+            empty.className = `${cfg.emptyClass} track-search-empty`;
+            empty.textContent = cfg.emptyText[view] || 'ماكو نتائج مطابقة.';
+            panel.appendChild(empty);
+        }
+    } catch (err) {
+        console.error('applyTrackModalSearch:', kind, err);
     }
 };
 
 window.showTrackSearchBar = function(kind) {
     const cfg = getTrackSearchConfig(kind);
-    if (!cfg) return;
+    if (!cfg || cfg.searchEnabled === false) return;
     setTrackSearchVisibility(kind, true);
     stopTrackRotateAction(kind);
     setTrackRotateActionMode(kind, 'refresh');
+    if (kind === 'invoiceAdmin' && typeof window.bindInvoiceAdminSearchInput === 'function') {
+        window.bindInvoiceAdminSearchInput();
+    }
     applyTrackModalSearch(kind);
     const input = document.getElementById(cfg.inputId);
     if (input) {
@@ -15115,16 +15385,25 @@ window.hideTrackSearchBar = function(kind, options = {}) {
     const config = options && typeof options === 'object' ? options : {};
     if (input && !config.preserveQuery) input.value = '';
     setTrackSearchVisibility(kind, false);
-    applyTrackModalSearch(kind);
-    if (config.restartRotate !== false) startTrackRotateAction(kind);
+    setTrackRotateActionMode(kind, 'refresh');
+    if (cfg.searchEnabled !== false && config.restartRotate !== false) startTrackRotateAction(kind);
+    try {
+        applyTrackModalSearch(kind);
+    } catch (err) {
+        console.error('hideTrackSearchBar/applyTrackModalSearch:', kind, err);
+    }
 };
 
 window.handleTrackRotatingAction = async function(kind) {
     const cfg = getTrackSearchConfig(kind);
     const state = trackSearchState[kind];
     if (!cfg || !state) return;
-    if (state.visible) {
+    if (cfg.searchEnabled === false) {
         if (typeof window[cfg.loadFn] === 'function') await window[cfg.loadFn]();
+        return;
+    }
+    if (state.visible) {
+        hideTrackSearchBar(kind);
         return;
     }
     if (state.mode === 'search') {
@@ -16557,17 +16836,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     overlay.addEventListener("click", (event) => {
         try { event.preventDefault(); } catch (_) {}
-        const modal = document.getElementById("newItemsModal");
-        const promo = document.getElementById("promoPopup");
-
-        if (modal && modal.style.display === "flex") {
-            closeNewItemsModal();
-        } else if (promo && promo.style.display === "flex") {
-            // دالة الإعلان الموجودة عندك
-            if (typeof closePopup === "function") {
-                closePopup();
-            }
-        }
+        try { event.stopPropagation(); } catch (_) {}
     });
 });
 
@@ -16607,8 +16876,8 @@ function showExitLikeAlert({ icon = "fas fa-exclamation-circle", title = "تنب
     `,
     confirmButtonText: confirmText,
     backdrop: 'rgba(2, 6, 23, 0.82)',
-    allowOutsideClick: true,
-    allowEscapeKey: true,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
     customClass: {
       container: 'request-like-backdrop',
       popup: 'swal2-popup exit-popup animate__animated animate__zoomIn',
@@ -17474,8 +17743,8 @@ if (!currentCategory) {
         `,
         confirmButtonText: 'تمام، راح أختار الصنف',
         backdrop: 'rgba(2, 6, 23, 0.82)',
-        allowOutsideClick: true,
-        allowEscapeKey: true,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
         customClass: {
             popup: 'swal2-popup exit-popup animate__animated animate__zoomIn',
             confirmButton: 'exit-confirm'
@@ -18538,8 +18807,8 @@ async function addToCart({name, category, price, img}){
           closeButtonHtml: '<i class="fas fa-xmark"></i>',
           reverseButtons: true,
           focusConfirm: true,
-          allowOutsideClick: true,
-          allowEscapeKey: true,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
           confirmButtonText: 'إضافة',
           denyButtonText: 'أنشئ فاتورة',
           buttonsStyling: false,
@@ -20319,12 +20588,18 @@ function fadeIn(){
     }
     if (!o.dataset.bound){
       o.dataset.bound = "1";
-      bindPress(o, close);
+      bindPress(o, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
     }
     if (!m.dataset.bound){
       m.dataset.bound = "1";
       m.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") close();
+        if (e.key === "Escape") {
+          e.preventDefault();
+          e.stopPropagation();
+        }
       });
     }
   }
@@ -20893,6 +21168,15 @@ document.addEventListener("visibilitychange", () => {
   function setPendingInvoiceCreateNewId(id){ try { if (id) localStorage.setItem(PENDING_INVOICE_CREATE_NEW_KEY, String(id)); else localStorage.removeItem(PENDING_INVOICE_CREATE_NEW_KEY); } catch(_) {} }
   let currentInvoiceTrackView = 'active';
   let currentInvoiceAdminView = 'active';
+  try {
+    Object.defineProperty(window, 'currentInvoiceAdminView', {
+      configurable: true,
+      get(){ return currentInvoiceAdminView; },
+      set(v){ currentInvoiceAdminView = v === 'archive' ? 'archive' : 'active'; }
+    });
+  } catch(_) {
+    window.currentInvoiceAdminView = currentInvoiceAdminView;
+  }
   let invoiceSending = false;
   let invoiceDraftArchives = [];
 
@@ -20928,8 +21212,9 @@ document.addEventListener("visibilitychange", () => {
     if (p3) p3.classList.toggle('is-active', currentInvoiceAdminView==='active');
     if (p4) p4.classList.toggle('is-active', currentInvoiceAdminView==='archive');
   }
+  window.setInvoiceViewButtons = setInvoiceViewButtons;
   window.switchInvoiceTrackView = async function(view){ currentInvoiceTrackView = view==='archive' ? 'archive' : 'active'; setInvoiceViewButtons(); await loadCustomerInvoices(); };
-  window.switchInvoiceAdminView = async function(view){ currentInvoiceAdminView = view==='archive' ? 'archive' : 'active'; setInvoiceViewButtons(); await loadAdminInvoices(); };
+  window.switchInvoiceAdminView = async function(view){ currentInvoiceAdminView = view==='archive' ? 'archive' : 'active'; window.currentInvoiceAdminView = currentInvoiceAdminView; setInvoiceViewButtons(); await loadAdminInvoices(); };
 
   function getDiscountValue(){ return 0; }
   function getInvoiceNote(){ return (document.getElementById('cartInvoiceNote')?.value || '').trim(); }
@@ -20968,6 +21253,7 @@ document.addEventListener("visibilitychange", () => {
     const raw = snap.exists() ? (snap.val() || {}) : {};
     return Object.values(raw).sort((a,b)=>(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0));
   }
+  window.getAllInvoicesOriginalStyle = getAllInvoices;
 
   async function getCustomerProfileForInvoice(){
     const { db, ref, get } = window.firebaseDB;
@@ -20984,7 +21270,7 @@ document.addEventListener("visibilitychange", () => {
   }
 
   function buildInvoiceItemsMini(inv, editable=false){
-    const items = Array.isArray(inv?.items) ? inv.items : [];
+    const items = inv && Array.isArray(inv.items) ? inv.items : [];
     const editMode = editable === true ? 'admin' : (editable || false);
     return `<div class="invoice-items invoice-items-compact">${items.map(it=>{
       const total = (Number(it.price)||0) * (Number(it.qty)||0);
@@ -21100,7 +21386,7 @@ document.addEventListener("visibilitychange", () => {
       const all = (await getAllInvoices()).filter(inv => inv && inv.deviceId===deviceId && !inv.customerDeleted);
       const activeInvoices = all.filter(inv => !inv.customerArchived);
       const archiveInvoices = all.filter(inv => !!inv.customerArchived);
-      active.innerHTML = buildDraftCard() + (activeInvoices.length ? activeInvoices.map(inv=>`<div class="invoice-sent-card" data-invoice-id="${escapeHtml(inv.id)}"><div class="invoice-sent-head"><div><div class="invoice-sent-title">${escapeHtml(inv.id)}</div><div class="invoice-sent-sub">${formatRequestTime(inv.updatedAt || inv.createdAt)}</div></div><div class="invoice-status-badge ${(inv.cancelledByCustomer || inv.status==='cancelled')?'archived':(inv.status==='prepared'?'prepared':'pending')}"><i class="fas ${(inv.cancelledByCustomer || inv.status==='cancelled')?'fa-ban':(inv.status==='prepared'?'fa-check-double':'fa-hourglass-half')}"></i>${(inv.cancelledByCustomer || inv.status==='cancelled')?'تم الالغاء':(inv.status==='prepared'?'تم التجهيز':'قيد المراجعة')}</div></div>${buildInvoiceMetaBadges(inv)}${buildInvoiceItemsMini(inv,'customer')}<div class="invoice-totals"><div class="invoice-total-row grand"><span>الإجمالي</span><strong>${moneyIQD(inv.total || 0)}</strong></div></div>${inv.note?`<div class="invoice-note-box"><div class="request-label">ملاحظة الفاتورة</div><div class="invoice-note-input" style="min-height:auto;">${escapeHtml(inv.note)}</div></div>`:''}${buildInvoiceMessages(inv.messages, freshMap[inv.id]||null)}${(inv.status!=='prepared' && !(inv.cancelledByCustomer || inv.status==='cancelled'))?`<div class="invoice-admin-card-actions stack"><textarea id="invoiceTrackReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب ردك أو استفسارك على هاي الفاتورة..."></textarea><button class="request-track-send" type="button" onclick="sendCustomerInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button><button class="invoice-action-btn delete" type="button" onclick="cancelCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-ban"></i> إلغاء الفاتورة</button></div>`:((inv.cancelledByCustomer || inv.status==='cancelled')?`<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة</div><div class="sub" style="margin-bottom:10px">تم إشعار الإدارة بإلغاء الطلب، ويمكنك أرشفة الفاتورة الآن.</div><div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn archive" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button></div></div>`:`<div class="invoice-admin-card-actions single-center"><button class="request-track-clear archive-btn" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة</button></div>`)}</div>`).join('') : '');
+      active.innerHTML = buildDraftCard() + (activeInvoices.length ? activeInvoices.map(inv=>`<div class="invoice-sent-card" data-invoice-id="${escapeHtml(inv.id)}" data-track-search="${escapeHtml(safeBuildTrackSearchText('invoice', { id: inv.id, itemsText: extractInvoiceSearchItems(inv), note: inv.note, date: inv.archivedAt || inv.updatedAt || inv.createdAt }))}"><div class="invoice-sent-head"><div><div class="invoice-sent-title">${escapeHtml(inv.id)}</div><div class="invoice-sent-sub">${formatRequestTime(inv.updatedAt || inv.createdAt)}</div></div><div class="invoice-status-badge ${(inv.cancelledByCustomer || inv.status==='cancelled')?'archived':(inv.status==='prepared'?'prepared':'pending')}"><i class="fas ${(inv.cancelledByCustomer || inv.status==='cancelled')?'fa-ban':(inv.status==='prepared'?'fa-check-double':'fa-hourglass-half')}"></i>${(inv.cancelledByCustomer || inv.status==='cancelled')?'تم الالغاء':(inv.status==='prepared'?'تم التجهيز':'قيد المراجعة')}</div></div>${buildInvoiceMetaBadges(inv)}${buildInvoiceItemsMini(inv,'customer')}<div class="invoice-totals"><div class="invoice-total-row grand"><span>الإجمالي</span><strong>${moneyIQD(inv.total || 0)}</strong></div></div>${inv.note?`<div class="invoice-note-box"><div class="request-label">ملاحظة الفاتورة</div><div class="invoice-note-input" style="min-height:auto;">${escapeHtml(inv.note)}</div></div>`:''}${buildInvoiceMessages(inv.messages, freshMap[inv.id]||null)}${(inv.status!=='prepared' && !(inv.cancelledByCustomer || inv.status==='cancelled'))?`<div class="invoice-admin-card-actions stack"><textarea id="invoiceTrackReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب ردك أو استفسارك على هاي الفاتورة..."></textarea><button class="request-track-send" type="button" onclick="sendCustomerInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button><button class="invoice-action-btn delete" type="button" onclick="cancelCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-ban"></i> إلغاء الفاتورة</button></div>`:((inv.cancelledByCustomer || inv.status==='cancelled')?`<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة</div><div class="sub" style="margin-bottom:10px">تم إشعار الإدارة بإلغاء الطلب، ويمكنك أرشفة الفاتورة الآن.</div><div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn archive" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button></div></div>`:`<div class="invoice-admin-card-actions single-center"><button class="request-track-clear archive-btn" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة</button></div>`)}</div>`).join('') : '');
       if (!cart.length && !activeInvoices.length) {
         active.innerHTML = '<div class="invoice-empty">لا توجد فواتير مستلمة في الوقت الحالي.</div>';
       }
@@ -21115,7 +21401,7 @@ document.addEventListener("visibilitychange", () => {
     } catch(err){ console.error('loadCustomerInvoices:', err); active.innerHTML='<div class="invoice-empty">تعذّر جلب الفواتير حالياً.</div>'; archive.innerHTML='<div class="invoice-empty">تعذّر جلب الأرشيف حالياً.</div>'; }
   };
 
-  window.loadAdminInvoices = async function(){
+  window.loadAdminInvoicesLegacy = async function(){
     const active = document.getElementById('invoiceAdminActivePanel');
     const archive = document.getElementById('invoiceAdminArchivePanel');
     if (!active || !archive) return;
@@ -21555,6 +21841,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
   window.openInvoiceAdminModal = async function(){
     if (!isAdminUser()) return;
     currentInvoiceAdminView='active';
+    window.currentInvoiceAdminView = currentInvoiceAdminView;
     setTrackSearchVisibility('invoiceAdmin', false);
     const trackInput=document.getElementById('invoiceAdminSearchInput');
     if (trackInput) trackInput.value='';
@@ -22126,7 +22413,6 @@ html.low-end-device .update-success-shell{
 
 <script>
 (function(){
-  if (!window.firebaseDB) return;
   const INVOICE_PATH = 'salesInvoices';
 
   function getTrackView(){
@@ -22136,12 +22422,27 @@ html.low-end-device .update-success-shell{
     return document.getElementById('invoiceAdminArchiveTabBtn')?.classList.contains('is-active') ? 'archive' : 'active';
   }
   async function getAllInvoicesFresh(){
+    if (!window.firebaseDB || !window.firebaseDB.db) {
+      throw new Error('firebaseDB not ready');
+    }
     const { db, ref, get } = window.firebaseDB;
     const snap = await get(ref(db, INVOICE_PATH));
     const raw = snap.exists() ? (snap.val() || {}) : {};
-    return Object.entries(raw).map(([id, value]) => ({ id, ...(value || {}) }))
-      .sort((a,b)=> (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+    const list = Array.isArray(raw)
+      ? raw.map((value, index) => ({ id: value?.id || `invoice_${index}`, ...(value || {}) }))
+      : Object.entries(raw).map(([id, value]) => ({ id, ...(value || {}) }));
+    return list.sort((a,b)=> (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
   }
+
+  window.getAllInvoicesStable = async function(){
+    try {
+      const list = await getAllInvoicesFresh();
+      return Array.isArray(list) ? list : [];
+    } catch (err) {
+      console.warn('getAllInvoicesStable:', err);
+      return [];
+    }
+  };
   function getDraftArchives(){ try { return JSON.parse(localStorage.getItem('assal_invoice_draft_archives') || '[]'); } catch(_){ return []; } }
   function getInvoiceNoteValue(){ const el=document.getElementById('cartInvoiceNote'); return (el?.value || '').trim(); }
   function getDiscountValueSafe(){ return 0; }
@@ -22307,7 +22608,7 @@ html.low-end-device .update-success-shell{
           : (inv.status!=='prepared'
               ? `<div class="invoice-admin-card-actions stack invoice-reply-stack"><textarea id="invoiceTrackReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب ردك أو استفسارك على هذه الفاتورة..."></textarea><button class="invoice-action-btn send" type="button" onclick="sendCustomerInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button><button class="invoice-action-btn delete customer-cancel-invoice-btn" type="button" onclick="cancelCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-ban"></i> إلغاء الفاتورة</button></div>`
               : `<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم تجهيز الفاتورة</div><div class="sub" style="margin-bottom:10px">تم التجهيز، يمكن أرشفة الطلب وبدء فاتورة جديدة.</div><div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn archive" type="button" onclick="archiveCustomerInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الآن</button></div></div>`));
-    return `<div class="invoice-sent-card">
+    return `<div class="invoice-sent-card" data-track-search="${escapeHtml(safeBuildTrackSearchText('invoice', { id: inv.id, itemsText: extractInvoiceSearchItems(inv), note: inv.note, date: inv.updatedAt || inv.createdAt }))}">
       <div class="invoice-sent-head">
         <div>
           <div class="invoice-sent-title">${escapeHtml(inv.id)}</div>
@@ -22324,10 +22625,97 @@ html.low-end-device .update-success-shell{
     </div>`;
   }
 
+  const invoiceAdminEntriesCache = { active: [], archive: [] };
+
+  function normalizeInvoiceAdminRecord(inv, fallbackId = '') {
+    const base = inv && typeof inv === 'object' ? { ...inv } : {};
+    const normalized = {
+      ...base,
+      id: String(base.id || fallbackId || '').trim(),
+      customerName: String(base.customerName || base.name || '').trim(),
+      customerPhone: String(base.customerPhone || base.phone || '').trim(),
+      customerAddress: String(base.customerAddress || base.address || '').trim(),
+      note: String(base.note || '').trim(),
+      deviceId: String(base.deviceId || '').trim(),
+      deviceName: String(base.deviceName || '').trim(),
+      status: String(base.status || 'pending').trim() || 'pending',
+      adminArchived: !!base.adminArchived,
+      customerArchived: !!base.customerArchived,
+      customerDeleted: !!base.customerDeleted,
+      cancelledByCustomer: !!base.cancelledByCustomer,
+      createdAt: Number(base.createdAt || 0) || 0,
+      updatedAt: Number(base.updatedAt || 0) || 0,
+      total: Number(base.total || 0) || 0,
+      items: Array.isArray(base.items) ? base.items.filter(Boolean).map(item => ({ ...(item || {}) })) : [],
+      messages: (base.messages && typeof base.messages === 'object') ? base.messages : {}
+    };
+    normalized.itemsSummary = extractInvoiceSearchItems(normalized);
+    return normalized;
+  }
+
+  function filterInvoiceAdminEntries(entries, query) {
+    const normalizedQuery = normalizeTrackSearchText(query);
+    const safeEntries = Array.isArray(entries) ? entries : [];
+    if (!normalizedQuery) return [...safeEntries];
+    return safeEntries.filter((inv) => {
+      const haystack = normalizeTrackSearchText([
+        inv?.customerName,
+        inv?.customerPhone,
+        inv?.id,
+        inv?.note,
+        inv?.deviceName,
+        inv?.deviceId,
+        inv?.itemsSummary || extractInvoiceSearchItems(inv),
+        buildTrackSearchDateTokens(inv?.updatedAt || inv?.createdAt || 0)
+      ].join(' '));
+      return haystack.includes(normalizedQuery);
+    });
+  }
+
+  function renderInvoiceAdminList(target, entries, emptyText, archived) {
+    if (!target) return;
+    const safeEntries = Array.isArray(entries) ? entries : [];
+    if (!safeEntries.length) {
+      target.innerHTML = `<div class="invoice-empty">${emptyText}</div>`;
+      return;
+    }
+    const html = safeEntries.map(inv => {
+      try {
+        return adminInvoiceCard(inv, archived ? null : invoiceAdminFreshMap[inv.id], archived);
+      } catch (err) {
+        console.warn('adminInvoiceCard:', inv?.id, err);
+        return '';
+      }
+    }).join('');
+    target.innerHTML = html || `<div class="invoice-empty">${emptyText}</div>`;
+  }
+
+  window.renderInvoiceAdminPanels = function() {
+    const active = document.getElementById('invoiceAdminActivePanel');
+    const archive = document.getElementById('invoiceAdminArchivePanel');
+    if (!active || !archive) return;
+
+    renderInvoiceAdminList(active, [...invoiceAdminEntriesCache.active], 'لا توجد فواتير مستلمة في الوقت الحالي.', false);
+    renderInvoiceAdminList(archive, [...invoiceAdminEntriesCache.archive], 'أرشيف الفواتير فارغ حالياً.', true);
+
+    try {
+      if (typeof window.bindInvoiceAdminSearchInput === 'function') window.bindInvoiceAdminSearchInput();
+      if (typeof window.filterAdminInvoiceSearch === 'function') {
+        const input = document.getElementById('invoiceAdminSearchInput');
+        window.filterAdminInvoiceSearch(input?.value || '');
+      }
+    } catch (err) {
+      console.error('renderInvoiceAdminPanels/filterAdminInvoiceSearch:', err);
+    }
+
+    if (typeof window.setInvoiceViewButtons === 'function') window.setInvoiceViewButtons();
+    scrollInvoicePanels(document.getElementById('invoiceAdminModal'));
+  };
+
   function adminInvoiceCard(inv, freshMsgId, archived){
     const cancelled = !!inv.cancelledByCustomer || inv.status === 'cancelled';
     const itemMode = (!archived && !cancelled) ? 'admin-edit' : 'view';
-    return `<div class="invoice-admin-card-shell">
+    return `<div class="invoice-admin-card-shell" data-track-search="${escapeHtml(safeBuildTrackSearchText('invoiceAdmin', { id: inv.id, owner: inv.customerName, name: inv.customerName, phone: inv.customerPhone, item: inv.deviceName, category: inv.deviceId, itemsText: inv.itemsSummary || extractInvoiceSearchItems(inv), note: inv.note, date: inv.updatedAt || inv.createdAt }))}">
       <div class="invoice-admin-head">
         <div>
           <div class="invoice-admin-name">${escapeHtml(inv.customerName || 'بدون اسم')}</div>
@@ -22390,27 +22778,62 @@ html.low-end-device .update-success-shell{
     const active = document.getElementById('invoiceAdminActivePanel');
     const archive = document.getElementById('invoiceAdminArchivePanel');
     if (!active || !archive) return;
+    if (!window.firebaseDB || !window.firebaseDB.db) {
+      active.innerHTML = '<div class="invoice-empty">Firebase غير جاهز حالياً.</div>';
+      archive.innerHTML = '<div class="invoice-empty">Firebase غير جاهز حالياً.</div>';
+      return;
+    }
     const view = getAdminView();
     active.innerHTML = view==='active' ? '<div class="invoice-empty">جاري تحميل الفواتير...</div>' : '';
     archive.innerHTML = view==='archive' ? '<div class="invoice-empty">جاري تحميل الأرشيف...</div>' : '';
     try {
-      const all0 = await getAllInvoicesFresh();
+      const fetched = typeof window.getAllInvoicesOriginalStyle === 'function'
+        ? await window.getAllInvoicesOriginalStyle()
+        : await getAllInvoicesFresh();
+
+      const all = (Array.isArray(fetched) ? fetched : [])
+        .map((inv, index) => normalizeInvoiceAdminRecord(inv, inv?.id || `invoice_${index}`))
+        .filter(inv => inv && inv.id);
+
+      const activeInvoices = all.filter(inv => !inv.adminArchived);
+      const archiveInvoices = all.filter(inv => !!inv.adminArchived);
       const freshMap = {};
-      for (const inv of all0.filter(x=>x && !x.adminArchived)) {
-        const msgs = Object.values(inv.messages||{}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
-        const latestUnread = [...msgs].reverse().find(msg => msg.senderRole==='customer' && !msg.seenByAdmin);
-        freshMap[inv.id] = latestUnread ? latestUnread.id : null;
-        if (typeof window.markInvoiceSeenForAdmin === 'function') await window.markInvoiceSeenForAdmin(inv);
+
+      activeInvoices.forEach(inv => {
+        try {
+          const msgs = Object.values(inv.messages || {}).filter(Boolean).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+          const latestUnread = [...msgs].reverse().find(msg => msg && msg.senderRole === 'customer' && !msg.seenByAdmin);
+          freshMap[inv.id] = latestUnread ? latestUnread.id : null;
+        } catch (err) {
+          console.warn('invoice freshMap:', inv?.id, err);
+          freshMap[inv?.id] = null;
+        }
+      });
+
+      invoiceAdminFreshMap = freshMap;
+      invoiceAdminEntriesCache.active = [...activeInvoices];
+      invoiceAdminEntriesCache.archive = [...archiveInvoices];
+      window.renderInvoiceAdminPanels();
+
+      Promise.allSettled(activeInvoices.map(inv => {
+        try {
+          if (typeof window.markInvoiceSeenForAdmin === 'function') return window.markInvoiceSeenForAdmin(inv);
+        } catch (err) {
+          console.warn('markInvoiceSeenForAdmin sync:', inv?.id, err);
+        }
+        return Promise.resolve();
+      })).catch(err => console.warn('markInvoiceSeenForAdmin:', err));
+
+      try {
+        if (typeof window.refreshInvoiceCounts === 'function') await window.refreshInvoiceCounts();
+      } catch (err) {
+        console.warn('refreshInvoiceCounts:', err);
       }
-      const all = await getAllInvoicesFresh();
-      const activeInvoices = all.filter(inv => inv && !inv.adminArchived);
-      const archiveInvoices = all.filter(inv => inv && !!inv.adminArchived);
-      active.innerHTML = activeInvoices.length ? activeInvoices.map(inv=>adminInvoiceCard(inv, freshMap[inv.id], false)).join('') : '<div class="invoice-empty">لا توجد فواتير مستلمة في الوقت الحالي.</div>';
-      archive.innerHTML = archiveInvoices.length ? archiveInvoices.map(inv=>adminInvoiceCard(inv, null, true)).join('') : '<div class="invoice-empty">أرشيف الفواتير فارغ حالياً.</div>';
-      applyTrackModalSearch('invoiceAdmin');
-      scrollInvoicePanels(document.getElementById('invoiceAdminModal'));
-      if (typeof window.refreshInvoiceCounts === 'function') await window.refreshInvoiceCounts();
-    } catch(err){ console.error('loadAdminInvoices:', err); active.innerHTML='<div class="invoice-empty">تعذّر جلب الفواتير حالياً.</div>'; archive.innerHTML='<div class="invoice-empty">تعذّر جلب الأرشيف حالياً.</div>'; }
+    } catch(err){
+      console.error('loadAdminInvoices:', err);
+      active.innerHTML='<div class="invoice-empty">تعذّر جلب الفواتير حالياً.</div>';
+      archive.innerHTML='<div class="invoice-empty">تعذّر جلب الأرشيف حالياً.</div>';
+    }
   };
 })();
 </script>
@@ -23636,7 +24059,7 @@ ${actionText} ${safeBranch}`;
             ? `<div class="request-thread-actions single-center"><button class="request-track-clear archive-btn" type="button" onclick="archiveAvailabilityRequestForCustomer('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة الاستعلام</button></div>`
             : '');
         return `
-          <div class="request-thread-card availability-compact-card" data-request-id="${escapeHtml(req.id)}">
+          <div class="request-thread-card availability-compact-card" data-request-id="${escapeHtml(req.id)}" data-track-search="${escapeHtml(safeBuildTrackSearchText('availability', { id: req.id, item: req.item, category: req.category, date: req.updatedAt || req.createdAt }))}">
             <div class="request-thread-head availability-compact-head">
               <div>
                 <div class="availability-card-title">${escapeHtml(itemLabel)}</div>
@@ -23658,7 +24081,6 @@ ${actionText} ${safeBranch}`;
         : '<div class="request-track-empty">أرشيف التوفر فارغ حالياً.</div>';
 
       setAvailabilityViewButtons();
-      applyTrackModalSearch('availability');
       attachRequestScrollRelay(document.getElementById('availabilityTrackModal'));
       setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('availabilityTrackModal')), 40);
       await refreshAvailabilityRequestCount();
@@ -23667,6 +24089,107 @@ ${actionText} ${safeBranch}`;
       activeList.innerHTML = '<div class="request-track-empty">تعذّر جلب استعلاماتك حالياً.</div>';
       archiveList.innerHTML = '<div class="request-track-empty">تعذّر جلب الأرشيف حالياً.</div>';
     }
+  };
+
+  const availabilityAdminEntriesCache = { active: [], archive: [] };
+  let availabilityAdminFreshMap = {};
+
+  function filterAvailabilityAdminEntries(entries, query) {
+    const normalizedQuery = normalizeTrackSearchText(query);
+    if (!normalizedQuery) return [...entries];
+    return entries.filter((req) => {
+      const haystack = normalizeTrackSearchText([
+        req?.name,
+        req?.phone,
+        req?.id,
+        req?.item,
+        req?.category
+      ].join(' '));
+      return haystack.includes(normalizedQuery);
+    });
+  }
+
+  function renderAvailabilityAdminCard(req, archived = false) {
+    const msgs = Object.values(req.messages || {}).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    const freshMsgId = availabilityAdminFreshMap[req.id] || null;
+    const statusClass = req.status === 'answered' ? 'processed' : 'new';
+    const statusText = archived ? 'في الأرشيف' : (req.status === 'answered' ? 'تم الرد' : 'جديد');
+    const itemLabel = buildAvailabilityDisplayName(req.item || '', req.category || '');
+    const messagesHtml = msgs.map(msg => {
+      const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
+      const senderLabel = msg.senderRole === 'customer'
+        ? 'الزبون'
+        : (String(msg.branchLabel || '').trim() || 'الإدارة');
+      return `
+        <div class="request-message availability-request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
+          <div class="request-message-head">
+            <span>${escapeHtml(senderLabel)}</span>
+            <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'admin')}</span>
+          </div>
+          <div class="availability-message-body">${renderAvailabilityMessageText(msg, req)}</div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="request-admin-card availability-compact-card" data-request-id="${escapeHtml(req.id)}" data-track-search="${escapeHtml(safeBuildTrackSearchText('availabilityAdmin', { id: req.id, owner: req.name, name: req.name, phone: req.phone, date: req.updatedAt || req.createdAt }))}">
+        <div class="request-admin-card-head availability-compact-head">
+          <div>
+            <div class="request-admin-name">${escapeHtml(req.name || 'بدون اسم')}</div>
+            <div class="request-admin-time">${formatRequestTime(req.updatedAt || req.createdAt)}</div>
+          </div>
+          <div class="request-thread-status ${statusClass}">${statusText}</div>
+        </div>
+        <div class="availability-card-title">${escapeHtml(itemLabel)}</div>
+        <div class="request-meta-badges availability-compact-badges">
+          <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
+        </div>
+        <div class="request-messages availability-request-messages">${messagesHtml}</div>
+        ${archived ? `
+          <div class="request-admin-card-actions single-center">
+            <button class="request-track-clear delete-btn" type="button" onclick="deleteAdminArchivedAvailabilityRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button>
+          </div>` : `
+          <div class="request-admin-card-actions availability-actions-grid">
+            <button class="request-admin-send availability-response-btn" type="button" onclick="sendAvailabilityAnswer('${escapeHtml(req.id)}','available')"><i class="fas fa-circle-check"></i> متوفر</button>
+            <button class="request-admin-done availability-response-btn" type="button" onclick="sendAvailabilityAnswer('${escapeHtml(req.id)}','unavailable')"><i class="fas fa-circle-xmark"></i> غير متوفر</button>
+            <button class="request-track-clear availability-archive-btn archive-btn" type="button" onclick="archiveAvailabilityRequestForAdmin('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة</button>
+          </div>`}
+      </div>`;
+  }
+
+  function renderAvailabilityAdminList(target, entries, emptyText, archived) {
+    if (!target) return;
+    target.innerHTML = entries.length
+      ? entries.map(req => renderAvailabilityAdminCard(req, archived)).join('')
+      : `<div class="request-admin-empty">${emptyText}</div>`;
+  }
+
+  window.renderAvailabilityAdminPanels = function() {
+    const activeList = document.getElementById('availabilityAdminActivePanel');
+    const archiveList = document.getElementById('availabilityAdminArchivePanel');
+    if (!activeList || !archiveList) return;
+
+    const query = getTrackSearchQuery('availabilityAdmin');
+    const searchingActive = trackSearchState.availabilityAdmin.visible && currentAvailabilityAdminView === 'active';
+    const searchingArchive = trackSearchState.availabilityAdmin.visible && currentAvailabilityAdminView === 'archive';
+
+    const activeEntries = searchingActive
+      ? filterAvailabilityAdminEntries(availabilityAdminEntriesCache.active, query)
+      : [...availabilityAdminEntriesCache.active];
+    const archiveEntries = searchingArchive
+      ? filterAvailabilityAdminEntries(availabilityAdminEntriesCache.archive, query)
+      : [...availabilityAdminEntriesCache.archive];
+
+    const activeEmpty = searchingActive && query
+      ? 'ماكو نتائج مطابقة داخل تبويب الاستعلامات.'
+      : 'لا توجد استعلامات توفر حالياً.';
+    const archiveEmpty = searchingArchive && query
+      ? 'ماكو نتائج مطابقة داخل أرشيف الاستعلامات.'
+      : 'أرشيف التوفر فارغ حالياً.';
+
+    renderAvailabilityAdminList(activeList, activeEntries, activeEmpty, false);
+    renderAvailabilityAdminList(archiveList, archiveEntries, archiveEmpty, true);
+    setAvailabilityViewButtons();
+    attachRequestScrollRelay(document.getElementById('availabilityAdminModal'));
+    setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('availabilityAdminModal')), 40);
   };
 
   window.loadAvailabilityRequests = async function () {
@@ -23684,76 +24207,22 @@ ${actionText} ${safeBranch}`;
 
     try {
       const currentBranchKey = getCurrentAvailabilityAdminBranchKey();
-      const arr0 = await getAllAvailabilityRequests();
-      const freshAdminMap = {};
-      for (const req of arr0.filter(r => r && !isAvailabilityArchivedForBranch(r, currentBranchKey))) {
-        const msgs = Object.values(req.messages || {}).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-        const latestUnread = [...msgs].reverse().find(msg => msg.senderRole === 'customer' && !msg.seenByAdmin);
-        freshAdminMap[req.id] = latestUnread ? latestUnread.id : null;
-        await markAvailabilityMessagesSeenForAdmin(req.id, req);
-      }
-
       const arr = await getAllAvailabilityRequests();
       const activeRequests = arr.filter(req => req && !isAvailabilityArchivedForBranch(req, currentBranchKey));
       const archiveRequests = arr.filter(req => req && isAvailabilityArchivedForBranch(req, currentBranchKey));
-
-      const renderAdminCard = (req, archived = false) => {
+      const freshAdminMap = {};
+      activeRequests.forEach(req => {
         const msgs = Object.values(req.messages || {}).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-        const freshMsgId = freshAdminMap[req.id] || null;
-        const statusClass = req.status === 'answered' ? 'processed' : 'new';
-        const statusText = archived ? 'في الأرشيف' : (req.status === 'answered' ? 'تم الرد' : 'جديد');
-        const itemLabel = buildAvailabilityDisplayName(req.item || '', req.category || '');
-        const messagesHtml = msgs.map(msg => {
-          const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
-          const senderLabel = msg.senderRole === 'customer'
-            ? 'الزبون'
-            : (String(msg.branchLabel || '').trim() || 'الإدارة');
-          return `
-            <div class="request-message availability-request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
-              <div class="request-message-head">
-                <span>${escapeHtml(senderLabel)}</span>
-                <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'admin')}</span>
-              </div>
-              <div class="availability-message-body">${renderAvailabilityMessageText(msg, req)}</div>
-            </div>`;
-        }).join('');
-        return `
-          <div class="request-admin-card availability-compact-card" data-request-id="${escapeHtml(req.id)}">
-            <div class="request-admin-card-head availability-compact-head">
-              <div>
-                <div class="request-admin-name">${escapeHtml(req.name || 'بدون اسم')}</div>
-                <div class="request-admin-time">${formatRequestTime(req.updatedAt || req.createdAt)}</div>
-              </div>
-              <div class="request-thread-status ${statusClass}">${statusText}</div>
-            </div>
-            <div class="availability-card-title">${escapeHtml(itemLabel)}</div>
-            <div class="request-meta-badges availability-compact-badges">
-              <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
-            </div>
-            <div class="request-messages availability-request-messages">${messagesHtml}</div>
-            ${archived ? `
-              <div class="request-admin-card-actions single-center">
-                <button class="request-track-clear delete-btn" type="button" onclick="deleteAdminArchivedAvailabilityRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button>
-              </div>` : `
-              <div class="request-admin-card-actions availability-actions-grid">
-                <button class="request-admin-send availability-response-btn" type="button" onclick="sendAvailabilityAnswer('${escapeHtml(req.id)}','available')"><i class="fas fa-circle-check"></i> متوفر</button>
-                <button class="request-admin-done availability-response-btn" type="button" onclick="sendAvailabilityAnswer('${escapeHtml(req.id)}','unavailable')"><i class="fas fa-circle-xmark"></i> غير متوفر</button>
-                <button class="request-track-clear availability-archive-btn archive-btn" type="button" onclick="archiveAvailabilityRequestForAdmin('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة</button>
-              </div>`}
-          </div>`;
-      };
+        const latestUnread = [...msgs].reverse().find(msg => msg.senderRole === 'customer' && !msg.seenByAdmin);
+        freshAdminMap[req.id] = latestUnread ? latestUnread.id : null;
+      });
 
-      activeList.innerHTML = activeRequests.length
-        ? activeRequests.map(req => renderAdminCard(req, false)).join('')
-        : '<div class="request-admin-empty">لا توجد استعلامات توفر حالياً.</div>';
-
-      archiveList.innerHTML = archiveRequests.length
-        ? archiveRequests.map(req => renderAdminCard(req, true)).join('')
-        : '<div class="request-admin-empty">أرشيف التوفر فارغ حالياً.</div>';
-
-      setAvailabilityViewButtons();
-      attachRequestScrollRelay(document.getElementById('availabilityAdminModal'));
-      setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('availabilityAdminModal')), 40);
+      availabilityAdminFreshMap = freshAdminMap;
+      availabilityAdminEntriesCache.active = [...activeRequests];
+      availabilityAdminEntriesCache.archive = [...archiveRequests];
+      window.renderAvailabilityAdminPanels();
+      Promise.allSettled(activeRequests.map(req => markAvailabilityMessagesSeenForAdmin(req.id, req)))
+        .catch(err => console.warn('markAvailabilityMessagesSeenForAdmin:', err));
       await refreshAvailabilityRequestCount();
     } catch (err) {
       console.error('loadAvailabilityRequests:', err);
@@ -23782,10 +24251,16 @@ ${actionText} ${safeBranch}`;
     if (availabilityTrackShell) availabilityTrackShell.addEventListener('click', e => e.stopPropagation());
 
     document.getElementById('availabilityAdminModal')?.addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) closeAvailabilityAdminModal();
+      if (e.target === e.currentTarget) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     });
     document.getElementById('availabilityTrackModal')?.addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) closeAvailabilityTrackModal();
+      if (e.target === e.currentTarget) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     });
 
     if (window.__assalPendingNotification) {
@@ -24073,7 +24548,7 @@ ${actionText} ${safeBranch}`;
         showConfirmButton: false,
         showCancelButton: false,
         allowOutsideClick: false,
-        allowEscapeKey: true,
+        allowEscapeKey: false,
         showCloseButton: true,
         focusConfirm: false,
         customClass: {
