@@ -11629,6 +11629,117 @@ html.low-end-device .results-container {
 #requestAdminModal .request-admin-list{
   padding:8px 4px 2px;
 }
+#requestTrackModal .support-chat-conversation-card,
+#requestAdminModal .support-chat-conversation-card{
+  position:relative;
+  overflow:hidden;
+}
+#requestTrackModal .support-chat-conversation-card::before,
+#requestAdminModal .support-chat-conversation-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  background: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,0) 34%, rgba(56,189,248,.07) 62%, rgba(16,185,129,.05));
+  opacity:.9;
+}
+#requestTrackModal .support-chat-conversation-head,
+#requestAdminModal .support-chat-conversation-head,
+#requestTrackModal .request-thread-head,
+#requestAdminModal .request-admin-card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:14px;
+}
+#requestTrackModal .request-thread-profile,
+#requestAdminModal .request-thread-profile{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  min-width:0;
+  flex:1;
+}
+#requestTrackModal .request-thread-avatar,
+#requestAdminModal .request-thread-avatar{
+  width:54px;
+  height:54px;
+  flex:0 0 54px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#f8fbff;
+  font-size:22px;
+  font-weight:900;
+  border:1px solid rgba(191,219,254,.28);
+  box-shadow: 0 14px 26px rgba(2,6,23,.22), inset 0 1px 0 rgba(255,255,255,.08);
+}
+#requestTrackModal .request-thread-avatar.is-support,
+#requestAdminModal .request-thread-avatar.is-support{
+  background: linear-gradient(135deg, rgba(56,189,248,.95), rgba(37,99,235,.90) 58%, rgba(16,185,129,.86));
+}
+#requestTrackModal .request-thread-avatar.is-customer,
+#requestAdminModal .request-thread-avatar.is-customer{
+  background: linear-gradient(135deg, rgba(99,102,241,.92), rgba(14,165,233,.88) 54%, rgba(16,185,129,.82));
+}
+#requestTrackModal .request-thread-labels,
+#requestAdminModal .request-thread-labels{
+  min-width:0;
+  display:grid;
+  gap:4px;
+}
+#requestTrackModal .request-thread-title,
+#requestAdminModal .request-thread-title,
+#requestAdminModal .request-admin-name{
+  margin:0;
+  font-size:18px;
+  font-weight:800;
+  color:#f8fbff;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#requestTrackModal .request-thread-subtitle,
+#requestAdminModal .request-thread-subtitle{
+  font-size:12px;
+  color:rgba(226,232,240,.74);
+  line-height:1.65;
+}
+#requestTrackModal .request-thread-time,
+#requestAdminModal .request-admin-time{
+  font-size:11px;
+  color:rgba(191,219,254,.72);
+  white-space:normal;
+}
+#requestTrackModal .request-thread-status,
+#requestAdminModal .request-thread-status{
+  flex:0 0 auto;
+}
+@media (max-width: 680px){
+  #requestTrackModal .support-chat-conversation-head,
+  #requestAdminModal .support-chat-conversation-head,
+  #requestTrackModal .request-thread-head,
+  #requestAdminModal .request-admin-card-head{
+    align-items:flex-start;
+  }
+  #requestTrackModal .request-thread-avatar,
+  #requestAdminModal .request-thread-avatar{
+    width:48px;
+    height:48px;
+    flex-basis:48px;
+    border-radius:16px;
+    font-size:20px;
+  }
+  #requestTrackModal .request-thread-title,
+  #requestAdminModal .request-thread-title,
+  #requestAdminModal .request-admin-name{
+    font-size:17px;
+  }
+}
 .support-chat-empty{
   display:flex;
   flex-direction:column;
@@ -12302,9 +12413,15 @@ html.low-end-device .results-container {
       <div class="support-chat-hero">
         <div class="support-chat-pill"><i class="fas fa-bolt"></i> دعم مباشر</div>
         <h4>راسل الإدارة فوراً من داخل التطبيق</h4>
+        <p>اكتب رسالتك مباشرة، لأن بياناتك مسجلة مسبقاً، وبعدها تنفتح عندك صفحة المحادثة الكاملة مثل المسنجر.</p>
       </div>
 
-      
+      <div class="request-grid request-grid-chat-only">
+        <div class="support-chat-account-note">
+          <i class="fas fa-circle-check"></i>
+          <span>المراسلة تصير مباشرة من حسابك المسجل، بدون إعادة كتابة الاسم أو رقم الهاتف.</span>
+        </div>
+
         <div class="request-field">
           <textarea id="requestItemInput" class="request-textarea support-chat-textarea" placeholder="اكتب رسالتك هنا مباشرة..."></textarea>
         </div>
@@ -12316,10 +12433,9 @@ html.low-end-device .results-container {
           </button>
         </div>
 
-       <div class="request-helper" style="text-align:center;">
-  أول رسالة تفتح المحادثة، وبعدها تكدر تتابع كل الردود داخل صفحة المحادثات بشكل فوري.
-</div>
-        
+        <div class="request-helper">
+          أول رسالة تفتح المحادثة، وبعدها تكدر تتابع كل الردود داخل صفحة المحادثات بشكل فوري.
+        </div>
       </div>
     </div>
   </div>
@@ -13663,6 +13779,13 @@ function escapeHtml(value) {
       .replace(/'/g, "&#39;");
 }
 
+function getSupportChatInitial(name) {
+    const cleaned = String(name || '').trim().replace(/\s+/g, ' ');
+    if (!cleaned) return 'ز';
+    const firstChar = Array.from(cleaned.replace(/\s+/g, ''))[0] || 'ز';
+    return firstChar;
+}
+
 function getCurrentRequestThreadCount(requests) {
     const deviceId = getDeviceId();
     return (requests || []).filter(r => r && r.deviceId === deviceId).length;
@@ -14614,17 +14737,17 @@ window.loadCustomerRequests = async function () {
                   <button class="request-track-clear archive-btn" type="button" onclick="archiveCustomerRequest('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة المحادثة</button>
                 </div>`);
             return `
-              <div class="request-thread-card" data-request-id="${escapeHtml(req.id)}" data-track-search="${escapeHtml(safeBuildTrackSearchText('request', { id: req.id, item: req.item, category: '', phone: req.phone, date: req.updatedAt || req.createdAt }))}">
-                <div class="request-thread-head">
-                  <div>
-                    <div class="request-thread-id">${escapeHtml(req.id)}</div>
-                    <div class="request-thread-time">${formatRequestTime(req.updatedAt || req.createdAt)}</div>
+              <div class="request-thread-card support-chat-conversation-card" data-request-id="${escapeHtml(req.id)}" data-track-search="${escapeHtml(safeBuildTrackSearchText('request', { id: req.id, item: req.item, category: '', phone: req.phone, date: req.updatedAt || req.createdAt }))}">
+                <div class="request-thread-head support-chat-conversation-head">
+                  <div class="request-thread-profile">
+                    <div class="request-thread-avatar is-support"><i class="fas fa-headset"></i></div>
+                    <div class="request-thread-labels">
+                      <div class="request-thread-title">محادثة مع الإدارة</div>
+                      <div class="request-thread-subtitle">دعم مباشر داخل التطبيق والردود توصلك هنا بشكل فوري.</div>
+                      <div class="request-thread-time">آخر تحديث: ${formatRequestTime(req.updatedAt || req.createdAt)}</div>
+                    </div>
                   </div>
                   <div class="request-thread-status ${statusClass}">${statusText}</div>
-                </div>
-                <div class="request-meta-badges">
-                  <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
-                  <span class="request-meta-badge"><i class="fas fa-comment-dots"></i>${escapeHtml((req.item || '-').slice(0, 70))}</span>
                 </div>
                 <div class="request-messages">${messagesHtml}</div>
                 ${actions}
@@ -14788,21 +14911,17 @@ window.loadMaterialRequests = async function () {
                 </div>`;
             }).join('');
             return `
-              <div class="request-admin-card" data-request-id="${escapeHtml(req.id)}" data-track-search="${escapeHtml(safeBuildTrackSearchText('requestAdmin', { id: req.id, owner: req.name, name: req.name, phone: req.phone, date: req.updatedAt || req.createdAt }))}">
-                <div class="request-admin-card-head">
-                  <div>
-                    <div class="request-admin-name">${escapeHtml(req.name || 'بدون اسم')}</div>
-                    <div class="request-admin-time">${formatRequestTime(req.updatedAt || req.createdAt)}</div>
+              <div class="request-admin-card support-chat-conversation-card" data-request-id="${escapeHtml(req.id)}" data-track-search="${escapeHtml(safeBuildTrackSearchText('requestAdmin', { id: req.id, owner: req.name, name: req.name, phone: req.phone, date: req.updatedAt || req.createdAt }))}">
+                <div class="request-admin-card-head support-chat-conversation-head">
+                  <div class="request-thread-profile">
+                    <div class="request-thread-avatar is-customer">${escapeHtml(getSupportChatInitial(req.name || 'ز'))}</div>
+                    <div class="request-thread-labels">
+                      <div class="request-admin-name">${escapeHtml(req.name || 'زبون مسجل')}</div>
+                   
+                      <div class="request-admin-time">آخر تحديث: ${formatRequestTime(req.updatedAt || req.createdAt)}</div>
+                    </div>
                   </div>
                   <div class="request-thread-status ${statusClass}">${statusText}</div>
-                </div>
-                <div class="request-admin-meta">
-                  <span class="request-admin-chip"><i class="fas fa-hashtag"></i>${escapeHtml(req.id || '')}</span>
-                  <span class="request-admin-chip"><i class="fas fa-mobile-screen"></i>${escapeHtml(req.deviceId || '')}</span>
-                </div>
-                <div class="request-meta-badges">
-                  <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
-                  <span class="request-meta-badge"><i class="fas fa-comment-dots"></i>${escapeHtml((req.item || '-').slice(0, 70))}</span>
                 </div>
                 <div class="request-messages">${messagesHtml}</div>
                 ${archived ? `
