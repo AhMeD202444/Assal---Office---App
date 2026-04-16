@@ -7908,7 +7908,7 @@ footer p{
 }
 
 
-/* ===== طلب مادة العائم ===== */
+/* ===== محادثة دعم العائم ===== */
 .floating-request-btn,
 .floating-request-admin-btn{
     position: fixed;
@@ -11409,6 +11409,287 @@ html.low-end-device .results-container {
 
 
 </style>
+
+<style id="support-chat-messenger-upgrade">
+/* ===== Support chat messenger facelift ===== */
+#requestFloatingBtn.support-chat-fab{
+  background:
+    radial-gradient(circle at 25% 25%, rgba(34,211,238,.34), rgba(34,211,238,0) 40%),
+    linear-gradient(135deg, rgba(14,165,233,.95), rgba(59,130,246,.92) 58%, rgba(16,185,129,.90));
+  border: 1px solid rgba(191,219,254,.55);
+  color: #fff;
+  box-shadow: 0 18px 35px rgba(14,165,233,.26), 0 8px 18px rgba(0,0,0,.26);
+}
+#requestFloatingBtn.support-chat-fab > span{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+  font-size:23px;
+}
+#requestFloatingBtn.support-chat-fab::after{
+  animation-duration: 3.4s;
+}
+#requestModal .request-shell,
+#requestTrackModal .request-track-shell,
+#requestAdminModal .request-admin-shell{
+  background:
+    radial-gradient(1000px 420px at 0% 0%, rgba(56,189,248,.16), transparent 55%),
+    radial-gradient(840px 360px at 100% 0%, rgba(16,185,129,.12), transparent 58%),
+    linear-gradient(180deg, rgba(10,17,30,.98), rgba(8,13,23,.98));
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow: 0 24px 70px rgba(2,6,23,.55), inset 0 1px 0 rgba(255,255,255,.06);
+}
+#requestModal .request-top,
+#requestTrackModal .request-track-top,
+#requestAdminModal .request-admin-top{
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+  border-bottom:1px solid rgba(148,163,184,.16);
+  padding:18px 20px 16px;
+}
+#requestModal .request-icon,
+#requestTrackModal .request-track-icon,
+#requestAdminModal .request-admin-icon{
+  background: linear-gradient(135deg, rgba(56,189,248,.24), rgba(16,185,129,.18));
+  border:1px solid rgba(125,211,252,.32);
+  color:#bff6ff;
+  box-shadow: 0 10px 24px rgba(14,165,233,.16);
+}
+#requestModal .request-title h3,
+#requestTrackModal .request-track-title h3,
+#requestAdminModal .request-admin-title h3{
+  font-size:22px;
+  letter-spacing:.2px;
+}
+.support-chat-hero{
+  position:relative;
+  overflow:hidden;
+  padding:18px 18px 16px;
+  margin-bottom:16px;
+  border-radius:24px;
+  background: linear-gradient(135deg, rgba(14,165,233,.16), rgba(15,23,42,.55) 56%, rgba(16,185,129,.12));
+  border:1px solid rgba(125,211,252,.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+}
+.support-chat-hero::after{
+  content:"";
+  position:absolute;
+  inset:auto -45px -45px auto;
+  width:150px;
+  height:150px;
+  border-radius:50%;
+  background: radial-gradient(circle, rgba(167,243,208,.22), rgba(167,243,208,0) 70%);
+  pointer-events:none;
+}
+.support-chat-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(191,219,254,.18);
+  color:#dff7ff;
+  font-size:12px;
+  margin-bottom:12px;
+}
+.support-chat-hero h4{
+  margin:0 0 8px;
+  font-size:21px;
+  color:#f8fbff;
+}
+.support-chat-hero p{
+  margin:0;
+  color:rgba(226,232,240,.82);
+  line-height:1.85;
+  font-size:14px;
+}
+
+.support-chat-account-note{
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  padding:14px 16px;
+  border-radius:18px;
+  background: rgba(16,185,129,.10);
+  border:1px solid rgba(52,211,153,.18);
+  color:#dcfce7;
+  line-height:1.8;
+  font-size:13px;
+}
+.support-chat-account-note i{
+  margin-top:2px;
+  color:#6ee7b7;
+}
+.support-chat-textarea{
+  min-height: 168px;
+}
+#requestModal .request-grid{
+  gap:14px;
+}
+#requestModal .request-input,
+#requestModal .request-textarea,
+#requestTrackModal .request-reply-box,
+#requestAdminModal .request-reply-box{
+  background: rgba(15,23,42,.72);
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+#requestModal .request-input:focus,
+#requestModal .request-textarea:focus,
+#requestTrackModal .request-reply-box:focus,
+#requestAdminModal .request-reply-box:focus{
+  border-color: rgba(56,189,248,.48);
+  box-shadow: 0 0 0 4px rgba(56,189,248,.10);
+}
+#requestModal .request-submit-btn,
+#requestTrackModal .request-reply-btn,
+#requestAdminModal .request-reply-btn{
+  background: linear-gradient(135deg, #38bdf8, #2563eb 65%, #10b981);
+  color:#fff;
+  border:none;
+  box-shadow: 0 14px 26px rgba(37,99,235,.24);
+}
+#requestAdminModal .request-process-btn{
+  background: linear-gradient(135deg, rgba(16,185,129,.95), rgba(5,150,105,.88));
+  color:#fff;
+  border:none;
+  box-shadow: 0 14px 24px rgba(5,150,105,.22);
+}
+#requestTrackModal .request-thread-card,
+#requestAdminModal .request-admin-card{
+  background: linear-gradient(180deg, rgba(15,23,42,.86), rgba(10,15,28,.92));
+  border:1px solid rgba(148,163,184,.14);
+  border-radius:28px;
+  box-shadow: 0 16px 34px rgba(2,6,23,.28);
+  padding:18px;
+}
+#requestTrackModal .request-track-card-head,
+#requestAdminModal .request-admin-card-head{
+  align-items:flex-start;
+  gap:14px;
+}
+#requestTrackModal .request-code,
+#requestAdminModal .request-admin-name{
+  font-size:17px;
+  color:#f8fbff;
+}
+#requestTrackModal .request-status,
+#requestAdminModal .request-status{
+  border-radius:999px;
+  padding:7px 12px;
+  font-size:12px;
+  border:1px solid rgba(255,255,255,.08);
+  backdrop-filter: blur(10px);
+}
+#requestTrackModal .request-meta,
+#requestAdminModal .request-meta{
+  margin-top:14px;
+  gap:10px;
+}
+#requestTrackModal .request-pill,
+#requestAdminModal .request-pill{
+  background: rgba(255,255,255,.06);
+  border:1px solid rgba(148,163,184,.14);
+  border-radius:999px;
+  padding:8px 12px;
+}
+#requestTrackModal .request-messages,
+#requestAdminModal .request-messages{
+  background:
+    linear-gradient(180deg, rgba(2,6,23,.34), rgba(15,23,42,.18)),
+    rgba(255,255,255,.02);
+  border:1px solid rgba(148,163,184,.12);
+  border-radius:24px;
+  padding:14px;
+}
+#requestTrackModal .request-message,
+#requestAdminModal .request-message{
+  border:1px solid rgba(148,163,184,.10);
+  border-radius:20px;
+  padding:13px 15px;
+  margin-bottom:10px;
+}
+#requestTrackModal .request-message.customer,
+#requestAdminModal .request-message.customer{
+  background: linear-gradient(135deg, rgba(14,165,233,.18), rgba(37,99,235,.13));
+}
+#requestTrackModal .request-message.admin,
+#requestTrackModal .request-message.system,
+#requestAdminModal .request-message.admin,
+#requestAdminModal .request-message.system{
+  background: linear-gradient(135deg, rgba(16,185,129,.16), rgba(13,148,136,.12));
+}
+#requestTrackModal .request-message-head,
+#requestAdminModal .request-message-head{
+  color:rgba(226,232,240,.68);
+}
+#requestTrackModal .request-track-list,
+#requestAdminModal .request-admin-list{
+  padding:8px 4px 2px;
+}
+.support-chat-empty{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  text-align:center;
+  padding:34px 18px;
+  border-radius:26px;
+  background: linear-gradient(180deg, rgba(15,23,42,.72), rgba(15,23,42,.45));
+  border:1px dashed rgba(125,211,252,.22);
+}
+.support-chat-empty i{
+  font-size:28px;
+  color:#7dd3fc;
+}
+.support-chat-empty strong{
+  color:#f8fbff;
+  font-size:18px;
+}
+.support-chat-empty span{
+  color:rgba(226,232,240,.74);
+  line-height:1.8;
+}
+.support-empty-action{
+  min-width:210px;
+  justify-content:center;
+}
+#requestTrackModal .request-view-tab.is-active,
+#requestAdminModal .request-view-tab.is-active{
+  background: linear-gradient(135deg, rgba(56,189,248,.22), rgba(16,185,129,.15));
+  border-color: rgba(125,211,252,.26);
+  color:#f8fbff;
+}
+#requestTrackModal .track-searchbar,
+#requestAdminModal .track-searchbar{
+  background: rgba(15,23,42,.82);
+  border:1px solid rgba(148,163,184,.18);
+}
+#requestTrackModal .request-inline-note,
+#requestAdminModal .request-inline-note,
+#requestModal .request-helper{
+  color: rgba(226,232,240,.72);
+}
+@media (max-width: 680px){
+  #requestTrackModal .request-track-shell,
+  #requestAdminModal .request-admin-shell,
+  #requestModal .request-shell{
+    border-radius:24px;
+  }
+  #requestTrackModal .request-thread-card,
+  #requestAdminModal .request-admin-card{
+    border-radius:24px;
+    padding:16px;
+  }
+  .support-chat-hero h4{
+    font-size:18px;
+  }
+}
+</style>
+
 </head>
 <body>
   
@@ -11422,12 +11703,12 @@ html.low-end-device .results-container {
 </div>
 
 
-<div id="requestFloatingBtn" class="floating-request-btn" title="طلب مادة">
-  <span>طلب</span>
+<div id="requestFloatingBtn" class="floating-request-btn support-chat-fab" title="المحادثة">
+  <span><i class="fas fa-comments"></i></span>
 </div>
 
-<button id="requestAdminFloatingBtn" class="floating-request-admin-btn" type="button" title="طلبات المواد" aria-label="طلبات المواد" style="display:none;">
-  <i class="fas fa-inbox"></i>
+<button id="requestAdminFloatingBtn" class="floating-request-admin-btn" type="button" title="مركز المحادثات" aria-label="مركز المحادثات" style="display:none;">
+  <i class="fas fa-comments"></i>
 </button>
 
 <!-- النافذة المنبثقة للعناصر الجديدة -->
@@ -11562,9 +11843,9 @@ html.low-end-device .results-container {
 <button class="header-btn header-cart-btn"
         id="requestUserHeaderBtn"
         type="button"
-        title="متابعة طلبي"
-        aria-label="متابعة طلبي">
-  <i class="fas fa-box-open"></i>
+        title="المحادثة"
+        aria-label="المحادثة">
+  <i class="fas fa-comments"></i>
   <span class="header-cart-badge request-header-badge user-badge" id="requestUserCount" style="display:none;">0</span>
 </button>
 
@@ -11580,10 +11861,10 @@ html.low-end-device .results-container {
 <button class="header-btn header-cart-btn"
         id="requestAdminHeaderBtn"
         type="button"
-        title="متابعة الطلبات"
-        aria-label="متابعة الطلبات"
+        title="مركز المحادثات"
+        aria-label="مركز المحادثات"
         style="display:none;">
-  <i class="fas fa-box-open"></i>
+  <i class="fas fa-comments"></i>
   <span class="header-cart-badge request-header-badge user-badge" id="requestAdminCount" style="display:none;">0</span>
 </button>
  
@@ -11921,7 +12202,7 @@ html.low-end-device .results-container {
                 <i class="fas fa-file-lines"></i><span>فاتورة</span>
               </button>
               <button id="invoiceTrackArchiveTabBtn" class="request-view-tab" type="button" onclick="switchInvoiceTrackView('archive')" aria-label="أرشيف" title="أرشيف">
-                <i class="fas fa-box-archive"></i><span>أرشيف</span>
+                <i class="fas fa-box-archive"></i><span>مؤرشفة</span>
               </button>
             </div>
           </div>
@@ -11968,7 +12249,7 @@ html.low-end-device .results-container {
                 <i class="fas fa-file-lines"></i><span>فاتورة</span>
               </button>
               <button id="invoiceAdminArchiveTabBtn" class="request-view-tab" type="button" onclick="switchInvoiceAdminView('archive')" aria-label="أرشيف" title="أرشيف">
-                <i class="fas fa-box-archive"></i><span>أرشيف</span>
+                <i class="fas fa-box-archive"></i><span>مؤرشفة</span>
               </button>
             </div>
           </div>
@@ -12003,14 +12284,14 @@ html.low-end-device .results-container {
 
 
 
-<div id="requestModal" class="request-modal" aria-hidden="true">
-  <div class="request-shell" role="dialog" aria-modal="true" aria-label="طلب مادة">
+<div id="requestModal" class="request-modal support-chat-start-modal" aria-hidden="true">
+  <div class="request-shell" role="dialog" aria-modal="true" aria-label="إرسال الرسالة">
     <div class="request-top">
       <div class="request-title">
-        <div class="request-icon"><i class="fas fa-box-open"></i></div>
+        <div class="request-icon"><i class="fas fa-comments"></i></div>
         <div>
-          <h3>طلب مادة</h3>
-      </div>
+          <h3>ابدأ محادثة</h3>
+        </div>
       </div>
       <button class="request-close" type="button" onclick="closeRequestModal()" aria-label="إغلاق">
         <i class="fas fa-times"></i>
@@ -12018,29 +12299,27 @@ html.low-end-device .results-container {
     </div>
 
     <div class="request-body">
-      <div class="request-grid">
-        <div class="request-field">
-               <input id="requestNameInput" class="request-input" type="text" maxlength="60" placeholder="اكتب الاسم الكامل">
-        </div>
+      <div class="support-chat-hero">
+        <div class="support-chat-pill"><i class="fas fa-bolt"></i> دعم مباشر</div>
+        <h4>راسل الإدارة فوراً من داخل التطبيق</h4>
+      </div>
 
+      
         <div class="request-field">
-                   <input id="requestPhoneInput" class="request-input" type="tel" maxlength="11" inputmode="numeric" placeholder="مثال: 07712345678" dir="ltr" autocomplete="tel" oninput="sanitizeRequestPhone(this)">
-        </div>
-
-        <div class="request-field">
-                   <textarea id="requestItemInput" class="request-textarea" placeholder="مثال: شاشة آيفون 11 أو بطارية سامسونگ A32"></textarea>
+          <textarea id="requestItemInput" class="request-textarea support-chat-textarea" placeholder="اكتب رسالتك هنا مباشرة..."></textarea>
         </div>
 
         <div class="request-actions">
           <button id="requestSubmitBtn" class="request-submit-btn" type="button" onclick="submitMaterialRequest()">
             <i class="fas fa-paper-plane"></i>
-            إرسال الطلب
+            إرسال الرسالة
           </button>
         </div>
 
-        <div class="request-helper">
-          اكتب طلبك ورقمك واحنه نراجع الطلب بأسرع وقت
-        </div>
+       <div class="request-helper" style="text-align:center;">
+  أول رسالة تفتح المحادثة، وبعدها تكدر تتابع كل الردود داخل صفحة المحادثات بشكل فوري.
+</div>
+        
       </div>
     </div>
   </div>
@@ -12049,30 +12328,30 @@ html.low-end-device .results-container {
 <div id="requestToast" class="request-toast" aria-live="polite">
   <div class="request-toast-icon"><i class="fas fa-circle-notch fa-spin"></i></div>
   <div class="request-toast-text">
-    <div class="request-toast-title">جاري الإرسال</div>
-    <div class="request-toast-sub">نرسل طلبك إلى السيرفر...</div>
+    <div class="request-toast-title">جاري إرسال الرسالة</div>
+    <div class="request-toast-sub">نرسل رسالتك إلى فريق الدعم...</div>
   </div>
 </div>
 
 <div id="requestAdminModal" class="request-admin-modal" aria-hidden="true">
-  <div class="request-admin-shell" role="dialog" aria-modal="true" aria-label="طلبات المواد">
+  <div class="request-admin-shell" role="dialog" aria-modal="true" aria-label="مركز المحادثات">
     <div class="request-admin-top">
       <div class="request-admin-title">
-        <div class="request-admin-icon"><i class="fas fa-inbox"></i></div>
+        <div class="request-admin-icon"><i class="fas fa-comments"></i></div>
         <div>
-          <h3>طلبات </h3>
+          <h3>مركز المحادثات</h3>
          
         </div>
       </div>
       <div class="request-admin-top-actions">
         <div class="track-switcher-wrap">
           <div id="requestAdminTabsHost" class="track-tabs-host">
-            <div class="request-view-tabs" role="tablist" aria-label="تبويبات طلبات المواد">
-              <button id="requestAdminActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchAdminRequestView('active')" aria-label="الطلبات" title="الطلبات">
-                <i class="fas fa-list-ul"></i><span>طلبات</span>
+            <div class="request-view-tabs" role="tablist" aria-label="تبويبات المحادثات">
+              <button id="requestAdminActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchAdminRequestView('active')" aria-label="المحادثات النشطة" title="المحادثات النشطة">
+                <i class="fas fa-comments"></i><span>نشطة</span>
               </button>
-              <button id="requestAdminArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAdminRequestView('archive')" aria-label="الأرشيف" title="الأرشيف">
-                <i class="fas fa-box-archive"></i><span>أرشيف</span>
+              <button id="requestAdminArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAdminRequestView('archive')" aria-label="المحادثات المؤرشفة" title="المحادثات المؤرشفة">
+                <i class="fas fa-box-archive"></i><span>مؤرشفة</span>
               </button>
             </div>
           </div>
@@ -12082,7 +12361,7 @@ html.low-end-device .results-container {
                 <i class="fas fa-arrow-right"></i>
               </button>
               <i class="fas fa-magnifying-glass track-searchicon"></i>
-              <input id="requestAdminSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب الطلبات الحالي" oninput="applyTrackModalSearch('requestAdmin')" autocomplete="off" dir="rtl">
+              <input id="requestAdminSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب المحادثات الحالي" oninput="applyTrackModalSearch('requestAdmin')" autocomplete="off" dir="rtl">
             </div>
           </div>
         </div>
@@ -12097,36 +12376,36 @@ html.low-end-device .results-container {
 
     <div class="request-admin-body">
       <div id="requestAdminActivePanel" class="request-admin-list request-panel is-active">
-        <div class="request-admin-empty">جاري تحميل الطلبات...</div>
+        <div class="request-admin-empty">جاري تحميل المحادثات...</div>
       </div>
       <div id="requestAdminArchivePanel" class="request-admin-list request-panel">
-        <div class="request-admin-empty">جاري تحميل أرشيف الطلبات...</div>
+        <div class="request-admin-empty">جاري تحميل أرشيف المحادثات...</div>
       </div>
-      <div class="request-inline-note">الطلبات التي يتم تعليمها "تمت المعالجة" تنتقل إلى الأرشيف.</div>
+      <div class="request-inline-note">المحادثات التي يتم إنهاؤها تنتقل مباشرة إلى الأرشيف.</div>
     </div>
   </div>
 </div>
 
 
 <div id="requestTrackModal" class="request-track-modal" aria-hidden="true">
-  <div class="request-track-shell" role="dialog" aria-modal="true" aria-label="متابعة الطلبات">
+  <div class="request-track-shell" role="dialog" aria-modal="true" aria-label="المحادثات">
     <div class="request-track-top">
       <div class="request-track-title">
-        <div class="request-track-icon"><i class="fas fa-box-open"></i></div>
+        <div class="request-track-icon"><i class="fas fa-comments"></i></div>
         <div>
-          <h3>الطلبات </h3>
+          <h3>المحادثات</h3>
 
         </div>
       </div>
       <div class="request-track-top-actions">
         <div class="track-switcher-wrap">
           <div id="requestTrackTabsHost" class="track-tabs-host">
-            <div class="request-view-tabs" role="tablist" aria-label="تبويبات متابعة الطلبات">
-              <button id="requestTrackActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchTrackRequestView('active')" aria-label="طلباتي" title="طلباتي">
-                <i class="fas fa-list-ul"></i><span>طلبات</span>
+            <div class="request-view-tabs" role="tablist" aria-label="تبويبات المحادثات">
+              <button id="requestTrackActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchTrackRequestView('active')" aria-label="المحادثات النشطة" title="المحادثات النشطة">
+                <i class="fas fa-comments"></i><span>نشطة</span>
               </button>
-              <button id="requestTrackArchiveTabBtn" class="request-view-tab" type="button" onclick="switchTrackRequestView('archive')" aria-label="أرشيف طلباتي" title="أرشيف طلباتي">
-                <i class="fas fa-box-archive"></i><span>أرشيف</span>
+              <button id="requestTrackArchiveTabBtn" class="request-view-tab" type="button" onclick="switchTrackRequestView('archive')" aria-label="المحادثات المؤرشفة" title="المحادثات المؤرشفة">
+                <i class="fas fa-box-archive"></i><span>مؤرشفة</span>
               </button>
             </div>
           </div>
@@ -12136,7 +12415,7 @@ html.low-end-device .results-container {
                 <i class="fas fa-arrow-right"></i>
               </button>
               <i class="fas fa-search track-searchicon" aria-hidden="true"></i>
-              <input id="requestTrackSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب الطلبات الحالي" oninput="applyTrackModalSearch('request')" autocomplete="off" dir="rtl">
+              <input id="requestTrackSearchInput" class="track-searchinput" type="search" placeholder="ابحث داخل تبويب المحادثات الحالي" oninput="applyTrackModalSearch('request')" autocomplete="off" dir="rtl">
             </div>
           </div>
         </div>
@@ -12150,10 +12429,10 @@ html.low-end-device .results-container {
     </div>
     <div class="request-track-body">
       <div id="requestTrackActivePanel" class="request-track-list request-panel is-active">
-        <div class="request-track-empty">جاري تحميل طلباتك...</div>
+        <div class="request-track-empty">جاري تحميل محادثاتك...</div>
       </div>
       <div id="requestTrackArchivePanel" class="request-track-list request-panel">
-        <div class="request-track-empty">جاري تحميل أرشيف طلباتك...</div>
+        <div class="request-track-empty">جاري تحميل أرشيف محادثاتك...</div>
       </div>
     </div>
   </div>
@@ -12176,7 +12455,7 @@ html.low-end-device .results-container {
                 <i class="fas fa-list-ul"></i><span>توفر</span>
               </button>
               <button id="availabilityAdminArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAvailabilityAdminView('archive')" aria-label="أرشيف استعلامات التوفر" title="أرشيف استعلامات التوفر">
-                <i class="fas fa-box-archive"></i><span>أرشيف</span>
+                <i class="fas fa-box-archive"></i><span>مؤرشفة</span>
               </button>
             </div>
           </div>
@@ -12228,7 +12507,7 @@ html.low-end-device .results-container {
                 <i class="fas fa-list-ul"></i><span>توفر</span>
               </button>
               <button id="availabilityTrackArchiveTabBtn" class="request-view-tab" type="button" onclick="switchAvailabilityTrackView('archive')" aria-label="أرشيف التوفر" title="أرشيف التوفر">
-                <i class="fas fa-box-archive"></i><span>أرشيف</span>
+                <i class="fas fa-box-archive"></i><span>مؤرشفة</span>
               </button>
             </div>
           </div>
@@ -13438,7 +13717,7 @@ function flashRequestSubmitState(type, title, icon, timeout = 1800) {
     clearTimeout(requestSubmitFeedbackTimer);
     setRequestSubmitState(type, title, icon);
     requestSubmitFeedbackTimer = setTimeout(() => {
-        setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+        setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
     }, timeout);
 }
 
@@ -13767,18 +14046,55 @@ window.addEventListener('focus', () => {
     }
 });
 
-window.openRequestModal = function () {
+
+async function getCustomerProfileForChat() {
+    if (!window.firebaseDB || !window.firebaseDB.db) return null;
+    const { db, ref, get } = window.firebaseDB;
+    const snap = await get(ref(db, `customerProfiles/${getDeviceId()}`));
+    if (!snap.exists()) return null;
+    const profile = snap.val() || {};
+    if (profile && profile.blocked) {
+        applyCustomerBlockedState(profile);
+    }
+    return profile;
+}
+
+window.openRequestModal = async function () {
     if (customerBlockedStateActive) {
         showCustomerBlockedOverlay({ blocked: true });
         return;
     }
+
+    try {
+        const profile = await getCustomerProfileForChat();
+        if (profile && profile.blocked) {
+            showCustomerBlockedOverlay(profile);
+            return;
+        }
+        const isComplete = !!(profile && String(profile.name || '').trim() && String(profile.phone || '').trim() && String(profile.address || '').trim());
+        if (!isComplete) {
+            openCustomerProfileModal(profile || {});
+            return;
+        }
+    } catch (err) {
+        console.error('openRequestModal profile check:', err);
+    }
+
     const modal = document.getElementById("requestModal");
+    const itemInput = document.getElementById("requestItemInput");
     if (!modal) return;
+    if (itemInput) {
+        itemInput.classList.remove('is-invalid');
+        itemInput.value = '';
+    }
     modal.classList.add("show");
     modal.setAttribute("aria-hidden", "false");
     syncGlobalModalLock();
     clearTimeout(requestSubmitFeedbackTimer);
-    setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+    setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
+    setTimeout(() => {
+        try { itemInput?.focus(); } catch (_) {}
+    }, 90);
 };
 
 window.closeRequestModal = function () {
@@ -13817,6 +14133,33 @@ async function getAllMaterialRequests() {
     const data = snap.exists() ? snap.val() : {};
     return Object.values(data || {}).sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
 }
+
+window.openCustomerChatEntryPoint = async function () {
+    if (customerBlockedStateActive) {
+        showCustomerBlockedOverlay({ blocked: true });
+        return;
+    }
+    try {
+        const deviceId = getDeviceId();
+        const all = await getAllMaterialRequests();
+        const visibleChats = all.filter(req => req && req.deviceId === deviceId && !req.customerDeleted);
+        if (visibleChats.length > 0) {
+            await openRequestTrackModal();
+            return;
+        }
+    } catch (err) {
+        console.error('openCustomerChatEntryPoint:', err);
+    }
+    openRequestModal();
+};
+
+window.openNewChatFromTrackModal = function () {
+    closeRequestTrackModal();
+    setTimeout(() => {
+        openRequestModal();
+    }, 180);
+};
+
 
 window.refreshMaterialRequestCount = async function () {
     const adminBadge = document.getElementById("requestAdminCount");
@@ -14014,27 +14357,14 @@ window.openRequestTrackModal = async function () {
 };
 
 window.submitMaterialRequest = async function () {
-    const nameInput = document.getElementById("requestNameInput");
-    const phoneInput = document.getElementById("requestPhoneInput");
     const itemInput = document.getElementById("requestItemInput");
-
-    const name = (nameInput?.value || "").trim();
-    const phone = (phoneInput?.value || "").trim();
     const item = (itemInput?.value || "").trim();
 
-    [nameInput, phoneInput, itemInput].forEach(el => el && el.classList.remove('is-invalid'));
+    [itemInput].forEach(el => el && el.classList.remove('is-invalid'));
 
-    if (!name || !phone || !item) {
-        if (!name && nameInput) nameInput.classList.add('is-invalid');
-        if (!phone && phoneInput) phoneInput.classList.add('is-invalid');
-        if (!item && itemInput) itemInput.classList.add('is-invalid');
-        flashRequestSubmitState('warning', 'يرجى ملء الاستمارة أولاً', 'fa-triangle-exclamation', 1800);
-        return;
-    }
-
-    if (!isValidIraqMobile(phone)) {
-        if (phoneInput) phoneInput.classList.add('is-invalid');
-        flashRequestSubmitState('error', 'يرجى إدخال رقم صحيح', 'fa-ban', 2200);
+    if (!item) {
+        if (itemInput) itemInput.classList.add('is-invalid');
+        flashRequestSubmitState('warning', 'اكتب رسالتك أولاً', 'fa-triangle-exclamation', 1800);
         return;
     }
 
@@ -14043,9 +14373,37 @@ window.submitMaterialRequest = async function () {
         return;
     }
 
+    let profile = null;
+    try {
+        profile = await getCustomerProfileForChat();
+    } catch (err) {
+        console.error('submitMaterialRequest profile load:', err);
+    }
+
+    if (profile && profile.blocked) {
+        showCustomerBlockedOverlay(profile);
+        return;
+    }
+
+    const name = String(profile?.name || "").trim();
+    const phone = String(profile?.phone || "").trim();
+    const address = String(profile?.address || "").trim();
+
+    if (!name || !phone || !address) {
+        openCustomerProfileModal(profile || {});
+        flashRequestSubmitState('warning', 'بيانات حسابك ناقصة، كمّلها أولاً', 'fa-user-pen', 2200);
+        return;
+    }
+
+    if (!isValidIraqMobile(phone)) {
+        openCustomerProfileModal(profile || {});
+        flashRequestSubmitState('error', 'رقم الحساب المسجل غير صحيح', 'fa-ban', 2200);
+        return;
+    }
+
     try {
         requestSubmitting = true;
-        setRequestSubmitState('busy', 'جاري الإرسال', 'fa-spinner fa-spin');
+        setRequestSubmitState('busy', 'جاري إرسال الرسالة', 'fa-spinner fa-spin');
 
         const { db, ref, set } = window.firebaseDB;
         const now = Date.now();
@@ -14069,7 +14427,7 @@ window.submitMaterialRequest = async function () {
                 [firstMsgId]: {
                     id: firstMsgId,
                     senderRole: "customer",
-                    text: `طلب مادة: ${item}`,
+                    text: item,
                     createdAt: now,
                     seenByAdmin: false,
                     seenByCustomer: true
@@ -14085,25 +14443,24 @@ window.submitMaterialRequest = async function () {
                 customerName: name,
                 customerPhone: phone,
                 deviceId,
-                body: `طلب مادة: ${item}`
+                body: item
             })
         });
 
         await new Promise(resolve => setTimeout(resolve, 1200));
-        setRequestSubmitState('success', 'تم الإرسال بنجاح', 'fa-circle-check');
-        if (nameInput) nameInput.value = "";
-        if (phoneInput) phoneInput.value = "";
+        setRequestSubmitState('success', 'تم إرسال الرسالة بنجاح', 'fa-circle-check');
         if (itemInput) itemInput.value = "";
         await refreshMaterialRequestCount();
-        setTimeout(() => {
+        setTimeout(async () => {
             requestSubmitting = false;
             closeRequestModal();
-            setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+            setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
+            await openRequestTrackModal();
         }, 950);
     } catch (err) {
         console.error("submitMaterialRequest:", err);
         requestSubmitting = false;
-        flashRequestSubmitState('error', 'تعذّر الإرسال', 'fa-circle-xmark', 2200);
+        flashRequestSubmitState('error', 'تعذّر إرسال الرسالة', 'fa-circle-xmark', 2200);
     }
 };
 
@@ -14213,8 +14570,8 @@ window.loadCustomerRequests = async function () {
         archiveList.innerHTML = '<div class="request-track-empty">Firebase غير جاهز حالياً.</div>';
         return;
     }
-    activeList.innerHTML = currentTrackRequestView === 'active' ? '<div class="request-track-empty">جاري تحميل طلباتك...</div>' : '';
-    archiveList.innerHTML = currentTrackRequestView === 'archive' ? '<div class="request-track-empty">جاري تحميل أرشيف طلباتك...</div>' : '';
+    activeList.innerHTML = currentTrackRequestView === 'active' ? '<div class="request-track-empty">جاري تحميل محادثاتك...</div>' : '';
+    archiveList.innerHTML = currentTrackRequestView === 'archive' ? '<div class="request-track-empty">جاري تحميل أرشيف محادثاتك...</div>' : '';
     try {
         const deviceId = getDeviceId();
         const allRequests = (await getAllMaterialRequests()).filter(req => req && req.deviceId === deviceId && !req.customerDeleted);
@@ -14233,13 +14590,13 @@ window.loadCustomerRequests = async function () {
             const msgs = Object.values(req.messages || {}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
             const freshMsgId = freshCustomerMap[req.id] || null;
             const statusClass = req.status === 'processed' ? 'processed' : (req.status === 'processing' ? 'processing' : 'new');
-            const statusText = req.status === 'processed' ? 'تمت المعالجة' : (req.status === 'processing' ? 'قيد المتابعة' : 'جديد');
+            const statusText = req.status === 'processed' ? 'مغلقة' : (req.status === 'processing' ? 'نشطة' : 'جديدة');
             const messagesHtml = msgs.map(msg => {
                 const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
                 return `
                 <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
                   <div class="request-message-head">
-                    <span>${msg.senderRole === 'customer' ? 'أنت' : (msg.senderRole === 'admin' ? 'الإدارة' : 'النظام')}</span>
+                    <span>${msg.senderRole === 'customer' ? 'أنت' : (msg.senderRole === 'admin' ? 'فريق الدعم' : 'النظام')}</span>
                     <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'customer')}</span>
                   </div>
                   <div>${escapeHtml(msg.text || '')}</div>
@@ -14247,14 +14604,14 @@ window.loadCustomerRequests = async function () {
             }).join('');
             const actions = archived ? `
                 <div class="request-thread-actions single-center">
-                  <button class="request-track-clear delete-btn" type="button" onclick="deleteCustomerArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف الطلب </button>
+                  <button class="request-track-clear delete-btn" type="button" onclick="deleteCustomerArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف المحادثة </button>
                 </div>` : (req.status !== 'processed' ? `
                 <div class="request-thread-actions is-stack">
-                  <textarea id="requestTrackReply_${escapeHtml(req.id)}" class="request-track-input" placeholder="اكتب ردك أو أي توضيح إضافي..."></textarea>
-                  <button class="request-track-send" type="button" onclick="sendCustomerReply('${escapeHtml(req.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button>
+                  <textarea id="requestTrackReply_${escapeHtml(req.id)}" class="request-track-input" placeholder="اكتب رسالتك هنا..."></textarea>
+                  <button class="request-track-send" type="button" onclick="sendCustomerReply('${escapeHtml(req.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرسالة</button>
                 </div>` : `
                 <div class="request-thread-actions single-center">
-                  <button class="request-track-clear archive-btn" type="button" onclick="archiveCustomerRequest('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button>
+                  <button class="request-track-clear archive-btn" type="button" onclick="archiveCustomerRequest('${escapeHtml(req.id)}')"><i class="fas fa-box-archive"></i> أرشفة المحادثة</button>
                 </div>`);
             return `
               <div class="request-thread-card" data-request-id="${escapeHtml(req.id)}" data-track-search="${escapeHtml(safeBuildTrackSearchText('request', { id: req.id, item: req.item, category: '', phone: req.phone, date: req.updatedAt || req.createdAt }))}">
@@ -14267,7 +14624,7 @@ window.loadCustomerRequests = async function () {
                 </div>
                 <div class="request-meta-badges">
                   <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
-                  <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(req.item || '-')}</span>
+                  <span class="request-meta-badge"><i class="fas fa-comment-dots"></i>${escapeHtml((req.item || '-').slice(0, 70))}</span>
                 </div>
                 <div class="request-messages">${messagesHtml}</div>
                 ${actions}
@@ -14276,11 +14633,11 @@ window.loadCustomerRequests = async function () {
 
         activeList.innerHTML = activeRequests.length
             ? activeRequests.map(req => renderCustomerCard(req, false)).join('')
-            : '<div class="request-track-empty">ما عندك طلب حاليا تكدر تطلب طلب جديد من زر طلب.</div>';
+            : '<div class="request-track-empty support-chat-empty"><i class="fas fa-comments"></i><strong>ما عندك محادثات حالياً</strong><span>اضغط زر المحادثة حتى تبدأ أول رسالة ويا الإدارة.</span><button class="request-submit-btn support-empty-action" type="button" onclick="openNewChatFromTrackModal()"><i class="fas fa-paper-plane"></i>ابدأ محادثة</button></div>';
 
         archiveList.innerHTML = archiveRequests.length
             ? archiveRequests.map(req => renderCustomerCard(req, true)).join('')
-            : '<div class="request-track-empty">أرشيف طلباتك فارغ حالياً.</div>';
+            : '<div class="request-track-empty">أرشيف المحادثات فارغ حالياً.</div>';
 
         setRequestViewButtons();
         applyTrackModalSearch('request');
@@ -14291,8 +14648,8 @@ window.loadCustomerRequests = async function () {
         await refreshMaterialRequestCount();
     } catch (err) {
         console.error('loadCustomerRequests:', err);
-        activeList.innerHTML = '<div class="request-track-empty">تعذّر جلب طلباتك حالياً.</div>';
-        archiveList.innerHTML = '<div class="request-track-empty">تعذّر جلب الأرشيف حالياً.</div>';
+        activeList.innerHTML = '<div class="request-track-empty">تعذّر جلب محادثاتك حالياً.</div>';
+        archiveList.innerHTML = '<div class="request-track-empty">تعذّر جلب أرشيف المحادثات حالياً.</div>';
     }
 };
 
@@ -14332,7 +14689,7 @@ window.sendAdminReply = async function (requestId) {
         targetRole: 'customer',
         targetDeviceId,
         customerName,
-        title: 'رد جديد على طلب المادة',
+        title: 'رد جديد من فريق الدعم',
         body: text
     });
     if (input) input.value = '';
@@ -14361,7 +14718,7 @@ window.markRequestProcessed = async function (requestId) {
         [`materialRequests/${requestId}/messages/${msgId}`]: {
             id: msgId,
             senderRole: 'system',
-            text: 'تمت معالجة الطلب. إذا تحتاج شيء ثاني تگدر ترسل طلب جديد.',
+            text: 'تم إغلاق المحادثة من قبل فريق الدعم. إذا تحتاج شي ثاني تگدر تبدأ محادثة جديدة بأي وقت.',
             createdAt: now,
             seenByAdmin: true,
             seenByCustomer: false
@@ -14375,8 +14732,8 @@ window.markRequestProcessed = async function (requestId) {
         targetRole: 'customer',
         targetDeviceId,
         customerName,
-        title: 'تمت معالجة الطلب',
-        body: 'تمت معالجة طلبك. إذا تحتاج شيء ثاني تگدر ترسل طلب جديد.'
+        title: 'تم إغلاق المحادثة',
+        body: 'فريق الدعم أنهى المحادثة الحالية. وتكدر ترجع تبدأ محادثة جديدة بأي وقت.'
     });
     await loadMaterialRequests();
     await refreshMaterialRequestCount();
@@ -14399,8 +14756,8 @@ window.loadMaterialRequests = async function () {
         archiveList.innerHTML = '<div class="request-admin-empty">Firebase غير جاهز حالياً.</div>';
         return;
     }
-    activeList.innerHTML = currentAdminRequestView === 'active' ? '<div class="request-admin-empty">جاري تحميل الطلبات...</div>' : '';
-    archiveList.innerHTML = currentAdminRequestView === 'archive' ? '<div class="request-admin-empty">جاري تحميل أرشيف الطلبات...</div>' : '';
+    activeList.innerHTML = currentAdminRequestView === 'active' ? '<div class="request-admin-empty">جاري تحميل المحادثات...</div>' : '';
+    archiveList.innerHTML = currentAdminRequestView === 'archive' ? '<div class="request-admin-empty">جاري تحميل أرشيف المحادثات...</div>' : '';
     try {
         const arr0 = await getAllMaterialRequests();
         const freshAdminMap = {};
@@ -14418,13 +14775,13 @@ window.loadMaterialRequests = async function () {
             const msgs = Object.values(req.messages || {}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
             const freshMsgId = freshAdminMap[req.id] || null;
             const statusClass = req.status === 'processed' ? 'processed' : (req.status === 'processing' ? 'processing' : 'new');
-            const statusText = archived ? 'في الأرشيف' : (req.status === 'processed' ? 'تمت المعالجة' : (req.status === 'processing' ? 'قيد المتابعة' : 'جديد'));
+            const statusText = archived ? 'مؤرشفة' : (req.status === 'processed' ? 'مغلقة' : (req.status === 'processing' ? 'نشطة' : 'جديدة'));
             const messagesHtml = msgs.map(msg => {
                 const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
                 return `
                 <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}">
                   <div class="request-message-head">
-                    <span>${msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'الإدارة' : 'النظام')}</span>
+                    <span>${msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'فريق الدعم' : 'النظام')}</span>
                     <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'admin')}</span>
                   </div>
                   <div>${escapeHtml(msg.text || '')}</div>
@@ -14445,28 +14802,28 @@ window.loadMaterialRequests = async function () {
                 </div>
                 <div class="request-meta-badges">
                   <span class="request-meta-badge"><i class="fas fa-phone"></i>${escapeHtml(req.phone || '-')}</span>
-                  <span class="request-meta-badge"><i class="fas fa-box"></i>${escapeHtml(req.item || '-')}</span>
+                  <span class="request-meta-badge"><i class="fas fa-comment-dots"></i>${escapeHtml((req.item || '-').slice(0, 70))}</span>
                 </div>
                 <div class="request-messages">${messagesHtml}</div>
                 ${archived ? `
                 <div class="request-admin-card-actions single-center">
                   <button class="request-track-clear delete-btn" type="button" onclick="deleteAdminArchivedRequest('${escapeHtml(req.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button>
                 </div>` : `
-                <textarea id="requestAdminReply_${escapeHtml(req.id)}" class="request-admin-reply-input" placeholder="اكتب رد للإدارة على هذا الطلب..."></textarea>
+                <textarea id="requestAdminReply_${escapeHtml(req.id)}" class="request-admin-reply-input" placeholder="اكتب رسالة الدعم هنا..."></textarea>
                 <div class="request-admin-card-actions">
-                  <button class="request-admin-send" type="button" onclick="sendAdminReply('${escapeHtml(req.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرد</button>
-                  <button class="request-admin-done" type="button" onclick="markRequestProcessed('${escapeHtml(req.id)}')"><i class="fas fa-check-double"></i> تمّت المعالجة</button>
+                  <button class="request-admin-send" type="button" onclick="sendAdminReply('${escapeHtml(req.id)}')"><i class="fas fa-paper-plane"></i> إرسال الرسالة</button>
+                  <button class="request-admin-done" type="button" onclick="markRequestProcessed('${escapeHtml(req.id)}')"><i class="fas fa-check-double"></i> إنهاء المحادثة</button>
                 </div>`}
               </div>`;
         };
 
         activeList.innerHTML = activeRequests.length
             ? activeRequests.map(req => renderAdminCard(req, false)).join('')
-            : '<div class="request-admin-empty">لا توجد طلبات مواد حالياً.</div>';
+            : '<div class="request-admin-empty">لا توجد محادثات نشطة حالياً.</div>';
 
         archiveList.innerHTML = archiveRequests.length
             ? archiveRequests.map(req => renderAdminCard(req, true)).join('')
-            : '<div class="request-admin-empty">أرشيف الطلبات فارغ حالياً.</div>';
+            : '<div class="request-admin-empty">أرشيف المحادثات فارغ حالياً.</div>';
 
         setRequestViewButtons();
         applyTrackModalSearch('requestAdmin');
@@ -14474,8 +14831,8 @@ window.loadMaterialRequests = async function () {
         setTimeout(() => scrollRequestMessageBoxesToBottom(document.getElementById('requestAdminModal')), 40);
     } catch (err) {
         console.error("loadMaterialRequests:", err);
-        activeList.innerHTML = '<div class="request-admin-empty">تعذّر جلب الطلبات حالياً.</div>';
-        archiveList.innerHTML = '<div class="request-admin-empty">تعذّر جلب الأرشيف حالياً.</div>';
+        activeList.innerHTML = '<div class="request-admin-empty">تعذّر جلب المحادثات حالياً.</div>';
+        archiveList.innerHTML = '<div class="request-admin-empty">تعذّر جلب أرشيف المحادثات حالياً.</div>';
     }
 };
 
@@ -15422,7 +15779,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const value = (this.value || '').trim();
             if (!value) {
                 this.classList.remove('is-invalid');
-                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
                 return;
             }
             if (!isPotentialIraqMobile(value) || (value.length === 11 && !isValidIraqMobile(value))) {
@@ -15430,7 +15787,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setRequestSubmitState('error', 'الرقم خطأ', 'fa-circle-exclamation');
             } else {
                 this.classList.remove('is-invalid');
-                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
             }
         });
     }
@@ -15451,7 +15808,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const customersAdminHeaderBtn = document.getElementById("customersAdminHeaderBtn");
     if (requestUserHeaderBtn) {
         requestUserHeaderBtn.addEventListener("click", () => {
-            openRequestTrackModal();
+            openCustomerChatEntryPoint();
         });
     }
     if (requestHeaderBtn) {
@@ -15558,7 +15915,7 @@ function updateRequestAdminFloatingBtn() {
 }
 
 if (requestFloatingBtn && floatingBtn) {
-  requestFloatingBtn.addEventListener("click", () => openRequestModal());
+  requestFloatingBtn.addEventListener("click", () => openCustomerChatEntryPoint());
   if (requestAdminFloatingBtn) {
     requestAdminFloatingBtn.addEventListener("click", () => {
       if (!isAdminUser || !isAdminUser()) return;
@@ -15975,7 +16332,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const value = (this.value || '').trim();
             if (!value) {
                 this.classList.remove('is-invalid');
-                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
                 return;
             }
             if (!isPotentialIraqMobile(value) || (value.length === 11 && !isValidIraqMobile(value))) {
@@ -15983,7 +16340,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setRequestSubmitState('error', 'الرقم خطأ', 'fa-circle-exclamation');
             } else {
                 this.classList.remove('is-invalid');
-                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
             }
         });
     }
@@ -16809,7 +17166,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const value = (this.value || '').trim();
             if (!value) {
                 this.classList.remove('is-invalid');
-                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
                 return;
             }
             if (!isPotentialIraqMobile(value) || (value.length === 11 && !isValidIraqMobile(value))) {
@@ -16817,7 +17174,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setRequestSubmitState('error', 'الرقم خطأ', 'fa-circle-exclamation');
             } else {
                 this.classList.remove('is-invalid');
-                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
             }
         });
     }
@@ -18112,7 +18469,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const value = (this.value || '').trim();
             if (!value) {
                 this.classList.remove('is-invalid');
-                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
                 return;
             }
             if (!isPotentialIraqMobile(value) || (value.length === 11 && !isValidIraqMobile(value))) {
@@ -18120,7 +18477,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setRequestSubmitState('error', 'الرقم خطأ', 'fa-circle-exclamation');
             } else {
                 this.classList.remove('is-invalid');
-                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
             }
         });
     }
@@ -19938,7 +20295,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const value = (this.value || '').trim();
             if (!value) {
                 this.classList.remove('is-invalid');
-                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
                 return;
             }
             if (!isPotentialIraqMobile(value) || (value.length === 11 && !isValidIraqMobile(value))) {
@@ -19946,7 +20303,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setRequestSubmitState('error', 'الرقم خطأ', 'fa-circle-exclamation');
             } else {
                 this.classList.remove('is-invalid');
-                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
             }
         });
     }
@@ -20202,7 +20559,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const value = (this.value || '').trim();
             if (!value) {
                 this.classList.remove('is-invalid');
-                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
                 return;
             }
             if (!isPotentialIraqMobile(value) || (value.length === 11 && !isValidIraqMobile(value))) {
@@ -20210,7 +20567,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setRequestSubmitState('error', 'الرقم خطأ', 'fa-circle-exclamation');
             } else {
                 this.classList.remove('is-invalid');
-                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الطلب', 'fa-paper-plane');
+                if (!requestSubmitting) setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
             }
         });
     }
@@ -21289,7 +21646,7 @@ document.addEventListener("visibilitychange", () => {
   function buildInvoiceMessages(messages, freshMsgId){
     const msgs = Object.values(messages || {}).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
     if (!msgs.length) return '<div class="invoice-empty" style="padding:12px">ماكو محادثة على هاي الفاتورة حالياً.</div>';
-    return `<div class="invoice-messages request-messages">${msgs.map(msg=>`<div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshMsgId===msg.id?' invoice-message-highlight':''}"><div class="request-message-head"><span>${msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'الإدارة' : 'النظام')}</span><span>${formatRequestTime(msg.createdAt)}</span></div><div>${escapeHtml(msg.text||'')}</div></div>`).join('')}</div>`;
+    return `<div class="invoice-messages request-messages">${msgs.map(msg=>`<div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshMsgId===msg.id?' invoice-message-highlight':''}"><div class="request-message-head"><span>${msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'فريق الدعم' : 'النظام')}</span><span>${formatRequestTime(msg.createdAt)}</span></div><div>${escapeHtml(msg.text||'')}</div></div>`).join('')}</div>`;
   }
 
   function buildDraftCard(){
@@ -22525,7 +22882,7 @@ html.low-end-device .update-success-shell{
     if (!msgs.length) return `<div class="invoice-empty" style="padding:12px">لا توجد محادثة على هذه الفاتورة حالياً.</div>`;
     const lastMsgs = msgs.slice(-3);
     return `<div class="invoice-messages request-messages">${lastMsgs.map(msg=>{
-      const role = msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'الإدارة' : 'النظام');
+      const role = msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'فريق الدعم' : 'النظام');
       const cls = escapeHtml(msg.senderRole || 'customer') + (freshMsgId===msg.id ? ' invoice-message-highlight' : '');
       return `<div class="request-message ${cls}">
         <div class="request-message-head"><span>${role}</span><span>${formatRequestTime(msg.createdAt)}</span></div>
@@ -24087,7 +24444,7 @@ ${actionText} ${safeBranch}`;
     } catch (err) {
       console.error('loadCustomerAvailabilityRequests:', err);
       activeList.innerHTML = '<div class="request-track-empty">تعذّر جلب استعلاماتك حالياً.</div>';
-      archiveList.innerHTML = '<div class="request-track-empty">تعذّر جلب الأرشيف حالياً.</div>';
+      archiveList.innerHTML = '<div class="request-track-empty">تعذّر جلب أرشيف المحادثات حالياً.</div>';
     }
   };
 
@@ -24227,7 +24584,7 @@ ${actionText} ${safeBranch}`;
     } catch (err) {
       console.error('loadAvailabilityRequests:', err);
       activeList.innerHTML = '<div class="request-admin-empty">تعذّر جلب استعلامات التوفر حالياً.</div>';
-      archiveList.innerHTML = '<div class="request-admin-empty">تعذّر جلب الأرشيف حالياً.</div>';
+      archiveList.innerHTML = '<div class="request-admin-empty">تعذّر جلب أرشيف المحادثات حالياً.</div>';
     }
   };
 
