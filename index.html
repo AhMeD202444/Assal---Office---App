@@ -21801,7 +21801,7 @@ document.addEventListener("visibilitychange", () => {
           <div class="invoice-total-row grand"><span>الإجمالي</span><strong>${moneyIQD(total)}</strong></div>
         </div>
         <div class="invoice-actions">
-          <button class="invoice-btn send" type="button" onclick="sendCurrentInvoice()"><i class="fas fa-paper-plane"></i> إرسال</button>
+          <button class="invoice-btn send ${getSavedInvoiceTargetBranchCode() ? "" : "needs-branch"}" type="button" onclick="sendCurrentInvoice()"><i class="fas fa-paper-plane"></i> ${getInvoiceSendButtonLabel()}</button>
           <button class="invoice-btn archive" type="button" onclick="archiveCurrentDraftInvoice()"><i class="fas fa-ban"></i> إلغاء الفاتورة</button>
         </div>
       </div>`;
@@ -21934,50 +21934,81 @@ document.addEventListener("visibilitychange", () => {
     if (!window.firebaseDB || !window.firebaseDB.db || !cart.length || invoiceSending) return;
     const sendBtn = document.querySelector('#invoiceTrackActivePanel .invoice-btn.send');
     try {
+      const selectedBranchCode = typeof window.getSavedInvoiceTargetBranchCode === 'function' ? window.getSavedInvoiceTargetBranchCode() : '';
+      const selectedBranch = typeof window.getInvoiceBranchConfig === 'function' ? window.getInvoiceBranchConfig(selectedBranchCode) : null;
+      if (!selectedBranchCode || !selectedBranch) {
+        await Swal.fire({ icon:'warning', title:'حدد الفرع أولاً', text:'قبل إرسال الفاتورة لازم تختار الفرع الذي تريد إرسالها إليه.' });
+        return;
+      }
+
       invoiceSending = true;
       if (sendBtn){ sendBtn.disabled=true; sendBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> جاري الإرسال'; }
       const profile = await getCustomerProfileForInvoice();
       const note = getInvoiceNote();
-      const subtotal = cart.reduce((s,it)=> s + (Number(it.price)||0)*(Number(it.qty)||0), 0);
-      const discount = 0;
-      const total = subtotal;
       const now = Date.now();
-      const id = 'INV-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
-      const msgId = 'MSG-' + now.toString(36).toUpperCase();
-      const deviceId = getDeviceId();
-      const customerName = String(profile.name || '').trim() || 'بدون اسم';
-      const customerPhone = String(profile.phone || '').trim();
-      const customerAddress = String(profile.address || '').trim();
-      const invoiceNotificationBody = note
-        ? `فاتورة جديدة - ${note}`
-        : `فاتورة جديدة بقيمة ${typeof moneyIQD === 'function' ? moneyIQD(total) : total}`;
+      const id = 'INV-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,5).toUpperCase();
+      const itemName = cart.length === 1
+        ? (cart[0]?.name || cart[0]?.item || cart[0]?.title || cart[0]?.deviceName || '')
+        : `${cart.length} مواد`;
+      const payload = {
+        id,
+        deviceId: getDeviceId(),
+        customerName: profile.name,
+        customerPhone: profile.phone,
+        customerAddress: profile.address,
+        deviceName: itemName,
+        note,
+        targetBranchCode: selectedBranch.code,
+        targetBranchLabel: selectedBranch.label,
+        selectedBranchCode: selectedBranch.code,
+        selectedBranchLabel: selectedBranch.label,
+        mainReviewBranchCode: 'r778899',
+        mainReviewBranchLabel: 'مكتب عسل فرع بعقوبة',
+        status: 'pending',
+        customerArchived: false,
+        adminArchived: false,
+        cancelledByCustomer: false,
+        createdAt: now,
+        updatedAt: now,
+        items: cart.map(item => ({ ...(item || {}) })),
+        total: cart.reduce((sum, item) => sum + (Number(item?.price)||0) * (Number(item?.qty)||1), 0),
+        messages: {},
+        searchable: `${profile.name || ''} ${profile.phone || ''} ${profile.address || ''} ${itemName || ''} ${selectedBranch.label || ''}`
+      };
+
       const { db, ref, set } = window.firebaseDB;
-      await set(ref(db, `${INVOICE_PATH}/${id}`), {
-        id, deviceId, customerName, customerPhone, customerAddress,
-        items: cart.map(it=>({ id:it.id, name:it.name, category:it.category, qty:Number(it.qty)||0, price:Number(it.price)||0, img:it.img||'' })),
-        note, discount, subtotal, total, createdAt:now, updatedAt:now, status:'pending', customerArchived:false, adminArchived:false, customerDeleted:false,
-        messages:{ [msgId]: { id:msgId, senderRole:'customer', text: note ? `فاتورة جديدة
-${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCustomer:true } }
-      });
-      await queuePushNotificationEvent('invoice_created', {
+      await set(ref(db, `${INVOICE_PATH}/${id}`), payload);
+
+      queuePushNotificationEvent('invoice_created', {
         invoiceId: id,
         targetRole: 'admin',
-        targetDeviceId: '',
-        ...window.buildAdminCustomerNotificationPayload({
-          customerName,
-          customerPhone,
-          deviceId,
-          body: invoiceNotificationBody
-        })
+        targetBranchCode: selectedBranch.code,
+        targetBranchLabel: selectedBranch.label,
+        mirrorBranchCode: 'r778899',
+        customerName: profile.name,
+        body: `${profile.name || 'زبون'} - ${itemName || 'فاتورة جديدة'}`
       });
-      cart = []; saveCart();
-    setPendingInvoiceCreateNewId('');
-      setPendingInvoiceCreateNewId('');
-      const noteEl = document.getElementById('cartInvoiceNote'); if (noteEl) noteEl.value='';
-            if (sendBtn) sendBtn.innerHTML='<i class="fas fa-check"></i> تم الإرسال';
-      setTimeout(async ()=>{ invoiceSending=false; if (sendBtn){ sendBtn.disabled=false; sendBtn.innerHTML='<i class="fas fa-paper-plane"></i> إرسال'; } await loadCustomerInvoices(); }, 850);
+
+      cart = [];
+      syncCart();
+      try { localStorage.removeItem('cartInvoiceNote'); } catch(_){}
+      try {
+        if (typeof window.setSavedInvoiceTargetBranchCode === 'function') window.setSavedInvoiceTargetBranchCode('');
+        else localStorage.removeItem('assal_invoice_selected_branch_code');
+      } catch(_){}
+      await loadCustomerInvoices();
+      try { await refreshInvoiceCounts(); } catch(_) {}
+      const activeBtn = document.getElementById('invoiceViewActiveBtn'); if (activeBtn) activeBtn.click();
+      Swal.fire({ icon:'success', title:'تم إرسال الفاتورة', text:`تم إرسال الفاتورة إلى ${selectedBranch.label}، وستظهر نسخة في فرع بعقوبة للاطلاع فقط.`, timer:1700, showConfirmButton:false });
     } catch(err){
       console.error('sendCurrentInvoice:', err); invoiceSending=false; if (sendBtn){ sendBtn.disabled=false; sendBtn.innerHTML='<i class="fas fa-triangle-exclamation"></i> تعذّر الإرسال'; setTimeout(()=>{ sendBtn.innerHTML='<i class="fas fa-paper-plane"></i> إرسال'; }, 1300); }
+      return;
+    } finally {
+      invoiceSending = false;
+      if (sendBtn){
+        sendBtn.disabled=false;
+      }
+      updateInvoiceSendButtonState();
     }
   };
 
@@ -22077,7 +22108,12 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     if (!window.firebaseDB || !window.firebaseDB.db) return;
     const ok = await invoiceActionSwal('archive','أرشفة الفاتورة','سيتم نقل الفاتورة الملغاة إلى تبويب الأرشيف.');
     if (!ok.isConfirmed) return;
-    const { db, ref, update } = window.firebaseDB;
+    const { db, ref, update, get } = window.firebaseDB;
+    const snap = await get(ref(db, `${INVOICE_PATH}/${id}`));
+    if (snap.exists() && typeof window.canCurrentAdminManageInvoice === 'function' && !window.canCurrentAdminManageInvoice(snap.val() || {})) {
+      await Swal.fire({ icon:'info', title:'للعرض فقط', text:'هذه الفاتورة مخصصة لفرع آخر، لذلك ما تكدر تأرشفها من هذا الحساب.' });
+      return;
+    }
     await update(ref(db, `${INVOICE_PATH}/${id}`), { adminArchived:true, updatedAt:Date.now() });
     await loadAdminInvoices();
     await refreshInvoiceCounts();
@@ -22125,16 +22161,19 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     const branchLabel = getAdminAccountLabel() || 'مكتب عسل';
     let targetDeviceId = '';
     let customerName = '';
-    try {
-      const snap = await get(ref(db, `${INVOICE_PATH}/${id}`));
-      if (snap.exists()) {
-        const inv = snap.val() || {};
-        targetDeviceId = String(inv.deviceId || '');
-        customerName = String(inv.customerName || '');
-      }
-    } catch (err) { console.error('Failed to read invoice before admin reply:', err); }
-    await update(ref(db), { [`${INVOICE_PATH}/${id}/messages/${msgId}`]: { id:msgId, senderRole:'admin', branchLabel, text, createdAt:now, seenByAdmin:true, seenByCustomer:false }, [`${INVOICE_PATH}/${id}/updatedAt`]: now, [`${INVOICE_PATH}/${id}/status`]: 'pending' });
-    await queuePushNotificationEvent('invoice_admin_reply', {
+    const snap = await get(ref(db, `${INVOICE_PATH}/${id}`));
+    if (!snap.exists()) return;
+    const invoice = snap.val() || {};
+    if (typeof window.canCurrentAdminManageInvoice === 'function' && !window.canCurrentAdminManageInvoice(invoice)) {
+      await Swal.fire({ icon:'info', title:'للعرض فقط', text:'هذه الفاتورة مخصصة لفرع آخر، لذلك ما تكدر ترسل رد من هذا الحساب.' });
+      return;
+    }
+    targetDeviceId = invoice.deviceId || '';
+    customerName = invoice.customerName || '';
+    const existing = invoice.messages && typeof invoice.messages==='object' ? invoice.messages : {};
+    const message = { id:msgId, senderRole:'admin', senderName:'فريق الدعم', senderBranchLabel: branchLabel, text, createdAt:now, seenByCustomer:false };
+    await update(ref(db, `${INVOICE_PATH}/${id}`), { messages:{ ...existing, [msgId]: message }, updatedAt:now, status:'pending' });
+    queuePushNotificationEvent('invoice_admin_reply', {
       invoiceId: id,
       targetRole: 'customer',
       targetDeviceId,
@@ -22142,7 +22181,9 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       title: 'رد جديد على الفاتورة',
       body: text
     });
-    if (input) input.value=''; await loadAdminInvoices(); await refreshInvoiceCounts();
+    if (input) input.value='';
+    await loadAdminInvoices();
+    await refreshInvoiceCounts();
   };
   window.markInvoicePrepared = async function(id){
     if (!window.firebaseDB || !window.firebaseDB.db) return;
@@ -22155,24 +22196,34 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
       const snap = await get(ref(db, `${INVOICE_PATH}/${id}`));
       if (snap.exists()) {
         const inv = snap.val() || {};
-        targetDeviceId = String(inv.deviceId || '');
-        customerName = String(inv.customerName || '');
+        if (typeof window.canCurrentAdminManageInvoice === 'function' && !window.canCurrentAdminManageInvoice(inv)) {
+          await Swal.fire({ icon:'info', title:'للعرض فقط', text:'هذه الفاتورة مخصصة لفرع آخر، لذلك ما تكدر تنهيها من هذا الحساب.' });
+          return;
+        }
+        targetDeviceId = inv.deviceId || '';
+        customerName = inv.customerName || '';
+        const existing = inv.messages && typeof inv.messages === 'object' ? inv.messages : {};
+        const systemMsg = {
+          id: msgId,
+          senderRole: 'system',
+          senderName: 'النظام',
+          text: 'تم تجهيز الفاتورة وإغلاقها من قبل فريق الدعم.',
+          createdAt: now,
+          seenByCustomer: false
+        };
+        await update(ref(db, `${INVOICE_PATH}/${id}`), {
+          status: 'prepared',
+          adminArchived: true,
+          updatedAt: now,
+          messages: { ...existing, [msgId]: systemMsg }
+        });
       }
-    } catch (err) { console.error('Failed to read invoice before prepared update:', err); }
-    await update(ref(db), {
-      [`${INVOICE_PATH}/${id}/updatedAt`]: now,
-      [`${INVOICE_PATH}/${id}/status`]: 'prepared',
-      [`${INVOICE_PATH}/${id}/adminArchived`]: true,
-      [`${INVOICE_PATH}/${id}/messages/${msgId}`]: {
-        id: msgId,
-        senderRole: 'system',
-        text: 'تم تجهيز الفاتورة ونقلها تلقائياً إلى أرشيف الإدارة.',
-        createdAt: now,
-        seenByAdmin: true,
-        seenByCustomer: false
-      }
-    });
-    await queuePushNotificationEvent('invoice_prepared', {
+    } catch (err) {
+      console.error('markInvoicePrepared:', err);
+      return;
+    }
+
+    queuePushNotificationEvent('invoice_prepared', {
       invoiceId: id,
       targetRole: 'customer',
       targetDeviceId,
@@ -22185,7 +22236,7 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
     await loadCustomerInvoices();
     await refreshInvoiceCounts();
   };
-  window.deleteAdminArchivedInvoiceRecord = async function(id){ if (!window.firebaseDB || !window.firebaseDB.db) return; const ok = await invoiceActionSwal('delete','حذف الفاتورة نهائيًا','سيتم حذف الفاتورة نهائيًا من قاعدة البيانات.'); if (!ok.isConfirmed) return; const { db, ref, remove } = window.firebaseDB; await remove(ref(db, `${INVOICE_PATH}/${id}`)); await loadAdminInvoices(); await refreshInvoiceCounts(); };
+  window.deleteAdminArchivedInvoiceRecord = async function(id){ if (!window.firebaseDB || !window.firebaseDB.db) return; const ok = await invoiceActionSwal('delete','حذف الفاتورة نهائيًا','سيتم حذف الفاتورة نهائيًا من قاعدة البيانات.'); if (!ok.isConfirmed) return; const { db, ref, remove, get } = window.firebaseDB; const snap = await get(ref(db, `${INVOICE_PATH}/${id}`)); if (snap.exists() && typeof window.canCurrentAdminManageInvoice === 'function' && !window.canCurrentAdminManageInvoice(snap.val() || {})) { await Swal.fire({ icon:'info', title:'للعرض فقط', text:'هذه الفاتورة مخصصة لفرع آخر، لذلك ما تكدر تحذفها من هذا الحساب.' }); return; } await remove(ref(db, `${INVOICE_PATH}/${id}`)); await loadAdminInvoices(); await refreshInvoiceCounts(); };
 
   function updateVisibleAdminInvoiceCard(invoiceId, items, total){
     const card = document.querySelector(`#invoiceAdminActivePanel [data-invoice-id="${CSS.escape(String(invoiceId))}"]`);
@@ -22544,6 +22595,84 @@ ${note}` : 'فاتورة جديدة', createdAt:now, seenByAdmin:false, seenByCu
 }
 .invoice-note-view{ min-height:auto; }
 .invoice-note-input::placeholder{ color:rgba(255,255,255,.45); }
+
+.invoice-branch-box{
+  display:grid;
+  gap:10px;
+  padding:14px;
+  border-radius:20px;
+  background:linear-gradient(135deg, rgba(23,62,96,.24), rgba(9,22,44,.34));
+  border:1px solid rgba(110,229,255,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+.invoice-branch-label{
+  color:#fff;
+  font-size:13px;
+  font-weight:900;
+}
+.invoice-branch-badges{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.invoice-branch-chip{
+  border:none;
+  border-radius:16px;
+  min-height:48px;
+  padding:0 12px;
+  background:linear-gradient(135deg, rgba(15,37,71,.96), rgba(22,55,97,.88));
+  border:1px solid rgba(117,222,255,.14);
+  color:#dff8ff;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  cursor:pointer;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease, color .18s ease;
+  box-shadow:0 10px 24px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.invoice-branch-chip:hover{
+  transform:translateY(-1px);
+  border-color:rgba(127,241,255,.3);
+}
+.invoice-branch-chip.active{
+  color:#fff;
+  background:linear-gradient(135deg, rgba(61,221,198,.95), rgba(40,128,255,.9));
+  border-color:rgba(173,255,250,.55);
+  box-shadow:0 0 0 1px rgba(163,255,248,.16), 0 12px 30px rgba(39,136,255,.28), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.invoice-branch-chip span{
+  display:block;
+  line-height:1.35;
+}
+.invoice-branch-hint{
+  color:rgba(223,244,255,.72);
+  font-size:12px;
+  line-height:1.8;
+}
+.invoice-btn.send.needs-branch{
+  background:linear-gradient(135deg, rgba(28,63,106,.95), rgba(23,93,153,.88));
+  border-color:rgba(116,235,255,.2);
+  box-shadow:0 12px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.invoice-target-meta{
+  margin-top:12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:11px 13px;
+  border-radius:16px;
+  background:rgba(14,31,58,.48);
+  border:1px solid rgba(110,229,255,.14);
+  color:#dffcff;
+  font-size:13px;
+  font-weight:800;
+}
+.invoice-target-meta i{ color:#87f7ff; }
+.invoice-readonly-box{ margin-top:12px; }
 
 .invoice-totals{ display:grid; gap:8px; }
 .invoice-total-row{
@@ -22936,6 +23065,107 @@ html.low-end-device .update-success-shell{
   function getDiscountValueSafe(){ return 0; }
   window.refreshInvoiceDraftOnly = function(){ if (typeof window.loadCustomerInvoices==='function') window.loadCustomerInvoices(); };
 
+  const MAIN_INVOICE_BRANCH_CODE = 'r778899';
+  const INVOICE_BRANCH_SELECT_STORAGE_KEY = 'assal_invoice_selected_branch_code';
+  const INVOICE_BRANCH_OPTIONS = [
+    { code:'r778899', shortLabel:'بعقوبة', label:'مكتب عسل فرع بعقوبة' },
+    { code:'t445566', shortLabel:'حي المعلمين', label:'مكتب عسل فرع الحي' },
+    { code:'y112233', shortLabel:'بلدروز', label:'مكتب عسل فرع بلدروز' },
+    { code:'u991100', shortLabel:'التحرير', label:'مكتب عسل فرع التحرير' }
+  ];
+
+  function normalizeInvoiceBranchCode(value){ return String(value || '').trim().toLowerCase(); }
+  function getInvoiceBranchConfig(code){
+    const normalized = normalizeInvoiceBranchCode(code);
+    return INVOICE_BRANCH_OPTIONS.find(item => item.code === normalized) || null;
+  }
+  function getSavedInvoiceTargetBranchCode(){
+    try {
+      const saved = normalizeInvoiceBranchCode(localStorage.getItem(INVOICE_BRANCH_SELECT_STORAGE_KEY));
+      return getInvoiceBranchConfig(saved)?.code || '';
+    } catch(_) { return ''; }
+  }
+  function setSavedInvoiceTargetBranchCode(code){
+    const normalized = getInvoiceBranchConfig(code)?.code || '';
+    try {
+      if (normalized) localStorage.setItem(INVOICE_BRANCH_SELECT_STORAGE_KEY, normalized);
+      else localStorage.removeItem(INVOICE_BRANCH_SELECT_STORAGE_KEY);
+    } catch(_){}
+    return normalized;
+  }
+  function getInvoiceTargetBranchCode(inv){
+    const candidates = [inv?.targetBranchCode, inv?.selectedBranchCode, inv?.branchCode, inv?.assignedBranchCode];
+    for (const value of candidates) {
+      const normalized = normalizeInvoiceBranchCode(value);
+      if (normalized) return normalized;
+    }
+    return '';
+  }
+  function getInvoiceTargetBranchLabel(inv){
+    const configured = getInvoiceBranchConfig(getInvoiceTargetBranchCode(inv));
+    const raw = String(inv?.targetBranchLabel || inv?.selectedBranchLabel || inv?.branchLabel || '').trim();
+    return configured?.label || raw || '';
+  }
+  function invoiceVisibleToCurrentAdmin(inv){
+    if (!window.isAdminUser) return false;
+    const adminCode = normalizeInvoiceBranchCode(typeof getAdminAccountCode === 'function' ? getAdminAccountCode() : '');
+    const targetCode = getInvoiceTargetBranchCode(inv);
+    if (!targetCode || !adminCode) return true;
+    if (adminCode === MAIN_INVOICE_BRANCH_CODE) return true;
+    return adminCode === targetCode;
+  }
+  function invoiceBelongsToManagedBranch(inv){
+    if (!window.isAdminUser) return false;
+    const adminCode = normalizeInvoiceBranchCode(typeof getAdminAccountCode === 'function' ? getAdminAccountCode() : '');
+    const targetCode = getInvoiceTargetBranchCode(inv);
+    if (!targetCode || !adminCode) return true;
+    return adminCode === targetCode || (adminCode === MAIN_INVOICE_BRANCH_CODE && targetCode === MAIN_INVOICE_BRANCH_CODE);
+  }
+  function getInvoiceSendButtonLabel(){
+    return getSavedInvoiceTargetBranchCode() ? 'إرسال' : 'اختر الفرع';
+  }
+  function updateInvoiceSendButtonState(){
+    const btn = document.querySelector('#invoiceTrackActivePanel .invoice-btn.send');
+    if (!btn) return;
+    const hasBranch = !!getSavedInvoiceTargetBranchCode();
+    btn.classList.toggle('needs-branch', !hasBranch);
+    btn.innerHTML = `<i class="fas fa-paper-plane"></i> ${hasBranch ? 'إرسال' : 'اختر الفرع'}`;
+  }
+  function renderInvoiceBranchSelector(){
+    const current = getSavedInvoiceTargetBranchCode();
+    return `<div class="invoice-branch-box">
+      <div class="invoice-branch-label">اختر الفرع الذي تريد ارسال الفاتورة اليه</div>
+      <div class="invoice-branch-badges">
+        ${INVOICE_BRANCH_OPTIONS.map(branch => `<button type="button" class="invoice-branch-chip ${current===branch.code ? 'active' : ''}" onclick="onInvoiceTargetBranchChange('${branch.code}', this)"><span>${escapeHtml(branch.shortLabel)}</span></button>`).join('')}
+      </div>
+     
+    </div>`;
+  }
+  function invoiceTargetMeta(inv){
+    const label = getInvoiceTargetBranchLabel(inv);
+    if (!label) return '';
+    return `<div class="invoice-target-meta"><i class="fas fa-store"></i><span>الفرع المختار: ${escapeHtml(label)}</span></div>`;
+  }
+  function invoiceReadonlyHint(inv){
+    const label = escapeHtml(getInvoiceTargetBranchLabel(inv) || 'فرع آخر');
+    return `<div class="invoice-inline-state invoice-readonly-box"><div class="title">للاطلاع فقط</div><div class="sub">هذه الفاتورة موجهة إلى <strong>${label}</strong>، لذلك الحساب الحالي يطلع عليها فقط بدون إرسال رد أو إنهاء.</div></div>`;
+  }
+
+  window.getInvoiceBranchConfig = getInvoiceBranchConfig;
+  window.getSavedInvoiceTargetBranchCode = getSavedInvoiceTargetBranchCode;
+  window.setSavedInvoiceTargetBranchCode = setSavedInvoiceTargetBranchCode;
+  window.getInvoiceTargetBranchLabel = getInvoiceTargetBranchLabel;
+  window.canCurrentAdminManageInvoice = invoiceBelongsToManagedBranch;
+  window.onInvoiceTargetBranchChange = function(value, el){
+    const selected = setSavedInvoiceTargetBranchCode(value);
+    document.querySelectorAll('#invoiceTrackActivePanel .invoice-branch-chip').forEach(chip => {
+      const clickText = chip.getAttribute('onclick') || '';
+      chip.classList.toggle('active', !!selected && clickText.includes(`'${selected}'`));
+    });
+    if (el && selected) el.classList.add('active');
+    updateInvoiceSendButtonState();
+  };
+
   function invoiceMetaBadges(inv){
     return `<div class="invoice-meta-badges">
       <div class="invoice-meta-badge"><i class="fas fa-user"></i><span>${escapeHtml(inv.customerName || 'بدون اسم')}</span></div>
@@ -23065,20 +23295,19 @@ html.low-end-device .update-success-shell{
       <div class="invoice-draft-head">
         <div>
           <div class="invoice-draft-title">فاتورة جديدة</div>
-          <div class="invoice-draft-sub">راجع المواد، أضف ملاحظتك، ثم أرسلها أو ألغِها وتحويلها إلى الأرشيف المحلي.</div>
         </div>
         <div class="invoice-status-badge pending"><i class="fas fa-paper-plane"></i> جاهزة للإرسال</div>
       </div>
       ${draftInvoiceItems()}
+      ${renderInvoiceBranchSelector()}
       <div class="invoice-note-box">
-        <label class="invoice-note-label" for="cartInvoiceNote">ملاحظة الزبون على الفاتورة</label>
         <textarea id="cartInvoiceNote" class="invoice-note-input" placeholder="اكتب أي ملاحظة أو توضيح تحب تضيفه على الفاتورة...">${escapeHtml(getInvoiceNoteValue())}</textarea>
       </div>
       <div class="invoice-totals">
         <div class="invoice-total-row grand"><span>الإجمالي</span><strong>${moneyIQD(total)}</strong></div>
       </div>
       <div class="invoice-actions">
-        <button class="invoice-btn send" type="button" onclick="sendCurrentInvoice()"><i class="fas fa-paper-plane"></i> إرسال</button>
+        <button class="invoice-btn send ${getSavedInvoiceTargetBranchCode() ? "" : "needs-branch"}" type="button" onclick="sendCurrentInvoice()"><i class="fas fa-paper-plane"></i> ${getInvoiceSendButtonLabel()}</button>
         <button class="invoice-btn archive" type="button" onclick="archiveCurrentDraftInvoice()"><i class="fas fa-ban"></i> إلغاء الفاتورة</button>
       </div>
     </div>`;
@@ -23105,6 +23334,7 @@ html.low-end-device .update-success-shell{
         <div class="invoice-status-badge ${statusClass}"><i class="fas ${archived ? 'fa-box-archive' : (cancelled ? 'fa-ban' : (inv.status==='prepared' ? 'fa-check-double' : 'fa-hourglass-half'))}"></i>${statusText}</div>
       </div>
       ${invoiceMetaBadges(inv)}
+      ${invoiceTargetMeta(inv)}
       ${invoiceItems(inv, itemMode, inv.id)}
       <div class="invoice-totals"><div class="invoice-total-row grand"><span>الإجمالي</span><strong>${moneyIQD(inv.total || 0)}</strong></div></div>
       ${inv.note ? `<div class="invoice-note-box"><div class="invoice-note-label">ملاحظة الفاتورة</div><div class="invoice-note-view">${escapeHtml(inv.note)}</div></div>` : ''}
@@ -23153,6 +23383,7 @@ html.low-end-device .update-success-shell{
         inv?.note,
         inv?.deviceName,
         inv?.deviceId,
+        getInvoiceTargetBranchLabel(inv),
         inv?.itemsSummary || extractInvoiceSearchItems(inv),
         buildTrackSearchDateTokens(inv?.updatedAt || inv?.createdAt || 0)
       ].join(' '));
@@ -23202,7 +23433,15 @@ html.low-end-device .update-success-shell{
 
   function adminInvoiceCard(inv, freshMsgId, archived){
     const cancelled = !!inv.cancelledByCustomer || inv.status === 'cancelled';
-    const itemMode = (!archived && !cancelled) ? 'admin-edit' : 'view';
+    const canManage = invoiceBelongsToManagedBranch(inv);
+    const itemMode = (!archived && !cancelled && canManage) ? 'admin-edit' : 'view';
+    const actionBlock = !canManage
+      ? invoiceReadonlyHint(inv)
+      : (archived
+          ? `<div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn delete" type="button" onclick="deleteAdminArchivedInvoiceRecord('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div>`
+          : (cancelled
+              ? `<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة من الزبون</div><div class="sub" style="margin-bottom:10px">يمكنك الآن أرشفة الفاتورة أو حذفها لاحقًا من الأرشيف.</div><div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn archive" type="button" onclick="archiveAdminCancelledInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button></div></div>`
+              : `<div class="invoice-admin-card-actions stack"><textarea id="invoiceAdminReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب رد الإدارة على هذه الفاتورة..."></textarea><div class="invoice-admin-card-actions"><button class="invoice-action-btn send" type="button" onclick="sendAdminInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال</button><button class="invoice-action-btn done" type="button" onclick="markInvoicePrepared('${escapeHtml(inv.id)}')"><i class="fas fa-check-double"></i> تم التجهيز</button></div></div>`));
     return `<div class="invoice-admin-card-shell" data-track-search="${escapeHtml(safeBuildTrackSearchText('invoiceAdmin', { id: inv.id, owner: inv.customerName, name: inv.customerName, phone: inv.customerPhone, item: inv.deviceName, category: inv.deviceId, itemsText: inv.itemsSummary || extractInvoiceSearchItems(inv), note: inv.note, date: inv.updatedAt || inv.createdAt }))}">
       <div class="invoice-admin-head">
         <div>
@@ -23212,6 +23451,7 @@ html.low-end-device .update-success-shell{
         <div class="invoice-status-badge ${archived ? 'archived' : (cancelled ? 'archived' : (inv.status==='prepared' ? 'prepared' : 'pending'))}"><i class="fas ${archived ? 'fa-box-archive' : (cancelled ? 'fa-ban' : (inv.status==='prepared' ? 'fa-check-double' : 'fa-hourglass-half'))}"></i>${archived ? 'في الأرشيف' : (cancelled ? 'ملغاة من الزبون' : (inv.status==='prepared' ? 'تم التجهيز' : 'قيد المتابعة'))}</div>
       </div>
       ${invoiceMetaBadges(inv)}
+      ${invoiceTargetMeta(inv)}
       <div class="invoice-meta-badges" style="grid-template-columns:repeat(2,minmax(0,1fr))">
         <div class="invoice-meta-badge"><i class="fas fa-mobile-screen"></i><span>${escapeHtml(inv.deviceId || '-')}</span></div>
         <div class="invoice-meta-badge"><i class="fas fa-money-bill-wave"></i><span>${moneyIQD(inv.total || 0)}</span></div>
@@ -23219,7 +23459,7 @@ html.low-end-device .update-success-shell{
       ${invoiceItems(inv, itemMode, inv.id)}
       ${inv.note ? `<div class="invoice-note-box"><div class="invoice-note-label">ملاحظة الزبون</div><div class="invoice-note-view">${escapeHtml(inv.note)}</div></div>` : ''}
       ${invoiceMessages(inv.messages, freshMsgId || null)}
-      ${archived ? `<div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn delete" type="button" onclick="deleteAdminArchivedInvoiceRecord('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div>` : (cancelled ? `<div class="invoice-inline-state" style="padding:14px 12px"><div class="title" style="font-size:16px;margin-bottom:4px">تم إلغاء الفاتورة من الزبون</div><div class="sub" style="margin-bottom:10px">يمكنك الآن أرشفة الفاتورة أو حذفها لاحقًا من الأرشيف.</div><div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn archive" type="button" onclick="archiveAdminCancelledInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة الفاتورة</button></div></div>` : `<div class="invoice-admin-card-actions stack"><textarea id="invoiceAdminReply_${escapeHtml(inv.id)}" class="invoice-note-input" placeholder="اكتب رد الإدارة على هذه الفاتورة..."></textarea><div class="invoice-admin-card-actions"><button class="invoice-action-btn send" type="button" onclick="sendAdminInvoiceReply('${escapeHtml(inv.id)}')"><i class="fas fa-paper-plane"></i> إرسال</button><button class="invoice-action-btn done" type="button" onclick="markInvoicePrepared('${escapeHtml(inv.id)}')"><i class="fas fa-check-double"></i> تم التجهيز</button></div></div>`)}
+      ${actionBlock}
     </div>`;
   }
 
@@ -23258,6 +23498,7 @@ html.low-end-device .update-success-shell{
         : '<div class="invoice-empty">أرشيف الفواتير فارغ حالياً.</div>';
       applyTrackModalSearch('invoice');
       scrollInvoicePanels(document.getElementById('cartModal'));
+      updateInvoiceSendButtonState();
       if (typeof window.refreshInvoiceCounts === 'function') await window.refreshInvoiceCounts();
     } catch(err){ console.error('loadCustomerInvoices:', err); active.innerHTML='<div class="invoice-empty">تعذّر جلب الفواتير حالياً.</div>'; archive.innerHTML='<div class="invoice-empty">تعذّر جلب الأرشيف حالياً.</div>'; }
   };
@@ -23283,8 +23524,9 @@ html.low-end-device .update-success-shell{
         .map((inv, index) => normalizeInvoiceAdminRecord(inv, inv?.id || `invoice_${index}`))
         .filter(inv => inv && inv.id);
 
-      const activeInvoices = all.filter(inv => !inv.adminArchived);
-      const archiveInvoices = all.filter(inv => !!inv.adminArchived);
+      const visibleInvoices = all.filter(inv => invoiceVisibleToCurrentAdmin(inv));
+      const activeInvoices = visibleInvoices.filter(inv => !inv.adminArchived);
+      const archiveInvoices = visibleInvoices.filter(inv => !!inv.adminArchived);
       const freshMap = {};
 
       activeInvoices.forEach(inv => {
@@ -23321,6 +23563,32 @@ html.low-end-device .update-success-shell{
       console.error('loadAdminInvoices:', err);
       active.innerHTML='<div class="invoice-empty">تعذّر جلب الفواتير حالياً.</div>';
       archive.innerHTML='<div class="invoice-empty">تعذّر جلب الأرشيف حالياً.</div>';
+    }
+  };
+
+  window.refreshInvoiceCounts = async function(){
+    try {
+      const badge = document.getElementById('invoiceAdminBadge');
+      const activeBtn = document.getElementById('invoiceAdminActiveBtn');
+      const archiveBtn = document.getElementById('invoiceAdminArchiveBtn');
+      if (!window.isAdminUser) {
+        if (badge) badge.style.display = 'none';
+        if (activeBtn) activeBtn.innerHTML = 'الفواتير';
+        if (archiveBtn) archiveBtn.innerHTML = 'الأرشيف';
+        return;
+      }
+      const all = await getAllInvoicesFresh();
+      const visible = all.filter(inv => invoiceVisibleToCurrentAdmin(inv));
+      const activeCount = visible.filter(inv => !inv.adminArchived).length;
+      const archiveCount = visible.filter(inv => !!inv.adminArchived).length;
+      if (activeBtn) activeBtn.innerHTML = `الفواتير${activeCount ? ` <span class="request-count-badge">${activeCount}</span>` : ''}`;
+      if (archiveBtn) archiveBtn.innerHTML = `الأرشيف${archiveCount ? ` <span class="request-count-badge">${archiveCount}</span>` : ''}`;
+      if (badge) {
+        if (activeCount > 0) { badge.style.display = 'inline-flex'; badge.textContent = activeCount > 99 ? '99+' : String(activeCount); }
+        else { badge.style.display = 'none'; badge.textContent = '0'; }
+      }
+    } catch(err){
+      console.warn('refreshInvoiceCounts:', err);
     }
   };
 })();
