@@ -12756,7 +12756,6 @@ html.low-end-device .results-container {
       <div class="customer-profile-icon"><i class="fas fa-id-card"></i></div>
       <div class="customer-profile-copy">
         <h3>تسجيل بيانات الزبون</h3>
-        <p>لضمان سهولة التواصل وخدمتكم بدقة، يرجى تسجيل معلوماتك الصحيحة.</p>
       </div>
     </div>
     <div class="customer-profile-body">
@@ -12778,7 +12777,7 @@ html.low-end-device .results-container {
             <i class="fas fa-user-plus"></i>
             تسجيل
           </button>
-          <div class="customer-profile-helper">يتم الحفظ مرة واحدة فقط على هذا الجهاز وبشكل مستقل عن الإحصائيات والطلبات.</div>
+
         </div>
       </div>
     </div>
@@ -14765,7 +14764,7 @@ window.loadCustomerRequests = async function () {
 
         activeList.innerHTML = activeRequests.length
             ? activeRequests.map(req => renderCustomerCard(req, false)).join('')
-            : '<div class="request-track-empty support-chat-empty"><i class="fas fa-comments"></i><strong>ما عندك محادثات حالياً</strong><span>اضغط زر المحادثة حتى تبدأ أول رسالة ويا الإدارة.</span><button class="request-submit-btn support-empty-action" type="button" onclick="openNewChatFromTrackModal()"><i class="fas fa-paper-plane"></i>ابدأ محادثة</button></div>';
+            : '<div class="request-track-empty support-chat-empty"><i class="fas fa-comments"></i><strong>ما عندك محادثات حالياً</strong><button class="request-submit-btn support-empty-action" type="button" onclick="openNewChatFromTrackModal()"><i class="fas fa-paper-plane"></i>ابدأ محادثة</button></div>';
 
         archiveList.innerHTML = archiveRequests.length
             ? archiveRequests.map(req => renderCustomerCard(req, true)).join('')
@@ -23133,7 +23132,7 @@ html.low-end-device .update-success-shell{
   function renderInvoiceBranchSelector(){
     const current = getSavedInvoiceTargetBranchCode();
     return `<div class="invoice-branch-box">
-      <div class="invoice-branch-label">اختر الفرع الذي يستلم الفاتورة</div>
+<div class="invoice-branch-label" style="text-align:center;">اختر الفرع الذي يستلم الفاتورة</div>
       <div class="invoice-branch-badges">
         ${INVOICE_BRANCH_OPTIONS.map(branch => `<button type="button" class="invoice-branch-chip ${current===branch.code ? 'active' : ''}" onclick="onInvoiceTargetBranchChange('${branch.code}', this)"><span>${escapeHtml(branch.shortLabel)}</span></button>`).join('')}
       </div>
