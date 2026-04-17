@@ -22117,6 +22117,66 @@ document.addEventListener("visibilitychange", () => {
     await refreshInvoiceCounts();
   };
 
+  window.archiveMainReviewInvoice = async function(id){
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
+    const ok = await invoiceActionSwal('archive','أرشفة من بعقوبة','سيتم نقل هذه الفاتورة إلى أرشيف بعقوبة فقط، وستبقى ظاهرة للفرع المستلم كما هي.');
+    if (!ok.isConfirmed) return;
+    const { db, ref, update, get } = window.firebaseDB;
+    const snap = await get(ref(db, `${INVOICE_PATH}/${id}`));
+    if (!snap.exists()) return;
+    const invoice = snap.val() || {};
+    if (typeof isMainBranchMirrorInvoice === 'function' && !isMainBranchMirrorInvoice(invoice)) {
+      await Swal.fire({ icon:'info', title:'غير متاح', text:'هذا الخيار مخصص لعرض بعقوبة على فواتير الفروع الأخرى فقط.' });
+      return;
+    }
+    await update(ref(db, `${INVOICE_PATH}/${id}`), {
+      mainReviewArchived: true,
+      mainReviewDeleted: false,
+      mainReviewArchivedAt: Date.now()
+    });
+    await loadAdminInvoices();
+    await refreshInvoiceCounts();
+  };
+
+  window.restoreMainReviewInvoice = async function(id){
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
+    const { db, ref, update, get } = window.firebaseDB;
+    const snap = await get(ref(db, `${INVOICE_PATH}/${id}`));
+    if (!snap.exists()) return;
+    const invoice = snap.val() || {};
+    if (typeof isMainBranchMirrorInvoice === 'function' && !isMainBranchMirrorInvoice(invoice)) {
+      await Swal.fire({ icon:'info', title:'غير متاح', text:'هذا الخيار مخصص لعرض بعقوبة على فواتير الفروع الأخرى فقط.' });
+      return;
+    }
+    await update(ref(db, `${INVOICE_PATH}/${id}`), {
+      mainReviewArchived: false,
+      mainReviewDeleted: false,
+      mainReviewRestoredAt: Date.now()
+    });
+    await loadAdminInvoices();
+    await refreshInvoiceCounts();
+  };
+
+  window.deleteMainReviewInvoice = async function(id){
+    if (!window.firebaseDB || !window.firebaseDB.db) return;
+    const ok = await invoiceActionSwal('delete','حذف من بعقوبة فقط','سيتم إخفاء هذه الفاتورة من حساب بعقوبة فقط، ولن تُحذف من الفرع الذي استلمها.');
+    if (!ok.isConfirmed) return;
+    const { db, ref, update, get } = window.firebaseDB;
+    const snap = await get(ref(db, `${INVOICE_PATH}/${id}`));
+    if (!snap.exists()) return;
+    const invoice = snap.val() || {};
+    if (typeof isMainBranchMirrorInvoice === 'function' && !isMainBranchMirrorInvoice(invoice)) {
+      await Swal.fire({ icon:'info', title:'غير متاح', text:'هذا الخيار مخصص لعرض بعقوبة على فواتير الفروع الأخرى فقط.' });
+      return;
+    }
+    await update(ref(db, `${INVOICE_PATH}/${id}`), {
+      mainReviewDeleted: true,
+      mainReviewDeletedAt: Date.now()
+    });
+    await loadAdminInvoices();
+    await refreshInvoiceCounts();
+  };
+
   window.sendCustomerInvoiceReply = async function(id){
     if (!window.firebaseDB || !window.firebaseDB.db) return;
     const input = document.getElementById(`invoiceTrackReply_${id}`);
@@ -23104,12 +23164,29 @@ html.low-end-device .update-success-shell{
     const raw = String(inv?.targetBranchLabel || inv?.selectedBranchLabel || inv?.branchLabel || '').trim();
     return configured?.label || raw || '';
   }
+  function isMainBranchMirrorInvoice(inv){
+    if (!window.isAdminUser) return false;
+    const adminCode = normalizeInvoiceBranchCode(typeof getAdminAccountCode === 'function' ? getAdminAccountCode() : '');
+    const targetCode = getInvoiceTargetBranchCode(inv);
+    return adminCode === MAIN_INVOICE_BRANCH_CODE && !!targetCode && targetCode !== MAIN_INVOICE_BRANCH_CODE;
+  }
+  function isInvoiceArchivedForCurrentAdmin(inv){
+    if (isMainBranchMirrorInvoice(inv)) return !!inv?.mainReviewArchived;
+    return !!inv?.adminArchived;
+  }
+  function isInvoiceDeletedForCurrentAdmin(inv){
+    if (isMainBranchMirrorInvoice(inv)) return !!inv?.mainReviewDeleted;
+    return false;
+  }
   function invoiceVisibleToCurrentAdmin(inv){
     if (!window.isAdminUser) return false;
     const adminCode = normalizeInvoiceBranchCode(typeof getAdminAccountCode === 'function' ? getAdminAccountCode() : '');
     const targetCode = getInvoiceTargetBranchCode(inv);
     if (!targetCode || !adminCode) return true;
-    if (adminCode === MAIN_INVOICE_BRANCH_CODE) return true;
+    if (adminCode === MAIN_INVOICE_BRANCH_CODE) {
+      if (targetCode !== MAIN_INVOICE_BRANCH_CODE) return !isInvoiceDeletedForCurrentAdmin(inv);
+      return true;
+    }
     return adminCode === targetCode;
   }
   function invoiceBelongsToManagedBranch(inv){
@@ -23358,6 +23435,8 @@ html.low-end-device .update-success-shell{
       deviceName: String(base.deviceName || '').trim(),
       status: String(base.status || 'pending').trim() || 'pending',
       adminArchived: !!base.adminArchived,
+      mainReviewArchived: !!base.mainReviewArchived,
+      mainReviewDeleted: !!base.mainReviewDeleted,
       customerArchived: !!base.customerArchived,
       customerDeleted: !!base.customerDeleted,
       cancelledByCustomer: !!base.cancelledByCustomer,
@@ -23434,9 +23513,15 @@ html.low-end-device .update-success-shell{
   function adminInvoiceCard(inv, freshMsgId, archived){
     const cancelled = !!inv.cancelledByCustomer || inv.status === 'cancelled';
     const canManage = invoiceBelongsToManagedBranch(inv);
+    const mainMirrorView = !canManage && isMainBranchMirrorInvoice(inv);
     const itemMode = (!archived && !cancelled && canManage) ? 'admin-edit' : 'view';
+    const readonlyLabel = escapeHtml(getInvoiceTargetBranchLabel(inv) || 'فرع آخر');
+    const mainMirrorHint = `<div class="invoice-inline-state invoice-readonly-box"><div class="title">نسخة اطلاع لبعقوبة</div><div class="sub">هذه الفاتورة موجهة إلى <strong>${readonlyLabel}</strong>، ومن حساب بعقوبة تكدر فقط تأرشفها أو تخفيها من قائمتك بدون ما تتأثر عند الفرع المستلم.</div></div>`;
+    const mainMirrorActions = archived
+      ? `<div class="invoice-admin-card-actions"><button class="invoice-action-btn archive" type="button" onclick="restoreMainReviewInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-rotate-left"></i> إرجاع لبعقوبة</button><button class="invoice-action-btn delete" type="button" onclick="deleteMainReviewInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف من بعقوبة</button></div>`
+      : `<div class="invoice-admin-card-actions"><button class="invoice-action-btn archive" type="button" onclick="archiveMainReviewInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-box-archive"></i> أرشفة في بعقوبة</button><button class="invoice-action-btn delete" type="button" onclick="deleteMainReviewInvoice('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف من بعقوبة</button></div>`;
     const actionBlock = !canManage
-      ? invoiceReadonlyHint(inv)
+      ? (mainMirrorView ? `${mainMirrorHint}${mainMirrorActions}` : invoiceReadonlyHint(inv))
       : (archived
           ? `<div class="invoice-admin-card-actions single-center"><button class="invoice-action-btn delete" type="button" onclick="deleteAdminArchivedInvoiceRecord('${escapeHtml(inv.id)}')"><i class="fas fa-trash"></i> حذف نهائي</button></div>`
           : (cancelled
@@ -23525,8 +23610,8 @@ html.low-end-device .update-success-shell{
         .filter(inv => inv && inv.id);
 
       const visibleInvoices = all.filter(inv => invoiceVisibleToCurrentAdmin(inv));
-      const activeInvoices = visibleInvoices.filter(inv => !inv.adminArchived);
-      const archiveInvoices = visibleInvoices.filter(inv => !!inv.adminArchived);
+      const activeInvoices = visibleInvoices.filter(inv => !isInvoiceArchivedForCurrentAdmin(inv));
+      const archiveInvoices = visibleInvoices.filter(inv => !!isInvoiceArchivedForCurrentAdmin(inv));
       const freshMap = {};
 
       activeInvoices.forEach(inv => {
@@ -23579,8 +23664,8 @@ html.low-end-device .update-success-shell{
       }
       const all = await getAllInvoicesFresh();
       const visible = all.filter(inv => invoiceVisibleToCurrentAdmin(inv));
-      const activeCount = visible.filter(inv => !inv.adminArchived).length;
-      const archiveCount = visible.filter(inv => !!inv.adminArchived).length;
+      const activeCount = visible.filter(inv => !isInvoiceArchivedForCurrentAdmin(inv)).length;
+      const archiveCount = visible.filter(inv => !!isInvoiceArchivedForCurrentAdmin(inv)).length;
       if (activeBtn) activeBtn.innerHTML = `الفواتير${activeCount ? ` <span class="request-count-badge">${activeCount}</span>` : ''}`;
       if (archiveBtn) archiveBtn.innerHTML = `الأرشيف${archiveCount ? ` <span class="request-count-badge">${archiveCount}</span>` : ''}`;
       if (badge) {
