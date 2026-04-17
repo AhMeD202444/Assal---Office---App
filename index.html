@@ -27244,3 +27244,529 @@ html, body, button, input, textarea, select,
   }
 }
 </style>
+
+<style id="assal-header-refresh-logout-cycle-v2">
+/* ===== تبديل زر الريفريش إلى تسجيل خروج بنفس مكانه وبشكل دوري ===== */
+.header-buttons .refresh-btn.header-logout-mode{
+  background:
+    linear-gradient(135deg, rgba(255,92,115,.98), rgba(214,35,70,.96)) !important;
+  box-shadow:
+    0 16px 36px rgba(255, 78, 109, .28),
+    0 0 0 1px rgba(255,255,255,.10) inset,
+    0 0 24px rgba(255, 74, 105, .24) !important;
+  animation:assalHeaderLogoutGlow 2s ease-in-out infinite;
+}
+
+.header-buttons .refresh-btn.header-logout-mode i{
+  transform:translateY(0);
+}
+
+@keyframes assalHeaderLogoutGlow{
+  0%,100%{
+    box-shadow:
+      0 14px 30px rgba(255, 78, 109, .20),
+      0 0 0 1px rgba(255,255,255,.08) inset,
+      0 0 14px rgba(255, 74, 105, .14);
+  }
+  50%{
+    box-shadow:
+      0 18px 40px rgba(255, 78, 109, .34),
+      0 0 0 1px rgba(255,255,255,.14) inset,
+      0 0 26px rgba(255, 74, 105, .30);
+  }
+}
+
+.assal-logout-confirm-overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(4, 10, 24, .58);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .26s ease;
+  z-index:999999;
+}
+
+.assal-logout-confirm-overlay.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.assal-logout-confirm-dialog{
+  width:min(440px, 94vw);
+  max-width:440px;
+  border-radius:28px;
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at top left, rgba(72, 232, 220, .14), transparent 40%),
+    radial-gradient(circle at top right, rgba(53, 116, 255, .16), transparent 36%),
+    linear-gradient(180deg, rgba(9, 26, 55, .98), rgba(5, 16, 34, .98));
+  border:1px solid rgba(90, 220, 255, .18);
+  box-shadow:
+    0 24px 80px rgba(0,0,0,.46),
+    0 0 0 1px rgba(255,255,255,.04) inset,
+    0 0 28px rgba(28, 187, 255, .12);
+  color:#f8fbff;
+  font-family:'Cairo',sans-serif;
+  transform:translateY(16px) scale(.97);
+  transition:transform .28s cubic-bezier(.22,.9,.28,1), box-shadow .28s ease;
+}
+
+.assal-logout-confirm-overlay.show .assal-logout-confirm-dialog{
+  transform:translateY(0) scale(1);
+}
+
+.assal-logout-confirm-dialog::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), transparent 34%),
+    linear-gradient(120deg, rgba(90,220,255,.06), transparent 56%);
+  pointer-events:none;
+}
+
+.assal-logout-confirm-dialog.is-shake{
+  animation:assalLogoutDialogShake .34s ease;
+}
+
+@keyframes assalLogoutDialogShake{
+  0%,100%{ transform:translateX(0); }
+  25%{ transform:translateX(-6px); }
+  50%{ transform:translateX(6px); }
+  75%{ transform:translateX(-4px); }
+}
+
+.assal-logout-confirm-inner{
+  position:relative;
+  z-index:1;
+  padding:28px 24px 22px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.assal-logout-confirm-head{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.assal-logout-confirm-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 64px;
+  font-size:25px;
+  color:#fff6f7;
+  background:
+    linear-gradient(135deg, rgba(255,96,122,.96), rgba(211,37,67,.92));
+  box-shadow:
+    0 14px 34px rgba(255, 73, 106, .28),
+    0 0 0 1px rgba(255,255,255,.10) inset;
+}
+
+.assal-logout-confirm-title{
+  margin:0;
+  font-size:25px;
+  font-weight:900;
+  line-height:1.2;
+  color:#ffffff;
+}
+
+.assal-logout-confirm-subtitle{
+  margin:4px 0 0;
+  font-size:13.5px;
+  font-weight:700;
+  color:rgba(216, 237, 255, .78);
+  line-height:1.75;
+}
+
+.assal-logout-confirm-note{
+  margin:0;
+  padding:16px 18px;
+  border-radius:20px;
+  background:
+    linear-gradient(135deg, rgba(16, 45, 92, .92), rgba(8, 24, 48, .96));
+  border:1px solid rgba(81, 207, 255, .14);
+  font-size:15px;
+  font-weight:800;
+  color:#f6fbff;
+  line-height:1.95;
+  text-align:center;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.03) inset,
+    0 10px 28px rgba(0,0,0,.18);
+}
+
+.assal-logout-confirm-actions{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:12px;
+}
+
+.assal-logout-confirm-btn{
+  min-height:54px;
+  border:none;
+  border-radius:18px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:0 18px;
+  font-family:'Cairo',sans-serif;
+  font-size:16px;
+  font-weight:900;
+  color:#fff;
+  cursor:pointer;
+  transition:transform .20s ease, box-shadow .20s ease, filter .20s ease, opacity .20s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.assal-logout-confirm-btn:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.03);
+}
+
+.assal-logout-confirm-btn:active{
+  transform:scale(.98);
+}
+
+.assal-logout-confirm-btn.cancel{
+  background:
+    linear-gradient(135deg, rgba(37, 84, 150, .94), rgba(20, 49, 102, .98));
+  box-shadow:
+    0 14px 30px rgba(19, 58, 122, .24),
+    0 0 0 1px rgba(255,255,255,.06) inset;
+}
+
+.assal-logout-confirm-btn.approve{
+  background:
+    linear-gradient(135deg, rgba(255,91,109,.98), rgba(210,38,67,.96));
+  box-shadow:
+    0 16px 34px rgba(255, 78, 109, .28),
+    0 0 0 1px rgba(255,255,255,.08) inset;
+}
+
+.assal-logout-confirm-btn[disabled]{
+  opacity:.78;
+  cursor:default;
+  transform:none !important;
+}
+
+@media (max-width:760px){
+  .assal-logout-confirm-inner{
+    padding:24px 18px 18px;
+    gap:16px;
+  }
+
+  .assal-logout-confirm-head{
+    gap:12px;
+  }
+
+  .assal-logout-confirm-icon{
+    width:58px;
+    height:58px;
+    border-radius:20px;
+    flex-basis:58px;
+    font-size:23px;
+  }
+
+  .assal-logout-confirm-title{
+    font-size:22px;
+  }
+
+  .assal-logout-confirm-subtitle{
+    font-size:12.5px;
+    line-height:1.7;
+  }
+
+  .assal-logout-confirm-note{
+    font-size:14px;
+    line-height:1.85;
+    padding:14px 15px;
+    border-radius:18px;
+  }
+
+  .assal-logout-confirm-actions{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  .assal-logout-confirm-btn{
+    min-height:50px;
+    font-size:15px;
+    border-radius:16px;
+  }
+}
+</style>
+
+<script id="assal-header-refresh-logout-cycle-script-v2">
+(function(){
+  const OVERLAY_ID = 'assalLogoutConfirmOverlay';
+  let cycleInterval = null;
+  let hideTimeout = null;
+  let startTimeout = null;
+  let refreshBtn = null;
+  let originalRefreshHTML = '';
+  let originalRefreshTitle = '';
+  let originalRefreshAria = '';
+
+  function ensureLogoutModal(){
+    if (document.getElementById(OVERLAY_ID)) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = OVERLAY_ID;
+    overlay.className = 'assal-logout-confirm-overlay';
+    overlay.setAttribute('aria-hidden', 'true');
+
+    overlay.innerHTML = `
+      <div class="assal-logout-confirm-dialog" dir="rtl" role="dialog" aria-modal="true" aria-labelledby="assalLogoutConfirmTitle">
+        <div class="assal-logout-confirm-inner">
+          <div class="assal-logout-confirm-head">
+            <div class="assal-logout-confirm-icon">
+              <i class="fa-solid fa-right-from-bracket"></i>
+            </div>
+            <div class="assal-logout-confirm-texts">
+              <h3 class="assal-logout-confirm-title" id="assalLogoutConfirmTitle">تسجيل الخروج</h3>
+            </div>
+          </div>
+
+          <p class="assal-logout-confirm-note">
+            سيتم تسجيل الخروج من الحساب.
+          </p>
+
+          <div class="assal-logout-confirm-actions">
+            <button type="button" class="assal-logout-confirm-btn approve" id="assalLogoutConfirmApprove">
+              <i class="fa-solid fa-check"></i>
+              <span>موافق</span>
+            </button>
+
+            <button type="button" class="assal-logout-confirm-btn cancel" id="assalLogoutConfirmCancel">
+              <i class="fa-solid fa-xmark"></i>
+              <span>غير موافق</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const dialog = overlay.querySelector('.assal-logout-confirm-dialog');
+    const approveBtn = overlay.querySelector('#assalLogoutConfirmApprove');
+    const cancelBtn = overlay.querySelector('#assalLogoutConfirmCancel');
+
+    overlay.addEventListener('click', function(ev){
+      if (ev.target === overlay && dialog) {
+        dialog.classList.remove('is-shake');
+        void dialog.offsetWidth;
+        dialog.classList.add('is-shake');
+      }
+    });
+
+    cancelBtn.addEventListener('click', closeLogoutConfirmModal);
+    approveBtn.addEventListener('click', confirmLogoutNow);
+  }
+
+  function findRefreshButton(){
+    if (refreshBtn && document.body.contains(refreshBtn)) return refreshBtn;
+    refreshBtn = document.querySelector('.header-buttons .refresh-btn');
+    if (refreshBtn && !refreshBtn.dataset.logoutCycleBound) {
+      refreshBtn.dataset.logoutCycleBound = '1';
+      originalRefreshHTML = refreshBtn.innerHTML;
+      originalRefreshTitle = refreshBtn.getAttribute('title') || '';
+      originalRefreshAria = refreshBtn.getAttribute('aria-label') || '';
+      refreshBtn.dataset.headerActionMode = 'refresh';
+
+      refreshBtn.addEventListener('click', function(ev){
+        if (refreshBtn.dataset.headerActionMode === 'logout') {
+          ev.preventDefault();
+          ev.stopImmediatePropagation();
+          ev.stopPropagation();
+          openLogoutConfirmModal();
+          return false;
+        }
+      }, true);
+    }
+    return refreshBtn;
+  }
+
+  function setRefreshMode(){
+    const btn = findRefreshButton();
+    if (!btn) return;
+    btn.dataset.headerActionMode = 'refresh';
+    btn.classList.remove('header-logout-mode');
+    btn.innerHTML = originalRefreshHTML || '<i class="fa-solid fa-rotate-right"></i>';
+    if (originalRefreshTitle) btn.setAttribute('title', originalRefreshTitle); else btn.removeAttribute('title');
+    if (originalRefreshAria) btn.setAttribute('aria-label', originalRefreshAria); else btn.removeAttribute('aria-label');
+  }
+
+  function setLogoutMode(){
+    const btn = findRefreshButton();
+    if (!btn) return;
+    if (localStorage.getItem('isActivated') !== 'true') {
+      setRefreshMode();
+      return;
+    }
+    btn.dataset.headerActionMode = 'logout';
+    btn.classList.add('header-logout-mode');
+    btn.innerHTML = '<i class="fa-solid fa-right-from-bracket"></i>';
+    btn.setAttribute('title', 'تسجيل الخروج من الحساب');
+    btn.setAttribute('aria-label', 'تسجيل الخروج من الحساب');
+  }
+
+  function cycleToLogoutTemporarily(){
+    const overlay = document.getElementById(OVERLAY_ID);
+    if (document.hidden) return;
+    if (overlay && overlay.classList.contains('show')) return;
+
+    setLogoutMode();
+
+    clearTimeout(hideTimeout);
+    hideTimeout = setTimeout(() => {
+      setRefreshMode();
+    }, 2800);
+  }
+
+  function startRefreshLogoutCycle(){
+    clearInterval(cycleInterval);
+    clearTimeout(startTimeout);
+    setRefreshMode();
+    startTimeout = setTimeout(cycleToLogoutTemporarily, 2600);
+    cycleInterval = setInterval(cycleToLogoutTemporarily, 11000);
+  }
+
+  function openLogoutConfirmModal(){
+    ensureLogoutModal();
+    const overlay = document.getElementById(OVERLAY_ID);
+    const approveBtn = overlay ? overlay.querySelector('#assalLogoutConfirmApprove') : null;
+
+    if (!overlay) return;
+
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+
+    if (approveBtn) {
+      approveBtn.disabled = false;
+      approveBtn.innerHTML = '<i class="fa-solid fa-check"></i><span>موافق</span>';
+    }
+
+    try {
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    } catch (e) {}
+  }
+
+  function closeLogoutConfirmModal(){
+    const overlay = document.getElementById(OVERLAY_ID);
+    if (!overlay) return;
+
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+
+    try {
+      if (typeof syncGlobalModalLock === 'function') {
+        setTimeout(syncGlobalModalLock, 0);
+      } else {
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+      }
+    } catch (e) {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+
+    setRefreshMode();
+  }
+
+  function clearAdminStateSafely(){
+    try {
+      if (typeof setAdminUser === 'function') {
+        setAdminUser(false);
+      }
+    } catch (e) {}
+
+    const adminKeys = [
+      'isAdmin',
+      'adminUser',
+      'adminBranchId',
+      'adminBranchName',
+      'adminAccessProfile',
+      'adminAccessProfileKey',
+      'adminBranchRole',
+      'adminMode'
+    ];
+
+    adminKeys.forEach((key) => {
+      try { localStorage.removeItem(key); } catch (e) {}
+      try { sessionStorage.removeItem(key); } catch (e) {}
+    });
+  }
+
+  function confirmLogoutNow(){
+    const overlay = document.getElementById(OVERLAY_ID);
+    const approveBtn = overlay ? overlay.querySelector('#assalLogoutConfirmApprove') : null;
+
+    if (approveBtn) {
+      approveBtn.disabled = true;
+      approveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>جاري تسجيل الخروج...</span>';
+    }
+
+    try {
+      clearAdminStateSafely();
+      localStorage.removeItem('isActivated');
+      localStorage.removeItem('isActivatedBackup');
+      sessionStorage.removeItem('forcedActivationReason');
+
+      if (typeof closeCart === 'function') closeCart();
+      if (typeof closeRequestTrackModal === 'function') closeRequestTrackModal();
+      if (typeof closeAvailabilityTrackModal === 'function') closeAvailabilityTrackModal();
+      if (typeof closeRequestAdminModal === 'function') closeRequestAdminModal();
+      if (typeof closeAvailabilityAdminModal === 'function') closeAvailabilityAdminModal();
+      if (typeof closeOffersModal === 'function') closeOffersModal();
+      if (typeof closeStatsModal === 'function') closeStatsModal();
+      if (typeof closeCustomersAdminModal === 'function') closeCustomersAdminModal();
+      if (typeof closeContactModal === 'function') closeContactModal();
+    } catch (e) {}
+
+    closeLogoutConfirmModal();
+
+    setTimeout(() => {
+      location.reload();
+    }, 140);
+  }
+
+  function initRefreshLogoutCycle(){
+    findRefreshButton();
+    ensureLogoutModal();
+    startRefreshLogoutCycle();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initRefreshLogoutCycle, { once:true });
+  } else {
+    initRefreshLogoutCycle();
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(initRefreshLogoutCycle, 450);
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      clearTimeout(hideTimeout);
+      setRefreshMode();
+    }
+  });
+})();
+</script>
