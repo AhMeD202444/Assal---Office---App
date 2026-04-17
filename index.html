@@ -8669,7 +8669,7 @@ body.modal-lock #promoPopup *{
 .request-admin-list{
     display:grid;
     gap: 14px;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 1fr;
 }
 .request-admin-card{
     border-radius: 18px;
@@ -8811,7 +8811,7 @@ body.modal-lock #promoPopup *{
     scroll-padding-bottom:46px;
     -webkit-overflow-scrolling: touch;
 }
-.request-track-list{ display:grid; gap:10px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.request-track-list{ display:grid; gap:10px; grid-template-columns: 1fr; }
 .request-thread-card{
     border-radius: 18px;
     padding: 14px;
@@ -21801,7 +21801,7 @@ document.addEventListener("visibilitychange", () => {
           <div class="invoice-total-row grand"><span>الإجمالي</span><strong>${moneyIQD(total)}</strong></div>
         </div>
         <div class="invoice-actions">
-          <button class="invoice-btn send ${getSavedInvoiceTargetBranchCode() ? "" : "needs-branch"}" type="button" onclick="sendCurrentInvoice()"><i class="fas fa-paper-plane"></i> ${getInvoiceSendButtonLabel()}</button>
+          <button class="invoice-btn send ${(window.getSavedInvoiceTargetBranchCode && window.getSavedInvoiceTargetBranchCode()) ? "" : "needs-branch"}" type="button" onclick="sendCurrentInvoice()"><i class="fas fa-paper-plane"></i> ${(window.getInvoiceSendButtonLabel ? window.getInvoiceSendButtonLabel() : "اختر الفرع")}</button>
           <button class="invoice-btn archive" type="button" onclick="archiveCurrentDraftInvoice()"><i class="fas fa-ban"></i> إلغاء الفاتورة</button>
         </div>
       </div>`;
@@ -21990,7 +21990,7 @@ document.addEventListener("visibilitychange", () => {
       });
 
       cart = [];
-      syncCart();
+      saveCart();
       try { localStorage.removeItem('cartInvoiceNote'); } catch(_){}
       try {
         if (typeof window.setSavedInvoiceTargetBranchCode === 'function') window.setSavedInvoiceTargetBranchCode('');
@@ -21999,7 +21999,6 @@ document.addEventListener("visibilitychange", () => {
       await loadCustomerInvoices();
       try { await refreshInvoiceCounts(); } catch(_) {}
       const activeBtn = document.getElementById('invoiceViewActiveBtn'); if (activeBtn) activeBtn.click();
-      Swal.fire({ icon:'success', title:'تم إرسال الفاتورة', text:`تم إرسال الفاتورة إلى ${selectedBranch.label}، وستظهر نسخة في فرع بعقوبة للاطلاع فقط.`, timer:1700, showConfirmButton:false });
     } catch(err){
       console.error('sendCurrentInvoice:', err); invoiceSending=false; if (sendBtn){ sendBtn.disabled=false; sendBtn.innerHTML='<i class="fas fa-triangle-exclamation"></i> تعذّر الإرسال'; setTimeout(()=>{ sendBtn.innerHTML='<i class="fas fa-paper-plane"></i> إرسال'; }, 1300); }
       return;
@@ -22008,7 +22007,7 @@ document.addEventListener("visibilitychange", () => {
       if (sendBtn){
         sendBtn.disabled=false;
       }
-      updateInvoiceSendButtonState();
+      if (typeof window.updateInvoiceSendButtonState === 'function') window.updateInvoiceSendButtonState();
     }
   };
 
@@ -23134,11 +23133,11 @@ html.low-end-device .update-success-shell{
   function renderInvoiceBranchSelector(){
     const current = getSavedInvoiceTargetBranchCode();
     return `<div class="invoice-branch-box">
-      <div class="invoice-branch-label">اختر الفرع الذي تريد ارسال الفاتورة اليه</div>
+      <div class="invoice-branch-label">اختر الفرع الذي يستلم الفاتورة</div>
       <div class="invoice-branch-badges">
         ${INVOICE_BRANCH_OPTIONS.map(branch => `<button type="button" class="invoice-branch-chip ${current===branch.code ? 'active' : ''}" onclick="onInvoiceTargetBranchChange('${branch.code}', this)"><span>${escapeHtml(branch.shortLabel)}</span></button>`).join('')}
       </div>
-     
+  
     </div>`;
   }
   function invoiceTargetMeta(inv){
@@ -23155,6 +23154,8 @@ html.low-end-device .update-success-shell{
   window.getSavedInvoiceTargetBranchCode = getSavedInvoiceTargetBranchCode;
   window.setSavedInvoiceTargetBranchCode = setSavedInvoiceTargetBranchCode;
   window.getInvoiceTargetBranchLabel = getInvoiceTargetBranchLabel;
+  window.getInvoiceSendButtonLabel = getInvoiceSendButtonLabel;
+  window.updateInvoiceSendButtonState = updateInvoiceSendButtonState;
   window.canCurrentAdminManageInvoice = invoiceBelongsToManagedBranch;
   window.onInvoiceTargetBranchChange = function(value, el){
     const selected = setSavedInvoiceTargetBranchCode(value);
@@ -23163,7 +23164,7 @@ html.low-end-device .update-success-shell{
       chip.classList.toggle('active', !!selected && clickText.includes(`'${selected}'`));
     });
     if (el && selected) el.classList.add('active');
-    updateInvoiceSendButtonState();
+    if (typeof window.updateInvoiceSendButtonState === 'function') window.updateInvoiceSendButtonState();
   };
 
   function invoiceMetaBadges(inv){
@@ -23307,7 +23308,7 @@ html.low-end-device .update-success-shell{
         <div class="invoice-total-row grand"><span>الإجمالي</span><strong>${moneyIQD(total)}</strong></div>
       </div>
       <div class="invoice-actions">
-        <button class="invoice-btn send ${getSavedInvoiceTargetBranchCode() ? "" : "needs-branch"}" type="button" onclick="sendCurrentInvoice()"><i class="fas fa-paper-plane"></i> ${getInvoiceSendButtonLabel()}</button>
+        <button class="invoice-btn send ${(window.getSavedInvoiceTargetBranchCode && window.getSavedInvoiceTargetBranchCode()) ? "" : "needs-branch"}" type="button" onclick="sendCurrentInvoice()"><i class="fas fa-paper-plane"></i> ${(window.getInvoiceSendButtonLabel ? window.getInvoiceSendButtonLabel() : "اختر الفرع")}</button>
         <button class="invoice-btn archive" type="button" onclick="archiveCurrentDraftInvoice()"><i class="fas fa-ban"></i> إلغاء الفاتورة</button>
       </div>
     </div>`;
@@ -23498,7 +23499,7 @@ html.low-end-device .update-success-shell{
         : '<div class="invoice-empty">أرشيف الفواتير فارغ حالياً.</div>';
       applyTrackModalSearch('invoice');
       scrollInvoicePanels(document.getElementById('cartModal'));
-      updateInvoiceSendButtonState();
+      if (typeof window.updateInvoiceSendButtonState === 'function') window.updateInvoiceSendButtonState();
       if (typeof window.refreshInvoiceCounts === 'function') await window.refreshInvoiceCounts();
     } catch(err){ console.error('loadCustomerInvoices:', err); active.innerHTML='<div class="invoice-empty">تعذّر جلب الفواتير حالياً.</div>'; archive.innerHTML='<div class="invoice-empty">تعذّر جلب الأرشيف حالياً.</div>'; }
   };
