@@ -18568,6 +18568,16 @@ function assalExpandVoiceMarketAliasVariants(variant) {
     return assalUniqueArray(out);
 }
 
+function assalIsSamsungMarketAliasKeyNeedingOfficialOnly(variant) {
+    const compact = assalVoiceCompactOnly(variant);
+    if (!compact) return false;
+    const key = compact.replace(/^SAMSUNG/, "");
+    const official = ASSAL_VOICE_MARKET_ALIAS_MAP[key];
+    if (!official || !official.length) return false;
+    // إذا الكود الرسمي نفس المفتاح، مثل S7EDGE، نتركه يطابق طبيعي.
+    return !official.map(x => assalVoiceCompactOnly(x)).includes(key);
+}
+
 function assalIsStrongAlphaNumericVariant(variant) {
     const compact = assalVoiceCompactOnly(variant);
     if (!compact) return false;
@@ -18841,13 +18851,17 @@ function assalApplyVoicePostCorrections(query, rawText) {
     q = q.replace(/\bZERO\s*X\s*NEO\b/g, "ZEROXNEO");
     q = q.replace(/\bZERO\s*X\b/g, "ZEROX");
 
-    // Huawei P: إذا الصوت كتب B40 بدل P40، نصححها بحذر بدون تحويل كل B إلى P.
-    q = q.replace(/^B\s*40\s*PLUS$/g, "P40PLUS");
-    q = q.replace(/^B\s*40$/g, "P40");
-    q = q.replace(/\bHUAWEI\s+B\s*40\s*PLUS\b/g, "HUAWEI P40PLUS");
-    q = q.replace(/\bHUAWEI\s+B\s*40\b/g, "HUAWEI P40");
-    q = q.replace(/\bP\s*40\s*PLUS\b/g, "P40PLUS");
-    q = q.replace(/\bP\s*40\b/g, "P40");
+    // Huawei P-series: المايك أحياناً يسمع P كـ B، لذلك B20/B20PRO/B40PLUS => P20/P20PRO/P40PLUS.
+    // التصحيح هنا مخصص لنمط B + رقم + إضافات موديل، ولا يحول كل حرف B عشوائياً.
+    q = q.replace(/\bHUAWEI\s+B\s*(\d{1,3})\s*(PRO|PLUS|LITE|5G)?\b/g, function(_, n, tail){
+        return "HUAWEI P" + n + (tail || "");
+    });
+    q = q.replace(/^B\s*(\d{1,3})\s*(PRO|PLUS|LITE|5G)?$/g, function(_, n, tail){
+        return "P" + n + (tail || "");
+    });
+    q = q.replace(/\bP\s*(\d{1,3})\s*(PRO|PLUS|LITE|5G)?\b/g, function(_, n, tail){
+        return "P" + n + (tail || "");
+    });
 
     // VIVO Y*i: في هذا السياق "اي" بعد رقم Y تعني I وليس A.
     if (/\bVIVO\b/.test(q) || /فيفو/.test(rawNorm)) {
@@ -18978,7 +18992,16 @@ function assalBuildVoiceQueryVariants(parsed) {
         if (brandlessSpaced && brandlessSpaced !== brandless) variants.push(brandlessSpaced);
     }
 
-    return assalUniqueArray(variants);
+    let finalVariants = assalUniqueArray(variants);
+
+    // إذا المستخدم ذكر سامسونك بوضوح، لا نخلي اسم السوق القصير يطابق بالـ contains.
+    // مثال: SAMSUNG A52 أو A52 بعد ذكر سامسونك يجب أن يطلع A525/A527/A528 فقط، وليس A520.
+    const samsungMentioned = (parsed.mentionedBrands || []).includes("SAMSUNG") || assalVoiceCompactOnly(base).startsWith("SAMSUNG");
+    if (samsungMentioned) {
+        finalVariants = finalVariants.filter(v => !assalIsSamsungMarketAliasKeyNeedingOfficialOnly(v));
+    }
+
+    return finalVariants;
 }
 
 function assalBuildVoiceItemTokens(itemName) {
@@ -19221,7 +19244,7 @@ function getAssalVoiceEnglishQuery(rawText) {
         q = q.replace(/\b(SPARK)GO(20\d{2}|0[1-3])\b/g, "$1 GO $2");
         q = q.replace(/\b(HOT|SMART|CAMON|TAB|MATE|VISION|POP|BV|Q)(\d{1,4})(HD|SE|I|SIM|WIFI|KIDS|PRO|PLUS|PLAY|LITE|4G|5G|C|A|D|P|B)?\b/g, function(_, a, n, tail){ return (a + " " + n + (tail || "")).trim(); });
         q = q.replace(/\b(BLACKVIEW)(TAB|A|BV)(\d{1,4})(PRO|PLUS|KIDS|WIFI|SIM|4G|5G)?\b/g, function(_, brand, kind, n, tail){ return (brand + " " + kind + " " + n + (tail ? " " + tail : "")).trim(); });
-        q = q.replace(/\b(P40)(PLUS)\b/g, "P40 PLUS");
+        q = q.replace(/\b(P\d{1,3})(PRO|PLUS|LITE|5G)\b/g, "$1 $2");
         q = q.replace(/\b(ZERO)(8I|8|20|30|40)\b/g, "$1 $2");
         q = q.replace(/\b(ZERO)X(PRO|NEO)?\b/g, function(_, a, b){ return (a + " X" + (b ? " " + b : "")).trim(); });
         return q.replace(/\s+/g, " ").trim();
