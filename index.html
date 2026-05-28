@@ -469,7 +469,6 @@ html.low-end-device.manual-light-news #newsTicker {
 }
 
 html.low-end-device .notification-container {
-    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     margin: 0 auto 2px !important;
@@ -1664,6 +1663,366 @@ h1 {
         font-size: 15px;
         clip-path: circle(16px at center) !important;
     }
+}
+
+
+
+/* ===== ASSAL FIX: ترتيب أزرار البحث داخل الشريط =====
+   من اليمين: بحث 🔍 ثم مايك 🎙 ثم مسح X عند وجود نص */
+.search-container input {
+    padding-right: 132px !important;
+}
+.search-container #searchBtn {
+    right: 10px !important;
+    z-index: 5 !important;
+}
+.search-container #voiceSearchBtn {
+    right: 50px !important;
+    z-index: 5 !important;
+}
+.search-container #clearBtn {
+    right: 90px !important;
+    z-index: 5 !important;
+}
+.search-container .result-category-badge {
+    display: none !important;
+}
+@media (max-width: 480px) {
+    .search-container input {
+        padding-right: 148px !important;
+    }
+    .search-container #searchBtn {
+        right: 10px !important;
+        width: 35px !important;
+        height: 35px !important;
+    }
+    .search-container #voiceSearchBtn {
+        right: 54px !important;
+        width: 35px !important;
+        height: 35px !important;
+        clip-path: circle(17px at center) !important;
+    }
+    .search-container #clearBtn {
+        right: 98px !important;
+        width: 35px !important;
+        height: 35px !important;
+        clip-path: circle(17px at center) !important;
+    }
+}
+@media (min-width: 481px) and (max-width: 768px) {
+    .search-container input {
+        padding-right: 138px !important;
+    }
+    .search-container #searchBtn {
+        right: 10px !important;
+    }
+    .search-container #voiceSearchBtn {
+        right: 50px !important;
+    }
+    .search-container #clearBtn {
+        right: 90px !important;
+    }
+}
+
+
+
+/* ===== ASSAL Voice UI Premium Fix: أزرار متقاربة + نافذة مايك أنيقة ===== */
+.search-container input {
+    padding-right: 122px !important;
+}
+.search-container #searchBtn,
+.search-container #voiceSearchBtn,
+.search-container #clearBtn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    border-radius: 50% !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,.23), inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+.search-container #searchBtn {
+    right: 8px !important;
+    z-index: 6 !important;
+}
+.search-container #voiceSearchBtn {
+    right: 46px !important;
+    z-index: 6 !important;
+}
+.search-container #clearBtn {
+    right: 84px !important;
+    z-index: 6 !important;
+}
+.search-container #searchBtn,
+.search-container #voiceSearchBtn {
+    display: flex !important;
+}
+.search-container #voiceSearchBtn i,
+.search-container #searchBtn i,
+.search-container #clearBtn i {
+    line-height: 1 !important;
+}
+@media (max-width: 480px) {
+    .search-container input {
+        padding-right: 126px !important;
+    }
+    .search-container #searchBtn,
+    .search-container #voiceSearchBtn,
+    .search-container #clearBtn {
+        width: 35px !important;
+        height: 35px !important;
+        min-width: 35px !important;
+        min-height: 35px !important;
+        clip-path: circle(17.5px at center) !important;
+    }
+    .search-container #searchBtn { right: 8px !important; }
+    .search-container #voiceSearchBtn { right: 46px !important; }
+    .search-container #clearBtn { right: 84px !important; }
+}
+@media (min-width: 481px) and (max-width: 768px) {
+    .search-container input {
+        padding-right: 122px !important;
+    }
+    .search-container #searchBtn { right: 8px !important; }
+    .search-container #voiceSearchBtn { right: 46px !important; }
+    .search-container #clearBtn { right: 84px !important; }
+}
+
+.assal-voice-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+    background:
+        radial-gradient(circle at 50% 35%, rgba(0, 214, 255, .16), transparent 34%),
+        rgba(2, 8, 18, .72);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    opacity: 0;
+    transition: opacity .22s ease;
+}
+.assal-voice-overlay.is-open {
+    display: flex;
+    opacity: 1;
+}
+.assal-voice-card {
+    width: min(92vw, 390px);
+    border-radius: 32px;
+    padding: 24px 20px 20px;
+    direction: rtl;
+    text-align: center;
+    font-family: 'Cairo', sans-serif;
+    color: #f8fdff;
+    background:
+        linear-gradient(145deg, rgba(25, 44, 64, .94), rgba(10, 17, 33, .96)),
+        radial-gradient(circle at 50% 10%, rgba(52, 211, 153, .18), transparent 42%);
+    border: 1px solid rgba(148, 210, 230, .20);
+    box-shadow:
+        0 30px 75px rgba(0, 0, 0, .52),
+        inset 0 1px 0 rgba(255, 255, 255, .10),
+        0 0 0 1px rgba(255,255,255,.04);
+    position: relative;
+    overflow: hidden;
+    transform: translateY(12px) scale(.96);
+    transition: transform .26s cubic-bezier(.2,.9,.2,1);
+}
+.assal-voice-overlay.is-open .assal-voice-card {
+    transform: translateY(0) scale(1);
+}
+.assal-voice-card::before {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    top: -65px;
+    right: -45px;
+    background: radial-gradient(circle, rgba(34, 211, 238, .26), transparent 64%);
+    pointer-events: none;
+}
+.assal-voice-card::after {
+    content: "";
+    position: absolute;
+    inset: auto -24px -80px -24px;
+    height: 150px;
+    background: radial-gradient(circle at 50% 0%, rgba(20, 184, 166, .18), transparent 60%);
+    pointer-events: none;
+}
+.assal-voice-close {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 50%;
+    color: rgba(255,255,255,.88);
+    background: rgba(255,255,255,.07);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+}
+.assal-voice-kicker {
+    width: fit-content;
+    margin: 2px auto 14px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .2px;
+    background: rgba(255,255,255,.09);
+    border: 1px solid rgba(255,255,255,.13);
+    color: #b7f8ff;
+    position: relative;
+    z-index: 1;
+}
+.assal-voice-orb-wrap {
+    width: 156px;
+    height: 156px;
+    margin: 0 auto 16px;
+    position: relative;
+    display: grid;
+    place-items: center;
+    z-index: 1;
+}
+.assal-voice-ring,
+.assal-voice-ring.second {
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 1px solid rgba(103, 232, 249, .34);
+    box-shadow: 0 0 38px rgba(34, 211, 238, .20);
+    animation: assalVoiceRing 1.75s ease-in-out infinite;
+}
+.assal-voice-ring.second {
+    inset: 0;
+    opacity: .45;
+    animation-delay: .45s;
+}
+.assal-voice-orb {
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 42px;
+    background: linear-gradient(145deg, #12d6cf, #2563eb 54%, #8b5cf6);
+    box-shadow: 0 18px 42px rgba(37, 99, 235, .36), 0 0 30px rgba(20, 184, 166, .30), inset 0 2px 0 rgba(255,255,255,.18);
+    transform: scale(calc(.92 + (var(--assal-voice-level, 0) * .16)));
+    transition: transform .08s linear, filter .14s ease;
+}
+.assal-voice-overlay.is-listening .assal-voice-orb {
+    animation: assalVoiceOrb 1.1s ease-in-out infinite;
+}
+.assal-voice-overlay.has-error .assal-voice-orb {
+    background: linear-gradient(145deg, #ef4444, #f97316);
+}
+.assal-voice-overlay.has-result .assal-voice-orb {
+    background: linear-gradient(145deg, #22c55e, #06b6d4);
+}
+.assal-voice-wave {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    gap: 5px;
+    height: 30px;
+    margin: 4px auto 8px;
+    position: relative;
+    z-index: 1;
+}
+.assal-voice-wave span {
+    width: 5px;
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #e0fbff, #22d3ee);
+    opacity: .76;
+    transform-origin: bottom;
+    animation: assalVoiceBars .9s ease-in-out infinite;
+}
+.assal-voice-wave span:nth-child(2){ animation-delay: .09s; }
+.assal-voice-wave span:nth-child(3){ animation-delay: .18s; }
+.assal-voice-wave span:nth-child(4){ animation-delay: .27s; }
+.assal-voice-wave span:nth-child(5){ animation-delay: .36s; }
+.assal-voice-overlay:not(.is-listening) .assal-voice-wave span { animation-play-state: paused; opacity: .36; }
+.assal-voice-title {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.35;
+    margin: 0 0 6px;
+    position: relative;
+    z-index: 1;
+}
+.assal-voice-subtitle {
+    min-height: 25px;
+    margin: 0 auto 14px;
+    color: rgba(235, 248, 255, .76);
+    font-size: 14px;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+}
+.assal-voice-live,
+.assal-voice-final {
+    position: relative;
+    z-index: 1;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(3, 10, 23, .30);
+    padding: 12px 14px;
+    margin-top: 10px;
+    text-align: right;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+.assal-voice-label {
+    font-size: 11px;
+    font-weight: 900;
+    color: rgba(183, 248, 255, .72);
+    margin-bottom: 5px;
+}
+.assal-voice-text {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+    min-height: 22px;
+    overflow-wrap: anywhere;
+}
+.assal-voice-final {
+    display: none;
+    background: linear-gradient(135deg, rgba(20,184,166,.16), rgba(59,130,246,.10));
+}
+.assal-voice-overlay.has-result .assal-voice-final {
+    display: block;
+}
+.assal-voice-final .assal-voice-text {
+    direction: ltr;
+    text-align: left;
+    color: #d9fffb;
+    letter-spacing: .4px;
+}
+@keyframes assalVoiceRing {
+    0%, 100% { transform: scale(.86); opacity: .68; }
+    50% { transform: scale(1.08); opacity: .18; }
+}
+@keyframes assalVoiceOrb {
+    0%, 100% { filter: drop-shadow(0 0 0 rgba(34,211,238,0)); }
+    50% { filter: drop-shadow(0 0 16px rgba(34,211,238,.36)); }
+}
+@keyframes assalVoiceBars {
+    0%, 100% { height: 9px; transform: scaleY(.75); }
+    50% { height: 27px; transform: scaleY(1.05); }
+}
+@media (max-width: 430px) {
+    .assal-voice-card { width: min(94vw, 360px); padding: 22px 17px 18px; border-radius: 28px; }
+    .assal-voice-orb-wrap { width: 142px; height: 142px; }
+    .assal-voice-orb { width: 96px; height: 96px; font-size: 38px; }
+    .assal-voice-title { font-size: 20px; }
 }
 
 
@@ -12368,7 +12727,7 @@ html.low-end-device .results-container {
 </button>
 
     
-    <input type="text" id="searchInput" placeholder="ابحث عن القطعة أو اضغط المايك واحچي...">
+    <input type="text" id="searchInput" placeholder="ابحث داخل الصنف المختار أو اضغط المايك...">
     <div id="wholesaleSuggestions" class="wholesale-suggestions" aria-label="Wholesale suggestions"></div>
     <button id="clearBtn" class="clear-btn" onclick="clearSearch()" style="display: none;"><i class="fas fa-times"></i></button>
     <button id="voiceSearchBtn" class="voice-search-btn" type="button" onclick="startAssalVoiceSearch()" title="بحث صوتي" aria-label="بحث صوتي"><i class="fas fa-microphone"></i></button>
@@ -12376,7 +12735,32 @@ html.low-end-device .results-container {
 </div>
 
 
-        <div id="results" class="results"></div>
+        
+
+<div id="assalVoiceOverlay" class="assal-voice-overlay" aria-hidden="true">
+    <div class="assal-voice-card" role="dialog" aria-modal="true" aria-label="نافذة البحث الصوتي">
+        <button class="assal-voice-close" type="button" onclick="cancelAssalVoiceSearchModal()" aria-label="إلغاء البحث الصوتي"><i class="fas fa-times"></i></button>
+        <div class="assal-voice-kicker">بحث صوتي عسل</div>
+        <div class="assal-voice-orb-wrap">
+            <div class="assal-voice-ring"></div>
+            <div class="assal-voice-ring second"></div>
+            <div class="assal-voice-orb"><i class="fas fa-microphone"></i></div>
+        </div>
+        <div class="assal-voice-wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        <h3 id="assalVoiceTitle" class="assal-voice-title">جاري الاستماع...</h3>
+        <p id="assalVoiceSubtitle" class="assal-voice-subtitle">احچي اسم المادة بوضوح</p>
+        <div class="assal-voice-live">
+            <div class="assal-voice-label">النص المسموع</div>
+            <div id="assalVoiceHeardText" class="assal-voice-text">بانتظار الصوت...</div>
+        </div>
+        <div id="assalVoiceFinalBox" class="assal-voice-final">
+            <div class="assal-voice-label">راح أبحث عن</div>
+            <div id="assalVoiceEnglishText" class="assal-voice-text">—</div>
+        </div>
+    </div>
+</div>
+
+<div id="results" class="results"></div>
 
 </div>
 
@@ -16061,13 +16445,27 @@ function clearSearch() {
     const resultsContainer = document.getElementById("results");
     
     searchInput.value = ""; // تفريغ الحقل
+    searchInput.setAttribute("dir", "rtl");
     resultsContainer.style.display = "none"; // إخفاء النتائج
     toggleClearButton(); // تحديث حالة زر المسح
     toggleScrollToTopButton(); // تحديث زر الرجوع لأعلى
 }
 
-// ربط حدث الكتابة بحقل البحث
-document.getElementById("searchInput").addEventListener("input", toggleClearButton);
+// ربط حدث الكتابة بحقل البحث + ضبط اتجاه النص حسب اللغة
+const assalMainSearchInputEl = document.getElementById("searchInput");
+if (assalMainSearchInputEl) {
+    assalMainSearchInputEl.addEventListener("input", function () {
+        toggleClearButton();
+        const v = (this.value || "").trim();
+        if (!v) {
+            this.setAttribute("dir", "rtl");
+        } else if (/[A-Za-z0-9]/.test(v) && !(typeof hasArabicText === "function" && hasArabicText(v))) {
+            this.setAttribute("dir", "ltr");
+        } else {
+            this.setAttribute("dir", "rtl");
+        }
+    });
+}
 
 // التأكد من حالة الزر عند تحميل الصفحة
 document.addEventListener("DOMContentLoaded", toggleClearButton);
@@ -18243,6 +18641,118 @@ function searchAssalVoiceAllCategories(rawVoiceText, options = {}) {
     return finalResults;
 }
 
+
+function searchAssalVoiceCurrentCategory(rawVoiceText, options = {}) {
+    const resultsContainer = document.getElementById("results");
+    const parsed = assalVoiceToEnglishQuery(rawVoiceText);
+    const variants = assalBuildVoiceQueryVariants(parsed);
+    const englishQuery = assalNormalizeLatinForCompare(parsed.query) || String(rawVoiceText || "").trim();
+
+    const input = document.getElementById("searchInput");
+    if (input && options.updateInput !== false) {
+        input.value = englishQuery;
+        input.setAttribute("dir", "ltr");
+    }
+    try { toggleClearButton(); } catch (_) {}
+
+    if (!parsed.query || variants.length === 0) {
+        if (resultsContainer) resultsContainer.style.display = "none";
+        showExitLikeAlert({
+            icon: "fas fa-microphone-lines",
+            title: "بحث صوتي غير مكتمل",
+            message: "احچي اسم الموديل بوضوح، مثل: سامسونك اي صفر خمسة وعشرين أو هونر اكس تسعة دي.",
+            confirmText: "موافق"
+        });
+        return [];
+    }
+
+    const selectedCat = String(currentCategory || "").trim();
+    const selectedCatUpper = selectedCat.toUpperCase();
+    if (!selectedCat || selectedCatUpper === "ALL" || selectedCatUpper === "SIMILARITES") {
+        if (resultsContainer) resultsContainer.style.display = "none";
+        Swal.fire({
+            html: `
+                <div class="exit-shell">
+                    <div class="exit-icon"><i class="fas fa-list-alt"></i></div>
+                    <h2 class="exit-title">اختيار الصنف أولًا</h2>
+                    <p class="exit-text">اختار الصنف من الشريط، وبعدها استخدم البحث الصوتي داخل نفس الصنف.</p>
+                </div>
+            `,
+            confirmButtonText: 'تمام، راح أختار الصنف',
+            backdrop: 'rgba(2, 6, 23, 0.82)',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            customClass: {
+                popup: 'swal2-popup exit-popup animate__animated animate__zoomIn',
+                confirmButton: 'exit-confirm'
+            },
+            hideClass: { popup: 'animate__animated animate__zoomOut' }
+        });
+        return [];
+    }
+
+    const items = Array.isArray(database?.[selectedCat]) ? database[selectedCat] : [];
+    if (!items.length) {
+        if (resultsContainer) resultsContainer.style.display = "none";
+        showExitLikeAlert({
+            icon: "fas fa-database",
+            title: "لا توجد بيانات",
+            message: `لا توجد بيانات متاحة لفئة ${selectedCat}. يرجى تحديث الصفحة أو التحقق من الاتصال.`,
+            confirmText: "موافق"
+        });
+        return [];
+    }
+
+    const rows = [];
+    items.forEach(row => {
+        const itemName = row && (row["Item Name"] || row["ITEM NAME"] || row["Item"] || row["Name"] || row["name"]);
+        if (!itemName) return;
+
+        const baseScore = assalVoiceBestMatchScore(itemName, variants);
+        if (baseScore < 0.62) return;
+
+        let score = Math.round(baseScore * 100);
+        const itemCompact = assalCompactSearchText(itemName);
+        parsed.mentionedBrands.forEach(br => {
+            if (itemCompact.includes(assalCompactSearchText(br))) score += 5;
+        });
+
+        rows.push({ item: row, score, itemName: String(itemName) });
+    });
+
+    rows.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.itemName.length - b.itemName.length;
+    });
+
+    const finalResults = rows.slice(0, 150).map(x => x.item);
+    displayResults(finalResults);
+
+    console.log("ASSAL Voice Current Category Search", {
+        raw: rawVoiceText,
+        englishQuery,
+        category: selectedCat,
+        parsed,
+        variants,
+        count: finalResults.length
+    });
+    return finalResults;
+}
+
+
+let assalVoiceModalHideTimer = null;
+let assalVoiceSafetyTimer = null;
+let assalVoiceModalOpen = false;
+
+function getAssalVoiceEnglishQuery(rawText) {
+    try {
+        const parsed = assalVoiceToEnglishQuery(rawText);
+        return assalNormalizeLatinForCompare(parsed.query) || String(rawText || "").trim();
+    } catch (_) {
+        return String(rawText || "").trim();
+    }
+}
+
 function setAssalVoiceButtonListening(isListening) {
     const btn = document.getElementById("voiceSearchBtn");
     if (!btn) return;
@@ -18250,13 +18760,132 @@ function setAssalVoiceButtonListening(isListening) {
     btn.title = isListening ? "جاري الاستماع..." : "بحث صوتي";
 }
 
-function handleAssalVoiceSearchText(text) {
+function setAssalVoiceModalLevel(level) {
+    const overlay = document.getElementById("assalVoiceOverlay");
+    if (!overlay) return;
+    const n = Math.max(0, Math.min(1, Number(level) || 0));
+    overlay.style.setProperty("--assal-voice-level", String(n));
+}
+
+function showAssalVoiceModal(mode = "listening", data = {}) {
+    const overlay = document.getElementById("assalVoiceOverlay");
+    if (!overlay) return;
+
+    clearTimeout(assalVoiceModalHideTimer);
+    assalVoiceModalOpen = true;
+
+    const title = document.getElementById("assalVoiceTitle");
+    const subtitle = document.getElementById("assalVoiceSubtitle");
+    const heard = document.getElementById("assalVoiceHeardText");
+    const english = document.getElementById("assalVoiceEnglishText");
+
+    overlay.classList.remove("has-result", "has-error", "is-listening");
+    overlay.classList.add("is-open");
+    overlay.setAttribute("aria-hidden", "false");
+
+    if (mode === "ready") {
+        overlay.classList.add("is-listening");
+        if (title) title.textContent = "جاهز أسمعك...";
+        if (subtitle) subtitle.textContent = "احچي اسم المادة أو الموديل";
+        if (heard) heard.textContent = "بانتظار الصوت...";
+        if (english) english.textContent = "—";
+        setAssalVoiceModalLevel(0.08);
+        return;
+    }
+
+    if (mode === "hearing") {
+        overlay.classList.add("is-listening");
+        if (title) title.textContent = "جاري الاستماع...";
+        if (subtitle) subtitle.textContent = "استمر بالحچي، أني أسمعك";
+        if (data.text && heard) heard.textContent = data.text;
+        return;
+    }
+
+    if (mode === "processing") {
+        if (title) title.textContent = "جاري التحويل...";
+        if (subtitle) subtitle.textContent = "أحوّل النطق إلى بحث إنكليزي";
+        if (data.text && heard) heard.textContent = data.text;
+        setAssalVoiceModalLevel(0.18);
+        return;
+    }
+
+    if (mode === "result") {
+        overlay.classList.add("has-result");
+        if (title) title.textContent = "تم فهم البحث";
+        if (subtitle) subtitle.textContent = "راح أكتبه بالشريط وأبحث داخل الصنف الحالي";
+        if (heard) heard.textContent = data.raw || "—";
+        if (english) english.textContent = data.english || "—";
+        setAssalVoiceModalLevel(0.3);
+        assalVoiceModalHideTimer = setTimeout(hideAssalVoiceModal, data.delay || 650);
+        return;
+    }
+
+    if (mode === "error") {
+        overlay.classList.add("has-error");
+        if (title) title.textContent = "ما سمعت الصوت بوضوح";
+        if (subtitle) subtitle.textContent = data.message || "جرّب مرة ثانية أو اكتب البحث يدوياً";
+        if (heard) heard.textContent = "—";
+        if (english) english.textContent = "—";
+        setAssalVoiceButtonListening(false);
+        setAssalVoiceModalLevel(0.05);
+        assalVoiceModalHideTimer = setTimeout(hideAssalVoiceModal, data.delay || 1800);
+        return;
+    }
+
+    overlay.classList.add("is-listening");
+    if (title) title.textContent = "جاري الاستماع...";
+    if (subtitle) subtitle.textContent = "احچي اسم المادة بوضوح";
+    if (heard) heard.textContent = "بانتظار الصوت...";
+    if (english) english.textContent = "—";
+    setAssalVoiceModalLevel(0.1);
+}
+
+function hideAssalVoiceModal() {
+    const overlay = document.getElementById("assalVoiceOverlay");
+    if (!overlay) return;
+    overlay.classList.remove("is-open", "is-listening", "has-result", "has-error");
+    overlay.setAttribute("aria-hidden", "true");
+    assalVoiceModalOpen = false;
+    setAssalVoiceModalLevel(0);
+    clearTimeout(assalVoiceModalHideTimer);
+    clearTimeout(assalVoiceSafetyTimer);
+}
+
+function cancelAssalVoiceSearchModal() {
+    try {
+        if (window.Android && typeof window.Android.cancelVoiceSearch === "function") {
+            window.Android.cancelVoiceSearch();
+        }
+    } catch (_) {}
+    setAssalVoiceButtonListening(false);
+    hideAssalVoiceModal();
+}
+
+function updateAssalVoicePartialText(text) {
     const value = String(text || "").trim();
     if (!value) return;
-    const input = document.getElementById("searchInput");
-    if (input) input.value = value;
-    try { toggleClearButton(); } catch (_) {}
-    searchAssalVoiceAllCategories(value, { source: "voice" });
+    const heard = document.getElementById("assalVoiceHeardText");
+    const english = document.getElementById("assalVoiceEnglishText");
+    const overlay = document.getElementById("assalVoiceOverlay");
+    if (heard) heard.textContent = value;
+    if (english) english.textContent = getAssalVoiceEnglishQuery(value) || "—";
+    if (overlay) overlay.classList.add("has-result");
+}
+
+function handleAssalVoiceSearchText(text) {
+    const value = String(text || "").trim();
+    if (!value) {
+        showAssalVoiceModal("error", { message: "ما وصلني صوت واضح، جرّب مرة ثانية." });
+        return;
+    }
+
+    const englishQuery = getAssalVoiceEnglishQuery(value);
+    showAssalVoiceModal("result", { raw: value, english: englishQuery, delay: 720 });
+
+    setTimeout(() => {
+        searchAssalVoiceCurrentCategory(value, { source: "voice", updateInput: true });
+        setAssalVoiceButtonListening(false);
+    }, 430);
 }
 
 window.handleAssalVoiceSearchText = handleAssalVoiceSearchText;
@@ -18264,13 +18893,50 @@ window.receiveAssalVoiceSearchText = handleAssalVoiceSearchText;
 window.onAssalVoiceSearchResult = handleAssalVoiceSearchText;
 window.receiveVoiceSearchText = handleAssalVoiceSearchText;
 window.onVoiceSearchResult = handleAssalVoiceSearchText;
+window.setAssalVoiceButtonListening = setAssalVoiceButtonListening;
+window.showAssalVoiceModal = showAssalVoiceModal;
+window.hideAssalVoiceModal = hideAssalVoiceModal;
+window.cancelAssalVoiceSearchModal = cancelAssalVoiceSearchModal;
+window.onAssalNativeVoiceStart = function(){
+    setAssalVoiceButtonListening(true);
+    showAssalVoiceModal("listening");
+};
+window.onAssalNativeVoiceReady = function(){
+    setAssalVoiceButtonListening(true);
+    showAssalVoiceModal("ready");
+};
+window.onAssalNativeVoiceBegin = function(){
+    setAssalVoiceButtonListening(true);
+    showAssalVoiceModal("hearing");
+};
+window.onAssalNativeVoiceLevel = function(level){
+    setAssalVoiceModalLevel(level);
+};
+window.onAssalNativeVoicePartial = function(text){
+    showAssalVoiceModal("hearing", { text });
+    updateAssalVoicePartialText(text);
+};
+window.onAssalNativeVoiceEnd = function(){
+    showAssalVoiceModal("processing");
+};
+window.onAssalNativeVoiceError = function(message){
+    showAssalVoiceModal("error", { message: message || "ما سمعت الصوت بوضوح، جرّب مرة ثانية." });
+};
 
 function startAssalVoiceSearch() {
     try {
+        setAssalVoiceButtonListening(true);
+        showAssalVoiceModal("listening");
+        clearTimeout(assalVoiceSafetyTimer);
+        assalVoiceSafetyTimer = setTimeout(() => {
+            if (assalVoiceModalOpen) {
+                showAssalVoiceModal("error", { message: "طوّل الاستماع بدون نتيجة، جرّب مرة ثانية." });
+                setAssalVoiceButtonListening(false);
+            }
+        }, 16000);
+
         if (window.Android && typeof window.Android.startVoiceSearch === "function") {
-            setAssalVoiceButtonListening(true);
             window.Android.startVoiceSearch();
-            setTimeout(() => setAssalVoiceButtonListening(false), 7000);
             return;
         }
     } catch (e) {
@@ -18279,35 +18945,40 @@ function startAssalVoiceSearch() {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        showExitLikeAlert({
-            icon: "fas fa-microphone-slash",
-            title: "الميكروفون يحتاج تحديث",
-            message: "حتى يشتغل بثبات داخل التطبيق، نحتاج نضيف كود المايك من Android Studio. حالياً أضفت محرك الفهم والبحث داخل ملف الواجهة.",
-            confirmText: "موافق"
-        });
+        setAssalVoiceButtonListening(false);
+        showAssalVoiceModal("error", { message: "الميكروفون يحتاج كود Android Studio حتى يشتغل بثبات داخل التطبيق." });
         return;
     }
 
     const rec = new SpeechRecognition();
     rec.lang = "ar-IQ";
-    rec.interimResults = false;
+    rec.interimResults = true;
     rec.maxAlternatives = 3;
-    setAssalVoiceButtonListening(true);
+
+    rec.onstart = () => showAssalVoiceModal("ready");
+    rec.onspeechstart = () => showAssalVoiceModal("hearing");
+    rec.onspeechend = () => showAssalVoiceModal("processing");
     rec.onresult = (event) => {
-        const list = event.results && event.results[0] ? Array.from(event.results[0]) : [];
-        const best = list.map(x => x.transcript).filter(Boolean)[0] || "";
-        handleAssalVoiceSearchText(best);
+        let finalText = "";
+        let partialText = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const res = event.results[i];
+            const txt = res && res[0] ? String(res[0].transcript || "").trim() : "";
+            if (!txt) continue;
+            if (res.isFinal) finalText = txt;
+            else partialText = txt;
+        }
+        if (partialText) updateAssalVoicePartialText(partialText);
+        if (finalText) handleAssalVoiceSearchText(finalText);
     };
     rec.onerror = (event) => {
         console.warn("Voice recognition error:", event);
-        showExitLikeAlert({
-            icon: "fas fa-microphone-slash",
-            title: "ما سمعت الصوت بوضوح",
-            message: "جرّب مرة ثانية أو اكتب البحث يدوياً.",
-            confirmText: "موافق"
-        });
+        setAssalVoiceButtonListening(false);
+        showAssalVoiceModal("error", { message: "ما سمعت الصوت بوضوح، جرّب مرة ثانية أو اكتب البحث يدوياً." });
     };
-    rec.onend = () => setAssalVoiceButtonListening(false);
+    rec.onend = () => {
+        setAssalVoiceButtonListening(false);
+    };
     rec.start();
 }
 /* ================== /ASSAL Voice Search Engine ================== */
@@ -18381,7 +19052,6 @@ function displayResults(results) {
                 <div class="result-card">
                     ${miniActions.length ? `<div class="result-card-mini-actions">${miniActions.join('')}</div>` : ''}
                     <img src="${imgSrc}" alt="Item Image">
-                    <div class="result-category-badge">${escapeHtml(getArabicCategoryLabel(catForItem))}</div>
                     <h4>${itemName}</h4>
                     ${priceHtml}
                 </div>
@@ -18880,9 +19550,9 @@ function searchItems() {
         return;
     }
 
-    // ✅ البحث العربي/الصوتي يبحث بكل الأصناف، والصنف يكون أولوية فقط
+    // ✅ البحث العربي/الصوتي يتحول إلى إنكليزي ويبحث فقط داخل الصنف المختار حالياً
     if (typeof shouldUseAssalVoiceSearch === "function" && shouldUseAssalVoiceSearch(searchInput)) {
-        searchAssalVoiceAllCategories(searchInput, { source: "manual-arabic" });
+        searchAssalVoiceCurrentCategory(searchInput, { source: "manual-arabic" });
         return;
     }
 
