@@ -18343,7 +18343,7 @@ const ASSAL_SINGLE_MODEL_LETTERS = new Set(["A","M","F","S","G","C","T","D","B",
 const ASSAL_VOICE_MARKET_ALIAS_MAP = {
     // Samsung A / M market names -> official/service model codes
     "A12": ["A125"], "A12S": ["A127"],
-    "A02S": ["A025"], "A03S": ["A037"], "A05": ["A055"], "A05S": ["A057"],
+    "A01": ["A015"], "A02S": ["A025"], "A03S": ["A037"], "A05": ["A055"], "A05S": ["A057"],
     "A10": ["A105"], "A10S": ["A107"], "M10": ["M105"],
     "A11": ["A115"], "A14": ["A145F", "A146P", "A146B"],
     "A15": ["A155", "A156"], "A16": ["A165", "A166"],
@@ -18377,6 +18377,7 @@ const ASSAL_VOICE_MARKET_ALIAS_MAP = {
     "Y6P": ["Y6P"],
     "Y92019": ["Y92019"],
     "SPARKGO2024": ["SPARKGO2024"],
+    "SPARKGO01": ["SPARKGO01"], "SPARKGO02": ["SPARKGO02"], "SPARKGO03": ["SPARKGO03"],
     "IPHONE6S": ["IPHONE6S"],
     "6S": ["6S"],
     "IPHONE6SPLUS": ["IPHONE6SPLUS"],
@@ -18404,6 +18405,12 @@ const ASSAL_VOICE_EXTRA_PHRASE_MAP = {
     "سكس اس": "6 S", "ستة اس": "6 S", "سته اس": "6 S",
     "زيرو اكس برو": "ZERO X PRO", "زيرو اكس نيو": "ZERO X NEO", "زيرو اكس": "ZERO X",
     "زيرو عشرين": "ZERO 20", "زيرو ثلاثين": "ZERO 30", "زيرو تلاثين": "ZERO 30", "زيرو اربعين": "ZERO 40",
+    "سبارك كو صفر واحد": "SPARK GO 01", "سبارك گو صفر واحد": "SPARK GO 01", "سبارك جو صفر واحد": "SPARK GO 01", "سبارك غو صفر واحد": "SPARK GO 01",
+    "سبارك كو واحد": "SPARK GO 01", "سبارك كو وان": "SPARK GO 01", "سبارك گو واحد": "SPARK GO 01", "سبارك جو واحد": "SPARK GO 01",
+    "سبارك كو صفر اثنين": "SPARK GO 02", "سبارك كو صفر ثنين": "SPARK GO 02", "سبارك گو صفر اثنين": "SPARK GO 02", "سبارك جو صفر اثنين": "SPARK GO 02",
+    "سبارك كو اثنين": "SPARK GO 02", "سبارك كو ثنين": "SPARK GO 02", "سبارك كو تو": "SPARK GO 02",
+    "سبارك كو صفر ثلاثة": "SPARK GO 03", "سبارك كو صفر تلاثة": "SPARK GO 03", "سبارك گو صفر ثلاثة": "SPARK GO 03", "سبارك جو صفر ثلاثة": "SPARK GO 03",
+    "سبارك كو ثلاثة": "SPARK GO 03", "سبارك كو تلاثة": "SPARK GO 03", "سبارك كو ثري": "SPARK GO 03",
     "سبارك كو": "SPARK GO", "سبارك كَو": "SPARK GO", "سبارك گو": "SPARK GO", "سبارك جو": "SPARK GO", "سبارك غو": "SPARK GO",
 
     // Samsung direct speech helpers where generic letter rules can confuse J/G
@@ -18600,6 +18607,35 @@ function assalJoinVoiceModelTokens(tokens) {
         const next2 = tokens[i + 2];
         const next3 = tokens[i + 3];
 
+        // SPARK GO 2024 / 01 / 02 / 03: كتلة قوية قبل أي تفكيك أو بحث ضعيف على الرقم.
+        if (cur === "SPARK" && next === "GO") {
+            if (/^\d{4}$/.test(next2 || "")) {
+                out.push("SPARKGO" + next2);
+                i += 2;
+                continue;
+            }
+            if (next2 === "0" && /^[1-3]$/.test(next3 || "")) {
+                out.push("SPARKGO0" + next3);
+                i += 3;
+                continue;
+            }
+            if (/^[1-3]$/.test(next2 || "")) {
+                out.push("SPARKGO0" + next2);
+                i += 2;
+                continue;
+            }
+        }
+
+        // Honor X5/X6/X7/X8/X9 + 2022 بدون NEW أيضاً لازم يطابق نسخة NEW 2022.
+        if (cur === "X" && /^[5-9]$/.test(next || "") && /^\d{2,4}$/.test(next2 || "")) {
+            const year = next2.length === 2 ? "20" + next2 : next2;
+            if (year === "2022") {
+                out.push("X" + next + year);
+                i += 2;
+                continue;
+            }
+        }
+
         // ZERO series: ZERO 20/30/40 and ZERO X/PRO/NEO must stay ZERO, not 0.
         if (cur === "ZERO" && (/^\d{1,4}$/.test(next || "") || next === "X")) {
             if (next === "X" && (next2 === "PRO" || next2 === "NEO")) {
@@ -18726,6 +18762,31 @@ function assalJoinVoiceModelTokens(tokens) {
     return out;
 }
 
+function assalApplyVoicePostCorrections(query, rawText) {
+    let q = assalNormalizeLatinForCompare(query);
+    const rawNorm = assalNormalizeArabicVoice(rawText);
+
+    // ZERO هنا اسم سلسلة جهاز، مو رقم صفر. هذه القاعدة قبل/بعد التحويل حتى تمنع 0 20 / 0 30 / 0 40.
+    if (/(^|\s)زيرو(?=\s|$)/.test(rawNorm) || /\bZERO\b/.test(q)) {
+        q = q.replace(/\b0\s*(20|30|40)\b/g, "ZERO$1");
+        q = q.replace(/\bZERO\s*(20|30|40)\b/g, "ZERO$1");
+        q = q.replace(/\bZERO\s*X\s*PRO\b/g, "ZEROXPRO");
+        q = q.replace(/\bZERO\s*X\s*NEO\b/g, "ZEROXNEO");
+        q = q.replace(/\bZERO\s*X\b/g, "ZEROX");
+    }
+
+    // SPARK GO لازم تبقى كتلة، حتى لا يصير البحث على السنة/الرقم وحده.
+    q = q.replace(/\bSPARK\s*GO\s*2024\b/g, "SPARKGO2024");
+    q = q.replace(/\bSPARK\s*GO\s*0?\s*1\b/g, "SPARKGO01");
+    q = q.replace(/\bSPARK\s*GO\s*0?\s*2\b/g, "SPARKGO02");
+    q = q.replace(/\bSPARK\s*GO\s*0?\s*3\b/g, "SPARKGO03");
+
+    // ترتيب العرض/المقارنة لموديلات السنة مثل Y9 2019.
+    q = q.replace(/\b(Y)(\d)(20\d{2})\b/g, "$1$2 $3");
+
+    return q.replace(/\s+/g, " ").trim();
+}
+
 function assalVoiceToEnglishQuery(rawText) {
     const detected = assalDetectVoiceCategories(rawText);
     let cleaned = detected.cleanText;
@@ -18733,7 +18794,8 @@ function assalVoiceToEnglishQuery(rawText) {
 
     const mapped = cleaned.split(/\s+/).map(assalMapVoiceToken).filter(Boolean);
     const joined = assalJoinVoiceModelTokens(mapped);
-    const query = joined.join(" ").replace(/\s+/g, " ").trim().toUpperCase();
+    let query = joined.join(" ").replace(/\s+/g, " ").trim().toUpperCase();
+    query = assalApplyVoicePostCorrections(query, rawText);
 
     return {
         raw: String(rawText || "").trim(),
@@ -18762,13 +18824,27 @@ function assalUniqueArray(arr) {
 }
 
 function assalAddSamsungZeroVariants(query) {
-    const variants = [query];
-    const rgx = /\b([AMFGSC])([1-9]\d)\b/g;
-    let m;
-    while ((m = rgx.exec(query)) !== null) {
-        variants.push(query.replace(m[0], m[1] + "0" + m[2]));
+    // مهم جداً: لا نضيف صفر قبل أرقام سامسونك بشكل عام.
+    // A25 لازم تطابق A256 فقط، وليس A025.
+    // A15 لازم تطابق A155/A156 فقط، وليس A015.
+    // الصفر يضاف فقط إذا الزبون نطقه صراحة: A01 / A02S / A05 / A05S.
+    return [query];
+}
+
+function assalExpandHonorX2022Variants(variant) {
+    const compact = assalVoiceCompactOnly(variant).replace(/^HUAWEI/, "").replace(/^HONOR/, "");
+    const out = [];
+    const m = compact.match(/^X([5-9])(NEW)?(2022|22)$/);
+    if (m) {
+        const n = m[1];
+        out.push("X" + n + "2022");
+        out.push("X" + n + " NEW 2022");
+        out.push("X" + n + "NEW2022");
+        out.push("HONOR X" + n + " 2022");
+        out.push("HONOR X" + n + " NEW 2022");
+        out.push("HUAWEI HONOR X" + n + " NEW 2022");
     }
-    return variants;
+    return assalUniqueArray(out);
 }
 
 function assalBuildVoiceQueryVariants(parsed) {
@@ -18788,6 +18864,11 @@ function assalBuildVoiceQueryVariants(parsed) {
     // Market aliases: A12 -> A125, A12S -> A127, J7PRO -> J730, etc.
     [...variants].forEach(v => {
         assalExpandVoiceMarketAliasVariants(v).forEach(aliasVariant => variants.push(aliasVariant));
+    });
+
+    // Honor X5/X6/X7/X8/X9 2022: NEW اختيارية في النطق والبحث.
+    [...variants].forEach(v => {
+        assalExpandHonorX2022Variants(v).forEach(aliasVariant => variants.push(aliasVariant));
     });
 
     // Specific correction: speech engine often hears Y6P as Y6B.
@@ -18940,7 +19021,7 @@ function searchAssalVoiceCurrentCategory(rawVoiceText, options = {}) {
     const resultsContainer = document.getElementById("results");
     const parsed = assalVoiceToEnglishQuery(rawVoiceText);
     const variants = assalBuildVoiceQueryVariants(parsed);
-    const englishQuery = assalNormalizeLatinForCompare(parsed.query) || String(rawVoiceText || "").trim();
+    const englishQuery = getAssalVoiceEnglishQuery(rawVoiceText) || assalNormalizeLatinForCompare(parsed.query) || String(rawVoiceText || "").trim();
 
     const input = document.getElementById("searchInput");
     if (input && options.updateInput !== false) {
@@ -19043,16 +19124,19 @@ function getAssalVoiceEnglishQuery(rawText) {
         const parsed = assalVoiceToEnglishQuery(rawText);
         let q = assalNormalizeLatinForCompare(parsed.query) || String(rawText || "").trim();
         q = q.replace(/\b(Y)(\d)(20\d{2})\b/g, "$1$2 $3");
+        q = q.replace(/\b(X[5-9])NEW(2022)\b/g, "$1 NEW $2");
+        q = q.replace(/\b(X[5-9])(2022)\b/g, "$1 $2");
         q = q.replace(/\b(NOVA)\s*(\d+)\s*SE\b/g, "$1 $2SE");
-        q = q.replace(/\b(SPARK)\s*GO\s*(20\d{2})\b/g, "$1 GO $2");
+        q = q.replace(/\b(SPARK)\s*GO\s*(20\d{2}|0[1-3])\b/g, "$1 GO $2");
+        q = q.replace(/\b(SPARK)GO(20\d{2}|0[1-3])\b/g, "$1 GO $2");
+        q = q.replace(/\b(HOT|SMART|CAMON|TAB)(\d{1,4})(HD|SE|I|SIM|WIFI|KIDS|PRO|PLUS|PLAY|C|A|D|P|B)?\b/g, function(_, a, n, tail){ return (a + " " + n + (tail || "")).trim(); });
         q = q.replace(/\b(ZERO)(20|30|40)\b/g, "$1 $2");
         q = q.replace(/\b(ZERO)X(PRO|NEO)?\b/g, function(_, a, b){ return (a + " X" + (b ? " " + b : "")).trim(); });
-        return q;
+        return q.replace(/\s+/g, " ").trim();
     } catch (_) {
         return String(rawText || "").trim();
     }
 }
-
 function setAssalVoiceButtonListening(isListening) {
     const btn = document.getElementById("voiceSearchBtn");
     if (!btn) return;
