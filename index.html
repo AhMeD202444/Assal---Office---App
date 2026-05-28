@@ -18340,6 +18340,184 @@ const ASSAL_VOICE_FILLERS = new Set(["مال", "موبايل", "جهاز", "قط
 const ASSAL_COMPACT_MODEL_WORDS = new Set(["HOT", "SMART", "NOTE", "SPARK", "CAMON", "POVA", "ZERO", "NARZO", "RENO", "FIND", "TAB", "GT", "K", "C", "Y", "X"]);
 const ASSAL_SINGLE_MODEL_LETTERS = new Set(["A","M","F","S","G","C","T","D","B","K","L","R","U","Y","Z","X"]);
 
+const ASSAL_VOICE_MARKET_ALIAS_MAP = {
+    // Samsung A / M market names -> official/service model codes
+    "A12": ["A125"], "A12S": ["A127"],
+    "A02S": ["A025"], "A03S": ["A037"], "A05": ["A055"], "A05S": ["A057"],
+    "A10": ["A105"], "A10S": ["A107"], "M10": ["M105"],
+    "A11": ["A115"], "A14": ["A145F", "A146P", "A146B"],
+    "A15": ["A155", "A156"], "A16": ["A165", "A166"],
+    "A20": ["A205"], "A20S": ["A207"], "A21S": ["A217"],
+    "A22": ["A225", "A226"], "A23": ["A235"], "A24": ["A245", "A246"], "A25": ["A256"],
+    "A30": ["A305"], "A50": ["A505"], "A3": ["A300"], "A5": ["A500"],
+    "A30S": ["A307"], "A31": ["A315"], "A32": ["A325", "A326"],
+    "A33": ["A336"], "A34": ["A345", "A346"], "A35": ["A356"],
+    "A51": ["A515"], "A52": ["A525", "A527", "A528"], "A52S": ["A527"],
+    "A53": ["A536"], "A54": ["A546"], "A55": ["A556"],
+    "A7": ["A700"], "A6": ["A600"], "A6PLUS": ["A605"],
+    "A70": ["A705"], "A71": ["A715"], "A72": ["A725"], "A73": ["A736"],
+    "A82018": ["A530"], "A8PLUS2018": ["A730"], "A72018": ["A750"], "A82017": ["A800"], "A8": ["A800"], "A80": ["A805"], "A92018": ["A920"],
+
+    // Samsung C / E / G / J market names
+    "C5": ["C500"], "C5PRO": ["C500PRO"], "C7": ["C700"], "C7PRO": ["C700PRO"], "C9": ["C900"], "C9PRO": ["C900PRO"],
+    "E5": ["E500"], "E7": ["E700"],
+    "G5PRIME": ["G570"], "G6PRIME": ["G610"], "G6PRIME2": ["G611"], "G6PRIMETO": ["G611"],
+    "J6": ["J600"], "J16": ["J120"], "J1SIX": ["J120"], "J2": ["J200"], "J2PRIME": ["J250"],
+    "J4": ["J400"], "J4PLUS": ["J410", "J415"], "J6PLUS": ["J610"],
+    "J5": ["J500"], "J56": ["J510"], "J5PRO": ["J530"],
+    "J7": ["J700"], "J76": ["J710"], "J7DUOS": ["J720"], "J7DOS": ["J720"],
+    "J7PRO": ["J730"], "J7CORE": ["J701"], "J8": ["J810"],
+    "M12": ["M125"],
+
+    // Samsung S edge family
+    "S6EDGE": ["S6EDGE"], "S6EDGEPLUS": ["S6EDGEPLUS"], "S7EDGE": ["S7EDGE"],
+
+    // Common speech/OCR corrections and compact-model fixes
+    "Y6B": ["Y6P"],
+    "Y6P": ["Y6P"],
+    "Y92019": ["Y92019"],
+    "SPARKGO2024": ["SPARKGO2024"],
+    "IPHONE6S": ["IPHONE6S"],
+    "6S": ["6S"],
+    "IPHONE6SPLUS": ["IPHONE6SPLUS"],
+    "6SPLUS": ["6SPLUS"],
+    "ZERO20": ["ZERO20"], "ZERO30": ["ZERO30"], "ZERO40": ["ZERO40"],
+    "ZEROX": ["ZEROX"], "ZEROXPRO": ["ZEROXPRO"], "ZEROXNEO": ["ZEROXNEO"],
+    "NOVA9SE": ["NOVA9SE"]
+};
+
+const ASSAL_VOICE_EXTRA_PHRASE_MAP = {
+    // المركبات لازم قبل الحروف المفردة: HD / SE / FE / NE / GT / 5G
+    "اتش دي": "HD", "اش دي": "HD", "اج دي": "HD", "اچ دي": "HD", "هتش دي": "HD", "ايج دي": "HD", "ايتش دي": "HD", "هتش دي": "HD",
+    "اس اي": "SE", "اس ايه": "SE", "اس يي": "SE", "اس إي": "SE",
+    "اف اي": "FE", "اف ايه": "FE",
+    "ان اي": "NE", "ان ايه": "NE",
+    "جي تي": "GT", "جيتي": "GT",
+    "فايف جي": "5G", "فور جي": "4G",
+    "واي فاي": "WIFI", "وايفاي": "WIFI",
+    "سيم كارت": "SIM", "سيم كارد": "SIM",
+
+    // كلمات السوق المركبة
+    "برو ماكس": "PRO MAX", "برو مكس": "PRO MAX",
+    "اكس برو": "X PRO", "اكس نيو": "X NEO",
+    "سكس اس بلاس": "6 S PLUS", "ستة اس بلاس": "6 S PLUS", "سته اس بلاس": "6 S PLUS",
+    "سكس اس": "6 S", "ستة اس": "6 S", "سته اس": "6 S",
+    "زيرو اكس برو": "ZERO X PRO", "زيرو اكس نيو": "ZERO X NEO", "زيرو اكس": "ZERO X",
+    "زيرو عشرين": "ZERO 20", "زيرو ثلاثين": "ZERO 30", "زيرو تلاثين": "ZERO 30", "زيرو اربعين": "ZERO 40",
+    "سبارك كو": "SPARK GO", "سبارك كَو": "SPARK GO", "سبارك گو": "SPARK GO", "سبارك جو": "SPARK GO", "سبارك غو": "SPARK GO",
+
+    // Samsung direct speech helpers where generic letter rules can confuse J/G
+    "جي سكس برايم تو": "G6 PRIME 2", "جي سكس برايم توو": "G6 PRIME 2", "جي سكس برايم": "G6 PRIME", "جي فايف برايم": "G5 PRIME",
+    "جاي وان سكس": "J1 6", "جاي تو": "J2", "جاي ربع": "J2 PRIME",
+    "جاي فور بلاس": "J4 PLUS", "جاي فور": "J4", "جاي اربعه": "J4", "جاي اربعة": "J4",
+    "جاي سكس بلاس": "J6 PLUS", "جاي ستة بلاس": "J6 PLUS", "جاي سته بلاس": "J6 PLUS",
+    "جاي فايف سكس": "J5 6", "جاي فايف برو": "J5 PRO", "جاي خمسة برو": "J5 PRO", "جاي خمسه برو": "J5 PRO",
+    "جاي فايف": "J5", "جاي خمسة": "J5", "جاي خمسه": "J5",
+    "جاي سفن سكس": "J7 6", "جاي سبعة سكس": "J7 6", "جاي سبعه سكس": "J7 6",
+    "جاي سفن ديوس": "J7 DUOS", "جاي سفن دوس": "J7 DOS",
+    "جاي سفن برو": "J7 PRO", "جاي سبعة برو": "J7 PRO", "جاي سبعه برو": "J7 PRO",
+    "جاي سفن كور": "J7 CORE", "جاي سبعة كور": "J7 CORE", "جاي سبعه كور": "J7 CORE",
+    "جاي سفن": "J7", "جاي سبعة": "J7", "جاي سبعه": "J7", "جاي ثمانية": "J8", "جاي ثمانيه": "J8",
+
+    // Years often spoken without the full 20 prefix in market names
+    "الفين واثنين وعشرين": "2022", "الفين واثنين عشرين": "2022", "اثنين وعشرين": "22",
+    "الفين واثمنطعش": "2018", "الفين وثمنطعش": "2018", "الفين وثمنتعش": "2018",
+    "الفين واسبعطعش": "2017", "الفين وسبعطعش": "2017", "الفين وسبعتعش": "2017"
+};
+Object.assign(ASSAL_VOICE_PHRASE_MAP, ASSAL_VOICE_EXTRA_PHRASE_MAP);
+
+const ASSAL_VOICE_EXTRA_TOKEN_MAP = {
+    // model/description words inside item names
+    "نوفا": "NOVA", "وايفاي": "WIFI", "واي فاي": "WIFI", "كيدز": "KIDS", "كيدس": "KIDS", "كدز": "KIDS", "سيم": "SIM",
+    "كارت": "", "كارد": "",
+    "كو": "GO", "گو": "GO", "جو": "GO", "غو": "GO",
+    "نيو": "NEW", "كامون": "CAMON", "كمون": "CAMON",
+    "تابلت": "TAB", "تاب": "TAB",
+    "دوس": "DOS", "ديوس": "DUOS", "كور": "CORE",
+    "ايج": "EDGE", "ايدج": "EDGE",
+    "ثري": "3", "فايف": "5", "سكس": "6", "سفن": "7", "ايت": "8", "ناين": "9",
+    "پ": "P", "پي": "P", "بيي": "P",
+    "آي": "I", "ائ": "I",
+    // ZERO هنا اسم سلسلة، أما "صفر" يبقى 0 للأكواد مثل A05/A025
+    "زيرو": "ZERO"
+};
+Object.assign(ASSAL_VOICE_TOKEN_MAP, ASSAL_VOICE_EXTRA_TOKEN_MAP);
+
+Object.assign(ASSAL_VOICE_PHRASE_MAP, {
+    "واحد وخمسين": "51", "واحد و خمسين": "51", "احد وخمسين": "51", "احد و خمسين": "51",
+    "اثنين وخمسين": "52", "اثنين و خمسين": "52", "ثنين وخمسين": "52", "ثنين و خمسين": "52",
+    "ثلاثة وخمسين": "53", "ثلاثه وخمسين": "53", "ثلاث وخمسين": "53", "تلاثة وخمسين": "53", "تلاثه وخمسين": "53", "تلاث وخمسين": "53",
+    "اربعة وخمسين": "54", "اربعه وخمسين": "54", "اربع وخمسين": "54",
+    "خمسة وخمسين": "55", "خمسه وخمسين": "55", "خمس وخمسين": "55",
+    "واحد وسبعين": "71", "واحد و سبعين": "71", "احد وسبعين": "71", "احد و سبعين": "71",
+    "اثنين وسبعين": "72", "اثنين و سبعين": "72", "ثنين وسبعين": "72", "ثنين و سبعين": "72",
+    "ثلاثة وسبعين": "73", "ثلاثه وسبعين": "73", "ثلاث وسبعين": "73", "تلاثة وسبعين": "73", "تلاثه وسبعين": "73", "تلاث وسبعين": "73"
+});
+Object.assign(ASSAL_VOICE_TOKEN_MAP, { "سطعش": "16", "صطعش": "16", "سطنعش": "16" });
+
+
+["NOVA","IPHONE","REDMI","TECNO","INFINIX","HONOR","HUAWEI","REALME","OPPO","VIVO","WIFI","KIDS","SIM","GO","NEW","EDGE"].forEach(w => ASSAL_COMPACT_MODEL_WORDS.add(w));
+["I","P","E"].forEach(w => ASSAL_SINGLE_MODEL_LETTERS.add(w));
+
+function assalVoiceCompactOnly(str) {
+    return assalCompactSearchText(str);
+}
+
+function assalVoiceCodeToDisplay(code) {
+    return String(code || "")
+        .replace(/([A-Z]+)(\d+)/g, "$1 $2")
+        .replace(/(\d+)([A-Z]+)/g, "$1$2")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function assalExpandVoiceMarketAliasVariants(variant) {
+    const compact = assalVoiceCompactOnly(variant);
+    if (!compact) return [];
+    const withoutSamsung = compact.replace(/^SAMSUNG/, "");
+    const probes = assalUniqueArray([compact, withoutSamsung]);
+    const out = [];
+
+    probes.forEach(probe => {
+        const official = ASSAL_VOICE_MARKET_ALIAS_MAP[probe];
+        if (official && official.length) {
+            official.forEach(code => {
+                out.push(code);
+                out.push(assalVoiceCodeToDisplay(code));
+                if (compact.startsWith("SAMSUNG") && !String(code).startsWith("SAMSUNG")) {
+                    out.push("SAMSUNG " + assalVoiceCodeToDisplay(code));
+                }
+            });
+        }
+    });
+
+    // Samsung M follows A-style market naming when available in data: M12 -> M125, M15 -> M155/M156 style where useful.
+    const m = withoutSamsung.match(/^M(\d{1,2})(S?)$/);
+    if (m) {
+        const aKey = "A" + m[1] + (m[2] || "");
+        const aOfficial = ASSAL_VOICE_MARKET_ALIAS_MAP[aKey];
+        if (aOfficial && aOfficial.length) {
+            aOfficial.forEach(code => {
+                const mCode = String(code).replace(/^A/, "M");
+                out.push(mCode);
+                out.push(assalVoiceCodeToDisplay(mCode));
+                if (compact.startsWith("SAMSUNG")) out.push("SAMSUNG " + assalVoiceCodeToDisplay(mCode));
+            });
+        }
+    }
+
+    return assalUniqueArray(out);
+}
+
+function assalIsStrongAlphaNumericVariant(variant) {
+    const compact = assalVoiceCompactOnly(variant);
+    if (!compact) return false;
+    if (/\d+[A-Z]+/.test(compact)) return true;       // 14C / 6S / 12I / 7HD / 9SE
+    if (/[A-Z]+\d+[A-Z0-9]*/.test(compact) && compact.length >= 3) return true; // HOT12I / SPARKGO2024 / Y92019
+    return false;
+}
+
+
 function assalEscapeRegExp(str) {
     return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -18348,6 +18526,9 @@ function assalNormalizeArabicVoice(raw) {
     return String(raw || "")
         .toLowerCase()
         .replace(/[أإآٱ]/g, "ا")
+        .replace(/[کك]/g, "ك")
+        .replace(/گ/g, "ك")
+        .replace(/چ/g, "ج")
         .replace(/ى/g, "ي")
         .replace(/ة/g, "ه")
         .replace(/ؤ/g, "و")
@@ -18417,7 +18598,40 @@ function assalJoinVoiceModelTokens(tokens) {
         const cur = tokens[i];
         const next = tokens[i + 1];
         const next2 = tokens[i + 2];
+        const next3 = tokens[i + 3];
 
+        // ZERO series: ZERO 20/30/40 and ZERO X/PRO/NEO must stay ZERO, not 0.
+        if (cur === "ZERO" && (/^\d{1,4}$/.test(next || "") || next === "X")) {
+            if (next === "X" && (next2 === "PRO" || next2 === "NEO")) {
+                out.push("ZERO" + next + next2);
+                i += 2;
+            } else {
+                out.push("ZERO" + next);
+                i += 1;
+            }
+            continue;
+        }
+
+        // iPhone 6S / 6S PLUS and any number+letter(+PLUS) model.
+        if (/^\d{1,4}$/.test(cur) && ASSAL_SINGLE_MODEL_LETTERS.has(next || "")) {
+            if (next2 === "PLUS") {
+                out.push(cur + next + "PLUS");
+                i += 2;
+            } else {
+                out.push(cur + next);
+                i += 1;
+            }
+            continue;
+        }
+
+        // Honor X5 NEW 2022 must run before generic single-letter X+number handling.
+        if (cur === "X" && /^\d{1,2}$/.test(next || "") && next2 === "NEW" && /^\d{2,4}$/.test(next3 || "")) {
+            out.push("X" + next + "NEW" + (next3.length === 2 ? "20" + next3 : next3));
+            i += 3;
+            continue;
+        }
+
+        // A/M/F/J/C/G + number + optional letter/word, e.g. A12S, C5PRO, J7CORE, S6EDGE.
         if (ASSAL_SINGLE_MODEL_LETTERS.has(cur) && /^\d{1,4}$/.test(next || "")) {
             let numericPart = "";
             let j = i + 1;
@@ -18425,9 +18639,19 @@ function assalJoinVoiceModelTokens(tokens) {
                 numericPart += tokens[j];
                 j++;
             }
-            if (ASSAL_SINGLE_MODEL_LETTERS.has(tokens[j] || "")) {
-                out.push(cur + numericPart + tokens[j]);
+            const tail = tokens[j] || "";
+            if (ASSAL_SINGLE_MODEL_LETTERS.has(tail)) {
+                out.push(cur + numericPart + tail);
                 i = j;
+            } else if (["PRO", "PLUS", "PRIME", "CORE", "DUOS", "DOS", "EDGE", "NEW", "NEO"].includes(tail)) {
+                const tail2 = tokens[j + 1] || "";
+                if (tail === "EDGE" && tail2 === "PLUS") {
+                    out.push(cur + numericPart + "EDGEPLUS");
+                    i = j + 1;
+                } else {
+                    out.push(cur + numericPart + tail);
+                    i = j;
+                }
             } else {
                 out.push(cur + numericPart);
                 i = j - 1;
@@ -18441,12 +18665,57 @@ function assalJoinVoiceModelTokens(tokens) {
             continue;
         }
 
+        // HOT 12 I problem: spoken "اي" becomes A in Samsung, but after HOT+number it is usually I.
+        if (cur === "HOT" && /^\d{1,4}$/.test(next || "") && next2 === "A") {
+            out.push(cur + next + "I");
+            i += 2;
+            continue;
+        }
+
+        // X5 NEW 2022 / X6 / X7 / X8 / X9 Honor style must run before generic compact X+number.
+        if (cur === "X" && /^\d{1,2}$/.test(next || "")) {
+            if (next2 === "NEW" && /^\d{2,4}$/.test(next3 || "")) {
+                out.push("X" + next + "NEW" + (next3.length === 2 ? "20" + next3 : next3));
+                i += 3;
+            } else if (next2 === "NEW") {
+                out.push("X" + next + "NEW");
+                i += 2;
+            } else {
+                out.push("X" + next);
+                i += 1;
+            }
+            continue;
+        }
+
+        // Word + number + optional suffix: HOT12I, SMART7HD, NOVA9SE, TAB8SIM, SPARKGO2024.
         if (ASSAL_COMPACT_MODEL_WORDS.has(cur) && /^\d{1,4}$/.test(next || "")) {
-            if (ASSAL_SINGLE_MODEL_LETTERS.has(next2 || "")) {
+            if (["HD", "SE", "FE", "NE", "GT", "SIM", "WIFI", "KIDS", "NEW", "PRO", "PLUS", "PLAY", "LITE", "I", "A", "S", "C", "D", "P", "B"].includes(next2 || "")) {
                 out.push(cur + next + next2);
                 i += 2;
             } else {
                 out.push(cur + next);
+                i += 1;
+            }
+            continue;
+        }
+
+        // Word + GO + year: SPARK GO 2024 as one strong model.
+        if (ASSAL_COMPACT_MODEL_WORDS.has(cur) && next === "GO" && /^\d{4}$/.test(next2 || "")) {
+            out.push(cur + "GO" + next2);
+            i += 2;
+            continue;
+        }
+
+        // X5 NEW 2022 / X6 / X7 / X8 / X9 Honor style.
+        if (cur === "X" && /^\d{1,2}$/.test(next || "")) {
+            if (next2 === "NEW" && /^\d{2,4}$/.test(next3 || "")) {
+                out.push("X" + next + "NEW" + (next3.length === 2 ? "20" + next3 : next3));
+                i += 3;
+            } else if (next2 === "NEW") {
+                out.push("X" + next + "NEW");
+                i += 2;
+            } else {
+                out.push("X" + next);
                 i += 1;
             }
             continue;
@@ -18516,11 +18785,25 @@ function assalBuildVoiceQueryVariants(parsed) {
         assalAddSamsungZeroVariants(brandless).forEach(v => variants.push(v));
     }
 
-    // احتمالات المسافة: HOT10 PLAY / HOT 10 PLAY / SMART9 / SMART 9
-    const spaced = base.replace(/\b([A-Z]{3,})(\d{1,4})([A-Z]?)\b/g, "$1 $2 $3").replace(/\s+/g, " ").trim();
+    // Market aliases: A12 -> A125, A12S -> A127, J7PRO -> J730, etc.
+    [...variants].forEach(v => {
+        assalExpandVoiceMarketAliasVariants(v).forEach(aliasVariant => variants.push(aliasVariant));
+    });
+
+    // Specific correction: speech engine often hears Y6P as Y6B.
+    [...variants].forEach(v => {
+        const c = assalVoiceCompactOnly(v);
+        if (c.includes("Y6B")) {
+            variants.push(v.replace(/Y\s*6\s*B/gi, "Y6P"));
+            variants.push("Y6P");
+        }
+    });
+
+    // احتمالات المسافة للعرض والمطابقة فقط، مع بقاء البحث القوي يمنع التوسيع على الرقم وحده.
+    const spaced = base.replace(/\b([A-Z]{2,})(\d{1,4})([A-Z0-9]*)\b/g, "$1 $2$3").replace(/\s+/g, " ").trim();
     if (spaced && spaced !== base) variants.push(spaced);
     if (brandless) {
-        const brandlessSpaced = brandless.replace(/\b([A-Z]{3,})(\d{1,4})([A-Z]?)\b/g, "$1 $2 $3").replace(/\s+/g, " ").trim();
+        const brandlessSpaced = brandless.replace(/\b([A-Z]{2,})(\d{1,4})([A-Z0-9]*)\b/g, "$1 $2$3").replace(/\s+/g, " ").trim();
         if (brandlessSpaced && brandlessSpaced !== brandless) variants.push(brandlessSpaced);
     }
 
@@ -18555,9 +18838,20 @@ function assalVoiceBestMatchScore(itemName, variants) {
     for (const variant of variants) {
         const v = assalNormalizeLatinForCompare(variant);
         if (!v) continue;
-        const digitExact = assalVariantDigitTokensAreExact(name, v);
         const compact = assalCompactSearchText(v);
-        if (digitExact && compact && itemCompact.includes(compact)) best = Math.max(best, 1.08);
+        if (!compact) continue;
+
+        const isStrongModel = assalIsStrongAlphaNumericVariant(v);
+        const digitExact = assalVariantDigitTokensAreExact(name, v);
+
+        // Strong model queries like 14C / HOT12I / SMART7HD / SPARKGO2024 must match as one block.
+        // This prevents "14C" from showing every item that only contains 14.
+        if (isStrongModel) {
+            if (itemCompact.includes(compact)) best = Math.max(best, 1.15);
+            continue;
+        }
+
+        if (digitExact && itemCompact.includes(compact)) best = Math.max(best, 1.08);
         if (typeof smartScore === "function") {
             const sc = smartScore(name, v);
             best = Math.max(best, digitExact ? sc : Math.min(sc, 0.45));
@@ -18747,7 +19041,13 @@ let assalVoiceModalOpen = false;
 function getAssalVoiceEnglishQuery(rawText) {
     try {
         const parsed = assalVoiceToEnglishQuery(rawText);
-        return assalNormalizeLatinForCompare(parsed.query) || String(rawText || "").trim();
+        let q = assalNormalizeLatinForCompare(parsed.query) || String(rawText || "").trim();
+        q = q.replace(/\b(Y)(\d)(20\d{2})\b/g, "$1$2 $3");
+        q = q.replace(/\b(NOVA)\s*(\d+)\s*SE\b/g, "$1 $2SE");
+        q = q.replace(/\b(SPARK)\s*GO\s*(20\d{2})\b/g, "$1 GO $2");
+        q = q.replace(/\b(ZERO)(20|30|40)\b/g, "$1 $2");
+        q = q.replace(/\b(ZERO)X(PRO|NEO)?\b/g, function(_, a, b){ return (a + " X" + (b ? " " + b : "")).trim(); });
+        return q;
     } catch (_) {
         return String(rawText || "").trim();
     }
