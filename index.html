@@ -19252,341 +19252,6 @@ function getAssalVoiceEnglishQuery(rawText) {
         return String(rawText || "").trim();
     }
 }
-
-
-/* =========================================================
-   ASSAL PRICE APP - Voice Screen Type Rules Patch
-   مرادفات أنواع الشاشات كفلتر اختياري للبحث الصوتي فقط.
-   إذا لم يذكر الزبون نوع الشاشة يبقى البحث على نمطه السابق.
-   ========================================================= */
-const ASSAL_SCREEN_VOICE_ORG_WORDS = ["اوريجينال","اورجنل","اورجينل","اروجينال","ورجنال","وكالة","وكاله"];
-const ASSAL_SCREEN_VOICE_FRAME_WORDS = ["فريم","قريم","فريمات","frame","frm"];
-const ASSAL_SCREEN_VOICE_INCL_WORDS = ["انسل","انصل","انكل","انسلل","ان سيل","انسييل","incell","incl","تجاري","كوبي"];
-const ASSAL_SCREEN_VOICE_PIX_WORDS = ["بكسل","بكس","بكسل","بي اي اكس","بي اكس","pix"];
-const ASSAL_SCREEN_VOICE_KBS_WORDS = ["كبس","كي بي اس","كي بس اس","كي بي اس","kbs"];
-const ASSAL_SCREEN_VOICE_FLY_WORDS = ["فلاي","fly"];
-
-function assalScreenNormalizeArabicText(str) {
-    return String(str || "")
-        .toLowerCase()
-        .replace(/[أإآ]/g, "ا")
-        .replace(/ة/g, "ه")
-        .replace(/ى/g, "ي")
-        .replace(/[ؤئ]/g, "ي")
-        .replace(/[ًٌٍَُِّْـ]/g, "")
-        .replace(/[\u200f\u200e]/g, " ")
-        .replace(/[^\u0600-\u06FFA-Za-z0-9]+/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-}
-
-function assalScreenWordRegex(alias) {
-    const normalized = assalScreenNormalizeArabicText(alias);
-    if (!normalized) return null;
-    return new RegExp('(^|\\s)' + normalized.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\ /g, '\\s+') + '(?=\\s|$)', 'i');
-}
-
-function assalScreenContainsAny(norm, aliases) {
-    return (aliases || []).some(alias => {
-        const rx = assalScreenWordRegex(alias);
-        return rx ? rx.test(norm) : false;
-    });
-}
-
-function assalScreenRemoveAliases(raw, aliases) {
-    let out = String(raw || "");
-    (aliases || [])
-        .slice()
-        .sort((a, b) => String(b).length - String(a).length)
-        .forEach(alias => {
-            const normalizedAlias = assalScreenNormalizeArabicText(alias);
-            if (!normalizedAlias) return;
-            // حذف مرن للعبارة من النص الأصلي: نستخدم النسخة المطبعة كدليل، ونحذف أبسط صيغة ممكنة أيضاً.
-            out = out.replace(new RegExp(String(alias).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), ' ');
-        });
-    return out.replace(/\s+/g, " ").trim();
-}
-
-function assalScreenCompactText(str) {
-    return String(str || "").toUpperCase().replace(/[^A-Z0-9]+/g, "");
-}
-
-function assalScreenItemHasOneMark(itemName) {
-    const raw = String(itemName || "").toUpperCase();
-    const latin = assalNormalizeLatinForCompare(itemName);
-    return /\(\s*1\s*\)/.test(raw) || /(^|\s)1(\s|$)/.test(latin);
-}
-
-function assalScreenItemHasAnyCompact(itemName, keys) {
-    const compact = assalScreenCompactText(itemName);
-    return (keys || []).some(k => compact.includes(assalScreenCompactText(k)));
-}
-
-function assalScreenItemMatchesKind(itemName, kind) {
-    const compact = assalScreenCompactText(itemName);
-    const has = (token) => compact.includes(assalScreenCompactText(token));
-    const hasFrame = has('FRM') || has('FRAME');
-    const hasIncl = has('INCL') || has('INCELL');
-    const hasOled = has('OLED') || has('OLD');
-    const hasOrg = has('ORG');
-    const hasPix = has('PIX');
-    const hasFly = has('FLY');
-    const hasKbs = has('KBS');
-
-    switch (kind) {
-        case 'PIX_ORG_FRM': return hasPix && hasOrg && hasFrame;
-        case 'FLY_ORG_FRM': return hasFly && hasOrg && hasFrame;
-        case 'ONE_FRM': return hasFrame && assalScreenItemHasOneMark(itemName);
-        case 'KBS_OLED_FRM': return hasKbs && hasOled && hasFrame;
-        case 'PIX_SAML_ONE_FRM': return hasPix && (has('SAML') || has('SMALL')) && hasFrame && assalScreenItemHasOneMark(itemName);
-        case 'BIG_ONE_FRM': return has('BIG') && hasFrame && assalScreenItemHasOneMark(itemName);
-        case 'KBS_INCL_FRM': return hasKbs && hasIncl && hasFrame;
-        case 'FLY_INCL_FRM': return hasFly && hasIncl && hasFrame;
-        case 'PIX_INCL_FRM': return hasPix && hasIncl && hasFrame;
-        case 'ORG_APPLE': return hasOrg && has('APPLE');
-        case 'ORG_SUN': return hasOrg && has('SUN');
-        case 'FLY_ORG': return hasFly && hasOrg;
-        case 'PIX_ORG': return hasPix && hasOrg;
-        case 'ORG_A': return has('ORGA') || (hasOrg && /(^|\s)A(\s|$)/.test(assalNormalizeLatinForCompare(itemName)));
-        case 'KBS_ORG': return hasKbs && hasOrg;
-        case 'INCL_ANY': return hasIncl;
-        case 'ONE': return assalScreenItemHasOneMark(itemName);
-        case 'ORG': return hasOrg;
-        default: return true;
-    }
-}
-
-function assalScreenCreateFilter(kind, display, matchedAliases) {
-    return { kind, display, matchedAliases: matchedAliases || [] };
-}
-
-function assalDetectScreenTypeFilters(rawText) {
-    const raw = String(rawText || "");
-    const norm = assalScreenNormalizeArabicText(raw);
-    if (!norm) return { filters: [], cleanText: raw, displayParts: [] };
-
-    // القواعد الأطول والأكثر تحديداً أولاً حتى لا تسحبها ORG العامة أو FRM وحدها.
-    const rules = [
-        { kind:'PIX_ORG_FRM', display:'PIX ORG FRM', aliases:['وكالة بكسل فريم','وكاله بكسل فريم','وكالة بكس فريم','بكسل اوريجينال فريم','بكس اورجينال فريم','بكسل فريم','بكس فريم','بي اي اكس فريم','اوريجينال بكسل فريم','اورجينال بكس فريم','اوريجنال فريم','اورجينال فريم','اوريجينال فريم'] },
-        { kind:'FLY_ORG_FRM', display:'FLY ORG FRM', aliases:['وكالة فلاي فريم','وكاله فلاي فريم','فلاي فريم','فلاي اوريجينال فريم','فلاي اورجينال فريم','اوريجينال فلاي فريم','اورجينال فلاي فريم'] },
-        { kind:'KBS_INCL_FRM', display:'KBS INCL FRM', aliases:['تجاري كبس','كبس تجاري','كي بي اس انسل فريم','كي بي اس انصل فريم','كي بي اس انكل فريم','انسل كبس فريم','انصل كبس فريم','انكل كبس فريم','انسل كبس قريم','انصل كبس قريم','كي بس اس انسل فريم','كي بس اس انصل فريم'] },
-        { kind:'FLY_INCL_FRM', display:'FLY INCL FRM', aliases:['تجاري فلاي فريم','فلاي تجاري فريم','انسل فلاي تجاري فريم','انصل فلاي تجاري فريم','انكل فلاي تجاري فريم','فلاي انسل تجاري فريم','فلاي انصل تجاري فريم','تجاري انسل فلاي فريم','تجاري انصل فلاي فريم','انسل فلاي فريم','انصل فلاي فريم','انكل فلاي فريم'] },
-        { kind:'PIX_INCL_FRM', display:'PIX INCL FRM', aliases:['تجاري بكسل فريم','تجاري بكس فريم','بكسل تجاري فريم','بكس تجاري فريم','انسل بكسل تجاري فريم','انصل بكسل تجاري فريم','انكل بكسل تجاري فريم','بكسل انسل تجاري فريم','بكسل انصل تجاري فريم','تجاري انسل بكسل فريم','تجاري انصل بكسل فريم','انسل بكسل فريم','انصل بكسل فريم','انكل بكسل فريم','انسل بكس فريم','انصل بكس فريم'] },
-        { kind:'KBS_OLED_FRM', display:'KBS OLED FRM', aliases:['رقم واحد كبس','رقم 1 كبس','كي بي اس اوليد فريم','كي بي اس اولد فريم','كي بس اس اوليد فريم','كي بس اس اولد فريم','كبس اوليد فريم','كبس اولد فريم'] },
-        { kind:'PIX_SAML_ONE_FRM', display:'PIX SAML (1) FRM', aliases:['رقم واحد بكسل سمول','رقم واحد بكس سمول','اصلي صين بكسل سمول','اصلي صيني بكسل سمول','اصلي صين بكس سمول','اصلي صيني بكس سمول','رقم واحد بسكل سمول','اصلي صين بسكل سمول'] },
-        { kind:'BIG_ONE_FRM', display:'BIG (1) FRM', aliases:['رقم واحد بك','رقم واحد بيك','اصلي صين بك','اصلي صيني بك','اصلي صين بيك','رقم واحد big'] },
-        { kind:'ONE_FRM', display:'(1) FRM', aliases:['رقم واحد فريم','رقم 1 فريم','اصلي صين فريم','اصلي صيني فريم'] },
-        { kind:'ORG_APPLE', display:'ORG APPLE', aliases:['وكالة ابل','وكاله ابل','اوريجينال ابل','اورجينال ابل','اورجنل ابل'] },
-        { kind:'ORG_SUN', display:'ORG SUN', aliases:['وكالة صن','وكاله صن','وكالة سن','وكاله سن','اورجينال صن','اوريجينال صن','اورجنل صن','ورجنال صن','اورجينال سن','اوريجينال سن','اورجنل سن','ورجنال سن'] },
-        { kind:'FLY_ORG', display:'FLY ORG', aliases:['اوريجينال فلاي','اورجينال فلاي','اورجنل فلاي','فلاي اوريجينال','فلاي اورجينال','فلاي اورجنل','وكالة فلاي','وكاله فلاي','فلاي وكالة','فلاي وكاله'] },
-        { kind:'PIX_ORG', display:'PIX ORG', aliases:['بكسل اوريجنال','بكسل اورجينال','بكسل اوريجينال','بكس اورجينال','بكس اوريجينال','اورجينل بكسل','اورجنل بكسل','اوريجينال بكسل','اورجينل بكس','اورجنل بكس','اوريجينال بكس','بي اي اكس'] },
-        { kind:'ORG_A', display:'ORG A', aliases:['اوريجينال اي','اورجينال اي','اورجنل اي','وكالة اي','وكاله اي'] },
-        { kind:'KBS_ORG', display:'KBS ORG', aliases:['وكالة كبس','وكاله كبس','كبس اورجينال','كبس اوريجينال','كي بي اس اورجينال','كي بي اس اوريجينال','كي بس اس اورجينال','كي بي اس'] },
-        { kind:'ONE', display:'(1)', aliases:['رقم واحد','رقم 1','اصلي صين','اصلي صيني'] },
-        { kind:'ORG', display:'ORG', aliases:['اوريجينال','اورجنل','اورجينل','اروجينال','ورجنال','وكالة','وكاله'] }
-    ];
-
-    // قواعد منطقية للألفاظ المركبة المتغيرة، حتى لو ترتيب الكلمات تغيّر.
-    if (assalScreenContainsAny(norm, ASSAL_SCREEN_VOICE_KBS_WORDS) && assalScreenContainsAny(norm, ASSAL_SCREEN_VOICE_INCL_WORDS)) {
-        const f = assalScreenCreateFilter('KBS_INCL_FRM', 'KBS INCL FRM', []);
-        return { filters:[f], cleanText: raw, displayParts:[f.display] };
-    }
-    if (assalScreenContainsAny(norm, ASSAL_SCREEN_VOICE_FLY_WORDS) && assalScreenContainsAny(norm, ASSAL_SCREEN_VOICE_INCL_WORDS)) {
-        const f = assalScreenCreateFilter('FLY_INCL_FRM', 'FLY INCL FRM', []);
-        return { filters:[f], cleanText: raw, displayParts:[f.display] };
-    }
-    if (assalScreenContainsAny(norm, ASSAL_SCREEN_VOICE_PIX_WORDS) && assalScreenContainsAny(norm, ASSAL_SCREEN_VOICE_INCL_WORDS)) {
-        const f = assalScreenCreateFilter('PIX_INCL_FRM', 'PIX INCL FRM', []);
-        return { filters:[f], cleanText: raw, displayParts:[f.display] };
-    }
-
-    for (const rule of rules) {
-        const matched = (rule.aliases || []).filter(alias => {
-            const rx = assalScreenWordRegex(alias);
-            return rx ? rx.test(norm) : false;
-        });
-        if (matched.length) {
-            const best = matched.sort((a,b) => String(b).length - String(a).length)[0];
-            const f = assalScreenCreateFilter(rule.kind, rule.display, [best]);
-            return { filters:[f], cleanText: assalScreenRemoveAliases(raw, [best]), displayParts:[f.display] };
-        }
-    }
-
-    // إذا الزبون قال انسل/انصل/تجاري/كوبي مع الايفون أو غيره، نقيّد إلى أي نوع يحتوي INCL.
-    if (assalScreenContainsAny(norm, ASSAL_SCREEN_VOICE_INCL_WORDS)) {
-        const f = assalScreenCreateFilter('INCL_ANY', 'INCL', []);
-        return { filters:[f], cleanText: raw, displayParts:[f.display] };
-    }
-
-    return { filters: [], cleanText: raw, displayParts: [] };
-}
-
-const ASSAL_ORIGINAL_VOICE_TO_ENGLISH_WITHOUT_SCREEN_TYPES = assalVoiceToEnglishQuery;
-assalVoiceToEnglishQuery = function(rawText) {
-    const screen = assalDetectScreenTypeFilters(rawText);
-    const base = ASSAL_ORIGINAL_VOICE_TO_ENGLISH_WITHOUT_SCREEN_TYPES(screen.cleanText || rawText);
-    const screenPart = assalUniqueArray(screen.displayParts || []).join(' ');
-    const modelQuery = assalNormalizeLatinForCompare(base.query);
-    const finalQuery = (modelQuery + (screenPart ? ' ' + screenPart : '')).replace(/\s+/g, ' ').trim();
-    return {
-        ...base,
-        raw: String(rawText || '').trim(),
-        query: finalQuery,
-        modelQuery,
-        screenTypeFilters: screen.filters || [],
-        screenTypeDisplay: screenPart
-    };
-};
-
-const ASSAL_ORIGINAL_BUILD_VOICE_VARIANTS_WITHOUT_SCREEN_TYPES = assalBuildVoiceQueryVariants;
-assalBuildVoiceQueryVariants = function(parsed) {
-    if (!parsed || !(parsed.screenTypeFilters || []).length) {
-        return ASSAL_ORIGINAL_BUILD_VOICE_VARIANTS_WITHOUT_SCREEN_TYPES(parsed);
-    }
-    const modelParsed = { ...parsed, query: parsed.modelQuery || parsed.query };
-    const modelVariants = ASSAL_ORIGINAL_BUILD_VOICE_VARIANTS_WITHOUT_SCREEN_TYPES(modelParsed);
-    const screenPart = String(parsed.screenTypeDisplay || '').trim();
-    if (!screenPart) return modelVariants;
-    const withScreen = [];
-    modelVariants.forEach(v => {
-        withScreen.push(v);
-        withScreen.push((v + ' ' + screenPart).replace(/\s+/g, ' ').trim());
-    });
-    return assalUniqueArray(withScreen);
-};
-
-function assalScreenTypeFiltersMatchItem(itemName, filters) {
-    const list = filters || [];
-    if (!list.length) return true;
-    return list.every(f => assalScreenItemMatchesKind(itemName, f.kind));
-}
-
-const ASSAL_ORIGINAL_GET_VOICE_ENGLISH_QUERY_WITHOUT_SCREEN_TYPES = getAssalVoiceEnglishQuery;
-getAssalVoiceEnglishQuery = function(rawText) {
-    try {
-        const parsed = assalVoiceToEnglishQuery(rawText);
-        let q = assalNormalizeLatinForCompare(parsed.query) || String(rawText || '').trim();
-        q = q.replace(/\b(Y)(\d)(20\d{2})\b/g, "$1$2 $3");
-        q = q.replace(/\b(X[5-9])NEW(2022)\b/g, "$1 NEW $2");
-        q = q.replace(/\b(X[5-9])(2022)\b/g, "$1 $2");
-        q = q.replace(/\b(NOVA)\s*(\d+)\s*SE\b/g, "$1 $2SE");
-        q = q.replace(/\b(SPARK)\s*GO\s*(20\d{2}|0[1-3])\b/g, "$1 GO $2");
-        q = q.replace(/\b(SPARK)GO(20\d{2}|0[1-3])\b/g, "$1 GO $2");
-        q = q.replace(/\b(HOT|SMART|CAMON|TAB|MATE|VISION|POP|BV|Q)(\d{1,4})(HD|SE|I|SIM|WIFI|KIDS|PRO|PLUS|PLAY|LITE|4G|5G|C|A|D|P|B)?\b/g, function(_, a, n, tail){ return (a + ' ' + n + (tail || '')).trim(); });
-        q = q.replace(/\b(BLACKVIEW)(TAB|A|BV)(\d{1,4})(PRO|PLUS|KIDS|WIFI|SIM|4G|5G)?\b/g, function(_, brand, kind, n, tail){ return (brand + ' ' + kind + ' ' + n + (tail ? ' ' + tail : '')).trim(); });
-        q = q.replace(/\b(P\d{1,3})(PRO|PLUS|LITE|5G)\b/g, "$1 $2");
-        q = q.replace(/\b(ZERO)(8I|8|20|30|40)\b/g, "$1 $2");
-        q = q.replace(/\b(ZERO)X(PRO|NEO)?\b/g, function(_, a, b){ return (a + ' X' + (b ? ' ' + b : '')).trim(); });
-        return q.replace(/\s+/g, ' ').trim();
-    } catch (_) {
-        return ASSAL_ORIGINAL_GET_VOICE_ENGLISH_QUERY_WITHOUT_SCREEN_TYPES(rawText);
-    }
-};
-
-// البحث الصوتي داخل الصنف الحالي: نوع الشاشة فلتر اختياري فقط إذا ذكره الزبون.
-searchAssalVoiceCurrentCategory = function(rawVoiceText, options = {}) {
-    const resultsContainer = document.getElementById("results");
-    const parsed = assalVoiceToEnglishQuery(rawVoiceText);
-    const modelParsed = (parsed.screenTypeFilters || []).length ? { ...parsed, query: parsed.modelQuery || parsed.query } : parsed;
-    const variants = ASSAL_ORIGINAL_BUILD_VOICE_VARIANTS_WITHOUT_SCREEN_TYPES(modelParsed);
-    const englishQuery = getAssalVoiceEnglishQuery(rawVoiceText) || assalNormalizeLatinForCompare(parsed.query) || String(rawVoiceText || "").trim();
-
-    const input = document.getElementById("searchInput");
-    if (input && options.updateInput !== false) {
-        input.value = englishQuery;
-        input.setAttribute("dir", "ltr");
-    }
-    try { toggleClearButton(); } catch (_) {}
-
-    if (!modelParsed.query || variants.length === 0) {
-        if (resultsContainer) resultsContainer.style.display = "none";
-        showExitLikeAlert({
-            icon: "fas fa-microphone-lines",
-            title: "بحث صوتي غير مكتمل",
-            message: "احچي اسم الموديل بوضوح، مثل: سامسونك اي صفر خمسة وعشرين أو ايفون 11 وكالة.",
-            confirmText: "موافق"
-        });
-        return [];
-    }
-
-    const selectedCat = String(currentCategory || "").trim();
-    const selectedCatUpper = selectedCat.toUpperCase();
-    if (!selectedCat || selectedCatUpper === "ALL" || selectedCatUpper === "SIMILARITES") {
-        if (resultsContainer) resultsContainer.style.display = "none";
-        Swal.fire({
-            html: `
-                <div class="exit-shell">
-                    <div class="exit-icon"><i class="fas fa-list-alt"></i></div>
-                    <h2 class="exit-title">اختيار الصنف أولًا</h2>
-                    <p class="exit-text">اختار الصنف من الشريط، وبعدها استخدم البحث الصوتي داخل نفس الصنف.</p>
-                </div>
-            `,
-            confirmButtonText: 'تمام، راح أختار الصنف',
-            backdrop: 'rgba(2, 6, 23, 0.82)',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            customClass: {
-                popup: 'swal2-popup exit-popup animate__animated animate__zoomIn',
-                confirmButton: 'exit-confirm'
-            },
-            hideClass: { popup: 'animate__animated animate__zoomOut' }
-        });
-        return [];
-    }
-
-    const items = Array.isArray(database?.[selectedCat]) ? database[selectedCat] : [];
-    if (!items.length) {
-        if (resultsContainer) resultsContainer.style.display = "none";
-        showExitLikeAlert({
-            icon: "fas fa-database",
-            title: "لا توجد بيانات",
-            message: `لا توجد بيانات متاحة لفئة ${selectedCat}. يرجى تحديث الصفحة أو التحقق من الاتصال.`,
-            confirmText: "موافق"
-        });
-        return [];
-    }
-
-    const screenFilters = parsed.screenTypeFilters || [];
-    const rows = [];
-    items.forEach(row => {
-        const itemName = row && (row["Item Name"] || row["ITEM NAME"] || row["Item"] || row["Name"] || row["name"]);
-        if (!itemName) return;
-
-        if (screenFilters.length && !assalScreenTypeFiltersMatchItem(itemName, screenFilters)) return;
-
-        const baseScore = assalVoiceBestMatchScore(itemName, variants);
-        if (baseScore < 0.62) return;
-
-        let score = Math.round(baseScore * 100);
-        if (screenFilters.length) score += 28;
-        const itemCompact = assalCompactSearchText(itemName);
-        parsed.mentionedBrands.forEach(br => {
-            if (itemCompact.includes(assalCompactSearchText(br))) score += 5;
-        });
-
-        rows.push({ item: row, score, itemName: String(itemName) });
-    });
-
-    rows.sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        return a.itemName.length - b.itemName.length;
-    });
-
-    const finalResults = rows.slice(0, 150).map(x => x.item);
-    displayResults(finalResults);
-
-    console.log("ASSAL Voice Current Category Search", {
-        raw: rawVoiceText,
-        englishQuery,
-        category: selectedCat,
-        parsed,
-        variants,
-        screenFilters,
-        count: finalResults.length
-    });
-    return finalResults;
-};
-
 function setAssalVoiceButtonListening(isListening) {
     const btn = document.getElementById("voiceSearchBtn");
     if (!btn) return;
@@ -19757,8 +19422,28 @@ window.onAssalNativeVoiceError = function(message){
     showAssalVoiceModal("error", { message: message || "ما سمعت الصوت بوضوح، جرّب مرة ثانية." });
 };
 
+
+function clearAssalResultsBeforeVoiceSearch() {
+    try {
+        const resultsContainer = document.getElementById("results");
+        if (resultsContainer) {
+            resultsContainer.innerHTML = "";
+            resultsContainer.style.display = "none";
+        }
+        if (typeof hideWholesaleSuggestions === "function") {
+            try { hideWholesaleSuggestions(); } catch (_) {}
+        }
+        if (typeof toggleScrollToTopButton === "function") {
+            try { toggleScrollToTopButton(); } catch (_) {}
+        }
+    } catch (e) {
+        console.warn("clearAssalResultsBeforeVoiceSearch failed:", e);
+    }
+}
+
 function startAssalVoiceSearch() {
     try {
+        clearAssalResultsBeforeVoiceSearch();
         setAssalVoiceButtonListening(true);
         showAssalVoiceModal("listening");
         clearTimeout(assalVoiceSafetyTimer);
@@ -29687,6 +29372,55 @@ html, body, button, input, textarea, select,
     font-size:15px;
     border-radius:16px;
   }
+}
+
+
+/* ===== ASSAL DESIGN FIX: هيدر/فوتر غير شفاف + توسيط حرف اللوكو + تنظيف نتائج قبل البحث الصوتي ===== */
+.header {
+    background: #080c16 !important;
+    background-color: #080c16 !important;
+    border-bottom: 1px solid rgba(255,255,255,.12) !important;
+    box-shadow: 0 3px 12px rgba(0,0,0,.55) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+footer {
+    background: #080c16 !important;
+    background-color: #080c16 !important;
+    border-top: 1px solid rgba(255,255,255,.12) !important;
+    box-shadow: 0 -3px 12px rgba(0,0,0,.55) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.header-brand-logo {
+    display: grid !important;
+    place-items: center !important;
+    line-height: 1 !important;
+}
+
+.header-brand-letter {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+    width: 100% !important;
+    line-height: 1 !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: relative !important;
+    top: 0 !important;
+}
+
+/* إلغاء أي شفافية لاحقة من الثيم الحديث */
+body .header,
+html body .header,
+body footer,
+html body footer {
+    background: #080c16 !important;
+    background-color: #080c16 !important;
 }
 </style>
 
