@@ -18463,6 +18463,58 @@ Object.assign(ASSAL_VOICE_PHRASE_MAP, {
 Object.assign(ASSAL_VOICE_TOKEN_MAP, { "سطعش": "16", "صطعش": "16", "سطنعش": "16" });
 
 
+// إضافات أحمد الأخيرة - ملاحظات بحث صوتي دقيقة فوق القواعد الحالية
+Object.assign(ASSAL_VOICE_PHRASE_MAP, {
+    // ZERO لازم يُفهم كسلسلة جهاز قبل أي تعامل معه كرقم صفر
+    "زيرو ثمانية اي": "ZERO 8I", "زيرو ثمانيه اي": "ZERO 8I", "زيرو ايت اي": "ZERO 8I", "زيرو ايت آي": "ZERO 8I",
+    "زيرو ثمانية": "ZERO 8", "زيرو ثمانيه": "ZERO 8", "زيرو ايت": "ZERO 8",
+    "زيرو عشرين": "ZERO 20", "زيرو ثلاثين": "ZERO 30", "زيرو تلاثين": "ZERO 30", "زيرو اربعين": "ZERO 40",
+
+    // Huawei MATE
+    "هواوي ميت": "HUAWEI MATE", "هواوي مايت": "HUAWEI MATE",
+
+    // Huawei P series: المايك أحياناً يسمع P كـ B
+    "هواوي بي اربعين بلاس": "HUAWEI P40 PLUS", "هواوي پي اربعين بلاس": "HUAWEI P40 PLUS",
+    "بي اربعين بلاس": "P40 PLUS", "پي اربعين بلاس": "P40 PLUS",
+    "هواوي بي اربعين": "HUAWEI P40", "هواوي پي اربعين": "HUAWEI P40",
+    "بي اربعين": "P40", "پي اربعين": "P40",
+
+    // BLACKVIEW + BV
+    "بلاك فيو": "BLACKVIEW", "بلاكفيو": "BLACKVIEW", "بي في": "BV",
+
+    // VISION / POP / Realme Q
+    "فيشن": "VISION", "فيجن": "VISION", "فيزون": "VISION", "فايزون": "VISION",
+    "بوب": "POP",
+    "ريلمي كيو": "REALME Q",
+
+    // VIVO Y + رقم + i: كلمة اي بعد رقم Y هنا غالباً I وليس A
+    "فيفو واي خمسطعش اي": "VIVO Y15I", "فيفو واي خمسة عشر اي": "VIVO Y15I", "فيفو واي خمسه عشر اي": "VIVO Y15I",
+    "فيفو واي اثنعش اي": "VIVO Y12I", "فيفو واي اضنعش اي": "VIVO Y12I", "فيفو واي اثني عشر اي": "VIVO Y12I",
+    "فيفو واي دعش اي": "VIVO Y11I", "فيفو واي عشرين اي": "VIVO Y20I", "فيفو واي واحد وعشرين اي": "VIVO Y21I"
+});
+
+Object.assign(ASSAL_VOICE_TOKEN_MAP, {
+    "ميت": "MATE", "مايت": "MATE",
+    "فيشن": "VISION", "فيجن": "VISION", "فيزون": "VISION", "فايزون": "VISION",
+    "بوب": "POP",
+    "كيو": "Q",
+    "بلاكفيو": "BLACKVIEW", "بلاك": "BLACK", "فيو": "VIEW",
+    "پي": "P", "پيي": "P", "بي": "B"
+});
+
+Object.assign(ASSAL_VOICE_MARKET_ALIAS_MAP, {
+    "ZERO8": ["ZERO8"], "ZERO8I": ["ZERO8I"],
+    "ZERO20": ["ZERO20"], "ZERO30": ["ZERO30"], "ZERO40": ["ZERO40"],
+    "P40": ["P40"], "P40PLUS": ["P40PLUS"],
+    "B40": ["P40"], "B40PLUS": ["P40PLUS"],
+    "Y11A": ["Y11I"], "Y12A": ["Y12I"], "Y15A": ["Y15I"], "Y20A": ["Y20I"], "Y21A": ["Y21I"]
+});
+
+if (!ASSAL_VOICE_BRANDS.includes("BLACKVIEW")) ASSAL_VOICE_BRANDS.push("BLACKVIEW");
+["MATE","VISION","POP","BLACKVIEW","BV"].forEach(w => ASSAL_COMPACT_MODEL_WORDS.add(w));
+["Q","P"].forEach(w => ASSAL_SINGLE_MODEL_LETTERS.add(w));
+
+
 ["NOVA","IPHONE","REDMI","TECNO","INFINIX","HONOR","HUAWEI","REALME","OPPO","VIVO","WIFI","KIDS","SIM","GO","NEW","EDGE"].forEach(w => ASSAL_COMPACT_MODEL_WORDS.add(w));
 ["I","P","E"].forEach(w => ASSAL_SINGLE_MODEL_LETTERS.add(w));
 
@@ -18725,7 +18777,7 @@ function assalJoinVoiceModelTokens(tokens) {
 
         // Word + number + optional suffix: HOT12I, SMART7HD, NOVA9SE, TAB8SIM, SPARKGO2024.
         if (ASSAL_COMPACT_MODEL_WORDS.has(cur) && /^\d{1,4}$/.test(next || "")) {
-            if (["HD", "SE", "FE", "NE", "GT", "SIM", "WIFI", "KIDS", "NEW", "PRO", "PLUS", "PLAY", "LITE", "I", "A", "S", "C", "D", "P", "B"].includes(next2 || "")) {
+            if (["HD", "SE", "FE", "NE", "GT", "SIM", "WIFI", "KIDS", "NEW", "PRO", "PLUS", "PLAY", "LITE", "PRIME", "CORE", "DUOS", "DOS", "EDGE", "4G", "5G", "I", "A", "S", "C", "D", "P", "B", "Q"].includes(next2 || "")) {
                 out.push(cur + next + next2);
                 i += 2;
             } else {
@@ -18766,14 +18818,52 @@ function assalApplyVoicePostCorrections(query, rawText) {
     let q = assalNormalizeLatinForCompare(query);
     const rawNorm = assalNormalizeArabicVoice(rawText);
 
-    // ZERO هنا اسم سلسلة جهاز، مو رقم صفر. هذه القاعدة قبل/بعد التحويل حتى تمنع 0 20 / 0 30 / 0 40.
-    if (/(^|\s)زيرو(?=\s|$)/.test(rawNorm) || /\bZERO\b/.test(q)) {
-        q = q.replace(/\b0\s*(20|30|40)\b/g, "ZERO$1");
-        q = q.replace(/\bZERO\s*(20|30|40)\b/g, "ZERO$1");
-        q = q.replace(/\bZERO\s*X\s*PRO\b/g, "ZEROXPRO");
-        q = q.replace(/\bZERO\s*X\s*NEO\b/g, "ZEROXNEO");
-        q = q.replace(/\bZERO\s*X\b/g, "ZEROX");
+    // تصحيح BLACK VIEW إذا تفككت كلمتين إنكليزيتين.
+    q = q.replace(/\bBLACK\s+VIEW\b/g, "BLACKVIEW");
+
+    // ZERO هنا اسم سلسلة جهاز، مو رقم صفر.
+    // مهم: نعالج حتى إذا محرك الصوت رجّعها أرقاماً جاهزة مثل 0 30 بدل زيرو ثلاثين.
+    q = q.replace(/^(INFINIX\s*)?0\s*8\s*(A|I)?$/g, function(_, brand, tail){
+        return (brand || "") + "ZERO8" + (tail ? "I" : "");
+    });
+    q = q.replace(/^(INFINIX\s*)?0\s*(20|30|40)$/g, function(_, brand, n){
+        return (brand || "") + "ZERO" + n;
+    });
+    q = q.replace(/\b(INFINIX|TECNO)\s*0\s*8\s*(A|I)?\b/g, function(_, brand, tail){
+        return brand + " ZERO8" + (tail ? "I" : "");
+    });
+    q = q.replace(/\b(INFINIX|TECNO)\s*0\s*(20|30|40)\b/g, function(_, brand, n){
+        return brand + " ZERO" + n;
+    });
+    q = q.replace(/\bZERO\s*8\s*(A|I)?\b/g, function(_, tail){ return "ZERO8" + (tail ? "I" : ""); });
+    q = q.replace(/\bZERO\s*(20|30|40)\b/g, "ZERO$1");
+    q = q.replace(/\bZERO\s*X\s*PRO\b/g, "ZEROXPRO");
+    q = q.replace(/\bZERO\s*X\s*NEO\b/g, "ZEROXNEO");
+    q = q.replace(/\bZERO\s*X\b/g, "ZEROX");
+
+    // Huawei P: إذا الصوت كتب B40 بدل P40، نصححها بحذر بدون تحويل كل B إلى P.
+    q = q.replace(/^B\s*40\s*PLUS$/g, "P40PLUS");
+    q = q.replace(/^B\s*40$/g, "P40");
+    q = q.replace(/\bHUAWEI\s+B\s*40\s*PLUS\b/g, "HUAWEI P40PLUS");
+    q = q.replace(/\bHUAWEI\s+B\s*40\b/g, "HUAWEI P40");
+    q = q.replace(/\bP\s*40\s*PLUS\b/g, "P40PLUS");
+    q = q.replace(/\bP\s*40\b/g, "P40");
+
+    // VIVO Y*i: في هذا السياق "اي" بعد رقم Y تعني I وليس A.
+    if (/\bVIVO\b/.test(q) || /فيفو/.test(rawNorm)) {
+        q = q.replace(/\bY\s*(\d{1,2})\s*A\b/g, "Y$1I");
+    } else {
+        q = q.replace(/\bY\s*(11|12|15|20|21)\s*A\b/g, "Y$1I");
     }
+    q = q.replace(/\bY\s*(\d{1,2})\s*I\b/g, "Y$1I");
+
+    // MATE / VISION / POP / BLACKVIEW / BV / Q: كتل قوية مع الرقم حتى لا يبحث على الرقم وحده.
+    q = q.replace(/\b(MATE|VISION|POP|BV|Q)\s*(\d{1,4})\s*(PRO|PLUS|4G|5G|LITE|I|A|C|D|P|B)?\b/g, function(_, word, n, tail){
+        return word + n + (tail || "");
+    });
+    q = q.replace(/\bBLACKVIEW\s+(TAB|A|BV)\s*(\d{1,4})\s*(PRO|PLUS|KIDS|WIFI|SIM|4G|5G)?\b/g, function(_, kind, n, tail){
+        return "BLACKVIEW" + kind + n + (tail || "");
+    });
 
     // SPARK GO لازم تبقى كتلة، حتى لا يصير البحث على السنة/الرقم وحده.
     q = q.replace(/\bSPARK\s*GO\s*2024\b/g, "SPARKGO2024");
@@ -19129,8 +19219,10 @@ function getAssalVoiceEnglishQuery(rawText) {
         q = q.replace(/\b(NOVA)\s*(\d+)\s*SE\b/g, "$1 $2SE");
         q = q.replace(/\b(SPARK)\s*GO\s*(20\d{2}|0[1-3])\b/g, "$1 GO $2");
         q = q.replace(/\b(SPARK)GO(20\d{2}|0[1-3])\b/g, "$1 GO $2");
-        q = q.replace(/\b(HOT|SMART|CAMON|TAB)(\d{1,4})(HD|SE|I|SIM|WIFI|KIDS|PRO|PLUS|PLAY|C|A|D|P|B)?\b/g, function(_, a, n, tail){ return (a + " " + n + (tail || "")).trim(); });
-        q = q.replace(/\b(ZERO)(20|30|40)\b/g, "$1 $2");
+        q = q.replace(/\b(HOT|SMART|CAMON|TAB|MATE|VISION|POP|BV|Q)(\d{1,4})(HD|SE|I|SIM|WIFI|KIDS|PRO|PLUS|PLAY|LITE|4G|5G|C|A|D|P|B)?\b/g, function(_, a, n, tail){ return (a + " " + n + (tail || "")).trim(); });
+        q = q.replace(/\b(BLACKVIEW)(TAB|A|BV)(\d{1,4})(PRO|PLUS|KIDS|WIFI|SIM|4G|5G)?\b/g, function(_, brand, kind, n, tail){ return (brand + " " + kind + " " + n + (tail ? " " + tail : "")).trim(); });
+        q = q.replace(/\b(P40)(PLUS)\b/g, "P40 PLUS");
+        q = q.replace(/\b(ZERO)(8I|8|20|30|40)\b/g, "$1 $2");
         q = q.replace(/\b(ZERO)X(PRO|NEO)?\b/g, function(_, a, b){ return (a + " X" + (b ? " " + b : "")).trim(); });
         return q.replace(/\s+/g, " ").trim();
     } catch (_) {
