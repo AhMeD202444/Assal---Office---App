@@ -25925,21 +25925,9 @@ html.low-end-device .update-success-shell{
       .replace(/'/g, '&#039;');
   }
 
-  function buildUpdateFeatures(remote){
-    const rawFeatures = Array.isArray(remote && remote.features) ? remote.features : [];
-    const features = rawFeatures.length ? rawFeatures : [
-      'إضافة البحث الصوتي الذكي',
-      'تحسين البحث داخل الصنف المحدد',
-      'إصلاحات وتحسينات للاستقرار'
-    ];
-
-    return features.slice(0, 4).map(item => `
-      <div class="force-update-feature">
-        <i class="fas fa-check"></i>
-        <span>${escapeUpdateText(item, '')}</span>
-      </div>
-    `).join('');
-  }
+ function buildUpdateFeatures(remote){
+  return '';
+}
 
   function buildUpdateHtml(remote, current){
     const title = escapeUpdateText(remote.title, 'تحديث جديد متوفر');
