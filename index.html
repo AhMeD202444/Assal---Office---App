@@ -25795,9 +25795,12 @@ html.low-end-device .update-success-shell{
     updateState.started = false;
     updateState.installShown = false;
     updateState.installUrl = updateState.remote?.apkUrl || APP_UPDATE_CONFIG.githubApkDirectUrl;
-    updateProgressUI(100, 'اكتمل التنزيل بنجاح. إذا لم تفتح شاشة التثبيت تلقائياً اضغط زر التثبيت.');
+    updateProgressUI(100, 'اكتمل التنزيل بنجاح. جارٍ فتح شاشة التثبيت...');
     showInstallSection();
     setDownloadButtonState(true, '<i class="fas fa-check-circle"></i><span>اكتمل التنزيل</span>');
+    window.setTimeout(() => {
+      try { triggerInstall(); } catch (err) { console.error('auto trigger install failed:', err); }
+    }, 450);
   };
 
   window.onNativeUpdateInstallRequired = function(message){
@@ -25912,17 +25915,74 @@ html.low-end-device .update-success-shell{
     }
   }
 
+  function escapeUpdateText(value, fallback){
+    const raw = String(value || fallback || '').trim();
+    return raw
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function buildUpdateFeatures(remote){
+    const rawFeatures = Array.isArray(remote && remote.features) ? remote.features : [];
+    const features = rawFeatures.length ? rawFeatures : [
+      'إضافة البحث الصوتي الذكي',
+      'تحسين البحث داخل الصنف المحدد',
+      'إصلاحات وتحسينات للاستقرار'
+    ];
+
+    return features.slice(0, 4).map(item => `
+      <div class="force-update-feature">
+        <i class="fas fa-check"></i>
+        <span>${escapeUpdateText(item, '')}</span>
+      </div>
+    `).join('');
+  }
+
   function buildUpdateHtml(remote, current){
+    const title = escapeUpdateText(remote.title, 'تحديث جديد متوفر');
+    const message = escapeUpdateText(remote.message, 'تمت إضافة البحث الصوتي وتحسينات مهمة على البحث وتجربة الاستخدام.');
+    const versionName = escapeUpdateText(remote.versionName, '-');
+    const currentName = escapeUpdateText(current.versionName, '1.0');
+
     return `
       <div class="force-update-shell" dir="rtl">
-        <div class="force-update-badge"><i class="fas fa-rocket"></i> تحديث إلزامي</div>
-        <div class="force-update-icon"><i class="fas fa-cloud-arrow-down"></i></div>
-        <h2 class="force-update-title">${remote.title || 'تحديث إلزامي'}</h2>
-        <p class="force-update-text">${remote.message || 'دعم أجهزة ذات المعالجات الضعيفة'}</p>
-        <div class="force-update-versions">
-          <div class="force-update-version-card"><span>نسختك الحالية</span><strong>${current.versionName || '1.0'}</strong></div>
-          <div class="force-update-version-card active"><span>النسخة المطلوبة</span><strong>${remote.versionName || '-'}</strong></div>
+        <div class="force-update-bg-orb one"></div>
+        <div class="force-update-bg-orb two"></div>
+
+        <div class="force-update-topline">
+          <span class="force-update-badge"><i class="fas fa-bolt"></i> تحديث إلزامي</span>
+          <span class="force-update-small-version">v${versionName}</span>
         </div>
+
+        <div class="force-update-orb-wrap" aria-hidden="true">
+          <div class="force-update-ring"></div>
+          <div class="force-update-ring second"></div>
+          <div class="force-update-icon">
+            <i class="fas fa-microphone-lines"></i>
+          </div>
+        </div>
+
+        <h2 class="force-update-title">${title}</h2>
+        <p class="force-update-text">${message}</p>
+
+        <div class="force-update-feature-list">
+          ${buildUpdateFeatures(remote)}
+        </div>
+
+        <div class="force-update-versions">
+          <div class="force-update-version-card">
+            <span>نسختك الحالية</span>
+            <strong>${currentName}</strong>
+          </div>
+          <div class="force-update-version-card active">
+            <span>النسخة الجديدة</span>
+            <strong>${versionName}</strong>
+          </div>
+        </div>
+
         <div id="appUpdateProgressWrap" class="force-update-progress-wrap" style="display:none">
           <div class="force-update-progress-head">
             <span id="appUpdateStatusText">جاري تهيئة تنزيل التحديث...</span>
@@ -25930,11 +25990,21 @@ html.low-end-device .update-success-shell{
           </div>
           <div class="force-update-progress-track"><div id="appUpdateProgressFill" class="force-update-progress-fill"></div></div>
         </div>
+
         <div class="force-update-actions">
-          <button id="appUpdateDownloadBtn" class="force-update-btn primary" type="button"><i class="fas fa-download"></i><span>نزل التحديث</span></button>
-          <button id="appUpdateInstallBtn" class="force-update-btn success" type="button" style="display:none"><i class="fas fa-mobile-screen-button"></i><span>حدث الآن</span></button>
+          <button id="appUpdateDownloadBtn" class="force-update-btn primary" type="button">
+            <i class="fas fa-download"></i>
+            <span>تحديث الآن</span>
+          </button>
+          <button id="appUpdateInstallBtn" class="force-update-btn success" type="button" style="display:none">
+            <i class="fas fa-mobile-screen-button"></i>
+            <span>فتح التثبيت</span>
+          </button>
         </div>
-        <div id="appUpdateInstallHint" class="force-update-hint" style="display:none">إذا لم تظهر شاشة التثبيت مباشرة، افتح الملف من قسم التنزيلات ثم أكمل التحديث يدويًا.</div>
+
+        <div id="appUpdateInstallHint" class="force-update-hint" style="display:none">
+          إذا لم تظهر شاشة التثبيت تلقائياً، اضغط فتح التثبيت أو افتح الملف من التنزيلات.
+        </div>
       </div>`;
   }
 
@@ -25944,97 +26014,307 @@ html.low-end-device .update-success-shell{
     style.id = 'forceUpdateStyles';
     style.textContent = `
       .swal2-container.force-update-container {
-        backdrop-filter: blur(10px);
-        background: rgba(2, 10, 26, 0.72) !important;
+        backdrop-filter: blur(16px) saturate(135%) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(135%) !important;
+        background:
+          radial-gradient(circle at 50% 30%, rgba(34, 211, 238, .14), transparent 35%),
+          rgba(2, 8, 18, .78) !important;
         padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)) !important;
         box-sizing: border-box;
       }
       .swal2-popup.force-update-popup {
-        width: min(92vw, 520px) !important;
-        max-width: 520px !important;
+        width: min(94vw, 430px) !important;
+        max-width: 430px !important;
         max-height: calc(100dvh - max(24px, env(safe-area-inset-top)) - max(24px, env(safe-area-inset-bottom))) !important;
         border-radius: 32px !important;
         padding: 0 !important;
         margin: 0 auto !important;
-        background: linear-gradient(180deg, rgba(9,17,40,.98), rgba(5,10,25,.98)) !important;
-        color: #fff !important;
-        box-shadow: 0 30px 90px rgba(0,0,0,.45), 0 0 0 1px rgba(83,177,255,.14) inset !important;
+        background:
+          linear-gradient(145deg, rgba(25, 44, 64, .96), rgba(10, 17, 33, .98)),
+          radial-gradient(circle at 50% 10%, rgba(52, 211, 153, .18), transparent 42%) !important;
+        color: #f8fdff !important;
+        box-shadow:
+          0 30px 75px rgba(0, 0, 0, .52),
+          inset 0 1px 0 rgba(255, 255, 255, .10),
+          0 0 0 1px rgba(255,255,255,.045) !important;
         overflow: hidden auto !important;
         box-sizing: border-box !important;
+        border: 1px solid rgba(148, 210, 230, .20) !important;
       }
       .force-update-shell {
-        padding: 26px 22px 22px;
+        position: relative;
+        padding: 24px 20px 20px;
         text-align: center;
         font-family: 'Cairo', 'Tajawal', sans-serif;
         max-height: calc(100dvh - max(24px, env(safe-area-inset-top)) - max(24px, env(safe-area-inset-bottom)));
         overflow-y: auto;
         box-sizing: border-box;
+        isolation: isolate;
+      }
+      .force-update-shell::-webkit-scrollbar { display: none; }
+      .force-update-shell { scrollbar-width: none; -ms-overflow-style: none; }
+      .force-update-bg-orb {
+        position: absolute;
+        width: 190px;
+        height: 190px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -1;
+        filter: blur(1px);
+      }
+      .force-update-bg-orb.one {
+        top: -70px;
+        right: -60px;
+        background: radial-gradient(circle, rgba(34, 211, 238, .24), transparent 66%);
+      }
+      .force-update-bg-orb.two {
+        bottom: -90px;
+        left: -60px;
+        background: radial-gradient(circle, rgba(139, 92, 246, .20), transparent 65%);
+      }
+      .force-update-topline {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
       }
       .force-update-badge {
-        display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px;
-        background: rgba(67,206,162,.14); border: 1px solid rgba(67,206,162,.34); color: #8ef0cf;
-        font-size: 13px; font-weight: 700; margin-bottom: 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 13px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.09);
+        border: 1px solid rgba(255,255,255,.13);
+        color: #b7f8ff;
+        font-size: 12px;
+        font-weight: 900;
+      }
+      .force-update-small-version {
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 900;
+        color: rgba(255,255,255,.84);
+        background: rgba(3, 10, 23, .28);
+        border: 1px solid rgba(255,255,255,.08);
+        direction: ltr;
+      }
+      .force-update-orb-wrap {
+        width: 148px;
+        height: 148px;
+        margin: 0 auto 14px;
+        position: relative;
+        display: grid;
+        place-items: center;
+      }
+      .force-update-ring,
+      .force-update-ring.second {
+        position: absolute;
+        inset: 8px;
+        border-radius: 50%;
+        border: 1px solid rgba(103, 232, 249, .34);
+        box-shadow: 0 0 38px rgba(34, 211, 238, .20);
+        animation: forceUpdateRing 1.75s ease-in-out infinite;
+      }
+      .force-update-ring.second {
+        inset: 0;
+        opacity: .45;
+        animation-delay: .45s;
       }
       .force-update-icon {
-        width: 88px; height: 88px; margin: 0 auto 16px; border-radius: 28px;
-        display: flex; align-items: center; justify-content: center; font-size: 34px; color: #fff;
-        background: radial-gradient(circle at 30% 30%, #43cea2, #185a9d 70%);
-        box-shadow: 0 16px 40px rgba(24,90,157,.42), 0 0 0 10px rgba(67,206,162,.08);
+        width: 102px;
+        height: 102px;
+        margin: 0 auto;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 40px;
+        color: #fff;
+        background: linear-gradient(145deg, #12d6cf, #2563eb 54%, #8b5cf6);
+        box-shadow: 0 18px 42px rgba(37, 99, 235, .36), 0 0 30px rgba(20, 184, 166, .30), inset 0 2px 0 rgba(255,255,255,.18);
       }
-      .force-update-title { margin: 0 0 10px; font-size: 30px; line-height: 1.25; font-weight: 800; }
-      .force-update-text { margin: 0 auto 18px; max-width: 390px; color: rgba(255,255,255,.82); font-size: 17px; line-height: 1.85; }
-      .force-update-versions { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-bottom: 18px; }
+      .force-update-title {
+        margin: 0 0 7px;
+        font-size: 22px;
+        line-height: 1.35;
+        font-weight: 900;
+        color: #ffffff;
+      }
+      .force-update-text {
+        margin: 0 auto 13px;
+        max-width: 350px;
+        color: rgba(235, 248, 255, .76);
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1.85;
+      }
+      .force-update-feature-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 7px;
+        margin: 12px 0 13px;
+      }
+      .force-update-feature {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        text-align: right;
+        border-radius: 15px;
+        padding: 9px 11px;
+        background: rgba(3, 10, 23, .26);
+        border: 1px solid rgba(255,255,255,.08);
+        color: rgba(255,255,255,.88);
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .force-update-feature i {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 10px;
+        color: #052e2b;
+        background: linear-gradient(135deg, #67e8f9, #34d399);
+      }
+      .force-update-versions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0,1fr));
+        gap: 10px;
+        margin-bottom: 13px;
+      }
       .force-update-version-card {
-        border-radius: 20px; padding: 14px 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
-        display: flex; flex-direction: column; gap: 6px;
+        border-radius: 18px;
+        padding: 11px 9px;
+        background: rgba(255,255,255,.045);
+        border: 1px solid rgba(255,255,255,.08);
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
       }
-      .force-update-version-card.active { background: rgba(67,206,162,.10); border-color: rgba(67,206,162,.25); }
-      .force-update-version-card span { font-size: 12px; color: rgba(255,255,255,.65); }
-      .force-update-version-card strong { font-size: 24px; color: #fff; }
+      .force-update-version-card.active {
+        background: linear-gradient(135deg, rgba(20,184,166,.16), rgba(59,130,246,.10));
+        border-color: rgba(103,232,249,.18);
+      }
+      .force-update-version-card span {
+        font-size: 11px;
+        color: rgba(183, 248, 255, .66);
+        font-weight: 900;
+      }
+      .force-update-version-card strong {
+        font-size: 19px;
+        color: #fff;
+        direction: ltr;
+      }
       .force-update-progress-wrap {
-        border-radius: 18px; padding: 14px; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.08); margin-bottom: 16px;
+        border-radius: 18px;
+        padding: 13px;
+        background: rgba(3, 10, 23, .30);
+        border: 1px solid rgba(255,255,255,.10);
+        margin-bottom: 13px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
       }
-      .force-update-progress-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 10px; font-size: 13px; color: rgba(255,255,255,.8); }
-      .force-update-progress-track { width:100%; height:12px; border-radius:999px; overflow:hidden; background: rgba(255,255,255,.10); }
+      .force-update-progress-head {
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        margin-bottom: 9px;
+        font-size: 12px;
+        color: rgba(235, 248, 255, .78);
+        font-weight: 800;
+      }
+      .force-update-progress-track {
+        width:100%;
+        height:12px;
+        border-radius:999px;
+        overflow:hidden;
+        background: rgba(255,255,255,.10);
+      }
       .force-update-progress-fill {
-        width:0%; height:100%; border-radius:999px; background: linear-gradient(90deg, #43cea2, #25b9ff, #185a9d);
-        box-shadow: 0 8px 22px rgba(37,185,255,.35); transition: width .28s ease;
+        width:0%;
+        height:100%;
+        border-radius:999px;
+        background: linear-gradient(90deg, #34d399, #22d3ee, #60a5fa);
+        box-shadow: 0 8px 22px rgba(34,211,238,.30);
+        transition: width .22s ease;
       }
-      .force-update-actions { display:flex; flex-direction:column; gap:12px; }
+      .force-update-actions {
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+      }
       .force-update-btn {
-        border:0; outline:0; border-radius: 18px; padding: 16px 20px; font-size: 18px; font-weight: 800; color:#fff; cursor:pointer;
-        display:inline-flex; align-items:center; justify-content:center; gap:10px; width:100%; font-family: 'Cairo', 'Tajawal', sans-serif;
-        transition: transform .18s ease, opacity .18s ease, box-shadow .18s ease;
+        border:0;
+        outline:0;
+        border-radius: 18px;
+        padding: 14px 18px;
+        font-size: 16px;
+        font-weight: 900;
+        color:#fff;
+        cursor:pointer;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:10px;
+        width:100%;
+        font-family: 'Cairo', 'Tajawal', sans-serif;
+        transition: transform .18s ease, opacity .18s ease, box-shadow .18s ease, filter .18s ease;
+        -webkit-tap-highlight-color: transparent;
       }
       .force-update-btn:active { transform: scale(.985); }
-      .force-update-btn.primary { background: linear-gradient(135deg, #0ea5e9, #2563eb); box-shadow: 0 16px 30px rgba(37,99,235,.28); }
-      .force-update-btn.success { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 16px 30px rgba(22,163,74,.28); }
-      .force-update-hint { margin-top: 14px; color: rgba(255,255,255,.66); font-size: 12px; line-height: 1.9; }
+      .force-update-btn.primary {
+        background: linear-gradient(135deg, #06b6d4, #2563eb 58%, #7c3aed);
+        box-shadow: 0 16px 30px rgba(37,99,235,.26);
+      }
+      .force-update-btn.success {
+        background: linear-gradient(135deg, #22c55e, #06b6d4);
+        box-shadow: 0 16px 30px rgba(22,163,74,.22);
+      }
+      .force-update-btn:disabled {
+        cursor: default;
+        filter: saturate(.85);
+      }
+      .force-update-hint {
+        margin-top: 11px;
+        color: rgba(235, 248, 255, .62);
+        font-size: 11px;
+        line-height: 1.8;
+        font-weight: 700;
+      }
+      @keyframes forceUpdateRing {
+        0%, 100% { transform: scale(.86); opacity: .68; }
+        50% { transform: scale(1.08); opacity: .18; }
+      }
       @media (max-width: 520px){
         .swal2-container.force-update-container {
           padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) !important;
         }
         .swal2-popup.force-update-popup {
-          width: min(96vw, 420px) !important;
-          border-radius: 24px !important;
+          width: min(96vw, 390px) !important;
+          border-radius: 28px !important;
           max-height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom))) !important;
         }
         .force-update-shell {
-          padding: 18px 14px 16px;
+          padding: 20px 15px 16px;
           max-height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom)));
         }
-        .force-update-badge { margin-bottom: 12px; font-size: 12px; padding: 7px 13px; }
-        .force-update-icon { width: 68px; height: 68px; margin-bottom: 12px; font-size: 28px; border-radius: 22px; }
-        .force-update-title { font-size: 21px; margin-bottom: 8px; }
-        .force-update-text { font-size: 14px; line-height: 1.7; margin-bottom: 14px; }
-        .force-update-versions { gap: 10px; margin-bottom: 14px; }
-        .force-update-version-card { border-radius: 16px; padding: 12px 10px; }
-        .force-update-version-card strong { font-size: 18px; }
-        .force-update-progress-wrap { padding: 12px; border-radius: 16px; margin-bottom: 14px; }
-        .force-update-progress-head { font-size: 12px; gap: 8px; }
+        .force-update-orb-wrap { width: 132px; height: 132px; margin-bottom: 11px; }
+        .force-update-icon { width: 92px; height: 92px; font-size: 36px; }
+        .force-update-title { font-size: 20px; }
+        .force-update-text { font-size: 13px; line-height: 1.75; margin-bottom: 11px; }
+        .force-update-feature { padding: 8px 10px; font-size: 11px; border-radius: 14px; }
+        .force-update-version-card { border-radius: 15px; padding: 10px 8px; }
+        .force-update-version-card strong { font-size: 17px; }
+        .force-update-progress-wrap { padding: 12px; border-radius: 16px; }
+        .force-update-progress-head { font-size: 11px; gap: 8px; }
         .force-update-progress-track { height: 10px; }
-        .force-update-btn { font-size: 15px; padding: 13px 14px; border-radius: 15px; }
-        .force-update-hint { margin-top: 10px; font-size: 11px; line-height: 1.75; }
+        .force-update-btn { font-size: 14px; padding: 13px 14px; border-radius: 15px; }
       }
     `;
     document.head.appendChild(style);
