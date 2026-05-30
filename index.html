@@ -19441,7 +19441,51 @@ function clearAssalResultsBeforeVoiceSearch() {
     }
 }
 
-function startAssalVoiceSearch() {
+async function ensureAssalBrowserMicPermission() {
+    if (window.Android && typeof window.Android.startVoiceSearch === "function") {
+        return { ok: true, source: "android-native" };
+    }
+
+    if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function") {
+        return {
+            ok: false,
+            source: "browser",
+            message: "المتصفح ما يدعم طلب صلاحية المايك مباشرة. جرّب Chrome أو افتح الموقع عبر HTTPS."
+        };
+    }
+
+    let stream = null;
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        return { ok: true, source: "browser" };
+    } catch (err) {
+        console.warn("Browser microphone permission failed:", err);
+        const errorName = err && err.name ? String(err.name) : "";
+
+        let message = "يرجى السماح بالوصول للمايك من المتصفح حتى يشتغل البحث الصوتي.";
+        if (errorName === "NotAllowedError" || errorName === "PermissionDeniedError") {
+            message = "تم رفض صلاحية المايك. افتح إعدادات الموقع من علامة القفل وفعّل Microphone.";
+        } else if (errorName === "NotFoundError" || errorName === "DevicesNotFoundError") {
+            message = "ماكو مايك متاح على هذا الجهاز أو المتصفح ما كدر يوصله.";
+        } else if (errorName === "NotReadableError" || errorName === "TrackStartError") {
+            message = "الميكروفون مشغول بتطبيق ثاني. أغلق التطبيق الثاني وجرّب مرة ثانية.";
+        } else if (location.protocol !== "https:" && location.hostname !== "localhost") {
+            message = "صلاحية المايك تحتاج رابط HTTPS حتى تشتغل داخل المتصفح.";
+        }
+
+        return { ok: false, source: "browser", message };
+    } finally {
+        try {
+            if (stream) {
+                stream.getTracks().forEach(track => {
+                    try { track.stop(); } catch (_) {}
+                });
+            }
+        } catch (_) {}
+    }
+}
+
+async function startAssalVoiceSearch() {
     try {
         clearAssalResultsBeforeVoiceSearch();
         setAssalVoiceButtonListening(true);
@@ -19462,10 +19506,19 @@ function startAssalVoiceSearch() {
         console.warn("Android native voice failed:", e);
     }
 
+    const micPermission = await ensureAssalBrowserMicPermission();
+    if (!micPermission.ok) {
+        clearTimeout(assalVoiceSafetyTimer);
+        setAssalVoiceButtonListening(false);
+        showAssalVoiceModal("error", { message: micPermission.message || "يرجى السماح بالوصول للمايك 🎤" });
+        return;
+    }
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
+        clearTimeout(assalVoiceSafetyTimer);
         setAssalVoiceButtonListening(false);
-        showAssalVoiceModal("error", { message: "الميكروفون يحتاج كود Android Studio حتى يشتغل بثبات داخل التطبيق." });
+        showAssalVoiceModal("error", { message: "المتصفح ما يدعم التعرف الصوتي. جرّب Google Chrome أو استخدم التطبيق." });
         return;
     }
 
@@ -19492,14 +19545,25 @@ function startAssalVoiceSearch() {
     };
     rec.onerror = (event) => {
         console.warn("Voice recognition error:", event);
+        clearTimeout(assalVoiceSafetyTimer);
         setAssalVoiceButtonListening(false);
         showAssalVoiceModal("error", { message: "ما سمعت الصوت بوضوح، جرّب مرة ثانية أو اكتب البحث يدوياً." });
     };
     rec.onend = () => {
+        clearTimeout(assalVoiceSafetyTimer);
         setAssalVoiceButtonListening(false);
     };
-    rec.start();
+
+    try {
+        rec.start();
+    } catch (err) {
+        console.warn("Voice recognition start failed:", err);
+        clearTimeout(assalVoiceSafetyTimer);
+        setAssalVoiceButtonListening(false);
+        showAssalVoiceModal("error", { message: "تعذر تشغيل المايك من المتصفح، جرّب مرة ثانية." });
+    }
 }
+
 /* ================== /ASSAL Voice Search Engine ================== */
 
 
