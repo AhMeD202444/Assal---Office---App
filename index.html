@@ -245,7 +245,17 @@
           };
         }
 
-        const manualOverride = safeStorageGet('assal_force_low_end');
+        const LIGHT_CHOICE_CONFIRMED_KEY = 'assal_light_mode_user_confirmed_v3';
+        let manualOverride = safeStorageGet('assal_force_low_end');
+        const lightChoiceConfirmed = safeStorageGet(LIGHT_CHOICE_CONFIRMED_KEY) === 'true';
+
+        // تنظيف آمن لإعدادات قديمة: أي وضع خفيف مخزون من النسخ السابقة لا يُعتبر اختياراً مؤكداً.
+        // هذا يمنع تفعيل الوضع الخفيف تلقائياً بسبب localStorage قديم.
+        if (manualOverride === 'on' && !lightChoiceConfirmed) {
+          safeStorageRemove('assal_force_low_end');
+          manualOverride = null;
+        }
+
         const nativeValue = nativeLowEndValue();
         const nativeDecision = normalizeNativeLowEndValue(nativeValue);
         const signals = getDeviceSignals();
@@ -261,10 +271,11 @@
         const isForcedOn = manualOverride === 'on';
         const isForcedOff = manualOverride === 'off';
 
-        const isLowEnd = !!(
-          isForcedOn ||
-          (!isForcedOff && autoDecision.isLow)
-        );
+        // ASSAL SAFE MODE POLICY:
+        // الوضع القياسي هو الافتراضي دائماً.
+        // فحص الجهاز يبقى للتقرير والتوصية فقط، ولا يفعّل الوضع الخفيف تلقائياً.
+        const isLowEnd = !!isForcedOn;
+        const autoSuggestedLowEnd = !!autoDecision.isLow;
 
         if (isLowEnd) {
           document.documentElement.classList.add('low-end-device');
@@ -273,12 +284,15 @@
           document.documentElement.classList.remove('low-end-device');
           document.documentElement.setAttribute('data-device-profile', 'standard');
         }
+        document.documentElement.setAttribute('data-device-mode-policy', 'manual-only');
+        document.documentElement.setAttribute('data-device-recommendation', autoSuggestedLowEnd ? 'light-suggested' : 'standard-suggested');
 
         window.__ASSAL_LOW_END_DEVICE__ = !!isLowEnd;
+        window.__ASSAL_LOW_END_RECOMMENDED__ = autoSuggestedLowEnd;
         window.__ASSAL_LOW_END_SOURCE__ =
           isForcedOn ? 'manual-on' :
           isForcedOff ? 'manual-off' :
-          autoDecision.source;
+          'standard-default';
 
         window.__ASSAL_LOW_END_DIAGNOSTICS__ = {
           manualOverride,
@@ -292,7 +306,10 @@
           runtimeLow: !!runtimeResult.isLow,
           runtimeScore: runtimeResult.score,
           autoLow: !!autoDecision.isLow,
+          autoSuggestedLowEnd,
           autoSource: autoDecision.source,
+          modePolicy: 'manual-only-standard-default',
+          finalProfile: isLowEnd ? 'low-end' : 'standard',
           finalScore,
           signals,
           benches: runtimeResult.benches || [],
@@ -306,12 +323,58 @@
         window.__ASSAL_DECIDE_AUTO_LOW_END__ = decideAutoLowEnd;
         window.__ASSAL_NORMALIZE_NATIVE_LOW_END__ = normalizeNativeLowEndValue;
 
+        window.__ASSAL_APPLY_LOW_END_PROFILE__ = function(mode) {
+          const normalizedMode = mode === 'on' ? 'on' : (mode === 'off' ? 'off' : null);
+          const recommended = !!(window.__ASSAL_LOW_END_RECOMMENDED__ || autoSuggestedLowEnd);
+          const useLight = normalizedMode === 'on';
+
+          try {
+            if (useLight) {
+              document.documentElement.classList.add('low-end-device');
+              document.documentElement.setAttribute('data-device-profile', 'low-end');
+            } else {
+              document.documentElement.classList.remove('low-end-device');
+              document.documentElement.classList.remove('manual-light-news');
+              document.documentElement.setAttribute('data-device-profile', 'standard');
+            }
+            document.documentElement.setAttribute('data-device-mode-policy', 'manual-only');
+            document.documentElement.setAttribute('data-device-recommendation', recommended ? 'light-suggested' : 'standard-suggested');
+          } catch (_) {}
+
+          window.__ASSAL_LOW_END_DEVICE__ = !!useLight;
+          window.__ASSAL_LOW_END_SOURCE__ =
+            normalizedMode === 'on' ? 'manual-on' :
+            normalizedMode === 'off' ? 'manual-off' :
+            'standard-default';
+          window.__ASSAL_LOW_END_RECOMMENDED__ = recommended;
+
+          try {
+            if (window.__ASSAL_LOW_END_DIAGNOSTICS__) {
+              window.__ASSAL_LOW_END_DIAGNOSTICS__.manualOverride = normalizedMode;
+              window.__ASSAL_LOW_END_DIAGNOSTICS__.finalProfile = useLight ? 'low-end' : 'standard';
+              window.__ASSAL_LOW_END_DIAGNOSTICS__.modePolicy = 'manual-only-standard-default';
+              window.__ASSAL_LOW_END_DIAGNOSTICS__.autoSuggestedLowEnd = recommended;
+            }
+          } catch (_) {}
+
+          try { if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') window.__ASSAL_APPLY_NEWS_BAR_STATE__(); } catch (_) {}
+          try { if (typeof window.updatePerfDebugButtonState === 'function') window.updatePerfDebugButtonState(); } catch (_) {}
+        };
+
         window.__ASSAL_SET_LOW_END_OVERRIDE__ = function(mode) {
-          if (mode === 'on' || mode === 'off') {
-            safeStorageSet('assal_force_low_end', mode);
+          const normalizedMode = mode === 'on' ? 'on' : (mode === 'off' ? 'off' : null);
+          if (normalizedMode) {
+            safeStorageSet('assal_force_low_end', normalizedMode);
+            if (normalizedMode === 'on') {
+              safeStorageSet(LIGHT_CHOICE_CONFIRMED_KEY, 'true');
+            } else {
+              safeStorageRemove(LIGHT_CHOICE_CONFIRMED_KEY);
+            }
           } else {
             safeStorageRemove('assal_force_low_end');
+            safeStorageRemove(LIGHT_CHOICE_CONFIRMED_KEY);
           }
+          try { window.__ASSAL_APPLY_LOW_END_PROFILE__(normalizedMode); } catch (_) {}
         };
       })();
     </script>
@@ -12246,6 +12309,495 @@ html.low-end-device .results-container {
 
 </style>
 
+
+
+<style id="assal-performance-modal-polish">
+/* ===== ASSAL compact performance modal: نافذة أداء مختصرة وأنيقة ===== */
+.assal-debug-container.swal2-backdrop-show{
+  background:
+    radial-gradient(circle at 50% 12%, rgba(45,212,191,.16), transparent 32%),
+    rgba(2,6,23,.68) !important;
+  backdrop-filter:blur(12px) saturate(140%) !important;
+  -webkit-backdrop-filter:blur(12px) saturate(140%) !important;
+}
+.assal-debug-popup{
+  width:min(358px, 92vw) !important;
+  max-width:358px !important;
+  padding:0 !important;
+  border-radius:26px !important;
+  overflow:hidden !important;
+  color:#fff !important;
+  font-family:'Cairo',sans-serif !important;
+  background:
+    radial-gradient(circle at 86% 0%, rgba(34,211,238,.18), transparent 34%),
+    linear-gradient(145deg, rgba(11,18,32,.98), rgba(3,7,18,.99)) !important;
+  border:1px solid rgba(148,210,230,.16) !important;
+  box-shadow:0 26px 58px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.09) !important;
+}
+.assal-debug-popup .swal2-title,
+.assal-debug-popup .swal2-actions{
+  display:none !important;
+}
+.assal-debug-popup .swal2-html-container{
+  margin:0 !important;
+  padding:0 !important;
+  overflow:visible !important;
+}
+.assal-debug-popup .swal2-close{
+  position:absolute !important;
+  top:14px !important;
+  right:14px !important;
+  left:auto !important;
+  margin:0 !important;
+  padding:0 !important;
+  width:36px !important;
+  height:36px !important;
+  min-width:36px !important;
+  min-height:36px !important;
+  border-radius:50% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  line-height:36px !important;
+  font-size:24px !important;
+  font-family:Arial, sans-serif !important;
+  font-weight:400 !important;
+  color:#fff !important;
+  background:linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.055)) !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+  box-shadow:0 10px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.12) !important;
+  transform:none !important;
+  z-index:5 !important;
+}
+.assal-debug-popup .swal2-close:hover{
+  transform:scale(1.05) !important;
+  background:linear-gradient(145deg, rgba(248,113,113,.30), rgba(127,29,29,.38)) !important;
+}
+.assal-debug-popup .swal2-close:focus{
+  outline:none !important;
+  box-shadow:0 0 0 3px rgba(255,255,255,.10), 0 10px 20px rgba(0,0,0,.25) !important;
+}
+.assal-debug-shell{
+  direction:rtl;
+  text-align:right;
+  font-family:'Cairo',sans-serif;
+  padding:56px 14px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.assal-debug-hero{
+  position:relative;
+  min-height:64px;
+  border-radius:21px;
+  padding:11px 12px 11px 48px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  overflow:hidden;
+  background:linear-gradient(135deg, rgba(20,184,166,.16), rgba(59,130,246,.08)), rgba(255,255,255,.045);
+  border:1px solid rgba(103,232,249,.13);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+.assal-debug-hero::before{
+  content:"";
+  position:absolute;
+  width:105px;
+  height:105px;
+  border-radius:50%;
+  left:-45px;
+  bottom:-62px;
+  background:radial-gradient(circle, rgba(45,212,191,.22), transparent 66%);
+  pointer-events:none;
+}
+.assal-debug-hero-icon{
+  width:43px;
+  height:43px;
+  flex:0 0 43px;
+  border-radius:16px;
+  display:grid;
+  place-items:center;
+  font-size:19px;
+  color:#f8fdff;
+  background:linear-gradient(145deg, #0891b2, #14b8a6);
+  box-shadow:0 12px 24px rgba(8,145,178,.28), inset 0 1px 0 rgba(255,255,255,.18);
+}
+.assal-debug-hero-text{
+  min-width:0;
+  flex:1;
+  display:grid;
+  gap:3px;
+}
+.assal-debug-kicker{
+  width:fit-content;
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:9.5px;
+  font-weight:950;
+  color:#b7f8ff;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.09);
+}
+.assal-debug-title{
+  font-size:17px;
+  font-weight:950;
+  line-height:1.15;
+  color:#ffffff;
+  margin:0;
+  transform:none !important;
+}
+.assal-debug-subtitle{
+  font-size:10.5px;
+  font-weight:800;
+  line-height:1.45;
+  color:rgba(232,251,255,.72);
+}
+.assal-debug-current-pill{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:9px;
+  border-radius:18px;
+  padding:9px 11px;
+  background:rgba(255,255,255,.043);
+  border:1px solid rgba(255,255,255,.075);
+}
+.assal-debug-current-main{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  font-size:12.5px;
+  font-weight:950;
+  color:#fff;
+}
+.assal-debug-current-main i{ color:#67e8f9; }
+.assal-debug-current-note{
+  font-size:9.8px;
+  font-weight:800;
+  color:rgba(226,252,255,.60);
+  white-space:nowrap;
+}
+.assal-debug-mode-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:7px;
+}
+.assal-debug-mode-card{
+  appearance:none;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:17px;
+  min-height:68px;
+  padding:8px 6px;
+  font-family:'Cairo',sans-serif;
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  text-align:center;
+  background:linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
+  box-shadow:0 10px 20px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.08);
+  transition:transform .16s ease, border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+.assal-debug-mode-card:hover{
+  transform:translateY(-1px);
+  border-color:rgba(103,232,249,.22);
+}
+.assal-debug-mode-card:active{ transform:scale(.975); }
+.assal-debug-mode-card.is-selected{
+  border-color:rgba(94,234,212,.48);
+  box-shadow:0 0 0 1px rgba(94,234,212,.15), 0 12px 22px rgba(8,145,178,.14), inset 0 1px 0 rgba(255,255,255,.10);
+}
+.assal-debug-mode-card.action-on.is-selected{
+  border-color:rgba(196,181,253,.50);
+  box-shadow:0 0 0 1px rgba(196,181,253,.15), 0 12px 22px rgba(124,58,237,.13), inset 0 1px 0 rgba(255,255,255,.10);
+}
+.assal-debug-mode-icon{
+  width:31px;
+  height:31px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  font-size:14px;
+  background:linear-gradient(145deg, #0891b2, #0f766e);
+  color:#fff;
+  box-shadow:0 8px 15px rgba(8,145,178,.22);
+}
+.assal-debug-mode-card.action-on .assal-debug-mode-icon{
+  background:linear-gradient(145deg, #7c3aed, #0891b2);
+}
+.assal-debug-mode-card.action-reset .assal-debug-mode-icon{
+  background:linear-gradient(145deg, #334155, #475569);
+}
+.assal-debug-mode-title{
+  font-size:11.5px;
+  font-weight:950;
+  line-height:1.05;
+  white-space:nowrap;
+}
+.assal-debug-smart-strip{
+  position:relative;
+  height:34px;
+  min-height:34px;
+  border-radius:16px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  background:
+    linear-gradient(90deg, rgba(3,7,18,.72), rgba(15,23,42,.46), rgba(3,7,18,.72)),
+    rgba(255,255,255,.045);
+  border:1px solid rgba(103,232,249,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+  direction:rtl;
+  isolation:isolate;
+}
+.assal-debug-smart-strip::before,
+.assal-debug-smart-strip::after{
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  width:48px;
+  z-index:2;
+  pointer-events:none;
+}
+.assal-debug-smart-strip::before{
+  right:0;
+  background:linear-gradient(270deg, rgba(3,7,18,.94), rgba(3,7,18,0));
+}
+.assal-debug-smart-strip::after{
+  left:0;
+  background:linear-gradient(90deg, rgba(3,7,18,.94), rgba(3,7,18,0));
+}
+.assal-debug-strip-track{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  width:max-content;
+  white-space:nowrap;
+  animation:assalDebugTicker 28s linear infinite;
+  will-change:transform;
+}
+.assal-debug-strip-group{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  padding-inline:12px;
+}
+.assal-debug-strip-item{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:22px;
+  padding:4px 9px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:850;
+  color:rgba(231,253,255,.86);
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.07);
+}
+.assal-debug-strip-item i{
+  font-size:10px;
+  color:#67e8f9;
+}
+.assal-debug-strip-item.is-soft i{ color:#a7f3d0; }
+.assal-debug-strip-item.is-warn i{ color:#fbbf24; }
+@keyframes assalDebugTicker{
+  0%{ transform:translateX(0); }
+  100%{ transform:translateX(50%); }
+}
+.assal-debug-smart-strip:hover .assal-debug-strip-track{
+  animation-play-state:paused;
+}
+@media (prefers-reduced-motion: reduce){
+  .assal-debug-strip-track{ animation:none !important; transform:none !important; }
+}
+.assal-debug-mini-note{
+  text-align:center;
+  color:rgba(226,252,255,.56);
+  font-size:9.6px;
+  font-weight:760;
+  line-height:1.45;
+  margin-top:-2px;
+}
+@media (max-width:380px){
+  .assal-debug-popup{ width:min(332px, 92vw) !important; border-radius:24px !important; }
+  .assal-debug-shell{ padding:52px 12px 13px; gap:9px; }
+  .assal-debug-hero{ min-height:60px; padding:10px 10px 10px 45px; }
+  .assal-debug-hero-icon{ width:39px; height:39px; flex-basis:39px; border-radius:15px; font-size:17px; }
+  .assal-debug-title{ font-size:16px; }
+  .assal-debug-subtitle{ font-size:10px; }
+  .assal-debug-mode-grid{ gap:6px; }
+  .assal-debug-mode-card{ min-height:64px; border-radius:15px; }
+  .assal-debug-mode-title{ font-size:10.8px; }
+  .assal-debug-smart-strip{ height:32px; min-height:32px; border-radius:15px; }
+  .assal-debug-strip-item{ font-size:9.5px; padding:4px 8px; }
+}
+</style>
+
+<style id="assal-usage-report-modal-style">
+/* ===== ASSAL startup notice: مختصر، ذكي، لا يغير الوضع ===== */
+.assal-usage-swal-container.swal2-backdrop-show{
+  background:
+    radial-gradient(circle at 50% 18%, rgba(14,165,233,.14), transparent 35%),
+    rgba(2, 6, 23, .45) !important;
+  backdrop-filter:blur(9px) saturate(130%) !important;
+  -webkit-backdrop-filter:blur(9px) saturate(130%) !important;
+}
+.assal-usage-swal-popup{
+  width:min(334px, 90vw) !important;
+  max-width:334px !important;
+  padding:0 !important;
+  border-radius:24px !important;
+  overflow:hidden !important;
+  color:#fff !important;
+  background:
+    radial-gradient(circle at top right, rgba(20,184,166,.20), transparent 36%),
+    linear-gradient(145deg, rgba(15,23,42,.99), rgba(3,7,18,.985)) !important;
+  border:1px solid rgba(148,210,230,.16) !important;
+  box-shadow:0 22px 54px rgba(0,0,0,.50), inset 0 1px 0 rgba(255,255,255,.08) !important;
+  font-family:'Cairo',sans-serif !important;
+}
+.assal-usage-swal-popup .swal2-html-container{
+  margin:0 !important;
+  padding:0 !important;
+  overflow:visible !important;
+}
+.assal-usage-shell{
+  direction:rtl;
+  text-align:right;
+  padding:16px 15px 14px;
+  position:relative;
+}
+.assal-usage-head{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  margin-bottom:11px;
+}
+.assal-usage-orb{
+  width:43px;
+  height:43px;
+  border-radius:16px;
+  display:grid;
+  place-items:center;
+  color:#efffff;
+  font-size:18px;
+  background:linear-gradient(145deg, #0891b2, #0f766e);
+  box-shadow:0 11px 24px rgba(8,145,178,.27), inset 0 1px 0 rgba(255,255,255,.16);
+  flex:0 0 43px;
+}
+.assal-usage-titlebox{ min-width:0; flex:1; }
+.assal-usage-mini{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:4px 9px;
+  border-radius:999px;
+  font-size:9.5px;
+  font-weight:950;
+  color:#b7f8ff;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.09);
+  margin-bottom:5px;
+}
+.assal-usage-title{
+  font-size:18px;
+  font-weight:950;
+  line-height:1.25;
+  color:#fff;
+}
+.assal-usage-line{
+  margin:0 0 11px;
+  padding:11px 12px;
+  border-radius:17px;
+  background:linear-gradient(135deg, rgba(6,182,212,.11), rgba(20,184,166,.07));
+  border:1px solid rgba(103,232,249,.12);
+  color:#e8fbff;
+  font-size:12px;
+  line-height:1.65;
+  font-weight:850;
+}
+.assal-usage-line b{
+  color:#ffffff;
+  font-weight:950;
+}
+.assal-usage-toggle{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 9px;
+  border-radius:15px;
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.075);
+  margin:0 0 10px;
+  cursor:pointer;
+  user-select:none;
+}
+.assal-usage-toggle input{
+  width:17px;
+  height:17px;
+  accent-color:#14b8a6;
+  flex:0 0 17px;
+}
+.assal-usage-toggle span{
+  font-size:10.8px;
+  color:#e5f7ff;
+  font-weight:850;
+  line-height:1.45;
+}
+.assal-usage-actions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+}
+.assal-usage-action{
+  min-height:43px;
+  border:0;
+  outline:0;
+  border-radius:16px;
+  color:#fff;
+  font-family:'Cairo',sans-serif;
+  font-weight:950;
+  font-size:12px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  background:linear-gradient(135deg, #0891b2, #0f766e);
+  box-shadow:0 10px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.13);
+}
+.assal-usage-action:active{ transform:scale(.98); }
+@media (max-width:420px){
+  .assal-usage-swal-popup{ width:min(316px, 90vw) !important; }
+  .assal-usage-shell{ padding:15px 13px 13px; }
+  .assal-usage-title{ font-size:17px; }
+  .assal-usage-line{ font-size:11.6px; padding:10px 11px; }
+}
+.assal-usage-inline-icon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:20px;
+  height:20px;
+  margin:0 3px;
+  border-radius:8px;
+  color:#eaffff;
+  background:linear-gradient(145deg, #0891b2, #14b8a6);
+  box-shadow:0 5px 12px rgba(8,145,178,.18), inset 0 1px 0 rgba(255,255,255,.14);
+  vertical-align:middle;
+}
+.assal-usage-inline-icon i{
+  font-size:11px;
+  line-height:1;
+}
+</style>
+
 </head>
 <body>
   
@@ -12456,8 +13008,8 @@ html.low-end-device .results-container {
 
 <button class="header-btn header-icon-btn debug-btn"
         onclick="openPerfDebugModal()"
-        title="فحص الأداء الذكي"
-        aria-label="فحص الأداء الذكي">
+        title="إعداد الأداء"
+        aria-label="إعداد الأداء واختيار الوضع الخفيف">
   <i class="fas fa-stethoscope"></i>
 </button>
 
@@ -16722,7 +17274,7 @@ let offersCache = [];
 function isLightOfferModeActive() {
     const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
     const manualMode = String(diag.manualOverride || '').toLowerCase();
-    return manualMode === 'on' || (manualMode !== 'off' && !!window.__ASSAL_LOW_END_DEVICE__);
+    return manualMode === 'on' || !!window.__ASSAL_LOW_END_DEVICE__;
 }
 
 function formatOfferPriceValue(value) {
@@ -20902,7 +21454,7 @@ function applyManualLightNewsBarState() {
     const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
     const manualMode = String(diag.manualOverride || '').toLowerCase();
     const isManualLight = manualMode === 'on';
-    const isAutoLight = manualMode !== 'off' && !!window.__ASSAL_LOW_END_DEVICE__;
+    const isAutoLight = false; // الوضع الخفيف لم يعد يتفعل تلقائياً؛ فقط يدوي.
 
     root.classList.remove('manual-light-news');
 
@@ -20911,13 +21463,11 @@ function applyManualLightNewsBarState() {
     if (isManualLight || isAutoLight) {
         root.classList.add('manual-light-news');
         newsBar.style.display = 'flex';
-        badge.textContent = isManualLight ? '⚡ خفيف' : '⚡ وضع تلقائي';
+        badge.textContent = '⚡ خفيف';
         if (tickerContainer) {
             tickerContainer.style.justifyContent = 'center';
         }
-        ticker.textContent = isManualLight
-            ? 'تم تفعيل الوضع الخفيف في هاتفك'
-            : 'وضع تلقائي: تم تفعيل الوضع الخفيف';
+        ticker.textContent = 'تم تفعيل الوضع الخفيف يدوياً في هاتفك';
         ticker.title = ticker.textContent;
         ticker.style.animation = 'none';
         ticker.style.position = 'relative';
@@ -27464,7 +28014,7 @@ ${actionText} ${safeBranch}`;
       const mode = diag.manualOverride || 'none';
       if (mode === 'on') btn.classList.add('is-manual-on');
       else if (mode === 'off') btn.classList.add('is-manual-off');
-      else if (window.__ASSAL_LOW_END_DEVICE__) btn.classList.add('is-auto-low');
+      else if (!!window.__ASSAL_LOW_END_RECOMMENDED__) btn.classList.add('is-auto-low');
     } catch (_) {}
   };
 
@@ -27477,112 +28027,111 @@ ${actionText} ${safeBranch}`;
         .replace(/>/g, '&gt;');
     }
 
-    function pct(value, max) {
-      const n = Number(value) || 0;
-      const m = Number(max) || 1;
-      return Math.max(0, Math.min(100, (n / m) * 100));
-    }
-
-    function fillClass(value) {
-      if (value >= 7) return 'danger';
-      if (value >= 4) return 'warn';
-      return '';
-    }
-
     const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
-    const signals = diag.signals || {};
-    let nativeValue = diag.nativeValue;
-    try {
-      if ((nativeValue === null || nativeValue === undefined) && window.Android && typeof window.Android.isLowEndDevice === 'function') {
-        nativeValue = window.Android.isLowEndDevice();
-      }
-    } catch (err) {
-      nativeValue = 'error';
-    }
-
     const lowEnd = !!window.__ASSAL_LOW_END_DEVICE__;
-    const source = window.__ASSAL_LOW_END_SOURCE__ || 'unknown';
-    const cpuBench = Number(diag.cpuBench || window.__ASSAL_LOW_END_CPU_BENCH__ || 0);
-    const heurScore = Number(diag.heuristicScore || 0);
-    const runScore = Number(diag.runtimeScore || 0);
-    const finalScore = Number(diag.finalScore || 0);
+    const source = window.__ASSAL_LOW_END_SOURCE__ || 'standard-default';
     const currentOverride = diag.manualOverride || 'none';
-    const screenText = ((window.screen && window.screen.width) || window.innerWidth || 0) + ' × ' + ((window.screen && window.screen.height) || window.innerHeight || 0);
+    const recommended = !!(diag.autoSuggestedLowEnd || window.__ASSAL_LOW_END_RECOMMENDED__);
 
-    function selected(mode) {
-      return currentOverride === mode ? ' is-selected' : '';
+    function sourceText(src) {
+      if (src === 'manual-on') return 'اختيار محفوظ: خفيف';
+      if (src === 'manual-off') return 'اختيار محفوظ: قياسي';
+      if (src === 'standard-default') return 'قياسي تلقائي';
+      if (src === 'standard') return 'قياسي';
+      return src || 'قياسي';
+    }
+    function selectedLight() { return currentOverride === 'on' ? ' is-selected' : ''; }
+    function selectedStandard() { return currentOverride === 'off' || (!lowEnd && currentOverride !== 'on') ? ' is-selected' : ''; }
+    function selectedReset() { return currentOverride === 'none' ? ' is-selected' : ''; }
+
+    const modeIcon = lowEnd ? 'fa-feather-pointed' : 'fa-gauge-high';
+    const modeTitle = lowEnd ? 'الوضع الخفيف مفعل' : 'الوضع القياسي مفعل';
+    const modeNote = lowEnd ? 'مؤثرات أقل لتخفيف الحمل' : 'كل الميزات تعمل بشكل كامل';
+    const hintText = recommended ? 'التطبيق لاحظ أن الخفيف قد يفيد جهازك، والاختيار إلك.' : 'القياسي مناسب، والخفيف اختياري فقط.';
+
+    function compactNum(value, suffix) {
+      const n = Number(value);
+      if (!Number.isFinite(n) || n <= 0) return 'غير معروف';
+      const rounded = Math.round(n * 10) / 10;
+      return String(rounded).replace(/\.0$/, '') + (suffix || '');
     }
 
-    const rows = [
-      ['المصدر', source],
-      ['Native', nativeValue === null || nativeValue === undefined ? '—' : nativeValue],
-      ['التحكم', currentOverride],
-      ['المعالج', navigator.hardwareConcurrency || '—'],
-      ['الرام', navigator.deviceMemory || '—'],
-      ['الشاشة', screenText]
+    function screenText(signals) {
+      try {
+        const w = Number(signals && signals.width) || 0;
+        const h = Number(signals && signals.height) || 0;
+        const dpr = Number(signals && signals.dpr) || 0;
+        if (!w || !h) return 'الشاشة: غير معروف';
+        return 'الشاشة: ' + Math.round(w) + '×' + Math.round(h) + (dpr ? ' · DPR ' + (Math.round(dpr * 10) / 10) : '');
+      } catch (_) {
+        return 'الشاشة: غير معروف';
+      }
+    }
+
+    const signals = diag.signals || {};
+    const tickerItems = [
+      { icon: 'fa-circle-check', cls: 'is-soft', text: sourceText(source) },
+      { icon: 'fa-microchip', cls: '', text: 'المعالج: ' + compactNum(signals.cores, ' أنوية') },
+      { icon: 'fa-memory', cls: '', text: 'الرام التقريبية: ' + compactNum(signals.mem, ' GB') },
+      { icon: 'fa-mobile-screen-button', cls: '', text: screenText(signals) },
+      { icon: 'fa-stopwatch', cls: '', text: 'فحص السرعة: ' + compactNum(diag.cpuBench, 'ms') },
+      { icon: 'fa-gauge-high', cls: 'is-soft', text: 'القياسي يحافظ على كل الميزات' },
+      { icon: 'fa-feather-pointed', cls: 'is-warn', text: 'الخفيف يقلل المؤثرات فقط عند اختيارك' }
     ];
+
+    const tickerHtml = tickerItems.map((item) => (
+      '<span class="assal-debug-strip-item ' + safeText(item.cls || '') + '"><i class="fas ' + safeText(item.icon) + '"></i><span>' + safeText(item.text) + '</span></span>'
+    )).join('');
 
     const html = `
       <div class="assal-debug-shell">
-        <div class="assal-debug-top">
-          <div class="assal-debug-badge ${lowEnd ? 'is-low' : 'is-standard'}">
-            <i class="fas ${lowEnd ? 'fa-feather-pointed' : 'fa-gauge-high'}"></i>
-            <span>${lowEnd ? 'الوضع الخفيف' : 'الوضع القياسي'}</span>
-          </div>
-          <div class="assal-debug-chip-row">
-            <span class="assal-debug-chip"><i class="fas fa-bolt"></i> ${safeText(source)}</span>
-            <span class="assal-debug-chip"><i class="fas fa-sliders"></i> ${safeText(currentOverride === 'none' ? 'تلقائي' : currentOverride)}</span>
+        <div class="assal-debug-hero">
+          <div class="assal-debug-hero-icon"><i class="fas fa-stethoscope"></i></div>
+          <div class="assal-debug-hero-text">
+            <div class="assal-debug-kicker"><i class="fas fa-sliders"></i> الأداء</div>
+            <div class="assal-debug-title">إعداد الأداء</div>
+            <div class="assal-debug-subtitle">القياسي هو الافتراضي، والخفيف يتفعل فقط باختيارك.</div>
           </div>
         </div>
 
-        <div class="assal-debug-bars">
-          <div class="assal-debug-bar-card">
-            <div class="assal-debug-bar-head">
-              <span class="assal-debug-bar-label">النتيجة</span>
-              <span class="assal-debug-bar-value">${safeText(finalScore ? Number(finalScore).toFixed(1) : 0)}/10</span>
-            </div>
-            <div class="assal-debug-bar-track"><div class="assal-debug-bar-fill ${fillClass(finalScore)}" style="width:${pct(finalScore,10)}%"></div></div>
-          </div>
-          <div class="assal-debug-bar-card">
-            <div class="assal-debug-bar-head">
-              <span class="assal-debug-bar-label">السرعة</span>
-              <span class="assal-debug-bar-value">${safeText(cpuBench ? cpuBench.toFixed(1) : 0)}ms</span>
-            </div>
-            <div class="assal-debug-bar-track"><div class="assal-debug-bar-fill ${fillClass(runScore)}" style="width:${pct(runScore,10)}%"></div></div>
+        <div class="assal-debug-current-pill">
+          <div class="assal-debug-current-main"><i class="fas ${modeIcon}"></i><span>${safeText(modeTitle)}</span></div>
+          <div class="assal-debug-current-note">${safeText(modeNote)}</div>
+        </div>
+
+        <div class="assal-debug-smart-strip" aria-label="معلومات الأداء والجهاز">
+          <div class="assal-debug-strip-track">
+            <div class="assal-debug-strip-group">${tickerHtml}</div>
+            <div class="assal-debug-strip-group" aria-hidden="true">${tickerHtml}</div>
           </div>
         </div>
 
-        <div class="assal-debug-scroll">
-          ${rows.map(([k,v]) => `
-            <div class="assal-debug-row">
-              <div class="assal-debug-key">${safeText(k)}</div>
-              <div class="assal-debug-val">${safeText(v)}</div>
-            </div>
-          `).join('')}
+        <div class="assal-debug-mode-grid">
+          <button type="button" class="assal-debug-mode-card action-off${selectedStandard()}" data-debug-force="off" aria-label="تفعيل الوضع القياسي">
+            <span class="assal-debug-mode-icon"><i class="fas fa-gauge-high"></i></span>
+            <span class="assal-debug-mode-title">قياسي</span>
+          </button>
+          <button type="button" class="assal-debug-mode-card action-on${selectedLight()}" data-debug-force="on" aria-label="تفعيل الوضع الخفيف">
+            <span class="assal-debug-mode-icon"><i class="fas fa-feather-pointed"></i></span>
+            <span class="assal-debug-mode-title">خفيف</span>
+          </button>
+          <button type="button" class="assal-debug-mode-card action-reset${selectedReset()}" data-debug-force="reset" aria-label="الرجوع للوضع الافتراضي">
+            <span class="assal-debug-mode-icon"><i class="fas fa-rotate-left"></i></span>
+            <span class="assal-debug-mode-title">افتراضي</span>
+          </button>
         </div>
 
-        <div class="assal-debug-actions">
-          <button type="button" class="assal-debug-action action-on${selected('on')}" data-debug-force="on" aria-label="تفعيل الوضع الخفيف">
-            <i class="fas fa-feather-pointed"></i>
-            <span>خفيف</span>
-          </button>
-          <button type="button" class="assal-debug-action action-off${selected('off')}" data-debug-force="off" aria-label="تعطيل الوضع الخفيف">
-            <i class="fas fa-power-off"></i>
-            <span>قياسي</span>
-          </button>
-          <button type="button" class="assal-debug-action action-reset${selected('none')}" data-debug-force="reset" aria-label="إلغاء الاختيار اليدوي">
-            <i class="fas fa-rotate-left"></i>
-            <span>تلقائي</span>
-          </button>
+        <div class="assal-debug-mini-note">
+          ${safeText(sourceText(source))} · ${safeText(hintText)}
         </div>
       </div>
     `;
 
     if (window.Swal && typeof window.Swal.fire === 'function') {
       window.Swal.fire({
-        title: 'فحص الأداء',
+        title: '',
         html,
-        width: 474,
+        width: 358,
         showConfirmButton: false,
         showCancelButton: false,
         allowOutsideClick: false,
@@ -27606,66 +28155,12 @@ ${actionText} ${safeBranch}`;
                 window.__ASSAL_SET_LOW_END_OVERRIDE__('off');
               } else if (mode === 'reset') {
                 window.__ASSAL_SET_LOW_END_OVERRIDE__(null);
-                try { localStorage.removeItem('assal_force_low_end'); } catch (_) {}
-                try {
-                  const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
-                  const signals = diag.signals || {};
-                  const nativeDecision = {
-                    hasDecision: !!diag.nativeHasDecision,
-                    isLow: !!diag.nativeLow,
-                    raw: diag.nativeValue,
-                    normalized: diag.nativeNormalized || (diag.nativeHasDecision ? (diag.nativeLow ? 'true' : 'false') : 'unknown')
-                  };
-                  const heuristicResult = {
-                    score: Number(diag.heuristicScore || 0),
-                    isLow: !!diag.heuristicLow,
-                    knownWeakModel: !!diag.knownWeakModel
-                  };
-                  const runtimeResult = {
-                    score: Number(diag.runtimeScore || 0),
-                    isLow: !!diag.runtimeLow
-                  };
-                  const autoDecision = typeof window.__ASSAL_DECIDE_AUTO_LOW_END__ === 'function'
-                    ? window.__ASSAL_DECIDE_AUTO_LOW_END__(signals, heuristicResult, runtimeResult, nativeDecision)
-                    : { isLow: !!nativeDecision.isLow, source: nativeDecision.isLow ? 'native' : 'standard', compositeScore: nativeDecision.isLow ? 10 : 0, hasStrongHardware: false, constrainedHardware: false, compactConstrained: false, fallbackSignalCount: 0 };
-                  const autoLow = !!autoDecision.isLow;
-
-                  document.documentElement.classList.remove('manual-light-news');
-                  document.documentElement.classList.toggle('low-end-device', autoLow);
-                  document.documentElement.setAttribute('data-device-profile', autoLow ? 'low-end' : 'standard');
-
-                  window.__ASSAL_LOW_END_DEVICE__ = autoLow;
-                  window.__ASSAL_LOW_END_SOURCE__ = autoDecision.source || 'standard';
-
-                  if (window.__ASSAL_LOW_END_DIAGNOSTICS__) {
-                    window.__ASSAL_LOW_END_DIAGNOSTICS__.manualOverride = null;
-                    window.__ASSAL_LOW_END_DIAGNOSTICS__.nativeHasDecision = !!nativeDecision.hasDecision;
-                    window.__ASSAL_LOW_END_DIAGNOSTICS__.nativeNormalized = nativeDecision.normalized || 'unknown';
-                    window.__ASSAL_LOW_END_DIAGNOSTICS__.autoLow = autoLow;
-                    window.__ASSAL_LOW_END_DIAGNOSTICS__.autoSource = autoDecision.source || 'standard';
-                    window.__ASSAL_LOW_END_DIAGNOSTICS__.finalScore = nativeDecision.isLow ? 10 : Number((autoDecision.compositeScore || 0).toFixed(1));
-                    window.__ASSAL_LOW_END_DIAGNOSTICS__.hasStrongHardware = !!autoDecision.hasStrongHardware;
-                    window.__ASSAL_LOW_END_DIAGNOSTICS__.constrainedHardware = !!autoDecision.constrainedHardware;
-                    window.__ASSAL_LOW_END_DIAGNOSTICS__.compactConstrained = !!autoDecision.compactConstrained;
-                    window.__ASSAL_LOW_END_DIAGNOSTICS__.fallbackSignalCount = Number(autoDecision.fallbackSignalCount || 0);
-                  }
-                } catch (_) {}
+                try { localStorage.removeItem('assal_force_low_end'); localStorage.removeItem('assal_light_mode_user_confirmed_v3'); } catch (_) {}
               }
 
               try { window.updatePerfDebugButtonState(); } catch (_) {}
               try { if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') window.__ASSAL_APPLY_NEWS_BAR_STATE__(); } catch (_) {}
-
               try { window.Swal.close(); } catch (_) {}
-              setTimeout(() => {
-                try {
-                  const target = new URL(window.location.href);
-                  target.searchParams.delete('_assal_auto');
-                  target.searchParams.set('_assal_auto', String(Date.now()));
-                  window.location.replace(target.toString());
-                } catch (_) {
-                  try { window.location.reload(); } catch (__){}
-                }
-              }, mode === 'reset' ? 130 : 70);
             }, { passive: false });
           });
         }
@@ -27673,7 +28168,7 @@ ${actionText} ${safeBranch}`;
       return;
     }
 
-    alert(rows.map(([k, v]) => `${k}: ${v}`).join('\n'));
+    alert([modeTitle, sourceText(source), hintText].join('\n'));
   };
 
   window.addEventListener('load', () => {
@@ -30016,3 +30511,131 @@ html body footer {
   });
 })();
 </script>
+
+
+<script id="assal-usage-report-modal-script">
+(function(){
+  const HIDE_KEY = 'assal_usage_standard_notice_do_not_show_v1';
+  let sessionShown = false;
+  let showing = false;
+
+  function storageGet(key){ try { return localStorage.getItem(key); } catch(_) { return null; } }
+  function storageSet(key, value){ try { localStorage.setItem(key, value); } catch(_) {} }
+  function escapeHtml(value){
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+  function visibleByStyle(el){
+    if (!el) return false;
+    const st = window.getComputedStyle ? getComputedStyle(el) : null;
+    if (!st) return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+    return st.display !== 'none' && st.visibility !== 'hidden' && Number(st.opacity || 1) !== 0;
+  }
+  function hasBlockingModal(){
+    if (document.querySelector('.swal2-container.swal2-backdrop-show')) return true;
+    const ids = ['activation-overlay','adModal','promoPopup','newItemsModal','cartModal','requestTrackModal','requestAdminModal','availabilityTrackModal','availabilityAdminModal','invoiceTrackModal','invoiceAdminModal'];
+    return ids.some(id => visibleByStyle(document.getElementById(id)));
+  }
+  function isAppReadyForReport(){
+    const activated = storageGet('isActivated') === 'true';
+    const bypass = sessionStorage.getItem('maintenanceBypass') === 'true';
+    if (!activated && !bypass) return false;
+    if (document.hidden) return false;
+    return true;
+  }
+  function closeReport(){
+    showing = false;
+    try { Swal.close(); } catch(_) {}
+    setTimeout(() => { try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch(_) {} }, 0);
+  }
+  function openUsageReport(force){
+    if (showing) return;
+    if (!force && sessionShown) return;
+    if (!force && storageGet(HIDE_KEY) === 'true') return;
+    if (!window.Swal || typeof window.Swal.fire !== 'function') return;
+
+    const isLightNow = !!window.__ASSAL_LOW_END_DEVICE__;
+    const title = isLightNow ? 'الوضع الخفيف مفعل' : 'الوضع القياسي مفعل';
+    const line = isLightNow
+      ? 'اختيارك محفوظ. تقدر ترجع للوضع القياسي من زر <b>إعداد الأداء</b> أعلى التطبيق.'
+      : 'الوضع القياسي مفعل تلقائياً. إذا حسّيت التطبيق بطيء، من الشريط العلوي اضغط زر <b>إعداد الأداء</b> <span class="assal-usage-inline-icon" title="أيقونة الأداء"><i class="fas fa-stethoscope"></i></span> واختر وضع خفيف.';
+
+    const html = `
+      <div class="assal-usage-shell" dir="rtl">
+        <div class="assal-usage-head">
+          <div class="assal-usage-orb"><i class="fa-solid ${isLightNow ? 'fa-feather-pointed' : 'fa-gauge-high'}"></i></div>
+          <div class="assal-usage-titlebox">
+            <div class="assal-usage-mini"><i class="fa-solid fa-shield-halved"></i> تنبيه تشغيل</div>
+            <div class="assal-usage-title">${escapeHtml(title)}</div>
+          </div>
+        </div>
+
+        <div class="assal-usage-line">${line}</div>
+
+        <label class="assal-usage-toggle" for="assalUsageHideForever">
+          <input type="checkbox" id="assalUsageHideForever">
+          <span>لا تظهر هذه الرسالة مرة أخرى</span>
+        </label>
+
+        <div class="assal-usage-actions">
+          <button type="button" class="assal-usage-action" data-usage-action="ok"><i class="fa-solid fa-check"></i> تمام</button>
+        </div>
+      </div>
+    `;
+
+    showing = true;
+    sessionShown = true;
+    window.Swal.fire({
+      html,
+      showConfirmButton:false,
+      showCancelButton:false,
+      showCloseButton:false,
+      allowOutsideClick:true,
+      allowEscapeKey:true,
+      backdrop:'rgba(2, 6, 23, 0.45)',
+      customClass:{
+        popup:'assal-usage-swal-popup',
+        container:'assal-usage-swal-container'
+      },
+      didOpen:(popup)=>{
+        try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch(_) {}
+        const hideForever = popup.querySelector('#assalUsageHideForever');
+        const okBtn = popup.querySelector('[data-usage-action="ok"]');
+        if (okBtn) {
+          okBtn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            if (hideForever && hideForever.checked) storageSet(HIDE_KEY, 'true');
+            closeReport();
+          }, { passive:false });
+        }
+      },
+      willClose:()=>{
+        showing = false;
+        setTimeout(() => { try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch(_) {} }, 0);
+      }
+    });
+  }
+
+  function tryShowUsageReport(attempt = 0){
+    if (storageGet(HIDE_KEY) === 'true') return;
+    if (sessionShown || showing) return;
+    if (!isAppReadyForReport() || hasBlockingModal()) {
+      if (attempt < 24) setTimeout(() => tryShowUsageReport(attempt + 1), 420);
+      return;
+    }
+    openUsageReport(false);
+  }
+
+  window.__ASSAL_SHOW_USAGE_REPORT__ = function(force){
+    if (force === true) sessionShown = false;
+    openUsageReport(force === true);
+  };
+  window.addEventListener('load', () => setTimeout(() => tryShowUsageReport(), 900));
+})();
+</script>
+
