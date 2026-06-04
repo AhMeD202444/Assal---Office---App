@@ -326,6 +326,7 @@
         window.__ASSAL_APPLY_LOW_END_PROFILE__ = function(mode) {
           const normalizedMode = mode === 'on' ? 'on' : (mode === 'off' ? 'off' : null);
           const recommended = !!(window.__ASSAL_LOW_END_RECOMMENDED__ || autoSuggestedLowEnd);
+          const wasLight = !!window.__ASSAL_LOW_END_DEVICE__;
           const useLight = normalizedMode === 'on';
 
           try {
@@ -356,6 +357,55 @@
               window.__ASSAL_LOW_END_DIAGNOSTICS__.autoSuggestedLowEnd = recommended;
             }
           } catch (_) {}
+
+          if (wasLight && !useLight) {
+            const restoreStandardMotion = () => {
+              try {
+                const logo = document.getElementById('logo');
+                const notification = document.getElementById('notification');
+                if (logo) {
+                  logo.style.animation = '';
+                  logo.style.opacity = '1';
+                  logo.style.transform = '';
+                  logo.style.display = '';
+                }
+                if (notification) {
+                  notification.style.display = '';
+                  notification.style.animation = '';
+                  notification.style.opacity = '';
+                  notification.style.transform = '';
+                  notification.classList.remove('show');
+                }
+              } catch (_) {}
+
+              try {
+                if (!window.__ASSAL_LOW_END_DEVICE__ && typeof window.triggerAnimation === 'function') {
+                  setTimeout(() => {
+                    try { window.triggerAnimation(); } catch (_) {}
+                  }, 180);
+                } else if (!window.__ASSAL_LOW_END_DEVICE__ && typeof triggerAnimation === 'function') {
+                  setTimeout(() => {
+                    try { triggerAnimation(); } catch (_) {}
+                  }, 180);
+                }
+              } catch (_) {}
+            };
+
+            try {
+              if (typeof window.__ASSAL_ENSURE_GSAP__ === 'function') {
+                const waitForGsap = window.__ASSAL_ENSURE_GSAP__();
+                if (waitForGsap && typeof waitForGsap.then === 'function') {
+                  waitForGsap.then(restoreStandardMotion).catch(restoreStandardMotion);
+                } else {
+                  restoreStandardMotion();
+                }
+              } else {
+                restoreStandardMotion();
+              }
+            } catch (_) {
+              restoreStandardMotion();
+            }
+          }
 
           try { if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') window.__ASSAL_APPLY_NEWS_BAR_STATE__(); } catch (_) {}
           try { if (typeof window.updatePerfDebugButtonState === 'function') window.updatePerfDebugButtonState(); } catch (_) {}
@@ -12798,6 +12848,92 @@ html.low-end-device .results-container {
 }
 </style>
 
+
+
+<style id="assal-final-search-placeholder-visibility-fix">
+/* ===== ASSAL FINAL: عبارة البحث واضحة بالكامل بين أزرار اليسار واليمين ===== */
+.search-container #searchInput{
+  direction: rtl !important;
+  unicode-bidi: plaintext !important;
+  text-align: center !important;
+  padding-right: 92px !important;
+  padding-left: 108px !important;
+  font-family: 'Cairo', 'Tajawal', sans-serif !important;
+  font-size: clamp(11px, 2.6vw, 13px) !important;
+  font-weight: 900 !important;
+  letter-spacing: -.25px !important;
+  color: #ffffff !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+.search-container #searchInput::placeholder{
+  color: transparent !important;
+  opacity: 0 !important;
+}
+.search-container .search-placeholder-label{
+  position:absolute !important;
+  top:50% !important;
+  right:92px !important;
+  left:108px !important;
+  height:34px !important;
+  transform:translateY(-50%) !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  direction:rtl !important;
+  unicode-bidi:plaintext !important;
+  text-align:center !important;
+  pointer-events:none !important;
+  z-index:4 !important;
+  color:rgba(255,255,255,.54) !important;
+  font-family:'Cairo','Tajawal',sans-serif !important;
+  font-size:clamp(10px, 2.45vw, 12.5px) !important;
+  font-weight:800 !important;
+  line-height:1 !important;
+  letter-spacing:-.35px !important;
+  white-space:nowrap !important;
+  overflow:visible !important;
+  opacity:.78 !important;
+  text-shadow:
+    0 1px 3px rgba(0,0,0,.45) !important;
+}
+.search-container #searchInput:not(:placeholder-shown) ~ .search-placeholder-label,
+.search-container .search-placeholder-label.is-hidden{
+  opacity:0 !important;
+  visibility:hidden !important;
+}
+.search-container #searchInput:focus ~ .search-placeholder-label{
+  color:rgba(255,255,255,.38) !important;
+  opacity:.60 !important;
+}
+@media (max-width: 420px){
+  .search-container #searchInput{
+    padding-right: 88px !important;
+    padding-left: 100px !important;
+    font-size: 11px !important;
+    letter-spacing:-.35px !important;
+  }
+  .search-container .search-placeholder-label{
+    right:88px !important;
+    left:100px !important;
+    font-size:10.2px !important;
+    letter-spacing:-.55px !important;
+  }
+}
+@media (max-width: 360px){
+  .search-container #searchInput{
+    padding-right: 84px !important;
+    padding-left: 88px !important;
+    font-size:10.4px !important;
+  }
+  .search-container .search-placeholder-label{
+    right:84px !important;
+    left:88px !important;
+    font-size:9.5px !important;
+    letter-spacing:-.7px !important;
+  }
+}
+</style>
 </head>
 <body>
   
@@ -13279,7 +13415,8 @@ html.low-end-device .results-container {
 </button>
 
     
-    <input type="text" id="searchInput" placeholder="ابحث داخل الصنف المختار أو اضغط المايك...">
+    <input type="text" id="searchInput" placeholder=" " aria-label="اكتب اسم الآيتم أو اضغط المايك" autocomplete="off" dir="rtl">
+    <span id="searchPlaceholderLabel" class="search-placeholder-label" aria-hidden="true">اكتب اسم الآيتم أو اضغط المايك</span>
     <div id="wholesaleSuggestions" class="wholesale-suggestions" aria-label="Wholesale suggestions"></div>
     <button id="clearBtn" class="clear-btn" onclick="clearSearch()" style="display: none;"><i class="fas fa-times"></i></button>
     <button id="voiceSearchBtn" class="voice-search-btn" type="button" onclick="startAssalVoiceSearch()" title="بحث صوتي" aria-label="بحث صوتي"><i class="fas fa-microphone"></i></button>
@@ -17620,6 +17757,7 @@ function triggerAnimation() {
 
     setTimeout(triggerAnimation, 8000);
 }
+try { window.triggerAnimation = triggerAnimation; } catch (_) {}
 
 
 
@@ -30515,7 +30653,8 @@ html body footer {
 
 <script id="assal-usage-report-modal-script">
 (function(){
-  const HIDE_KEY = 'assal_usage_standard_notice_do_not_show_v1';
+  const HIDE_STANDARD_KEY = 'assal_usage_standard_notice_do_not_show_v1';
+  const HIDE_LIGHT_KEY = 'assal_usage_light_notice_do_not_show_v1';
   let sessionShown = false;
   let showing = false;
 
@@ -30547,6 +30686,9 @@ html body footer {
     if (document.hidden) return false;
     return true;
   }
+  function currentHideKey(){
+    return window.__ASSAL_LOW_END_DEVICE__ ? HIDE_LIGHT_KEY : HIDE_STANDARD_KEY;
+  }
   function closeReport(){
     showing = false;
     try { Swal.close(); } catch(_) {}
@@ -30555,13 +30697,14 @@ html body footer {
   function openUsageReport(force){
     if (showing) return;
     if (!force && sessionShown) return;
-    if (!force && storageGet(HIDE_KEY) === 'true') return;
+    const hideKey = currentHideKey();
+    if (!force && storageGet(hideKey) === 'true') return;
     if (!window.Swal || typeof window.Swal.fire !== 'function') return;
 
     const isLightNow = !!window.__ASSAL_LOW_END_DEVICE__;
     const title = isLightNow ? 'الوضع الخفيف مفعل' : 'الوضع القياسي مفعل';
     const line = isLightNow
-      ? 'اختيارك محفوظ. تقدر ترجع للوضع القياسي من زر <b>إعداد الأداء</b> أعلى التطبيق.'
+      ? 'الوضع الخفيف يقلل الحركة والمؤثرات حتى يصير التطبيق أخف. إذا حسّيت بعض الميزات ناقصة أو الواجهة مو مثل قبل، من زر <b>إعداد الأداء</b> <span class="assal-usage-inline-icon" title="أيقونة الأداء"><i class="fas fa-stethoscope"></i></span> ارجع للوضع القياسي.'
       : 'الوضع القياسي مفعل تلقائياً. إذا حسّيت التطبيق بطيء، من الشريط العلوي اضغط زر <b>إعداد الأداء</b> <span class="assal-usage-inline-icon" title="أيقونة الأداء"><i class="fas fa-stethoscope"></i></span> واختر وضع خفيف.';
 
     const html = `
@@ -30578,7 +30721,7 @@ html body footer {
 
         <label class="assal-usage-toggle" for="assalUsageHideForever">
           <input type="checkbox" id="assalUsageHideForever">
-          <span>لا تظهر هذه الرسالة مرة أخرى</span>
+          <span>لا تظهر هذه الرسالة مرة أخرى لهذا الوضع</span>
         </label>
 
         <div class="assal-usage-actions">
@@ -30594,8 +30737,8 @@ html body footer {
       showConfirmButton:false,
       showCancelButton:false,
       showCloseButton:false,
-      allowOutsideClick:true,
-      allowEscapeKey:true,
+      allowOutsideClick:false,
+      allowEscapeKey:false,
       backdrop:'rgba(2, 6, 23, 0.45)',
       customClass:{
         popup:'assal-usage-swal-popup',
@@ -30609,7 +30752,7 @@ html body footer {
           okBtn.addEventListener('click', (ev) => {
             ev.preventDefault();
             ev.stopPropagation();
-            if (hideForever && hideForever.checked) storageSet(HIDE_KEY, 'true');
+            if (hideForever && hideForever.checked) storageSet(currentHideKey(), 'true');
             closeReport();
           }, { passive:false });
         }
@@ -30622,7 +30765,7 @@ html body footer {
   }
 
   function tryShowUsageReport(attempt = 0){
-    if (storageGet(HIDE_KEY) === 'true') return;
+    if (storageGet(currentHideKey()) === 'true') return;
     if (sessionShown || showing) return;
     if (!isAppReadyForReport() || hasBlockingModal()) {
       if (attempt < 24) setTimeout(() => tryShowUsageReport(attempt + 1), 420);
@@ -30639,3 +30782,24 @@ html body footer {
 })();
 </script>
 
+<script id="assal-search-placeholder-label-fallback-script">
+(function(){
+  function syncSearchPlaceholderLabel(){
+    try {
+      var input = document.getElementById('searchInput');
+      var label = document.getElementById('searchPlaceholderLabel');
+      if (!input || !label) return;
+      label.classList.toggle('is-hidden', String(input.value || '').trim().length > 0);
+    } catch(_) {}
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    syncSearchPlaceholderLabel();
+    var input = document.getElementById('searchInput');
+    if (!input) return;
+    ['input','change','keyup','search','blur','focus'].forEach(function(evt){
+      input.addEventListener(evt, syncSearchPlaceholderLabel, false);
+    });
+  });
+  window.__ASSAL_SYNC_SEARCH_PLACEHOLDER_LABEL__ = syncSearchPlaceholderLabel;
+})();
+</script>
