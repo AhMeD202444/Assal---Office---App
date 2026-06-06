@@ -16542,9 +16542,11 @@ window.sendAssalCommunityMessage = async function(){
     try {
       const muted = localStorage.getItem('assal_customer_space_notifications_muted') === 'true';
       const body = `${user.name}: ${text || 'أرسل صورة'}`;
-      if (!muted && typeof queuePushNotificationEvent === 'function') {
-        await queuePushNotificationEvent('customer_space_message', { targetRole:'admin', title:'مجتمع عسل', body, customerName:user.name, item:text || 'صورة', data:{ communityMessageId:id } });
-        await queuePushNotificationEvent('customer_space_message', { targetRole:'customer', title:'مجتمع عسل', body, customerName:user.name, item:text || 'صورة', data:{ communityMessageId:id } });
+      if (typeof queuePushNotificationEvent === 'function') {
+        await queuePushNotificationEvent('customer_space_message', { targetRole:'admin', title:'مجتمع عسل', body, customerName:user.name, item:text || 'صورة', data:{ communityMessageId:id, screen:'assal_community' } });
+        if (!muted) {
+          await queuePushNotificationEvent('customer_space_message', { targetRole:'customer', title:'مجتمع عسل', body, customerName:user.name, item:text || 'صورة', data:{ communityMessageId:id, screen:'assal_community' } });
+        }
       }
     } catch (e) { console.error('community push:', e); }
   } catch (err) {
@@ -33185,7 +33187,7 @@ html body footer {
     if (state) {
       const closed = !!settings.closed;
       const mutedPush = !!settings.notificationsMuted;
-      state.textContent = closed ? 'الكتابة مغلقة' : (mutedPush ? 'الإشعارات مكتومة' : 'مفتوح');
+      state.textContent = closed ? 'الكتابة مغلقة' : (mutedPush ? 'إشعارات الزبائن مكتومة' : 'مفتوح');
       state.classList.toggle('is-closed', closed || mutedPush);
     }
   }
@@ -33542,10 +33544,12 @@ html body footer {
       await f.set(f.ref(f.db, PATH_MESSAGES + '/' + id), payload);
       if (input) { input.value = ''; input.style.height = ''; }
       try {
-        const pushMutedForAll = !!(settings && settings.notificationsMuted);
-        if (!pushMutedForAll && typeof window.queuePushNotificationEvent === 'function') {
+        const customerPushMuted = !!(settings && settings.notificationsMuted);
+        if (typeof window.queuePushNotificationEvent === 'function') {
           const body = (user.name || 'زبون') + ' : ' + text;
           const data = {communityMessageId:id, screen:'assal_community'};
+
+          // إشعارات الإدارة تبقى فعالة دائماً حتى عند تفعيل كتم إشعارات الزبائن.
           await window.queuePushNotificationEvent('customer_space_message', {
             targetRole:'admin',
             title:'مجتمع عسل',
@@ -33554,14 +33558,18 @@ html body footer {
             item:text,
             data:data
           });
-          await window.queuePushNotificationEvent('customer_space_message', {
-            targetRole:'customer',
-            title:'مجتمع عسل',
-            body:body,
-            customerName:user.name,
-            item:text,
-            data:data
-          });
+
+          // خيار الإدارة "كتم إشعارات الزبائن" يوقف إشعارات الزبائن فقط ولا يمس الأدمنية.
+          if (!customerPushMuted) {
+            await window.queuePushNotificationEvent('customer_space_message', {
+              targetRole:'customer',
+              title:'مجتمع عسل',
+              body:body,
+              customerName:user.name,
+              item:text,
+              data:data
+            });
+          }
         }
       } catch(e) { console.error('community push:', e); }
     } catch(e) {
@@ -33867,7 +33875,7 @@ html body footer {
       + '<div class="assal-community-admin-tools-body">'
       + '<button id="assalAdminToolClearAll" class="assal-community-admin-tool-btn danger" type="button"><i class="fas fa-trash"></i><span>مسح كل رسائل مجتمع عسل</span></button>'
       + '<button id="assalAdminToolToggleWriting" class="assal-community-admin-tool-btn warn" type="button"><i class="fas fa-lock"></i><span>إغلاق / فتح الكتابة</span></button>'
-      + '<button id="assalAdminToolMuteNotifications" class="assal-community-admin-tool-btn purple" type="button"><i class="fas fa-bell-slash"></i><span>كتم إشعارات المجتمع للجميع</span></button>'
+      + '<button id="assalAdminToolMuteNotifications" class="assal-community-admin-tool-btn purple" type="button"><i class="fas fa-bell-slash"></i><span>كتم إشعارات الزبائن فقط</span></button>'
       + '<button id="assalAdminToolAnnouncement" class="assal-community-admin-tool-btn blue" type="button"><i class="fas fa-bullhorn"></i><span>إعلان إداري مثبت</span></button>'
       + '<button id="assalAdminToolUnpinAll" class="assal-community-admin-tool-btn green" type="button"><i class="fas fa-thumbtack"></i><span>إلغاء كل التثبيتات</span></button>'
       + '<button id="assalAdminToolStats" class="assal-community-admin-tool-btn gray" type="button"><i class="fas fa-chart-simple"></i><span>إحصائيات المجتمع</span></button>'
@@ -33909,7 +33917,7 @@ html body footer {
         const v = snap && snap.exists && snap.exists() ? (snap.val() || {}) : {};
         const next = !v.notificationsMuted;
         await dbUpdate(PATH_SETTINGS,{notificationsMuted:next, notificationsMutedAt:Date.now(), notificationsMutedBy:'admin'});
-        closePanel(); toast('success', next ? 'تم كتم إشعارات المجتمع للجميع' : 'تم تشغيل إشعارات المجتمع');
+        closePanel(); toast('success', next ? 'تم كتم إشعارات مجتمع عسل للزبائن فقط' : 'تم تشغيل إشعارات مجتمع عسل للزبائن');
       } catch(err){ console.error(err); toast('error','فشل تغيير حالة الإشعارات'); }
     };
     const ann = $('assalAdminToolAnnouncement');
@@ -33952,7 +33960,7 @@ html body footer {
         const msgs = msgSnap && msgSnap.exists && msgSnap.exists() ? Object.values(msgSnap.val() || {}) : [];
         const st = setSnap && setSnap.exists && setSnap.exists() ? (setSnap.val() || {}) : {};
         const muted = muteSnap && muteSnap.exists && muteSnap.exists() ? Object.values(muteSnap.val() || {}).filter(x=>Number(x&&x.until||0)>Date.now()).length : 0;
-        await confirmNative({title:'إحصائيات مجتمع عسل', text:'عدد الرسائل: '+msgs.length+'<br>المحذوفة: '+msgs.filter(m=>m&&m.deletedAt).length+'<br>المثبتة: '+msgs.filter(m=>m&&m.pinned).length+'<br>المكتومين حالياً: '+muted+'<br>الإشعارات: '+(st.notificationsMuted?'مكتومة للجميع':'فعالة'), okText:'تمام'});
+        await confirmNative({title:'إحصائيات مجتمع عسل', text:'عدد الرسائل: '+msgs.length+'<br>المحذوفة: '+msgs.filter(m=>m&&m.deletedAt).length+'<br>المثبتة: '+msgs.filter(m=>m&&m.pinned).length+'<br>المكتومين حالياً: '+muted+'<br>إشعارات الزبائن: '+(st.notificationsMuted?'مكتومة':'فعالة'), okText:'تمام'});
       } catch(err){ console.error(err); toast('error','فشل عرض الإحصائيات'); }
     };
     const unmute = $('assalAdminToolUnmuteAll');
