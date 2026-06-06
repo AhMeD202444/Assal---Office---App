@@ -31374,11 +31374,18 @@ html body footer {
       approveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>جاري تسجيل الخروج...</span>';
     }
 
+    try { clearInterval(cycleInterval); clearTimeout(hideTimeout); clearTimeout(startTimeout); } catch(e) {}
+
     try {
+      /* إيقاف مجتمع عسل قبل حذف التفعيل حتى لا تبقى Firebase listeners أو نوافذ فوق نافذة كلمة المرور */
+      if (typeof window.__ASSAL_COMMUNITY_SAFE_CLOSE__ === 'function') window.__ASSAL_COMMUNITY_SAFE_CLOSE__();
+      else if (typeof closeAssalCommunitySpace === 'function') closeAssalCommunitySpace();
+
       clearAdminStateSafely();
       localStorage.removeItem('isActivated');
       localStorage.removeItem('isActivatedBackup');
       sessionStorage.removeItem('forcedActivationReason');
+      sessionStorage.setItem('assal_after_logout_show_activation', '1');
 
       if (typeof closeCart === 'function') closeCart();
       if (typeof closeRequestTrackModal === 'function') closeRequestTrackModal();
@@ -31389,13 +31396,20 @@ html body footer {
       if (typeof closeStatsModal === 'function') closeStatsModal();
       if (typeof closeCustomersAdminModal === 'function') closeCustomersAdminModal();
       if (typeof closeContactModal === 'function') closeContactModal();
+    } catch (e) { console.warn('ASSAL logout cleanup warning:', e); }
+
+    try {
+      const ov = document.getElementById(OVERLAY_ID);
+      if (ov) ov.remove();
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
     } catch (e) {}
 
-    closeLogoutConfirmModal();
-
+    /* إعادة تحميل نظيفة بعد تنظيف المجتمع، حتى تبدأ الصفحة مقفلة وتظهر نافذة كلمة المرور بدون تهنيك */
     setTimeout(() => {
-      location.reload();
-    }, 140);
+      try { window.location.replace(window.location.href.split('#')[0]); }
+      catch(_) { location.reload(); }
+    }, 80);
   }
 
   function initRefreshLogoutCycle(){
@@ -32665,6 +32679,32 @@ html body footer {
     unsubMessages = null; unsubPresence = null; unsubSettings = null;
   }
 
+  window.__ASSAL_COMMUNITY_STOP_REALTIME__ = stopRealtime;
+  window.__ASSAL_COMMUNITY_IS_ACTIVE__ = function(){
+    try { return localStorage.getItem('isActivated') === 'true'; } catch(_) { return false; }
+  };
+  window.__ASSAL_COMMUNITY_SAFE_CLOSE__ = function(){
+    try { stopRealtime(); } catch(_) {}
+    try {
+      var modal = document.getElementById('assalCommunityModal');
+      if (modal) { modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
+    } catch(_) {}
+    try {
+      var entry = document.getElementById('assalSpaceEntryModal');
+      if (entry) { entry.classList.remove('show'); entry.setAttribute('aria-hidden','true'); }
+    } catch(_) {}
+    try {
+      var hard = document.getElementById('assalCommunityHardActionDialog');
+      if (hard) hard.remove();
+      var tools = document.getElementById('assalCommunityAdminToolsFixedOverlay');
+      if (tools) tools.classList.remove('show');
+      var confirm = document.getElementById('assalCommunityConfirmNative');
+      if (confirm) confirm.remove();
+      var nativeConfirm = document.getElementById('assalCommunityConfirmNative');
+      if (nativeConfirm) nativeConfirm.remove();
+    } catch(_) {}
+  };
+
   function startRealtime(){
     if (!hasFirebase()) return;
     stopRealtime();
@@ -32996,6 +33036,13 @@ html body footer {
   };
 
   window.openAssalCommunitySpace = async function(){
+    try {
+      if (localStorage.getItem('isActivated') !== 'true') {
+        try { if (typeof window.__ASSAL_COMMUNITY_SAFE_CLOSE__ === 'function') window.__ASSAL_COMMUNITY_SAFE_CLOSE__(); } catch(_) {}
+        try { if (typeof showActivationPopup === 'function') showActivationPopup(); } catch(_) {}
+        return;
+      }
+    } catch(_) { return; }
     try { await getProfile(); } catch(e) { return; }
     const modal = $('assalCommunityModal');
     if (!modal) return;
@@ -33004,7 +33051,7 @@ html body footer {
     modal.setAttribute('aria-hidden','false');
     startRealtime();
     await checkMuted();
-    setTimeout(() => { try { $('assalCommunityInput') && $('assalCommunityInput').focus(); } catch(_){} }, 140);
+    /* لا نعمل focus إجباري هنا حتى لا يفتح الكيبورد ويبطّئ WebView عند الدخول/الخروج */
     try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch(_) {}
   };
 
@@ -33224,6 +33271,7 @@ html body footer {
   function fdb(){ return window.firebaseDB || {}; }
   function hasDb(){ const f=fdb(); return !!(f.db && f.ref && f.get && (f.update || f.set || f.remove)); }
   function isRealAdmin(){
+    try { if (localStorage.getItem('isActivated') !== 'true') return false; } catch(_) { return false; }
     try { if (typeof window.isAdminUser === 'function') return !!window.isAdminUser(); } catch(_){}
     try { return localStorage.getItem('isAdmin') === 'true' || localStorage.getItem('assal_admin_logged_in') === 'true'; } catch(_) { return false; }
   }
@@ -33336,9 +33384,57 @@ html body footer {
       e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation();
       if (isRealAdmin()) openPanel(); else syncAdminButton();
     }, true);
-    try { new MutationObserver(syncAdminButton).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class','hidden']}); } catch(_){}
-    setInterval(syncAdminButton, 900);
+
+    /* مهم جداً:
+       لا نستخدم MutationObserver ولا setInterval هنا.
+       النسخ السابقة كانت تراقب كل تغيّر بالصفحة وتعيد تعديل زر الإدارة،
+       وهذا سبب تهنيك بعد تسجيل الخروج داخل WebView خصوصاً مع مجتمع عسل. */
+    window.addEventListener('storage', syncAdminButton);
+    window.addEventListener('focus', syncAdminButton);
+    document.addEventListener('assal:admin-state-changed', syncAdminButton);
+    document.addEventListener('assal:community-opened', syncAdminButton);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true}); else start();
+})();
+</script>
+
+<script id="assal-community-logout-hard-guard-final">
+(function(){
+  'use strict';
+  function notActivated(){
+    try { return localStorage.getItem('isActivated') !== 'true'; } catch(_) { return true; }
+  }
+  function hardCloseCommunity(){
+    try { if (typeof window.__ASSAL_COMMUNITY_SAFE_CLOSE__ === 'function') window.__ASSAL_COMMUNITY_SAFE_CLOSE__(); } catch(_) {}
+    try {
+      ['assalCommunityModal','assalSpaceEntryModal','assalCommunityHardActionDialog','assalCommunityAdminToolsFixedOverlay','assalCommunityConfirmNative'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (id.indexOf('Dialog') !== -1 || id.indexOf('Confirm') !== -1) el.remove();
+        else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); el.style.display = ''; }
+      });
+    } catch(_) {}
+    try { document.documentElement.style.overflow = ''; document.body.style.overflow = ''; } catch(_) {}
+  }
+  function showPasswordIfNeeded(){
+    if (!notActivated()) return;
+    hardCloseCommunity();
+    try {
+      var btn = document.getElementById('assalCommunityAdminBtn');
+      if (btn) { btn.style.display = 'none'; btn.hidden = true; btn.disabled = true; }
+    } catch(_) {}
+    try {
+      if (typeof showActivationPopup === 'function') {
+        setTimeout(function(){ try { showActivationPopup(); } catch(_) {} }, 120);
+      }
+    } catch(_) {}
+  }
+  window.__ASSAL_LOGOUT_HARD_CLOSE_COMMUNITY__ = hardCloseCommunity;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', showPasswordIfNeeded, {once:true});
+  } else {
+    showPasswordIfNeeded();
+  }
+  window.addEventListener('pageshow', showPasswordIfNeeded);
 })();
 </script>
