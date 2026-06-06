@@ -11952,6 +11952,35 @@ html.low-end-device .results-container {
 }
 
 
+
+
+/* ===== ASSAL Community Action Dialog Fix ===== */
+.assal-community-action-dialog{
+  position:fixed; inset:0; z-index:1000002; display:flex; align-items:center; justify-content:center;
+  padding:18px; background:rgba(2,8,23,.68); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  opacity:0; pointer-events:none; transition:opacity .16s ease; direction:rtl; font-family:'Cairo',sans-serif;
+}
+.assal-community-action-dialog.show{ opacity:1; pointer-events:auto; }
+.assal-community-action-card{
+  width:min(92vw,380px); border-radius:22px; padding:16px; color:#fff; text-align:right;
+  background:radial-gradient(circle at top right, rgba(34,211,238,.15), transparent 42%), rgba(15,23,42,.98);
+  border:1px solid rgba(148,163,184,.18); box-shadow:0 24px 70px rgba(0,0,0,.70);
+  transform:translateY(10px) scale(.97); transition:transform .18s ease;
+}
+.assal-community-action-dialog.show .assal-community-action-card{ transform:translateY(0) scale(1); }
+.assal-community-action-title{ font-size:17px; font-weight:900; margin-bottom:6px; }
+.assal-community-action-text{ font-size:13px; color:rgba(226,232,240,.75); line-height:1.7; margin-bottom:12px; }
+.assal-community-action-input{
+  width:100%; min-height:112px; resize:vertical; border-radius:16px; padding:12px; color:#fff; outline:none;
+  background:rgba(2,6,23,.54); border:1px solid rgba(148,163,184,.18); font-family:'Cairo',sans-serif; font-size:14px;
+}
+.assal-community-action-input:focus{ border-color:rgba(45,212,191,.65); box-shadow:0 0 0 3px rgba(45,212,191,.10); }
+.assal-community-action-buttons{ display:flex; gap:10px; margin-top:12px; }
+.assal-community-action-buttons button{ flex:1; border:none; border-radius:14px; padding:10px 12px; font-family:'Cairo',sans-serif; font-weight:900; cursor:pointer; color:#fff; }
+.assal-community-action-cancel{ background:rgba(71,85,105,.85); }
+.assal-community-action-ok{ background:linear-gradient(135deg,#0f766e,#06b6d4); }
+.assal-community-action-ok.danger{ background:linear-gradient(135deg,#991b1b,#ef4444); }
+.assal-community-mini-action{ touch-action:manipulation; }
 </style>
 
 <style id="support-chat-messenger-upgrade">
@@ -12933,6 +12962,224 @@ html.low-end-device .results-container {
     letter-spacing:-.7px !important;
   }
 }
+
+
+/* ===== ASSAL Customer Space / مجتمع عسل ===== */
+.assal-space-entry-modal,
+.assal-community-modal{
+  position:fixed;
+  inset:0;
+  z-index:100050;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+  direction:rtl;
+  font-family:'Cairo',sans-serif;
+  background:rgba(2,8,23,.66);
+  backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+}
+.assal-space-entry-modal.show,
+.assal-community-modal.show{ display:flex; }
+.assal-space-entry-shell{
+  width:min(390px,94vw);
+  border-radius:28px;
+  overflow:hidden;
+  color:#fff;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(34,211,238,.20), transparent 42%),
+    radial-gradient(circle at 100% 12%, rgba(16,185,129,.18), transparent 48%),
+    linear-gradient(180deg, rgba(11,18,32,.98), rgba(7,11,22,.98));
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow:0 30px 85px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.assal-space-entry-head{
+  padding:18px 18px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border-bottom:1px solid rgba(148,163,184,.14);
+  background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.015));
+}
+.assal-space-entry-title{ display:flex; align-items:center; gap:11px; min-width:0; }
+.assal-space-entry-icon{
+  width:44px;height:44px;border-radius:16px;
+  display:grid;place-items:center;
+  color:#dffcff;
+  background:linear-gradient(135deg, rgba(14,165,233,.34), rgba(16,185,129,.20));
+  border:1px solid rgba(125,211,252,.28);
+  box-shadow:0 12px 26px rgba(14,165,233,.17);
+}
+.assal-space-entry-title h3{ margin:0; font-size:20px; font-weight:950; line-height:1.2; }
+.assal-space-entry-title p{ margin:3px 0 0; font-size:12px; color:rgba(226,232,240,.74); }
+.assal-space-close,
+.assal-community-close{
+  width:36px;height:36px;border:0;border-radius:999px;
+  display:grid;place-items:center;cursor:pointer;color:#fff;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+}
+.assal-space-close:hover,
+.assal-community-close:hover{ background:linear-gradient(135deg,#7f1d1d,#b91c1c); }
+.assal-space-entry-body{ padding:15px; display:grid; gap:10px; }
+.assal-space-choice{
+  width:100%; border:1px solid rgba(148,163,184,.16); border-radius:22px;
+  padding:14px; color:#fff; text-align:right; cursor:pointer;
+  background:linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
+  display:grid; grid-template-columns:48px 1fr auto; align-items:center; gap:12px;
+  box-shadow:0 12px 28px rgba(0,0,0,.22);
+  transition:transform .16s ease, border-color .16s ease, background .16s ease;
+}
+.assal-space-choice:hover{ transform:translateY(-1px); border-color:rgba(125,211,252,.34); background:linear-gradient(135deg, rgba(14,165,233,.15), rgba(16,185,129,.08)); }
+.assal-space-choice:active{ transform:scale(.985); }
+.assal-space-choice .ico{
+  width:48px;height:48px;border-radius:18px;display:grid;place-items:center;
+  background:linear-gradient(135deg, rgba(14,165,233,.38), rgba(16,185,129,.20));
+  border:1px solid rgba(125,211,252,.22);
+  font-size:20px;
+}
+.assal-space-choice.admin .ico{ background:linear-gradient(135deg, rgba(168,85,247,.38), rgba(14,165,233,.16)); }
+.assal-space-choice b{ display:block; font-size:15px; font-weight:950; margin-bottom:3px; }
+.assal-space-choice small{ display:block; font-size:11.5px; color:rgba(226,232,240,.72); line-height:1.55; }
+.assal-space-choice .arr{ color:rgba(255,255,255,.65); }
+
+.assal-community-shell{
+  width:min(980px,96vw);
+  height:min(720px, calc(100dvh - 34px));
+  border-radius:30px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  color:#fff;
+  background:
+    radial-gradient(1100px 520px at 0% 0%, rgba(56,189,248,.17), transparent 55%),
+    radial-gradient(840px 380px at 100% 0%, rgba(16,185,129,.13), transparent 58%),
+    linear-gradient(180deg, rgba(10,17,30,.985), rgba(7,11,22,.985));
+  border:1px solid rgba(148,163,184,.18);
+  box-shadow:0 34px 96px rgba(0,0,0,.70), inset 0 1px 0 rgba(255,255,255,.07);
+}
+.assal-community-top{
+  padding:14px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  border-bottom:1px solid rgba(148,163,184,.14);
+  background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.015));
+}
+.assal-community-title{ display:flex; align-items:center; gap:12px; min-width:0; }
+.assal-community-avatar{
+  width:46px;height:46px;border-radius:18px;display:grid;place-items:center;
+  color:#e8fdff;font-size:20px;
+  background:linear-gradient(135deg, rgba(14,165,233,.38), rgba(16,185,129,.22));
+  border:1px solid rgba(125,211,252,.30);
+  box-shadow:0 12px 26px rgba(14,165,233,.16);
+}
+.assal-community-title h3{ margin:0; font-size:20px; font-weight:950; line-height:1.2; }
+.assal-community-meta{ margin-top:4px; display:flex; gap:6px; flex-wrap:wrap; color:rgba(226,232,240,.78); font-size:11px; }
+.assal-community-pill{ padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); }
+.assal-community-actions{ display:flex; align-items:center; gap:8px; }
+.assal-community-icon-btn{
+  width:36px;height:36px;border-radius:14px;border:1px solid rgba(255,255,255,.12);
+  display:grid;place-items:center;cursor:pointer;color:#fff;background:rgba(255,255,255,.07);
+}
+.assal-community-icon-btn.is-active{ background:linear-gradient(135deg, rgba(14,165,233,.34), rgba(16,185,129,.20)); border-color:rgba(125,211,252,.32); }
+.assal-community-pinned{
+  display:none; margin:10px 14px 0; padding:10px 12px; border-radius:18px;
+  border:1px solid rgba(250,204,21,.18);
+  background:linear-gradient(135deg, rgba(250,204,21,.12), rgba(15,23,42,.45));
+  color:#fff7d6; font-size:12px; line-height:1.6;
+}
+.assal-community-pinned.show{ display:flex; align-items:flex-start; gap:8px; }
+.assal-community-messages{
+  flex:1; overflow:auto; padding:14px; display:flex; flex-direction:column; gap:10px;
+  scrollbar-width:none; -ms-overflow-style:none;
+}
+.assal-community-messages::-webkit-scrollbar{ display:none; }
+.assal-community-empty{
+  margin:auto; width:min(330px,90%); text-align:center; color:rgba(226,232,240,.74);
+  border:1px dashed rgba(148,163,184,.22); border-radius:24px; padding:22px;
+  background:rgba(255,255,255,.035);
+}
+.assal-community-empty i{ font-size:32px; color:#7dd3fc; margin-bottom:10px; }
+.assal-community-msg{
+  max-width:min(78%, 620px); align-self:flex-start;
+  border-radius:22px 22px 22px 8px; padding:10px 12px;
+  background:linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.03));
+  border:1px solid rgba(148,163,184,.14);
+  box-shadow:0 10px 25px rgba(0,0,0,.18);
+  position:relative;
+}
+.assal-community-msg.mine{
+  align-self:flex-end; border-radius:22px 22px 8px 22px;
+  background:linear-gradient(135deg, rgba(14,165,233,.22), rgba(16,185,129,.10));
+  border-color:rgba(125,211,252,.22);
+}
+.assal-community-msg.admin-msg{
+  background:linear-gradient(135deg, rgba(168,85,247,.18), rgba(14,165,233,.08));
+  border-color:rgba(216,180,254,.22);
+}
+.assal-community-msg.deleted{ opacity:.72; font-style:italic; }
+.assal-community-msg-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+.assal-community-sender{ display:flex; align-items:center; gap:6px; min-width:0; font-weight:950; font-size:12px; }
+.assal-community-sender .role-badge{ padding:3px 7px; border-radius:999px; font-size:10px; background:rgba(255,255,255,.08); color:#dbeafe; border:1px solid rgba(255,255,255,.08); }
+.assal-community-sender .role-badge.admin{ color:#f5d0fe; background:rgba(168,85,247,.12); border-color:rgba(216,180,254,.20); }
+.assal-community-time{ font-size:10px; color:rgba(226,232,240,.58); white-space:nowrap; }
+.assal-community-text{ font-size:13.5px; line-height:1.75; color:#f8fbff; white-space:pre-wrap; overflow-wrap:anywhere; }
+.assal-community-image{ margin-top:8px; border-radius:18px; overflow:hidden; border:1px solid rgba(255,255,255,.10); max-width:280px; cursor:pointer; }
+.assal-community-image img{ display:block; width:100%; max-height:260px; object-fit:cover; }
+.assal-community-edited{ margin-top:4px; color:rgba(226,232,240,.48); font-size:10px; }
+.assal-community-msg-actions{ display:flex; gap:5px; margin-top:8px; flex-wrap:wrap; }
+.assal-community-mini-action{
+  border:0; border-radius:999px; padding:5px 8px; font-size:10px; font-weight:900; cursor:pointer;
+  color:#e5f6ff; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.08);
+}
+.assal-community-mini-action.danger{ color:#fecaca; background:rgba(127,29,29,.18); border-color:rgba(248,113,113,.20); }
+.assal-community-composer{
+  padding:12px 14px; border-top:1px solid rgba(148,163,184,.14);
+  background:linear-gradient(180deg, rgba(2,6,23,.10), rgba(2,6,23,.42));
+}
+.assal-community-preview{ display:none; align-items:center; gap:10px; margin-bottom:8px; padding:8px; border-radius:16px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); }
+.assal-community-preview.show{ display:flex; }
+.assal-community-preview img{ width:54px; height:54px; object-fit:cover; border-radius:14px; }
+.assal-community-preview button{ margin-inline-start:auto; width:30px;height:30px;border:0;border-radius:999px;color:#fff;background:rgba(127,29,29,.65); }
+.assal-community-write-row{ display:grid; grid-template-columns:42px 1fr 42px; gap:8px; align-items:end; }
+.assal-community-attach,
+.assal-community-send{
+  width:42px;height:42px;border-radius:16px;border:1px solid rgba(255,255,255,.12); cursor:pointer;color:#fff;
+  display:grid;place-items:center;background:rgba(255,255,255,.07);
+}
+.assal-community-send{ background:linear-gradient(135deg, rgba(14,165,233,.95), rgba(16,185,129,.82)); box-shadow:0 10px 24px rgba(14,165,233,.18); }
+.assal-community-input{
+  min-height:42px; max-height:110px; resize:none; border:1px solid rgba(148,163,184,.18);
+  border-radius:18px; outline:none; color:#fff; background:rgba(15,23,42,.84);
+  padding:11px 13px; font-family:'Cairo',sans-serif; font-size:13px; line-height:1.55;
+}
+.assal-community-input::placeholder{ color:rgba(226,232,240,.52); }
+.assal-community-muted-note{ display:none; padding:10px 12px; border-radius:16px; margin-bottom:8px; font-size:12px; color:#fecaca; background:rgba(127,29,29,.16); border:1px solid rgba(248,113,113,.18); }
+.assal-community-muted-note.show{ display:block; }
+.assal-community-full-image{
+  position:fixed; inset:0; z-index:100080; display:none; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.86); padding:18px;
+}
+.assal-community-full-image.show{ display:flex; }
+.assal-community-full-image img{ max-width:96vw; max-height:86dvh; border-radius:18px; box-shadow:0 20px 70px rgba(0,0,0,.65); }
+.assal-community-full-image button{ position:absolute; top:18px; right:18px; width:38px;height:38px;border:0;border-radius:999px;color:#fff;background:rgba(127,29,29,.8); }
+@media (max-width:640px){
+  .assal-community-modal{ padding:7px; align-items:stretch; }
+  .assal-community-shell{ width:100%; height:calc(100dvh - 14px); border-radius:24px; }
+  .assal-community-top{ padding:12px; }
+  .assal-community-avatar{ width:40px;height:40px;border-radius:15px; }
+  .assal-community-title h3{ font-size:17px; }
+  .assal-community-meta{ font-size:10px; }
+  .assal-community-actions{ gap:5px; }
+  .assal-community-icon-btn,.assal-community-close{ width:34px;height:34px;border-radius:13px; }
+  .assal-community-msg{ max-width:90%; }
+  .assal-community-messages{ padding:10px; }
+  .assal-community-composer{ padding:10px; }
+}
 </style>
 </head>
 <body>
@@ -12947,7 +13194,7 @@ html.low-end-device .results-container {
 </div>
 
 
-<div id="requestFloatingBtn" class="floating-request-btn support-chat-fab" title="المحادثة">
+<div id="requestFloatingBtn" class="floating-request-btn support-chat-fab" title="مركز المحادثة">
   <span><i class="fas fa-comments"></i></span>
 </div>
 
@@ -13554,6 +13801,81 @@ html.low-end-device .results-container {
 
 
 
+
+
+
+<!-- مركز دخول المحادثات / مجتمع عسل -->
+<div id="assalSpaceEntryModal" class="assal-space-entry-modal" aria-hidden="true">
+  <div class="assal-space-entry-shell" role="dialog" aria-modal="true" aria-label="مركز المحادثة">
+    <div class="assal-space-entry-head">
+      <div class="assal-space-entry-title">
+        <div class="assal-space-entry-icon"><i class="fas fa-comments"></i></div>
+        <div>
+          <h3>مركز المحادثة</h3>
+          <p>اختار وين تحب تكتب رسالتك</p>
+        </div>
+      </div>
+      <button class="assal-space-close" type="button" onclick="closeAssalSpaceEntryModal()" aria-label="إغلاق"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="assal-space-entry-body">
+      <button class="assal-space-choice" type="button" onclick="openAssalCommunitySpaceFromEntry()">
+        <span class="ico"><i class="fas fa-globe"></i></span>
+        <span><b>مجتمع عسل</b><small>كروب عام لكل الزبائن والإدارة، رسائل مباشرة وتنبيهات.</small></span>
+        <i class="fas fa-chevron-left arr"></i>
+      </button>
+      <button id="assalDirectChatChoice" class="assal-space-choice admin" type="button" onclick="openAssalDirectChatFromEntry()">
+        <span class="ico"><i class="fas fa-headset"></i></span>
+        <span><b>مراسلة الإدارة</b><small>محادثة مباشرة وخاصة بينك وبين فريق عسل.</small></span>
+        <i class="fas fa-chevron-left arr"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- مجتمع عسل العامة -->
+<div id="assalCommunityModal" class="assal-community-modal" aria-hidden="true">
+  <div class="assal-community-shell" role="dialog" aria-modal="true" aria-label="مجتمع عسل">
+    <div class="assal-community-top">
+      <div class="assal-community-title">
+        <div class="assal-community-avatar"><i class="fas fa-globe"></i></div>
+        <div>
+          <h3>مجتمع عسل</h3>
+          <div class="assal-community-meta">
+            <span class="assal-community-pill" id="assalCommunityCount">0 رسالة</span>
+            <span class="assal-community-pill">كروب عام</span>
+          </div>
+        </div>
+      </div>
+      <div class="assal-community-actions">
+        <button id="assalCommunityImagesToggle" class="assal-community-icon-btn" type="button" onclick="toggleAssalCommunityImagesOnly()" title="الصور فقط"><i class="fas fa-image"></i></button>
+        <button id="assalCommunityMuteBtn" class="assal-community-icon-btn" type="button" onclick="toggleAssalCommunityMute()" title="كتم الإشعارات"><i class="fas fa-bell"></i></button>
+        <button id="assalCommunityAdminBtn" class="assal-community-icon-btn" type="button" onclick="openAssalCommunityAdminTools()" title="أدوات الإدارة" style="display:none"><i class="fas fa-shield-halved"></i></button>
+        <button class="assal-community-close" type="button" onclick="closeAssalCommunitySpace()" aria-label="إغلاق"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div id="assalCommunityPinned" class="assal-community-pinned"></div>
+    <div id="assalCommunityMessages" class="assal-community-messages"></div>
+    <div class="assal-community-composer">
+      <div id="assalCommunityMutedNote" class="assal-community-muted-note">تم كتمك من الكتابة مؤقتاً من قبل الإدارة.</div>
+      <div id="assalCommunityPreview" class="assal-community-preview">
+        <img id="assalCommunityPreviewImg" alt="صورة مرفقة">
+        <span>صورة جاهزة للإرسال</span>
+        <button type="button" onclick="clearAssalCommunityImage()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="assal-community-write-row">
+        <button class="assal-community-attach" type="button" onclick="pickAssalCommunityImage()" title="إرسال صورة"><i class="fas fa-camera"></i></button>
+        <textarea id="assalCommunityInput" class="assal-community-input" placeholder="اكتب مجتمع عسل..."></textarea>
+        <button id="assalCommunitySendBtn" class="assal-community-send" type="button" onclick="sendAssalCommunityMessage()" title="إرسال"><i class="fas fa-paper-plane"></i></button>
+      </div>
+      <input id="assalCommunityImageInput" type="file" accept="image/*" style="display:none">
+    </div>
+  </div>
+</div>
+
+<div id="assalCommunityFullImage" class="assal-community-full-image" onclick="if(event.target===this) closeAssalCommunityImageViewer()">
+  <button type="button" onclick="closeAssalCommunityImageViewer()"><i class="fas fa-times"></i></button>
+  <img id="assalCommunityFullImageImg" alt="صورة">
+</div>
 
 <div id="requestModal" class="request-modal support-chat-start-modal" aria-hidden="true">
   <div class="request-shell" role="dialog" aria-modal="true" aria-label="إرسال الرسالة">
@@ -15438,6 +15760,467 @@ window.openNewChatFromTrackModal = function () {
 };
 
 
+
+
+/* ===== ASSAL Customer Space: مجتمع عسل العامة ===== */
+const ASSAL_COMMUNITY_MESSAGES_PATH = 'customerSpace/messages';
+const ASSAL_COMMUNITY_MUTED_PATH = 'customerSpace/mutedDevices';
+const ASSAL_COMMUNITY_SETTINGS_PATH = 'customerSpace/settings';
+let assalCommunityUnsub = null;
+let assalCommunityMessages = [];
+let assalCommunityImageData = '';
+let assalCommunityImagesOnly = false;
+let assalCommunityLastSendAt = 0;
+let assalCommunityMutedUntil = 0;
+
+function assalCommunityIsAdmin(){
+  try { return typeof isAdminUser === 'function' && isAdminUser(); } catch (_) { return false; }
+}
+function assalCommunityDeviceId(){
+  try { return getDeviceId(); } catch (_) { return 'WEB-' + Math.random().toString(36).slice(2,8); }
+}
+function assalCommunityText(value){ return String(value == null ? '' : value).trim(); }
+function assalCommunityEscape(value){
+  try { if (typeof escapeHtml === 'function') return escapeHtml(value); } catch (_) {}
+  return String(value == null ? '' : value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+}
+function assalCommunityTime(ts){
+  const d = new Date(Number(ts || Date.now()));
+  try { return d.toLocaleTimeString('ar-IQ', { hour:'2-digit', minute:'2-digit' }); } catch (_) { return d.toLocaleTimeString(); }
+}
+function assalCommunityDateKey(ts){
+  const d = new Date(Number(ts || Date.now()));
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+async function getAssalCommunityUser(){
+  const role = assalCommunityIsAdmin() ? 'admin' : 'customer';
+  const deviceId = assalCommunityDeviceId();
+  if (role === 'admin') {
+    return { role, deviceId, name: 'الإدارة', phone: '', address: '' };
+  }
+  let profile = null;
+  try { profile = await getCustomerProfileForChat(); } catch (_) {}
+  if (profile && profile.blocked) {
+    showCustomerBlockedOverlay(profile);
+    throw new Error('blocked');
+  }
+  const complete = !!(profile && assalCommunityText(profile.name) && assalCommunityText(profile.phone) && assalCommunityText(profile.address));
+  if (!complete) {
+    openCustomerProfileModal(profile || {});
+    throw new Error('profile-required');
+  }
+  return {
+    role,
+    deviceId,
+    name: assalCommunityText(profile.name) || 'زبون',
+    phone: assalCommunityText(profile.phone),
+    address: assalCommunityText(profile.address)
+  };
+}
+
+window.openCustomerChatEntryPoint = async function(){
+  if (customerBlockedStateActive) {
+    showCustomerBlockedOverlay({ blocked: true });
+    return;
+  }
+  const modal = document.getElementById('assalSpaceEntryModal');
+  const direct = document.getElementById('assalDirectChatChoice');
+  if (direct) {
+    const isAdmin = assalCommunityIsAdmin();
+    direct.querySelector('b').textContent = isAdmin ? 'مركز محادثات الإدارة' : 'مراسلة الإدارة';
+    direct.querySelector('small').textContent = isAdmin ? 'متابعة رسائل الزبائن والردود الخاصة.' : 'محادثة مباشرة وخاصة بينك وبين فريق عسل.';
+  }
+  if (!modal) return;
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  try { syncGlobalModalLock(); } catch (_) {}
+};
+window.closeAssalSpaceEntryModal = function(){
+  const modal = document.getElementById('assalSpaceEntryModal');
+  if (!modal) return;
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+  try { syncGlobalModalLock(); } catch (_) {}
+};
+window.openAssalDirectChatFromEntry = async function(){
+  closeAssalSpaceEntryModal();
+  setTimeout(async () => {
+    try {
+      if (assalCommunityIsAdmin()) await openRequestAdminModal();
+      else {
+        const deviceId = getDeviceId();
+        const all = await getAllMaterialRequests();
+        const visibleChats = all.filter(req => req && req.deviceId === deviceId && !req.customerDeleted);
+        if (visibleChats.length > 0) await openRequestTrackModal();
+        else openRequestModal();
+      }
+    } catch (e) {
+      console.error('openAssalDirectChatFromEntry:', e);
+      try { openRequestModal(); } catch (_) {}
+    }
+  }, 140);
+};
+window.openAssalCommunitySpaceFromEntry = function(){
+  closeAssalSpaceEntryModal();
+  setTimeout(() => openAssalCommunitySpace(), 120);
+};
+
+window.openAssalCommunitySpace = async function(){
+  try { await getAssalCommunityUser(); } catch (e) { if (e.message !== 'profile-required' && e.message !== 'blocked') console.error(e); return; }
+  const modal = document.getElementById('assalCommunityModal');
+  if (!modal) return;
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  const adminBtn = document.getElementById('assalCommunityAdminBtn');
+  if (adminBtn) adminBtn.style.display = assalCommunityIsAdmin() ? 'grid' : 'none';
+  updateAssalCommunityMuteButton();
+  await checkAssalCommunityMuteState();
+  startAssalCommunityRealtime();
+  setTimeout(() => { try { document.getElementById('assalCommunityInput')?.focus(); } catch (_) {} }, 120);
+  try { syncGlobalModalLock(); } catch (_) {}
+};
+window.closeAssalCommunitySpace = function(){
+  const modal = document.getElementById('assalCommunityModal');
+  if (!modal) return;
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+  stopAssalCommunityRealtime();
+  clearAssalCommunityImage();
+  try { syncGlobalModalLock(); } catch (_) {}
+};
+function startAssalCommunityRealtime(){
+  if (!window.firebaseDB || !window.firebaseDB.db || typeof window.firebaseDB.onValue !== 'function') return;
+  stopAssalCommunityRealtime();
+  const { db, ref, onValue } = window.firebaseDB;
+  assalCommunityUnsub = onValue(ref(db, ASSAL_COMMUNITY_MESSAGES_PATH), snap => {
+    const raw = snap.exists() ? (snap.val() || {}) : {};
+    assalCommunityMessages = Object.entries(raw).map(([id, msg]) => ({ id, ...(msg || {}) }))
+      .sort((a,b) => Number(a.createdAt||0) - Number(b.createdAt||0));
+    renderAssalCommunityMessages();
+  });
+}
+function stopAssalCommunityRealtime(){
+  try { if (typeof assalCommunityUnsub === 'function') assalCommunityUnsub(); } catch (_) {}
+  assalCommunityUnsub = null;
+}
+async function checkAssalCommunityMuteState(){
+  assalCommunityMutedUntil = 0;
+  if (assalCommunityIsAdmin() || !window.firebaseDB || !window.firebaseDB.db) return false;
+  try {
+    const { db, ref, get } = window.firebaseDB;
+    const snap = await get(ref(db, `${ASSAL_COMMUNITY_MUTED_PATH}/${assalCommunityDeviceId()}`));
+    const data = snap.exists() ? (snap.val() || {}) : null;
+    assalCommunityMutedUntil = Number(data?.until || 0);
+  } catch (_) {}
+  const muted = assalCommunityMutedUntil && assalCommunityMutedUntil > Date.now();
+  const note = document.getElementById('assalCommunityMutedNote');
+  if (note) note.classList.toggle('show', !!muted);
+  return !!muted;
+}
+function renderAssalCommunityMessages(){
+  const wrap = document.getElementById('assalCommunityMessages');
+  const count = document.getElementById('assalCommunityCount');
+  const pinned = document.getElementById('assalCommunityPinned');
+  if (!wrap) return;
+  const me = assalCommunityDeviceId();
+  const visible = assalCommunityMessages.filter(m => !m.hardDeleted && (!assalCommunityImagesOnly || !!m.imageData));
+  if (count) count.textContent = `${visible.length} رسالة`;
+  const pinnedMsg = assalCommunityMessages.slice().reverse().find(m => m.pinned && !m.deletedAt && !m.hardDeleted);
+  if (pinned) {
+    if (pinnedMsg) {
+      pinned.classList.add('show');
+      const pinText = pinnedMsg.text ? assalCommunityEscape(pinnedMsg.text).slice(0, 160) : (pinnedMsg.imageData ? 'صورة مثبتة' : 'رسالة مثبتة');
+      pinned.innerHTML = `<i class="fas fa-thumbtack"></i><div><b>رسالة مثبتة</b><br>${pinText}</div>`;
+    } else {
+      pinned.classList.remove('show');
+      pinned.innerHTML = '';
+    }
+  }
+  if (!visible.length) {
+    wrap.innerHTML = `<div class="assal-community-empty"><i class="fas fa-comments"></i><div>بعد ماكو رسائل هنا.</div><small>ابدأ أول مجتمع عسل.</small></div>`;
+    return;
+  }
+  let lastDay = '';
+  wrap.innerHTML = visible.map(msg => {
+    const day = assalCommunityDateKey(msg.createdAt);
+    const daySep = day !== lastDay ? `<div style="align-self:center;margin:8px 0 2px;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.06);font-size:10px;color:rgba(226,232,240,.66)">${day === assalCommunityDateKey(Date.now()) ? 'اليوم' : day}</div>` : '';
+    lastDay = day;
+    const mine = msg.deviceId === me;
+    const adminMsg = msg.senderRole === 'admin';
+    const canManage = assalCommunityIsAdmin() || mine;
+    const deleted = !!msg.deletedAt;
+    const safeName = assalCommunityEscape(msg.senderName || (adminMsg ? 'الإدارة' : 'زبون'));
+    const roleBadge = adminMsg ? '<span class="role-badge admin">الإدارة</span>' : '<span class="role-badge">زبون</span>';
+    const textHtml = deleted ? 'تم حذف الرسالة' : assalCommunityEscape(msg.text || '');
+    const imgHtml = (!deleted && msg.imageData) ? `<div class="assal-community-image" onclick="openAssalCommunityImageViewer('${msg.id}')"><img src="${msg.imageData}" alt="صورة"></div>` : '';
+    const editLabel = msg.editedAt && !deleted ? '<div class="assal-community-edited">تم التعديل</div>' : '';
+    const safeId = String(msg.id || '').replace(/'/g, "\'");
+    const actions = canManage ? `<div class="assal-community-msg-actions" onclick="event.stopPropagation()">
+      ${(!deleted && (mine || assalCommunityIsAdmin())) ? `<button type="button" class="assal-community-mini-action" onclick="event.preventDefault();event.stopPropagation();editAssalCommunityMessage('${safeId}')"><i class="fas fa-pen"></i> تعديل</button>` : ''}
+      ${(!deleted && assalCommunityIsAdmin()) ? `<button type="button" class="assal-community-mini-action" onclick="event.preventDefault();event.stopPropagation();toggleAssalCommunityPin('${safeId}')"><i class="fas fa-thumbtack"></i> ${msg.pinned ? 'إلغاء التثبيت' : 'تثبيت'}</button>` : ''}
+      ${(!deleted && assalCommunityIsAdmin() && !adminMsg) ? `<button type="button" class="assal-community-mini-action" onclick="event.preventDefault();event.stopPropagation();muteAssalCommunitySender('${safeId}')"><i class="fas fa-volume-xmark"></i> كتم</button>` : ''}
+      ${(!deleted) ? `<button type="button" class="assal-community-mini-action danger" onclick="event.preventDefault();event.stopPropagation();deleteAssalCommunityMessage('${safeId}')"><i class="fas fa-trash"></i> حذف</button>` : ''}
+    </div>` : '';
+    return `${daySep}<div class="assal-community-msg ${mine ? 'mine' : ''} ${adminMsg ? 'admin-msg' : ''} ${deleted ? 'deleted' : ''}">
+      <div class="assal-community-msg-head"><div class="assal-community-sender"><span>${safeName}</span>${roleBadge}</div><div class="assal-community-time">${assalCommunityTime(msg.createdAt)}</div></div>
+      <div class="assal-community-text">${textHtml}</div>${imgHtml}${editLabel}${actions}
+    </div>`;
+  }).join('');
+  setTimeout(() => { try { wrap.scrollTop = wrap.scrollHeight; } catch (_) {} }, 40);
+}
+
+window.toggleAssalCommunityImagesOnly = function(){
+  assalCommunityImagesOnly = !assalCommunityImagesOnly;
+  document.getElementById('assalCommunityImagesToggle')?.classList.toggle('is-active', assalCommunityImagesOnly);
+  renderAssalCommunityMessages();
+};
+function updateAssalCommunityMuteButton(){
+  const muted = localStorage.getItem('assal_customer_space_notifications_muted') === 'true';
+  const btn = document.getElementById('assalCommunityMuteBtn');
+  if (!btn) return;
+  btn.classList.toggle('is-active', muted);
+  btn.innerHTML = muted ? '<i class="fas fa-bell-slash"></i>' : '<i class="fas fa-bell"></i>';
+}
+window.toggleAssalCommunityMute = function(){
+  const muted = localStorage.getItem('assal_customer_space_notifications_muted') === 'true';
+  localStorage.setItem('assal_customer_space_notifications_muted', muted ? 'false' : 'true');
+  updateAssalCommunityMuteButton();
+  if (window.Swal) Swal.fire({ toast:true, position:'top', timer:1600, showConfirmButton:false, icon:'success', title: muted ? 'تم تفعيل إشعارات المساحة' : 'تم كتم إشعارات المساحة' });
+};
+window.pickAssalCommunityImage = function(){ document.getElementById('assalCommunityImageInput')?.click(); };
+window.clearAssalCommunityImage = function(){
+  assalCommunityImageData = '';
+  const input = document.getElementById('assalCommunityImageInput');
+  if (input) input.value = '';
+  document.getElementById('assalCommunityPreview')?.classList.remove('show');
+};
+async function compressAssalCommunityImage(file){
+  if (!file || !file.type || !file.type.startsWith('image/')) throw new Error('اختار صورة فقط');
+  if (file.size > 6 * 1024 * 1024) throw new Error('حجم الصورة كبير جداً');
+  const dataUrl = await new Promise((resolve, reject) => {
+    const r = new FileReader(); r.onload = () => resolve(r.result); r.onerror = reject; r.readAsDataURL(file);
+  });
+  const img = await new Promise((resolve, reject) => {
+    const im = new Image(); im.onload = () => resolve(im); im.onerror = reject; im.src = dataUrl;
+  });
+  const maxSide = 900;
+  let w = img.width, h = img.height;
+  if (Math.max(w,h) > maxSide) {
+    const s = maxSide / Math.max(w,h); w = Math.round(w*s); h = Math.round(h*s);
+  }
+  const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+  let quality = .72;
+  let out = canvas.toDataURL('image/jpeg', quality);
+  while (out.length > 650000 && quality > .38) { quality -= .08; out = canvas.toDataURL('image/jpeg', quality); }
+  if (out.length > 750000) throw new Error('الصورة بقت كبيرة، جرّب صورة أصغر');
+  return out;
+}
+setTimeout(() => {
+  const imgInput = document.getElementById('assalCommunityImageInput');
+  if (imgInput) imgInput.addEventListener('change', async e => {
+    try {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      assalCommunityImageData = await compressAssalCommunityImage(file);
+      const prev = document.getElementById('assalCommunityPreview');
+      const img = document.getElementById('assalCommunityPreviewImg');
+      if (img) img.src = assalCommunityImageData;
+      if (prev) prev.classList.add('show');
+    } catch (err) {
+      clearAssalCommunityImage();
+      if (window.Swal) Swal.fire({ icon:'error', title:'تعذر إرفاق الصورة', text: err.message || String(err) });
+      else alert(err.message || err);
+    }
+  });
+}, 0);
+window.sendAssalCommunityMessage = async function(){
+  if (!window.firebaseDB || !window.firebaseDB.db) return;
+  const input = document.getElementById('assalCommunityInput');
+  const text = assalCommunityText(input?.value || '');
+  if (!text && !assalCommunityImageData) return;
+  if (text.length > 700) { if (window.Swal) Swal.fire({icon:'warning',title:'الرسالة طويلة'}); return; }
+  if (Date.now() - assalCommunityLastSendAt < 2500) return;
+  if (await checkAssalCommunityMuteState()) return;
+  if (!assalCommunityIsAdmin()) {
+    try {
+      const { db, ref, get } = window.firebaseDB;
+      const settingsSnap = await get(ref(db, ASSAL_COMMUNITY_SETTINGS_PATH));
+      if (settingsSnap.exists() && settingsSnap.val()?.closed) {
+        if (window.Swal) Swal.fire({ icon:'info', title:'المساحة مغلقة مؤقتاً', text:'الإدارة أوقفت الكتابة مؤقتاً.' });
+        return;
+      }
+    } catch (_) {}
+  }
+  assalCommunityLastSendAt = Date.now();
+  const btn = document.getElementById('assalCommunitySendBtn');
+  try {
+    if (btn) btn.disabled = true;
+    const user = await getAssalCommunityUser();
+    const { db, ref, set } = window.firebaseDB;
+    const now = Date.now();
+    const id = 'CS-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,7).toUpperCase();
+    const payload = {
+      id,
+      text,
+      imageData: assalCommunityImageData || '',
+      senderRole: user.role,
+      senderName: user.name,
+      customerPhone: user.phone || '',
+      deviceId: user.deviceId,
+      createdAt: now,
+      updatedAt: now
+    };
+    await set(ref(db, `${ASSAL_COMMUNITY_MESSAGES_PATH}/${id}`), payload);
+    if (input) input.value = '';
+    clearAssalCommunityImage();
+    try {
+      const muted = localStorage.getItem('assal_customer_space_notifications_muted') === 'true';
+      const body = `${user.name}: ${text || 'أرسل صورة'}`;
+      if (!muted && typeof queuePushNotificationEvent === 'function') {
+        await queuePushNotificationEvent('customer_space_message', { targetRole:'admin', title:'مجتمع عسل', body, customerName:user.name, item:text || 'صورة', data:{ communityMessageId:id } });
+        await queuePushNotificationEvent('customer_space_message', { targetRole:'customer', title:'مجتمع عسل', body, customerName:user.name, item:text || 'صورة', data:{ communityMessageId:id } });
+      }
+    } catch (e) { console.error('community push:', e); }
+  } catch (err) {
+    console.error('sendAssalCommunityMessage:', err);
+    if (window.Swal) Swal.fire({ icon:'error', title:'فشل الإرسال', text: err.message || String(err) });
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+};
+function assalCommunityToast(icon, title, text){
+  try {
+    if (window.Swal) return Swal.fire({ toast:true, position:'top', timer:1600, showConfirmButton:false, icon:icon||'success', title:title||'', text:text||'' });
+  } catch (_) {}
+  if (title) console.log(title, text || '');
+}
+function assalCommunityNativeDialog(options){
+  options = options || {};
+  return new Promise(resolve => {
+    const old = document.getElementById('assalCommunityActionDialog');
+    if (old) old.remove();
+    const box = document.createElement('div');
+    box.id = 'assalCommunityActionDialog';
+    box.className = 'assal-community-action-dialog';
+    const isInput = !!options.input;
+    box.innerHTML = `
+      <div class="assal-community-action-card" onclick="event.stopPropagation()">
+        <div class="assal-community-action-title">${assalCommunityEscape(options.title || 'تأكيد')}</div>
+        ${options.message ? `<div class="assal-community-action-text">${assalCommunityEscape(options.message)}</div>` : ''}
+        ${isInput ? `<textarea id="assalCommunityActionInput" class="assal-community-action-input" maxlength="700" placeholder="اكتب التعديل...">${assalCommunityEscape(options.value || '')}</textarea>` : ''}
+        <div class="assal-community-action-buttons">
+          <button type="button" class="assal-community-action-cancel">${assalCommunityEscape(options.cancelText || 'إلغاء')}</button>
+          <button type="button" class="assal-community-action-ok ${options.danger ? 'danger' : ''}">${assalCommunityEscape(options.okText || 'تمام')}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(box);
+    requestAnimationFrame(()=>box.classList.add('show'));
+    const close = (val) => { box.classList.remove('show'); setTimeout(()=>box.remove(), 160); resolve(val); };
+    box.addEventListener('click', e => { if (e.target === box) close({ ok:false }); });
+    box.querySelector('.assal-community-action-cancel')?.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); close({ ok:false }); });
+    box.querySelector('.assal-community-action-ok')?.addEventListener('click', e => {
+      e.preventDefault(); e.stopPropagation();
+      const inp = box.querySelector('#assalCommunityActionInput');
+      close({ ok:true, value: inp ? inp.value : '' });
+    });
+    setTimeout(()=>{ try { box.querySelector('#assalCommunityActionInput')?.focus(); } catch(_){} }, 120);
+  });
+}
+async function assalCommunityUpdateMessage(id, patch){
+  if (!window.firebaseDB || !window.firebaseDB.db) throw new Error('Firebase غير جاهز');
+  const { db, ref, update, set, get } = window.firebaseDB;
+  const path = `${ASSAL_COMMUNITY_MESSAGES_PATH}/${id}`;
+  if (typeof update === 'function') return update(ref(db, path), patch);
+  const snap = await get(ref(db, path));
+  const old = snap.exists() ? (snap.val() || {}) : {};
+  return set(ref(db, path), { ...old, ...patch });
+}
+window.editAssalCommunityMessage = async function(id){
+  try {
+    const msg = assalCommunityMessages.find(m => m.id === id);
+    if (!msg || msg.deletedAt) return;
+    const mine = msg.deviceId === assalCommunityDeviceId();
+    if (!mine && !assalCommunityIsAdmin()) return assalCommunityToast('warning','ما عندك صلاحية تعديل هاي الرسالة');
+    const res = await assalCommunityNativeDialog({ title:'تعديل الرسالة', input:true, value: msg.text || '', okText:'حفظ التعديل', cancelText:'إلغاء' });
+    if (!res || !res.ok) return;
+    const text = assalCommunityText(res.value || '');
+    if (!text && !msg.imageData) return assalCommunityToast('warning','الرسالة فارغة');
+    await assalCommunityUpdateMessage(id, { text, editedAt:Date.now(), updatedAt:Date.now(), editedBy: assalCommunityIsAdmin() ? 'admin' : 'sender' });
+    assalCommunityToast('success','تم تعديل الرسالة');
+  } catch (err) {
+    console.error('editAssalCommunityMessage:', err);
+    assalCommunityToast('error','فشل تعديل الرسالة', err.message || String(err));
+  }
+};
+window.deleteAssalCommunityMessage = async function(id){
+  try {
+    const msg = assalCommunityMessages.find(m => m.id === id);
+    if (!msg) return;
+    const mine = msg.deviceId === assalCommunityDeviceId();
+    if (!mine && !assalCommunityIsAdmin()) return assalCommunityToast('warning','ما عندك صلاحية حذف هاي الرسالة');
+    const ok = await assalCommunityNativeDialog({ title:'حذف الرسالة؟', message:'راح تظهر داخل مجتمع عسل كرسالة محذوفة بدون نص أو صورة.', okText:'حذف', cancelText:'إلغاء', danger:true });
+    if (!ok || !ok.ok) return;
+    await assalCommunityUpdateMessage(id, { deletedAt:Date.now(), deletedBy:assalCommunityIsAdmin()?'admin':'sender', text:'', imageData:'', pinned:false, updatedAt:Date.now() });
+    assalCommunityToast('success','تم حذف الرسالة');
+  } catch (err) {
+    console.error('deleteAssalCommunityMessage:', err);
+    assalCommunityToast('error','فشل حذف الرسالة', err.message || String(err));
+  }
+};
+window.toggleAssalCommunityPin = async function(id){
+  if (!assalCommunityIsAdmin()) return;
+  const msg = assalCommunityMessages.find(m => m.id === id);
+  if (!msg) return;
+  const { db, ref, update } = window.firebaseDB;
+  await update(ref(db, `${ASSAL_COMMUNITY_MESSAGES_PATH}/${id}`), { pinned: !msg.pinned, pinnedAt: !msg.pinned ? Date.now() : null, updatedAt:Date.now() });
+};
+window.muteAssalCommunitySender = async function(id){
+  if (!assalCommunityIsAdmin()) return;
+  const msg = assalCommunityMessages.find(m => m.id === id);
+  if (!msg || !msg.deviceId || msg.senderRole === 'admin') return;
+  const res = await Swal.fire({ icon:'question', title:'كتم هذا الزبون؟', text:'راح تمنعه من الكتابة لمدة 24 ساعة.', showCancelButton:true, confirmButtonText:'كتم 24 ساعة', cancelButtonText:'إلغاء' });
+  if (!res.isConfirmed) return;
+  const { db, ref, set } = window.firebaseDB;
+  await set(ref(db, `${ASSAL_COMMUNITY_MUTED_PATH}/${msg.deviceId}`), { deviceId:msg.deviceId, name:msg.senderName || '', until:Date.now()+24*60*60*1000, mutedAt:Date.now() });
+};
+window.openAssalCommunityAdminTools = async function(){
+  if (!assalCommunityIsAdmin()) return;
+  const res = await Swal.fire({
+    title:'أدوات مجتمع عسل',
+    html:'<div style="direction:rtl;text-align:center;line-height:1.8">اختار الإجراء الإداري المطلوب.</div>',
+    showDenyButton:true,
+    showCancelButton:true,
+    confirmButtonText:'مسح كل الرسائل',
+    denyButtonText:'إغلاق/فتح الكتابة',
+    cancelButtonText:'إلغاء'
+  });
+  if (res.isConfirmed) {
+    const sure = await Swal.fire({ icon:'warning', title:'مسح كل رسائل المساحة؟', text:'هذا الإجراء يحذف الرسائل من قاعدة البيانات.', showCancelButton:true, confirmButtonText:'مسح الكل', cancelButtonText:'إلغاء' });
+    if (sure.isConfirmed) {
+      const { db, ref, remove } = window.firebaseDB;
+      await remove(ref(db, ASSAL_COMMUNITY_MESSAGES_PATH));
+    }
+  } else if (res.isDenied) {
+    const { db, ref, get, update } = window.firebaseDB;
+    const snap = await get(ref(db, ASSAL_COMMUNITY_SETTINGS_PATH));
+    const closed = !!(snap.exists() && snap.val()?.closed);
+    await update(ref(db, ASSAL_COMMUNITY_SETTINGS_PATH), { closed: !closed, updatedAt:Date.now() });
+    Swal.fire({ icon:'success', title: closed ? 'تم فتح الكتابة' : 'تم إغلاق الكتابة مؤقتاً', timer:1400, showConfirmButton:false });
+  }
+};
+window.openAssalCommunityImageViewer = function(id){
+  const msg = assalCommunityMessages.find(m => m.id === id);
+  if (!msg || !msg.imageData) return;
+  const box = document.getElementById('assalCommunityFullImage');
+  const img = document.getElementById('assalCommunityFullImageImg');
+  if (img) img.src = msg.imageData;
+  if (box) box.classList.add('show');
+};
+window.closeAssalCommunityImageViewer = function(){
+  document.getElementById('assalCommunityFullImage')?.classList.remove('show');
+};
+
 window.refreshMaterialRequestCount = async function () {
     const adminBadge = document.getElementById("requestAdminCount");
     const userBadge = document.getElementById("requestUserCount");
@@ -17216,18 +17999,8 @@ if (requestFloatingBtn && floatingBtn) {
   setInterval(() => {
     syncRequestButtonsToNewBtn();
 
-    if (isAdminUser()) {
-      floatingBtn.style.display = "flex";
-      floatingBtn.classList.remove("smooth-hide");
-      requestFloatingBtn.style.display = "none";
-      requestFloatingBtn.classList.remove("show");
-      if (requestAdminFloatingBtn) {
-        requestAdminFloatingBtn.style.display = "none";
-        requestAdminFloatingBtn.classList.remove("show");
-      }
-      return;
-    }
-
+    // نفس زر المحادثة صار مركز دخول: مراسلة الإدارة + مجتمع عسل.
+    // لذلك نخليه يتناوب ويظهر للزبون وللأدمن بدون إضافة زر جديد للهيدر.
     showRequest = !showRequest;
 
     if (showRequest) {
@@ -30801,5 +31574,1771 @@ html body footer {
     });
   });
   window.__ASSAL_SYNC_SEARCH_PLACEHOLDER_LABEL__ = syncSearchPlaceholderLabel;
+})();
+</script>
+
+<!-- ===== ASSAL COMMUNITY FINAL REPAIR: مجتمع عسل - واجهة فخمة + ميزات فعالة ===== -->
+<style id="assal-community-final-repair-style">
+/* إخفاء ميزات الصور مؤقتاً حسب قرار التأجيل */
+#assalCommunityImagesToggle,
+#assalCommunityAttachBtn,
+#assalCommunityPreview,
+#assalCommunityImageInput{
+  display:none !important;
+}
+.assal-space-entry-shell{
+  width:min(410px, 94vw) !important;
+  border-radius:28px !important;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(34,211,238,.18), transparent 42%),
+    radial-gradient(circle at 95% 8%, rgba(34,197,94,.14), transparent 38%),
+    linear-gradient(180deg, rgba(10,17,30,.98), rgba(6,10,20,.98)) !important;
+  border:1px solid rgba(148,163,184,.20) !important;
+  box-shadow:0 30px 80px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+.assal-space-entry-title h3{ font-size:21px !important; }
+.assal-space-choice{
+  border-radius:22px !important;
+  padding:14px !important;
+  background:linear-gradient(135deg, rgba(15,23,42,.72), rgba(30,41,59,.48)) !important;
+  border:1px solid rgba(148,163,184,.18) !important;
+}
+.assal-space-choice:first-child{
+  background:
+    radial-gradient(circle at right, rgba(34,211,238,.14), transparent 48%),
+    linear-gradient(135deg, rgba(8,145,178,.18), rgba(15,23,42,.68)) !important;
+  border-color:rgba(125,211,252,.30) !important;
+}
+.assal-space-choice b{ font-size:16px !important; }
+.assal-space-choice small{ font-size:12px !important; }
+.assal-community-modal{
+  background:
+    radial-gradient(circle at 50% 15%, rgba(14,165,233,.13), transparent 34%),
+    rgba(2,6,23,.74) !important;
+  backdrop-filter:blur(15px) saturate(130%) !important;
+  -webkit-backdrop-filter:blur(15px) saturate(130%) !important;
+}
+.assal-community-shell{
+  width:min(780px, 96vw) !important;
+  height:min(760px, calc(100dvh - 18px)) !important;
+  border-radius:30px !important;
+  overflow:hidden !important;
+  background:
+    radial-gradient(900px 340px at 8% 0%, rgba(34,211,238,.16), transparent 56%),
+    radial-gradient(780px 280px at 100% 0%, rgba(16,185,129,.12), transparent 60%),
+    linear-gradient(180deg, rgba(11,18,32,.985), rgba(4,8,17,.985)) !important;
+  border:1px solid rgba(148,163,184,.20) !important;
+  box-shadow:0 28px 90px rgba(0,0,0,.68), inset 0 1px 0 rgba(255,255,255,.07) !important;
+}
+.assal-community-top{
+  padding:14px 16px !important;
+  background:linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.018)) !important;
+  border-bottom:1px solid rgba(148,163,184,.14) !important;
+}
+.assal-community-avatar{
+  width:48px !important;
+  height:48px !important;
+  border-radius:18px !important;
+  background:linear-gradient(135deg, #06b6d4, #2563eb 54%, #10b981) !important;
+  box-shadow:0 12px 28px rgba(14,165,233,.24), inset 0 1px 0 rgba(255,255,255,.20) !important;
+}
+.assal-community-title h3{
+  margin:0 !important;
+  font-size:21px !important;
+  font-weight:1000 !important;
+  background:linear-gradient(135deg,#ecfeff,#93c5fd 55%,#bbf7d0) !important;
+  -webkit-background-clip:text !important;
+  -webkit-text-fill-color:transparent !important;
+}
+.assal-community-pill{
+  border-radius:999px !important;
+  background:rgba(15,23,42,.56) !important;
+  border:1px solid rgba(148,163,184,.15) !important;
+  color:rgba(226,232,240,.82) !important;
+}
+.assal-community-icon-btn,
+.assal-community-close{
+  border-radius:15px !important;
+  background:rgba(255,255,255,.07) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  box-shadow:0 8px 18px rgba(0,0,0,.20) !important;
+}
+.assal-community-icon-btn.is-active{
+  background:linear-gradient(135deg, rgba(14,165,233,.36), rgba(16,185,129,.18)) !important;
+  border-color:rgba(125,211,252,.34) !important;
+  color:#eaffff !important;
+}
+.assal-community-close{
+  background:linear-gradient(135deg, rgba(127,29,29,.84), rgba(153,27,27,.72)) !important;
+  color:#fff !important;
+}
+.assal-community-pinned.show{
+  margin:10px 12px 0 !important;
+  border-radius:18px !important;
+  padding:10px 12px !important;
+  background:
+    linear-gradient(135deg, rgba(250,204,21,.13), rgba(15,23,42,.76)) !important;
+  border:1px solid rgba(250,204,21,.24) !important;
+  color:#fef9c3 !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.20) !important;
+}
+.assal-community-messages{
+  padding:12px 12px 10px !important;
+  gap:8px !important;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(14,165,233,.055), transparent 28%),
+    radial-gradient(circle at 80% 35%, rgba(16,185,129,.045), transparent 25%) !important;
+}
+.assal-community-day-sep{
+  align-self:center;
+  margin:8px 0 4px;
+  padding:5px 12px;
+  border-radius:999px;
+  font-size:10.5px;
+  font-weight:900;
+  color:rgba(226,232,240,.72);
+  background:rgba(15,23,42,.72);
+  border:1px solid rgba(148,163,184,.14);
+  box-shadow:0 8px 18px rgba(0,0,0,.18);
+}
+.assal-community-msg{
+  max-width:min(84%, 520px) !important;
+  border-radius:23px 23px 23px 8px !important;
+  padding:11px 12px 9px !important;
+  background:
+    linear-gradient(135deg, rgba(30,41,59,.90), rgba(15,23,42,.84)) !important;
+  border:1px solid rgba(148,163,184,.14) !important;
+  box-shadow:0 12px 26px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+.assal-community-msg.mine{
+  margin-inline-start:auto !important;
+  border-radius:23px 23px 8px 23px !important;
+  background:
+    linear-gradient(135deg, rgba(8,145,178,.31), rgba(15,118,110,.26) 55%, rgba(15,23,42,.78)) !important;
+  border-color:rgba(45,212,191,.22) !important;
+}
+.assal-community-msg.admin-msg{
+  background:
+    radial-gradient(circle at top right, rgba(250,204,21,.15), transparent 45%),
+    linear-gradient(135deg, rgba(88,28,135,.32), rgba(15,23,42,.86)) !important;
+  border-color:rgba(216,180,254,.24) !important;
+}
+.assal-community-msg.deleted{
+  opacity:.72 !important;
+  filter:saturate(.78) !important;
+}
+.assal-community-msg-head{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:10px !important;
+  margin-bottom:6px !important;
+}
+.assal-community-sender{
+  display:flex !important;
+  align-items:center !important;
+  gap:6px !important;
+  min-width:0 !important;
+}
+.assal-community-sender span:first-child{
+  font-size:12px !important;
+  font-weight:1000 !important;
+  color:#f8fafc !important;
+  max-width:170px !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+}
+.assal-community-time{
+  font-size:10.5px !important;
+  color:rgba(226,232,240,.54) !important;
+  white-space:nowrap !important;
+}
+.role-badge{
+  padding:2px 7px !important;
+  border-radius:999px !important;
+  font-size:9.5px !important;
+  font-weight:950 !important;
+  color:#cffafe !important;
+  background:rgba(14,165,233,.14) !important;
+  border:1px solid rgba(125,211,252,.18) !important;
+}
+.role-badge.admin{
+  color:#fef3c7 !important;
+  background:rgba(180,83,9,.18) !important;
+  border-color:rgba(251,191,36,.24) !important;
+}
+.assal-community-text{
+  color:rgba(248,250,252,.96) !important;
+  font-size:14px !important;
+  line-height:1.85 !important;
+  white-space:pre-wrap !important;
+  overflow-wrap:anywhere !important;
+}
+.assal-community-edited{
+  margin-top:4px;
+  font-size:10px;
+  color:rgba(226,232,240,.45);
+}
+.assal-community-msg-actions{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  gap:5px !important;
+  margin-top:9px !important;
+  padding-top:8px !important;
+  border-top:1px solid rgba(255,255,255,.065) !important;
+}
+.assal-community-mini-action{
+  min-height:26px !important;
+  padding:4px 8px !important;
+  border:1px solid rgba(148,163,184,.15) !important;
+  border-radius:999px !important;
+  color:rgba(241,245,249,.92) !important;
+  background:rgba(255,255,255,.06) !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:10.5px !important;
+  font-weight:900 !important;
+  cursor:pointer !important;
+}
+.assal-community-mini-action:hover{ background:rgba(14,165,233,.16) !important; }
+.assal-community-mini-action.danger{
+  color:#fecaca !important;
+  border-color:rgba(248,113,113,.18) !important;
+  background:rgba(127,29,29,.17) !important;
+}
+.assal-community-composer{
+  padding:11px 12px calc(11px + env(safe-area-inset-bottom,0px)) !important;
+  background:linear-gradient(180deg, rgba(15,23,42,.70), rgba(2,6,23,.88)) !important;
+  border-top:1px solid rgba(148,163,184,.13) !important;
+}
+.assal-community-input-row{
+  align-items:flex-end !important;
+  gap:8px !important;
+  border-radius:24px !important;
+  padding:7px 7px 7px 10px !important;
+  background:rgba(15,23,42,.72) !important;
+  border:1px solid rgba(148,163,184,.16) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035), 0 10px 24px rgba(0,0,0,.16) !important;
+}
+.assal-community-input{
+  min-height:42px !important;
+  max-height:118px !important;
+  padding:11px 12px !important;
+  border-radius:18px !important;
+  color:#f8fafc !important;
+  background:transparent !important;
+  border:0 !important;
+  line-height:1.65 !important;
+}
+.assal-community-input::placeholder{ color:rgba(226,232,240,.42) !important; }
+.assal-community-send{
+  width:42px !important;
+  height:42px !important;
+  min-width:42px !important;
+  border-radius:17px !important;
+  background:linear-gradient(135deg, #06b6d4, #2563eb 70%, #10b981) !important;
+  box-shadow:0 12px 26px rgba(37,99,235,.28) !important;
+}
+.assal-community-empty{
+  margin:auto !important;
+  width:min(320px, 92%) !important;
+  border-radius:26px !important;
+  padding:24px 18px !important;
+  background:rgba(15,23,42,.52) !important;
+  border:1px dashed rgba(148,163,184,.20) !important;
+  color:rgba(226,232,240,.78) !important;
+}
+.assal-community-admin-panel-btn{
+  width:100%;
+  border:0;
+  border-radius:16px;
+  padding:11px 12px;
+  margin:5px 0;
+  font-family:'Cairo',sans-serif;
+  font-size:13px;
+  font-weight:950;
+  color:#fff;
+  background:linear-gradient(135deg, rgba(14,165,233,.92), rgba(15,118,110,.86));
+  cursor:pointer;
+}
+.assal-community-admin-panel-btn.danger{ background:linear-gradient(135deg, #7f1d1d, #b91c1c); }
+.assal-community-admin-panel-btn.warn{ background:linear-gradient(135deg, #92400e, #b45309); }
+.assal-community-admin-panel-btn.gray{ background:linear-gradient(135deg, #334155, #475569); }
+@media (max-width:640px){
+  .assal-community-modal{ padding:0 !important; align-items:stretch !important; }
+  .assal-community-shell{ width:100vw !important; height:100dvh !important; border-radius:0 !important; }
+  .assal-community-top{ padding:11px 10px !important; }
+  .assal-community-title h3{ font-size:18px !important; }
+  .assal-community-avatar{ width:42px !important; height:42px !important; }
+  .assal-community-msg{ max-width:92% !important; }
+  .assal-community-messages{ padding:10px 8px !important; }
+  .assal-community-sender span:first-child{ max-width:135px !important; }
+}
+</style>
+<script id="assal-community-final-repair-script">
+(function(){
+  function ready(fn){ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, {once:true}); else fn(); }
+  function esc(v){ try { return assalCommunityEscape(v); } catch(_) { return String(v == null ? '' : v).replace(/[&<>'"]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];}); } }
+  function txt(v){ try { return assalCommunityText(v); } catch(_) { return String(v == null ? '' : v).trim(); } }
+  function time(ts){ try { return assalCommunityTime(ts); } catch(_) { return new Date(Number(ts||Date.now())).toLocaleTimeString('ar-IQ',{hour:'2-digit',minute:'2-digit'}); } }
+  function dayKey(ts){ try { return assalCommunityDateKey(ts); } catch(_) { var d=new Date(Number(ts||Date.now())); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); } }
+  function isAdmin(){ try { return assalCommunityIsAdmin(); } catch(_) { return false; } }
+  function devId(){ try { return assalCommunityDeviceId(); } catch(_) { return ''; } }
+  function msgArr(){ try { return Array.isArray(assalCommunityMessages) ? assalCommunityMessages : []; } catch(_) { return []; } }
+  function updateStaticCommunityTexts(){
+    var title = document.querySelector('#assalCommunityModal .assal-community-title h3');
+    if (title) title.textContent = 'مجتمع عسل';
+    var modal = document.getElementById('assalCommunityModal');
+    if (modal) modal.setAttribute('aria-label','مجتمع عسل');
+    var choice = document.querySelector('#assalSpaceEntryModal .assal-space-choice:not(.admin) b');
+    if (choice) choice.textContent = 'مجتمع عسل';
+    var choiceSmall = document.querySelector('#assalSpaceEntryModal .assal-space-choice:not(.admin) small');
+    if (choiceSmall) choiceSmall.textContent = 'كروب عام لكل الزبائن والإدارة، رسائل مباشرة وتنبيهات.';
+    var input = document.getElementById('assalCommunityInput');
+    if (input) input.placeholder = 'اكتب رسالتك داخل مجتمع عسل...';
+  }
+  ready(updateStaticCommunityTexts);
+
+  window.renderAssalCommunityMessages = function(){
+    var wrap = document.getElementById('assalCommunityMessages');
+    var count = document.getElementById('assalCommunityCount');
+    var pinned = document.getElementById('assalCommunityPinned');
+    if (!wrap) return;
+    var wasNearBottom = (wrap.scrollHeight - wrap.scrollTop - wrap.clientHeight) < 95;
+    var me = devId();
+    var list = msgArr().filter(function(m){ return m && !m.hardDeleted && (!window.assalCommunityImagesOnly || !!m.imageData); });
+    if (count) count.textContent = list.length + ' رسالة';
+    var pinnedMsg = msgArr().slice().reverse().find(function(m){ return m && m.pinned && !m.deletedAt && !m.hardDeleted; });
+    if (pinned) {
+      if (pinnedMsg) {
+        pinned.classList.add('show');
+        var pinText = pinnedMsg.text ? esc(pinnedMsg.text).slice(0, 170) : 'رسالة مثبتة';
+        pinned.innerHTML = '<i class="fas fa-thumbtack"></i><div><b>مثبّت في مجتمع عسل</b><br>'+pinText+'</div>';
+      } else {
+        pinned.classList.remove('show'); pinned.innerHTML = '';
+      }
+    }
+    if (!list.length) {
+      wrap.innerHTML = '<div class="assal-community-empty"><i class="fas fa-comments"></i><div>مجتمع عسل فارغ حالياً</div><small>اكتب أول رسالة حتى تبدي المحادثة.</small></div>';
+      return;
+    }
+    var last = '';
+    wrap.innerHTML = list.map(function(msg){
+      var day = dayKey(msg.createdAt);
+      var daySep = '';
+      if (day !== last) {
+        daySep = '<div class="assal-community-day-sep">'+(day === dayKey(Date.now()) ? 'اليوم' : day)+'</div>';
+        last = day;
+      }
+      var mine = msg.deviceId === me;
+      var adminMsg = msg.senderRole === 'admin';
+      var deleted = !!msg.deletedAt;
+      var canEdit = !deleted && (isAdmin() || mine);
+      var canDelete = !deleted && (isAdmin() || mine);
+      var safeName = esc(msg.senderName || (adminMsg ? 'الإدارة' : 'زبون'));
+      var roleBadge = adminMsg ? '<span class="role-badge admin">الإدارة</span>' : '<span class="role-badge">زبون</span>';
+      var textHtml = deleted ? '<span style="color:rgba(226,232,240,.62);font-style:italic">تم حذف الرسالة</span>' : esc(msg.text || '');
+      var editLabel = msg.editedAt && !deleted ? '<div class="assal-community-edited">تم التعديل</div>' : '';
+      var actions = '';
+      if (canEdit || canDelete || (isAdmin() && !deleted)) {
+        actions = '<div class="assal-community-msg-actions">'
+          + (canEdit ? '<button class="assal-community-mini-action" type="button" onclick="editAssalCommunityMessage(\''+esc(msg.id)+'\')"><i class="fas fa-pen"></i> تعديل</button>' : '')
+          + (isAdmin() && !deleted ? '<button class="assal-community-mini-action" type="button" onclick="toggleAssalCommunityPin(\''+esc(msg.id)+'\')"><i class="fas fa-thumbtack"></i> '+(msg.pinned ? 'إلغاء التثبيت' : 'تثبيت')+'</button>' : '')
+          + (isAdmin() && !deleted && !adminMsg ? '<button class="assal-community-mini-action" type="button" onclick="muteAssalCommunitySender(\''+esc(msg.id)+'\')"><i class="fas fa-volume-xmark"></i> كتم</button>' : '')
+          + (canDelete ? '<button class="assal-community-mini-action danger" type="button" onclick="deleteAssalCommunityMessage(\''+esc(msg.id)+'\')"><i class="fas fa-trash"></i> حذف</button>' : '')
+          + '</div>';
+      }
+      return daySep + '<div class="assal-community-msg '+(mine?'mine ':'')+(adminMsg?'admin-msg ':'')+(deleted?'deleted':'')+'">'
+        + '<div class="assal-community-msg-head"><div class="assal-community-sender"><span>'+safeName+'</span>'+roleBadge+'</div><div class="assal-community-time">'+time(msg.createdAt)+'</div></div>'
+        + '<div class="assal-community-text">'+textHtml+'</div>'+editLabel+actions+'</div>';
+    }).join('');
+    setTimeout(function(){ try { if (wasNearBottom) wrap.scrollTop = wrap.scrollHeight; } catch(_) {} }, 30);
+  };
+
+  window.sendAssalCommunityMessage = async function(){
+    if (!window.firebaseDB || !window.firebaseDB.db) {
+      if (window.Swal) Swal.fire({icon:'error', title:'Firebase غير جاهز'});
+      return;
+    }
+    var input = document.getElementById('assalCommunityInput');
+    var messageText = txt(input && input.value);
+    if (!messageText) return;
+    if (messageText.length > 700) { if (window.Swal) Swal.fire({icon:'warning', title:'الرسالة طويلة', text:'اختصر الرسالة إلى أقل من 700 حرف.'}); return; }
+    try { if (Date.now() - assalCommunityLastSendAt < 1800) return; assalCommunityLastSendAt = Date.now(); } catch(_) {}
+    try { if (await checkAssalCommunityMuteState()) return; } catch(_) {}
+    if (!isAdmin()) {
+      try {
+        var settingsSnap = await window.firebaseDB.get(window.firebaseDB.ref(window.firebaseDB.db, ASSAL_COMMUNITY_SETTINGS_PATH));
+        if (settingsSnap.exists() && settingsSnap.val() && settingsSnap.val().closed) {
+          if (window.Swal) Swal.fire({icon:'info', title:'مجتمع عسل مغلق مؤقتاً', text:'الإدارة أوقفت الكتابة حالياً.'});
+          return;
+        }
+      } catch(_) {}
+    }
+    var btn = document.getElementById('assalCommunitySendBtn');
+    try {
+      if (btn) btn.disabled = true;
+      var user = await getAssalCommunityUser();
+      var now = Date.now();
+      var id = 'CS-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,7).toUpperCase();
+      var payload = { id:id, text:messageText, senderRole:user.role, senderName:user.name, customerPhone:user.phone || '', deviceId:user.deviceId, createdAt:now, updatedAt:now };
+      await window.firebaseDB.set(window.firebaseDB.ref(window.firebaseDB.db, ASSAL_COMMUNITY_MESSAGES_PATH + '/' + id), payload);
+      if (input) { input.value = ''; input.style.height = ''; }
+      try { clearAssalCommunityImage(); } catch(_) {}
+      try {
+        if (typeof queuePushNotificationEvent === 'function') {
+          var body = (user.name || 'زبون') + ' : ' + messageText;
+          var data = { communityMessageId:id, screen:'assal_community' };
+          await queuePushNotificationEvent('customer_space_message', { targetRole:'admin', title:'مجتمع عسل', body:body, customerName:user.name, item:messageText, data:data });
+          await queuePushNotificationEvent('customer_space_message', { targetRole:'customer', title:'مجتمع عسل', body:body, customerName:user.name, item:messageText, data:data });
+        }
+      } catch(e) { console.error('community push:', e); }
+    } catch(err) {
+      console.error('sendAssalCommunityMessage:', err);
+      if (err && err.message === 'profile-required') return;
+      if (window.Swal) Swal.fire({icon:'error', title:'فشل الإرسال', text:(err && err.message) || String(err)});
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  };
+
+  window.editAssalCommunityMessage = async function(id){
+    var msg = msgArr().find(function(m){ return m && m.id === id; });
+    if (!msg || msg.deletedAt) return;
+    var mine = msg.deviceId === devId();
+    if (!isAdmin() && !mine) return;
+    var res = await Swal.fire({
+      title:'تعديل رسالة مجتمع عسل',
+      input:'textarea',
+      inputValue: msg.text || '',
+      inputAttributes:{ maxlength:700, dir:'rtl' },
+      showCancelButton:true,
+      confirmButtonText:'حفظ التعديل',
+      cancelButtonText:'إلغاء',
+      customClass:{ popup:'assal-debug-popup' }
+    });
+    if (!res.isConfirmed) return;
+    var newText = txt(res.value || '');
+    if (!newText) return;
+    await window.firebaseDB.update(window.firebaseDB.ref(window.firebaseDB.db, ASSAL_COMMUNITY_MESSAGES_PATH + '/' + id), { text:newText, editedAt:Date.now(), updatedAt:Date.now(), editedBy:isAdmin()?'admin':'sender' });
+  };
+
+  window.deleteAssalCommunityMessage = async function(id){
+    var msg = msgArr().find(function(m){ return m && m.id === id; });
+    if (!msg) return;
+    var mine = msg.deviceId === devId();
+    if (!isAdmin() && !mine) return;
+    var ok = await Swal.fire({ icon:'warning', title:'حذف الرسالة؟', text:'راح تبقى علامة أن الرسالة محذوفة داخل مجتمع عسل.', showCancelButton:true, confirmButtonText:'حذف', cancelButtonText:'إلغاء' });
+    if (!ok.isConfirmed) return;
+    await window.firebaseDB.update(window.firebaseDB.ref(window.firebaseDB.db, ASSAL_COMMUNITY_MESSAGES_PATH + '/' + id), { deletedAt:Date.now(), deletedBy:isAdmin()?'admin':'sender', text:'', imageData:'', pinned:false, updatedAt:Date.now() });
+  };
+
+  window.openAssalCommunityAdminTools = async function(){
+    if (!isAdmin()) return;
+    var html = '<div style="direction:rtl;text-align:right;font-family:Cairo,sans-serif">'
+      + '<button id="communityToolClear" class="assal-community-admin-panel-btn danger"><i class="fas fa-trash"></i> مسح كل رسائل مجتمع عسل</button>'
+      + '<button id="communityToolToggle" class="assal-community-admin-panel-btn warn"><i class="fas fa-lock"></i> إغلاق / فتح الكتابة</button>'
+      + '<button id="communityToolUnmute" class="assal-community-admin-panel-btn gray"><i class="fas fa-volume-high"></i> إلغاء كتم جميع الزبائن</button>'
+      + '<button id="communityToolDeleted" class="assal-community-admin-panel-btn gray"><i class="fas fa-broom"></i> تنظيف الرسائل المحذوفة نهائياً</button>'
+      + '<div style="margin-top:10px;color:rgba(226,232,240,.70);font-size:12px;line-height:1.8;text-align:center">صلاحيات الإدارة تعمل فقط لحسابات كادر عسل.</div>'
+      + '</div>';
+    await Swal.fire({ title:'أدوات إدارة مجتمع عسل', html:html, showConfirmButton:false, showCloseButton:true, didOpen:function(){
+      var close = function(){ try { Swal.close(); } catch(_){} };
+      var clearBtn = document.getElementById('communityToolClear');
+      if (clearBtn) clearBtn.onclick = async function(){
+        var sure = await Swal.fire({icon:'warning', title:'مسح كل الرسائل؟', text:'هذا يحذف محادثة مجتمع عسل كلها من القاعدة.', showCancelButton:true, confirmButtonText:'مسح الكل', cancelButtonText:'إلغاء'});
+        if (!sure.isConfirmed) return;
+        await window.firebaseDB.remove(window.firebaseDB.ref(window.firebaseDB.db, ASSAL_COMMUNITY_MESSAGES_PATH));
+        close();
+      };
+      var toggleBtn = document.getElementById('communityToolToggle');
+      if (toggleBtn) toggleBtn.onclick = async function(){
+        var snap = await window.firebaseDB.get(window.firebaseDB.ref(window.firebaseDB.db, ASSAL_COMMUNITY_SETTINGS_PATH));
+        var closed = !!(snap.exists() && snap.val() && snap.val().closed);
+        await window.firebaseDB.update(window.firebaseDB.ref(window.firebaseDB.db, ASSAL_COMMUNITY_SETTINGS_PATH), {closed:!closed, updatedAt:Date.now(), updatedBy:'admin'});
+        close();
+        Swal.fire({icon:'success', title: closed ? 'تم فتح الكتابة' : 'تم إغلاق الكتابة مؤقتاً', timer:1400, showConfirmButton:false});
+      };
+      var unmuteBtn = document.getElementById('communityToolUnmute');
+      if (unmuteBtn) unmuteBtn.onclick = async function(){
+        await window.firebaseDB.remove(window.firebaseDB.ref(window.firebaseDB.db, ASSAL_COMMUNITY_MUTED_PATH));
+        close();
+        Swal.fire({icon:'success', title:'تم إلغاء كتم الجميع', timer:1400, showConfirmButton:false});
+      };
+      var deletedBtn = document.getElementById('communityToolDeleted');
+      if (deletedBtn) deletedBtn.onclick = async function(){
+        var updates = {};
+        msgArr().forEach(function(m){ if (m && m.id && m.deletedAt) updates[ASSAL_COMMUNITY_MESSAGES_PATH + '/' + m.id] = null; });
+        if (!Object.keys(updates).length) { Swal.fire({icon:'info', title:'ماكو رسائل محذوفة للتنظيف', timer:1200, showConfirmButton:false}); return; }
+        await window.firebaseDB.update(window.firebaseDB.ref(window.firebaseDB.db), updates);
+        close();
+      };
+    }});
+  };
+
+  window.toggleAssalCommunityImagesOnly = function(){
+    if (window.Swal) Swal.fire({icon:'info', title:'الصور مؤجلة حالياً', text:'راح نضيف إرسال الصور والصوت بمرحلة ثانية حتى يبقى مجتمع عسل ثابت وسريع.'});
+  };
+
+  ready(function(){
+    updateStaticCommunityTexts();
+    var input = document.getElementById('assalCommunityInput');
+    if (input) {
+      input.addEventListener('input', function(){
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 118) + 'px';
+      });
+      input.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window.sendAssalCommunityMessage(); }
+      });
+    }
+  });
+})();
+</script>
+
+<!-- ===== ASSAL COMMUNITY ULTRA FIX V2: مجتمع عسل احترافي + صلاحيات فعالة ===== -->
+<style id="assal-community-ultra-v2-style">
+/* مجتمع عسل - نسخة خفيفة واحترافية قريبة من كروبات المحادثة */
+.assal-community-modal{
+  background:
+    radial-gradient(circle at 50% 0%, rgba(34,211,238,.10), transparent 28%),
+    rgba(2,6,23,.72) !important;
+  backdrop-filter:blur(12px) saturate(130%) !important;
+  -webkit-backdrop-filter:blur(12px) saturate(130%) !important;
+}
+.assal-community-shell{
+  width:min(760px, 96vw) !important;
+  height:min(700px, calc(100dvh - 14px)) !important;
+  border-radius:24px !important;
+  overflow:hidden !important;
+  display:flex !important;
+  flex-direction:column !important;
+  background:
+    radial-gradient(620px 220px at 0% -8%, rgba(34,211,238,.13), transparent 58%),
+    radial-gradient(520px 180px at 100% -8%, rgba(16,185,129,.10), transparent 60%),
+    linear-gradient(180deg, rgba(11,18,32,.99), rgba(4,8,17,.99)) !important;
+  border:1px solid rgba(148,163,184,.18) !important;
+  box-shadow:0 24px 80px rgba(0,0,0,.66), inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+.assal-community-top{
+  min-height:64px !important;
+  padding:8px 10px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:8px !important;
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.018)) !important;
+  border-bottom:1px solid rgba(148,163,184,.12) !important;
+  flex:0 0 auto !important;
+}
+.assal-community-title{
+  display:flex !important;
+  align-items:center !important;
+  gap:9px !important;
+  min-width:0 !important;
+}
+.assal-community-avatar{
+  width:40px !important;
+  height:40px !important;
+  min-width:40px !important;
+  border-radius:15px !important;
+  display:grid !important;
+  place-items:center !important;
+  background:linear-gradient(135deg, #06b6d4, #2563eb 55%, #10b981) !important;
+  box-shadow:0 10px 24px rgba(14,165,233,.22), inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+.assal-community-title h3{
+  margin:0 !important;
+  font-size:17px !important;
+  line-height:1.1 !important;
+  font-weight:1000 !important;
+  letter-spacing:-.25px !important;
+  color:#ecfeff !important;
+  background:none !important;
+  -webkit-text-fill-color:initial !important;
+}
+.assal-community-meta{
+  margin-top:5px !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:5px !important;
+  flex-wrap:wrap !important;
+}
+.assal-community-pill{
+  height:22px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:5px !important;
+  padding:0 8px !important;
+  border-radius:999px !important;
+  background:rgba(15,23,42,.60) !important;
+  border:1px solid rgba(148,163,184,.14) !important;
+  color:rgba(226,232,240,.82) !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  white-space:nowrap !important;
+}
+#assalCommunityOnlinePill{
+  color:#bbf7d0 !important;
+  border-color:rgba(34,197,94,.22) !important;
+  background:rgba(20,83,45,.22) !important;
+}
+#assalCommunityStatePill.is-closed{
+  color:#fecaca !important;
+  border-color:rgba(239,68,68,.30) !important;
+  background:rgba(127,29,29,.28) !important;
+}
+.assal-community-actions{
+  display:flex !important;
+  align-items:center !important;
+  gap:6px !important;
+  flex:0 0 auto !important;
+}
+.assal-community-icon-btn,
+.assal-community-close{
+  width:34px !important;
+  height:34px !important;
+  min-width:34px !important;
+  border-radius:13px !important;
+  display:grid !important;
+  place-items:center !important;
+  color:#fff !important;
+  cursor:pointer !important;
+  background:rgba(255,255,255,.075) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  box-shadow:0 8px 18px rgba(0,0,0,.18) !important;
+  transition:transform .14s ease, background .14s ease, border-color .14s ease !important;
+}
+.assal-community-icon-btn:active,
+.assal-community-close:active{ transform:scale(.94) !important; }
+.assal-community-icon-btn.is-active{
+  background:linear-gradient(135deg, rgba(14,165,233,.34), rgba(16,185,129,.18)) !important;
+  border-color:rgba(125,211,252,.34) !important;
+}
+.assal-community-close{
+  background:linear-gradient(135deg, rgba(127,29,29,.86), rgba(153,27,27,.72)) !important;
+}
+.assal-community-pinned{
+  display:none !important;
+  margin:8px 10px 0 !important;
+  padding:9px 11px !important;
+  border-radius:15px !important;
+  color:#fff !important;
+  background:linear-gradient(135deg, rgba(14,165,233,.18), rgba(16,185,129,.10)) !important;
+  border:1px solid rgba(125,211,252,.18) !important;
+  font-size:12px !important;
+  line-height:1.55 !important;
+  flex:0 0 auto !important;
+}
+.assal-community-pinned.show{
+  display:flex !important;
+  align-items:center !important;
+  gap:9px !important;
+}
+.assal-community-messages{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  padding:10px 10px 12px !important;
+  overflow-y:auto !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:6px !important;
+  scroll-behavior:smooth !important;
+  background:
+    linear-gradient(rgba(15,23,42,.08), rgba(15,23,42,.08)),
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,.035), transparent 24%) !important;
+}
+.assal-community-messages::-webkit-scrollbar{ width:5px !important; }
+.assal-community-messages::-webkit-scrollbar-thumb{ background:rgba(148,163,184,.22) !important; border-radius:999px !important; }
+.assal-community-day-sep{
+  align-self:center !important;
+  margin:6px 0 5px !important;
+  padding:4px 10px !important;
+  border-radius:999px !important;
+  background:rgba(15,23,42,.62) !important;
+  border:1px solid rgba(148,163,184,.12) !important;
+  color:rgba(226,232,240,.70) !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+}
+.assal-community-msg{
+  position:relative !important;
+  width:fit-content !important;
+  max-width:min(76%, 520px) !important;
+  margin-inline-end:auto !important;
+  border-radius:20px 20px 20px 7px !important;
+  padding:8px 9px 7px !important;
+  color:#f8fafc !important;
+  background:linear-gradient(135deg, rgba(30,41,59,.94), rgba(15,23,42,.90)) !important;
+  border:1px solid rgba(148,163,184,.12) !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.22) !important;
+  text-align:right !important;
+}
+.assal-community-msg.mine{
+  margin-inline-start:auto !important;
+  margin-inline-end:0 !important;
+  border-radius:20px 20px 7px 20px !important;
+  background:linear-gradient(135deg, rgba(8,145,178,.34), rgba(15,23,42,.91)) !important;
+  border-color:rgba(34,211,238,.20) !important;
+}
+.assal-community-msg.admin-msg{
+  background:
+    radial-gradient(circle at top left, rgba(250,204,21,.10), transparent 44%),
+    linear-gradient(135deg, rgba(15,118,110,.30), rgba(15,23,42,.92)) !important;
+  border-color:rgba(45,212,191,.22) !important;
+}
+.assal-community-msg.deleted{
+  opacity:.76 !important;
+}
+.assal-community-msg-head{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:10px !important;
+  margin-bottom:4px !important;
+}
+.assal-community-sender{
+  display:flex !important;
+  align-items:center !important;
+  gap:5px !important;
+  min-width:0 !important;
+  font-size:11px !important;
+  font-weight:950 !important;
+  color:#e0fbff !important;
+}
+.assal-community-sender > span:first-child{
+  max-width:150px !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+}
+.assal-community-time{
+  font-size:9px !important;
+  color:rgba(226,232,240,.55) !important;
+  white-space:nowrap !important;
+}
+.role-badge{
+  padding:2px 6px !important;
+  border-radius:999px !important;
+  font-size:8px !important;
+  font-weight:950 !important;
+  background:rgba(148,163,184,.14) !important;
+  color:#cbd5e1 !important;
+}
+.role-badge.admin{
+  color:#0f172a !important;
+  background:linear-gradient(135deg, #fde68a, #2dd4bf) !important;
+}
+.assal-community-text{
+  font-size:13px !important;
+  line-height:1.72 !important;
+  color:#ffffff !important;
+  white-space:pre-wrap !important;
+  overflow-wrap:anywhere !important;
+}
+.assal-community-edited{
+  margin-top:3px !important;
+  font-size:9px !important;
+  color:rgba(226,232,240,.48) !important;
+}
+.assal-community-msg-actions{
+  display:flex !important;
+  align-items:center !important;
+  gap:5px !important;
+  flex-wrap:wrap !important;
+  margin-top:7px !important;
+  padding-top:6px !important;
+  border-top:1px solid rgba(148,163,184,.10) !important;
+}
+.assal-community-mini-action{
+  height:26px !important;
+  padding:0 8px !important;
+  border:0 !important;
+  border-radius:999px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:4px !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:10px !important;
+  font-weight:900 !important;
+  color:#e0f2fe !important;
+  background:rgba(255,255,255,.075) !important;
+  border:1px solid rgba(255,255,255,.10) !important;
+  cursor:pointer !important;
+}
+.assal-community-mini-action.danger{
+  color:#fecaca !important;
+  background:rgba(127,29,29,.30) !important;
+  border-color:rgba(248,113,113,.24) !important;
+}
+.assal-community-composer{
+  flex:0 0 auto !important;
+  padding:8px 9px 10px !important;
+  background:linear-gradient(180deg, rgba(15,23,42,.76), rgba(2,6,23,.94)) !important;
+  border-top:1px solid rgba(148,163,184,.12) !important;
+}
+.assal-community-write-row{
+  display:grid !important;
+  grid-template-columns:1fr 42px !important;
+  gap:8px !important;
+  align-items:end !important;
+}
+.assal-community-attach{ display:none !important; }
+.assal-community-input{
+  width:100% !important;
+  min-height:42px !important;
+  max-height:110px !important;
+  resize:none !important;
+  border:1px solid rgba(148,163,184,.16) !important;
+  border-radius:18px !important;
+  padding:10px 13px !important;
+  direction:rtl !important;
+  text-align:right !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:13px !important;
+  line-height:1.55 !important;
+  color:#fff !important;
+  outline:none !important;
+  background:rgba(15,23,42,.70) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+.assal-community-input::placeholder{ color:rgba(226,232,240,.48) !important; }
+.assal-community-send{
+  width:42px !important;
+  height:42px !important;
+  border:0 !important;
+  border-radius:16px !important;
+  color:#fff !important;
+  display:grid !important;
+  place-items:center !important;
+  cursor:pointer !important;
+  background:linear-gradient(135deg, #06b6d4, #2563eb) !important;
+  box-shadow:0 12px 22px rgba(37,99,235,.28) !important;
+}
+.assal-community-send:disabled{ opacity:.55 !important; cursor:wait !important; }
+.assal-community-muted-note{
+  display:none !important;
+  margin-bottom:7px !important;
+  padding:8px 10px !important;
+  border-radius:14px !important;
+  color:#fecaca !important;
+  background:rgba(127,29,29,.24) !important;
+  border:1px solid rgba(248,113,113,.20) !important;
+  font-size:12px !important;
+  text-align:center !important;
+}
+.assal-community-muted-note.show{ display:block !important; }
+.assal-community-empty{
+  margin:auto !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:7px !important;
+  color:rgba(226,232,240,.72) !important;
+  text-align:center !important;
+}
+.assal-community-empty i{
+  width:58px !important;
+  height:58px !important;
+  border-radius:20px !important;
+  display:grid !important;
+  place-items:center !important;
+  background:rgba(255,255,255,.06) !important;
+  font-size:22px !important;
+  color:#67e8f9 !important;
+}
+.assal-community-admin-panel-btn{
+  width:100% !important;
+  min-height:42px !important;
+  margin:6px 0 !important;
+  border:0 !important;
+  border-radius:14px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:8px !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:13px !important;
+  font-weight:900 !important;
+  color:#fff !important;
+  cursor:pointer !important;
+  background:linear-gradient(135deg, #0f766e, #0ea5e9) !important;
+}
+.assal-community-admin-panel-btn.danger{ background:linear-gradient(135deg,#7f1d1d,#dc2626) !important; }
+.assal-community-admin-panel-btn.warn{ background:linear-gradient(135deg,#92400e,#f97316) !important; }
+.assal-community-admin-panel-btn.gray{ background:linear-gradient(135deg,#334155,#475569) !important; }
+.assal-community-more{
+  width:30px !important;
+  height:30px !important;
+  border-radius:12px !important;
+  border:1px solid rgba(255,255,255,.10) !important;
+  background:rgba(255,255,255,.065) !important;
+  color:#fff !important;
+  display:grid !important;
+  place-items:center !important;
+  cursor:pointer !important;
+}
+@media (max-width:520px){
+  .assal-community-shell{
+    width:calc(100vw - 10px) !important;
+    height:calc(100dvh - 10px) !important;
+    border-radius:20px !important;
+  }
+  .assal-community-top{ min-height:58px !important; padding:7px 8px !important; }
+  .assal-community-avatar{ width:36px !important; height:36px !important; min-width:36px !important; border-radius:13px !important; }
+  .assal-community-title h3{ font-size:15px !important; }
+  .assal-community-pill{ height:20px !important; padding:0 7px !important; font-size:9px !important; }
+  .assal-community-icon-btn,.assal-community-close{ width:31px !important; height:31px !important; min-width:31px !important; border-radius:12px !important; }
+  .assal-community-msg{ max-width:86% !important; padding:7px 8px !important; }
+  .assal-community-text{ font-size:12.5px !important; }
+  .assal-community-msg-actions{ gap:4px !important; }
+  .assal-community-mini-action{ height:25px !important; padding:0 7px !important; font-size:9.5px !important; }
+  .assal-community-messages{ padding:8px 8px 10px !important; }
+  .assal-community-composer{ padding:7px 8px 8px !important; }
+}
+</style>
+
+<script id="assal-community-ultra-v2-script">
+(function(){
+  'use strict';
+
+  const PATH_MESSAGES = 'customerSpace/messages';
+  const PATH_MUTED = 'customerSpace/mutedDevices';
+  const PATH_SETTINGS = 'customerSpace/settings';
+  const PATH_PRESENCE = 'customerSpace/presence';
+  const MAX_RENDER_MESSAGES = 120;
+  const SEND_COOLDOWN_MS = 1800;
+
+  let unsubMessages = null;
+  let unsubPresence = null;
+  let unsubSettings = null;
+  let messages = [];
+  let presenceMap = {};
+  let settings = {};
+  let lastSendAt = 0;
+  let mutedUntil = 0;
+
+  function $(id){ return document.getElementById(id); }
+  function dbApi(){ return window.firebaseDB || {}; }
+  function now(){ return Date.now(); }
+  function esc(v){
+    return String(v == null ? '' : v).replace(/[&<>'"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];
+    });
+  }
+  function clean(v){ return String(v == null ? '' : v).trim(); }
+  function deviceId(){
+    try {
+      let id = localStorage.getItem('device_id');
+      if (!id) {
+        id = 'DEV-' + Math.random().toString(36).slice(2,8).toUpperCase() + Date.now().toString(36).slice(-4).toUpperCase();
+        localStorage.setItem('device_id', id);
+      }
+      return id;
+    } catch(_) {
+      return 'WEB-' + Math.random().toString(36).slice(2,8).toUpperCase();
+    }
+  }
+  function isAdmin(){
+    try { return localStorage.getItem('isAdmin') === 'true'; } catch(_) { return false; }
+  }
+  function adminLabel(){
+    try { return clean(localStorage.getItem('adminAccountLabel')) || 'الإدارة'; } catch(_) { return 'الإدارة'; }
+  }
+  function timeText(ts){
+    try { return new Date(Number(ts||now())).toLocaleTimeString('ar-IQ',{hour:'2-digit',minute:'2-digit'}); }
+    catch(_) { return ''; }
+  }
+  function dateKey(ts){
+    const d = new Date(Number(ts || now()));
+    return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+  }
+  function sameDay(a,b){ return dateKey(a) === dateKey(b); }
+  function hasFirebase(){
+    const f = dbApi();
+    return !!(f.db && f.ref && f.get && f.set && f.update && f.remove && f.onValue);
+  }
+  async function getProfile(){
+    if (isAdmin()) return { role:'admin', deviceId:deviceId(), name:adminLabel(), phone:'', address:'' };
+    const f = dbApi();
+    const id = deviceId();
+    let profile = {};
+    try {
+      const snap = await f.get(f.ref(f.db, 'customerProfiles/' + id));
+      profile = snap.exists() ? (snap.val() || {}) : {};
+    } catch(_) {}
+    if (profile && profile.blocked) {
+      try { if (typeof showCustomerBlockedOverlay === 'function') showCustomerBlockedOverlay(profile); } catch(_) {}
+      throw new Error('blocked');
+    }
+    const name = clean(profile.name);
+    const phone = clean(profile.phone);
+    const address = clean(profile.address);
+    if (!name || !phone || !address) {
+      if (window.Swal) {
+        await Swal.fire({
+          icon:'info',
+          title:'كمّل بياناتك أولاً',
+          text:'حتى تشارك في مجتمع عسل لازم يكون الاسم والرقم والعنوان محفوظة.',
+          confirmButtonText:'تمام'
+        });
+      } else {
+        alert('كمّل بياناتك أولاً حتى تشارك في مجتمع عسل');
+      }
+      throw new Error('profile-required');
+    }
+    return { role:'customer', deviceId:id, name:name, phone:phone, address:address };
+  }
+
+  function ensureHeaderUi(){
+    try {
+      const meta = document.querySelector('#assalCommunityModal .assal-community-meta');
+      if (meta && !$('assalCommunityOnlinePill')) {
+        const online = document.createElement('span');
+        online.id = 'assalCommunityOnlinePill';
+        online.className = 'assal-community-pill';
+        online.innerHTML = '<i class="fas fa-circle"></i> المتواجدون 0';
+        meta.appendChild(online);
+      }
+      if (meta && !$('assalCommunityStatePill')) {
+        const state = document.createElement('span');
+        state.id = 'assalCommunityStatePill';
+        state.className = 'assal-community-pill';
+        state.textContent = 'مفتوح';
+        meta.appendChild(state);
+      }
+      const title = document.querySelector('#assalCommunityModal .assal-community-title h3');
+      if (title) title.textContent = 'مجتمع عسل';
+      const input = $('assalCommunityInput');
+      if (input) input.placeholder = 'اكتب رسالة للمجتمع...';
+      const imgBtn = $('assalCommunityImagesToggle');
+      if (imgBtn) imgBtn.style.display = 'none';
+      const attach = document.querySelector('#assalCommunityModal .assal-community-attach');
+      if (attach) attach.style.display = 'none';
+      const adminBtn = $('assalCommunityAdminBtn');
+      if (adminBtn) adminBtn.style.display = isAdmin() ? 'grid' : 'none';
+    } catch(e){ console.error('ensureHeaderUi', e); }
+  }
+
+  function updateCounters(){
+    const count = $('assalCommunityCount');
+    if (count) count.textContent = messages.filter(m => m && !m.hardDeleted).length + ' رسالة';
+    const online = $('assalCommunityOnlinePill');
+    if (online) {
+      const cutoff = now() - 90000;
+      const n = Object.values(presenceMap || {}).filter(p => Number(p && p.lastSeen || 0) > cutoff).length;
+      online.innerHTML = '<i class="fas fa-circle"></i> المتواجدون ' + n;
+    }
+    const state = $('assalCommunityStatePill');
+    if (state) {
+      const closed = !!settings.closed;
+      state.textContent = closed ? 'الكتابة مغلقة' : 'مفتوح';
+      state.classList.toggle('is-closed', closed);
+    }
+  }
+
+  async function updatePresence(){
+    if (!hasFirebase()) return;
+    const f = dbApi();
+    const id = deviceId();
+    const data = {
+      deviceId:id,
+      role:isAdmin() ? 'admin' : 'customer',
+      name:isAdmin() ? adminLabel() : '',
+      lastSeen:now()
+    };
+    try {
+      const r = f.ref(f.db, PATH_PRESENCE + '/' + encodeURIComponent(id).replace(/\./g, '%2E'));
+      await f.set(r, data);
+      if (typeof f.onDisconnect === 'function') {
+        try { await f.onDisconnect(r).remove(); } catch(_) {}
+      }
+    } catch(_) {}
+  }
+
+  function stopRealtime(){
+    try { if (typeof unsubMessages === 'function') unsubMessages(); } catch(_) {}
+    try { if (typeof unsubPresence === 'function') unsubPresence(); } catch(_) {}
+    try { if (typeof unsubSettings === 'function') unsubSettings(); } catch(_) {}
+    unsubMessages = null; unsubPresence = null; unsubSettings = null;
+  }
+
+  function startRealtime(){
+    if (!hasFirebase()) return;
+    stopRealtime();
+    const f = dbApi();
+    updatePresence();
+    try {
+      unsubMessages = f.onValue(f.ref(f.db, PATH_MESSAGES), snap => {
+        const raw = snap.exists() ? (snap.val() || {}) : {};
+        messages = Object.entries(raw).map(([id, v]) => Object.assign({id:id}, v || {}))
+          .filter(m => m && !m.hardDeleted)
+          .sort((a,b) => Number(a.createdAt || 0) - Number(b.createdAt || 0));
+        if (messages.length > MAX_RENDER_MESSAGES) messages = messages.slice(messages.length - MAX_RENDER_MESSAGES);
+        renderMessages();
+      }, err => console.error('community messages listener:', err));
+    } catch(e){ console.error(e); }
+    try {
+      unsubPresence = f.onValue(f.ref(f.db, PATH_PRESENCE), snap => {
+        presenceMap = snap.exists() ? (snap.val() || {}) : {};
+        updateCounters();
+      });
+    } catch(e){ console.error(e); }
+    try {
+      unsubSettings = f.onValue(f.ref(f.db, PATH_SETTINGS), snap => {
+        settings = snap.exists() ? (snap.val() || {}) : {};
+        updateCounters();
+      });
+    } catch(e){ console.error(e); }
+  }
+
+  async function checkMuted(){
+    mutedUntil = 0;
+    if (isAdmin() || !hasFirebase()) return false;
+    try {
+      const f = dbApi();
+      const snap = await f.get(f.ref(f.db, PATH_MUTED + '/' + deviceId()));
+      const data = snap.exists() ? (snap.val() || {}) : {};
+      mutedUntil = Number(data.until || 0);
+    } catch(_) {}
+    const muted = mutedUntil > now();
+    const note = $('assalCommunityMutedNote');
+    if (note) note.classList.toggle('show', muted);
+    if (muted && window.Swal) {
+      Swal.fire({icon:'info', title:'أنت مكتوم مؤقتاً', text:'الإدارة أوقفت كتابتك في مجتمع عسل لفترة مؤقتة.'});
+    }
+    return muted;
+  }
+
+  function renderPinned(){
+    const box = $('assalCommunityPinned');
+    if (!box) return;
+    const pinned = messages.slice().reverse().find(m => m && m.pinned && !m.deletedAt && !m.hardDeleted);
+    if (!pinned) {
+      box.classList.remove('show');
+      box.innerHTML = '';
+      return;
+    }
+    box.classList.add('show');
+    const txt = clean(pinned.text) || 'رسالة مثبتة';
+    box.innerHTML = '<i class="fas fa-thumbtack"></i><div><b>مثبّت في مجتمع عسل</b><br>' + esc(txt).slice(0,170) + '</div>';
+  }
+
+  function renderMessages(){
+    const wrap = $('assalCommunityMessages');
+    if (!wrap) return;
+    const me = deviceId();
+    const wasNearBottom = (wrap.scrollHeight - wrap.scrollTop - wrap.clientHeight) < 110;
+    const list = messages.filter(m => m && !m.hardDeleted);
+    updateCounters();
+    renderPinned();
+
+    if (!list.length) {
+      wrap.innerHTML = '<div class="assal-community-empty"><i class="fas fa-comments"></i><div>مجتمع عسل فارغ حالياً</div><small>اكتب أول رسالة حتى تبدي المحادثة.</small></div>';
+      return;
+    }
+
+    let lastDay = '';
+    wrap.innerHTML = list.map(msg => {
+      const dkey = dateKey(msg.createdAt);
+      const sep = dkey !== lastDay ? '<div class="assal-community-day-sep">' + (sameDay(msg.createdAt, now()) ? 'اليوم' : dkey) + '</div>' : '';
+      lastDay = dkey;
+
+      const mine = msg.deviceId === me;
+      const adminMsg = msg.senderRole === 'admin';
+      const deleted = !!msg.deletedAt;
+      const canEdit = !deleted && (isAdmin() || mine);
+      const canDelete = !deleted && (isAdmin() || mine);
+      const canPin = !deleted && isAdmin();
+      const canMute = !deleted && isAdmin() && !adminMsg && msg.deviceId;
+      const name = esc(msg.senderName || (adminMsg ? 'الإدارة' : 'زبون'));
+      const role = adminMsg ? '<span class="role-badge admin">الإدارة</span>' : '<span class="role-badge">زبون</span>';
+      const body = deleted ? '<span style="color:rgba(226,232,240,.62);font-style:italic">تم حذف الرسالة</span>' : esc(msg.text || '');
+      const edited = msg.editedAt && !deleted ? '<div class="assal-community-edited">تم التعديل</div>' : '';
+
+      let actions = '';
+      if (canEdit || canDelete || canPin || canMute) {
+        actions = '<div class="assal-community-msg-actions">'
+          + (canEdit ? '<button type="button" class="assal-community-mini-action" data-community-action="edit" data-id="'+esc(msg.id)+'"><i class="fas fa-pen"></i> تعديل</button>' : '')
+          + (canPin ? '<button type="button" class="assal-community-mini-action" data-community-action="pin" data-id="'+esc(msg.id)+'"><i class="fas fa-thumbtack"></i> '+(msg.pinned ? 'إلغاء التثبيت' : 'تثبيت')+'</button>' : '')
+          + (canMute ? '<button type="button" class="assal-community-mini-action" data-community-action="mute" data-id="'+esc(msg.id)+'"><i class="fas fa-volume-xmark"></i> كتم</button>' : '')
+          + (canDelete ? '<button type="button" class="assal-community-mini-action danger" data-community-action="delete" data-id="'+esc(msg.id)+'"><i class="fas fa-trash"></i> حذف</button>' : '')
+          + '</div>';
+      }
+
+      return sep + '<div class="assal-community-msg '+(mine?'mine ':'')+(adminMsg?'admin-msg ':'')+(deleted?'deleted':'')+'">'
+        + '<div class="assal-community-msg-head"><div class="assal-community-sender"><span>'+name+'</span>'+role+'</div><div class="assal-community-time">'+timeText(msg.createdAt)+'</div></div>'
+        + '<div class="assal-community-text">'+body+'</div>'+edited+actions+'</div>';
+    }).join('');
+
+    setTimeout(() => { try { if (wasNearBottom) wrap.scrollTop = wrap.scrollHeight; } catch(_){} }, 30);
+  }
+
+  async function patchMessage(id, patch){
+    if (!hasFirebase()) throw new Error('Firebase غير جاهز');
+    const f = dbApi();
+    await f.update(f.ref(f.db, PATH_MESSAGES + '/' + id), Object.assign({}, patch, {updatedAt:now()}));
+  }
+
+  window.editAssalCommunityMessage = async function(id){
+    try {
+      const msg = messages.find(m => m && m.id === id);
+      if (!msg || msg.deletedAt) return;
+      if (!isAdmin() && msg.deviceId !== deviceId()) return;
+      const res = await Swal.fire({
+        title:'تعديل الرسالة',
+        input:'textarea',
+        inputValue: msg.text || '',
+        inputAttributes:{maxlength:700, dir:'rtl'},
+        showCancelButton:true,
+        confirmButtonText:'حفظ',
+        cancelButtonText:'إلغاء'
+      });
+      if (!res.isConfirmed) return;
+      const newText = clean(res.value);
+      if (!newText) return;
+      await patchMessage(id, {text:newText, editedAt:now(), editedBy:isAdmin()?'admin':'sender'});
+      if (window.showElegantTopToast) showElegantTopToast('تم تعديل الرسالة', 'success', 1600);
+    } catch(e) {
+      console.error('edit community:', e);
+      if (window.Swal) Swal.fire({icon:'error', title:'تعذر التعديل', text:e.message || String(e)});
+    }
+  };
+
+  window.deleteAssalCommunityMessage = async function(id){
+    try {
+      const msg = messages.find(m => m && m.id === id);
+      if (!msg) return;
+      if (!isAdmin() && msg.deviceId !== deviceId()) return;
+      const ok = await Swal.fire({
+        icon:'warning',
+        title:'حذف الرسالة؟',
+        text:'راح تظهر داخل المجتمع كرسالة محذوفة.',
+        showCancelButton:true,
+        confirmButtonText:'حذف',
+        cancelButtonText:'إلغاء'
+      });
+      if (!ok.isConfirmed) return;
+      await patchMessage(id, {deletedAt:now(), deletedBy:isAdmin()?'admin':'sender', text:'', imageData:'', pinned:false});
+      if (window.showElegantTopToast) showElegantTopToast('تم حذف الرسالة', 'success', 1600);
+    } catch(e) {
+      console.error('delete community:', e);
+      if (window.Swal) Swal.fire({icon:'error', title:'تعذر الحذف', text:e.message || String(e)});
+    }
+  };
+
+  window.toggleAssalCommunityPin = async function(id){
+    try {
+      if (!isAdmin()) return;
+      const msg = messages.find(m => m && m.id === id);
+      if (!msg || msg.deletedAt) return;
+      await patchMessage(id, {pinned:!msg.pinned, pinnedAt:!msg.pinned ? now() : null, pinnedBy:'admin'});
+    } catch(e) {
+      console.error('pin community:', e);
+      if (window.Swal) Swal.fire({icon:'error', title:'تعذر التثبيت', text:e.message || String(e)});
+    }
+  };
+
+  window.muteAssalCommunitySender = async function(id){
+    try {
+      if (!isAdmin()) return;
+      const msg = messages.find(m => m && m.id === id);
+      if (!msg || !msg.deviceId || msg.senderRole === 'admin') return;
+      const ok = await Swal.fire({
+        icon:'question',
+        title:'كتم هذا الزبون؟',
+        text:'راح تمنعه من الكتابة لمدة 24 ساعة.',
+        showCancelButton:true,
+        confirmButtonText:'كتم 24 ساعة',
+        cancelButtonText:'إلغاء'
+      });
+      if (!ok.isConfirmed) return;
+      const f = dbApi();
+      await f.set(f.ref(f.db, PATH_MUTED + '/' + msg.deviceId), {
+        deviceId:msg.deviceId,
+        name:msg.senderName || '',
+        until:now() + 24*60*60*1000,
+        mutedAt:now(),
+        mutedBy:'admin'
+      });
+      if (window.showElegantTopToast) showElegantTopToast('تم كتم الزبون 24 ساعة', 'success', 1800);
+    } catch(e) {
+      console.error('mute community:', e);
+      if (window.Swal) Swal.fire({icon:'error', title:'تعذر الكتم', text:e.message || String(e)});
+    }
+  };
+
+  window.openAssalCommunityAdminTools = async function(){
+    if (!isAdmin()) return;
+    const html = '<div style="direction:rtl;text-align:right;font-family:Cairo,sans-serif">'
+      + '<button id="communityToolClear" class="assal-community-admin-panel-btn danger"><i class="fas fa-trash"></i> مسح كل الرسائل</button>'
+      + '<button id="communityToolToggle" class="assal-community-admin-panel-btn warn"><i class="fas fa-lock"></i> إغلاق / فتح الكتابة</button>'
+      + '<button id="communityToolUnmute" class="assal-community-admin-panel-btn gray"><i class="fas fa-volume-high"></i> إلغاء كتم الجميع</button>'
+      + '<button id="communityToolCleanDeleted" class="assal-community-admin-panel-btn gray"><i class="fas fa-broom"></i> تنظيف الرسائل المحذوفة</button>'
+      + '<div style="margin-top:10px;color:rgba(226,232,240,.70);font-size:12px;line-height:1.8;text-align:center">صلاحيات الإدارة فعالة على مجتمع عسل فقط.</div>'
+      + '</div>';
+    await Swal.fire({
+      title:'إدارة مجتمع عسل',
+      html:html,
+      showConfirmButton:false,
+      showCloseButton:true,
+      didOpen:function(){
+        const f = dbApi();
+        const close = () => { try { Swal.close(); } catch(_){} };
+        const clear = $('communityToolClear');
+        if (clear) clear.onclick = async function(){
+          const sure = await Swal.fire({icon:'warning', title:'مسح كل الرسائل؟', text:'هذا يحذف كل محادثة مجتمع عسل من قاعدة البيانات.', showCancelButton:true, confirmButtonText:'مسح الكل', cancelButtonText:'إلغاء'});
+          if (!sure.isConfirmed) return;
+          await f.remove(f.ref(f.db, PATH_MESSAGES));
+          close();
+        };
+        const tog = $('communityToolToggle');
+        if (tog) tog.onclick = async function(){
+          const snap = await f.get(f.ref(f.db, PATH_SETTINGS));
+          const closed = !!(snap.exists() && snap.val() && snap.val().closed);
+          await f.update(f.ref(f.db, PATH_SETTINGS), {closed:!closed, updatedAt:now(), updatedBy:'admin'});
+          close();
+          Swal.fire({icon:'success', title: closed ? 'تم فتح الكتابة' : 'تم إغلاق الكتابة مؤقتاً', timer:1400, showConfirmButton:false});
+        };
+        const unmute = $('communityToolUnmute');
+        if (unmute) unmute.onclick = async function(){
+          await f.remove(f.ref(f.db, PATH_MUTED));
+          close();
+          Swal.fire({icon:'success', title:'تم إلغاء كتم الجميع', timer:1400, showConfirmButton:false});
+        };
+        const cleanDeleted = $('communityToolCleanDeleted');
+        if (cleanDeleted) cleanDeleted.onclick = async function(){
+          const updates = {};
+          messages.forEach(m => { if (m && m.id && m.deletedAt) updates[PATH_MESSAGES + '/' + m.id] = null; });
+          if (!Object.keys(updates).length) {
+            Swal.fire({icon:'info', title:'ماكو رسائل محذوفة للتنظيف', timer:1300, showConfirmButton:false});
+            return;
+          }
+          await f.update(f.ref(f.db), updates);
+          close();
+        };
+      }
+    });
+  };
+
+  window.sendAssalCommunityMessage = async function(){
+    if (!hasFirebase()) {
+      if (window.Swal) Swal.fire({icon:'error', title:'Firebase غير جاهز'});
+      return;
+    }
+    const input = $('assalCommunityInput');
+    const text = clean(input && input.value);
+    if (!text) return;
+    if (text.length > 700) {
+      if (window.Swal) Swal.fire({icon:'warning', title:'الرسالة طويلة', text:'اختصر الرسالة إلى أقل من 700 حرف.'});
+      return;
+    }
+    if (now() - lastSendAt < SEND_COOLDOWN_MS) {
+      if (window.showElegantTopToast) showElegantTopToast('انتظر لحظة قبل إرسال رسالة ثانية', 'warning', 1500);
+      return;
+    }
+    if (await checkMuted()) return;
+    if (!isAdmin() && settings.closed) {
+      if (window.Swal) Swal.fire({icon:'info', title:'مجتمع عسل مغلق مؤقتاً', text:'الإدارة أوقفت الكتابة حالياً.'});
+      return;
+    }
+
+    const sendBtn = $('assalCommunitySendBtn');
+    try {
+      lastSendAt = now();
+      if (sendBtn) sendBtn.disabled = true;
+      const user = await getProfile();
+      const id = 'CS-' + now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,7).toUpperCase();
+      const payload = {
+        id:id,
+        text:text,
+        senderRole:user.role,
+        senderName:user.name,
+        customerPhone:user.phone || '',
+        deviceId:user.deviceId,
+        createdAt:now(),
+        updatedAt:now()
+      };
+      const f = dbApi();
+      await f.set(f.ref(f.db, PATH_MESSAGES + '/' + id), payload);
+      if (input) { input.value = ''; input.style.height = ''; }
+      try {
+        if (typeof window.queuePushNotificationEvent === 'function') {
+          const body = (user.name || 'زبون') + ' : ' + text;
+          const data = {communityMessageId:id, screen:'assal_community'};
+          await window.queuePushNotificationEvent('customer_space_message', {
+            targetRole:'admin',
+            title:'مجتمع عسل',
+            body:body,
+            customerName:user.name,
+            item:text,
+            data:data
+          });
+          await window.queuePushNotificationEvent('customer_space_message', {
+            targetRole:'customer',
+            title:'مجتمع عسل',
+            body:body,
+            customerName:user.name,
+            item:text,
+            data:data
+          });
+        }
+      } catch(e) { console.error('community push:', e); }
+    } catch(e) {
+      console.error('send community:', e);
+      if (e && (e.message === 'profile-required' || e.message === 'blocked')) return;
+      if (window.Swal) Swal.fire({icon:'error', title:'فشل الإرسال', text:e.message || String(e)});
+    } finally {
+      if (sendBtn) sendBtn.disabled = false;
+    }
+  };
+
+  window.openAssalCommunitySpace = async function(){
+    try { await getProfile(); } catch(e) { return; }
+    const modal = $('assalCommunityModal');
+    if (!modal) return;
+    ensureHeaderUi();
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden','false');
+    startRealtime();
+    await checkMuted();
+    setTimeout(() => { try { $('assalCommunityInput') && $('assalCommunityInput').focus(); } catch(_){} }, 140);
+    try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch(_) {}
+  };
+
+  window.closeAssalCommunitySpace = function(){
+    const modal = $('assalCommunityModal');
+    if (!modal) return;
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden','true');
+    stopRealtime();
+    try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch(_) {}
+  };
+
+  window.openAssalCommunitySpaceFromEntry = function(){
+    try { if (typeof closeAssalSpaceEntryModal === 'function') closeAssalSpaceEntryModal(); } catch(_) {}
+    setTimeout(() => window.openAssalCommunitySpace(), 120);
+  };
+
+  window.toggleAssalCommunityImagesOnly = function(){
+    if (window.Swal) Swal.fire({icon:'info', title:'الصور والصوت مؤجلة', text:'راح نضيفها بمرحلة ثانية بعد تثبيت المجتمع النصي.'});
+  };
+
+  function bindUi(){
+    ensureHeaderUi();
+    const input = $('assalCommunityInput');
+    if (input && !input.dataset.assalCommunityUltraBound) {
+      input.dataset.assalCommunityUltraBound = '1';
+      input.addEventListener('input', function(){
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 110) + 'px';
+      });
+      input.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          window.sendAssalCommunityMessage();
+        }
+      });
+    }
+    const wrap = $('assalCommunityMessages');
+    if (wrap && !wrap.dataset.assalCommunityActionsBound) {
+      wrap.dataset.assalCommunityActionsBound = '1';
+      wrap.addEventListener('click', function(e){
+        const btn = e.target.closest('[data-community-action]');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const action = btn.getAttribute('data-community-action');
+        const id = btn.getAttribute('data-id');
+        if (!id) return;
+        if (action === 'edit') return window.editAssalCommunityMessage(id);
+        if (action === 'delete') return window.deleteAssalCommunityMessage(id);
+        if (action === 'pin') return window.toggleAssalCommunityPin(id);
+        if (action === 'mute') return window.muteAssalCommunitySender(id);
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindUi, {once:true});
+  } else {
+    bindUi();
+  }
+})();
+</script>
+<script id="assal-community-actions-hard-fix-final">
+(function(){
+  'use strict';
+  const PATH = 'customerSpace/messages';
+  function fdb(){ return window.firebaseDB || {}; }
+  function hasDb(){ const f=fdb(); return !!(f.db && f.ref && f.get && (f.update || f.set)); }
+  function clean(v){ return String(v == null ? '' : v).trim(); }
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function isAdmin(){ try { return localStorage.getItem('isAdmin') === 'true'; } catch(_) { return false; } }
+  function deviceId(){
+    try {
+      if (typeof window.getDeviceId === 'function') return window.getDeviceId();
+      let id = localStorage.getItem('device_id');
+      if (!id) { id = 'DEV-' + Math.random().toString(36).slice(2,8).toUpperCase() + Date.now().toString(36).slice(-4).toUpperCase(); localStorage.setItem('device_id', id); }
+      return id;
+    } catch(_) { return ''; }
+  }
+  function toast(type, title, text){
+    try { if (window.showElegantTopToast) return window.showElegantTopToast(title || '', type || 'success', 1600); } catch(_) {}
+    try { if (window.Swal) return Swal.fire({toast:true, position:'top', timer:1500, showConfirmButton:false, icon:type||'success', title:title||'', text:text||''}); } catch(_) {}
+  }
+  function nativeDialog(opts){
+    opts = opts || {};
+    return new Promise(resolve => {
+      try { document.getElementById('assalCommunityHardActionDialog')?.remove(); } catch(_) {}
+      const overlay = document.createElement('div');
+      overlay.id = 'assalCommunityHardActionDialog';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(2,8,23,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);direction:rtl;font-family:Cairo,Tajawal,sans-serif;';
+      const inputHtml = opts.input ? '<textarea id="assalCommunityHardInput" maxlength="700" style="width:100%;min-height:112px;resize:vertical;border-radius:16px;padding:12px;background:rgba(2,6,23,.58);border:1px solid rgba(148,163,184,.22);color:#fff;outline:none;font-family:Cairo,Tajawal,sans-serif;font-size:14px;line-height:1.7">'+esc(opts.value || '')+'</textarea>' : '';
+      overlay.innerHTML = '<div style="width:min(92vw,380px);border-radius:22px;padding:16px;background:radial-gradient(circle at top right,rgba(34,211,238,.16),transparent 42%),rgba(15,23,42,.98);border:1px solid rgba(148,163,184,.20);box-shadow:0 24px 70px rgba(0,0,0,.70);color:#fff;text-align:right" onclick="event.stopPropagation()">'
+        + '<div style="font-size:17px;font-weight:900;margin-bottom:7px">'+esc(opts.title || 'تأكيد')+'</div>'
+        + (opts.message ? '<div style="font-size:13px;color:rgba(226,232,240,.75);line-height:1.8;margin-bottom:12px">'+esc(opts.message)+'</div>' : '')
+        + inputHtml
+        + '<div style="display:flex;gap:10px;margin-top:12px"><button id="assalCommunityHardCancel" type="button" style="flex:1;border:0;border-radius:14px;padding:10px 12px;background:#475569;color:#fff;font-weight:900;font-family:Cairo,Tajawal,sans-serif">'+esc(opts.cancelText || 'إلغاء')+'</button><button id="assalCommunityHardOk" type="button" style="flex:1;border:0;border-radius:14px;padding:10px 12px;background:'+(opts.danger?'linear-gradient(135deg,#991b1b,#ef4444)':'linear-gradient(135deg,#0f766e,#06b6d4)')+';color:#fff;font-weight:900;font-family:Cairo,Tajawal,sans-serif">'+esc(opts.okText || 'تمام')+'</button></div>'
+        + '</div>';
+      document.body.appendChild(overlay);
+      const close = val => { try { overlay.remove(); } catch(_) {} resolve(val); };
+      overlay.addEventListener('click', e => { if (e.target === overlay) close({ok:false}); });
+      overlay.querySelector('#assalCommunityHardCancel')?.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); close({ok:false}); });
+      overlay.querySelector('#assalCommunityHardOk')?.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); const inp=overlay.querySelector('#assalCommunityHardInput'); close({ok:true, value:inp ? inp.value : ''}); });
+      setTimeout(()=>{ try { overlay.querySelector('#assalCommunityHardInput')?.focus(); } catch(_){} },100);
+    });
+  }
+  async function getMsg(id){
+    if (!hasDb()) throw new Error('Firebase غير جاهز');
+    const f=fdb();
+    const snap = await f.get(f.ref(f.db, PATH + '/' + id));
+    return snap.exists() ? ({id, ...(snap.val() || {})}) : null;
+  }
+  async function patchMsg(id, patch){
+    if (!hasDb()) throw new Error('Firebase غير جاهز');
+    const f=fdb();
+    const r=f.ref(f.db, PATH + '/' + id);
+    const data = Object.assign({}, patch, {updatedAt:Date.now()});
+    if (typeof f.update === 'function') return f.update(r, data);
+    const old = await getMsg(id) || {id};
+    return f.set(r, Object.assign({}, old, data));
+  }
+  window.editAssalCommunityMessage = async function(id){
+    try {
+      const msg = await getMsg(id);
+      if (!msg || msg.deletedAt) return;
+      if (!isAdmin() && msg.deviceId !== deviceId()) return toast('warning','ما عندك صلاحية تعديل هاي الرسالة');
+      const res = await nativeDialog({title:'تعديل الرسالة', input:true, value:msg.text || '', okText:'حفظ التعديل', cancelText:'إلغاء'});
+      if (!res || !res.ok) return;
+      const text = clean(res.value || '');
+      if (!text) return toast('warning','الرسالة فارغة');
+      await patchMsg(id, {text, editedAt:Date.now(), editedBy:isAdmin()?'admin':'sender'});
+      toast('success','تم تعديل الرسالة');
+    } catch(e) { console.error('HARD edit community:', e); toast('error','فشل تعديل الرسالة', e.message || String(e)); }
+  };
+  window.deleteAssalCommunityMessage = async function(id){
+    try {
+      const msg = await getMsg(id);
+      if (!msg) return;
+      if (!isAdmin() && msg.deviceId !== deviceId()) return toast('warning','ما عندك صلاحية حذف هاي الرسالة');
+      const ok = await nativeDialog({title:'حذف الرسالة؟', message:'راح تظهر داخل مجتمع عسل كرسالة محذوفة بدون نص.', okText:'حذف', cancelText:'إلغاء', danger:true});
+      if (!ok || !ok.ok) return;
+      await patchMsg(id, {deletedAt:Date.now(), deletedBy:isAdmin()?'admin':'sender', text:'', imageData:'', pinned:false});
+      toast('success','تم حذف الرسالة');
+    } catch(e) { console.error('HARD delete community:', e); toast('error','فشل حذف الرسالة', e.message || String(e)); }
+  };
+  // ربط إضافي احتياطي حتى إذا الـ onclick القديم تعارض، هذا يمسك الزر بدون تعليق.
+  function bindHardActions(){
+    const wrap = document.getElementById('assalCommunityMessages');
+    if (!wrap || wrap.dataset.assalCommunityHardFixed) return;
+    wrap.dataset.assalCommunityHardFixed = '1';
+    wrap.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-community-action]');
+      if (!btn) return;
+      const action = btn.getAttribute('data-community-action');
+      if (action !== 'edit' && action !== 'delete') return;
+      e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation();
+      const id = btn.getAttribute('data-id');
+      if (!id) return;
+      if (action === 'edit') window.editAssalCommunityMessage(id);
+      if (action === 'delete') window.deleteAssalCommunityMessage(id);
+    }, true);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindHardActions, {once:true}); else bindHardActions();
+})();
+</script>
+
+
+<!-- ===== ASSAL Community Admin Tools visibility + safe panel FIX ===== -->
+<style id="assal-community-admin-tools-fixed-style">
+.assal-community-admin-tools-overlay{
+  position:fixed; inset:0; z-index:2147483200; display:none; align-items:center; justify-content:center;
+  padding:18px; direction:rtl; font-family:'Cairo','Tajawal',sans-serif;
+  background:rgba(2,8,23,.72); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+.assal-community-admin-tools-overlay.show{display:flex;}
+.assal-community-admin-tools-card{
+  width:min(94vw,430px); border-radius:24px; overflow:hidden; color:#fff;
+  background:radial-gradient(circle at top right,rgba(34,211,238,.18),transparent 44%),radial-gradient(circle at bottom left,rgba(168,85,247,.14),transparent 52%),rgba(15,23,42,.98);
+  border:1px solid rgba(148,163,184,.20); box-shadow:0 26px 76px rgba(0,0,0,.72);
+}
+.assal-community-admin-tools-head{
+  min-height:58px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+  border-bottom:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.035);
+}
+.assal-community-admin-tools-title{display:flex; align-items:center; gap:10px; min-width:0;}
+.assal-community-admin-tools-title .shield{
+  width:38px;height:38px;border-radius:15px;display:grid;place-items:center;flex:0 0 auto;
+  background:linear-gradient(135deg,rgba(34,211,238,.34),rgba(168,85,247,.18));border:1px solid rgba(255,255,255,.12);
+}
+.assal-community-admin-tools-title b{font-size:16px;font-weight:900;display:block;line-height:1.1;}
+.assal-community-admin-tools-title small{font-size:11px;color:rgba(226,232,240,.68);display:block;margin-top:4px;}
+.assal-community-admin-tools-x{
+  width:34px;height:34px;border:0;border-radius:50%;color:#fff;background:linear-gradient(135deg,#7f1d1d,#b91c1c);
+  display:grid;place-items:center;cursor:pointer;box-shadow:0 10px 22px rgba(0,0,0,.35);font-size:15px;
+}
+.assal-community-admin-tools-body{padding:13px;display:grid;gap:9px;}
+.assal-community-admin-tool-btn{
+  width:100%; min-height:48px; border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:10px 12px;
+  display:flex; align-items:center; justify-content:flex-start; gap:10px; color:#fff; font-family:'Cairo','Tajawal',sans-serif;
+  font-weight:900; cursor:pointer; background:linear-gradient(135deg,rgba(15,118,110,.82),rgba(14,165,164,.58));
+  box-shadow:0 10px 25px rgba(0,0,0,.22); text-align:right;
+}
+.assal-community-admin-tool-btn i{width:26px;height:26px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.10);}
+.assal-community-admin-tool-btn.danger{background:linear-gradient(135deg,#7f1d1d,#dc2626);}
+.assal-community-admin-tool-btn.warn{background:linear-gradient(135deg,#92400e,#f97316);}
+.assal-community-admin-tool-btn.gray{background:linear-gradient(135deg,#334155,#475569);}
+.assal-community-admin-tool-btn:active{transform:scale(.985);}
+.assal-community-admin-tools-note{font-size:11px;line-height:1.8;color:rgba(226,232,240,.68);text-align:center;margin-top:2px;}
+</style>
+<script id="assal-community-admin-tools-fixed-final">
+(function(){
+  'use strict';
+  const PATH_MESSAGES = 'customerSpace/messages';
+  const PATH_SETTINGS = 'customerSpace/settings';
+  const PATH_MUTED = 'customerSpace/mutedDevices';
+  function $(id){ return document.getElementById(id); }
+  function fdb(){ return window.firebaseDB || {}; }
+  function hasDb(){ const f=fdb(); return !!(f.db && f.ref && f.get && (f.update || f.set || f.remove)); }
+  function isRealAdmin(){
+    try { if (typeof window.isAdminUser === 'function') return !!window.isAdminUser(); } catch(_){}
+    try { return localStorage.getItem('isAdmin') === 'true' || localStorage.getItem('assal_admin_logged_in') === 'true'; } catch(_) { return false; }
+  }
+  function toast(type,title){
+    try { if (window.showElegantTopToast) return window.showElegantTopToast(title || '', type || 'success', 1600); } catch(_){}
+    try { if (window.Swal) return Swal.fire({toast:true,position:'top',timer:1500,showConfirmButton:false,icon:type||'success',title:title||''}); } catch(_){}
+  }
+  function confirmNative(opts){
+    opts = opts || {};
+    return new Promise(resolve=>{
+      const old = $('assalCommunityConfirmNative'); if (old) old.remove();
+      const ov = document.createElement('div');
+      ov.id = 'assalCommunityConfirmNative';
+      ov.style.cssText = 'position:fixed;inset:0;z-index:2147483300;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(2,8,23,.74);backdrop-filter:blur(10px);direction:rtl;font-family:Cairo,Tajawal,sans-serif;';
+      ov.innerHTML = '<div style="width:min(92vw,360px);border-radius:22px;padding:16px;background:rgba(15,23,42,.98);border:1px solid rgba(148,163,184,.22);box-shadow:0 24px 70px rgba(0,0,0,.72);color:#fff;text-align:right">'
+        + '<div style="font-weight:900;font-size:17px;margin-bottom:8px">'+String(opts.title||'تأكيد')+'</div>'
+        + '<div style="font-size:13px;color:rgba(226,232,240,.72);line-height:1.8;margin-bottom:12px">'+String(opts.text||'هل أنت متأكد؟')+'</div>'
+        + '<div style="display:flex;gap:10px"><button id="assalConfirmCancel" type="button" style="flex:1;border:0;border-radius:14px;padding:10px;background:#475569;color:white;font-weight:900;font-family:Cairo">إلغاء</button><button id="assalConfirmOk" type="button" style="flex:1;border:0;border-radius:14px;padding:10px;background:'+(opts.danger?'linear-gradient(135deg,#991b1b,#ef4444)':'linear-gradient(135deg,#0f766e,#06b6d4)')+';color:white;font-weight:900;font-family:Cairo">'+String(opts.okText||'تمام')+'</button></div>'
+        + '</div>';
+      document.body.appendChild(ov);
+      const close = v => { try { ov.remove(); } catch(_){} resolve(v); };
+      ov.querySelector('#assalConfirmCancel').onclick = e => { e.preventDefault(); e.stopPropagation(); close(false); };
+      ov.querySelector('#assalConfirmOk').onclick = e => { e.preventDefault(); e.stopPropagation(); close(true); };
+      ov.addEventListener('click', e => { if (e.target === ov) close(false); });
+    });
+  }
+  function ensurePanel(){
+    let ov = $('assalCommunityAdminToolsFixedOverlay');
+    if (ov) return ov;
+    ov = document.createElement('div');
+    ov.id = 'assalCommunityAdminToolsFixedOverlay';
+    ov.className = 'assal-community-admin-tools-overlay';
+    ov.innerHTML = '<div class="assal-community-admin-tools-card" onclick="event.stopPropagation()">'
+      + '<div class="assal-community-admin-tools-head"><div class="assal-community-admin-tools-title"><span class="shield"><i class="fas fa-shield-halved"></i></span><div><b>أدوات إدارة مجتمع عسل</b><small>خيارات الإدارة للرسائل والمستخدمين</small></div></div><button id="assalCommunityAdminToolsFixedClose" class="assal-community-admin-tools-x" type="button"><i class="fas fa-xmark"></i></button></div>'
+      + '<div class="assal-community-admin-tools-body">'
+      + '<button id="assalAdminToolClearAll" class="assal-community-admin-tool-btn danger" type="button"><i class="fas fa-trash"></i><span>مسح كل رسائل مجتمع عسل</span></button>'
+      + '<button id="assalAdminToolToggleWriting" class="assal-community-admin-tool-btn warn" type="button"><i class="fas fa-lock"></i><span>إغلاق / فتح الكتابة</span></button>'
+      + '<button id="assalAdminToolUnmuteAll" class="assal-community-admin-tool-btn gray" type="button"><i class="fas fa-volume-high"></i><span>إلغاء كتم جميع الزبائن</span></button>'
+      + '<button id="assalAdminToolCleanDeleted" class="assal-community-admin-tool-btn gray" type="button"><i class="fas fa-broom"></i><span>تنظيف الرسائل المحذوفة نهائياً</span></button>'
+      + '<div class="assal-community-admin-tools-note">هذه الأدوات تظهر للإدارة فقط، ولا تظهر للزبائن.</div>'
+      + '</div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', e => { if (e.target === ov) closePanel(); });
+    $('assalCommunityAdminToolsFixedClose').onclick = closePanel;
+    bindPanelButtons();
+    return ov;
+  }
+  function closePanel(){ const ov=$('assalCommunityAdminToolsFixedOverlay'); if (ov) ov.classList.remove('show'); }
+  function openPanel(){
+    if (!isRealAdmin()) { syncAdminButton(); return; }
+    ensurePanel().classList.add('show');
+  }
+  async function dbRemove(path){ const f=fdb(); if (typeof f.remove === 'function') return f.remove(f.ref(f.db,path)); return f.set(f.ref(f.db,path), null); }
+  async function dbUpdate(path, data){ const f=fdb(); if (typeof f.update === 'function') return f.update(f.ref(f.db,path), data); return f.set(f.ref(f.db,path), data); }
+  async function dbGet(path){ const f=fdb(); return f.get(f.ref(f.db,path)); }
+  function bindPanelButtons(){
+    const clear = $('assalAdminToolClearAll');
+    if (clear) clear.onclick = async function(e){
+      e.preventDefault(); e.stopPropagation();
+      try { if (!hasDb()) throw new Error('Firebase غير جاهز'); if (!await confirmNative({title:'مسح كل الرسائل؟', text:'راح تنحذف كل رسائل مجتمع عسل من السيرفر.', okText:'مسح الكل', danger:true})) return; await dbRemove(PATH_MESSAGES); closePanel(); toast('success','تم مسح رسائل مجتمع عسل'); } catch(err){ console.error(err); toast('error','فشل مسح الرسائل'); }
+    };
+    const tog = $('assalAdminToolToggleWriting');
+    if (tog) tog.onclick = async function(e){
+      e.preventDefault(); e.stopPropagation();
+      try { if (!hasDb()) throw new Error('Firebase غير جاهز'); const snap = await dbGet(PATH_SETTINGS); const v = snap && snap.exists && snap.exists() ? (snap.val() || {}) : {}; await dbUpdate(PATH_SETTINGS,{closed:!v.closed,updatedAt:Date.now(),updatedBy:'admin'}); closePanel(); toast('success', v.closed ? 'تم فتح الكتابة' : 'تم إغلاق الكتابة'); } catch(err){ console.error(err); toast('error','فشل تغيير حالة الكتابة'); }
+    };
+    const unmute = $('assalAdminToolUnmuteAll');
+    if (unmute) unmute.onclick = async function(e){
+      e.preventDefault(); e.stopPropagation();
+      try { if (!hasDb()) throw new Error('Firebase غير جاهز'); await dbRemove(PATH_MUTED); closePanel(); toast('success','تم إلغاء كتم الجميع'); } catch(err){ console.error(err); toast('error','فشل إلغاء الكتم'); }
+    };
+    const clean = $('assalAdminToolCleanDeleted');
+    if (clean) clean.onclick = async function(e){
+      e.preventDefault(); e.stopPropagation();
+      try {
+        if (!hasDb()) throw new Error('Firebase غير جاهز');
+        const snap = await dbGet(PATH_MESSAGES);
+        const map = snap && snap.exists && snap.exists() ? (snap.val() || {}) : {};
+        const updates = {};
+        Object.entries(map).forEach(([id,m])=>{ if (m && m.deletedAt) updates[PATH_MESSAGES + '/' + id] = null; });
+        const count = Object.keys(updates).length;
+        if (!count) { toast('warning','ماكو رسائل محذوفة للتنظيف'); return; }
+        if (!await confirmNative({title:'تنظيف الرسائل المحذوفة؟', text:'راح يتم حذف '+count+' رسالة محذوفة نهائياً.', okText:'تنظيف', danger:true})) return;
+        const f=fdb(); await f.update(f.ref(f.db), updates);
+        closePanel(); toast('success','تم تنظيف الرسائل المحذوفة');
+      } catch(err){ console.error(err); toast('error','فشل تنظيف الرسائل'); }
+    };
+  }
+  function syncAdminButton(){
+    const btn = $('assalCommunityAdminBtn');
+    if (!btn) return;
+    const admin = isRealAdmin();
+    btn.style.display = admin ? 'grid' : 'none';
+    btn.hidden = !admin;
+    btn.disabled = !admin;
+    btn.setAttribute('aria-hidden', admin ? 'false' : 'true');
+    btn.onclick = function(e){
+      e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation();
+      if (!isRealAdmin()) { syncAdminButton(); return false; }
+      openPanel();
+      return false;
+    };
+  }
+  window.openAssalCommunityAdminTools = function(){ openPanel(); };
+  function start(){
+    syncAdminButton();
+    document.addEventListener('click', function(e){
+      const btn = e.target && e.target.closest && e.target.closest('#assalCommunityAdminBtn');
+      if (!btn) return;
+      e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation();
+      if (isRealAdmin()) openPanel(); else syncAdminButton();
+    }, true);
+    try { new MutationObserver(syncAdminButton).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class','hidden']}); } catch(_){}
+    setInterval(syncAdminButton, 900);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, {once:true}); else start();
 })();
 </script>
