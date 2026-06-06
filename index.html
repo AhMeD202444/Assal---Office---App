@@ -29285,6 +29285,17 @@ ${actionText} ${safeBranch}`;
   }
 
   function getNativeNotificationType(payload) {
+    const openScreen = safeNotificationValue(payload?.openScreen || payload?.screen || payload?.targetScreen);
+    const openCommunity = safeNotificationValue(payload?.openCommunity || payload?.assalCommunity || payload?.community);
+    if (
+      openScreen === 'assal_community' ||
+      openScreen === 'community' ||
+      openScreen === 'customer_space' ||
+      openCommunity === 'true' ||
+      openCommunity === '1'
+    ) {
+      return 'customer_space_message';
+    }
     return safeNotificationValue(payload?.notificationType || payload?.type || payload?.eventType);
   }
 
@@ -29330,7 +29341,8 @@ ${actionText} ${safeBranch}`;
       && typeof openInvoiceAdminModal === 'function'
       && typeof openCart === 'function'
       && typeof openAvailabilityAdminModal === 'function'
-      && typeof openAvailabilityTrackModal === 'function';
+      && typeof openAvailabilityTrackModal === 'function'
+      && typeof openAssalCommunitySpace === 'function';
   }
 
   async function routeNativeNotificationTap(payload) {
@@ -29375,6 +29387,13 @@ ${actionText} ${safeBranch}`;
         if (requestId) setTimeout(() => focusNotificationTarget(`#availabilityTrackActivePanel [data-request-id="${cssEscapeSafe(requestId)}"], #availabilityTrackArchivePanel [data-request-id="${cssEscapeSafe(requestId)}"]`), 260);
         return true;
 
+      case 'customer_space_message':
+      case 'assal_community_message':
+      case 'community_message':
+        await openAssalCommunitySpace();
+        try { document.dispatchEvent(new CustomEvent('assal:community-opened-from-notification', { detail: payload || {} })); } catch (_) {}
+        return true;
+
       default:
         return false;
     }
@@ -29409,6 +29428,28 @@ ${actionText} ${safeBranch}`;
   window.handleNativeNotificationTap = function(payload) {
     queueNativeNotificationPayload(payload);
   };
+
+  window.openAssalCommunityFromNotification = function() {
+    queueNativeNotificationPayload({
+      notificationType: 'customer_space_message',
+      openScreen: 'assal_community',
+      openCommunity: 'true'
+    });
+  };
+
+  (function handleInitialAssalCommunityOpenQuery() {
+    try {
+      const params = new URLSearchParams(window.location.search || '');
+      const openValue = String(params.get('open') || params.get('screen') || params.get('targetScreen') || '').trim();
+      if (openValue === 'community' || openValue === 'assal_community' || openValue === 'customer_space') {
+        queueNativeNotificationPayload({
+          notificationType: 'customer_space_message',
+          openScreen: 'assal_community',
+          openCommunity: 'true'
+        });
+      }
+    } catch (_) {}
+  })();
 
 
   window.updatePerfDebugButtonState = function() {
