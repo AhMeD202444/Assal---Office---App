@@ -35107,9 +35107,9 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
 <style>
 #assalOfflineBanner{
     position:fixed;
-    top:calc(env(safe-area-inset-top, 0px) + 50px);
+    top:calc(env(safe-area-inset-top, 0px) + 46px);
     left:50%;
-    transform:translate(-50%,-18px);
+    transform:translate(-50%,-10px);
     width:min(92vw,520px);
     min-height:42px;
     padding:9px 14px;
@@ -35120,7 +35120,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
     justify-content:center;
     gap:10px;
     direction:rtl;
-    font-family:'Cairo','Tajawal',sans-serif;
+    font-family:'Cairo','Tajawal',sans-serif !important;
     font-size:13px;
     font-weight:800;
     color:#fff;
@@ -35131,7 +35131,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
     -webkit-backdrop-filter:blur(16px);
     opacity:0;
     pointer-events:none;
-    transition:opacity .22s ease, transform .22s ease;
+    transition:opacity .18s ease, transform .18s ease;
 }
 #assalOfflineBanner.is-visible{
     opacity:1;
@@ -35181,13 +35181,17 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
     justify-content:center;
     padding:24px;
     direction:rtl;
-    font-family:'Cairo','Tajawal',sans-serif;
+    font-family:'Cairo','Tajawal',sans-serif !important;
     background:
       radial-gradient(circle at 22% 18%, rgba(67,206,162,.20), transparent 34%),
       radial-gradient(circle at 84% 82%, rgba(56,189,248,.16), transparent 35%),
       rgba(2,8,23,.78);
     backdrop-filter:blur(18px);
     -webkit-backdrop-filter:blur(18px);
+}
+#assalOfflineModal,
+#assalOfflineModal *{
+    font-family:'Cairo','Tajawal',sans-serif !important;
 }
 #assalOfflineModal.is-visible{display:flex}
 .assal-offline-card{
@@ -35230,7 +35234,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
     border-radius:999px;
     background:linear-gradient(135deg,#22c55e,#06b6d4);
     color:#06121f;
-    font-family:'Cairo','Tajawal',sans-serif;
+    font-family:'Cairo','Tajawal',sans-serif !important;
     font-size:16px;
     font-weight:900;
     cursor:pointer;
@@ -35239,7 +35243,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
 .assal-offline-retry:active{transform:scale(.97)}
 @keyframes assalOfflinePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 @media(max-width:480px){
-    #assalOfflineBanner{top:calc(env(safe-area-inset-top, 0px) + 48px);font-size:12px;width:min(94vw,420px)}
+    #assalOfflineBanner{top:calc(env(safe-area-inset-top, 0px) + 46px);font-size:12px;width:min(94vw,420px)}
     .assal-offline-card{border-radius:26px;padding:25px 18px 21px}
     .assal-offline-title{font-size:22px}
 }
@@ -35303,7 +35307,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
         ensure();
         if (!banner) return;
         clearTimeout(onlineHideTimer);
-        if (bannerText) bannerText.textContent = 'تم استعادة الاتصال';
+        if (bannerText) bannerText.textContent = 'تم استعادة الاتصال بالإنترنت';
         banner.classList.add('is-visible','is-online');
         onlineHideTimer = setTimeout(function(){
             banner.classList.remove('is-visible','is-online');
@@ -35328,6 +35332,14 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
     });
 
     window.addEventListener('assalOnline', function(){
+        window.hideAssalOfflineState();
+    });
+
+    window.addEventListener('offline', function(){
+        window.showAssalOfflineState(false);
+    });
+
+    window.addEventListener('online', function(){
         window.hideAssalOfflineState();
     });
 
