@@ -35106,9 +35106,9 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
 <style>
 #assalOfflineBanner{
     position:fixed;
-    top:calc(env(safe-area-inset-top, 0px) + 46px);
+    top:calc(env(safe-area-inset-top, 0px) + 48px);
     left:50%;
-    transform:translate(-50%,-10px);
+    transform:translateX(-50%);
     width:min(92vw,520px);
     min-height:42px;
     padding:9px 14px;
@@ -35134,7 +35134,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
 }
 #assalOfflineBanner.is-visible{
     opacity:1;
-    transform:translate(-50%,0);
+    transform:translateX(-50%);
     pointer-events:auto;
 }
 #assalOfflineBanner .assal-offline-dot{
@@ -35242,7 +35242,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
 .assal-offline-retry:active{transform:scale(.97)}
 @keyframes assalOfflinePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 @media(max-width:480px){
-    #assalOfflineBanner{top:calc(env(safe-area-inset-top, 0px) + 46px);font-size:12px;width:min(94vw,420px)}
+    #assalOfflineBanner{top:calc(env(safe-area-inset-top, 0px) + 48px);font-size:12px;width:min(94vw,420px)}
     .assal-offline-card{border-radius:26px;padding:25px 18px 21px}
     .assal-offline-title{font-size:22px}
 }
@@ -35347,5 +35347,108 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
     } else {
         ensure();
     }
+})();
+</script>
+<!-- ===== ASSAL FINAL OVERRIDE: force offline banner directly under header ===== -->
+<style id="assalOfflineBannerFinalForceStyle">
+#assalOfflineBanner{
+    position:fixed !important;
+    top:calc(env(safe-area-inset-top, 0px) + 48px) !important;
+    left:50% !important;
+    right:auto !important;
+    bottom:auto !important;
+    transform:translateX(-50%) !important;
+    width:min(94vw,520px) !important;
+    margin:0 !important;
+    z-index:2147483647 !important;
+    font-family:'Cairo','Tajawal',sans-serif !important;
+}
+#assalOfflineBanner.is-visible{
+    transform:translateX(-50%) !important;
+}
+@media (max-width:480px){
+    #assalOfflineBanner{
+        top:calc(env(safe-area-inset-top, 0px) + 48px) !important;
+        width:calc(100vw - 18px) !important;
+        min-height:38px !important;
+        padding:8px 12px !important;
+        font-size:12px !important;
+    }
+}
+</style>
+<script id="assalOfflineBannerFinalForceScript">
+(function(){
+    function findHeader(){
+        return document.querySelector('.header') ||
+               document.querySelector('header') ||
+               document.getElementById('header') ||
+               document.querySelector('[class*="header"]');
+    }
+    function forceOfflineBannerPosition(){
+        try{
+            var banner = document.getElementById('assalOfflineBanner');
+            if(!banner) return;
+            var header = findHeader();
+            var safeTop = 0;
+            try{
+                var probe = document.createElement('div');
+                probe.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);height:0;visibility:hidden;pointer-events:none;';
+                document.body.appendChild(probe);
+                safeTop = Math.max(0, Math.round(probe.getBoundingClientRect().top || 0));
+                probe.remove();
+            }catch(_){}
+            var topPx = 48 + safeTop;
+            if(header){
+                var r = header.getBoundingClientRect();
+                if(r && r.bottom){
+                    topPx = Math.max(46 + safeTop, Math.round(r.bottom + 4));
+                }
+            }
+            banner.style.setProperty('position','fixed','important');
+            banner.style.setProperty('top', topPx + 'px','important');
+            banner.style.setProperty('left','50%','important');
+            banner.style.setProperty('right','auto','important');
+            banner.style.setProperty('bottom','auto','important');
+            banner.style.setProperty('transform','translateX(-50%)','important');
+            banner.style.setProperty('z-index','2147483647','important');
+            banner.style.setProperty('font-family',"'Cairo','Tajawal',sans-serif",'important');
+        }catch(e){}
+    }
+
+    var oldShow = window.showAssalOfflineState;
+    window.showAssalOfflineState = function(fullScreen){
+        if(typeof oldShow === 'function'){
+            oldShow.apply(this, arguments);
+        }else{
+            try{
+                var banner = document.getElementById('assalOfflineBanner');
+                if(banner) banner.classList.add('is-visible');
+            }catch(_){}
+        }
+        forceOfflineBannerPosition();
+        setTimeout(forceOfflineBannerPosition, 60);
+        setTimeout(forceOfflineBannerPosition, 220);
+    };
+
+    var oldHide = window.hideAssalOfflineState;
+    window.hideAssalOfflineState = function(){
+        if(typeof oldHide === 'function'){
+            oldHide.apply(this, arguments);
+        }
+        forceOfflineBannerPosition();
+    };
+
+    window.addEventListener('assalOffline', function(){ setTimeout(forceOfflineBannerPosition, 0); setTimeout(forceOfflineBannerPosition, 120); }, true);
+    window.addEventListener('offline', function(){ setTimeout(forceOfflineBannerPosition, 0); setTimeout(forceOfflineBannerPosition, 120); }, true);
+    window.addEventListener('resize', forceOfflineBannerPosition);
+    window.addEventListener('orientationchange', function(){ setTimeout(forceOfflineBannerPosition, 250); });
+
+    if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', forceOfflineBannerPosition, {once:true});
+    }else{
+        forceOfflineBannerPosition();
+    }
+    setTimeout(forceOfflineBannerPosition, 500);
+    setTimeout(forceOfflineBannerPosition, 1500);
 })();
 </script>
