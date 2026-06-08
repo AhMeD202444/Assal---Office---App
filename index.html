@@ -35351,24 +35351,29 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
 </script>
 <!-- ===== ASSAL FINAL OVERRIDE: force offline banner directly under header ===== -->
 <style id="assalOfflineBannerFinalForceStyle">
+:root{
+    --assal-header-height:44px;
+    --assal-offline-banner-gap:6px;
+}
 #assalOfflineBanner{
     position:fixed !important;
-    top:calc(env(safe-area-inset-top, 0px) + 48px) !important;
+    top:calc(var(--assal-header-height,44px) + var(--assal-offline-banner-gap,6px)) !important;
     left:50% !important;
     right:auto !important;
     bottom:auto !important;
-    transform:translateX(-50%) !important;
+    transform:translate3d(-50%,0,0) !important;
     width:min(94vw,520px) !important;
     margin:0 !important;
     z-index:2147483647 !important;
     font-family:'Cairo','Tajawal',sans-serif !important;
+    will-change:opacity, transform !important;
 }
 #assalOfflineBanner.is-visible{
-    transform:translateX(-50%) !important;
+    transform:translate3d(-50%,0,0) !important;
 }
 @media (max-width:480px){
     #assalOfflineBanner{
-        top:calc(env(safe-area-inset-top, 0px) + 48px) !important;
+        top:calc(var(--assal-header-height,44px) + var(--assal-offline-banner-gap,6px)) !important;
         width:calc(100vw - 18px) !important;
         min-height:38px !important;
         padding:8px 12px !important;
@@ -35384,35 +35389,57 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
                document.getElementById('header') ||
                document.querySelector('[class*="header"]');
     }
-    function forceOfflineBannerPosition(){
+
+    function forceOfflineBannerToBody(){
         try{
             var banner = document.getElementById('assalOfflineBanner');
+            if(!banner || !document.body) return;
+            if(banner.parentNode !== document.body){
+                document.body.appendChild(banner);
+            }
+        }catch(e){}
+    }
+
+    function forceOfflineBannerPosition(){
+        try{
+            forceOfflineBannerToBody();
+
+            var banner = document.getElementById('assalOfflineBanner');
             if(!banner) return;
+
             var header = findHeader();
-            var safeTop = 0;
-            try{
-                var probe = document.createElement('div');
-                probe.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);height:0;visibility:hidden;pointer-events:none;';
-                document.body.appendChild(probe);
-                safeTop = Math.max(0, Math.round(probe.getBoundingClientRect().top || 0));
-                probe.remove();
-            }catch(_){}
-            var topPx = 48 + safeTop;
+            var topPx = 50;
+
             if(header){
                 var r = header.getBoundingClientRect();
-                if(r && r.bottom){
-                    topPx = Math.max(46 + safeTop, Math.round(r.bottom + 4));
+                if(r && Number.isFinite(r.bottom)){
+                    /*
+                      مهم:
+                      لا نضيف env(safe-area-inset-top) هنا، لأن WebView أصلاً يضع الصفحة تحت شريط النظام.
+                      إضافته كانت سبب نزول الشريط بعيداً عن الهيدر.
+                    */
+                    topPx = Math.max(46, Math.round(r.bottom + 6));
                 }
             }
+
             banner.style.setProperty('position','fixed','important');
             banner.style.setProperty('top', topPx + 'px','important');
             banner.style.setProperty('left','50%','important');
             banner.style.setProperty('right','auto','important');
             banner.style.setProperty('bottom','auto','important');
-            banner.style.setProperty('transform','translateX(-50%)','important');
+            banner.style.setProperty('transform','translate3d(-50%,0,0)','important');
+            banner.style.setProperty('width','min(94vw,520px)','important');
+            banner.style.setProperty('margin','0','important');
             banner.style.setProperty('z-index','2147483647','important');
             banner.style.setProperty('font-family',"'Cairo','Tajawal',sans-serif",'important');
         }catch(e){}
+    }
+
+    function scheduleForce(){
+        forceOfflineBannerPosition();
+        setTimeout(forceOfflineBannerPosition, 40);
+        setTimeout(forceOfflineBannerPosition, 160);
+        setTimeout(forceOfflineBannerPosition, 420);
     }
 
     var oldShow = window.showAssalOfflineState;
@@ -35425,9 +35452,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
                 if(banner) banner.classList.add('is-visible');
             }catch(_){}
         }
-        forceOfflineBannerPosition();
-        setTimeout(forceOfflineBannerPosition, 60);
-        setTimeout(forceOfflineBannerPosition, 220);
+        scheduleForce();
     };
 
     var oldHide = window.hideAssalOfflineState;
@@ -35435,20 +35460,23 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
         if(typeof oldHide === 'function'){
             oldHide.apply(this, arguments);
         }
-        forceOfflineBannerPosition();
+        scheduleForce();
     };
 
-    window.addEventListener('assalOffline', function(){ setTimeout(forceOfflineBannerPosition, 0); setTimeout(forceOfflineBannerPosition, 120); }, true);
-    window.addEventListener('offline', function(){ setTimeout(forceOfflineBannerPosition, 0); setTimeout(forceOfflineBannerPosition, 120); }, true);
-    window.addEventListener('resize', forceOfflineBannerPosition);
-    window.addEventListener('orientationchange', function(){ setTimeout(forceOfflineBannerPosition, 250); });
+    window.addEventListener('assalOffline', scheduleForce, true);
+    window.addEventListener('assalOnline', scheduleForce, true);
+    window.addEventListener('offline', scheduleForce, true);
+    window.addEventListener('online', scheduleForce, true);
+    window.addEventListener('resize', scheduleForce);
+    window.addEventListener('orientationchange', function(){ setTimeout(scheduleForce, 250); });
 
     if(document.readyState === 'loading'){
-        document.addEventListener('DOMContentLoaded', forceOfflineBannerPosition, {once:true});
+        document.addEventListener('DOMContentLoaded', scheduleForce, {once:true});
     }else{
-        forceOfflineBannerPosition();
+        scheduleForce();
     }
-    setTimeout(forceOfflineBannerPosition, 500);
-    setTimeout(forceOfflineBannerPosition, 1500);
+
+    setTimeout(scheduleForce, 500);
+    setTimeout(scheduleForce, 1500);
 })();
 </script>
