@@ -33060,17 +33060,28 @@ html body footer {
   const PATH_MUTED = 'customerSpace/mutedDevices';
   const PATH_SETTINGS = 'customerSpace/settings';
   const PATH_PRESENCE = 'customerSpace/presence';
+  const PATH_TYPING = 'customerSpace/typing';
   const MAX_RENDER_MESSAGES = 120;
   const SEND_COOLDOWN_MS = 1800;
 
   let unsubMessages = null;
   let unsubPresence = null;
   let unsubSettings = null;
+  let unsubTyping = null;
   let messages = [];
   let presenceMap = {};
   let settings = {};
   let lastSendAt = 0;
   let mutedUntil = 0;
+  let typingMap = {};
+  let selectedReply = null;
+  let typingClearTimer = null;
+  let lastTypingWriteAt = 0;
+  const REACTION_OPTIONS = [
+    {key:'heart', emoji:'❤️', label:'قلب'},
+    {key:'laugh', emoji:'😂', label:'ضحك'},
+    {key:'like', emoji:'👍', label:'إعجاب'}
+  ];
 
   function $(id){ return document.getElementById(id); }
   function dbApi(){ return window.firebaseDB || {}; }
@@ -33092,6 +33103,55 @@ html body footer {
     } catch(_) {
       return 'WEB-' + Math.random().toString(36).slice(2,8).toUpperCase();
     }
+  }
+
+  function dbSafeKey(v){
+    return encodeURIComponent(String(v || '')).replace(/[.#$\[\]/]/g, '_');
+  }
+  function msgById(id){
+    return messages.find(m => m && String(m.id) === String(id));
+  }
+  function replySummary(msg){
+    if (!msg) return null;
+    return {
+      id: String(msg.id || ''),
+      senderName: clean(msg.senderName || (msg.senderRole === 'admin' ? 'الإدارة' : 'زبون')),
+      text: clean(msg.deletedAt ? 'رسالة محذوفة' : (msg.text || '')).slice(0, 160),
+      createdAt: Number(msg.createdAt || 0)
+    };
+  }
+  function renderReplyPreview(){
+    const box = $('assalCommunityReplyPreview');
+    if (!box) return;
+    if (!selectedReply || !selectedReply.id) {
+      box.classList.remove('show');
+      box.innerHTML = '';
+      return;
+    }
+    box.classList.add('show');
+    box.innerHTML = '<div class="assal-community-reply-side"></div>'
+      + '<div class="assal-community-reply-content"><b>رد على ' + esc(selectedReply.senderName || 'رسالة') + '</b>'
+      + '<span>' + esc(selectedReply.text || 'رسالة') + '</span></div>'
+      + '<button type="button" class="assal-community-reply-close" data-community-action="clear-reply"><i class="fas fa-times"></i></button>';
+  }
+  function ensureCommunityEnhancementUi(){
+    const composer = document.querySelector('#assalCommunityModal .assal-community-composer');
+    if (composer && !$('assalCommunityReplyPreview')) {
+      const reply = document.createElement('div');
+      reply.id = 'assalCommunityReplyPreview';
+      reply.className = 'assal-community-reply-preview';
+      composer.insertBefore(reply, composer.firstChild);
+    }
+    const messagesBox = $('assalCommunityMessages');
+    if (messagesBox && !$('assalCommunityTypingIndicator')) {
+      const typing = document.createElement('div');
+      typing.id = 'assalCommunityTypingIndicator';
+      typing.className = 'assal-community-typing';
+      typing.setAttribute('aria-live','polite');
+      messagesBox.insertAdjacentElement('afterend', typing);
+    }
+    renderReplyPreview();
+    renderTypingIndicator();
   }
   function isAdmin(){
     try { return localStorage.getItem('isAdmin') === 'true'; } catch(_) { return false; }
@@ -33203,7 +33263,7 @@ html body footer {
       lastSeen:now()
     };
     try {
-      const r = f.ref(f.db, PATH_PRESENCE + '/' + encodeURIComponent(id).replace(/\./g, '%2E'));
+      const r = f.ref(f.db, PATH_PRESENCE + '/' + dbSafeKey(id));
       await f.set(r, data);
       if (typeof f.onDisconnect === 'function') {
         try { await f.onDisconnect(r).remove(); } catch(_) {}
@@ -33215,7 +33275,9 @@ html body footer {
     try { if (typeof unsubMessages === 'function') unsubMessages(); } catch(_) {}
     try { if (typeof unsubPresence === 'function') unsubPresence(); } catch(_) {}
     try { if (typeof unsubSettings === 'function') unsubSettings(); } catch(_) {}
-    unsubMessages = null; unsubPresence = null; unsubSettings = null;
+    try { if (typeof unsubTyping === 'function') unsubTyping(); } catch(_) {}
+    try { clearOwnTyping(true); } catch(_) {}
+    unsubMessages = null; unsubPresence = null; unsubSettings = null; unsubTyping = null;
   }
 
   window.__ASSAL_COMMUNITY_STOP_REALTIME__ = stopRealtime;
@@ -33271,6 +33333,78 @@ html body footer {
         updateCounters();
       });
     } catch(e){ console.error(e); }
+    try {
+      unsubTyping = f.onValue(f.ref(f.db, PATH_TYPING), snap => {
+        typingMap = snap.exists() ? (snap.val() || {}) : {};
+        renderTypingIndicator();
+      });
+    } catch(e){ console.error(e); }
+  }
+
+  function renderTypingIndicator(){
+    const box = $('assalCommunityTypingIndicator');
+    if (!box) return;
+    const me = deviceId();
+    const active = Object.values(typingMap || {}).filter(function(t){
+      return t && t.deviceId !== me && Number(t.until || 0) > now() && clean(t.name);
+    });
+    if (!active.length) {
+      box.classList.remove('show');
+      box.innerHTML = '';
+      return;
+    }
+    const names = active.slice(0,2).map(t => esc(t.name)).join(' و ');
+    const more = active.length > 2 ? ' وآخرون' : '';
+    box.classList.add('show');
+    box.innerHTML = '<span class="typing-dots"><i></i><i></i><i></i></span><b>' + names + more + '</b><span> يكتب الآن...</span>';
+  }
+
+  async function setTypingState(isTyping){
+    if (!hasFirebase()) return;
+    const f = dbApi();
+    const id = deviceId();
+    const path = PATH_TYPING + '/' + dbSafeKey(id);
+    try {
+      if (!isTyping) {
+        await f.remove(f.ref(f.db, path));
+        return;
+      }
+      if (now() - lastTypingWriteAt < 1400) return;
+      lastTypingWriteAt = now();
+      let displayName = isAdmin() ? adminLabel() : 'زبون';
+      try {
+        if (!isAdmin()) {
+          const snap = await f.get(f.ref(f.db, 'customerProfiles/' + id));
+          const prof = snap.exists() ? (snap.val() || {}) : {};
+          displayName = clean(prof.name) || 'زبون';
+        }
+      } catch(_) {}
+      await f.set(f.ref(f.db, path), {
+        deviceId:id,
+        role:isAdmin() ? 'admin' : 'customer',
+        name:displayName,
+        at:now(),
+        until:now() + 5500
+      });
+      if (typingClearTimer) clearTimeout(typingClearTimer);
+      typingClearTimer = setTimeout(function(){ clearOwnTyping(false); }, 6200);
+    } catch(_) {}
+  }
+  function markTyping(){
+    const input = $('assalCommunityInput');
+    const hasText = !!clean(input && input.value);
+    if (hasText) setTypingState(true);
+    else clearOwnTyping(false);
+  }
+  function clearOwnTyping(syncOnly){
+    if (typingClearTimer) { clearTimeout(typingClearTimer); typingClearTimer = null; }
+    if (!hasFirebase()) return;
+    const f = dbApi();
+    const id = deviceId();
+    try {
+      const res = f.remove(f.ref(f.db, PATH_TYPING + '/' + dbSafeKey(id)));
+      if (!syncOnly && res && typeof res.catch === 'function') res.catch(function(){});
+    } catch(_) {}
   }
 
   async function checkMuted(){
@@ -33305,9 +33439,26 @@ html body footer {
     box.innerHTML = '<i class="fas fa-thumbtack"></i><div><b>مثبّت في مجتمع عسل</b><br>' + esc(txt).slice(0,170) + '</div>';
   }
 
+  function renderReactionBar(msg, deleted){
+    if (deleted) return '';
+    const reactions = msg.reactions || {};
+    const myKey = dbSafeKey(deviceId());
+    const parts = REACTION_OPTIONS.map(function(opt){
+      const bucket = reactions && reactions[opt.key] ? reactions[opt.key] : {};
+      const count = Object.keys(bucket || {}).length;
+      const active = !!(bucket && bucket[myKey]);
+      return '<button type="button" class="assal-community-reaction '+(active?'is-active':'')+'" data-community-action="react" data-id="'+esc(msg.id)+'" data-reaction="'+esc(opt.key)+'" title="'+esc(opt.label)+'">'
+        + '<span>'+opt.emoji+'</span>' + (count ? '<b>'+count+'</b>' : '') + '</button>';
+    }).join('');
+    return '<div class="assal-community-reactions">' + parts
+      + '<button type="button" class="assal-community-reply-btn" data-community-action="reply" data-id="'+esc(msg.id)+'"><i class="fas fa-reply"></i> رد</button>'
+      + '</div>';
+  }
+
   function renderMessages(){
     const wrap = $('assalCommunityMessages');
     if (!wrap) return;
+    ensureCommunityEnhancementUi();
     const me = deviceId();
     const wasNearBottom = (wrap.scrollHeight - wrap.scrollTop - wrap.clientHeight) < 110;
     const list = messages.filter(m => m && !m.hardDeleted);
@@ -33316,6 +33467,7 @@ html body footer {
 
     if (!list.length) {
       wrap.innerHTML = '<div class="assal-community-empty"><i class="fas fa-comments"></i><div>مجتمع عسل فارغ حالياً</div><small>اكتب أول رسالة حتى تبدي المحادثة.</small></div>';
+      renderTypingIndicator();
       return;
     }
 
@@ -33337,6 +33489,14 @@ html body footer {
       const body = deleted ? '<span style="color:rgba(226,232,240,.62);font-style:italic">تم حذف الرسالة</span>' : esc(msg.text || '');
       const edited = msg.editedAt && !deleted ? '<div class="assal-community-edited">تم التعديل</div>' : '';
 
+      let replyHtml = '';
+      if (msg.replyTo && msg.replyTo.id) {
+        replyHtml = '<button type="button" class="assal-community-quoted-reply" data-community-action="jump" data-id="'+esc(msg.replyTo.id)+'">'
+          + '<span class="assal-community-quote-line"></span>'
+          + '<span class="assal-community-quote-body"><b>'+esc(msg.replyTo.senderName || 'رسالة')+'</b><small>'+esc(msg.replyTo.text || 'رسالة')+'</small></span>'
+          + '</button>';
+      }
+
       let actions = '';
       if (canEdit || canDelete || canPin || canMute) {
         actions = '<div class="assal-community-msg-actions">'
@@ -33347,11 +33507,13 @@ html body footer {
           + '</div>';
       }
 
-      return sep + '<div class="assal-community-msg '+(mine?'mine ':'')+(adminMsg?'admin-msg ':'')+(deleted?'deleted':'')+'">'
+      return sep + '<div id="assal-community-msg-'+esc(msg.id)+'" class="assal-community-msg '+(mine?'mine ':'')+(adminMsg?'admin-msg ':'')+(deleted?'deleted':'')+'">'
         + '<div class="assal-community-msg-head"><div class="assal-community-sender"><span>'+name+'</span>'+role+'</div><div class="assal-community-time">'+timeText(msg.createdAt)+'</div></div>'
-        + '<div class="assal-community-text">'+body+'</div>'+edited+actions+'</div>';
+        + replyHtml
+        + '<div class="assal-community-text">'+body+'</div>'+edited+renderReactionBar(msg, deleted)+actions+'</div>';
     }).join('');
 
+    renderTypingIndicator();
     setTimeout(() => { try { if (wasNearBottom) wrap.scrollTop = wrap.scrollHeight; } catch(_){} }, 30);
   }
 
@@ -33360,6 +33522,59 @@ html body footer {
     const f = dbApi();
     await f.update(f.ref(f.db, PATH_MESSAGES + '/' + id), Object.assign({}, patch, {updatedAt:now()}));
   }
+
+  window.reactAssalCommunityMessage = async function(id, reactionKey){
+    try {
+      if (!hasFirebase()) return;
+      const msg = msgById(id);
+      if (!msg || msg.deletedAt) return;
+      const opt = REACTION_OPTIONS.find(o => o.key === reactionKey);
+      if (!opt) return;
+      const f = dbApi();
+      const meKey = dbSafeKey(deviceId());
+      const base = PATH_MESSAGES + '/' + id + '/reactions';
+      const updates = {};
+      REACTION_OPTIONS.forEach(function(o){
+        if (o.key !== reactionKey) updates[base + '/' + o.key + '/' + meKey] = null;
+      });
+      const active = !!(msg.reactions && msg.reactions[reactionKey] && msg.reactions[reactionKey][meKey]);
+      updates[base + '/' + reactionKey + '/' + meKey] = active ? null : {
+        deviceId:deviceId(),
+        role:isAdmin() ? 'admin' : 'customer',
+        name:isAdmin() ? adminLabel() : '',
+        at:now()
+      };
+      updates[PATH_MESSAGES + '/' + id + '/updatedAt'] = now();
+      await f.update(f.ref(f.db), updates);
+    } catch(e) {
+      console.error('community reaction:', e);
+      if (window.showElegantTopToast) showElegantTopToast('تعذر حفظ التفاعل', 'error', 1400);
+    }
+  };
+
+  window.replyAssalCommunityMessage = function(id){
+    const msg = msgById(id);
+    if (!msg || msg.deletedAt) return;
+    selectedReply = replySummary(msg);
+    renderReplyPreview();
+    const input = $('assalCommunityInput');
+    try { input && input.focus(); } catch(_) {}
+  };
+
+  window.clearAssalCommunityReply = function(){
+    selectedReply = null;
+    renderReplyPreview();
+  };
+
+  window.jumpAssalCommunityMessage = function(id){
+    const el = document.getElementById('assal-community-msg-' + id);
+    if (!el) return;
+    try {
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+      el.classList.add('is-jump-highlight');
+      setTimeout(function(){ try { el.classList.remove('is-jump-highlight'); } catch(_){} }, 1400);
+    } catch(_) {}
+  };
 
   window.editAssalCommunityMessage = async function(id){
     try {
@@ -33538,11 +33753,20 @@ html body footer {
         customerPhone:user.phone || '',
         deviceId:user.deviceId,
         createdAt:now(),
-        updatedAt:now()
+        updatedAt:now(),
+        replyTo:selectedReply ? {
+          id:selectedReply.id,
+          senderName:selectedReply.senderName || '',
+          text:selectedReply.text || '',
+          createdAt:selectedReply.createdAt || 0
+        } : null
       };
       const f = dbApi();
       await f.set(f.ref(f.db, PATH_MESSAGES + '/' + id), payload);
       if (input) { input.value = ''; input.style.height = ''; }
+      selectedReply = null;
+      renderReplyPreview();
+      clearOwnTyping(false);
       try {
         const customerPushMuted = !!(settings && settings.notificationsMuted);
         if (typeof window.queuePushNotificationEvent === 'function') {
@@ -33593,6 +33817,7 @@ html body footer {
     const modal = $('assalCommunityModal');
     if (!modal) return;
     ensureHeaderUi();
+    ensureCommunityEnhancementUi();
     modal.classList.add('show');
     modal.setAttribute('aria-hidden','false');
     startRealtime();
@@ -33606,6 +33831,9 @@ html body footer {
     if (!modal) return;
     modal.classList.remove('show');
     modal.setAttribute('aria-hidden','true');
+    clearOwnTyping(false);
+    selectedReply = null;
+    renderReplyPreview();
     stopRealtime();
     try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch(_) {}
   };
@@ -33621,12 +33849,14 @@ html body footer {
 
   function bindUi(){
     ensureHeaderUi();
+    ensureCommunityEnhancementUi();
     const input = $('assalCommunityInput');
     if (input && !input.dataset.assalCommunityUltraBound) {
       input.dataset.assalCommunityUltraBound = '1';
       input.addEventListener('input', function(){
         this.style.height = 'auto';
         this.style.height = Math.min(this.scrollHeight, 110) + 'px';
+        markTyping();
       });
       input.addEventListener('keydown', function(e){
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -33634,7 +33864,20 @@ html body footer {
           window.sendAssalCommunityMessage();
         }
       });
+      input.addEventListener('blur', function(){ setTimeout(function(){ clearOwnTyping(false); }, 700); });
     }
+    const composer = document.querySelector('#assalCommunityModal .assal-community-composer');
+    if (composer && !composer.dataset.assalCommunityReplyClearBound) {
+      composer.dataset.assalCommunityReplyClearBound = '1';
+      composer.addEventListener('click', function(e){
+        const btn = e.target.closest('[data-community-action="clear-reply"], .assal-community-reply-close');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        window.clearAssalCommunityReply();
+      }, true);
+    }
+
     const wrap = $('assalCommunityMessages');
     if (wrap && !wrap.dataset.assalCommunityActionsBound) {
       wrap.dataset.assalCommunityActionsBound = '1';
@@ -33650,6 +33893,10 @@ html body footer {
         if (action === 'delete') return window.deleteAssalCommunityMessage(id);
         if (action === 'pin') return window.toggleAssalCommunityPin(id);
         if (action === 'mute') return window.muteAssalCommunitySender(id);
+        if (action === 'reply') return window.replyAssalCommunityMessage(id);
+        if (action === 'jump') return window.jumpAssalCommunityMessage(id);
+        if (action === 'react') return window.reactAssalCommunityMessage(id, btn.getAttribute('data-reaction'));
+        if (action === 'clear-reply') return window.clearAssalCommunityReply();
       });
     }
   }
@@ -34306,3 +34553,552 @@ html.low-end-device .assal-community-composer{
   transition:none !important;
 }
 </style>
+<!-- ===== ASSAL Community Social Interactions: reactions + replies + typing ===== -->
+<style id="assal-community-social-interactions-final">
+.assal-community-reactions{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-top:7px;
+}
+.assal-community-reaction,
+.assal-community-reply-btn{
+  border:1px solid rgba(148,163,184,.16);
+  background:rgba(15,23,42,.38);
+  color:rgba(226,232,240,.86);
+  min-height:28px;
+  border-radius:999px;
+  padding:4px 9px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  font-family:'Cairo',sans-serif;
+  font-size:11px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045);
+}
+.assal-community-reaction span{font-size:14px;line-height:1;}
+.assal-community-reaction b{
+  min-width:14px;
+  height:14px;
+  border-radius:999px;
+  display:inline-grid;
+  place-items:center;
+  font-size:9px;
+  background:rgba(255,255,255,.11);
+}
+.assal-community-reaction.is-active{
+  border-color:rgba(34,211,238,.36);
+  background:linear-gradient(135deg, rgba(14,165,233,.22), rgba(16,185,129,.16));
+  color:#fff;
+}
+.assal-community-reply-btn i{font-size:10px;}
+.assal-community-quoted-reply{
+  width:100%;
+  margin:5px 0 7px;
+  padding:7px 8px;
+  border:none;
+  border-radius:13px;
+  display:grid;
+  grid-template-columns:3px minmax(0,1fr);
+  gap:8px;
+  text-align:right;
+  direction:rtl;
+  cursor:pointer;
+  background:rgba(2,6,23,.24);
+  color:inherit;
+  font-family:'Cairo',sans-serif;
+  border:1px solid rgba(148,163,184,.10);
+}
+.assal-community-msg.mine .assal-community-quoted-reply{
+  background:rgba(255,255,255,.08);
+}
+.assal-community-quote-line{
+  width:3px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#22d3ee,#22c55e);
+}
+.assal-community-quote-body{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.assal-community-quote-body b{
+  font-size:11px;
+  color:#67e8f9;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.assal-community-quote-body small{
+  font-size:11px;
+  color:rgba(226,232,240,.70);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.assal-community-reply-preview{
+  display:none;
+  grid-template-columns:3px minmax(0,1fr) 30px;
+  gap:8px;
+  align-items:center;
+  margin:0 0 6px;
+  padding:7px 8px;
+  border-radius:15px;
+  background:linear-gradient(135deg, rgba(14,165,233,.13), rgba(16,185,129,.08));
+  border:1px solid rgba(125,211,252,.18);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+.assal-community-reply-preview.show{display:grid;}
+.assal-community-reply-side{
+  width:3px;
+  height:100%;
+  min-height:34px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#38bdf8,#22c55e);
+}
+.assal-community-reply-content{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  text-align:right;
+  direction:rtl;
+  gap:2px;
+}
+.assal-community-reply-content b{
+  font-size:11px;
+  color:#dffaff;
+}
+.assal-community-reply-content span{
+  font-size:11px;
+  color:rgba(226,232,240,.72);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.assal-community-reply-close{
+  width:28px;
+  height:28px;
+  border-radius:11px;
+  border:1px solid rgba(248,113,113,.18);
+  background:rgba(127,29,29,.22);
+  color:#fecaca;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+}
+.assal-community-typing{
+  display:none;
+  align-self:flex-start;
+  margin:0 14px 6px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(15,23,42,.54);
+  border:1px solid rgba(148,163,184,.12);
+  color:rgba(226,232,240,.78);
+  font-family:'Cairo',sans-serif;
+  font-size:11px;
+  font-weight:800;
+  gap:6px;
+  align-items:center;
+  width:max-content;
+  max-width:calc(100% - 28px);
+}
+.assal-community-typing.show{display:flex;}
+.typing-dots{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+}
+.typing-dots i{
+  width:5px;
+  height:5px;
+  border-radius:999px;
+  background:#67e8f9;
+  animation:assalTypingDot .9s ease-in-out infinite;
+}
+.typing-dots i:nth-child(2){animation-delay:.14s;}
+.typing-dots i:nth-child(3){animation-delay:.28s;}
+@keyframes assalTypingDot{
+  0%,100%{transform:translateY(0);opacity:.45;}
+  50%{transform:translateY(-3px);opacity:1;}
+}
+.assal-community-msg.is-jump-highlight{
+  animation:assalCommunityJumpGlow 1.35s ease;
+}
+@keyframes assalCommunityJumpGlow{
+  0%,100%{box-shadow:0 8px 28px rgba(0,0,0,.25);}
+  35%{box-shadow:0 0 0 2px rgba(34,211,238,.42),0 12px 34px rgba(34,211,238,.20);}
+}
+@media(max-width:520px){
+  .assal-community-reactions{gap:4px;margin-top:6px;}
+  .assal-community-reaction,
+  .assal-community-reply-btn{min-height:27px;padding:4px 8px;font-size:10px;}
+  .assal-community-typing{font-size:10.5px;margin-inline:10px;}
+}
+html.low-end-device .typing-dots i,
+html.low-end-device .assal-community-msg.is-jump-highlight{
+  animation:none !important;
+}
+</style>
+
+
+
+<!-- ===== ASSAL COMMUNITY GESTURE UX FINAL: التفاعل بالضغط المطول + الرد بالسحب ===== -->
+<style id="assal-community-gesture-reactions-style">
+/* إخفاء زر الرد القديم، والاعتماد على السحب للرد */
+#assalCommunityModal .assal-community-reply-btn{
+  display:none !important;
+}
+
+/* التفاعلات تبقى ظاهرة فقط إذا عليها عداد أو تفاعل المستخدم */
+#assalCommunityModal .assal-community-reactions{
+  gap:5px !important;
+  margin-top:6px !important;
+  min-height:0 !important;
+}
+#assalCommunityModal .assal-community-reactions.is-empty-reactions{
+  display:none !important;
+}
+#assalCommunityModal .assal-community-reaction.is-gesture-hidden{
+  display:none !important;
+}
+
+/* تحسين لمس الرسالة بدون تخريب السكرول */
+#assalCommunityModal .assal-community-msg{
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+  will-change: transform;
+}
+#assalCommunityModal .assal-community-msg.is-swipe-replying{
+  box-shadow:0 14px 34px rgba(14,165,233,.18), 0 10px 24px rgba(0,0,0,.28) !important;
+}
+#assalCommunityModal .assal-community-msg.is-long-pressing{
+  filter:brightness(1.08);
+}
+
+.assal-community-swipe-hint{
+  position:absolute;
+  right:calc(100% + 8px);
+  top:50%;
+  width:34px;
+  height:34px;
+  transform:translateY(-50%) scale(.82);
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  color:#e0f2fe;
+  background:linear-gradient(135deg, rgba(14,165,233,.96), rgba(37,99,235,.80));
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 10px 24px rgba(14,165,233,.30);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .14s ease, transform .14s ease;
+  z-index:4;
+}
+#assalCommunityModal .assal-community-msg.is-swipe-replying .assal-community-swipe-hint{
+  opacity:1;
+  transform:translateY(-50%) scale(1);
+}
+
+/* نافذة الرموز العائمة */
+.assal-community-reaction-picker{
+  position:fixed;
+  z-index:1000005;
+  direction:ltr;
+  display:none;
+  align-items:center;
+  gap:7px;
+  padding:8px 10px;
+  border-radius:999px;
+  background:rgba(8,13,24,.92);
+  border:1px solid rgba(148,163,184,.24);
+  box-shadow:0 18px 42px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  transform:translate(-50%, -8px) scale(.94);
+  opacity:0;
+  transition:opacity .14s ease, transform .14s ease;
+}
+.assal-community-reaction-picker.show{
+  display:flex;
+  opacity:1;
+  transform:translate(-50%, -8px) scale(1);
+}
+.assal-community-reaction-picker button{
+  width:40px;
+  height:40px;
+  border:0;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  font-size:22px;
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+  transition:transform .12s ease, background .12s ease;
+}
+.assal-community-reaction-picker button:hover,
+.assal-community-reaction-picker button:active{
+  transform:scale(1.12) translateY(-2px);
+  background:rgba(255,255,255,.16);
+}
+.assal-community-reaction-picker .picker-hint{
+  direction:rtl;
+  font-family:'Cairo',sans-serif;
+  font-size:10px;
+  font-weight:800;
+  color:rgba(226,232,240,.72);
+  padding-inline:3px 1px;
+  white-space:nowrap;
+}
+
+@media (max-width:480px){
+  .assal-community-reaction-picker{ gap:6px; padding:7px 8px; }
+  .assal-community-reaction-picker button{ width:38px; height:38px; font-size:21px; }
+  .assal-community-reaction-picker .picker-hint{ display:none; }
+  .assal-community-swipe-hint{ width:31px; height:31px; right:calc(100% + 5px); }
+}
+</style>
+<script id="assal-community-gesture-reactions-script">
+(function(){
+  'use strict';
+
+  var PREFIX = 'assal-community-msg-';
+  var longPressTimer = null;
+  var longPressTarget = null;
+  var activeTouch = null;
+  var pickerHideTimer = null;
+  var REACTIONS = [
+    {key:'heart', emoji:'❤️', label:'قلب'},
+    {key:'laugh', emoji:'😂', label:'ضحك'},
+    {key:'like', emoji:'👍', label:'إعجاب'}
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function messagesBox(){ return $('assalCommunityMessages'); }
+  function isCommunityOpen(){
+    var m = $('assalCommunityModal');
+    return !!(m && (m.classList.contains('show') || m.getAttribute('aria-hidden') === 'false'));
+  }
+  function getMsgEl(node){
+    return node && node.closest ? node.closest('#assalCommunityModal .assal-community-msg') : null;
+  }
+  function getMsgId(el){
+    if (!el || !el.id || el.id.indexOf(PREFIX) !== 0) return '';
+    return el.id.slice(PREFIX.length);
+  }
+  function ignoreInteractive(target){
+    return !!(target && target.closest && target.closest('button,a,input,textarea,select,.assal-community-msg-actions,.assal-community-reactions,.assal-community-quoted-reply,.assal-community-reply-preview'));
+  }
+
+  function ensureSwipeHint(el){
+    if (!el || el.querySelector('.assal-community-swipe-hint')) return;
+    var hint = document.createElement('div');
+    hint.className = 'assal-community-swipe-hint';
+    hint.innerHTML = '<i class="fas fa-reply"></i>';
+    el.appendChild(hint);
+  }
+
+  function ensurePicker(){
+    var picker = $('assalCommunityReactionPicker');
+    if (picker) return picker;
+    picker = document.createElement('div');
+    picker.id = 'assalCommunityReactionPicker';
+    picker.className = 'assal-community-reaction-picker';
+    picker.innerHTML = REACTIONS.map(function(r){
+      return '<button type="button" data-reaction="'+r.key+'" title="'+r.label+'">'+r.emoji+'</button>';
+    }).join('') + '<span class="picker-hint">تفاعل</span>';
+    document.body.appendChild(picker);
+    picker.addEventListener('click', function(e){
+      var btn = e.target.closest('button[data-reaction]');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var id = picker.getAttribute('data-message-id') || '';
+      var key = btn.getAttribute('data-reaction') || '';
+      hidePicker();
+      if (id && key && typeof window.reactAssalCommunityMessage === 'function') {
+        window.reactAssalCommunityMessage(id, key);
+      }
+    }, true);
+    return picker;
+  }
+
+  function positionPickerFor(el){
+    var picker = ensurePicker();
+    if (!el || !picker) return;
+    var id = getMsgId(el);
+    if (!id) return;
+    var rect = el.getBoundingClientRect();
+    var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    var x = Math.min(Math.max(rect.left + rect.width / 2, 92), vw - 92);
+    var y = Math.max(56, rect.top - 8);
+    picker.style.left = x + 'px';
+    picker.style.top = y + 'px';
+    picker.setAttribute('data-message-id', id);
+    picker.classList.add('show');
+    clearTimeout(pickerHideTimer);
+  }
+
+  function hidePicker(){
+    var picker = $('assalCommunityReactionPicker');
+    if (!picker) return;
+    picker.classList.remove('show');
+    picker.removeAttribute('data-message-id');
+  }
+
+  function cancelLongPress(){
+    if (longPressTimer) clearTimeout(longPressTimer);
+    longPressTimer = null;
+    if (longPressTarget) longPressTarget.classList.remove('is-long-pressing');
+    longPressTarget = null;
+  }
+
+  function startLongPress(el){
+    cancelLongPress();
+    if (!el || !getMsgId(el)) return;
+    longPressTarget = el;
+    el.classList.add('is-long-pressing');
+    longPressTimer = setTimeout(function(){
+      var target = longPressTarget;
+      cancelLongPress();
+      if (target && isCommunityOpen()) {
+        try { if (navigator.vibrate) navigator.vibrate(18); } catch(_) {}
+        positionPickerFor(target);
+      }
+    }, 430);
+  }
+
+  function syncReactionVisibility(){
+    var wrap = messagesBox();
+    if (!wrap) return;
+    wrap.querySelectorAll('.assal-community-msg').forEach(ensureSwipeHint);
+    wrap.querySelectorAll('.assal-community-reactions').forEach(function(row){
+      var visible = false;
+      row.querySelectorAll('.assal-community-reaction').forEach(function(btn){
+        var hasCount = !!btn.querySelector('b');
+        var active = btn.classList.contains('is-active');
+        var show = hasCount || active;
+        btn.classList.toggle('is-gesture-hidden', !show);
+        if (show) visible = true;
+      });
+      row.classList.toggle('is-empty-reactions', !visible);
+    });
+  }
+
+  function beginSwipe(el, x, y){
+    activeTouch = {el:el, startX:x, startY:y, dx:0, dy:0, swiping:false, cancelled:false};
+    ensureSwipeHint(el);
+  }
+  function moveSwipe(x, y, ev){
+    if (!activeTouch || !activeTouch.el) return;
+    var dx = x - activeTouch.startX;
+    var dy = y - activeTouch.startY;
+    activeTouch.dx = dx;
+    activeTouch.dy = dy;
+
+    if (Math.abs(dy) > 18 && Math.abs(dy) > Math.abs(dx)) {
+      endSwipe(false);
+      cancelLongPress();
+      return;
+    }
+    if (dx > 10 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+      activeTouch.swiping = true;
+      cancelLongPress();
+      if (ev && ev.cancelable) ev.preventDefault();
+      var move = Math.min(Math.max(dx, 0), 84);
+      activeTouch.el.classList.add('is-swipe-replying');
+      activeTouch.el.style.transform = 'translateX(' + move + 'px)';
+    }
+  }
+  function endSwipe(shouldReply){
+    if (!activeTouch || !activeTouch.el) { activeTouch = null; return; }
+    var el = activeTouch.el;
+    var id = getMsgId(el);
+    var ok = shouldReply !== false && activeTouch.swiping && activeTouch.dx > 62 && Math.abs(activeTouch.dy) < 50;
+    el.style.transform = '';
+    el.classList.remove('is-swipe-replying');
+    activeTouch = null;
+    if (ok && id && typeof window.replyAssalCommunityMessage === 'function') {
+      try { if (navigator.vibrate) navigator.vibrate(14); } catch(_) {}
+      window.replyAssalCommunityMessage(id);
+    }
+  }
+
+  function bindGestures(){
+    var wrap = messagesBox();
+    if (!wrap || wrap.dataset.assalGestureReactionsBound === '1') {
+      syncReactionVisibility();
+      return;
+    }
+    wrap.dataset.assalGestureReactionsBound = '1';
+
+    wrap.addEventListener('touchstart', function(e){
+      if (!isCommunityOpen() || e.touches.length !== 1 || ignoreInteractive(e.target)) return;
+      var el = getMsgEl(e.target);
+      if (!el || el.classList.contains('deleted')) return;
+      var t = e.touches[0];
+      beginSwipe(el, t.clientX, t.clientY);
+      startLongPress(el);
+    }, {passive:true});
+
+    wrap.addEventListener('touchmove', function(e){
+      if (!activeTouch || !e.touches.length) return;
+      var t = e.touches[0];
+      moveSwipe(t.clientX, t.clientY, e);
+    }, {passive:false});
+
+    wrap.addEventListener('touchend', function(){ cancelLongPress(); endSwipe(true); }, {passive:true});
+    wrap.addEventListener('touchcancel', function(){ cancelLongPress(); endSwipe(false); }, {passive:true});
+
+    /* دعم الكمبيوتر: ضغط مطوّل بالماوس للتجربة */
+    wrap.addEventListener('mousedown', function(e){
+      if (e.button !== 0 || ignoreInteractive(e.target)) return;
+      var el = getMsgEl(e.target);
+      if (!el || el.classList.contains('deleted')) return;
+      startLongPress(el);
+    });
+    wrap.addEventListener('mousemove', cancelLongPress);
+    wrap.addEventListener('mouseup', cancelLongPress);
+    wrap.addEventListener('mouseleave', cancelLongPress);
+
+    wrap.addEventListener('scroll', function(){ hidePicker(); cancelLongPress(); }, {passive:true});
+
+    var mo = new MutationObserver(function(){
+      window.requestAnimationFrame(syncReactionVisibility);
+    });
+    mo.observe(wrap, {childList:true, subtree:true});
+    syncReactionVisibility();
+  }
+
+  document.addEventListener('click', function(e){
+    var picker = $('assalCommunityReactionPicker');
+    if (picker && picker.classList.contains('show') && !picker.contains(e.target) && !getMsgEl(e.target)) hidePicker();
+  }, true);
+  window.addEventListener('resize', hidePicker, {passive:true});
+  window.addEventListener('orientationchange', hidePicker, {passive:true});
+
+  var oldReply = window.replyAssalCommunityMessage;
+  if (typeof oldReply === 'function' && !oldReply.__assalGestureWrapped) {
+    var wrappedReply = function(id){
+      hidePicker();
+      return oldReply.apply(this, arguments);
+    };
+    wrappedReply.__assalGestureWrapped = true;
+    window.replyAssalCommunityMessage = wrappedReply;
+  }
+
+  function boot(){ bindGestures(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
+  setTimeout(boot, 350);
+  setTimeout(boot, 1200);
+})();
+</script>
