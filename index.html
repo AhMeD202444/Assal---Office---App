@@ -14121,7 +14121,7 @@ html.low-end-device .assal-community-write-row{
 </button>
 
     
-    <input type="text" id="searchInput" placeholder=" " aria-label="اكتب اسم الآيتم أو اضغط المايك" autocomplete="off" dir="rtl">
+    <input type="text" id="searchInput" placeholder=" " aria-label="اكتب اسم الآيتم أو اضغط المايك" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" lang="en" inputmode="latin" dir="ltr" data-assal-english-keyboard="true">
     <span id="searchPlaceholderLabel" class="search-placeholder-label" aria-hidden="true">اكتب اسم الآيتم أو اضغط المايك</span>
     <div id="wholesaleSuggestions" class="wholesale-suggestions" aria-label="Wholesale suggestions"></div>
     <button id="clearBtn" class="clear-btn" onclick="clearSearch()" style="display: none;"><i class="fas fa-times"></i></button>
@@ -35947,5 +35947,47 @@ html.assal-offline-mode #assalOfflineBanner{
 
     setTimeout(scheduleForce, 500);
     setTimeout(scheduleForce, 1500);
+})();
+</script>
+
+<script>
+/* ===== ASSAL: Search input prefers English/Latin keyboard ===== */
+(function(){
+    function applyAssalEnglishKeyboardHints(){
+        try {
+            var input = document.getElementById('searchInput');
+            if (!input) return;
+
+            input.setAttribute('lang', 'en');
+            input.setAttribute('dir', 'ltr');
+            input.setAttribute('inputmode', 'latin');
+            input.setAttribute('autocomplete', 'off');
+            input.setAttribute('autocorrect', 'off');
+            input.setAttribute('autocapitalize', 'characters');
+            input.setAttribute('spellcheck', 'false');
+            input.setAttribute('data-assal-english-keyboard', 'true');
+
+            if (!input.__assalEnglishKeyboardBound) {
+                input.__assalEnglishKeyboardBound = true;
+                input.addEventListener('focus', function(){
+                    try {
+                        if (window.Android && typeof window.Android.assalEnglishKeyboardFocus === 'function') {
+                            window.Android.assalEnglishKeyboardFocus();
+                        }
+                    } catch (_) {}
+                }, true);
+            }
+        } catch (_) {}
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyAssalEnglishKeyboardHints, { once: true });
+    } else {
+        applyAssalEnglishKeyboardHints();
+    }
+
+    window.addEventListener('focus', applyAssalEnglishKeyboardHints, true);
+    setTimeout(applyAssalEnglishKeyboardHints, 500);
+    setTimeout(applyAssalEnglishKeyboardHints, 1500);
 })();
 </script>
