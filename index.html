@@ -19819,39 +19819,232 @@ function showExitLikeAlert({ icon = "fas fa-exclamation-circle", title = "تنب
         let isWholesaleMode = false;
 
 
+/* ===== ASSAL OFFLINE DATA CACHE: آخر نسخة ناجحة من Google Sheet ===== */
+const ASSAL_PRICE_CACHE_DB = 'assal_price_cache_db_v1';
+const ASSAL_PRICE_CACHE_STORE = 'snapshots';
+const ASSAL_PRICE_CACHE_KEY = 'latest-google-sheet-snapshot';
+const ASSAL_PRICE_CACHE_META_KEY = 'assal_price_cache_meta_v1';
+let assalPriceCacheDbPromise = null;
+let assalUsingOfflineCachedData = false;
+
+function assalIsBrowserOffline() {
+    try { return navigator.onLine === false; } catch (_) { return false; }
+}
+
+function assalHasValidPriceData(db) {
+    try {
+        if (!db || typeof db !== 'object') return false;
+        return Object.values(db).some(items => Array.isArray(items) && items.length > 0);
+    } catch (_) {
+        return false;
+    }
+}
+
+function assalReadCacheMeta() {
+    try {
+        const raw = localStorage.getItem(ASSAL_PRICE_CACHE_META_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (_) { return null; }
+}
+
+function assalWriteCacheMeta(meta) {
+    try { localStorage.setItem(ASSAL_PRICE_CACHE_META_KEY, JSON.stringify(meta || {})); } catch (_) {}
+}
+
+function assalFormatCacheTime(ts) {
+    try {
+        if (!ts) return '';
+        return new Date(ts).toLocaleString('ar-IQ', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit'
+        });
+    } catch (_) { return ''; }
+}
+
+function assalOpenPriceCacheDb() {
+    if (assalPriceCacheDbPromise) return assalPriceCacheDbPromise;
+    assalPriceCacheDbPromise = new Promise((resolve, reject) => {
+        try {
+            if (!('indexedDB' in window)) {
+                reject(new Error('IndexedDB غير مدعوم'));
+                return;
+            }
+            const req = indexedDB.open(ASSAL_PRICE_CACHE_DB, 1);
+            req.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(ASSAL_PRICE_CACHE_STORE)) {
+                    db.createObjectStore(ASSAL_PRICE_CACHE_STORE, { keyPath: 'id' });
+                }
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error || new Error('فشل فتح كاش الأسعار'));
+        } catch (err) { reject(err); }
+    });
+    return assalPriceCacheDbPromise;
+}
+
+async function assalSavePriceSnapshot(payload) {
+    try {
+        if (!payload || !assalHasValidPriceData(payload.database)) return false;
+        const db = await assalOpenPriceCacheDb();
+        await new Promise((resolve, reject) => {
+            const tx = db.transaction(ASSAL_PRICE_CACHE_STORE, 'readwrite');
+            const store = tx.objectStore(ASSAL_PRICE_CACHE_STORE);
+            store.put({ id: ASSAL_PRICE_CACHE_KEY, ...payload });
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error || new Error('فشل حفظ كاش الأسعار'));
+            tx.onabort = () => reject(tx.error || new Error('توقف حفظ كاش الأسعار'));
+        });
+        assalWriteCacheMeta({ savedAt: payload.savedAt, categoryCount: Object.keys(payload.database || {}).length });
+        return true;
+    } catch (err) {
+        console.warn('ASSAL offline cache save failed:', err);
+        return false;
+    }
+}
+
+async function assalLoadPriceSnapshot() {
+    try {
+        const db = await assalOpenPriceCacheDb();
+        return await new Promise((resolve, reject) => {
+            const tx = db.transaction(ASSAL_PRICE_CACHE_STORE, 'readonly');
+            const store = tx.objectStore(ASSAL_PRICE_CACHE_STORE);
+            const req = store.get(ASSAL_PRICE_CACHE_KEY);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => reject(req.error || new Error('فشل قراءة كاش الأسعار'));
+        });
+    } catch (err) {
+        console.warn('ASSAL offline cache read failed:', err);
+        return null;
+    }
+}
+
+async function assalRestorePriceSnapshot(reason) {
+    const snapshot = await assalLoadPriceSnapshot();
+    if (!snapshot || !assalHasValidPriceData(snapshot.database)) return null;
+
+    database = snapshot.database || {};
+    allDatabase = Array.isArray(snapshot.allDatabase) ? snapshot.allDatabase : [];
+    assalUsingOfflineCachedData = true;
+    window.__ASSAL_USING_OFFLINE_PRICE_CACHE__ = true;
+    window.__ASSAL_PRICE_CACHE_SAVED_AT__ = snapshot.savedAt || 0;
+
+    try { refreshOffersUiCount(); } catch (_) {}
+    try { if (typeof loadNewItems === 'function') loadNewItems(); } catch (_) {}
+    try { window.dispatchEvent(new CustomEvent('assalOfflineDataRestored', { detail: { reason, savedAt: snapshot.savedAt || 0 } })); } catch (_) {}
+    try { if (typeof window.showAssalOfflineState === 'function') window.showAssalOfflineState(false); } catch (_) {}
+    try { if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') window.__ASSAL_APPLY_NEWS_BAR_STATE__(); } catch (_) {}
+
+    console.warn('ASSAL: تم تشغيل آخر نسخة محفوظة من بيانات الأسعار.', { reason, savedAt: snapshot.savedAt });
+    return snapshot;
+}
+
+function assalMarkOnlineFreshData() {
+    assalUsingOfflineCachedData = false;
+    window.__ASSAL_USING_OFFLINE_PRICE_CACHE__ = false;
+    try { if (typeof window.hideAssalOfflineState === 'function') window.hideAssalOfflineState(); } catch (_) {}
+    try { if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') window.__ASSAL_APPLY_NEWS_BAR_STATE__(); } catch (_) {}
+}
+
+function assalOfflineDataMessage() {
+    const ts = window.__ASSAL_PRICE_CACHE_SAVED_AT__ || (assalReadCacheMeta() || {}).savedAt || 0;
+    const when = assalFormatCacheTime(ts);
+    return when
+        ? `أنت حالياً تستخدم وضع الأوفلاين — آخر تحديث محفوظ: ${when}`
+        : 'أنت حالياً تستخدم وضع الأوفلاين — سيتم تحديث الأسعار تلقائياً عند رجوع الإنترنت';
+}
+try { window.assalOfflineDataMessage = assalOfflineDataMessage; } catch (_) {}
+
+
 async function loadExcelFiles() {
     try {
         if (!dropboxMainFile) {
             console.error("رابط ملف Excel غير معرف.");
-            Swal.fire({
-                title: 'خطأ',
-                html: '<p style="color: #ff4d4d;">رابط ملف Excel غير معرف. يرجى التحقق من الاتصال.</p>',
-                iconHtml: '<i class="fas fa-exclamation-circle"></i>',
-                confirmButtonText: 'موافق',
-                customClass: {
-                    popup: 'swal2-popup',
-                    title: 'swal2-title',
-                    htmlContainer: 'swal2-html-container',
-                    confirmButton: 'swal2-confirm'
-                }
-            });
-           return { success: false, hasData: false, message: "رابط ملف Excel غير معرف." };
+            if (!assalIsBrowserOffline()) {
+                Swal.fire({
+                    title: 'خطأ',
+                    html: '<p style="color: #ff4d4d;">رابط ملف Excel غير معرف. يرجى التحقق من الاتصال.</p>',
+                    iconHtml: '<i class="fas fa-exclamation-circle"></i>',
+                    confirmButtonText: 'موافق',
+                    customClass: {
+                        popup: 'swal2-popup',
+                        title: 'swal2-title',
+                        htmlContainer: 'swal2-html-container',
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+            }
+            return { success: false, hasData: false, message: "رابط ملف Excel غير معرف." };
+        }
 
+        // إذا التطبيق انفتح بدون إنترنت: لا نظهر خطأ تحميل، نقرأ آخر نسخة محفوظة مباشرة.
+        if (assalIsBrowserOffline()) {
+            const restored = await assalRestorePriceSnapshot('browser-offline-before-fetch');
+            if (restored) {
+                return {
+                    success: true,
+                    hasData: true,
+                    fromCache: true,
+                    offline: true,
+                    savedAt: restored.savedAt || 0,
+                    message: assalOfflineDataMessage()
+                };
+            }
+            try { if (typeof window.showAssalOfflineState === 'function') window.showAssalOfflineState(false); } catch (_) {}
+            try { if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') window.__ASSAL_APPLY_NEWS_BAR_STATE__(); } catch (_) {}
+            return {
+                success: false,
+                hasData: false,
+                offline: true,
+                noCache: true,
+                message: "لا توجد نسخة محفوظة من البيانات. افتح التطبيق مرة واحدة والإنترنت متصل حتى تُحفظ نسخة أوفلاين."
+            };
         }
 
         console.log("جارٍ تحميل ملف Excel من:", dropboxMainFile);
-        const mainResponse = await fetch(dropboxMainFile, { cache: 'no-store' });
+        let mainResponse;
+        try {
+            mainResponse = await fetch(dropboxMainFile, { cache: 'no-store' });
+        } catch (fetchError) {
+            console.warn("فشل الاتصال بملف Excel، محاولة تشغيل آخر نسخة محفوظة:", fetchError);
+            const restored = await assalRestorePriceSnapshot('fetch-throw-' + (fetchError && fetchError.message ? fetchError.message : 'unknown'));
+            if (restored) {
+                return {
+                    success: true,
+                    hasData: true,
+                    fromCache: true,
+                    offline: true,
+                    savedAt: restored.savedAt || 0,
+                    message: assalOfflineDataMessage()
+                };
+            }
+            try { if (typeof window.showAssalOfflineState === 'function') window.showAssalOfflineState(false); } catch (_) {}
+            return { success: false, hasData: false, offline: true, noCache: true, message: fetchError.message || "فشل الاتصال بملف البيانات." };
+        }
+
         if (!mainResponse.ok) {
             console.error(`فشل تحميل ملف Excel: ${mainResponse.status} ${mainResponse.statusText}`);
-            showExitLikeAlert({
-             icon: "fas fa-exclamation-circle",
-             title: "خطأ في التحميل",
-             message: `فشل تحميل البيانات: ${mainResponse.status} - ${mainResponse.statusText}`,
-             confirmText: "موافق"
-            });
+            const restored = await assalRestorePriceSnapshot('bad-http-' + mainResponse.status);
+            if (restored) {
+                return {
+                    success: true,
+                    hasData: true,
+                    fromCache: true,
+                    offline: true,
+                    savedAt: restored.savedAt || 0,
+                    message: assalOfflineDataMessage()
+                };
+            }
 
-           return { success: false, hasData: false, message: `فشل تحميل ملف Excel: ${mainResponse.status}` };
-
+            if (!assalIsBrowserOffline()) {
+                showExitLikeAlert({
+                    icon: "fas fa-exclamation-circle",
+                    title: "خطأ في التحميل",
+                    message: `فشل تحميل البيانات: ${mainResponse.status} - ${mainResponse.statusText}`,
+                    confirmText: "موافق"
+                });
+            }
+            return { success: false, hasData: false, message: `فشل تحميل ملف Excel: ${mainResponse.status}` };
         }
 
         const mainBuffer = await mainResponse.arrayBuffer();
@@ -19881,7 +20074,6 @@ async function loadExcelFiles() {
             TOUCH: [],
             VIBRATION: [],
             "SIGNAL CABLE": []
-            
         };
 
         // تحميل البيانات من كل ورقة
@@ -19911,8 +20103,6 @@ async function loadExcelFiles() {
         // ✅ تحميل شيت ALL (أسعار الجملة)
         allDatabase = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["ALL"] || {}, { defval: null });
 
-         
-
         // تصحيح البيانات
         Object.keys(database).forEach(category => {
             console.log(`فئة ${category}: ${database[category].length} عنصر`, database[category]);
@@ -19931,34 +20121,67 @@ async function loadExcelFiles() {
             }
         });
 
-        const hasData = Object.values(database).some(items => items.length > 0);
+        const hasData = assalHasValidPriceData(database);
         if (!hasData) {
-            console.warn("ملف Excel لا يحتوي على بيانات صالحة (جميع الفئات فارغة).");
-           
-           showExitLikeAlert({
-  icon: "fas fa-exclamation-circle",
-  title: "خطأ",
-  message: "ملف Excel لا يحتوي على بيانات صالحة.",
-  confirmText: "موافق"
-});
-
-           
-           return { success: false, hasData: false, message: "ملف Excel لا يحتوي على بيانات صالحة." };
+            console.warn("ملف Excel لا يحتوي على بيانات صالحة (جميع الفئات فارغة). محاولة تشغيل آخر نسخة محفوظة.");
+            const restored = await assalRestorePriceSnapshot('online-empty-workbook');
+            if (restored) {
+                return {
+                    success: true,
+                    hasData: true,
+                    fromCache: true,
+                    offline: true,
+                    savedAt: restored.savedAt || 0,
+                    message: assalOfflineDataMessage()
+                };
+            }
+            showExitLikeAlert({
+                icon: "fas fa-exclamation-circle",
+                title: "خطأ",
+                message: "ملف Excel لا يحتوي على بيانات صالحة.",
+                confirmText: "موافق"
+            });
+            return { success: false, hasData: false, message: "ملف Excel لا يحتوي على بيانات صالحة." };
         }
 
+        const savedAt = Date.now();
+        await assalSavePriceSnapshot({
+            savedAt,
+            database,
+            allDatabase,
+            source: 'google-sheet-xlsx',
+            url: dropboxMainFile.replace(/([?&]t=)\d+/, '$1TIMESTAMP')
+        });
+        assalMarkOnlineFreshData();
+
         try { refreshOffersUiCount(); } catch (_) {}
-        return { success: true, hasData: true };
+        return { success: true, hasData: true, fromCache: false, savedAt };
     } catch (error) {
         console.error("خطأ في تحميل ملف Excel:", error.message, error.stack);
-       showExitLikeAlert({
-  icon: "fas fa-wifi",
-  title: "خطأ بالتحميل",
-  message: `حدث خطأ أثناء تحميل البيانات: ${error.message}`,
-  confirmText: "موافق"
-});
+        const restored = await assalRestorePriceSnapshot('load-catch-' + (error && error.message ? error.message : 'unknown'));
+        if (restored) {
+            return {
+                success: true,
+                hasData: true,
+                fromCache: true,
+                offline: true,
+                savedAt: restored.savedAt || 0,
+                message: assalOfflineDataMessage()
+            };
+        }
 
-       return { success: false, hasData: false, message: error.message };
+        if (!assalIsBrowserOffline()) {
+            showExitLikeAlert({
+                icon: "fas fa-wifi",
+                title: "خطأ بالتحميل",
+                message: `حدث خطأ أثناء تحميل البيانات: ${error.message}`,
+                confirmText: "موافق"
+            });
+        } else {
+            try { if (typeof window.showAssalOfflineState === 'function') window.showAssalOfflineState(false); } catch (_) {}
+        }
 
+        return { success: false, hasData: false, offline: assalIsBrowserOffline(), noCache: true, message: error.message };
     }
 }
 
@@ -22134,6 +22357,12 @@ if (!currentCategory) {
 
     if (!database || !database[currentCategory] || database[currentCategory].length === 0) {
         resultsContainer.style.display = 'none';
+        if (assalIsBrowserOffline() || assalUsingOfflineCachedData || window.__ASSAL_USING_OFFLINE_PRICE_CACHE__) {
+            try { if (typeof window.showAssalOfflineState === 'function') window.showAssalOfflineState(false); } catch (_) {}
+            try { if (typeof setAssalOfflineNewsTicker === 'function') setAssalOfflineNewsTicker(); } catch (_) {}
+            console.warn(`لا توجد بيانات محلية محفوظة لفئة ${currentCategory} أثناء وضع الأوفلاين.`);
+            return;
+        }
       showExitLikeAlert({
   icon: "fas fa-database",
   title: "لا توجد بيانات",
@@ -22674,12 +22903,28 @@ async function refreshData() {
 
     const [_, loadResult] = await Promise.all([loadingPromise, loadFilesPromise]);
 
+    // ✅ إذا التحديث رجّعنا إلى نسخة أوفلاين محفوظة، لا نعرض خطأ ولا نعرض نجاح تحديث وهمي.
+    if (loadResult && loadResult.fromCache) {
+        Swal.close();
+        try { if (typeof window.showAssalOfflineState === 'function') window.showAssalOfflineState(false); } catch (_) {}
+        try { if (typeof setAssalOfflineNewsTicker === 'function') setAssalOfflineNewsTicker(); } catch (_) {}
+        try { await loadNewItems(); } catch (_) {}
+        return;
+    }
+
     // ✅ التعديل المطلوب: إذا فشل التحميل/ماكو بيانات لا تكمل ولا تطلع "تم تحديث البيانات"
     if (!loadResult || loadResult.success === false || !loadResult.hasData) {
         // سكّر نافذة جاري التحديث
         Swal.close();
 
-        // طلع رسالة فشل (مثل نافذة الخروج) — لازم تكون عندك دالة showExitLikeAlert
+        // في وضع الأوفلاين لا نعرض نافذة خطأ؛ نخلي الشريط يوضح الحالة بهدوء.
+        if (assalIsBrowserOffline() || (loadResult && loadResult.offline)) {
+            try { if (typeof window.showAssalOfflineState === 'function') window.showAssalOfflineState(false); } catch (_) {}
+            try { if (typeof setAssalOfflineNewsTicker === 'function') setAssalOfflineNewsTicker(); } catch (_) {}
+            return;
+        }
+
+        // طلع رسالة فشل (مثل نافذة الخروج) — فقط إذا المشكلة ليست أوفلاين
         showExitLikeAlert({
             icon: "fas fa-wifi",
             title: "فشل التحديث",
@@ -22745,8 +22990,46 @@ async function refreshData() {
 
  let newsInterval = null;
 
+const ASSAL_OFFLINE_NEWS_MESSAGES = [
+  '📴 أنت حالياً تستخدم وضع الأوفلاين — الأسعار المعروضة من آخر نسخة محفوظة',
+  '⏳ سيتم تحديث الأسعار تلقائياً أول ما يرجع الإنترنت',
+  '🛡️ البحث يعمل على آخر بيانات محفوظة — قد لا تكون الأسعار محدثة',
+  '🔄 لا تحتاج تضغط تحديث؛ التطبيق يرجع أونلاين تلقائياً عند توفر الشبكة'
+];
+let assalOfflineNewsIndex = 0;
+
+function setAssalOfflineNewsTicker() {
+  const newsBar = document.querySelector('.news-bar');
+  const badge = document.querySelector('.breaking-news');
+  const ticker = document.getElementById('newsTicker');
+  if (!newsBar || !badge || !ticker) return;
+  newsBar.style.display = 'flex';
+  badge.textContent = '📴 أوفلاين';
+  const savedMsg = (typeof assalOfflineDataMessage === 'function') ? assalOfflineDataMessage() : '';
+  const msg = assalUsingOfflineCachedData && savedMsg ? savedMsg : ASSAL_OFFLINE_NEWS_MESSAGES[assalOfflineNewsIndex % ASSAL_OFFLINE_NEWS_MESSAGES.length];
+  assalOfflineNewsIndex += 1;
+  ticker.textContent = msg;
+  ticker.title = msg;
+  ticker.style.animation = 'none';
+  ticker.style.position = 'relative';
+  ticker.style.whiteSpace = 'nowrap';
+  ticker.style.overflow = 'hidden';
+  ticker.style.textOverflow = 'ellipsis';
+  ticker.style.textAlign = 'center';
+  ticker.style.justifyContent = 'center';
+  ticker.style.direction = 'rtl';
+}
+
+function shouldShowAssalOfflineNews() {
+  return assalIsBrowserOffline() || !!assalUsingOfflineCachedData || !!window.__ASSAL_USING_OFFLINE_PRICE_CACHE__;
+}
+
 async function fetchTechNews() {
   if (window.__ASSAL_LOW_END_DEVICE__) return;
+  if (shouldShowAssalOfflineNews()) {
+    setAssalOfflineNewsTicker();
+    return;
+  }
   // RSS شغال (بديل عن AITnews لأن feed مالته صار مو RSS)
 const FEED = "http://feeds.feedburner.com/arabhardware";
 
@@ -22867,6 +23150,13 @@ function applyManualLightNewsBarState() {
 
     if (!newsBar || !badge || !ticker) return;
 
+    if (shouldShowAssalOfflineNews()) {
+        root.classList.remove('manual-light-news');
+        setAssalOfflineNewsTicker();
+        stopNewsUpdates();
+        return;
+    }
+
     if (isManualLight || isAutoLight) {
         root.classList.add('manual-light-news');
         newsBar.style.display = 'flex';
@@ -22910,6 +23200,27 @@ function applyManualLightNewsBarState() {
 }
 applyManualLightNewsBarState();
 window.__ASSAL_APPLY_NEWS_BAR_STATE__ = applyManualLightNewsBarState;
+window.addEventListener('offline', function(){
+    assalUsingOfflineCachedData = true;
+    try { window.__ASSAL_USING_OFFLINE_PRICE_CACHE__ = true; } catch (_) {}
+    try { applyManualLightNewsBarState(); } catch (_) {}
+});
+window.addEventListener('online', function(){
+    try { applyManualLightNewsBarState(); } catch (_) {}
+    try {
+        setTimeout(function(){
+            if (!assalIsBrowserOffline()) {
+                assalBootDataPromise = null;
+                runAssalBootDataLoad().then(function(){
+                    try { applyManualLightNewsBarState(); } catch (_) {}
+                });
+            }
+        }, 700);
+    } catch (_) {}
+});
+window.addEventListener('assalOfflineDataRestored', function(){
+    try { applyManualLightNewsBarState(); } catch (_) {}
+});
 
 ['pointerdown','touchstart','mousedown'].forEach((eventName) => {
     document.addEventListener(eventName, () => {
@@ -35308,7 +35619,15 @@ html.assal-offline-mode #assalOfflineBanner{
         if (!banner) return;
         clearTimeout(onlineHideTimer);
         banner.classList.remove('is-online');
-        if (bannerText) bannerText.textContent = 'أنت تستخدم نسخة أوفلاين — قد لا تكون الأسعار محدثة';
+        if (bannerText) {
+            try {
+                bannerText.textContent = (typeof window.assalOfflineDataMessage === 'function')
+                    ? window.assalOfflineDataMessage()
+                    : ((typeof assalOfflineDataMessage === 'function') ? assalOfflineDataMessage() : 'أنت تستخدم نسخة أوفلاين — قد لا تكون الأسعار محدثة');
+            } catch(_) {
+                bannerText.textContent = 'أنت تستخدم نسخة أوفلاين — قد لا تكون الأسعار محدثة';
+            }
+        }
         try { document.documentElement.classList.add('assal-offline-mode'); } catch(_){}
         banner.classList.add('is-visible');
     }
