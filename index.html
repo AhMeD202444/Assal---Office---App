@@ -35137,6 +35137,16 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
     transform:translateX(-50%);
     pointer-events:auto;
 }
+
+#assalOfflineBannerText{
+    white-space:normal;
+    text-align:center;
+    line-height:1.45;
+}
+html.assal-offline-mode #assalOfflineBanner{
+    background:linear-gradient(135deg,rgba(127,29,29,.94),rgba(185,28,28,.88));
+}
+
 #assalOfflineBanner .assal-offline-dot{
     width:9px;
     height:9px;
@@ -35249,7 +35259,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
 </style>
 <div id="assalOfflineBanner" aria-live="polite">
     <span class="assal-offline-dot"></span>
-    <span id="assalOfflineBannerText">لا يوجد اتصال بالإنترنت</span>
+    <span id="assalOfflineBannerText">أنت تستخدم نسخة أوفلاين — قد لا تكون الأسعار محدثة</span>
     <span class="assal-offline-dots"><i></i><i></i><i></i></span>
 </div>
 <div id="assalOfflineModal" role="dialog" aria-modal="true">
@@ -35298,7 +35308,8 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
         if (!banner) return;
         clearTimeout(onlineHideTimer);
         banner.classList.remove('is-online');
-        if (bannerText) bannerText.textContent = 'لا يوجد اتصال بالإنترنت';
+        if (bannerText) bannerText.textContent = 'أنت تستخدم نسخة أوفلاين — قد لا تكون الأسعار محدثة';
+        try { document.documentElement.classList.add('assal-offline-mode'); } catch(_){}
         banner.classList.add('is-visible');
     }
 
@@ -35306,7 +35317,8 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
         ensure();
         if (!banner) return;
         clearTimeout(onlineHideTimer);
-        if (bannerText) bannerText.textContent = 'تم استعادة الاتصال بالإنترنت';
+        if (bannerText) bannerText.textContent = 'تم استعادة الاتصال — أنت الآن على النسخة الأونلاين';
+        try { document.documentElement.classList.remove('assal-offline-mode'); } catch(_){}
         banner.classList.add('is-visible','is-online');
         onlineHideTimer = setTimeout(function(){
             banner.classList.remove('is-visible','is-online');
