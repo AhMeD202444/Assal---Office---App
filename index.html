@@ -23143,12 +23143,21 @@ function assalResetTickerInlineStyle(ticker) {
 
 function setAssalOfflineNewsTicker() {
   const newsBar = document.querySelector('.news-bar');
+  const badge = document.querySelector('.breaking-news');
   const ticker = document.getElementById('newsTicker');
+
   if (!newsBar || !ticker) return;
+
   newsBar.style.display = 'flex';
+
+  if (badge) {
+    badge.textContent = '📴 أوفلاين';
+  }
+
   assalResetTickerInlineStyle(ticker);
   ticker.innerHTML = assalBuildOfflineNewsHtml();
   ticker.title = 'أنت في نسخة الأوفلاين - آخر نسخة محفوظة: ' + assalOfflineLastSavedText();
+
   try {
     ticker.style.animation = 'none';
     void ticker.offsetWidth;
