@@ -19824,6 +19824,7 @@ const ASSAL_PRICE_CACHE_DB = 'assal_price_cache_db_v1';
 const ASSAL_PRICE_CACHE_STORE = 'snapshots';
 const ASSAL_PRICE_CACHE_KEY = 'latest-google-sheet-snapshot';
 const ASSAL_PRICE_CACHE_META_KEY = 'assal_price_cache_meta_v1';
+const ASSAL_IMAGE_CACHE_NAME = 'assal_price_images_cache_v1';
 let assalPriceCacheDbPromise = null;
 let assalUsingOfflineCachedData = false;
 
@@ -19896,6 +19897,7 @@ async function assalSavePriceSnapshot(payload) {
             tx.onabort = () => reject(tx.error || new Error('توقف حفظ كاش الأسعار'));
         });
         assalWriteCacheMeta({ savedAt: payload.savedAt, categoryCount: Object.keys(payload.database || {}).length });
+        try { assalPrecacheOfflineImagesFromDatabase(payload.database); } catch (_) {}
         return true;
     } catch (err) {
         console.warn('ASSAL offline cache save failed:', err);
@@ -19934,6 +19936,7 @@ async function assalRestorePriceSnapshot(reason) {
     try { window.dispatchEvent(new CustomEvent('assalOfflineDataRestored', { detail: { reason, savedAt: snapshot.savedAt || 0 } })); } catch (_) {}
     try { if (typeof window.showAssalOfflineState === 'function') window.showAssalOfflineState(false); } catch (_) {}
     try { if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') window.__ASSAL_APPLY_NEWS_BAR_STATE__(); } catch (_) {}
+    try { assalPrecacheOfflineImagesFromDatabase(database); } catch (_) {}
 
     console.warn('ASSAL: تم تشغيل آخر نسخة محفوظة من بيانات الأسعار.', { reason, savedAt: snapshot.savedAt });
     return snapshot;
@@ -19954,6 +19957,119 @@ function assalOfflineDataMessage() {
         : 'أنت حالياً تستخدم وضع الأوفلاين — سيتم تحديث الأسعار تلقائياً عند رجوع الإنترنت';
 }
 try { window.assalOfflineDataMessage = assalOfflineDataMessage; } catch (_) {}
+
+/* ===== ASSAL OFFLINE IMAGE CACHE: صور الأصناف من مجلد images على GitHub ===== */
+function assalNormalizeCategoryImageName(category) {
+    try {
+        return String(category || '')
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-');
+    } catch (_) { return ''; }
+}
+
+function assalCategoryImageUrl(category) {
+    const name = assalNormalizeCategoryImageName(category);
+    return name ? `images/${name}.png` : 'images/default.png';
+}
+
+function assalToAbsoluteAssetUrl(url) {
+    try { return new URL(String(url || ''), window.location.href).href; }
+    catch (_) { return String(url || ''); }
+}
+
+async function assalCacheImageUrl(url) {
+    try {
+        if (!('caches' in window) || !url) return false;
+        const absoluteUrl = assalToAbsoluteAssetUrl(url);
+        if (!absoluteUrl || absoluteUrl.startsWith('data:') || absoluteUrl.startsWith('blob:')) return false;
+        const cache = await caches.open(ASSAL_IMAGE_CACHE_NAME);
+        const existing = await cache.match(absoluteUrl);
+        if (existing) return true;
+        if (assalIsBrowserOffline()) return false;
+        const response = await fetch(absoluteUrl, { cache: 'force-cache' });
+        if (response && response.ok) {
+            await cache.put(absoluteUrl, response.clone());
+            return true;
+        }
+    } catch (err) {
+        try { console.warn('ASSAL image cache failed:', url, err); } catch (_) {}
+    }
+    return false;
+}
+
+async function assalUseCachedImage(img) {
+    try {
+        if (!img || img.__assalCacheTried) return false;
+        img.__assalCacheTried = true;
+        const rawUrl = img.getAttribute('data-assal-cache-src') || img.getAttribute('src') || '';
+        const absoluteUrl = assalToAbsoluteAssetUrl(rawUrl);
+        if ('caches' in window && absoluteUrl) {
+            const cache = await caches.open(ASSAL_IMAGE_CACHE_NAME);
+            const response = await cache.match(absoluteUrl);
+            if (response) {
+                const blob = await response.blob();
+                const objectUrl = URL.createObjectURL(blob);
+                img.onload = function(){ try { URL.revokeObjectURL(objectUrl); } catch (_) {} };
+                img.onerror = function(){ img.src = 'images/default.png'; };
+                img.src = objectUrl;
+                return true;
+            }
+        }
+    } catch (err) {
+        try { console.warn('ASSAL cached image restore failed:', err); } catch (_) {}
+    }
+    try {
+        const current = String(img.getAttribute('src') || '');
+        if (!/images\/default\.png/i.test(current)) img.src = 'images/default.png';
+    } catch (_) {}
+    return false;
+}
+
+function assalCollectImageUrlsFromDatabase(db) {
+    const urls = new Set(['images/default.png', 'images/logo.png']);
+    try {
+        Object.keys(db || {}).forEach(cat => {
+            if (cat && cat !== 'SIMILARITES') urls.add(assalCategoryImageUrl(cat));
+        });
+        Object.values(db || {}).forEach(list => {
+            if (!Array.isArray(list)) return;
+            list.forEach(item => {
+                if (!item || typeof item !== 'object') return;
+                const cat = item.CAG || item['CAG'] || item.category || item.Category || item['Category'];
+                if (cat) urls.add(assalCategoryImageUrl(cat));
+                ['Image','image','IMG','img','Photo','photo','Picture','picture'].forEach(key => {
+                    const val = item[key];
+                    if (val && typeof val === 'string') urls.add(val.trim());
+                });
+            });
+        });
+    } catch (_) {}
+    return Array.from(urls).filter(Boolean);
+}
+
+async function assalPrecacheOfflineImagesFromDatabase(db) {
+    try {
+        if (!('caches' in window) || assalIsBrowserOffline()) return;
+        const urls = assalCollectImageUrlsFromDatabase(db).slice(0, 350);
+        let i = 0;
+        async function pump() {
+            const batch = urls.slice(i, i + 8);
+            i += 8;
+            await Promise.all(batch.map(url => assalCacheImageUrl(url).catch(() => false)));
+            if (i < urls.length) setTimeout(pump, 120);
+        }
+        pump();
+    } catch (err) {
+        try { console.warn('ASSAL image precache failed:', err); } catch (_) {}
+    }
+}
+
+try {
+    window.assalCacheImageUrl = assalCacheImageUrl;
+    window.assalUseCachedImage = assalUseCachedImage;
+    window.assalPrecacheOfflineImagesFromDatabase = assalPrecacheOfflineImagesFromDatabase;
+} catch (_) {}
 
 
 async function loadExcelFiles() {
@@ -21816,7 +21932,7 @@ function displayResults(results) {
             htmlContent += `
                 <div class="result-card">
                     ${miniActions.length ? `<div class="result-card-mini-actions">${miniActions.join('')}</div>` : ''}
-                    <img src="${imgSrc}" alt="Item Image">
+                    <img src="${imgSrc}" data-assal-cache-src="${imgSrc}" onload="try{if(window.assalCacheImageUrl)window.assalCacheImageUrl(this.getAttribute('data-assal-cache-src')||this.src)}catch(_){}" onerror="try{if(window.assalUseCachedImage)window.assalUseCachedImage(this);else this.src='images/default.png'}catch(_){this.src='images/default.png'}" alt="Item Image">
                     <h4>${itemName}</h4>
                     ${priceHtml}
                 </div>
@@ -22991,35 +23107,54 @@ async function refreshData() {
  let newsInterval = null;
 
 const ASSAL_OFFLINE_NEWS_MESSAGES = [
-  '📴 أنت حالياً تستخدم وضع الأوفلاين — الأسعار المعروضة من آخر نسخة محفوظة',
-  '⏳ سيتم تحديث الأسعار تلقائياً أول ما يرجع الإنترنت',
-  '🛡️ البحث يعمل على آخر بيانات محفوظة — قد لا تكون الأسعار محدثة',
-  '🔄 لا تحتاج تضغط تحديث؛ التطبيق يرجع أونلاين تلقائياً عند توفر الشبكة'
+  '📴 أنت تستخدم نسخة محفوظة من آخر اتصال ناجح بالإنترنت',
+  '🕒 آخر نسخة محفوظة: {lastSaved}',
+  '🔎 البحث والأسعار تعمل من البيانات المخزونة محلياً',
+  '⚠️ قد تختلف الأسعار عن آخر تحديث جديد على السيرفر',
+  '🔄 سيتم تحديث البيانات تلقائياً عند رجوع الإنترنت'
 ];
 let assalOfflineNewsIndex = 0;
 
-function setAssalOfflineNewsTicker() {
-  const newsBar = document.querySelector('.news-bar');
-  const badge = document.querySelector('.breaking-news');
-  const ticker = document.getElementById('newsTicker');
-  if (!newsBar || !badge || !ticker) return;
-  newsBar.style.display = 'flex';
-  badge.textContent = '📴 أوفلاين';
-  const savedMsg = (typeof assalOfflineDataMessage === 'function') ? assalOfflineDataMessage() : '';
-  const msg = assalUsingOfflineCachedData && savedMsg ? savedMsg : ASSAL_OFFLINE_NEWS_MESSAGES[assalOfflineNewsIndex % ASSAL_OFFLINE_NEWS_MESSAGES.length];
-  assalOfflineNewsIndex += 1;
-  ticker.textContent = msg;
-  ticker.title = msg;
-  ticker.style.animation = 'none';
-  ticker.style.position = 'relative';
-  ticker.style.whiteSpace = 'nowrap';
-  ticker.style.overflow = 'hidden';
-  ticker.style.textOverflow = 'ellipsis';
-  ticker.style.textAlign = 'center';
-  ticker.style.justifyContent = 'center';
-  ticker.style.direction = 'rtl';
+function assalOfflineLastSavedText() {
+  const ts = window.__ASSAL_PRICE_CACHE_SAVED_AT__ || (assalReadCacheMeta() || {}).savedAt || 0;
+  const when = assalFormatCacheTime(ts);
+  return when || 'غير متوفر حالياً';
 }
 
+function assalBuildOfflineNewsHtml() {
+  const lastSaved = assalOfflineLastSavedText();
+  return ASSAL_OFFLINE_NEWS_MESSAGES.map(function(msg){
+    const text = String(msg || '').replace('{lastSaved}', lastSaved);
+    return `<span><i class="fas fa-wifi-slash" style="font-size:13px;color:#fecaca"></i>${text}</span>`;
+  }).join(' | ');
+}
+
+function assalResetTickerInlineStyle(ticker) {
+  if (!ticker) return;
+  ticker.style.animation = '';
+  ticker.style.position = '';
+  ticker.style.whiteSpace = '';
+  ticker.style.overflow = '';
+  ticker.style.textOverflow = '';
+  ticker.style.textAlign = '';
+  ticker.style.justifyContent = '';
+  ticker.style.direction = '';
+}
+
+function setAssalOfflineNewsTicker() {
+  const newsBar = document.querySelector('.news-bar');
+  const ticker = document.getElementById('newsTicker');
+  if (!newsBar || !ticker) return;
+  newsBar.style.display = 'flex';
+  assalResetTickerInlineStyle(ticker);
+  ticker.innerHTML = assalBuildOfflineNewsHtml();
+  ticker.title = 'أنت في نسخة الأوفلاين - آخر نسخة محفوظة: ' + assalOfflineLastSavedText();
+  try {
+    ticker.style.animation = 'none';
+    void ticker.offsetWidth;
+    ticker.style.animation = 'scrollText 60s linear infinite';
+  } catch (_) {}
+}
 function shouldShowAssalOfflineNews() {
   return assalIsBrowserOffline() || !!assalUsingOfflineCachedData || !!window.__ASSAL_USING_OFFLINE_PRICE_CACHE__;
 }
@@ -23557,7 +23692,7 @@ function renderCart(){
       const line = it.price * it.qty;
       return `
         <div class="cart-item">
-          <img src="${it.img || 'images/default.png'}" onerror="this.src='images/default.png'" alt="img">
+          <img src="${it.img || 'images/default.png'}" data-assal-cache-src="${it.img || 'images/default.png'}" onload="try{if(window.assalCacheImageUrl)window.assalCacheImageUrl(this.getAttribute('data-assal-cache-src')||this.src)}catch(_){}" onerror="try{if(window.assalUseCachedImage)window.assalUseCachedImage(this);else this.src='images/default.png'}catch(_){this.src='images/default.png'}" alt="img">
           <div class="cart-info">
             <div class="cart-name">${escapeHtml(it.name)}</div>
             <div class="cart-sub">
@@ -35450,7 +35585,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
 }
 
 #assalOfflineBannerText{
-    white-space:normal;
+    white-space:nowrap;
     text-align:center;
     line-height:1.45;
 }
@@ -35570,7 +35705,7 @@ html.assal-offline-mode #assalOfflineBanner{
 </style>
 <div id="assalOfflineBanner" aria-live="polite">
     <span class="assal-offline-dot"></span>
-    <span id="assalOfflineBannerText">أنت تستخدم نسخة أوفلاين — قد لا تكون الأسعار محدثة</span>
+    <span id="assalOfflineBannerText">أنت في نسخة الأوفلاين</span>
     <span class="assal-offline-dots"><i></i><i></i><i></i></span>
 </div>
 <div id="assalOfflineModal" role="dialog" aria-modal="true">
@@ -35620,13 +35755,7 @@ html.assal-offline-mode #assalOfflineBanner{
         clearTimeout(onlineHideTimer);
         banner.classList.remove('is-online');
         if (bannerText) {
-            try {
-                bannerText.textContent = (typeof window.assalOfflineDataMessage === 'function')
-                    ? window.assalOfflineDataMessage()
-                    : ((typeof assalOfflineDataMessage === 'function') ? assalOfflineDataMessage() : 'أنت تستخدم نسخة أوفلاين — قد لا تكون الأسعار محدثة');
-            } catch(_) {
-                bannerText.textContent = 'أنت تستخدم نسخة أوفلاين — قد لا تكون الأسعار محدثة';
-            }
+            bannerText.textContent = 'أنت في نسخة الأوفلاين';
         }
         try { document.documentElement.classList.add('assal-offline-mode'); } catch(_){}
         banner.classList.add('is-visible');
@@ -35636,7 +35765,7 @@ html.assal-offline-mode #assalOfflineBanner{
         ensure();
         if (!banner) return;
         clearTimeout(onlineHideTimer);
-        if (bannerText) bannerText.textContent = 'تم استعادة الاتصال — أنت الآن على النسخة الأونلاين';
+        if (bannerText) bannerText.textContent = 'أنت الآن في نسخة الأونلاين';
         try { document.documentElement.classList.remove('assal-offline-mode'); } catch(_){}
         banner.classList.add('is-visible','is-online');
         onlineHideTimer = setTimeout(function(){
