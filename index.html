@@ -14751,6 +14751,12 @@ html.low-end-device .assal-community-write-row{
     onDisconnect,
     onValue
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import {
+    getMessaging,
+    getToken,
+    isSupported as isMessagingSupported,
+    onMessage
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDY-ZPogbPPNTWavB-zn5Z24yXjz2AL4T8",
@@ -14764,6 +14770,11 @@ html.low-end-device .assal-community-write-row{
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
+  const ASSAL_WEB_PUSH_VAPID_KEY = "BGF9dcmtT44zOZAUROzTpMFIQJkFm_XUuwISUOFOkJTfPUa-yXShtxXa-z8eNgtyKfn6sCF8KcxyxXX49c7f8OLc";
+  const ASSAL_WEB_PUSH_SW_PATH = "/Assal---Office---App/firebase-messaging-sw.js";
+  const ASSAL_WEB_PUSH_SW_SCOPE = "/Assal---Office---App/";
+  let assalMessagingInstance = null;
+  let assalMessagingSupportPromise = null;
 
   window.firebaseDB = { db, ref, get, set, update, remove, runTransaction, onDisconnect, onValue };
 
@@ -14878,6 +14889,151 @@ html.low-end-device .assal-community-write-row{
     } catch (err) {
       console.error('Failed to trigger notification queue processing:', err);
       return false;
+    }
+  }
+
+
+  function isAssalProbablyNativeAndroidApp() {
+    try {
+      return !!(window.Android && (typeof window.Android.saveDeviceContext === 'function' || typeof window.Android.syncNativeTokenNow === 'function' || typeof window.Android.startVoiceSearch === 'function'));
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function isAssalIOSDevice() {
+    try {
+      const ua = String(navigator.userAgent || '');
+      const platform = String(navigator.platform || '');
+      return /iPhone|iPad|iPod/i.test(ua) || (/MacIntel/i.test(platform) && Number(navigator.maxTouchPoints || 0) > 1);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function isAssalStandaloneWebApp() {
+    try {
+      return !!(
+        (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+        window.navigator.standalone === true
+      );
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function isAssalWebPushSupported() {
+    try {
+      if (!('serviceWorker' in navigator)) return false;
+      if (typeof Notification === 'undefined') return false;
+      if (!('PushManager' in window)) return false;
+      if (!assalMessagingSupportPromise) assalMessagingSupportPromise = isMessagingSupported().catch(() => false);
+      return !!(await assalMessagingSupportPromise);
+    } catch (err) {
+      console.error('ASSAL_WEB_PUSH_SUPPORT_ERROR', err);
+      return false;
+    }
+  }
+
+  async function getAssalServiceWorkerRegistration() {
+    if (!('serviceWorker' in navigator)) return null;
+    try {
+      const existing = await navigator.serviceWorker.getRegistration(ASSAL_WEB_PUSH_SW_SCOPE);
+      if (existing) return existing;
+    } catch (_) {}
+    try {
+      return await navigator.serviceWorker.register(ASSAL_WEB_PUSH_SW_PATH, { scope: ASSAL_WEB_PUSH_SW_SCOPE });
+    } catch (err) {
+      console.error('ASSAL_WEB_PUSH_SW_REGISTER_ERROR', err);
+      return null;
+    }
+  }
+
+  function buildAssalWebPushPlatform() {
+    if (isAssalIOSDevice()) return isAssalStandaloneWebApp() ? 'iOS PWA' : 'iOS Browser';
+    try {
+      if (/android/i.test(navigator.userAgent || '')) return 'Android Browser';
+      if (/mac/i.test(navigator.platform || '')) return 'Mac Browser';
+      if (/win/i.test(navigator.platform || '')) return 'Windows Browser';
+    } catch (_) {}
+    return navigator.platform || 'Web Browser';
+  }
+
+  async function getAssalWebPushToken(permission) {
+    try {
+      if (permission !== 'granted') return null;
+      if (!(await isAssalWebPushSupported())) return null;
+      const swRegistration = await getAssalServiceWorkerRegistration();
+      if (!swRegistration) return null;
+      assalMessagingInstance = assalMessagingInstance || getMessaging(app);
+      const token = await getToken(assalMessagingInstance, {
+        vapidKey: ASSAL_WEB_PUSH_VAPID_KEY,
+        serviceWorkerRegistration: swRegistration
+      });
+      return token || null;
+    } catch (err) {
+      console.error('ASSAL_WEB_PUSH_TOKEN_ERROR', err);
+      return null;
+    }
+  }
+
+  async function saveAssalWebPushToken(token, permission = 'granted') {
+    if (!window.firebaseDB || !window.firebaseDB.db) return { ok: false, reason: 'firebase-not-ready' };
+    const cleanToken = String(token || '').trim();
+    if (!cleanToken) return { ok: false, reason: 'empty-web-token' };
+
+    const { db, ref, set, update, get, remove } = window.firebaseDB;
+    const role = getCurrentPushRole();
+    const roleBucket = getCurrentPushRoleBucket();
+    const deviceId = getCurrentPushDeviceId();
+    const now = Date.now();
+    const tokenKey = normalizeTokenKey(cleanToken);
+    const existingSnap = await get(ref(db, `fcmTokens/web/byRole/${roleBucket}/${deviceId}`)).catch(() => null);
+    const existing = existingSnap && existingSnap.exists && existingSnap.exists() ? (existingSnap.val() || {}) : {};
+
+    const payload = {
+      ...(existing || {}),
+      deviceId,
+      role,
+      roleBucket,
+      permission,
+      app: document.title || 'Assal App',
+      platform: buildAssalWebPushPlatform(),
+      language: navigator.language || 'ar',
+      userAgent: String(navigator.userAgent || ''),
+      token: cleanToken,
+      tokenKey,
+      createdAt: Number(existing.createdAt || now),
+      updatedAt: now,
+      source: 'web-pwa',
+      webPush: true,
+      standalone: isAssalStandaloneWebApp(),
+      ios: isAssalIOSDevice()
+    };
+
+    try {
+      await update(ref(db), {
+        [`devices/${deviceId}/webPushRole`]: role,
+        [`devices/${deviceId}/webPushPermission`]: permission,
+        [`devices/${deviceId}/webPushTokenKey`]: tokenKey,
+        [`devices/${deviceId}/webPushUpdatedAt`]: now,
+        [`devices/${deviceId}/webPushPlatform`]: payload.platform,
+        [`devices/${deviceId}/webPushSource`]: 'web-pwa',
+        [`fcmTokens/all/${tokenKey}`]: payload,
+        [`fcmTokens/web/${tokenKey}`]: payload,
+        [`fcmTokens/web/byRole/${roleBucket}/${deviceId}`]: payload
+      });
+
+      try {
+        const otherRoleBucket = roleBucket === 'admins' ? 'customers' : 'admins';
+        await remove(ref(db, `fcmTokens/web/byRole/${otherRoleBucket}/${deviceId}`));
+      } catch (_) {}
+
+      try { localStorage.setItem('assal_web_push_token', cleanToken); } catch (_) {}
+      return { ok: true, payload };
+    } catch (err) {
+      console.error('ASSAL_WEB_PUSH_SAVE_ERROR', err);
+      return { ok: false, reason: err?.message || String(err) };
     }
   }
 
@@ -15021,7 +15177,13 @@ html.low-end-device .assal-community-write-row{
     const roleBucket = getCurrentPushRoleBucket();
     const deviceId = getCurrentPushDeviceId();
     const now = Date.now();
-    const tokenRow = await findBestWebPushTokenForCurrentDevice();
+    const webToken = await getAssalWebPushToken(permission);
+    if (webToken) {
+      try { await saveAssalWebPushToken(webToken, permission); } catch (err) { console.error('Failed to save live web push token:', err); }
+    }
+    const tokenRow = webToken
+      ? { token: webToken, key: normalizeTokenKey(webToken), platform: buildAssalWebPushPlatform(), app: document.title || 'Assal App', language: navigator.language || 'ar', updatedAt: now, createdAt: now }
+      : await findBestWebPushTokenForCurrentDevice();
     const existingBinding = await getExistingPushBinding(deviceId, roleBucket);
 
     if (existingBinding?.source === 'native-app' && existingBinding?.token) {
@@ -15154,6 +15316,31 @@ html.low-end-device .assal-community-write-row{
     setTimeout(() => { window.initPushNotifications?.(); }, 1800);
     setTimeout(() => { window.syncCurrentPushRegistration?.(); }, 6000);
   });
+
+  (async function setupAssalForegroundWebPush(){
+    try {
+      if (!(await isAssalWebPushSupported())) return;
+      assalMessagingInstance = assalMessagingInstance || getMessaging(app);
+      onMessage(assalMessagingInstance, (payload) => {
+        try {
+          const title = payload?.notification?.title || payload?.data?.title || payload?.data?.notificationTitle || 'إشعار جديد';
+          const body = payload?.notification?.body || payload?.data?.body || payload?.data?.message || payload?.data?.notificationBody || '';
+          if (typeof showExitLikeAlert === 'function') {
+            showExitLikeAlert({
+              icon: 'fas fa-bell',
+              title,
+              message: body,
+              confirmText: 'موافق'
+            });
+          }
+        } catch (err) {
+          console.error('ASSAL_FOREGROUND_PUSH_ERROR', err);
+        }
+      });
+    } catch (err) {
+      console.error('ASSAL_FOREGROUND_PUSH_SETUP_ERROR', err);
+    }
+  })();
 </script>
 
 
