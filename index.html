@@ -21583,7 +21583,7 @@ function showAssalVoiceModal(mode = "listening", data = {}) {
     if (mode === "ready") {
         overlay.classList.add("is-listening");
         if (title) title.textContent = "جاهز أسمعك...";
-        if (subtitle) subtitle.textContent = "احچي اسم المادة أو الموديل";
+        if (subtitle) subtitle.textContent = isAssalVoiceOfflineMode() ? "أحاول أشغل المايك أوفلاين من الجهاز" : "احچي اسم المادة أو الموديل";
         if (heard) heard.textContent = "بانتظار الصوت...";
         if (english) english.textContent = "—";
         setAssalVoiceModalLevel(0.08);
@@ -21600,7 +21600,7 @@ function showAssalVoiceModal(mode = "listening", data = {}) {
 
     if (mode === "processing") {
         if (title) title.textContent = "جاري التحويل...";
-        if (subtitle) subtitle.textContent = "أحوّل النطق إلى بحث إنكليزي";
+        if (subtitle) subtitle.textContent = isAssalVoiceOfflineMode() ? "أحوّل النطق من وضع الأوفلاين إلى بحث" : "أحوّل النطق إلى بحث إنكليزي";
         if (data.text && heard) heard.textContent = data.text;
         setAssalVoiceModalLevel(0.18);
         return;
@@ -21631,7 +21631,7 @@ function showAssalVoiceModal(mode = "listening", data = {}) {
 
     overlay.classList.add("is-listening");
     if (title) title.textContent = "جاري الاستماع...";
-    if (subtitle) subtitle.textContent = "احچي اسم المادة بوضوح";
+    if (subtitle) subtitle.textContent = isAssalVoiceOfflineMode() ? "احچي اسم المادة بوضوح — أوفلاين" : "احچي اسم المادة بوضوح";
     if (heard) heard.textContent = "بانتظار الصوت...";
     if (english) english.textContent = "—";
     setAssalVoiceModalLevel(0.1);
@@ -21694,6 +21694,37 @@ window.setAssalVoiceButtonListening = setAssalVoiceButtonListening;
 window.showAssalVoiceModal = showAssalVoiceModal;
 window.hideAssalVoiceModal = hideAssalVoiceModal;
 window.cancelAssalVoiceSearchModal = cancelAssalVoiceSearchModal;
+
+function isAssalVoiceOfflineMode() {
+    try {
+        return !!(
+            window.__ASSAL_NATIVE_VOICE_OFFLINE_MODE__ ||
+            window.__ASSAL_USING_OFFLINE_PRICE_CACHE__ ||
+            !navigator.onLine ||
+            (document.documentElement && document.documentElement.classList.contains('assal-offline-mode'))
+        );
+    } catch (_) {
+        return false;
+    }
+}
+
+function normalizeAssalNativeVoiceErrorMessage(message) {
+    const msg = String(message || "").trim();
+    if (!isAssalVoiceOfflineMode()) return msg || "ما سمعت الصوت بوضوح، جرّب مرة ثانية.";
+
+    const networkLike = /إنترنت|انترنت|اتصال|شبكة|NETWORK|SERVER|offline|أوفلاين|اوفلاين/i.test(msg);
+    if (networkLike) {
+        return "التعرف الصوتي الأوفلاين غير متوفر أو غير مفعّل على هذا الجهاز حالياً. البحث الكتابي يبقى شغال من آخر نسخة محفوظة.";
+    }
+
+    return msg || "ما سمعت الصوت بوضوح أو جهازك ما يدعم التعرف الصوتي الأوفلاين، جرّب البحث الكتابي.";
+}
+
+window.isAssalVoiceOfflineMode = isAssalVoiceOfflineMode;
+window.normalizeAssalNativeVoiceErrorMessage = normalizeAssalNativeVoiceErrorMessage;
+window.onAssalNativeVoiceOfflineMode = function(isOffline){
+    window.__ASSAL_NATIVE_VOICE_OFFLINE_MODE__ = !!isOffline;
+};
 window.onAssalNativeVoiceStart = function(){
     setAssalVoiceButtonListening(true);
     showAssalVoiceModal("listening");
@@ -21717,7 +21748,7 @@ window.onAssalNativeVoiceEnd = function(){
     showAssalVoiceModal("processing");
 };
 window.onAssalNativeVoiceError = function(message){
-    showAssalVoiceModal("error", { message: message || "ما سمعت الصوت بوضوح، جرّب مرة ثانية." });
+    showAssalVoiceModal("error", { message: normalizeAssalNativeVoiceErrorMessage(message) });
 };
 
 
@@ -21797,11 +21828,19 @@ async function startAssalVoiceSearch() {
         }, 16000);
 
         if (window.Android && typeof window.Android.startVoiceSearch === "function") {
+            try { window.__ASSAL_NATIVE_VOICE_OFFLINE_MODE__ = isAssalVoiceOfflineMode(); } catch (_) {}
             window.Android.startVoiceSearch();
             return;
         }
     } catch (e) {
         console.warn("Android native voice failed:", e);
+    }
+
+    if (isAssalVoiceOfflineMode()) {
+        clearTimeout(assalVoiceSafetyTimer);
+        setAssalVoiceButtonListening(false);
+        showAssalVoiceModal("error", { message: "البحث الصوتي الأوفلاين يحتاج تطبيق الأندرويد حتى يشتغل. داخل المتصفح اكتب البحث يدوياً من آخر نسخة محفوظة." });
+        return;
     }
 
     const micPermission = await ensureAssalBrowserMicPermission();
