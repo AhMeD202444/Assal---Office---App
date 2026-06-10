@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Phone Parts Pro</title>
 
+    <!-- ASSAL PWA / iPhone install metadata - safe web-only addition -->
+    <link rel="manifest" href="/Assal---Office---App/manifest.json">
+    <meta name="theme-color" content="#16222A">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="عسل">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/Assal---Office---App/images/logo.png">
+
         <script>
       (function () {
         function safeNumber(value) {
@@ -15304,6 +15312,47 @@ html.low-end-device .assal-community-write-row{
     if (permission === 'granted') return await syncCurrentPushRegistration();
     return { ok: false, permission };
   };
+
+
+  // ASSAL iOS PWA Web Push permission bridge:
+  // iPhone Safari لا يسمح غالباً بإظهار طلب الإشعارات من تحميل الصفحة وحده.
+  // لذلك نطلب الصلاحية بأمان عند أول لمسة داخل نسخة Home Screen فقط.
+  (function setupAssalIOSWebPushPermissionGesture() {
+    try {
+      if (isAssalAndroidNative()) return;
+      if (!isAssalIOSDevice()) return;
+      if (!isAssalStandaloneWebApp()) return;
+      if (typeof Notification === 'undefined') return;
+      if (Notification.permission !== 'default') return;
+
+      let fired = false;
+
+      const cleanup = () => {
+        try { window.removeEventListener('click', onFirstGesture, true); } catch (_) {}
+        try { window.removeEventListener('touchend', onFirstGesture, true); } catch (_) {}
+      };
+
+      const onFirstGesture = () => {
+        if (fired) return;
+        fired = true;
+        cleanup();
+
+        try {
+          const run = window.showPushPermissionPrompt && window.showPushPermissionPrompt();
+          if (run && typeof run.catch === 'function') {
+            run.catch((err) => console.error('ASSAL_IOS_WEB_PUSH_PERMISSION_GESTURE_ERROR', err));
+          }
+        } catch (err) {
+          console.error('ASSAL_IOS_WEB_PUSH_PERMISSION_GESTURE_ERROR', err);
+        }
+      };
+
+      window.addEventListener('click', onFirstGesture, true);
+      window.addEventListener('touchend', onFirstGesture, true);
+    } catch (err) {
+      console.error('ASSAL_IOS_WEB_PUSH_PERMISSION_GESTURE_SETUP_ERROR', err);
+    }
+  })();
 
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
