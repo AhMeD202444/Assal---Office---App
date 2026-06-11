@@ -36759,11 +36759,11 @@ html.assal-offline-mode #assalOfflineBanner{
 </script>
 
 <script>
-/* ===== ASSAL SAFE FIX: عند فتح كيبورد مجتمع عسل أظهر آخر رسالة كاملة ===== */
+/* ===== ASSAL SAFE FIX: سكرول ناعم ومستقر لآخر رسالة عند الكتابة فقط ===== */
 (function(){
   'use strict';
-  if (window.__ASSAL_COMMUNITY_KEYBOARD_LAST_MESSAGE_FIX__) return;
-  window.__ASSAL_COMMUNITY_KEYBOARD_LAST_MESSAGE_FIX__ = true;
+  if (window.__ASSAL_COMMUNITY_KEYBOARD_LAST_MESSAGE_SMOOTH_FIX__) return;
+  window.__ASSAL_COMMUNITY_KEYBOARD_LAST_MESSAGE_SMOOTH_FIX__ = true;
 
   function byId(id){ return document.getElementById(id); }
 
@@ -36773,84 +36773,124 @@ html.assal-offline-mode #assalOfflineBanner{
 
   function isCommunityInputActive(){
     try {
-      const active = document.activeElement;
+      var active = document.activeElement;
       return !!active && active.id === 'assalCommunityInput' && communityIsOpen();
     } catch(_) { return false; }
   }
 
-  function getLastCommunityMessage(messagesBox){
-    try {
-      if (!messagesBox) return null;
-      const nodes = messagesBox.querySelectorAll('.assal-community-msg:not(.deleted)');
-      if (nodes && nodes.length) return nodes[nodes.length - 1];
-      const fallback = messagesBox.querySelectorAll('.assal-community-msg');
-      return fallback && fallback.length ? fallback[fallback.length - 1] : null;
-    } catch(_) { return null; }
+  function getMessagesBox(){
+    return byId('assalCommunityMessages');
   }
 
-  function scrollLastCommunityMessageFully(){
+  var focusTimer = null;
+  var viewportTimer = null;
+  var animFrame = null;
+  var lastRunAt = 0;
+
+  function cancelAnim(){
+    try { if (animFrame) cancelAnimationFrame(animFrame); } catch(_) {}
+    animFrame = null;
+  }
+
+  function maxScrollTop(box){
+    try { return Math.max(0, box.scrollHeight - box.clientHeight); } catch(_) { return 0; }
+  }
+
+  function easeOutCubic(t){
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function smoothScrollBoxToBottom(reason){
     try {
       if (!communityIsOpen()) return;
-      const box = byId('assalCommunityMessages');
+      var box = getMessagesBox();
       if (!box) return;
 
-      const last = getLastCommunityMessage(box);
-      if (last && typeof last.scrollIntoView === 'function') {
-        last.scrollIntoView({ block: 'end', inline: 'nearest', behavior: 'auto' });
+      var target = maxScrollTop(box);
+      var start = Number(box.scrollTop || 0);
+      var distance = target - start;
+
+      // إذا المسافة صغيرة جداً، لا نسوي أنيميشن حتى لا يحس المستخدم برجفة.
+      if (Math.abs(distance) < 8) {
+        box.scrollTop = target;
+        return;
       }
 
-      // احتياط: إذا كان آخر عنصر طويل أو الكيبورد بعده يفتح، نثبت السكرول بالنهاية.
-      box.scrollTop = box.scrollHeight;
+      cancelAnim();
+
+      var duration = reason === 'keyboard' ? 260 : 220;
+      var startTime = performance.now();
+
+      function step(now){
+        try {
+          var p = Math.min(1, (now - startTime) / duration);
+          box.scrollTop = start + (distance * easeOutCubic(p));
+          if (p < 1) {
+            animFrame = requestAnimationFrame(step);
+          } else {
+            box.scrollTop = maxScrollTop(box);
+            animFrame = null;
+          }
+        } catch(_) { animFrame = null; }
+      }
+
+      animFrame = requestAnimationFrame(step);
     } catch(_) {}
   }
 
-  function scheduleKeyboardCommunityScroll(){
+  function scheduleStableKeyboardScroll(){
     if (!communityIsOpen()) return;
-    // أكثر من توقيت لأن الموبايل يغيّر ارتفاع الشاشة بعد فتح الكيبورد بلحظات.
-    [60, 180, 360, 650].forEach(function(delay){
-      setTimeout(scrollLastCommunityMessageFully, delay);
-    });
+
+    clearTimeout(focusTimer);
+    focusTimer = setTimeout(function(){
+      try {
+        if (!isCommunityInputActive()) return;
+
+        var now = Date.now();
+        if (now - lastRunAt < 220) return;
+        lastRunAt = now;
+
+        smoothScrollBoxToBottom('keyboard');
+      } catch(_) {}
+    }, 330);
   }
 
   function bindCommunityInput(){
-    const input = byId('assalCommunityInput');
-    if (!input || input.dataset.assalKeyboardLastMessageFix === '1') return;
-    input.dataset.assalKeyboardLastMessageFix = '1';
+    var input = byId('assalCommunityInput');
+    if (!input || input.dataset.assalSmoothKeyboardLastMessageFix === '1') return;
+    input.dataset.assalSmoothKeyboardLastMessageFix = '1';
 
-    input.addEventListener('focus', scheduleKeyboardCommunityScroll, true);
-    input.addEventListener('click', scheduleKeyboardCommunityScroll, true);
-    input.addEventListener('touchstart', function(){ setTimeout(scheduleKeyboardCommunityScroll, 30); }, { passive:true, capture:true });
+    // فوكس فقط: لا نربطه بالـ click/touch حتى ما تتكرر النزلة وتطلع متقطعة.
+    input.addEventListener('focus', scheduleStableKeyboardScroll, true);
   }
 
   function boot(){
     bindCommunityInput();
-    if (communityIsOpen()) scheduleKeyboardCommunityScroll();
+    // مهم: لا نجبر السكرول عند فتح المجتمع، حتى يبقى سلوك الفتح الأصلي ناعم مثل قبل.
   }
 
-  // ربط خفيف جداً بدون مراقبة DOM مستمرة حتى لا يسبب هنگ.
-  const oldOpen = window.openAssalCommunitySpace;
-  if (typeof oldOpen === 'function' && !oldOpen.__assalKeyboardLastMessageWrapped) {
-    const wrapped = async function(){
-      const result = await oldOpen.apply(this, arguments);
-      setTimeout(boot, 160);
-      setTimeout(scheduleKeyboardCommunityScroll, 420);
+  var oldOpen = window.openAssalCommunitySpace;
+  if (typeof oldOpen === 'function' && !oldOpen.__assalKeyboardSmoothWrapped) {
+    var wrapped = async function(){
+      var result = await oldOpen.apply(this, arguments);
+      setTimeout(boot, 180);
       return result;
     };
-    wrapped.__assalKeyboardLastMessageWrapped = true;
+    wrapped.__assalKeyboardSmoothWrapped = true;
     window.openAssalCommunitySpace = wrapped;
   }
 
   document.addEventListener('DOMContentLoaded', boot);
   document.addEventListener('focusin', function(e){
-    if (e && e.target && e.target.id === 'assalCommunityInput') scheduleKeyboardCommunityScroll();
+    if (e && e.target && e.target.id === 'assalCommunityInput') scheduleStableKeyboardScroll();
   }, true);
 
+  // لما الكيبورد يغيّر ارتفاع الشاشة، ننتظر استقراره ثم ننزل مرة واحدة فقط.
   if (window.visualViewport && typeof window.visualViewport.addEventListener === 'function') {
-    let vvTimer = null;
     window.visualViewport.addEventListener('resize', function(){
       if (!isCommunityInputActive()) return;
-      clearTimeout(vvTimer);
-      vvTimer = setTimeout(scheduleKeyboardCommunityScroll, 80);
+      clearTimeout(viewportTimer);
+      viewportTimer = setTimeout(scheduleStableKeyboardScroll, 180);
     }, { passive:true });
   }
 
