@@ -14085,7 +14085,7 @@ html.low-end-device .assal-community-write-row{
     <!-- شعار دائري -->
    <div class="notification-container">
     <div class="logo-container" id="logo"> 
-     <img src="images/logo.png" data-assal-cache-src="images/logo.png" onload="try{if(window.assalCacheImageUrl)window.assalCacheImageUrl(this.getAttribute('data-assal-cache-src')||this.src)}catch(_){}" onerror="try{if(window.assalUseCachedImage)window.assalUseCachedImage(this);else this.style.display='none'}catch(_){this.style.display='none'}" alt="Logo">
+     <img src="images/logo.png" alt="Logo">
     </div>
     <div class="notification" id="notification">
         <div class="notification-text" id="notification-text"></div>
@@ -20420,14 +20420,7 @@ async function assalUseCachedImage(img) {
 }
 
 function assalCollectImageUrlsFromDatabase(db) {
-    const urls = new Set([
-        'images/default.png',
-        './images/default.png',
-        '/Assal---Office---App/images/default.png',
-        'images/logo.png',
-        './images/logo.png',
-        '/Assal---Office---App/images/logo.png'
-    ]);
+    const urls = new Set(['images/default.png', 'images/logo.png']);
     try {
         Object.keys(db || {}).forEach(cat => {
             if (cat && cat !== 'SIMILARITES') urls.add(assalCategoryImageUrl(cat));
@@ -20469,57 +20462,6 @@ try {
     window.assalCacheImageUrl = assalCacheImageUrl;
     window.assalUseCachedImage = assalUseCachedImage;
     window.assalPrecacheOfflineImagesFromDatabase = assalPrecacheOfflineImagesFromDatabase;
-} catch (_) {}
-
-/* ===== ASSAL OFFLINE LOGO CACHE: تثبيت لوكو عسل ضمن نفس كاش صور الأوفلاين ===== */
-function assalLogoOfflineUrls() {
-    return ['images/logo.png', './images/logo.png', '/Assal---Office---App/images/logo.png'];
-}
-
-async function assalPrecacheOfflineLogo() {
-    try {
-        if (!('caches' in window) || assalIsBrowserOffline()) return false;
-        const urls = assalLogoOfflineUrls();
-        await Promise.all(urls.map(url => assalCacheImageUrl(url).catch(() => false)));
-        return true;
-    } catch (err) {
-        try { console.warn('ASSAL logo cache failed:', err); } catch (_) {}
-        return false;
-    }
-}
-
-function assalBindOfflineLogoImages() {
-    try {
-        const logos = Array.from(document.querySelectorAll('img[src*="images/logo.png"], img[data-assal-logo="1"]'));
-        logos.forEach(img => {
-            if (!img || img.__assalLogoOfflineBound) return;
-            img.__assalLogoOfflineBound = true;
-            if (!img.getAttribute('data-assal-cache-src')) img.setAttribute('data-assal-cache-src', 'images/logo.png');
-            img.setAttribute('data-assal-logo', '1');
-            img.addEventListener('load', function(){
-                try { if (window.assalCacheImageUrl) window.assalCacheImageUrl(img.getAttribute('data-assal-cache-src') || img.getAttribute('src') || 'images/logo.png'); } catch (_) {}
-            }, { passive: true });
-            img.addEventListener('error', function(){
-                try { if (window.assalUseCachedImage) window.assalUseCachedImage(img); } catch (_) {}
-            }, { passive: true });
-        });
-    } catch (_) {}
-}
-
-try {
-    window.assalPrecacheOfflineLogo = assalPrecacheOfflineLogo;
-    window.assalBindOfflineLogoImages = assalBindOfflineLogoImages;
-    document.addEventListener('DOMContentLoaded', function(){
-        try { assalBindOfflineLogoImages(); } catch (_) {}
-        try { assalPrecacheOfflineLogo(); } catch (_) {}
-    }, { once: true });
-    window.addEventListener('load', function(){
-        try { assalBindOfflineLogoImages(); } catch (_) {}
-        try { assalPrecacheOfflineLogo(); } catch (_) {}
-    }, { once: true });
-    window.addEventListener('online', function(){
-        try { assalPrecacheOfflineLogo(); } catch (_) {}
-    });
 } catch (_) {}
 
 
@@ -24802,7 +24744,7 @@ function buildInvoiceHTML({invNo, dateStr, subtotal, discount, total, note=""}){
         <div class="hdr-row">
           <div class="brand">
             <div class="logo">
-              <img src="images/logo.png" data-assal-cache-src="images/logo.png" onload="try{if(window.assalCacheImageUrl)window.assalCacheImageUrl(this.getAttribute('data-assal-cache-src')||this.src)}catch(_){}" onerror="try{if(window.assalUseCachedImage)window.assalUseCachedImage(this);else this.style.display='none'}catch(_){this.style.display='none'}">
+              <img src="images/logo.png" onerror="this.style.display='none'">
             </div>
             <div class="brandTxt">
               <div class="bname">Assal Office</div>
@@ -36956,108 +36898,3 @@ html.assal-offline-mode #assalOfflineBanner{
 })();
 </script>
 
-
-
-<style id="assal-community-resume-width-safe-fix">
-/* ===== ASSAL SAFE FIX: منع تمدد رسائل المجتمع بعد الرجوع من الخلفية =====
-   تعديل ناعم جداً: لا يغير ارتفاع الرسائل ولا display ولا max-height. */
-.assal-community-modal,
-.assal-community-shell,
-.assal-community-messages{
-  max-width:100% !important;
-  box-sizing:border-box !important;
-  overflow-x:hidden !important;
-}
-.assal-community-shell,
-.assal-community-top,
-.assal-community-pinned,
-.assal-community-messages,
-.assal-community-composer,
-.assal-community-write-row{
-  min-width:0 !important;
-  box-sizing:border-box !important;
-}
-.assal-community-msg{
-  box-sizing:border-box !important;
-  min-width:0 !important;
-  max-width:min(90%, 620px) !important;
-  max-inline-size:min(90%, 620px) !important;
-  overflow-wrap:anywhere !important;
-  word-break:normal !important;
-}
-.assal-community-msg-head,
-.assal-community-sender,
-.assal-community-text,
-.assal-community-msg-actions{
-  min-width:0 !important;
-  max-width:100% !important;
-  box-sizing:border-box !important;
-}
-.assal-community-text{
-  overflow-wrap:anywhere !important;
-  word-break:break-word !important;
-}
-.assal-community-image{
-  max-width:min(280px, 100%) !important;
-  box-sizing:border-box !important;
-}
-.assal-community-image img{
-  max-width:100% !important;
-}
-@media (max-width:640px){
-  .assal-community-msg{
-    max-width:90% !important;
-    max-inline-size:90% !important;
-  }
-}
-</style>
-
-<script id="assal-community-resume-width-safe-fix-script">
-(function(){
-  'use strict';
-  if (window.__ASSAL_COMMUNITY_RESUME_WIDTH_SAFE_FIX__) return;
-  window.__ASSAL_COMMUNITY_RESUME_WIDTH_SAFE_FIX__ = true;
-
-  var timer = null;
-  function isCommunityOpen(){
-    var modal = document.querySelector('.assal-community-modal.show, #assalCommunityModal.show');
-    if (!modal) return false;
-    var shell = modal.querySelector('.assal-community-shell');
-    return !!shell;
-  }
-
-  function safeNormalizeCommunityWidth(){
-    if (!isCommunityOpen()) return;
-    var modal = document.querySelector('.assal-community-modal.show, #assalCommunityModal.show');
-    var shell = modal && modal.querySelector('.assal-community-shell');
-    var messages = modal && modal.querySelector('.assal-community-messages');
-    if (!shell || !messages) return;
-
-    // نعمل نغزة Layout خفيفة فقط حتى WebView يعيد حساب العرض بعد الرجوع من الخلفية.
-    // لا نعيد رسم الرسائل ولا نغير ارتفاعها.
-    try {
-      shell.style.webkitTransform = 'translateZ(0)';
-      shell.style.transform = 'translateZ(0)';
-      void shell.offsetWidth;
-      setTimeout(function(){
-        try {
-          shell.style.webkitTransform = '';
-          shell.style.transform = '';
-        } catch(_) {}
-      }, 120);
-    } catch(_) {}
-  }
-
-  function scheduleNormalize(){
-    clearTimeout(timer);
-    timer = setTimeout(safeNormalizeCommunityWidth, 180);
-  }
-
-  document.addEventListener('visibilitychange', function(){
-    if (document.visibilityState === 'visible') scheduleNormalize();
-  }, { passive:true });
-  window.addEventListener('pageshow', scheduleNormalize, { passive:true });
-  window.addEventListener('focus', scheduleNormalize, { passive:true });
-  window.addEventListener('resize', scheduleNormalize, { passive:true });
-})();
-</script>
