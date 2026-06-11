@@ -33484,6 +33484,7 @@ html body footer {
     var input = document.getElementById('assalCommunityInput');
     if (input) {
       input.addEventListener('input', function(){
+        if (applyMutedState(false)) { try { this.blur(); } catch(_){} return; }
         this.style.height = 'auto';
         this.style.height = Math.min(this.scrollHeight, 118) + 'px';
       });
@@ -33899,6 +33900,28 @@ html body footer {
 }
 </style>
 
+
+<style id="assal-community-mute-admin-state-style">
+.assal-community-mini-action.assal-community-mute-action.is-muted{
+  background:linear-gradient(135deg,#7f1d1d,#dc2626) !important;
+  color:#fff !important;
+  border-color:rgba(248,113,113,.45) !important;
+  box-shadow:0 8px 18px rgba(127,29,29,.24) !important;
+}
+.assal-community-composer.is-muted .assal-community-input{
+  opacity:.68 !important;
+  cursor:not-allowed !important;
+  background:rgba(127,29,29,.10) !important;
+  border-color:rgba(248,113,113,.22) !important;
+}
+.assal-community-composer.is-muted .assal-community-send,
+.assal-community-composer.is-muted .assal-community-attach{
+  opacity:.45 !important;
+  cursor:not-allowed !important;
+  filter:grayscale(.45) !important;
+  pointer-events:none !important;
+}
+</style>
 <script id="assal-community-ultra-v2-script">
 (function(){
   'use strict';
@@ -33915,11 +33938,13 @@ html body footer {
   let unsubPresence = null;
   let unsubSettings = null;
   let unsubTyping = null;
+  let unsubMuted = null;
   let messages = [];
   let presenceMap = {};
   let settings = {};
   let lastSendAt = 0;
   let mutedUntil = 0;
+  let mutedMap = {};
   let typingMap = {};
   let selectedReply = null;
   let typingClearTimer = null;
@@ -33954,6 +33979,17 @@ html body footer {
 
   function dbSafeKey(v){
     return encodeURIComponent(String(v || '')).replace(/[.#$\[\]/]/g, '_');
+  }
+  function mutedKey(device){
+    return dbSafeKey(device || '');
+  }
+  function getMutedRecord(device){
+    const key = mutedKey(device);
+    return (mutedMap && (mutedMap[key] || mutedMap[String(device || '')])) || null;
+  }
+  function isDeviceMuted(device){
+    const rec = getMutedRecord(device);
+    return !!(rec && Number(rec.until || 0) > now());
   }
   function msgById(id){
     return messages.find(m => m && String(m.id) === String(id));
@@ -34123,8 +34159,9 @@ html body footer {
     try { if (typeof unsubPresence === 'function') unsubPresence(); } catch(_) {}
     try { if (typeof unsubSettings === 'function') unsubSettings(); } catch(_) {}
     try { if (typeof unsubTyping === 'function') unsubTyping(); } catch(_) {}
+    try { if (typeof unsubMuted === 'function') unsubMuted(); } catch(_) {}
     try { clearOwnTyping(true); } catch(_) {}
-    unsubMessages = null; unsubPresence = null; unsubSettings = null; unsubTyping = null;
+    unsubMessages = null; unsubPresence = null; unsubSettings = null; unsubTyping = null; unsubMuted = null;
   }
 
   window.__ASSAL_COMMUNITY_STOP_REALTIME__ = stopRealtime;
@@ -34186,6 +34223,21 @@ html body footer {
         renderTypingIndicator();
       });
     } catch(e){ console.error(e); }
+    try {
+      if (isAdmin()) {
+        unsubMuted = f.onValue(f.ref(f.db, PATH_MUTED), snap => {
+          mutedMap = snap.exists() ? (snap.val() || {}) : {};
+          renderMessages();
+        }, err => console.error('community muted map listener:', err));
+      } else {
+        const myKey = mutedKey(deviceId());
+        unsubMuted = f.onValue(f.ref(f.db, PATH_MUTED + '/' + myKey), snap => {
+          const data = snap.exists() ? (snap.val() || {}) : {};
+          mutedUntil = Number(data.until || 0);
+          applyMutedState(false);
+        }, err => console.error('community muted listener:', err));
+      }
+    } catch(e){ console.error(e); }
   }
 
   function renderTypingIndicator(){
@@ -34207,6 +34259,7 @@ html body footer {
   }
 
   async function setTypingState(isTyping){
+    if (!isAdmin() && mutedUntil > now()) { try { clearOwnTyping(false); } catch(_) {} return; }
     if (!hasFirebase()) return;
     const f = dbApi();
     const id = deviceId();
@@ -34238,6 +34291,7 @@ html body footer {
     } catch(_) {}
   }
   function markTyping(){
+    if (!isAdmin() && mutedUntil > now()) { try { clearOwnTyping(false); } catch(_) {} return; }
     const input = $('assalCommunityInput');
     const hasText = !!clean(input && input.value);
     if (hasText) setTypingState(true);
@@ -34254,22 +34308,59 @@ html body footer {
     } catch(_) {}
   }
 
-  async function checkMuted(){
+  function applyMutedState(showNotice){
+    const muted = !isAdmin() && mutedUntil > now();
+    const input = $('assalCommunityInput');
+    const sendBtn = $('assalCommunitySendBtn');
+    const note = $('assalCommunityMutedNote');
+    const composer = document.querySelector('#assalCommunityModal .assal-community-composer');
+
+    if (note) note.classList.toggle('show', !!muted);
+    if (composer) composer.classList.toggle('is-muted', !!muted);
+
+    if (input) {
+      input.disabled = !!muted;
+      input.readOnly = !!muted;
+      input.setAttribute('aria-disabled', muted ? 'true' : 'false');
+      input.placeholder = muted ? 'تم كتمك مؤقتاً من قبل الإدارة' : 'اكتب رسالة للمجتمع...';
+      if (muted) {
+        try { input.value = ''; input.style.height = ''; input.blur(); } catch(_) {}
+      }
+    }
+    if (sendBtn) {
+      sendBtn.disabled = !!muted;
+      sendBtn.setAttribute('aria-disabled', muted ? 'true' : 'false');
+    }
+    if (muted) {
+      try { clearOwnTyping(false); } catch(_) {}
+      if (showNotice) {
+        const last = Number(window.__ASSAL_COMMUNITY_LAST_MUTE_NOTICE_UNTIL__ || 0);
+        if (last !== mutedUntil) {
+          window.__ASSAL_COMMUNITY_LAST_MUTE_NOTICE_UNTIL__ = mutedUntil;
+          if (window.Swal) Swal.fire({icon:'info', title:'أنت مكتوم مؤقتاً', text:'الإدارة أوقفت كتابتك في مجتمع عسل لفترة مؤقتة.'});
+          else if (window.showElegantTopToast) showElegantTopToast('تم كتمك مؤقتاً من قبل الإدارة', 'warning', 2000);
+        }
+      }
+    } else if (window.__ASSAL_COMMUNITY_LAST_MUTE_NOTICE_UNTIL__) {
+      window.__ASSAL_COMMUNITY_LAST_MUTE_NOTICE_UNTIL__ = 0;
+    }
+    return !!muted;
+  }
+
+  async function checkMuted(showNotice){
     mutedUntil = 0;
-    if (isAdmin() || !hasFirebase()) return false;
+    if (isAdmin() || !hasFirebase()) {
+      applyMutedState(false);
+      return false;
+    }
     try {
       const f = dbApi();
-      const snap = await f.get(f.ref(f.db, PATH_MUTED + '/' + deviceId()));
+      const myKey = mutedKey(deviceId());
+      const snap = await f.get(f.ref(f.db, PATH_MUTED + '/' + myKey));
       const data = snap.exists() ? (snap.val() || {}) : {};
       mutedUntil = Number(data.until || 0);
     } catch(_) {}
-    const muted = mutedUntil > now();
-    const note = $('assalCommunityMutedNote');
-    if (note) note.classList.toggle('show', muted);
-    if (muted && window.Swal) {
-      Swal.fire({icon:'info', title:'أنت مكتوم مؤقتاً', text:'الإدارة أوقفت كتابتك في مجتمع عسل لفترة مؤقتة.'});
-    }
-    return muted;
+    return applyMutedState(showNotice !== false);
   }
 
   function renderPinned(){
@@ -34331,6 +34422,7 @@ html body footer {
       const canDelete = !deleted && (isAdmin() || mine);
       const canPin = !deleted && isAdmin();
       const canMute = !deleted && isAdmin() && !adminMsg && msg.deviceId;
+      const msgMuted = canMute && isDeviceMuted(msg.deviceId);
       const name = esc(msg.senderName || (adminMsg ? 'الإدارة' : 'زبون'));
       const role = adminMsg ? '<span class="role-badge admin">الإدارة</span>' : '<span class="role-badge">زبون</span>';
       const body = deleted ? '<span style="color:rgba(226,232,240,.62);font-style:italic">تم حذف الرسالة</span>' : esc(msg.text || '');
@@ -34349,7 +34441,7 @@ html body footer {
         actions = '<div class="assal-community-msg-actions">'
           + (canEdit ? '<button type="button" class="assal-community-mini-action" data-community-action="edit" data-id="'+esc(msg.id)+'"><i class="fas fa-pen"></i> تعديل</button>' : '')
           + (canPin ? '<button type="button" class="assal-community-mini-action" data-community-action="pin" data-id="'+esc(msg.id)+'"><i class="fas fa-thumbtack"></i> '+(msg.pinned ? 'إلغاء التثبيت' : 'تثبيت')+'</button>' : '')
-          + (canMute ? '<button type="button" class="assal-community-mini-action" data-community-action="mute" data-id="'+esc(msg.id)+'"><i class="fas fa-volume-xmark"></i> كتم</button>' : '')
+          + (canMute ? '<button type="button" class="assal-community-mini-action assal-community-mute-action '+(msgMuted?'is-muted':'')+'" data-community-action="mute" data-id="'+esc(msg.id)+'" data-device="'+esc(mutedKey(msg.deviceId))+'"><i class="fas '+(msgMuted?'fa-volume-high':'fa-volume-xmark')+'"></i> '+(msgMuted?'إلغاء الكتم':'كتم')+'</button>' : '')
           + (canDelete ? '<button type="button" class="assal-community-mini-action danger" data-community-action="delete" data-id="'+esc(msg.id)+'"><i class="fas fa-trash"></i> حذف</button>' : '')
           + '</div>';
       }
@@ -34485,31 +34577,64 @@ html body footer {
   window.muteAssalCommunitySender = async function(id){
     try {
       if (!isAdmin()) return;
-      const msg = messages.find(m => m && m.id === id);
+      if (!hasFirebase()) throw new Error('Firebase غير جاهز');
+      const msg = messages.find(m => m && String(m.id) === String(id));
       if (!msg || !msg.deviceId || msg.senderRole === 'admin') return;
-      const ok = await Swal.fire({
-        icon:'question',
-        title:'كتم هذا الزبون؟',
-        text:'راح تمنعه من الكتابة لمدة 24 ساعة.',
-        showCancelButton:true,
-        confirmButtonText:'كتم 24 ساعة',
-        cancelButtonText:'إلغاء'
+      const key = mutedKey(msg.deviceId);
+      const active = isDeviceMuted(msg.deviceId);
+      const ok = await assalCommunityToggleMuteConfirm({
+        muted: active,
+        name: msg.senderName || 'زبون'
       });
-      if (!ok.isConfirmed) return;
+      if (!ok) return;
       const f = dbApi();
-      await f.set(f.ref(f.db, PATH_MUTED + '/' + msg.deviceId), {
-        deviceId:msg.deviceId,
-        name:msg.senderName || '',
-        until:now() + 24*60*60*1000,
-        mutedAt:now(),
-        mutedBy:'admin'
-      });
-      if (window.showElegantTopToast) showElegantTopToast('تم كتم الزبون 24 ساعة', 'success', 1800);
+      if (active) {
+        await f.remove(f.ref(f.db, PATH_MUTED + '/' + key));
+        if (window.showElegantTopToast) showElegantTopToast('تم إلغاء كتم الزبون', 'success', 1600);
+      } else {
+        const until = now() + 24*60*60*1000;
+        await f.set(f.ref(f.db, PATH_MUTED + '/' + key), {
+          deviceId: msg.deviceId,
+          key: key,
+          name: msg.senderName || '',
+          until: until,
+          mutedAt: now(),
+          mutedBy: 'admin'
+        });
+        mutedMap = Object.assign({}, mutedMap || {}, {[key]: {deviceId:msg.deviceId, key:key, name:msg.senderName || '', until:until, mutedAt:now(), mutedBy:'admin'}});
+        renderMessages();
+        if (window.showElegantTopToast) showElegantTopToast('تم كتم الزبون 24 ساعة', 'success', 1600);
+      }
     } catch(e) {
       console.error('mute community:', e);
-      if (window.Swal) Swal.fire({icon:'error', title:'تعذر الكتم', text:e.message || String(e)});
+      if (window.Swal) Swal.fire({icon:'error', title:'تعذر تنفيذ الكتم', text:e.message || String(e)});
+      else alert('تعذر تنفيذ الكتم: ' + (e.message || e));
     }
   };
+
+  function assalCommunityToggleMuteConfirm(opts){
+    opts = opts || {};
+    return new Promise(resolve => {
+      try {
+        const old = $('assalCommunityMuteConfirmNative');
+        if (old) old.remove();
+        const ov = document.createElement('div');
+        ov.id = 'assalCommunityMuteConfirmNative';
+        ov.style.cssText = 'position:fixed;inset:0;z-index:2147483320;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(2,8,23,.72);backdrop-filter:blur(10px);direction:rtl;font-family:Cairo,Tajawal,sans-serif;';
+        const muted = !!opts.muted;
+        ov.innerHTML = '<div style="width:min(92vw,360px);border-radius:22px;padding:16px;background:rgba(15,23,42,.98);border:1px solid rgba(148,163,184,.22);box-shadow:0 24px 70px rgba(0,0,0,.72);color:#fff;text-align:right">'
+          + '<div style="font-weight:900;font-size:17px;margin-bottom:8px">' + (muted ? 'إلغاء كتم الزبون؟' : 'كتم هذا الزبون؟') + '</div>'
+          + '<div style="font-size:13px;color:rgba(226,232,240,.72);line-height:1.8;margin-bottom:12px">' + (muted ? 'راح يرجع يكتب داخل مجتمع عسل مباشرة.' : 'راح تمنعه من الكتابة لمدة 24 ساعة، ويُقفل حقل الكتابة عنده فوراً.') + '</div>'
+          + '<div style="display:flex;gap:10px"><button id="assalMuteCancel" type="button" style="flex:1;border:0;border-radius:14px;padding:10px;background:#475569;color:white;font-weight:900;font-family:Cairo">إلغاء</button><button id="assalMuteOk" type="button" style="flex:1;border:0;border-radius:14px;padding:10px;background:' + (muted ? 'linear-gradient(135deg,#0f766e,#06b6d4)' : 'linear-gradient(135deg,#7f1d1d,#ef4444)') + ';color:white;font-weight:900;font-family:Cairo">' + (muted ? 'إلغاء الكتم' : 'كتم 24 ساعة') + '</button></div>'
+          + '</div>';
+        document.body.appendChild(ov);
+        const close = v => { try { ov.remove(); } catch(_){} resolve(!!v); };
+        ov.querySelector('#assalMuteCancel').onclick = e => { e.preventDefault(); e.stopPropagation(); close(false); };
+        ov.querySelector('#assalMuteOk').onclick = e => { e.preventDefault(); e.stopPropagation(); close(true); };
+        ov.addEventListener('click', e => { if (e.target === ov) close(false); });
+      } catch(_) { resolve(false); }
+    });
+  }
 
   window.openAssalCommunityAdminTools = async function(){
     if (!isAdmin()) return;
@@ -34711,6 +34836,8 @@ html body footer {
           window.sendAssalCommunityMessage();
         }
       });
+      input.addEventListener('focus', function(){ if (applyMutedState(true)) { try { this.blur(); } catch(_){} } });
+      input.addEventListener('keydown', function(e){ if (applyMutedState(false)) { e.preventDefault(); try { this.blur(); } catch(_){} return; } });
       input.addEventListener('blur', function(){ setTimeout(function(){ clearOwnTyping(false); }, 700); });
     }
     const composer = document.querySelector('#assalCommunityModal .assal-community-composer');
