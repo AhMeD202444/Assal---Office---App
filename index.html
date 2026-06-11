@@ -34215,6 +34215,9 @@ html body footer {
       unsubSettings = f.onValue(f.ref(f.db, PATH_SETTINGS), snap => {
         settings = snap.exists() ? (snap.val() || {}) : {};
         updateCounters();
+        // ASSAL FIX: إغلاق/فتح الكتابة من أدوات الأدمن لازم يقفل شريط الزبون فوراً مثل الكتم
+        try { applyMutedState(false); } catch(_) {}
+        try { renderTypingIndicator(); } catch(_) {}
       });
     } catch(e){ console.error(e); }
     try {
@@ -34259,7 +34262,7 @@ html body footer {
   }
 
   async function setTypingState(isTyping){
-    if (!isAdmin() && mutedUntil > now()) { try { clearOwnTyping(false); } catch(_) {} return; }
+    if (isCommunityInputLocked()) { try { clearOwnTyping(false); } catch(_) {} return; }
     if (!hasFirebase()) return;
     const f = dbApi();
     const id = deviceId();
@@ -34291,7 +34294,7 @@ html body footer {
     } catch(_) {}
   }
   function markTyping(){
-    if (!isAdmin() && mutedUntil > now()) { try { clearOwnTyping(false); } catch(_) {} return; }
+    if (isCommunityInputLocked()) { try { clearOwnTyping(false); } catch(_) {} return; }
     const input = $('assalCommunityInput');
     const hasText = !!clean(input && input.value);
     if (hasText) setTypingState(true);
@@ -34308,43 +34311,72 @@ html body footer {
     } catch(_) {}
   }
 
+  function isCommunityInputLocked(){
+    return !isAdmin() && ((mutedUntil > now()) || !!(settings && settings.closed));
+  }
+  function communityInputLockReason(){
+    if (!isAdmin() && mutedUntil > now()) return 'muted';
+    if (!isAdmin() && settings && settings.closed) return 'closed';
+    return '';
+  }
   function applyMutedState(showNotice){
-    const muted = !isAdmin() && mutedUntil > now();
+    const reason = communityInputLockReason();
+    const locked = !!reason;
+    const muted = reason === 'muted';
+    const writingClosed = reason === 'closed';
     const input = $('assalCommunityInput');
     const sendBtn = $('assalCommunitySendBtn');
     const note = $('assalCommunityMutedNote');
     const composer = document.querySelector('#assalCommunityModal .assal-community-composer');
+    const noticeText = muted
+      ? 'تم تقييد المراسلة من قبل الإدارة'
+      : (writingClosed ? 'تم تقييد المراسلة من قبل الإدارة' : '');
 
-    if (note) note.classList.toggle('show', !!muted);
-    if (composer) composer.classList.toggle('is-muted', !!muted);
+    if (note) {
+      note.classList.toggle('show', !!locked);
+      // نفس رسالة الكتم تظهر أيضاً عند إغلاق الكتابة من أدوات الأدمن
+      const textNode = note.querySelector('.assal-community-muted-note-text, span, b, small');
+      if (textNode && noticeText) textNode.textContent = noticeText;
+      else if (noticeText && !note.dataset.assalOriginalHtmlSaved) {
+        note.dataset.assalOriginalHtmlSaved = '1';
+        note.textContent = noticeText;
+      } else if (noticeText && note.dataset.assalOriginalHtmlSaved) {
+        note.textContent = noticeText;
+      }
+    }
+    if (composer) {
+      composer.classList.toggle('is-muted', !!locked);
+      composer.classList.toggle('is-writing-closed', !!writingClosed);
+    }
 
     if (input) {
-      input.disabled = !!muted;
-      input.readOnly = !!muted;
-      input.setAttribute('aria-disabled', muted ? 'true' : 'false');
-      input.placeholder = muted ? 'تم كتمك مؤقتاً من قبل الإدارة' : 'اكتب رسالة للمجتمع...';
-      if (muted) {
+      input.disabled = !!locked;
+      input.readOnly = !!locked;
+      input.setAttribute('aria-disabled', locked ? 'true' : 'false');
+      input.placeholder = locked ? noticeText : 'اكتب رسالة للمجتمع...';
+      if (locked) {
         try { input.value = ''; input.style.height = ''; input.blur(); } catch(_) {}
       }
     }
     if (sendBtn) {
-      sendBtn.disabled = !!muted;
-      sendBtn.setAttribute('aria-disabled', muted ? 'true' : 'false');
+      sendBtn.disabled = !!locked;
+      sendBtn.setAttribute('aria-disabled', locked ? 'true' : 'false');
     }
-    if (muted) {
+    if (locked) {
       try { clearOwnTyping(false); } catch(_) {}
       if (showNotice) {
-        const last = Number(window.__ASSAL_COMMUNITY_LAST_MUTE_NOTICE_UNTIL__ || 0);
-        if (last !== mutedUntil) {
-          window.__ASSAL_COMMUNITY_LAST_MUTE_NOTICE_UNTIL__ = mutedUntil;
-          if (window.Swal) Swal.fire({icon:'info', title:'أنت مكتوم مؤقتاً', text:'الإدارة أوقفت كتابتك في مجتمع عسل لفترة مؤقتة.'});
-          else if (window.showElegantTopToast) showElegantTopToast('تم كتمك مؤقتاً من قبل الإدارة', 'warning', 2000);
+        const noticeKey = muted ? ('muted:' + mutedUntil) : ('closed:' + Number(settings && settings.updatedAt || 1));
+        const last = String(window.__ASSAL_COMMUNITY_LAST_LOCK_NOTICE_KEY__ || '');
+        if (last !== noticeKey) {
+          window.__ASSAL_COMMUNITY_LAST_LOCK_NOTICE_KEY__ = noticeKey;
+          if (window.Swal) Swal.fire({icon:'info', title:'تم تقييد المراسلة', text:'الإدارة أوقفت الكتابة حالياً.'});
+          else if (window.showElegantTopToast) showElegantTopToast('تم تقييد المراسلة من قبل الإدارة', 'warning', 2000);
         }
       }
-    } else if (window.__ASSAL_COMMUNITY_LAST_MUTE_NOTICE_UNTIL__) {
-      window.__ASSAL_COMMUNITY_LAST_MUTE_NOTICE_UNTIL__ = 0;
+    } else if (window.__ASSAL_COMMUNITY_LAST_LOCK_NOTICE_KEY__) {
+      window.__ASSAL_COMMUNITY_LAST_LOCK_NOTICE_KEY__ = '';
     }
-    return !!muted;
+    return !!locked;
   }
 
   async function checkMuted(showNotice){
@@ -34705,11 +34737,8 @@ html body footer {
       if (window.showElegantTopToast) showElegantTopToast('انتظر لحظة قبل إرسال رسالة ثانية', 'warning', 1500);
       return;
     }
-    if (await checkMuted()) return;
-    if (!isAdmin() && settings.closed) {
-      if (window.Swal) Swal.fire({icon:'info', title:'مجتمع عسل مغلق مؤقتاً', text:'الإدارة أوقفت الكتابة حالياً.'});
-      return;
-    }
+    await checkMuted(false);
+    if (applyMutedState(true)) return;
 
     const sendBtn = $('assalCommunitySendBtn');
     try {
