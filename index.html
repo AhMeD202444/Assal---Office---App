@@ -34135,6 +34135,18 @@ html body footer {
     }
   }
 
+  function isCommunityWritingClosedForCustomer(){
+    return !isAdmin() && !!(settings && settings.closed);
+  }
+
+  function isCommunityInputLocked(){
+    return !isAdmin() && ((mutedUntil > now()) || !!(settings && settings.closed));
+  }
+
+  function communityLockText(){
+    return 'تم تقييد المراسلة من قبل الإدارة';
+  }
+
   async function updatePresence(){
     if (!hasFirebase()) return;
     const f = dbApi();
@@ -34215,9 +34227,8 @@ html body footer {
       unsubSettings = f.onValue(f.ref(f.db, PATH_SETTINGS), snap => {
         settings = snap.exists() ? (snap.val() || {}) : {};
         updateCounters();
-        // ASSAL FIX: إغلاق/فتح الكتابة من أدوات الأدمن لازم يقفل شريط الزبون فوراً مثل الكتم
+        // تطبيق قفل الكتابة العام فوراً على الزبائن بدون أي مراقبة إضافية ثقيلة.
         try { applyMutedState(false); } catch(_) {}
-        try { renderTypingIndicator(); } catch(_) {}
       });
     } catch(e){ console.error(e); }
     try {
@@ -34311,72 +34322,48 @@ html body footer {
     } catch(_) {}
   }
 
-  function isCommunityInputLocked(){
-    return !isAdmin() && ((mutedUntil > now()) || !!(settings && settings.closed));
-  }
-  function communityInputLockReason(){
-    if (!isAdmin() && mutedUntil > now()) return 'muted';
-    if (!isAdmin() && settings && settings.closed) return 'closed';
-    return '';
-  }
   function applyMutedState(showNotice){
-    const reason = communityInputLockReason();
-    const locked = !!reason;
-    const muted = reason === 'muted';
-    const writingClosed = reason === 'closed';
+    const muted = !isAdmin() && mutedUntil > now();
+    const writingClosed = isCommunityWritingClosedForCustomer();
+    const locked = !!(muted || writingClosed);
     const input = $('assalCommunityInput');
     const sendBtn = $('assalCommunitySendBtn');
     const note = $('assalCommunityMutedNote');
     const composer = document.querySelector('#assalCommunityModal .assal-community-composer');
-    const noticeText = muted
-      ? 'تم تقييد المراسلة من قبل الإدارة'
-      : (writingClosed ? 'تم تقييد المراسلة من قبل الإدارة' : '');
 
     if (note) {
-      note.classList.toggle('show', !!locked);
-      // نفس رسالة الكتم تظهر أيضاً عند إغلاق الكتابة من أدوات الأدمن
-      const textNode = note.querySelector('.assal-community-muted-note-text, span, b, small');
-      if (textNode && noticeText) textNode.textContent = noticeText;
-      else if (noticeText && !note.dataset.assalOriginalHtmlSaved) {
-        note.dataset.assalOriginalHtmlSaved = '1';
-        note.textContent = noticeText;
-      } else if (noticeText && note.dataset.assalOriginalHtmlSaved) {
-        note.textContent = noticeText;
-      }
+      note.textContent = communityLockText();
+      note.classList.toggle('show', locked);
     }
-    if (composer) {
-      composer.classList.toggle('is-muted', !!locked);
-      composer.classList.toggle('is-writing-closed', !!writingClosed);
-    }
+    if (composer) composer.classList.toggle('is-muted', locked);
 
     if (input) {
-      input.disabled = !!locked;
-      input.readOnly = !!locked;
+      input.disabled = locked;
+      input.readOnly = locked;
       input.setAttribute('aria-disabled', locked ? 'true' : 'false');
-      input.placeholder = locked ? noticeText : 'اكتب رسالة للمجتمع...';
+      input.placeholder = locked ? communityLockText() : 'اكتب رسالة للمجتمع...';
       if (locked) {
         try { input.value = ''; input.style.height = ''; input.blur(); } catch(_) {}
       }
     }
     if (sendBtn) {
-      sendBtn.disabled = !!locked;
+      sendBtn.disabled = locked;
       sendBtn.setAttribute('aria-disabled', locked ? 'true' : 'false');
     }
     if (locked) {
       try { clearOwnTyping(false); } catch(_) {}
-      if (showNotice) {
-        const noticeKey = muted ? ('muted:' + mutedUntil) : ('closed:' + Number(settings && settings.updatedAt || 1));
-        const last = String(window.__ASSAL_COMMUNITY_LAST_LOCK_NOTICE_KEY__ || '');
-        if (last !== noticeKey) {
-          window.__ASSAL_COMMUNITY_LAST_LOCK_NOTICE_KEY__ = noticeKey;
-          if (window.Swal) Swal.fire({icon:'info', title:'تم تقييد المراسلة', text:'الإدارة أوقفت الكتابة حالياً.'});
-          else if (window.showElegantTopToast) showElegantTopToast('تم تقييد المراسلة من قبل الإدارة', 'warning', 2000);
+      // لا نفتح SweetAlert هنا حتى لا يسبب ثقل/هنگ، الرسالة الثابتة فوق الشريط تكفي.
+      if (muted && showNotice) {
+        const last = Number(window.__ASSAL_COMMUNITY_LAST_MUTE_NOTICE_UNTIL__ || 0);
+        if (last !== mutedUntil) {
+          window.__ASSAL_COMMUNITY_LAST_MUTE_NOTICE_UNTIL__ = mutedUntil;
+          if (window.showElegantTopToast) showElegantTopToast(communityLockText(), 'warning', 1800);
         }
       }
-    } else if (window.__ASSAL_COMMUNITY_LAST_LOCK_NOTICE_KEY__) {
-      window.__ASSAL_COMMUNITY_LAST_LOCK_NOTICE_KEY__ = '';
+    } else if (window.__ASSAL_COMMUNITY_LAST_MUTE_NOTICE_UNTIL__) {
+      window.__ASSAL_COMMUNITY_LAST_MUTE_NOTICE_UNTIL__ = 0;
     }
-    return !!locked;
+    return locked;
   }
 
   async function checkMuted(showNotice){
@@ -34737,8 +34724,11 @@ html body footer {
       if (window.showElegantTopToast) showElegantTopToast('انتظر لحظة قبل إرسال رسالة ثانية', 'warning', 1500);
       return;
     }
-    await checkMuted(false);
-    if (applyMutedState(true)) return;
+    if (await checkMuted()) return;
+    if (isCommunityInputLocked()) {
+      applyMutedState(true);
+      return;
+    }
 
     const sendBtn = $('assalCommunitySendBtn');
     try {
