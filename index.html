@@ -36758,3 +36758,103 @@ html.assal-offline-mode #assalOfflineBanner{
 })();
 </script>
 
+<script>
+/* ===== ASSAL SAFE FIX: عند فتح كيبورد مجتمع عسل أظهر آخر رسالة كاملة ===== */
+(function(){
+  'use strict';
+  if (window.__ASSAL_COMMUNITY_KEYBOARD_LAST_MESSAGE_FIX__) return;
+  window.__ASSAL_COMMUNITY_KEYBOARD_LAST_MESSAGE_FIX__ = true;
+
+  function byId(id){ return document.getElementById(id); }
+
+  function communityIsOpen(){
+    try { return !!byId('assalCommunityModal')?.classList.contains('show'); } catch(_) { return false; }
+  }
+
+  function isCommunityInputActive(){
+    try {
+      const active = document.activeElement;
+      return !!active && active.id === 'assalCommunityInput' && communityIsOpen();
+    } catch(_) { return false; }
+  }
+
+  function getLastCommunityMessage(messagesBox){
+    try {
+      if (!messagesBox) return null;
+      const nodes = messagesBox.querySelectorAll('.assal-community-msg:not(.deleted)');
+      if (nodes && nodes.length) return nodes[nodes.length - 1];
+      const fallback = messagesBox.querySelectorAll('.assal-community-msg');
+      return fallback && fallback.length ? fallback[fallback.length - 1] : null;
+    } catch(_) { return null; }
+  }
+
+  function scrollLastCommunityMessageFully(){
+    try {
+      if (!communityIsOpen()) return;
+      const box = byId('assalCommunityMessages');
+      if (!box) return;
+
+      const last = getLastCommunityMessage(box);
+      if (last && typeof last.scrollIntoView === 'function') {
+        last.scrollIntoView({ block: 'end', inline: 'nearest', behavior: 'auto' });
+      }
+
+      // احتياط: إذا كان آخر عنصر طويل أو الكيبورد بعده يفتح، نثبت السكرول بالنهاية.
+      box.scrollTop = box.scrollHeight;
+    } catch(_) {}
+  }
+
+  function scheduleKeyboardCommunityScroll(){
+    if (!communityIsOpen()) return;
+    // أكثر من توقيت لأن الموبايل يغيّر ارتفاع الشاشة بعد فتح الكيبورد بلحظات.
+    [60, 180, 360, 650].forEach(function(delay){
+      setTimeout(scrollLastCommunityMessageFully, delay);
+    });
+  }
+
+  function bindCommunityInput(){
+    const input = byId('assalCommunityInput');
+    if (!input || input.dataset.assalKeyboardLastMessageFix === '1') return;
+    input.dataset.assalKeyboardLastMessageFix = '1';
+
+    input.addEventListener('focus', scheduleKeyboardCommunityScroll, true);
+    input.addEventListener('click', scheduleKeyboardCommunityScroll, true);
+    input.addEventListener('touchstart', function(){ setTimeout(scheduleKeyboardCommunityScroll, 30); }, { passive:true, capture:true });
+  }
+
+  function boot(){
+    bindCommunityInput();
+    if (communityIsOpen()) scheduleKeyboardCommunityScroll();
+  }
+
+  // ربط خفيف جداً بدون مراقبة DOM مستمرة حتى لا يسبب هنگ.
+  const oldOpen = window.openAssalCommunitySpace;
+  if (typeof oldOpen === 'function' && !oldOpen.__assalKeyboardLastMessageWrapped) {
+    const wrapped = async function(){
+      const result = await oldOpen.apply(this, arguments);
+      setTimeout(boot, 160);
+      setTimeout(scheduleKeyboardCommunityScroll, 420);
+      return result;
+    };
+    wrapped.__assalKeyboardLastMessageWrapped = true;
+    window.openAssalCommunitySpace = wrapped;
+  }
+
+  document.addEventListener('DOMContentLoaded', boot);
+  document.addEventListener('focusin', function(e){
+    if (e && e.target && e.target.id === 'assalCommunityInput') scheduleKeyboardCommunityScroll();
+  }, true);
+
+  if (window.visualViewport && typeof window.visualViewport.addEventListener === 'function') {
+    let vvTimer = null;
+    window.visualViewport.addEventListener('resize', function(){
+      if (!isCommunityInputActive()) return;
+      clearTimeout(vvTimer);
+      vvTimer = setTimeout(scheduleKeyboardCommunityScroll, 80);
+    }, { passive:true });
+  }
+
+  setTimeout(boot, 900);
+})();
+</script>
+
