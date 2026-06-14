@@ -38079,13 +38079,14 @@ html.assal-offline-mode #assalOfflineBanner{
         if (window.Swal) {
           var res = await Swal.fire({
             title:'مسح رسائل الزبون؟',
-            html:'سيتم حذف رسائل هذه المحادثة الخاصة فقط، بدون حذف بروفايل الزبون.',
-            icon:'warning',
+            html:'<div class="assal-private-clean-card"><div class="assal-private-clean-icon"><i class="fas fa-broom"></i></div><h3>تنظيف رسائل الزبون</h3><p>سيتم حذف رسائل هذه المحادثة الخاصة فقط، بدون حذف بروفايل الزبون.</p></div>',
+            icon:null,
             showCancelButton:true,
             confirmButtonText:'نعم، امسح',
             cancelButtonText:'إلغاء',
-            confirmButtonColor:'#b91c1c',
-            cancelButtonColor:'#334155'
+            reverseButtons:true,
+            buttonsStyling:false,
+            customClass:{popup:'assal-private-clean-popup', confirmButton:'assal-private-clean-ok', cancelButton:'assal-private-clean-cancel'}
           });
           ok = !!res.isConfirmed;
         } else {
@@ -39234,3 +39235,567 @@ button[data-private-msg-delete]:active{transform:scale(.93) !important;}
   }, true);
 })();
 </script>
+
+<!-- ===== ASSAL FINAL UI POLISH: Private messages + customer profile centering ===== -->
+<style id="assal-private-windows-polish-centered-profile-final">
+/* يسمح للـ SweetAlert الخاصة تبقى فوق نوافذ الخاص */
+.swal2-container,
+.swal2-container.swal2-backdrop-show,
+.swal2-container.swal2-shown{
+  z-index:2147483647 !important;
+}
+
+/* الخلفية العامة للنوافذ الخاصة */
+.assal-private-modal{
+  background:
+    radial-gradient(760px 380px at 50% -8%, rgba(56,189,248,.14), transparent 58%),
+    radial-gradient(520px 320px at 12% 92%, rgba(16,185,129,.12), transparent 62%),
+    rgba(1,7,18,.78) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(135%) !important;
+  backdrop-filter: blur(14px) saturate(135%) !important;
+}
+
+/* توسيط بروفايل الزبون بين الهيدر والفوتر */
+#assalPrivateCustomerProfileModal.assal-private-modal{
+  align-items:center !important;
+  justify-content:center !important;
+  padding:
+    calc(44px + 14px + env(safe-area-inset-top,0px))
+    14px
+    calc(40px + 14px + env(safe-area-inset-bottom,0px))
+    14px !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-shell{
+  width:min(94vw, 440px) !important;
+  height:auto !important;
+  max-height:calc(100dvh - 44px - 40px - 36px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)) !important;
+  border-radius:28px !important;
+  overflow:hidden !important;
+  margin:auto !important;
+}
+
+/* شيل شكل الفل سكرين من بروفايل الزبون بالموبايل فقط */
+@media(max-width:520px){
+  #assalPrivateCustomerProfileModal .assal-private-shell{
+    width:min(94vw, 410px) !important;
+    height:auto !important;
+    max-height:calc(100dvh - 44px - 40px - 32px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)) !important;
+    border-radius:26px !important;
+  }
+}
+
+/* كارد البروفايل: مختصر، مرتب، بدون طول زائد */
+#assalPrivateCustomerProfileModal .assal-private-top{
+  min-height:58px !important;
+  padding:10px 12px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.020)) !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-mark{
+  width:36px !important;
+  height:36px !important;
+  border-radius:14px !important;
+  background:linear-gradient(135deg,#7dd3fc,#34d399) !important;
+  color:#04111d !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-title b{
+  font-size:14.5px !important;
+  max-width:250px !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-title small{
+  font-size:10.5px !important;
+  max-width:250px !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-body{
+  padding:10px !important;
+  overflow:auto !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-profile-compact-v4{
+  border-radius:24px !important;
+  background:
+    radial-gradient(280px 150px at 90% 0%, rgba(125,211,252,.18), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,.082), rgba(255,255,255,.026)) !important;
+  border:1px solid rgba(186,230,253,.14) !important;
+  box-shadow:0 18px 48px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-compact-cover{
+  grid-template-columns:58px minmax(0,1fr) !important;
+  gap:10px !important;
+  padding:12px 12px 9px !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-compact-avatar{
+  width:58px !important;
+  height:58px !important;
+  border-radius:20px !important;
+  font-size:24px !important;
+  background:linear-gradient(135deg,#93c5fd,#5eead4 55%,#bef264) !important;
+  color:#03131f !important;
+  box-shadow:0 14px 28px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.26) !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-compact-chip{
+  padding:4px 8px !important;
+  font-size:9.5px !important;
+  margin-bottom:5px !important;
+  color:#dffcff !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-compact-main h3{
+  font-size:17px !important;
+  line-height:1.2 !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-compact-main p{
+  font-size:11px !important;
+  margin-top:4px !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-compact-info{
+  grid-template-columns:1fr 1fr !important;
+  gap:7px !important;
+  padding:0 10px 10px !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-compact-info>div{
+  border-radius:16px !important;
+  padding:8px !important;
+  grid-template-columns:25px minmax(0,1fr) !important;
+  column-gap:7px !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-compact-info i{
+  width:25px !important;
+  height:25px !important;
+  border-radius:10px !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-compact-info span{
+  font-size:9px !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-compact-info b{
+  font-size:11px !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-actions.compact-actions{
+  grid-template-columns:1fr 1fr !important;
+  gap:8px !important;
+  padding:0 10px 10px !important;
+  margin-top:0 !important;
+}
+#assalPrivateCustomerProfileModal .assal-private-actions.compact-actions .assal-private-btn{
+  min-height:40px !important;
+  border-radius:15px !important;
+  font-size:12px !important;
+}
+
+/* نافذة الرسائل الخاصة: تصميم أنظف وأكثر فخامة */
+#assalPrivateChatModal .assal-private-shell{
+  width:min(96vw, 560px) !important;
+  max-height:calc(100dvh - 92px) !important;
+  border-radius:30px !important;
+  background:
+    radial-gradient(620px 260px at 100% -8%, rgba(14,165,233,.17), transparent 58%),
+    radial-gradient(460px 260px at -10% 105%, rgba(16,185,129,.13), transparent 64%),
+    linear-gradient(155deg, rgba(8,13,28,.985), rgba(3,7,18,.992)) !important;
+  border:1px solid rgba(191,219,254,.16) !important;
+  box-shadow:0 32px 88px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+#assalPrivateChatModal .assal-private-top{
+  min-height:64px !important;
+  padding:11px 13px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.080), rgba(255,255,255,.018)) !important;
+  border-bottom:1px solid rgba(255,255,255,.085) !important;
+}
+#assalPrivateChatModal .assal-private-mark{
+  width:39px !important;
+  height:39px !important;
+  border-radius:15px !important;
+  background:linear-gradient(135deg,#e0f2fe,#67e8f9 46%,#34d399) !important;
+  color:#03131f !important;
+  box-shadow:0 12px 24px rgba(34,211,238,.16), inset 0 1px 0 rgba(255,255,255,.36) !important;
+}
+#assalPrivateChatModal .assal-private-title b{
+  font-size:15px !important;
+  max-width:300px !important;
+  color:#fff !important;
+}
+#assalPrivateChatModal .assal-private-title small{
+  font-size:10.5px !important;
+  max-width:300px !important;
+  color:rgba(226,232,240,.62) !important;
+}
+#assalPrivateChatModal .assal-private-x,
+#assalPrivateChatModal .assal-private-clear-btn{
+  width:36px !important;
+  height:36px !important;
+  border-radius:14px !important;
+}
+#assalPrivateChatModal .assal-private-clear-btn{
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255,255,255,.18), transparent 24%),
+    linear-gradient(135deg,#7f1d1d,#e11d48) !important;
+  border:1px solid rgba(254,202,202,.18) !important;
+}
+
+/* قائمة محادثات الزبائن الخاصة */
+#assalPrivateChatList.assal-private-body{
+  padding:12px !important;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(125,211,252,.060), transparent 44%) !important;
+}
+.assal-private-chat-list{
+  display:grid !important;
+  gap:10px !important;
+}
+.assal-private-chat-row.premium{
+  width:100% !important;
+  min-width:0 !important;
+  grid-template-columns:1fr auto !important;
+  gap:8px !important;
+  align-items:center !important;
+  padding:8px !important;
+  border-radius:22px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.082), rgba(255,255,255,.026)),
+    radial-gradient(circle at 100% 0%, rgba(103,232,249,.11), transparent 48%) !important;
+  border:1px solid rgba(186,230,253,.12) !important;
+  box-shadow:0 14px 30px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+.assal-private-chat-tap{
+  min-width:0 !important;
+  width:100% !important;
+  border:0 !important;
+  background:transparent !important;
+  color:inherit !important;
+  display:grid !important;
+  grid-template-columns:46px minmax(0,1fr) 32px !important;
+  gap:9px !important;
+  align-items:center !important;
+  text-align:right !important;
+  padding:0 !important;
+  font-family:'Cairo','Tajawal',sans-serif !important;
+  cursor:pointer !important;
+}
+.assal-private-chat-avatar{
+  width:46px !important;
+  height:46px !important;
+  border-radius:17px !important;
+  display:grid !important;
+  place-items:center !important;
+  background:linear-gradient(135deg,#bfdbfe,#67e8f9 45%,#34d399) !important;
+  color:#03131f !important;
+  font-size:18px !important;
+  box-shadow:0 10px 22px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.32) !important;
+}
+.assal-private-chat-main{
+  min-width:0 !important;
+  gap:2px !important;
+}
+.assal-private-chat-main b{
+  font-size:13.5px !important;
+  color:#fff !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+.assal-private-chat-main span{
+  font-size:9.8px !important;
+  color:rgba(226,232,240,.50) !important;
+}
+.assal-private-chat-main em{
+  font-size:11px !important;
+  color:rgba(226,232,240,.72) !important;
+}
+.assal-private-chat-open,
+.assal-private-chat-delete{
+  width:32px !important;
+  height:32px !important;
+  border-radius:13px !important;
+  display:grid !important;
+  place-items:center !important;
+  border:1px solid rgba(255,255,255,.075) !important;
+}
+.assal-private-chat-open{
+  background:rgba(125,211,252,.10) !important;
+  color:#7dd3fc !important;
+}
+.assal-private-chat-delete{
+  background:rgba(127,29,29,.34) !important;
+  color:#fecaca !important;
+}
+
+/* جسم الرسائل */
+#assalPrivateMessages.assal-private-messages{
+  flex:1 1 auto !important;
+  padding:13px 12px !important;
+  gap:9px !important;
+  background:
+    radial-gradient(420px 140px at 50% 0%, rgba(34,211,238,.070), transparent 70%),
+    linear-gradient(180deg, rgba(2,6,23,.38), rgba(2,6,23,.58)) !important;
+  overflow-y:auto !important;
+  scrollbar-width:none !important;
+}
+#assalPrivateMessages::-webkit-scrollbar{display:none !important;}
+.assal-private-msg{
+  max-width:86% !important;
+  padding:10px 11px 8px !important;
+  border-radius:20px 20px 7px 20px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.082), rgba(255,255,255,.030)) !important;
+  border:1px solid rgba(255,255,255,.080) !important;
+  box-shadow:0 12px 24px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+.assal-private-msg.mine{
+  margin-inline-start:auto !important;
+  border-radius:20px 20px 20px 7px !important;
+  background:
+    linear-gradient(135deg, rgba(103,232,249,.20), rgba(52,211,153,.12)) !important;
+  border-color:rgba(125,211,252,.16) !important;
+}
+.assal-private-msg.admin{
+  background:
+    linear-gradient(135deg, rgba(59,130,246,.17), rgba(16,185,129,.10)) !important;
+}
+.assal-private-msg-head{
+  margin-bottom:5px !important;
+  padding-bottom:4px !important;
+  border-bottom:1px solid rgba(255,255,255,.050) !important;
+}
+.assal-private-msg-head b{font-size:10.5px !important;color:#e0faff !important;}
+.assal-private-msg-head span{font-size:9.5px !important;color:rgba(226,232,240,.48) !important;}
+.assal-private-msg-text{
+  font-size:13.4px !important;
+  line-height:1.78 !important;
+  color:#fff !important;
+  overflow-wrap:anywhere !important;
+}
+.assal-private-msg-foot{
+  margin-top:7px !important;
+  gap:6px !important;
+}
+.assal-private-msg-actions{
+  gap:5px !important;
+}
+.assal-private-msg-action{
+  min-height:26px !important;
+  padding:0 8px !important;
+  border-radius:999px !important;
+  font-size:9.8px !important;
+  background:rgba(255,255,255,.055) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+}
+.assal-private-msg-action.edit{
+  color:#dff8ff !important;
+  background:linear-gradient(135deg, rgba(14,165,233,.25), rgba(59,130,246,.10)) !important;
+}
+.assal-private-msg-action.del{
+  color:#fee2e2 !important;
+  background:linear-gradient(135deg, rgba(127,29,29,.42), rgba(220,38,38,.18)) !important;
+}
+
+/* صندوق الكتابة: نظيف ومضغوط */
+#assalPrivateCompose.assal-private-compose{
+  padding:8px 12px calc(9px + env(safe-area-inset-bottom,0px)) !important;
+  background:linear-gradient(180deg, rgba(15,23,42,.38), rgba(2,6,23,.98)) !important;
+  border-top:1px solid rgba(148,163,184,.10) !important;
+}
+.assal-private-write-row.assal-community-write-row{
+  grid-template-columns:36px minmax(0,1fr) 42px !important;
+  min-height:50px !important;
+  padding:5px !important;
+  border-radius:23px !important;
+  background:linear-gradient(135deg, rgba(255,255,255,.095), rgba(255,255,255,.030)) !important;
+  border:1px solid rgba(191,219,254,.14) !important;
+}
+.assal-private-input.assal-community-input{
+  height:40px !important;
+  min-height:40px !important;
+  max-height:78px !important;
+  padding:9px 8px !important;
+  border-radius:17px !important;
+  font-size:13px !important;
+  line-height:1.45 !important;
+}
+.assal-private-send.assal-community-send{
+  width:42px !important;
+  height:42px !important;
+  border-radius:18px !important;
+  background:linear-gradient(135deg,#7dd3fc,#34d399 58%,#bef264) !important;
+  color:#03131f !important;
+}
+
+/* نافذة تنظيف رسائل الزبون + تأكيدات الخاص + تعديل الرسالة */
+.swal2-popup.assal-private-clean-popup,
+.swal2-popup.assal-private-confirm-popup,
+.swal2-popup.assal-private-edit-popup{
+  width:min(92vw, 390px) !important;
+  border-radius:28px !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  color:#fff !important;
+  font-family:'Cairo','Tajawal',sans-serif !important;
+  background:
+    radial-gradient(360px 170px at 90% 0%, rgba(248,113,113,.18), transparent 62%),
+    radial-gradient(320px 180px at 0% 100%, rgba(56,189,248,.10), transparent 62%),
+    linear-gradient(155deg, rgba(15,23,42,.990), rgba(2,6,23,.990)) !important;
+  border:1px solid rgba(254,202,202,.14) !important;
+  box-shadow:0 32px 84px rgba(0,0,0,.70), inset 0 1px 0 rgba(255,255,255,.055) !important;
+}
+.swal2-popup.assal-private-clean-popup .swal2-title,
+.swal2-popup.assal-private-clean-popup .swal2-icon,
+.swal2-popup.assal-private-confirm-popup .swal2-title,
+.swal2-popup.assal-private-confirm-popup .swal2-icon{
+  display:none !important;
+}
+.swal2-popup.assal-private-clean-popup .swal2-html-container,
+.swal2-popup.assal-private-confirm-popup .swal2-html-container{
+  margin:0 !important;
+  padding:0 !important;
+  overflow:visible !important;
+}
+.assal-private-clean-card,
+.assal-private-confirm-card{
+  padding:24px 18px 14px !important;
+  text-align:center !important;
+  direction:rtl !important;
+}
+.assal-private-clean-icon,
+.assal-private-confirm-icon{
+  width:72px !important;
+  height:72px !important;
+  border-radius:26px !important;
+  margin:0 auto 13px !important;
+  display:grid !important;
+  place-items:center !important;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,.22), transparent 25%),
+    linear-gradient(135deg,#7f1d1d,#e11d48) !important;
+  box-shadow:0 18px 36px rgba(127,29,29,.34), inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+.assal-private-clean-icon i,
+.assal-private-confirm-icon i{font-size:28px !important;color:#fff !important;}
+.assal-private-clean-card h3,
+.assal-private-confirm-card h3{
+  margin:0 0 8px !important;
+  font-size:20px !important;
+  font-weight:950 !important;
+  color:#fff !important;
+}
+.assal-private-clean-card p,
+.assal-private-confirm-card p{
+  margin:0 auto !important;
+  max-width:300px !important;
+  font-size:13px !important;
+  line-height:1.85 !important;
+  color:rgba(226,232,240,.74) !important;
+}
+.swal2-popup.assal-private-clean-popup .swal2-actions,
+.swal2-popup.assal-private-confirm-popup .swal2-actions{
+  margin:0 !important;
+  padding:0 18px 18px !important;
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:10px !important;
+  width:100% !important;
+}
+.assal-private-clean-ok,
+.assal-private-clean-cancel,
+.assal-private-confirm-ok,
+.assal-private-confirm-cancel,
+.swal2-popup.assal-private-edit-popup .swal2-confirm,
+.swal2-popup.assal-private-edit-popup .swal2-cancel{
+  min-height:44px !important;
+  border:0 !important;
+  border-radius:16px !important;
+  font-family:'Cairo','Tajawal',sans-serif !important;
+  font-size:13px !important;
+  font-weight:900 !important;
+  color:#fff !important;
+  cursor:pointer !important;
+}
+.assal-private-clean-ok,
+.assal-private-confirm-ok{
+  background:linear-gradient(135deg,#7f1d1d,#e11d48) !important;
+}
+.assal-private-clean-cancel,
+.assal-private-confirm-cancel{
+  background:linear-gradient(135deg, rgba(51,65,85,.90), rgba(15,23,42,.80)) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+}
+.swal2-popup.assal-private-edit-popup{
+  padding:18px !important;
+  border-color:rgba(125,211,252,.16) !important;
+}
+.swal2-popup.assal-private-edit-popup .swal2-title{
+  font-size:19px !important;
+  margin:0 0 10px !important;
+}
+.swal2-popup.assal-private-edit-popup .swal2-html-container{margin:0 !important;}
+.swal2-popup.assal-private-edit-popup .swal2-textarea{
+  width:100% !important;
+  min-height:124px !important;
+  margin:0 auto 12px !important;
+  border-radius:20px !important;
+  padding:13px !important;
+  background:rgba(255,255,255,.060) !important;
+  border:1px solid rgba(191,219,254,.15) !important;
+  color:#fff !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05) !important;
+}
+.swal2-popup.assal-private-edit-popup .swal2-actions{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:10px !important;
+  width:100% !important;
+  margin:0 !important;
+}
+.swal2-popup.assal-private-edit-popup .swal2-confirm{
+  background:linear-gradient(135deg,#0ea5e9,#10b981) !important;
+  color:#03131f !important;
+}
+.swal2-popup.assal-private-edit-popup .swal2-cancel{
+  background:linear-gradient(135deg, rgba(51,65,85,.90), rgba(15,23,42,.80)) !important;
+}
+
+/* موبايل: المحادثة تبقى فل، البروفايل لا */
+@media(max-width:520px){
+  #assalPrivateChatModal .assal-private-shell{
+    width:100vw !important;
+    height:100dvh !important;
+    max-height:100dvh !important;
+    border-radius:0 !important;
+  }
+  #assalPrivateChatModal .assal-private-title b,
+  #assalPrivateChatModal .assal-private-title small{
+    max-width:205px !important;
+  }
+  .assal-private-chat-row.premium{
+    grid-template-columns:1fr 32px !important;
+    padding:7px !important;
+    border-radius:19px !important;
+  }
+  .assal-private-chat-tap{
+    grid-template-columns:42px minmax(0,1fr) 28px !important;
+    gap:8px !important;
+  }
+  .assal-private-chat-avatar{width:42px !important;height:42px !important;border-radius:16px !important;font-size:16px !important;}
+  .assal-private-chat-open,.assal-private-chat-delete{width:30px !important;height:30px !important;border-radius:12px !important;}
+  .assal-private-msg{max-width:90% !important;}
+  .assal-private-msg-action span{display:none !important;}
+  .assal-private-msg-action{width:28px !important;min-width:28px !important;padding:0 !important;}
+  .swal2-popup.assal-private-clean-popup,
+  .swal2-popup.assal-private-confirm-popup,
+  .swal2-popup.assal-private-edit-popup{
+    width:min(94vw, 360px) !important;
+    border-radius:24px !important;
+  }
+}
+</style>
+
+<style id="assal-private-modal-lock-allow-final">
+body.modal-lock .assal-private-modal,
+body.modal-lock .assal-private-modal *,
+body.modal-lock .swal2-container,
+body.modal-lock .swal2-container *{
+  pointer-events:auto !important;
+  animation-play-state:running !important;
+  caret-color:auto !important;
+}
+body.modal-lock .assal-private-modal{
+  visibility:visible !important;
+  opacity:1;
+}
+</style>
