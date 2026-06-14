@@ -39799,3 +39799,187 @@ body.modal-lock .assal-private-modal{
   opacity:1;
 }
 </style>
+
+
+<!-- ===== ASSAL PRIVATE WINDOWS NO-BLINK + OUTSIDE TOUCH LOCK FINAL =====
+     يعتمد آخر نسخة: تحسين ثبات نوافذ الحذف/التنظيف/التعديل ومنع اللمس خارج النافذة. -->
+<style id="assal-private-no-blink-touch-lock-final">
+/* ثبّت SweetAlert الخاصة فوق كل النوافذ بدون رمشة/انتقال */
+.swal2-container.assal-private-stable-swal,
+.swal2-container.assal-private-stable-swal.swal2-backdrop-show,
+.swal2-container.assal-private-stable-swal.swal2-shown{
+  z-index:2147483647 !important;
+  background:rgba(1,7,18,.72) !important;
+  -webkit-backdrop-filter:blur(10px) saturate(125%) !important;
+  backdrop-filter:blur(10px) saturate(125%) !important;
+  transition:none !important;
+  animation:none !important;
+  pointer-events:auto !important;
+  touch-action:none !important;
+}
+.swal2-container.assal-private-stable-swal .swal2-popup.assal-private-clean-popup,
+.swal2-container.assal-private-stable-swal .swal2-popup.assal-private-confirm-popup,
+.swal2-container.assal-private-stable-swal .swal2-popup.assal-private-edit-popup{
+  opacity:1 !important;
+  transform:none !important;
+  transition:none !important;
+  animation:none !important;
+  will-change:auto !important;
+  backface-visibility:hidden !important;
+  -webkit-backface-visibility:hidden !important;
+  contain:layout paint !important;
+}
+.swal2-container.assal-private-stable-swal .swal2-popup.assal-private-clean-popup *,
+.swal2-container.assal-private-stable-swal .swal2-popup.assal-private-confirm-popup *,
+.swal2-container.assal-private-stable-swal .swal2-popup.assal-private-edit-popup *{
+  animation:none !important;
+  transition:none !important;
+}
+.swal2-container.assal-private-stable-swal .swal2-confirm,
+.swal2-container.assal-private-stable-swal .swal2-cancel,
+.swal2-container.assal-private-stable-swal .swal2-textarea,
+.swal2-container.assal-private-stable-swal .assal-private-clean-ok,
+.swal2-container.assal-private-stable-swal .assal-private-clean-cancel,
+.swal2-container.assal-private-stable-swal .assal-private-confirm-ok,
+.swal2-container.assal-private-stable-swal .assal-private-confirm-cancel{
+  pointer-events:auto !important;
+  touch-action:manipulation !important;
+}
+/* النافذة الخاصة نفسها تمسك اللمس على الخلفية حتى ما ينغلق/يتسرب للصفحة */
+.assal-private-modal.show,
+.assal-private-modal.is-open{
+  pointer-events:auto !important;
+  touch-action:none !important;
+  overscroll-behavior:contain !important;
+}
+.assal-private-modal.show .assal-private-shell,
+.assal-private-modal.is-open .assal-private-shell,
+.assal-private-modal.show .assal-private-shell *,
+.assal-private-modal.is-open .assal-private-shell *{
+  touch-action:manipulation !important;
+}
+/* منع ومضة الفوكس/الهايلايت عند فتح تعديل أو حذف */
+.assal-private-modal,
+.assal-private-modal *,
+.swal2-container.assal-private-stable-swal,
+.swal2-container.assal-private-stable-swal *{
+  -webkit-tap-highlight-color:transparent !important;
+  outline:none !important;
+}
+</style>
+
+<script id="assal-private-no-blink-touch-lock-final-js">
+(function(){
+  'use strict';
+  if (window.__ASSAL_PRIVATE_NO_BLINK_TOUCH_LOCK_FINAL__) return;
+  window.__ASSAL_PRIVATE_NO_BLINK_TOUCH_LOCK_FINAL__ = true;
+
+  function hasOpenPrivateModal(){
+    try {
+      return !!document.querySelector('.assal-private-modal.show, .assal-private-modal.is-open, #assalPrivateChatModal.show, #assalPrivateCustomerProfileModal.show');
+    } catch(_) { return false; }
+  }
+
+  function isPrivateSwalOptions(opts){
+    try {
+      if (!opts || typeof opts !== 'object') return false;
+      var popupClass = '';
+      if (opts.customClass) {
+        if (typeof opts.customClass === 'string') popupClass = opts.customClass;
+        else if (opts.customClass.popup) popupClass = String(opts.customClass.popup || '');
+      }
+      return /assal-private-(clean|confirm|edit)-popup/.test(popupClass);
+    } catch(_) { return false; }
+  }
+
+  function stabilizePrivateSwalOptions(opts){
+    if (!opts || typeof opts !== 'object') return opts;
+    var customClass = opts.customClass || {};
+    if (typeof customClass === 'string') customClass = { popup: customClass };
+    var containerClass = String(customClass.container || '');
+    if (containerClass.indexOf('assal-private-stable-swal') === -1) {
+      customClass.container = (containerClass + ' assal-private-stable-swal').trim();
+    }
+    opts.customClass = customClass;
+
+    opts.allowOutsideClick = false;     // لا يقبل لمس خارج النافذة
+    opts.allowEnterKey = true;
+    if (typeof opts.allowEscapeKey === 'undefined') opts.allowEscapeKey = true;
+    opts.backdrop = true;
+    opts.heightAuto = false;
+    opts.scrollbarPadding = false;
+    opts.returnFocus = false;
+    opts.focusConfirm = false;
+    opts.showClass = { popup: '', backdrop: '', icon: '' };
+    opts.hideClass = { popup: '', backdrop: '', icon: '' };
+
+    var oldDidOpen = opts.didOpen;
+    opts.didOpen = function(el){
+      try {
+        var c = document.querySelector('.swal2-container');
+        if (c) c.classList.add('assal-private-stable-swal');
+      } catch(_) {}
+      if (typeof oldDidOpen === 'function') {
+        try { oldDidOpen.call(this, el); } catch(err) { console.error(err); }
+      }
+    };
+    return opts;
+  }
+
+  function patchSwal(){
+    try {
+      if (!window.Swal || !window.Swal.fire || window.Swal.__ASSAL_PRIVATE_STABLE_PATCHED__) return;
+      var originalFire = window.Swal.fire.bind(window.Swal);
+      window.Swal.fire = function(){
+        try {
+          if (arguments.length && arguments[0] && typeof arguments[0] === 'object') {
+            if (isPrivateSwalOptions(arguments[0]) || hasOpenPrivateModal()) {
+              arguments[0] = stabilizePrivateSwalOptions(arguments[0]);
+            }
+          }
+        } catch(_) {}
+        return originalFire.apply(window.Swal, arguments);
+      };
+      window.Swal.__ASSAL_PRIVATE_STABLE_PATCHED__ = true;
+    } catch(_) {}
+  }
+
+  patchSwal();
+  document.addEventListener('DOMContentLoaded', patchSwal, { once:true });
+  setTimeout(patchSwal, 400);
+  setTimeout(patchSwal, 1200);
+
+  function stopOutsidePrivateTouch(e){
+    try {
+      var modal = e.target && e.target.closest ? e.target.closest('.assal-private-modal.show, .assal-private-modal.is-open') : null;
+      if (!modal) return;
+      var shell = e.target.closest('.assal-private-shell');
+      if (!shell) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      }
+    } catch(_) {}
+  }
+
+  ['pointerdown','pointerup','mousedown','mouseup','touchstart','touchend','click'].forEach(function(type){
+    document.addEventListener(type, stopOutsidePrivateTouch, true);
+  });
+
+  function stopOutsideSwalTouch(e){
+    try {
+      var container = e.target && e.target.closest ? e.target.closest('.swal2-container.assal-private-stable-swal') : null;
+      if (!container) return;
+      var popup = e.target.closest('.swal2-popup');
+      if (!popup) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      }
+    } catch(_) {}
+  }
+  ['pointerdown','pointerup','mousedown','mouseup','touchstart','touchend','click'].forEach(function(type){
+    document.addEventListener(type, stopOutsideSwalTouch, true);
+  });
+})();
+</script>
