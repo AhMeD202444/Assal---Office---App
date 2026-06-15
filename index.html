@@ -17396,17 +17396,19 @@ window.submitMaterialRequest = async function () {
             }
         });
 
-        await queuePushNotificationEvent('material_request_created', {
+        await queuePushNotificationEvent('customer_private_message', {
             requestId,
             targetRole: 'admin',
-            title: 'مسج جديد',
             item,
+            requestKind: 'private_chat',
             ...window.buildAdminCustomerNotificationPayload({
                 customerName: name,
                 customerPhone: phone,
                 deviceId,
-                body: item
-            })
+                body: item,
+                extraData: { requestKind: 'private_chat' }
+            }),
+            title: 'مسج جديد'
         });
 
         await new Promise(resolve => setTimeout(resolve, 1200));
@@ -17485,16 +17487,18 @@ window.sendCustomerReply = async function (requestId) {
         [`materialRequests/${requestId}/status`]: 'processing'
     });
 
-    await queuePushNotificationEvent('material_request_customer_reply', {
+    await queuePushNotificationEvent('customer_private_reply', {
         requestId,
         targetRole: 'admin',
-        title: 'مسج جديد',
+        requestKind: 'private_chat',
         ...window.buildAdminCustomerNotificationPayload({
             customerName,
             customerPhone,
             deviceId: customerDeviceId,
-            body: text
-        })
+            body: text,
+            extraData: { requestKind: 'private_chat' }
+        }),
+        title: 'رد على المسج'
     });
 
     if (input) input.value = "";
@@ -17649,13 +17653,22 @@ window.sendAdminReply = async function (requestId) {
         [`materialRequests/${requestId}/updatedAt`]: now,
         [`materialRequests/${requestId}/status`]: 'processing'
     });
-    await queuePushNotificationEvent('material_request_admin_reply', {
+    await queuePushNotificationEvent('customer_private_reply', {
         requestId,
         targetRole: 'customer',
         targetDeviceId,
         customerName,
+        requestKind: 'private_chat',
         title: 'رد على المسج',
-        body: text
+        body: text,
+        senderName: branchLabel,
+        branchLabel,
+        data: {
+            requestKind: 'private_chat',
+            senderDisplayName: branchLabel,
+            senderName: branchLabel,
+            realCustomerName: customerName
+        }
     });
     if (input) input.value = '';
     await loadMaterialRequests();
@@ -29883,7 +29896,7 @@ ${actionText} ${safeBranch}`;
             requestKind: 'availability'
           }
         }),
-        title: 'مسج من زبون'
+        title: 'استعلام توفر جديد'
       });
 
       await refreshAvailabilityRequestCount();
@@ -38091,11 +38104,17 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     payload = payload || {};
     var type = String(eventType || payload.type || '').trim();
     var kind = String(payload.requestKind || (payload.data && payload.data.requestKind) || '').trim();
-    // استعلامات التوفر تبقى لنظام التوفر فقط.
+    // استعلامات التوفر تبقى لنظام التوفر فقط ولا يتم تغيير عناوينها هنا.
     if (kind === 'availability' || type.indexOf('availability_') === 0) return payload;
-    if (type === 'material_request_created' || type === 'material_request_customer_reply') {
+    var isPrivateChat = kind === 'private_chat' || (payload.data && payload.data.requestKind === 'private_chat');
+    if (!isPrivateChat && (type === 'material_request_created' || type === 'material_request_customer_reply' || type === 'material_request_admin_reply')) {
+      isPrivateChat = true;
+      payload.requestKind = 'private_chat';
+      payload.data = Object.assign({}, payload.data || {}, { requestKind: 'private_chat' });
+    }
+    if (isPrivateChat && (type === 'material_request_created' || type === 'material_request_customer_reply')) {
       payload.title = 'مسج جديد';
-    } else if (type === 'material_request_admin_reply') {
+    } else if (isPrivateChat && type === 'material_request_admin_reply') {
       payload.title = 'رد على المسج';
     }
     return payload;
