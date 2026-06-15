@@ -16513,9 +16513,7 @@ window.openRequestModal = async function () {
     syncGlobalModalLock();
     clearTimeout(requestSubmitFeedbackTimer);
     setRequestSubmitState('idle', 'إرسال الرسالة', 'fa-paper-plane');
-    setTimeout(() => {
-        try { itemInput?.focus(); } catch (_) {}
-    }, 90);
+    // ASSAL: no automatic focus; المستخدم يختار حقل الكتابة بنفسه.
 };
 
 window.closeRequestModal = function () {
@@ -16739,7 +16737,7 @@ window.openAssalCommunitySpace = async function(){
   updateAssalCommunityMuteButton();
   await checkAssalCommunityMuteState();
   startAssalCommunityRealtime();
-  setTimeout(() => { try { document.getElementById('assalCommunityInput')?.focus(); } catch (_) {} }, 120);
+  // ASSAL: no automatic focus on community input.
   try { syncGlobalModalLock(); } catch (_) {}
 };
 window.closeAssalCommunitySpace = function(){
@@ -16997,7 +16995,7 @@ function assalCommunityNativeDialog(options){
       const inp = box.querySelector('#assalCommunityActionInput');
       close({ ok:true, value: inp ? inp.value : '' });
     });
-    setTimeout(()=>{ try { box.querySelector('#assalCommunityActionInput')?.focus(); } catch(_){} }, 120);
+    // ASSAL: no automatic focus inside edit dialog.
   });
 }
 async function assalCommunityUpdateMessage(id, patch){
@@ -17401,7 +17399,7 @@ window.submitMaterialRequest = async function () {
         await queuePushNotificationEvent('material_request_created', {
             requestId,
             targetRole: 'admin',
-            title: 'مسج من زبون',
+            title: 'مسج جديد',
             item,
             ...window.buildAdminCustomerNotificationPayload({
                 customerName: name,
@@ -17490,7 +17488,7 @@ window.sendCustomerReply = async function (requestId) {
     await queuePushNotificationEvent('material_request_customer_reply', {
         requestId,
         targetRole: 'admin',
-        title: 'مسج من زبون',
+        title: 'مسج جديد',
         ...window.buildAdminCustomerNotificationPayload({
             customerName,
             customerPhone,
@@ -17656,7 +17654,7 @@ window.sendAdminReply = async function (requestId) {
         targetRole: 'customer',
         targetDeviceId,
         customerName,
-        title: 'رد جديد من فريق الدعم',
+        title: 'رد على المسج',
         body: text
     });
     if (input) input.value = '';
@@ -17759,7 +17757,7 @@ window.editMaterialRequestMessage = async function(requestId, msgId, viewMode = 
             customClass: { popup: 'customer-confirm-popup' },
             allowOutsideClick: false,
             allowEscapeKey: false,
-            didOpen: () => { try { document.querySelector('.swal2-textarea')?.focus(); } catch(_){} },
+            didOpen: () => {},
             inputValidator: (value) => !String(value || '').trim() ? 'اكتب نص الرسالة أولاً' : undefined
         });
         if (!result.isConfirmed) return;
@@ -18124,12 +18122,7 @@ window.showCustomersSearchBar = function() {
     setCustomersRotateActionMode('refresh');
     renderCustomersAdminPanels();
     const input = document.getElementById('customersAdminSearchInput');
-    if (input) {
-        setTimeout(() => {
-            try { input.focus({ preventScroll: true }); } catch (_) { input.focus(); }
-            if (typeof input.select === 'function') input.select();
-        }, 30);
-    }
+    if (input) { input.blur(); }
 };
 
 window.hideCustomersSearchBar = function(options = {}) {
@@ -18861,12 +18854,7 @@ window.showTrackSearchBar = function(kind) {
     }
     applyTrackModalSearch(kind);
     const input = document.getElementById(cfg.inputId);
-    if (input) {
-        setTimeout(() => {
-            try { input.focus({ preventScroll: true }); } catch (_) { input.focus(); }
-            if (typeof input.select === 'function') input.select();
-        }, 30);
-    }
+    if (input) { input.blur(); }
 };
 
 window.hideTrackSearchBar = function(kind, options = {}) {
@@ -35127,7 +35115,7 @@ html body footer {
       overlay.addEventListener('click', e => { if (e.target === overlay) close({ok:false}); });
       overlay.querySelector('#assalCommunityHardCancel')?.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); close({ok:false}); });
       overlay.querySelector('#assalCommunityHardOk')?.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); const inp=overlay.querySelector('#assalCommunityHardInput'); close({ok:true, value:inp ? inp.value : ''}); });
-      setTimeout(()=>{ try { overlay.querySelector('#assalCommunityHardInput')?.focus(); } catch(_){} },100);
+      // ASSAL: no automatic focus inside prompt.
     });
   }
   async function getMsg(id){
@@ -35287,7 +35275,7 @@ html body footer {
       const close = v => { try { ov.remove(); } catch(_){} resolve(v); };
       ov.querySelector('#assalPromptCancel').onclick = e => { e.preventDefault(); e.stopPropagation(); close({ok:false,value:''}); };
       ov.querySelector('#assalPromptOk').onclick = e => { e.preventDefault(); e.stopPropagation(); const val=(ov.querySelector('#assalPromptValue')||{}).value || ''; close({ok:true,value:val}); };
-      setTimeout(()=>{ try{ ov.querySelector('#assalPromptValue').focus(); }catch(_){} },80);
+      // ASSAL: no automatic focus inside prompt.
     });
   }
   function ensurePanel(){
@@ -38010,12 +37998,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         return cleanup({ok:true,value:inp?inp.value:''});
       }, true);
       setTimeout(function(){ try{ wrap.classList.add('show'); }catch(_){ } },10);
-      setTimeout(function(){
-        try{
-          var i=wrap.querySelector('.assal-private-clean-input');
-          if(i){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); }
-        }catch(_){ }
-      },110);
+      // ASSAL: no automatic focus/caret in edit dialog; المستخدم يضغط الحقل ويختار مكان التعديل.
     });
   }
   function safeRefresh(viewMode){
@@ -38093,5 +38076,168 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     else deleteCore(args.requestId,args.msgId,args.viewMode).catch(function(err){ console.error('ASSAL private delegated delete:',err); toast('تعذر حذف الرسالة','error'); });
     return false;
   }, true);
+})();
+</script>
+
+
+<!-- ===== ASSAL FINAL PATCH: no auto-focus + correct private chat notification titles ===== -->
+<script id="assal-no-autofocus-private-title-final-patch">
+(function(){
+  'use strict';
+  if (window.__ASSAL_NO_AUTOFOCUS_PRIVATE_TITLE_PATCH__) return;
+  window.__ASSAL_NO_AUTOFOCUS_PRIVATE_TITLE_PATCH__ = true;
+
+  function normalizePrivateNotificationTitle(eventType, payload){
+    payload = payload || {};
+    var type = String(eventType || payload.type || '').trim();
+    var kind = String(payload.requestKind || (payload.data && payload.data.requestKind) || '').trim();
+    // استعلامات التوفر تبقى لنظام التوفر فقط.
+    if (kind === 'availability' || type.indexOf('availability_') === 0) return payload;
+    if (type === 'material_request_created' || type === 'material_request_customer_reply') {
+      payload.title = 'مسج جديد';
+    } else if (type === 'material_request_admin_reply') {
+      payload.title = 'رد على المسج';
+    }
+    return payload;
+  }
+
+  function wrapQueue(){
+    if (typeof window.queuePushNotificationEvent !== 'function' || window.queuePushNotificationEvent.__assalPrivateTitleWrapped) return false;
+    var old = window.queuePushNotificationEvent;
+    var wrapped = function(eventType, payload){
+      try { payload = normalizePrivateNotificationTitle(eventType, payload || {}); } catch(_) {}
+      return old.call(this, eventType, payload);
+    };
+    wrapped.__assalPrivateTitleWrapped = true;
+    window.queuePushNotificationEvent = wrapped;
+    return true;
+  }
+
+  function preventModalAutoFocus(){
+    // إزالة أي autofocus موجود داخل النوافذ عند فتحها، بدون منع المستخدم من الضغط على الحقل يدوياً.
+    try {
+      document.querySelectorAll('input[autofocus], textarea[autofocus], [contenteditable][autofocus]').forEach(function(el){
+        try { el.removeAttribute('autofocus'); } catch(_) {}
+      });
+    } catch(_) {}
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    wrapQueue();
+    preventModalAutoFocus();
+  });
+  setTimeout(wrapQueue, 200);
+  setTimeout(wrapQueue, 1000);
+  setTimeout(preventModalAutoFocus, 300);
+  document.addEventListener('assal:modal-opened', preventModalAutoFocus, true);
+})();
+</script>
+
+
+<!-- ===== ASSAL FINAL PATCH: visible caret inside private edit dialog ===== -->
+<style id="assal-private-edit-visible-caret-style">
+/* يخلي مؤشر الكتابة داخل نافذة تعديل رسائل الزبائن واضح وامض عند الضغط بأي مكان داخل النص */
+.assal-private-clean-input,
+.assal-private-clean-dialog textarea.assal-private-clean-input{
+  caret-color:#5eead4 !important;
+  color:#ffffff !important;
+  cursor:text !important;
+  -webkit-user-select:text !important;
+  user-select:text !important;
+  touch-action:auto !important;
+  -webkit-touch-callout:default !important;
+  opacity:1 !important;
+  text-shadow:0 0 0 rgba(255,255,255,0) !important;
+}
+.assal-private-clean-input:focus,
+.assal-private-clean-dialog textarea.assal-private-clean-input:focus{
+  caret-color:#22f7e5 !important;
+  outline:none !important;
+  border-color:rgba(94,234,212,.92) !important;
+  box-shadow:0 0 0 3px rgba(45,212,191,.18), inset 0 1px 0 rgba(255,255,255,.06) !important;
+}
+.assal-private-clean-input::selection{
+  background:rgba(45,212,191,.38) !important;
+  color:#ffffff !important;
+}
+.assal-private-clean-input::-moz-selection{
+  background:rgba(45,212,191,.38) !important;
+  color:#ffffff !important;
+}
+/* لا نخلي أي overlay داخلي يمنع لمس/تحديد النص */
+.assal-private-clean-card,
+.assal-private-clean-card *{
+  pointer-events:auto;
+}
+.assal-private-clean-icon,
+.assal-private-clean-title{
+  pointer-events:none;
+}
+.assal-private-clean-actions,
+.assal-private-clean-actions *{
+  pointer-events:auto !important;
+}
+</style>
+<script id="assal-private-edit-visible-caret-script">
+(function(){
+  'use strict';
+  if (window.__ASSAL_PRIVATE_EDIT_VISIBLE_CARET_PATCH__) return;
+  window.__ASSAL_PRIVATE_EDIT_VISIBLE_CARET_PATCH__ = true;
+
+  function isPrivateEditInput(el){
+    return !!(el && el.matches && el.matches('.assal-private-clean-input'));
+  }
+
+  function prepareInput(input){
+    if (!isPrivateEditInput(input)) return;
+    try {
+      input.removeAttribute('readonly');
+      input.removeAttribute('disabled');
+      input.style.caretColor = '#22f7e5';
+      input.style.webkitUserSelect = 'text';
+      input.style.userSelect = 'text';
+      input.style.cursor = 'text';
+      input.style.pointerEvents = 'auto';
+      input.style.touchAction = 'auto';
+      input.setAttribute('spellcheck', 'false');
+      input.setAttribute('autocomplete', 'off');
+      input.setAttribute('autocorrect', 'off');
+      input.setAttribute('autocapitalize', 'off');
+    } catch(_) {}
+  }
+
+  function prepareAll(){
+    try { document.querySelectorAll('.assal-private-clean-input').forEach(prepareInput); } catch(_) {}
+  }
+
+  // لا نسوي focus تلقائي عند فتح النافذة. فقط من المستخدم يضغط على النص نضمن ظهور الكيرسر.
+  ['pointerdown','touchstart','mousedown','click'].forEach(function(ev){
+    document.addEventListener(ev, function(e){
+      var input = e.target && e.target.closest ? e.target.closest('.assal-private-clean-input') : null;
+      if (!input) return;
+      prepareInput(input);
+      // لا نعمل preventDefault حتى المتصفح يحط المؤشر بالمكان الذي ضغطت عليه، مو آخر حرف.
+      try { if (document.activeElement !== input && (ev === 'click' || ev === 'mousedown')) input.focus({preventScroll:true}); } catch(_) {}
+    }, true);
+  });
+
+  document.addEventListener('focusin', function(e){
+    if (!isPrivateEditInput(e.target)) return;
+    prepareInput(e.target);
+    try { e.target.style.caretColor = '#22f7e5'; } catch(_) {}
+  }, true);
+
+  document.addEventListener('input', function(e){
+    if (!isPrivateEditInput(e.target)) return;
+    prepareInput(e.target);
+  }, true);
+
+  var mo = null;
+  try {
+    mo = new MutationObserver(function(){ prepareAll(); });
+    mo.observe(document.documentElement || document.body, {childList:true, subtree:true});
+  } catch(_) {}
+  setTimeout(prepareAll, 50);
+  setTimeout(prepareAll, 300);
 })();
 </script>
