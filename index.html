@@ -17401,6 +17401,7 @@ window.submitMaterialRequest = async function () {
         await queuePushNotificationEvent('material_request_created', {
             requestId,
             targetRole: 'admin',
+            title: 'مسج من زبون',
             item,
             ...window.buildAdminCustomerNotificationPayload({
                 customerName: name,
@@ -17489,6 +17490,7 @@ window.sendCustomerReply = async function (requestId) {
     await queuePushNotificationEvent('material_request_customer_reply', {
         requestId,
         targetRole: 'admin',
+        title: 'مسج من زبون',
         ...window.buildAdminCustomerNotificationPayload({
             customerName,
             customerPhone,
@@ -29893,7 +29895,7 @@ ${actionText} ${safeBranch}`;
             requestKind: 'availability'
           }
         }),
-        title: 'استعلام توفر جديد'
+        title: 'مسج من زبون'
       });
 
       await refreshAvailabilityRequestCount();
@@ -37832,6 +37834,18 @@ html.assal-private-clean-dialog-open body{
 @media(max-width:430px){.assal-private-clean-dialog{padding:14px !important}.assal-private-clean-card{width:min(94vw,360px) !important;padding:14px !important;border-radius:20px !important}.assal-private-clean-actions{gap:8px !important}.assal-private-clean-actions button{font-size:12px !important}}
 html.low-end-device .assal-private-clean-dialog,
 html.low-end-device .assal-private-clean-dialog *{animation:none !important;transition:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;}
+
+/* ===== ASSAL FINAL: Mobile customer delete button spans full row ===== */
+@media (max-width: 768px){
+  #customersAdminModal .customers-admin-actions{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  #customersAdminModal .customers-admin-action.delete{
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+}
+
 </style>
 <script id="assal-private-one-clean-edit-delete-script">
 (function(){
@@ -37860,6 +37874,46 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       var s=await f.get(f.ref(f.db,'materialRequests/'+requestId+'/messages/'+msgId));
       return s && s.exists && s.exists() ? (s.val() || {}) : null;
     }catch(e){ console.warn('ASSAL fetch private message failed:', e); return null; }
+  }
+  function safeKey(v){
+    return encodeURIComponent(String(v || '')).replace(/[.#$\[\]/]/g, '_');
+  }
+  function getDeviceSafe(){
+    try{ if(typeof window.getDeviceId === 'function') return window.getDeviceId(); }catch(_){}
+    try{ return localStorage.getItem('device_id') || localStorage.getItem('assalDeviceId') || 'WEB'; }catch(_){}
+    return 'WEB';
+  }
+  function dialogTypingName(role){
+    if(role === 'admin'){
+      try{ if(typeof window.getAdminAccountLabel === 'function') return clean(window.getAdminAccountLabel()) || 'فريق الدعم'; }catch(_){}
+      return 'فريق الدعم';
+    }
+    try{ return clean((window.__ASSAL_CUSTOMER_PROFILE__ || {}).name) || 'الزبون'; }catch(_){}
+    return 'الزبون';
+  }
+  function dialogTypingPath(requestId, role){
+    return 'materialRequestTyping/' + safeKey(requestId) + '/' + safeKey(role + '_' + getDeviceSafe());
+  }
+  async function setDialogTyping(requestId, role, enabled){
+    requestId = clean(requestId); role = clean(role || 'admin');
+    var f = fbase();
+    if(!requestId || !f.db || !f.ref) return;
+    try{
+      if(!enabled){
+        if(f.remove) await f.remove(f.ref(f.db, dialogTypingPath(requestId, role)));
+        return;
+      }
+      if(!f.set) return;
+      var ts = Date.now();
+      await f.set(f.ref(f.db, dialogTypingPath(requestId, role)), {
+        requestId: requestId,
+        role: role,
+        deviceId: getDeviceSafe(),
+        name: dialogTypingName(role),
+        at: ts,
+        until: ts + 5600
+      });
+    }catch(e){ console.warn('ASSAL edit dialog typing:', e); }
   }
   function parseArgs(call){
     call=String(call||'');
@@ -37906,8 +37960,19 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         '</div>';
       document.body.appendChild(wrap);
       var done=false;
+      var typingTimer=null;
+      var dialogRole = clean(opts.role || 'admin');
+      var dialogRequestId = clean(opts.requestId || '');
+      function markDialogTyping(){
+        if(!opts.input || !dialogRequestId) return;
+        setDialogTyping(dialogRequestId, dialogRole, true);
+        if(typingTimer) clearTimeout(typingTimer);
+        typingTimer = setTimeout(function(){ setDialogTyping(dialogRequestId, dialogRole, false); }, 6500);
+      }
       function cleanup(result){
         if(done) return; done=true;
+        try{ if(typingTimer) clearTimeout(typingTimer); }catch(_){ }
+        try{ if(opts.input && dialogRequestId) setDialogTyping(dialogRequestId, dialogRole, false); }catch(_){ }
         try{ document.removeEventListener('keydown', keyLock, true); }catch(_){ }
         try{ wrap.classList.remove('show'); }catch(_){ }
         setTimeout(function(){
@@ -37929,6 +37994,11 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       var card=wrap.querySelector('.assal-private-clean-card');
       if(card){
         ['click','mousedown','mouseup','pointerdown','pointerup','touchstart','touchend'].forEach(function(ev){ card.addEventListener(ev,function(e){ e.stopPropagation(); }, true); });
+      }
+      var editInput = wrap.querySelector('.assal-private-clean-input');
+      if(editInput){
+        ['input','keydown','focus'].forEach(function(ev){ editInput.addEventListener(ev, function(){ markDialogTyping(); }, true); });
+        editInput.addEventListener('blur', function(){ setDialogTyping(dialogRequestId, dialogRole, false); }, true);
       }
       wrap.addEventListener('click', function(e){
         var btn=e.target && e.target.closest ? e.target.closest('[data-private-clean]') : null;
@@ -37965,7 +38035,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     var perms=canManage(msg || {}, viewMode) || {};
     if(perms.edit === false) return toast('ما عندك صلاحية تعديل هاي الرسالة','warning');
     var current=clean((msg && msg.text) || domText || '');
-    var res=await openDialog({title:'تعديل الرسالة',input:true,value:current,okText:'حفظ التعديل',cancelText:'إلغاء'});
+    var res=await openDialog({title:'تعديل الرسالة',input:true,value:current,okText:'حفظ التعديل',cancelText:'إلغاء',requestId:requestId,role:viewMode==='customer'?'customer':'admin'});
     if(!res || !res.ok) return;
     var txt=clean(res.value||'');
     if(!txt) return toast('الرسالة فارغة','warning');
