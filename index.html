@@ -17627,10 +17627,9 @@ window.sendAdminReply = async function (requestId) {
     const { db, ref, update, get } = window.firebaseDB;
     const now = Date.now();
     const msgId = "MSG-" + now.toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2,5).toUpperCase();
-    const branchLabel = getAdminAccountLabel() || 'مكتب عسل';
+    const branchLabel = (typeof getAdminAccountLabel === 'function' ? getAdminAccountLabel() : '') || 'مكتب عسل';
     let targetDeviceId = '';
     let customerName = '';
-    const branchLabel = (typeof getAdminAccountLabel === 'function' ? getAdminAccountLabel() : '') || 'مكتب عسل';
     try {
         const snap = await get(ref(db, `materialRequests/${requestId}`));
         if (snap.exists()) {
