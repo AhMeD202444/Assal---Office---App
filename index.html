@@ -36569,6 +36569,162 @@ html.assal-offline-mode #assalOfflineBanner{
   #assalCommunityModal .assal-community-msg.mine .assal-community-views{
     align-self:auto !important;
   }
+
+
+/* =========================================================
+   ASSAL SAFE FIX - Customers cards mobile width only
+   الهدف: منع خروج بطاقة الزبون من نافذة إدارة الزبائن على الهاتف
+   بدون لمس منطق الحذف/الحظر/البحث/البروفايل وبدون ضغط ارتفاع الكروت
+   ========================================================= */
+#customersAdminModal,
+#customersAdminModal *{
+  box-sizing: border-box !important;
+}
+
+#customersAdminModal.customers-admin-modal{
+  overflow: hidden !important;
+}
+
+#customersAdminModal .customers-admin-shell{
+  overflow: hidden !important;
+  min-width: 0 !important;
+}
+
+#customersAdminModal .customers-admin-body,
+#customersAdminModal .customers-admin-list,
+#customersAdminModal .customers-admin-card,
+#customersAdminModal .customers-admin-head,
+#customersAdminModal .customers-admin-meta,
+#customersAdminModal .customers-admin-chip,
+#customersAdminModal .customers-admin-actions{
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+#customersAdminModal .customers-admin-list{
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+#customersAdminModal .customers-admin-card{
+  justify-self: stretch !important;
+  align-self: stretch !important;
+  height: auto !important;
+  min-height: unset !important;
+  transform: none !important;
+}
+
+#customersAdminModal .customers-admin-name,
+#customersAdminModal .customers-admin-chip span{
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+@media (max-width: 768px){
+  #customersAdminModal.customers-admin-modal{
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  #customersAdminModal .customers-admin-shell{
+    width: 100% !important;
+    max-width: calc(100vw - 20px) !important;
+    border-radius: 22px !important;
+  }
+
+  #customersAdminModal .customers-admin-top{
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    min-width: 0 !important;
+  }
+
+  #customersAdminModal .customers-admin-body{
+    padding: 10px 8px 12px !important;
+    overflow: hidden !important;
+  }
+
+  #customersAdminModal .customers-admin-list{
+    padding: 6px 0 2px !important;
+    gap: 10px !important;
+  }
+
+  #customersAdminModal .customers-admin-card{
+    margin: 0 !important;
+    padding: 11px 10px !important;
+    border-radius: 17px !important;
+    gap: 10px !important;
+  }
+
+  #customersAdminModal .customers-admin-head{
+    gap: 8px !important;
+  }
+
+  #customersAdminModal .customers-admin-name{
+    font-size: 15px !important;
+    white-space: nowrap !important;
+  }
+
+  #customersAdminModal .customers-admin-status{
+    flex: 0 0 auto !important;
+    padding: 5px 9px !important;
+    font-size: 10.5px !important;
+  }
+
+  #customersAdminModal .customers-admin-meta{
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  #customersAdminModal .customers-admin-chip{
+    padding: 8px 9px !important;
+    border-radius: 14px !important;
+    gap: 8px !important;
+  }
+
+  #customersAdminModal .customers-admin-actions{
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  #customersAdminModal .customers-admin-action{
+    min-width: 0 !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    height: auto !important;
+    padding: 9px 8px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 380px){
+  #customersAdminModal.customers-admin-modal{
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  #customersAdminModal .customers-admin-shell{
+    max-width: calc(100vw - 12px) !important;
+  }
+
+  #customersAdminModal .customers-admin-body{
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  #customersAdminModal .customers-admin-card{
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  #customersAdminModal .customers-admin-action{
+    font-size: 11.5px !important;
+    gap: 6px !important;
+  }
+}
 </style>
 <script id="assal-community-safe-views-addon-script">
 (function(){
