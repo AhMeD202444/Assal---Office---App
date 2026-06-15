@@ -17630,6 +17630,7 @@ window.sendAdminReply = async function (requestId) {
     const branchLabel = getAdminAccountLabel() || 'مكتب عسل';
     let targetDeviceId = '';
     let customerName = '';
+    const branchLabel = (typeof getAdminAccountLabel === 'function' ? getAdminAccountLabel() : '') || 'مكتب عسل';
     try {
         const snap = await get(ref(db, `materialRequests/${requestId}`));
         if (snap.exists()) {
@@ -17705,13 +17706,22 @@ window.markRequestProcessed = async function (requestId) {
         [`materialRequests/${requestId}/status`]: 'processed',
         [`materialRequests/${requestId}/archivedForAdmin`]: true
     });
-    await queuePushNotificationEvent('material_request_processed', {
+    await queuePushNotificationEvent('private_chat_closed', {
         requestId,
         targetRole: 'customer',
         targetDeviceId,
         customerName,
-        title: 'تم إغلاق المحادثة',
-        body: 'فريق الدعم أنهى المحادثة الحالية. وتكدر ترجع تبدأ محادثة جديدة بأي وقت.'
+        requestKind: 'private_chat',
+        title: 'تم إنهاء المحادثة',
+        body: 'فريق الدعم أنهى المحادثة الحالية. وتكدر ترجع تبدأ محادثة جديدة بأي وقت.',
+        senderName: branchLabel,
+        branchLabel,
+        data: {
+            requestKind: 'private_chat',
+            senderDisplayName: branchLabel,
+            senderName: branchLabel,
+            realCustomerName: customerName
+        }
     });
     await loadMaterialRequests();
     await refreshMaterialRequestCount();
@@ -30430,6 +30440,20 @@ ${actionText} ${safeBranch}`;
         try { document.dispatchEvent(new CustomEvent('assal:community-opened-from-notification', { detail: payload || {} })); } catch (_) {}
         return true;
 
+      case 'customer_private_message':
+      case 'customer_private_reply':
+      case 'private_chat_closed': {
+        const targetRole = safeNotificationValue(payload?.targetRole).toLowerCase();
+        if (targetRole === 'admin') {
+          await openRequestAdminModal();
+          if (requestId) setTimeout(() => focusNotificationTarget(`#requestAdminActivePanel [data-request-id="${cssEscapeSafe(requestId)}"], #requestAdminArchivePanel [data-request-id="${cssEscapeSafe(requestId)}"]`), 260);
+        } else {
+          await openRequestTrackModal();
+          if (requestId) setTimeout(() => focusNotificationTarget(`#requestTrackActivePanel [data-request-id="${cssEscapeSafe(requestId)}"], #requestTrackArchivePanel [data-request-id="${cssEscapeSafe(requestId)}"]`), 260);
+        }
+        return true;
+      }
+
       default:
         return false;
     }
@@ -38112,10 +38136,12 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       payload.requestKind = 'private_chat';
       payload.data = Object.assign({}, payload.data || {}, { requestKind: 'private_chat' });
     }
-    if (isPrivateChat && (type === 'material_request_created' || type === 'material_request_customer_reply')) {
+    if (isPrivateChat && (type === 'material_request_created' || type === 'material_request_customer_reply' || type === 'customer_private_message')) {
       payload.title = 'مسج جديد';
-    } else if (isPrivateChat && type === 'material_request_admin_reply') {
+    } else if (isPrivateChat && (type === 'material_request_admin_reply' || type === 'customer_private_reply')) {
       payload.title = 'رد على المسج';
+    } else if (isPrivateChat && type === 'private_chat_closed') {
+      payload.title = 'تم إنهاء المحادثة';
     }
     return payload;
   }
