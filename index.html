@@ -38260,3 +38260,187 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
   setTimeout(prepareAll, 300);
 })();
 </script>
+
+<!-- ===== ASSAL OFFLINE SEARCH-ONLY GUARD FINAL ===== -->
+<script id="assalOfflineSearchOnlyGuardFinal">
+(function(){
+  if (window.__ASSAL_OFFLINE_SEARCH_ONLY_GUARD_FINAL__) return;
+  window.__ASSAL_OFFLINE_SEARCH_ONLY_GUARD_FINAL__ = true;
+
+  var TOAST_TEXT = 'لا تستطيع الدخول في وضع الأوفلاين';
+  var lastToastAt = 0;
+
+  function isOfflineMode(){
+    try {
+      if (navigator && navigator.onLine === false) return true;
+    } catch(_) {}
+    try {
+      if (window.__ASSAL_USING_OFFLINE_PRICE_CACHE__) return true;
+    } catch(_) {}
+    try {
+      if (document.documentElement && document.documentElement.classList.contains('assal-offline-mode')) return true;
+    } catch(_) {}
+    try {
+      var banner = document.getElementById('assalOfflineBanner');
+      if (banner && banner.classList.contains('is-visible') && !banner.classList.contains('is-online')) return true;
+    } catch(_) {}
+    return false;
+  }
+
+  function showOfflineToast(){
+    var now = Date.now();
+    if (now - lastToastAt < 900) return;
+    lastToastAt = now;
+
+    try {
+      if (typeof window.showElegantTopToast === 'function') {
+        window.showElegantTopToast(TOAST_TEXT, 'warning', 2100, 'البحث فقط متاح حالياً من البيانات المحفوظة');
+        return;
+      }
+    } catch(_) {}
+
+    try {
+      if (window.Swal && typeof window.Swal.fire === 'function') {
+        window.Swal.fire({
+          toast: true,
+          position: 'top',
+          icon: 'warning',
+          title: TOAST_TEXT,
+          text: 'البحث فقط متاح حالياً من البيانات المحفوظة',
+          timer: 2100,
+          showConfirmButton: false
+        });
+        return;
+      }
+    } catch(_) {}
+
+    try {
+      var id = 'assalOfflineSearchOnlyToast';
+      var old = document.getElementById(id);
+      if (old && old.parentNode) old.parentNode.removeChild(old);
+      var el = document.createElement('div');
+      el.id = id;
+      el.textContent = TOAST_TEXT;
+      el.setAttribute('dir','rtl');
+      el.style.cssText = 'position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:2147483647;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-family:Cairo,Tajawal,sans-serif;font-weight:900;font-size:14px;padding:10px 16px;border-radius:999px;box-shadow:0 14px 35px rgba(0,0,0,.35);text-align:center;max-width:calc(100vw - 24px);white-space:nowrap;';
+      document.body.appendChild(el);
+      setTimeout(function(){ try { if (el && el.parentNode) el.parentNode.removeChild(el); } catch(_) {} }, 2100);
+    } catch(_) {}
+  }
+
+  function isAllowedSearchElement(target){
+    if (!target || !target.closest) return false;
+
+    // حقل البحث وزر البحث وزر المسح فقط مسموحات في الأوفلاين.
+    if (target.closest('#searchInput')) return true;
+    if (target.closest('#searchBtn')) return true;
+    if (target.closest('#clearBtn')) return true;
+
+    // السماح بالتمرير/اللمس داخل النتائج نفسها، لكن ليس أزرار النتائج مثل السلة أو الاستعلام.
+    var inResults = target.closest('#results, .results, .results-container');
+    var activeControl = target.closest('button, a, [role="button"], [onclick], .add-mini, .availability-mini, .result-card-mini-actions');
+    if (inResults && !activeControl) return true;
+
+    return false;
+  }
+
+  function isAlwaysAllowedControl(target){
+    if (!target || !target.closest) return false;
+
+    // زر إعادة المحاولة الخاص بالأوفلاين مسموح حتى يرجع التطبيق عند توفر النت.
+    if (target.closest('#assalOfflineRetryBtn, .assal-offline-retry')) return true;
+
+    // أزرار الإغلاق فقط مسموحة حتى إذا كانت نافذة مفتوحة قبل انقطاع النت.
+    if (target.closest('.swal2-close, .swal2-cancel, .close-modal-btn, .cart-x, .assal-voice-close')) return true;
+
+    return false;
+  }
+
+  function shouldBlockEventTarget(target){
+    if (!isOfflineMode()) return false;
+    if (isAlwaysAllowedControl(target)) return false;
+    if (isAllowedSearchElement(target)) return false;
+
+    if (!target || !target.closest) return false;
+
+    // المايك ممنوع صراحة في الأوفلاين.
+    if (target.closest('#voiceSearchBtn, .voice-search-btn, .assal-voice-overlay, .assal-voice-card')) return true;
+
+    // أي زر/رابط/عنصر يفتح نافذة أو ينفذ أمر يمنع في الأوفلاين.
+    if (target.closest('button, a, [role="button"], [onclick], .header-btn, .category, .category-btn, .new-category-btn, .tools-btn, .slider-btn, .floating-new-btn, .add-mini, .availability-mini, .customer-card, .customer-admin-card, .request-submit-btn, .cart-btn, .activation-btn, .alert-primary, .alert-secondary')) return true;
+
+    // أي لمس داخل نافذة غير البحث يمنع إذا النافذة موجودة.
+    if (target.closest('.cart-modal, #offersModal, #newItemsModal, .request-modal, .request-admin-modal, .request-track-modal, .stats-modal, .customers-admin-modal, .customer-profile-modal, .invoice-track-modal, .invoice-admin-modal, .customer-blocked-overlay, .assal-debug-popup')) return true;
+
+    return false;
+  }
+
+  function blockEvent(e){
+    if (!shouldBlockEventTarget(e.target)) return;
+    try { e.preventDefault(); } catch(_) {}
+    try { e.stopPropagation(); } catch(_) {}
+    try { e.stopImmediatePropagation(); } catch(_) {}
+    showOfflineToast();
+    return false;
+  }
+
+  ['click','dblclick','contextmenu','submit'].forEach(function(ev){
+    document.addEventListener(ev, blockEvent, true);
+  });
+
+  // نمنع فتح كيبورد/فوكَس لأي كتابة خارج حقل البحث في الأوفلاين.
+  document.addEventListener('focusin', function(e){
+    if (!isOfflineMode()) return;
+    var t = e.target;
+    if (!t || !t.matches) return;
+    if (t.matches('#searchInput')) return;
+    if (t.matches('input, textarea, select, [contenteditable="true"]')) {
+      try { t.blur(); } catch(_) {}
+      try { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } catch(_) {}
+      showOfflineToast();
+    }
+  }, true);
+
+  function guardFunction(name){
+    try {
+      var original = window[name];
+      if (typeof original !== 'function' || original.__assalOfflineGuarded) return;
+      var wrapped = function(){
+        if (isOfflineMode()) {
+          showOfflineToast();
+          return false;
+        }
+        return original.apply(this, arguments);
+      };
+      wrapped.__assalOfflineGuarded = true;
+      wrapped.__assalOriginal = original;
+      window[name] = wrapped;
+    } catch(_) {}
+  }
+
+  function guardKnownOpeners(){
+    [
+      // النوافذ والأزرار العامة
+      'openModal', 'openOffersModal', 'openStatsModal', 'openPerfDebugModal', 'openContactModal',
+      // الطلبات/المحادثات/الزبائن
+      'openRequestModal', 'openRequestAdminModal', 'openRequestTrackModal', 'openNewChatFromTrackModal',
+      'openCustomersAdminModal', 'openCustomerProfileModal',
+      // السلة والفواتير والتوافقات إن وجدت بهذه الأسماء
+      'openCartModal', 'openInvoiceAdminModal', 'openInvoiceTrackModal', 'openCompatibilityModal', 'openWholesaleSuggestions',
+      // البحث الصوتي ممنوع في الأوفلاين
+      'startAssalVoiceSearch'
+    ].forEach(guardFunction);
+  }
+
+  guardKnownOpeners();
+  document.addEventListener('DOMContentLoaded', guardKnownOpeners, {once:true});
+  setTimeout(guardKnownOpeners, 300);
+  setTimeout(guardKnownOpeners, 1200);
+  window.addEventListener('offline', guardKnownOpeners, true);
+  window.addEventListener('assalOffline', guardKnownOpeners, true);
+
+  // واجهات اختبار/استخدام داخلية آمنة.
+  window.assalOfflineGuardIsOffline = isOfflineMode;
+  window.assalOfflineGuardToast = showOfflineToast;
+})();
+</script>
