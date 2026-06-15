@@ -10424,11 +10424,24 @@ body.modal-lock #promoPopup *{
 .customers-admin-chip{ min-width:0; font-size:12px; color:rgba(255,255,255,.86); background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.06); border-radius:14px; padding:9px 10px; display:flex; align-items:center; gap:8px; }
 .customers-admin-chip i{ color:#8fe8cf; flex:0 0 auto; }
 .customers-admin-chip span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.customers-admin-actions{ display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:9px; }
+.customers-admin-actions{ display:grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap:9px; }
 .customers-admin-action{ border:none; border-radius:14px; min-height:42px; cursor:pointer; color:#fff; font-family:'Cairo',sans-serif; font-size:12px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px; transition: transform .16s ease, filter .2s ease; -webkit-tap-highlight-color: transparent; }
 .customers-admin-action.ban{ background: linear-gradient(135deg,#f59e0b,#b45309); box-shadow: 0 10px 22px rgba(180,83,9,.22); }
 .customers-admin-action.unban{ background: linear-gradient(135deg,#10b981,#0f766e); box-shadow: 0 10px 22px rgba(15,118,110,.22); }
 .customers-admin-action.delete{ background: linear-gradient(135deg,#7f1d1d,#b91c1c); box-shadow: 0 10px 22px rgba(127,29,29,.24); }
+.customers-admin-action.chat{ background: linear-gradient(135deg,#2563eb,#06b6d4); box-shadow: 0 10px 22px rgba(37,99,235,.22); }
+.request-message{ position:relative; }
+.request-message.is-deleted .request-message-body-text{ opacity:.66; font-style:italic; }
+.request-message-actions{ display:flex; align-items:center; justify-content:flex-end; gap:6px; margin-top:7px; }
+.request-message-mini-action{ border:none; border-radius:999px; min-height:28px; padding:5px 10px; color:#fff; cursor:pointer; font-family:'Cairo',sans-serif; font-size:10.5px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; gap:5px; background:linear-gradient(135deg, rgba(37,99,235,.78), rgba(6,182,212,.58)); box-shadow:0 6px 14px rgba(0,0,0,.16); -webkit-tap-highlight-color:transparent; }
+.request-message-mini-action.danger{ background:linear-gradient(135deg,#7f1d1d,#b91c1c); }
+.request-message-mini-action:active{ transform:scale(.96); }
+@media (max-width:520px){
+  .customers-admin-actions{ grid-template-columns:1fr !important; }
+  .request-message-actions{ justify-content:flex-start; flex-wrap:wrap; }
+  .request-message-mini-action{ flex:0 0 auto; min-width:72px; }
+}
+
 .customers-admin-empty{ text-align:center; color:rgba(255,255,255,.72); background: rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:28px 14px; }
 
 .customer-blocked-overlay{
@@ -17544,12 +17557,12 @@ window.loadCustomerRequests = async function () {
             const messagesHtml = msgs.map(msg => {
                 const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
                 return `
-                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}" data-branch-label="${escapeHtml(String(msg.branchLabel || msg.senderLabel || (typeof getAdminAccountLabel === 'function' ? getAdminAccountLabel() : '') || '').trim())}">
+                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}${msg.deletedAt ? ' is-deleted' : ''}" data-branch-label="${escapeHtml(String(msg.branchLabel || msg.senderLabel || (typeof getAdminAccountLabel === 'function' ? getAdminAccountLabel() : '') || '').trim())}">
                   <div class="request-message-head">
                     <span>${msg.senderRole === 'customer' ? 'أنت' : (msg.senderRole === 'admin' ? 'فريق الدعم' : 'النظام')}</span>
                     <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'customer')}</span>
                   </div>
-                  <div class="request-message-body-text">${escapeHtml(msg.text || '')}</div>${renderMessageBranchFooter(msg)}
+                  <div class="request-message-body-text">${msg.deletedAt ? 'تم حذف الرسالة' : escapeHtml(msg.text || '')}${msg.editedAt && !msg.deletedAt ? '<div class="assal-community-edited">تم التعديل</div>' : ''}</div>${renderMessageBranchFooter(msg)}${renderMaterialRequestMessageActions(req.id, msg, 'customer')}
                 </div>`;
             }).join('');
             const actions = archived ? `
@@ -17699,6 +17712,176 @@ window.deleteAdminArchivedRequest = async function (requestId) {
     await refreshMaterialRequestCount();
 };
 
+
+function canManageMaterialRequestMessage(msg, viewMode) {
+    if (!msg || msg.senderRole === 'system' || msg.deletedAt) return { edit:false, delete:false };
+    const admin = isAdminUser();
+    if (viewMode === 'admin' && admin) {
+        return { edit: msg.senderRole === 'admin', delete: msg.senderRole !== 'system' };
+    }
+    if (viewMode === 'customer' && !admin) {
+        return { edit: msg.senderRole === 'customer', delete: msg.senderRole === 'customer' };
+    }
+    return { edit:false, delete:false };
+}
+
+function renderMaterialRequestMessageActions(requestId, msg, viewMode) {
+    const perms = canManageMaterialRequestMessage(msg, viewMode);
+    if (!perms.edit && !perms.delete) return '';
+    const safeReqId = escapeHtml(requestId || '');
+    const safeMsgId = escapeHtml(msg.id || '');
+    return `<div class="request-message-actions" onclick="event.stopPropagation()">
+      ${perms.edit ? `<button class="request-message-mini-action" type="button" onclick="event.preventDefault();event.stopPropagation();editMaterialRequestMessage('${safeReqId}','${safeMsgId}','${viewMode}')"><i class="fas fa-pen"></i> تعديل</button>` : ''}
+      ${perms.delete ? `<button class="request-message-mini-action danger" type="button" onclick="event.preventDefault();event.stopPropagation();deleteMaterialRequestMessage('${safeReqId}','${safeMsgId}','${viewMode}')"><i class="fas fa-trash"></i> حذف</button>` : ''}
+    </div>`;
+}
+
+window.editMaterialRequestMessage = async function(requestId, msgId, viewMode = 'admin') {
+    if (!window.firebaseDB || !window.firebaseDB.db || !requestId || !msgId) return;
+    const { db, ref, get, update } = window.firebaseDB;
+    try {
+        const snap = await get(ref(db, `materialRequests/${requestId}/messages/${msgId}`));
+        if (!snap.exists()) return;
+        const msg = snap.val() || {};
+        const perms = canManageMaterialRequestMessage(msg, viewMode);
+        if (!perms.edit) return;
+        const oldText = String(msg.text || '').trim();
+        const result = await Swal.fire({
+            title: 'تعديل الرسالة',
+            input: 'textarea',
+            inputValue: oldText,
+            inputAttributes: { 'aria-label': 'نص الرسالة' },
+            showCancelButton: true,
+            confirmButtonText: 'حفظ',
+            cancelButtonText: 'إلغاء',
+            customClass: { popup: 'customer-confirm-popup' },
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => { try { document.querySelector('.swal2-textarea')?.focus(); } catch(_){} },
+            inputValidator: (value) => !String(value || '').trim() ? 'اكتب نص الرسالة أولاً' : undefined
+        });
+        if (!result.isConfirmed) return;
+        const text = String(result.value || '').trim();
+        if (!text || text === oldText) return;
+        await update(ref(db), {
+            [`materialRequests/${requestId}/messages/${msgId}/text`]: text,
+            [`materialRequests/${requestId}/messages/${msgId}/editedAt`]: Date.now(),
+            [`materialRequests/${requestId}/updatedAt`]: Date.now()
+        });
+        if (viewMode === 'customer') await loadCustomerRequests();
+        else await loadMaterialRequests();
+        await refreshMaterialRequestCount();
+    } catch (err) {
+        console.error('editMaterialRequestMessage:', err);
+        try { showElegantTopToast('تعذر تعديل الرسالة', 'error'); } catch (_) {}
+    }
+};
+
+window.deleteMaterialRequestMessage = async function(requestId, msgId, viewMode = 'admin') {
+    if (!window.firebaseDB || !window.firebaseDB.db || !requestId || !msgId) return;
+    const { db, ref, get, update } = window.firebaseDB;
+    try {
+        const snap = await get(ref(db, `materialRequests/${requestId}/messages/${msgId}`));
+        if (!snap.exists()) return;
+        const msg = snap.val() || {};
+        const perms = canManageMaterialRequestMessage(msg, viewMode);
+        if (!perms.delete) return;
+        const result = await Swal.fire({
+            title: 'حذف الرسالة؟',
+            html: '<div class="customer-confirm-text">راح تبقى مكانها عبارة تم حذف الرسالة داخل المحادثة.</div>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'حذف',
+            cancelButtonText: 'إلغاء',
+            customClass: { popup: 'customer-confirm-popup', confirmButton: 'delete' },
+            allowOutsideClick: false,
+            allowEscapeKey: false
+        });
+        if (!result.isConfirmed) return;
+        await update(ref(db), {
+            [`materialRequests/${requestId}/messages/${msgId}/text`]: '',
+            [`materialRequests/${requestId}/messages/${msgId}/deletedAt`]: Date.now(),
+            [`materialRequests/${requestId}/messages/${msgId}/deletedBy`]: viewMode === 'admin' ? 'admin' : 'customer',
+            [`materialRequests/${requestId}/updatedAt`]: Date.now()
+        });
+        if (viewMode === 'customer') await loadCustomerRequests();
+        else await loadMaterialRequests();
+        await refreshMaterialRequestCount();
+    } catch (err) {
+        console.error('deleteMaterialRequestMessage:', err);
+        try { showElegantTopToast('تعذر حذف الرسالة', 'error'); } catch (_) {}
+    }
+};
+
+window.openAdminChatWithCustomer = async function(deviceId) {
+    if (!isAdminUser() || !window.firebaseDB || !window.firebaseDB.db) return;
+    const cleanDeviceId = String(deviceId || '').trim();
+    if (!cleanDeviceId) return;
+    try {
+        const { db, ref, get, set, update } = window.firebaseDB;
+        const profileSnap = await get(ref(db, `customerProfiles/${cleanDeviceId}`));
+        const profile = profileSnap.exists() ? (profileSnap.val() || {}) : {};
+        const name = String(profile.name || 'زبون مسجل').trim();
+        const phone = String(profile.phone || '').trim();
+        const address = String(profile.address || '').trim();
+        const all = await getAllMaterialRequests();
+        let req = all.find(r => r && String(r.deviceId || '') === cleanDeviceId && !r.archivedForAdmin && !r.customerDeleted);
+        const now = Date.now();
+        if (!req) {
+            const requestId = 'REQ-ADM-' + now.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+            const msgId = 'MSG-' + now.toString(36).toUpperCase() + '-OPEN';
+            req = { id: requestId };
+            await set(ref(db, `materialRequests/${requestId}`), {
+                id: requestId,
+                name,
+                phone,
+                address,
+                item: 'محادثة خاصة من الإدارة',
+                deviceId: cleanDeviceId,
+                createdAt: now,
+                updatedAt: now,
+                status: 'processing',
+                customerDeleted: false,
+                customerArchived: false,
+                archivedForAdmin: false,
+                openedByAdmin: true,
+                messages: {
+                    [msgId]: {
+                        id: msgId,
+                        senderRole: 'system',
+                        text: 'تم فتح محادثة خاصة من الإدارة. اكتب رسالتك بالأسفل.',
+                        createdAt: now,
+                        seenByAdmin: true,
+                        seenByCustomer: false
+                    }
+                }
+            });
+        } else {
+            await update(ref(db), { [`materialRequests/${req.id}/updatedAt`]: now, [`materialRequests/${req.id}/archivedForAdmin`]: false });
+        }
+        closeCustomersAdminModal();
+        currentAdminRequestView = 'active';
+        setTimeout(async () => {
+            await openRequestAdminModal();
+            setTimeout(() => {
+                try {
+                    const card = Array.from(document.querySelectorAll('#requestAdminModal [data-request-id]')).find(el => el.getAttribute('data-request-id') === String(req.id));
+                    if (card) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        card.classList.add('invoice-message-highlight');
+                        setTimeout(() => card.classList.remove('invoice-message-highlight'), 1800);
+                        const input = card.querySelector('.request-admin-reply-input');
+                        if (input) input.focus({ preventScroll: true });
+                    }
+                } catch (_) {}
+            }, 420);
+        }, 160);
+    } catch (err) {
+        console.error('openAdminChatWithCustomer:', err);
+        try { showElegantTopToast('تعذر فتح محادثة الزبون', 'error'); } catch (_) {}
+    }
+};
+
 window.loadMaterialRequests = async function () {
     const activeList = document.getElementById("requestAdminActivePanel");
     const archiveList = document.getElementById("requestAdminArchivePanel");
@@ -17731,12 +17914,12 @@ window.loadMaterialRequests = async function () {
             const messagesHtml = msgs.map(msg => {
                 const freshClass = freshMsgId && freshMsgId === msg.id ? ' has-fresh-reply' : '';
                 return `
-                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}" data-branch-label="${escapeHtml(String(msg.branchLabel || msg.senderLabel || (typeof getAdminAccountLabel === 'function' ? getAdminAccountLabel() : '') || '').trim())}">
+                <div class="request-message ${escapeHtml(msg.senderRole || 'customer')}${freshClass}${msg.deletedAt ? ' is-deleted' : ''}" data-branch-label="${escapeHtml(String(msg.branchLabel || msg.senderLabel || (typeof getAdminAccountLabel === 'function' ? getAdminAccountLabel() : '') || '').trim())}">
                   <div class="request-message-head">
                     <span>${msg.senderRole === 'customer' ? 'الزبون' : (msg.senderRole === 'admin' ? 'فريق الدعم' : 'النظام')}</span>
                     <span>${formatRequestTime(msg.createdAt)} ${renderMessageChecks(msg, 'admin')}</span>
                   </div>
-                  <div class="request-message-body-text">${escapeHtml(msg.text || '')}</div>${renderMessageBranchFooter(msg)}
+                  <div class="request-message-body-text">${msg.deletedAt ? 'تم حذف الرسالة' : escapeHtml(msg.text || '')}${msg.editedAt && !msg.deletedAt ? '<div class="assal-community-edited">تم التعديل</div>' : ''}</div>${renderMessageBranchFooter(msg)}${renderMaterialRequestMessageActions(req.id, msg, 'admin')}
                 </div>`;
             }).join('');
             return `
@@ -18024,6 +18207,7 @@ function renderCustomerCard(customer) {
         </div>
         <div class="customers-admin-actions">
           ${actionBtn}
+          <button class="customers-admin-action chat" type="button" onclick="openAdminChatWithCustomer('${deviceId}')"><i class="fas fa-comments"></i> مراسلة</button>
           <button class="customers-admin-action delete" type="button" onclick="confirmDeleteCustomerProfile('${deviceId}')"><i class="fas fa-trash"></i> حذف</button>
         </div>
       </div>`;
@@ -37051,5 +37235,793 @@ html.assal-offline-mode #assalOfflineBanner{
   }
 
   setTimeout(boot, 900);
+})();
+</script>
+<style id="assal-customer-private-live-chat-final-style">
+/* ===== ASSAL Customer Private Chats - Live Center Patch ===== */
+.request-live-typing{
+  display:none;
+  align-items:center;
+  gap:8px;
+  width:fit-content;
+  max-width:92%;
+  margin:8px 10px 4px auto;
+  padding:7px 12px;
+  border-radius:999px;
+  direction:rtl;
+  font-family:'Cairo','Tajawal',sans-serif;
+  font-size:12px;
+  font-weight:800;
+  color:#d9fffb;
+  background:linear-gradient(135deg, rgba(20,184,166,.16), rgba(59,130,246,.10));
+  border:1px solid rgba(94,234,212,.20);
+  box-shadow:0 8px 18px rgba(0,0,0,.18);
+}
+.request-live-typing.show{display:inline-flex;}
+.request-live-typing .typing-dots{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+}
+.request-live-typing .typing-dots i{
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#67e8f9;
+  display:block;
+  animation:assalReqTypingDot 1s ease-in-out infinite;
+}
+.request-live-typing .typing-dots i:nth-child(2){animation-delay:.14s;}
+.request-live-typing .typing-dots i:nth-child(3){animation-delay:.28s;}
+@keyframes assalReqTypingDot{
+  0%,100%{transform:translateY(0);opacity:.45}
+  50%{transform:translateY(-3px);opacity:1}
+}
+.request-admin-card.support-chat-conversation-card,
+.request-thread-card.support-chat-conversation-card{
+  contain:layout paint;
+}
+.request-admin-reply-input,
+.request-track-input{
+  resize:none;
+  min-height:46px;
+}
+.request-admin-reply-input:focus,
+.request-track-input:focus{
+  border-color:rgba(94,234,212,.42) !important;
+  box-shadow:0 0 0 3px rgba(45,212,191,.09) !important;
+}
+</style>
+
+<script id="assal-customer-private-live-chat-final-script">
+(function(){
+  'use strict';
+  if (window.__ASSAL_CUSTOMER_PRIVATE_LIVE_CHAT_FINAL__) return;
+  window.__ASSAL_CUSTOMER_PRIVATE_LIVE_CHAT_FINAL__ = true;
+
+  var PATH_REQUESTS = 'materialRequests';
+  var PATH_TYPING = 'materialRequestTyping';
+  var adminUnsub = null;
+  var customerUnsub = null;
+  var typingUnsub = null;
+  var typingMap = {};
+  var adminReloadTimer = null;
+  var customerReloadTimer = null;
+  var typingClearTimers = {};
+  var lastTypingWrite = {};
+  var liveBooted = false;
+  var silentReload = false;
+
+  function byId(id){ return document.getElementById(id); }
+  function fb(){ return window.firebaseDB || {}; }
+  function hasFirebase(){ var f = fb(); return !!(f && f.db && f.ref && f.onValue); }
+  function now(){ return Date.now(); }
+  function clean(v){ return String(v == null ? '' : v).trim(); }
+  function esc(v){
+    return String(v == null ? '' : v).replace(/[&<>'"]/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];
+    });
+  }
+  function safeKey(v){
+    return encodeURIComponent(String(v || '')).replace(/[.#$\[\]/]/g, '_');
+  }
+  function getDevice(){
+    try {
+      if (typeof window.getDeviceId === 'function') return window.getDeviceId();
+      var id = localStorage.getItem('device_id');
+      if (!id) {
+        id = 'DEV-' + Math.random().toString(36).slice(2,8).toUpperCase() + Date.now().toString(36).slice(-4).toUpperCase();
+        localStorage.setItem('device_id', id);
+      }
+      return id;
+    } catch(_) {
+      return 'WEB-' + Math.random().toString(36).slice(2,8).toUpperCase();
+    }
+  }
+  function isAdmin(){
+    try { return typeof window.isAdminUser === 'function' && window.isAdminUser(); } catch(_) { return false; }
+  }
+  function adminName(){
+    try {
+      if (typeof window.getAdminAccountLabel === 'function') return clean(window.getAdminAccountLabel()) || 'فريق الدعم';
+    } catch(_) {}
+    return 'فريق الدعم';
+  }
+  function modalOpen(id){
+    var m = byId(id);
+    return !!(m && m.classList && m.classList.contains('show'));
+  }
+  function anyChatOpen(){
+    return modalOpen('requestAdminModal') || modalOpen('requestTrackModal');
+  }
+  function activeRole(){
+    return modalOpen('requestAdminModal') && isAdmin() ? 'admin' : 'customer';
+  }
+  function activeName(role){
+    if (role === 'admin') return adminName();
+    try {
+      var name = clean((window.__ASSAL_CUSTOMER_PROFILE__ || {}).name);
+      if (name) return name;
+    } catch(_) {}
+    return 'الزبون';
+  }
+  function getCardRequestIdFromTarget(target){
+    var card = target && target.closest ? target.closest('[data-request-id]') : null;
+    if (card) return clean(card.getAttribute('data-request-id'));
+    var id = target && target.id ? String(target.id) : '';
+    var m = id.match(/request(?:Admin|Track)Reply_(.+)$/);
+    return m ? clean(m[1]) : '';
+  }
+  function getDrafts(rootId){
+    var root = byId(rootId);
+    var out = {};
+    if (!root) return out;
+    root.querySelectorAll('textarea[id^="requestAdminReply_"], textarea[id^="requestTrackReply_"]').forEach(function(t){
+      out[t.id] = { value:t.value || '', focused: document.activeElement === t, selStart:t.selectionStart, selEnd:t.selectionEnd };
+    });
+    return out;
+  }
+  function restoreDrafts(rootId, drafts){
+    var root = byId(rootId);
+    if (!root || !drafts) return;
+    Object.keys(drafts).forEach(function(id){
+      var t = byId(id);
+      var d = drafts[id];
+      if (!t || !d) return;
+      if (d.value && !clean(t.value)) t.value = d.value;
+      if (d.focused) {
+        try {
+          t.focus({preventScroll:true});
+          if (typeof t.setSelectionRange === 'function') {
+            var s = Number(d.selStart || t.value.length), e = Number(d.selEnd || s);
+            t.setSelectionRange(s, e);
+          }
+        } catch(_) {}
+      }
+    });
+  }
+  function scrollCardsBottom(rootId){
+    try {
+      var root = byId(rootId);
+      if (!root) return;
+      root.querySelectorAll('.request-messages').forEach(function(box){
+        box.scrollTop = box.scrollHeight;
+      });
+    } catch(_) {}
+  }
+  function callLoad(fnName, rootId){
+    var fn = window[fnName];
+    if (typeof fn !== 'function') return;
+    var drafts = getDrafts(rootId);
+    silentReload = true;
+    Promise.resolve(fn()).catch(function(e){
+      console.warn('assal live reload failed:', fnName, e);
+    }).finally(function(){
+      silentReload = false;
+      setTimeout(function(){
+        restoreDrafts(rootId, drafts);
+        injectTypingIndicators();
+        scrollCardsBottom(rootId);
+      }, 30);
+    });
+  }
+  function scheduleAdminReload(){
+    if (!modalOpen('requestAdminModal')) return;
+    clearTimeout(adminReloadTimer);
+    adminReloadTimer = setTimeout(function(){ callLoad('loadMaterialRequests', 'requestAdminModal'); }, 180);
+  }
+  function scheduleCustomerReload(){
+    if (!modalOpen('requestTrackModal')) return;
+    clearTimeout(customerReloadTimer);
+    customerReloadTimer = setTimeout(function(){ callLoad('loadCustomerRequests', 'requestTrackModal'); }, 180);
+  }
+  function stopAdminLive(){
+    try { if (typeof adminUnsub === 'function') adminUnsub(); } catch(_) {}
+    adminUnsub = null;
+  }
+  function stopCustomerLive(){
+    try { if (typeof customerUnsub === 'function') customerUnsub(); } catch(_) {}
+    customerUnsub = null;
+  }
+  function startAdminLive(){
+    if (!hasFirebase() || adminUnsub) return;
+    try {
+      var f = fb();
+      adminUnsub = f.onValue(f.ref(f.db, PATH_REQUESTS), function(){
+        scheduleAdminReload();
+      }, function(err){ console.warn('admin live requests:', err); });
+    } catch(e){ console.warn('startAdminLive:', e); }
+  }
+  function startCustomerLive(){
+    if (!hasFirebase() || customerUnsub) return;
+    try {
+      var f = fb();
+      customerUnsub = f.onValue(f.ref(f.db, PATH_REQUESTS), function(){
+        scheduleCustomerReload();
+      }, function(err){ console.warn('customer live requests:', err); });
+    } catch(e){ console.warn('startCustomerLive:', e); }
+  }
+  function startTypingLive(){
+    if (!hasFirebase() || typingUnsub) return;
+    try {
+      var f = fb();
+      typingUnsub = f.onValue(f.ref(f.db, PATH_TYPING), function(snap){
+        typingMap = snap && snap.exists && snap.exists() ? (snap.val() || {}) : {};
+        injectTypingIndicators();
+      }, function(err){ console.warn('request typing live:', err); });
+    } catch(e){ console.warn('startTypingLive:', e); }
+  }
+  function activeTypingForRequest(requestId, viewerRole){
+    var bucket = typingMap && typingMap[safeKey(requestId)];
+    if (!bucket) return [];
+    var meDevice = getDevice();
+    var opposite = viewerRole === 'admin' ? 'customer' : 'admin';
+    return Object.values(bucket).filter(function(t){
+      return t && t.role === opposite && Number(t.until || 0) > now() && clean(t.deviceId) !== meDevice;
+    });
+  }
+  function typingHtml(list, viewerRole){
+    if (!list.length) return '';
+    var label = viewerRole === 'admin'
+      ? (clean(list[0].name) || 'الزبون')
+      : (clean(list[0].name) || 'فريق الدعم');
+    return '<span class="typing-dots"><i></i><i></i><i></i></span><b>' + esc(label) + '</b><span> يكتب الآن...</span>';
+  }
+  function ensureIndicator(card){
+    var ind = card.querySelector(':scope > .request-live-typing');
+    if (ind) return ind;
+    ind = document.createElement('div');
+    ind.className = 'request-live-typing';
+    var actions = card.querySelector('.request-thread-actions, .request-admin-card-actions, .request-admin-reply-input');
+    if (actions && actions.parentNode === card) card.insertBefore(ind, actions);
+    else card.appendChild(ind);
+    return ind;
+  }
+  function injectTypingIndicators(){
+    try {
+      [
+        {root:'requestAdminModal', role:'admin'},
+        {root:'requestTrackModal', role:'customer'}
+      ].forEach(function(cfg){
+        var root = byId(cfg.root);
+        if (!root) return;
+        root.querySelectorAll('[data-request-id]').forEach(function(card){
+          var reqId = clean(card.getAttribute('data-request-id'));
+          if (!reqId) return;
+          var active = activeTypingForRequest(reqId, cfg.role);
+          var ind = ensureIndicator(card);
+          if (active.length) {
+            ind.innerHTML = typingHtml(active, cfg.role);
+            ind.classList.add('show');
+          } else {
+            ind.innerHTML = '';
+            ind.classList.remove('show');
+          }
+        });
+      });
+    } catch(_) {}
+  }
+  function typingPath(requestId, role){
+    return PATH_TYPING + '/' + safeKey(requestId) + '/' + safeKey(role + '_' + getDevice());
+  }
+  async function clearTypingFor(requestId, role){
+    if (!requestId || !hasFirebase()) return;
+    var key = requestId + ':' + role;
+    if (typingClearTimers[key]) {
+      clearTimeout(typingClearTimers[key]);
+      delete typingClearTimers[key];
+    }
+    try {
+      var f = fb();
+      await f.remove(f.ref(f.db, typingPath(requestId, role)));
+    } catch(_) {}
+  }
+  async function setTypingFor(requestId, role, isTyping){
+    if (!requestId || !hasFirebase()) return;
+    if (!isTyping) { await clearTypingFor(requestId, role); return; }
+    var key = requestId + ':' + role;
+    if (now() - Number(lastTypingWrite[key] || 0) < 1300) return;
+    lastTypingWrite[key] = now();
+    try {
+      var f = fb();
+      await f.set(f.ref(f.db, typingPath(requestId, role)), {
+        requestId: requestId,
+        role: role,
+        deviceId: getDevice(),
+        name: activeName(role),
+        at: now(),
+        until: now() + 5600
+      });
+      if (typingClearTimers[key]) clearTimeout(typingClearTimers[key]);
+      typingClearTimers[key] = setTimeout(function(){ clearTypingFor(requestId, role); }, 6400);
+    } catch(_) {}
+  }
+  function bindTypingDelegates(){
+    if (document.body.dataset.assalReqTypingDelegated === '1') return;
+    document.body.dataset.assalReqTypingDelegated = '1';
+
+    document.addEventListener('input', function(e){
+      var t = e.target;
+      if (!t || !t.matches || !t.matches('textarea[id^="requestAdminReply_"], textarea[id^="requestTrackReply_"]')) return;
+      var requestId = getCardRequestIdFromTarget(t);
+      var role = t.id.indexOf('requestAdminReply_') === 0 ? 'admin' : 'customer';
+      if (clean(t.value)) setTypingFor(requestId, role, true);
+      else clearTypingFor(requestId, role);
+    }, true);
+
+    document.addEventListener('blur', function(e){
+      var t = e.target;
+      if (!t || !t.matches || !t.matches('textarea[id^="requestAdminReply_"], textarea[id^="requestTrackReply_"]')) return;
+      var requestId = getCardRequestIdFromTarget(t);
+      var role = t.id.indexOf('requestAdminReply_') === 0 ? 'admin' : 'customer';
+      clearTypingFor(requestId, role);
+    }, true);
+
+    document.addEventListener('keydown', function(e){
+      var t = e.target;
+      if (!t || !t.matches || !t.matches('textarea[id^="requestAdminReply_"], textarea[id^="requestTrackReply_"]')) return;
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        var requestId = getCardRequestIdFromTarget(t);
+        if (!requestId) return;
+        if (t.id.indexOf('requestAdminReply_') === 0 && typeof window.sendAdminReply === 'function') window.sendAdminReply(requestId);
+        else if (typeof window.sendCustomerReply === 'function') window.sendCustomerReply(requestId);
+      }
+    }, true);
+  }
+  function wrapOpenClose(){
+    if (window.__ASSAL_REQ_LIVE_WRAPPED__) return;
+    window.__ASSAL_REQ_LIVE_WRAPPED__ = true;
+
+    var oldOpenAdmin = window.openRequestAdminModal;
+    if (typeof oldOpenAdmin === 'function') {
+      window.openRequestAdminModal = async function(){
+        var res = await oldOpenAdmin.apply(this, arguments);
+        setTimeout(function(){ startAdminLive(); startTypingLive(); injectTypingIndicators(); scrollCardsBottom('requestAdminModal'); }, 120);
+        return res;
+      };
+    }
+
+    var oldOpenCustomer = window.openRequestTrackModal;
+    if (typeof oldOpenCustomer === 'function') {
+      window.openRequestTrackModal = async function(){
+        var res = await oldOpenCustomer.apply(this, arguments);
+        setTimeout(function(){ startCustomerLive(); startTypingLive(); injectTypingIndicators(); scrollCardsBottom('requestTrackModal'); }, 120);
+        return res;
+      };
+    }
+
+    var oldCloseAdmin = window.closeRequestAdminModal;
+    if (typeof oldCloseAdmin === 'function') {
+      window.closeRequestAdminModal = function(){
+        stopAdminLive();
+        return oldCloseAdmin.apply(this, arguments);
+      };
+    }
+
+    var oldCloseCustomer = window.closeRequestTrackModal;
+    if (typeof oldCloseCustomer === 'function') {
+      window.closeRequestTrackModal = function(){
+        stopCustomerLive();
+        return oldCloseCustomer.apply(this, arguments);
+      };
+    }
+
+    var oldSendAdmin = window.sendAdminReply;
+    if (typeof oldSendAdmin === 'function') {
+      window.sendAdminReply = async function(requestId){
+        await clearTypingFor(requestId, 'admin');
+        var res = await oldSendAdmin.apply(this, arguments);
+        setTimeout(function(){ startAdminLive(); injectTypingIndicators(); scrollCardsBottom('requestAdminModal'); }, 80);
+        return res;
+      };
+    }
+
+    var oldSendCustomer = window.sendCustomerReply;
+    if (typeof oldSendCustomer === 'function') {
+      window.sendCustomerReply = async function(requestId){
+        await clearTypingFor(requestId, 'customer');
+        var res = await oldSendCustomer.apply(this, arguments);
+        setTimeout(function(){ startCustomerLive(); injectTypingIndicators(); scrollCardsBottom('requestTrackModal'); }, 80);
+        return res;
+      };
+    }
+
+    var oldEdit = window.editMaterialRequestMessage;
+    if (typeof oldEdit === 'function') {
+      window.editMaterialRequestMessage = async function(requestId, msgId, viewMode){
+        var res = await oldEdit.apply(this, arguments);
+        setTimeout(function(){
+          if (viewMode === 'customer') { startCustomerLive(); injectTypingIndicators(); scrollCardsBottom('requestTrackModal'); }
+          else { startAdminLive(); injectTypingIndicators(); scrollCardsBottom('requestAdminModal'); }
+        }, 80);
+        return res;
+      };
+    }
+
+    var oldDelete = window.deleteMaterialRequestMessage;
+    if (typeof oldDelete === 'function') {
+      window.deleteMaterialRequestMessage = async function(requestId, msgId, viewMode){
+        var res = await oldDelete.apply(this, arguments);
+        setTimeout(function(){
+          if (viewMode === 'customer') { startCustomerLive(); injectTypingIndicators(); scrollCardsBottom('requestTrackModal'); }
+          else { startAdminLive(); injectTypingIndicators(); scrollCardsBottom('requestAdminModal'); }
+        }, 80);
+        return res;
+      };
+    }
+  }
+  function boot(){
+    if (liveBooted) return;
+    liveBooted = true;
+    bindTypingDelegates();
+    wrapOpenClose();
+    startTypingLive();
+    if (modalOpen('requestAdminModal')) startAdminLive();
+    if (modalOpen('requestTrackModal')) startCustomerLive();
+    setInterval(function(){
+      if (anyChatOpen()) injectTypingIndicators();
+    }, 1200);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  setTimeout(boot, 800);
+})();
+</script>
+
+<!-- ===== ASSAL PATCH: ONE CLEAN private message edit/delete controller (no duplicated listeners) ===== -->
+<style id="assal-private-one-clean-edit-delete-style">
+/* نفس شكل أزرار تعديل/حذف مجتمع عسل للرسائل الخاصة */
+.request-message-actions{
+  display:flex !important;
+  gap:5px !important;
+  margin-top:8px !important;
+  padding-top:7px !important;
+  border-top:1px solid rgba(255,255,255,.055) !important;
+  flex-wrap:wrap !important;
+  justify-content:flex-start !important;
+  align-items:center !important;
+}
+.request-message-mini-action{
+  min-height:27px !important;
+  padding:5px 9px !important;
+  border-radius:12px !important;
+  font-size:10px !important;
+  font-weight:900 !important;
+  cursor:pointer !important;
+  font-family:'Cairo',sans-serif !important;
+  color:#e5f6ff !important;
+  background:rgba(255,255,255,.075) !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+  box-shadow:none !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:5px !important;
+  -webkit-tap-highlight-color:transparent !important;
+  touch-action:manipulation !important;
+  user-select:none !important;
+}
+.request-message-mini-action.danger{
+  color:#fecaca !important;
+  background:rgba(127,29,29,.18) !important;
+  border-color:rgba(248,113,113,.20) !important;
+}
+.request-message-mini-action:hover,
+.request-message-mini-action:active{
+  transform:scale(.97) !important;
+  filter:brightness(1.06) !important;
+}
+.request-message-mini-action i{font-size:10px !important;pointer-events:none !important;}
+
+html.assal-private-clean-dialog-open,
+html.assal-private-clean-dialog-open body{
+  overflow:hidden !important;
+  overscroll-behavior:none !important;
+}
+.assal-private-clean-dialog{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:2147483646 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:18px !important;
+  direction:rtl !important;
+  font-family:'Cairo',sans-serif !important;
+  background:rgba(2,8,23,.72) !important;
+  backdrop-filter:blur(12px) !important;
+  -webkit-backdrop-filter:blur(12px) !important;
+  opacity:0 !important;
+  pointer-events:auto !important;
+  transition:opacity .14s ease !important;
+  touch-action:none !important;
+  overscroll-behavior:contain !important;
+  -webkit-tap-highlight-color:transparent !important;
+}
+.assal-private-clean-dialog.show{opacity:1 !important;}
+.assal-private-clean-card{
+  width:min(92vw,390px) !important;
+  max-width:390px !important;
+  border-radius:22px !important;
+  padding:16px !important;
+  color:#fff !important;
+  background:radial-gradient(circle at top right, rgba(45,212,191,.16), transparent 42%), linear-gradient(145deg, rgba(15,23,42,.98), rgba(2,6,23,.98)) !important;
+  border:1px solid rgba(255,255,255,.10) !important;
+  box-shadow:0 24px 70px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.06) !important;
+  transform:translateY(7px) scale(.985) !important;
+  transition:transform .16s ease !important;
+  pointer-events:auto !important;
+  touch-action:auto !important;
+  -webkit-tap-highlight-color:transparent !important;
+}
+.assal-private-clean-dialog.show .assal-private-clean-card{transform:translateY(0) scale(1) !important;}
+.assal-private-clean-head{display:flex !important;align-items:center !important;gap:10px !important;margin-bottom:10px !important;text-align:right !important;}
+.assal-private-clean-icon{width:38px !important;height:38px !important;border-radius:14px !important;display:flex !important;align-items:center !important;justify-content:center !important;background:rgba(255,255,255,.08) !important;border:1px solid rgba(255,255,255,.10) !important;flex:0 0 38px !important;color:#67e8f9 !important;}
+.assal-private-clean-icon.danger{color:#fecaca !important;background:rgba(127,29,29,.24) !important;border-color:rgba(248,113,113,.22) !important;}
+.assal-private-clean-title{font-size:17px !important;font-weight:950 !important;line-height:1.35 !important;color:#fff !important;}
+.assal-private-clean-text{font-size:13px !important;font-weight:700 !important;color:#cbd5e1 !important;line-height:1.8 !important;margin:8px 0 12px !important;text-align:right !important;}
+.assal-private-clean-input{
+  width:100% !important;
+  min-height:124px !important;
+  max-height:220px !important;
+  resize:vertical !important;
+  border-radius:17px !important;
+  padding:12px !important;
+  background:rgba(255,255,255,.065) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  color:#fff !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:16px !important;
+  line-height:1.75 !important;
+  outline:none !important;
+  margin:8px 0 12px !important;
+  direction:rtl !important;
+  text-align:right !important;
+  pointer-events:auto !important;
+  touch-action:manipulation !important;
+  -webkit-user-select:text !important;
+  user-select:text !important;
+}
+.assal-private-clean-input:focus{border-color:rgba(45,212,191,.70) !important;box-shadow:0 0 0 3px rgba(45,212,191,.12) !important;background:rgba(255,255,255,.085) !important;}
+.assal-private-clean-actions{display:flex !important;gap:10px !important;margin-top:12px !important;}
+.assal-private-clean-actions button{
+  flex:1 !important;
+  min-height:42px !important;
+  border:none !important;
+  border-radius:14px !important;
+  padding:10px 12px !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:13px !important;
+  font-weight:950 !important;
+  cursor:pointer !important;
+  color:#fff !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:7px !important;
+  pointer-events:auto !important;
+  touch-action:manipulation !important;
+  -webkit-tap-highlight-color:transparent !important;
+}
+.assal-private-clean-cancel{background:rgba(71,85,105,.90) !important;border:1px solid rgba(255,255,255,.08) !important;}
+.assal-private-clean-ok{background:linear-gradient(135deg,#0f766e,#06b6d4) !important;box-shadow:0 10px 22px rgba(6,182,212,.16) !important;}
+.assal-private-clean-ok.danger{background:linear-gradient(135deg,#991b1b,#ef4444) !important;box-shadow:0 10px 22px rgba(239,68,68,.18) !important;}
+.assal-private-clean-actions button:active{transform:scale(.97) !important;}
+@media(max-width:430px){.assal-private-clean-dialog{padding:14px !important}.assal-private-clean-card{width:min(94vw,360px) !important;padding:14px !important;border-radius:20px !important}.assal-private-clean-actions{gap:8px !important}.assal-private-clean-actions button{font-size:12px !important}}
+html.low-end-device .assal-private-clean-dialog,
+html.low-end-device .assal-private-clean-dialog *{animation:none !important;transition:none !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;}
+</style>
+<script id="assal-private-one-clean-edit-delete-script">
+(function(){
+  'use strict';
+  window.__ASSAL_PRIVATE_ONE_CLEAN_EDIT_DELETE__ = true;
+
+  function clean(v){ return String(v == null ? '' : v).trim(); }
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>'"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'})[c]||c;}); }
+  function decodeHtml(s){ var t=document.createElement('textarea'); t.innerHTML=String(s||''); return t.value; }
+  function toast(title,type){
+    try{ if(typeof window.showElegantTopToast==='function') return window.showElegantTopToast(title,type||'success'); }catch(_){ }
+    try{ if(typeof window.assalCommunityToast==='function') return window.assalCommunityToast(type||'success', title); }catch(_){ }
+    try{ if(window.Swal) return Swal.fire({toast:true,position:'top',timer:1600,showConfirmButton:false,icon:type||'success',title:title||''}); }catch(_){ }
+  }
+  function fbase(){ return window.firebaseDB || {}; }
+  function hasDb(){ var f=fbase(); return !!(f.db && f.ref && f.update); }
+  function canManage(msg, viewMode){
+    try{ if(typeof window.canManageMaterialRequestMessage === 'function') return window.canManageMaterialRequestMessage(msg, viewMode); }catch(_){ }
+    try{ if(typeof canManageMaterialRequestMessage === 'function') return canManageMaterialRequestMessage(msg, viewMode); }catch(_){ }
+    return {edit:true, delete:true};
+  }
+  async function fetchMessage(requestId,msgId){
+    var f=fbase();
+    if(!f.db || !f.ref || !f.get) return null;
+    try{
+      var s=await f.get(f.ref(f.db,'materialRequests/'+requestId+'/messages/'+msgId));
+      return s && s.exists && s.exists() ? (s.val() || {}) : null;
+    }catch(e){ console.warn('ASSAL fetch private message failed:', e); return null; }
+  }
+  function parseArgs(call){
+    call=String(call||'');
+    var m=call.match(/(edit|delete)MaterialRequestMessage\(\s*['\"]([^'\"]*)['\"]\s*,\s*['\"]([^'\"]*)['\"]\s*,\s*['\"]([^'\"]*)['\"]\s*\)/);
+    if(!m) return null;
+    return {action:m[1],requestId:decodeHtml(m[2]),msgId:decodeHtml(m[3]),viewMode:decodeHtml(m[4]||'admin')};
+  }
+  function textFromButton(btn){
+    try{
+      var msg=btn && btn.closest ? btn.closest('.request-message') : null;
+      var body=msg ? msg.querySelector('.request-message-body-text') : null;
+      if(!body) return '';
+      var clone=body.cloneNode(true);
+      clone.querySelectorAll('.assal-community-edited,.message-branch-footer,.request-message-actions,button,.request-message-mini-action').forEach(function(n){try{n.remove();}catch(_){} });
+      var txt=decodeHtml(clean(clone.textContent||''));
+      txt=txt.replace(/تم\s*التعديل\s*$/,'').trim();
+      if(txt==='تم حذف الرسالة') return '';
+      return txt;
+    }catch(_){ return ''; }
+  }
+  function openDialog(opts){
+    opts=opts||{};
+    return new Promise(function(resolve){
+      try{ document.querySelectorAll('.assal-private-clean-dialog,.assal-private-final-dialog,.assal-private-hard-dialog,.assal-private-action-dialog').forEach(function(n){n.remove();}); }catch(_){ }
+      var oldOverflow = document.body ? document.body.style.overflow : '';
+      try{ document.documentElement.classList.add('assal-private-clean-dialog-open'); if(document.body) document.body.style.overflow='hidden'; }catch(_){ }
+      var wrap=document.createElement('div');
+      wrap.className='assal-private-clean-dialog';
+      wrap.setAttribute('role','dialog');
+      wrap.setAttribute('aria-modal','true');
+      var danger=!!opts.danger;
+      wrap.innerHTML=''+
+        '<div class="assal-private-clean-card">'+
+          '<div class="assal-private-clean-head">'+
+            '<div class="assal-private-clean-icon '+(danger?'danger':'')+'"><i class="fas '+(danger?'fa-trash':'fa-pen')+'"></i></div>'+
+            '<div class="assal-private-clean-title">'+esc(opts.title||'تأكيد')+'</div>'+
+          '</div>'+ 
+          (opts.message?'<div class="assal-private-clean-text">'+esc(opts.message)+'</div>':'')+
+          (opts.input?'<textarea class="assal-private-clean-input" maxlength="700" placeholder="اكتب التعديل...">'+esc(opts.value||'')+'</textarea>':'')+
+          '<div class="assal-private-clean-actions">'+
+            '<button type="button" class="assal-private-clean-cancel" data-private-clean="cancel"><i class="fas fa-xmark"></i> '+esc(opts.cancelText||'إلغاء')+'</button>'+ 
+            '<button type="button" class="assal-private-clean-ok '+(danger?'danger':'')+'" data-private-clean="ok"><i class="fas '+(danger?'fa-trash':'fa-check')+'"></i> '+esc(opts.okText||'تمام')+'</button>'+ 
+          '</div>'+ 
+        '</div>';
+      document.body.appendChild(wrap);
+      var done=false;
+      function cleanup(result){
+        if(done) return; done=true;
+        try{ document.removeEventListener('keydown', keyLock, true); }catch(_){ }
+        try{ wrap.classList.remove('show'); }catch(_){ }
+        setTimeout(function(){
+          try{ wrap.remove(); }catch(_){ }
+          try{ document.documentElement.classList.remove('assal-private-clean-dialog-open'); if(document.body) document.body.style.overflow=oldOverflow || ''; }catch(_){ }
+          resolve(result);
+        },80);
+      }
+      function keyLock(e){
+        if(e.key==='Escape'){
+          e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+        }
+      }
+      document.addEventListener('keydown', keyLock, true);
+      function swallowOutside(e){
+        if(e.target===wrap){ e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation(); return false; }
+      }
+      ['click','mousedown','mouseup','pointerdown','pointerup','touchstart','touchend','wheel'].forEach(function(ev){ wrap.addEventListener(ev, swallowOutside, true); });
+      var card=wrap.querySelector('.assal-private-clean-card');
+      if(card){
+        ['click','mousedown','mouseup','pointerdown','pointerup','touchstart','touchend'].forEach(function(ev){ card.addEventListener(ev,function(e){ e.stopPropagation(); }, true); });
+      }
+      wrap.addEventListener('click', function(e){
+        var btn=e.target && e.target.closest ? e.target.closest('[data-private-clean]') : null;
+        if(!btn || !wrap.contains(btn)) return;
+        e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+        var act=btn.getAttribute('data-private-clean');
+        if(act==='cancel') return cleanup({ok:false});
+        var inp=wrap.querySelector('.assal-private-clean-input');
+        return cleanup({ok:true,value:inp?inp.value:''});
+      }, true);
+      setTimeout(function(){ try{ wrap.classList.add('show'); }catch(_){ } },10);
+      setTimeout(function(){
+        try{
+          var i=wrap.querySelector('.assal-private-clean-input');
+          if(i){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); }
+        }catch(_){ }
+      },110);
+    });
+  }
+  function safeRefresh(viewMode){
+    // لا نعيد فتح القائمة ولا نسوي load كامل؛ اللايف يحدث البطاقة وحده.
+    setTimeout(function(){
+      try{
+        var root=document.getElementById(viewMode==='customer'?'requestTrackModal':'requestAdminModal');
+        if(root) root.querySelectorAll('.request-messages').forEach(function(box){ try{ box.scrollTop=box.scrollTop; }catch(_){} });
+      }catch(_){ }
+    },80);
+  }
+  async function editCore(requestId,msgId,viewMode,domText){
+    requestId=clean(requestId); msgId=clean(msgId); viewMode=clean(viewMode||'admin');
+    if(!requestId || !msgId) return;
+    var msg=await fetchMessage(requestId,msgId);
+    if(msg && msg.deletedAt) return toast('ما تكدر تعدل رسالة محذوفة','warning');
+    var perms=canManage(msg || {}, viewMode) || {};
+    if(perms.edit === false) return toast('ما عندك صلاحية تعديل هاي الرسالة','warning');
+    var current=clean((msg && msg.text) || domText || '');
+    var res=await openDialog({title:'تعديل الرسالة',input:true,value:current,okText:'حفظ التعديل',cancelText:'إلغاء'});
+    if(!res || !res.ok) return;
+    var txt=clean(res.value||'');
+    if(!txt) return toast('الرسالة فارغة','warning');
+    if(txt===current) return;
+    if(!hasDb()) return toast('قاعدة البيانات غير جاهزة','error');
+    var f=fbase();
+    await f.update(f.ref(f.db), {
+      ['materialRequests/'+requestId+'/messages/'+msgId+'/text']: txt,
+      ['materialRequests/'+requestId+'/messages/'+msgId+'/deletedAt']: null,
+      ['materialRequests/'+requestId+'/messages/'+msgId+'/deletedBy']: null,
+      ['materialRequests/'+requestId+'/messages/'+msgId+'/editedAt']: Date.now(),
+      ['materialRequests/'+requestId+'/messages/'+msgId+'/editedBy']: viewMode==='admin'?'admin':'customer',
+      ['materialRequests/'+requestId+'/updatedAt']: Date.now()
+    });
+    safeRefresh(viewMode);
+    try{ if(typeof window.refreshMaterialRequestCount==='function') await window.refreshMaterialRequestCount(); }catch(_){ }
+    toast('تم تعديل الرسالة','success');
+  }
+  async function deleteCore(requestId,msgId,viewMode){
+    requestId=clean(requestId); msgId=clean(msgId); viewMode=clean(viewMode||'admin');
+    if(!requestId || !msgId) return;
+    var msg=await fetchMessage(requestId,msgId);
+    var perms=canManage(msg || {}, viewMode) || {};
+    if(perms.delete === false) return toast('ما عندك صلاحية حذف هاي الرسالة','warning');
+    var res=await openDialog({title:'حذف الرسالة؟',message:'راح تظهر داخل المحادثة كرسالة محذوفة بدون نص.',okText:'حذف',cancelText:'إلغاء',danger:true});
+    if(!res || !res.ok) return;
+    if(!hasDb()) return toast('قاعدة البيانات غير جاهزة','error');
+    var f=fbase();
+    await f.update(f.ref(f.db), {
+      ['materialRequests/'+requestId+'/messages/'+msgId+'/text']: '',
+      ['materialRequests/'+requestId+'/messages/'+msgId+'/deletedAt']: Date.now(),
+      ['materialRequests/'+requestId+'/messages/'+msgId+'/deletedBy']: viewMode==='admin'?'admin':'customer',
+      ['materialRequests/'+requestId+'/messages/'+msgId+'/editedAt']: null,
+      ['materialRequests/'+requestId+'/updatedAt']: Date.now()
+    });
+    safeRefresh(viewMode);
+    try{ if(typeof window.refreshMaterialRequestCount==='function') await window.refreshMaterialRequestCount(); }catch(_){ }
+    toast('تم حذف الرسالة','success');
+  }
+
+  window.editMaterialRequestMessage=function(requestId,msgId,viewMode){
+    return editCore(requestId,msgId,viewMode,'').catch(function(e){ console.error('ASSAL private clean edit:',e); toast('تعذر تعديل الرسالة','error'); });
+  };
+  window.deleteMaterialRequestMessage=function(requestId,msgId,viewMode){
+    return deleteCore(requestId,msgId,viewMode).catch(function(e){ console.error('ASSAL private clean delete:',e); toast('تعذر حذف الرسالة','error'); });
+  };
+
+  document.addEventListener('click', function(e){
+    var btn=e.target && e.target.closest ? e.target.closest('.request-message-mini-action') : null;
+    if(!btn) return;
+    var args=parseArgs(btn.getAttribute('onclick')||'');
+    if(!args) return;
+    e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+    if(args.action==='edit') editCore(args.requestId,args.msgId,args.viewMode,textFromButton(btn)).catch(function(err){ console.error('ASSAL private delegated edit:',err); toast('تعذر تعديل الرسالة','error'); });
+    else deleteCore(args.requestId,args.msgId,args.viewMode).catch(function(err){ console.error('ASSAL private delegated delete:',err); toast('تعذر حذف الرسالة','error'); });
+    return false;
+  }, true);
 })();
 </script>
