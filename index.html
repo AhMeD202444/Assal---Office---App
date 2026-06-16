@@ -38408,6 +38408,11 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     // أزرار الإغلاق فقط مسموحة حتى إذا كانت نافذة مفتوحة قبل انقطاع النت.
     if (target.closest('.swal2-close, .swal2-cancel, .close-modal-btn, .cart-x, .assal-voice-close')) return true;
 
+    // نوافذ تنبيهات البحث المحلية مثل: حقل فارغ / اختيار الصنف أولاً.
+    // هاي لازم تبقى قابلة للضغط بالأوفلاين حتى زر (موافق/تمام) يشتغل ولا يتصادم ويا الحارس.
+    if (target.closest('.swal2-confirm, .exit-confirm')) return true;
+    if (target.closest('.swal2-popup.exit-popup, .request-like-backdrop .swal2-popup')) return true;
+
     return false;
   }
 
