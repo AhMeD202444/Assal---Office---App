@@ -15584,6 +15584,124 @@ const dropboxSimilaritesFile = "https://docs.google.com/spreadsheets/d/e/2PACX-1
 let compatDatabase = [];
 let compatLoaded = false;
 
+/* ===== ASSAL OFFLINE COMPAT CACHE: آخر نسخة ناجحة من Google Sheet للتوافقات ===== */
+const ASSAL_COMPAT_CACHE_DB = 'assal_compat_cache_db_v1';
+const ASSAL_COMPAT_CACHE_STORE = 'snapshots';
+const ASSAL_COMPAT_CACHE_KEY = 'latest-compat-google-sheet-snapshot';
+const ASSAL_COMPAT_CACHE_META_KEY = 'assal_compat_cache_meta_v1';
+let assalCompatCacheDbPromise = null;
+
+function assalHasValidCompatData(rows) {
+    try {
+        return Array.isArray(rows) && rows.some(row => row && typeof row === 'object' && String(row["Item"] || row["Item Name"] || row["Name"] || "").trim() !== "");
+    } catch (_) {
+        return false;
+    }
+}
+
+function assalReadCompatCacheMeta() {
+    try {
+        const raw = localStorage.getItem(ASSAL_COMPAT_CACHE_META_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (_) { return null; }
+}
+
+function assalWriteCompatCacheMeta(meta) {
+    try { localStorage.setItem(ASSAL_COMPAT_CACHE_META_KEY, JSON.stringify(meta || {})); } catch (_) {}
+}
+
+function assalOpenCompatCacheDb() {
+    if (assalCompatCacheDbPromise) return assalCompatCacheDbPromise;
+    assalCompatCacheDbPromise = new Promise((resolve, reject) => {
+        try {
+            if (!('indexedDB' in window)) {
+                reject(new Error('IndexedDB غير مدعوم'));
+                return;
+            }
+            const req = indexedDB.open(ASSAL_COMPAT_CACHE_DB, 1);
+            req.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(ASSAL_COMPAT_CACHE_STORE)) {
+                    db.createObjectStore(ASSAL_COMPAT_CACHE_STORE, { keyPath: 'id' });
+                }
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error || new Error('فشل فتح كاش التوافقات'));
+        } catch (err) { reject(err); }
+    });
+    return assalCompatCacheDbPromise;
+}
+
+async function assalSaveCompatSnapshot(payload) {
+    try {
+        if (!payload || !assalHasValidCompatData(payload.rows)) return false;
+        const db = await assalOpenCompatCacheDb();
+        await new Promise((resolve, reject) => {
+            const tx = db.transaction(ASSAL_COMPAT_CACHE_STORE, 'readwrite');
+            const store = tx.objectStore(ASSAL_COMPAT_CACHE_STORE);
+            store.put({ id: ASSAL_COMPAT_CACHE_KEY, ...payload });
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => reject(tx.error || new Error('فشل حفظ كاش التوافقات'));
+            tx.onabort = () => reject(tx.error || new Error('توقف حفظ كاش التوافقات'));
+        });
+        assalWriteCompatCacheMeta({
+            savedAt: payload.savedAt || Date.now(),
+            count: Array.isArray(payload.rows) ? payload.rows.length : 0,
+            sheetName: payload.sheetName || ''
+        });
+        return true;
+    } catch (err) {
+        console.warn('ASSAL compatibility cache save failed:', err);
+        return false;
+    }
+}
+
+async function assalLoadCompatSnapshot() {
+    try {
+        const db = await assalOpenCompatCacheDb();
+        return await new Promise((resolve, reject) => {
+            const tx = db.transaction(ASSAL_COMPAT_CACHE_STORE, 'readonly');
+            const store = tx.objectStore(ASSAL_COMPAT_CACHE_STORE);
+            const req = store.get(ASSAL_COMPAT_CACHE_KEY);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => reject(req.error || new Error('فشل قراءة كاش التوافقات'));
+        });
+    } catch (err) {
+        console.warn('ASSAL compatibility cache read failed:', err);
+        return null;
+    }
+}
+
+async function assalRestoreCompatSnapshot(reason) {
+    const snapshot = await assalLoadCompatSnapshot();
+    if (!snapshot || !assalHasValidCompatData(snapshot.rows)) return null;
+
+    compatDatabase = snapshot.rows || [];
+    compatLoaded = true;
+
+    try {
+        window.__ASSAL_COMPAT_USING_OFFLINE_CACHE__ = true;
+        window.__ASSAL_COMPAT_CACHE_SAVED_AT__ = snapshot.savedAt || 0;
+        window.__ASSAL_COMPAT_CACHE_REASON__ = reason || '';
+    } catch (_) {}
+
+    console.warn('ASSAL: تم تشغيل آخر نسخة محفوظة من بيانات التوافقات.', {
+        reason,
+        savedAt: snapshot.savedAt,
+        count: compatDatabase.length
+    });
+
+    return snapshot;
+}
+
+function assalCompatOfflineMissingMessage() {
+    const meta = assalReadCompatCacheMeta();
+    if (meta && meta.savedAt) {
+        return "تعذر تحميل ملف التوافقات، ولم نتمكن من قراءة النسخة المحفوظة. جرّب تحديث التطبيق عند توفر الإنترنت.";
+    }
+    return "لا توجد نسخة توافقات محفوظة للأوفلاين. افتح التوافقات مرة واحدة وأنت أونلاين حتى تنحفظ وتشتغل بدون إنترنت.";
+}
+
 function isAdminUser() {
     return localStorage.getItem(ADMIN_FLAG_KEY) === "true";
 }
@@ -22559,7 +22677,7 @@ function escapeHtml(str) {
 
 async function loadCompatibilitiesFile() {
     if (compatLoaded && Array.isArray(compatDatabase) && compatDatabase.length) {
-        return { success: true };
+        return { success: true, source: "memory" };
     }
 
     try {
@@ -22574,18 +22692,46 @@ async function loadCompatibilitiesFile() {
             workbook.SheetNames[0];
 
         const worksheet = workbook.Sheets[preferredSheet];
-        compatDatabase = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        const rows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
+        if (!assalHasValidCompatData(rows)) {
+            throw new Error("ملف التوافقات فارغ أو غير صالح.");
+        }
+
+        compatDatabase = rows;
         compatLoaded = true;
-        return { success: true };
+
+        try {
+            window.__ASSAL_COMPAT_USING_OFFLINE_CACHE__ = false;
+            window.__ASSAL_COMPAT_CACHE_REASON__ = "";
+        } catch (_) {}
+
+        try {
+            assalSaveCompatSnapshot({
+                savedAt: Date.now(),
+                sheetName: preferredSheet || "",
+                rows: compatDatabase
+            });
+        } catch (_) {}
+
+        return { success: true, source: "network" };
     } catch (err) {
+        const cached = await assalRestoreCompatSnapshot("network-failed");
+        if (cached && Array.isArray(compatDatabase) && compatDatabase.length) {
+            return { success: true, source: "offline-cache", message: err?.message || "offline-cache" };
+        }
+
         compatLoaded = false;
         compatDatabase = [];
 
+        const offlineNow = (typeof assalIsBrowserOffline === "function" && assalIsBrowserOffline()) || (navigator.onLine === false);
+
         showExitLikeAlert({
             icon: "fas fa-exclamation-circle",
-            title: "خطأ",
-            message: "ما كدرنا نحمّل ملف التوافقات. تأكد من النت أو الرابط.",
+            title: offlineNow ? "التوافقات غير محفوظة" : "خطأ",
+            message: offlineNow
+                ? assalCompatOfflineMissingMessage()
+                : "ما كدرنا نحمّل ملف التوافقات. تأكد من النت أو الرابط.",
             confirmText: "موافق"
         });
 
