@@ -38261,14 +38261,17 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 })();
 </script>
 
-<!-- ===== ASSAL OFFLINE SEARCH-ONLY GUARD FINAL ===== -->
+<!-- ===== ASSAL OFFLINE SEARCH-ONLY GUARD FINAL - SEARCH WINDOWS SAFE ===== -->
 <script id="assalOfflineSearchOnlyGuardFinal">
 (function(){
   if (window.__ASSAL_OFFLINE_SEARCH_ONLY_GUARD_FINAL__) return;
   window.__ASSAL_OFFLINE_SEARCH_ONLY_GUARD_FINAL__ = true;
 
   var TOAST_TEXT = 'لا تستطيع الدخول في وضع الأوفلاين';
+  var TOAST_SUBTEXT = 'البحث واختيار الصنف فقط متاحان حالياً من البيانات المحفوظة';
+  var TOAST_DURATION = 2100;
   var lastToastAt = 0;
+  var offlineBannerRestoreTimer = null;
 
   function isOfflineMode(){
     try {
@@ -38287,14 +38290,50 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     return false;
   }
 
+  function getOfflineBanner(){
+    try { return document.getElementById('assalOfflineBanner'); } catch(_) { return null; }
+  }
+
+  function pauseOfflineBannerForToast(){
+    try {
+      var banner = getOfflineBanner();
+      if (!banner) return;
+
+      clearTimeout(offlineBannerRestoreTimer);
+
+      var wasVisible = banner.classList.contains('is-visible') && !banner.classList.contains('is-online');
+      if (wasVisible) {
+        banner.setAttribute('data-assal-guard-paused', '1');
+        banner.classList.remove('is-visible');
+        banner.style.display = 'none';
+      }
+
+      offlineBannerRestoreTimer = setTimeout(function(){
+        try {
+          var b = getOfflineBanner();
+          if (!b) return;
+          if (b.getAttribute('data-assal-guard-paused') !== '1') return;
+          b.removeAttribute('data-assal-guard-paused');
+          b.style.display = '';
+          if (isOfflineMode()) {
+            b.classList.remove('is-online');
+            b.classList.add('is-visible');
+          }
+        } catch(_) {}
+      }, TOAST_DURATION + 520);
+    } catch(_) {}
+  }
+
   function showOfflineToast(){
     var now = Date.now();
     if (now - lastToastAt < 900) return;
     lastToastAt = now;
 
+    pauseOfflineBannerForToast();
+
     try {
       if (typeof window.showElegantTopToast === 'function') {
-        window.showElegantTopToast(TOAST_TEXT, 'warning', 2100, 'البحث فقط متاح حالياً من البيانات المحفوظة');
+        window.showElegantTopToast(TOAST_TEXT, 'warning', TOAST_DURATION, TOAST_SUBTEXT);
         return;
       }
     } catch(_) {}
@@ -38306,8 +38345,8 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
           position: 'top',
           icon: 'warning',
           title: TOAST_TEXT,
-          text: 'البحث فقط متاح حالياً من البيانات المحفوظة',
-          timer: 2100,
+          text: TOAST_SUBTEXT,
+          timer: TOAST_DURATION,
           showConfirmButton: false
         });
         return;
@@ -38320,21 +38359,37 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       if (old && old.parentNode) old.parentNode.removeChild(old);
       var el = document.createElement('div');
       el.id = id;
-      el.textContent = TOAST_TEXT;
+      el.innerHTML = '<div style="font-weight:900;line-height:1.35;">' + TOAST_TEXT + '</div><div style="font-size:11px;opacity:.9;margin-top:2px;line-height:1.35;">' + TOAST_SUBTEXT + '</div>';
       el.setAttribute('dir','rtl');
-      el.style.cssText = 'position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:2147483647;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-family:Cairo,Tajawal,sans-serif;font-weight:900;font-size:14px;padding:10px 16px;border-radius:999px;box-shadow:0 14px 35px rgba(0,0,0,.35);text-align:center;max-width:calc(100vw - 24px);white-space:nowrap;';
+      el.style.cssText = 'position:fixed;top:58px;left:50%;transform:translateX(-50%);z-index:2147483647;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-family:Cairo,Tajawal,sans-serif;font-weight:900;font-size:14px;padding:10px 16px;border-radius:18px;box-shadow:0 14px 35px rgba(0,0,0,.35);text-align:center;max-width:calc(100vw - 24px);min-width:min(300px,calc(100vw - 24px));';
       document.body.appendChild(el);
-      setTimeout(function(){ try { if (el && el.parentNode) el.parentNode.removeChild(el); } catch(_) {} }, 2100);
+      setTimeout(function(){ try { if (el && el.parentNode) el.parentNode.removeChild(el); } catch(_) {} }, TOAST_DURATION);
     } catch(_) {}
   }
 
   function isAllowedSearchElement(target){
     if (!target || !target.closest) return false;
 
-    // حقل البحث وزر البحث وزر المسح فقط مسموحات في الأوفلاين.
+    // أساس البحث.
     if (target.closest('#searchInput')) return true;
     if (target.closest('#searchBtn')) return true;
     if (target.closest('#clearBtn')) return true;
+
+    // اختيار الصنف داخل السلايدر وكل أزرار تمريره.
+    if (target.closest('.slider-container, #slider, .slider, .category, .slider-btn')) return true;
+    try {
+      var onclick = target.closest('[onclick]');
+      var onclickText = onclick ? String(onclick.getAttribute('onclick') || '') : '';
+      if (/filterCategory\s*\(/i.test(onclickText)) return true;
+    } catch(_) {}
+
+    // أزرار تخص البحث داخل شريط البحث: توافقات + أسعار الجملة + اقتراحات الجملة.
+    if (target.closest('#adminCompatBtn, .admin-compat-btn')) return true;
+    if (target.closest('#adminWholesaleBtn, .admin-wholesale-btn')) return true;
+    if (target.closest('#wholesaleSuggestions, .wholesale-suggestions, .wholesale-suggestion-item')) return true;
+
+    // أي نافذة/عنصر خاص بالبحث أو التوافقات أو اقتراحات الجملة يسمح بالتعامل داخله.
+    if (target.closest('.wholesale-suggestions, .wholesale-suggestion-item, .compatibility-results, .compat-results, .search-related-modal, .search-window, .search-modal')) return true;
 
     // السماح بالتمرير/اللمس داخل النتائج نفسها، لكن ليس أزرار النتائج مثل السلة أو الاستعلام.
     var inResults = target.closest('#results, .results, .results-container');
@@ -38367,7 +38422,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     if (target.closest('#voiceSearchBtn, .voice-search-btn, .assal-voice-overlay, .assal-voice-card')) return true;
 
     // أي زر/رابط/عنصر يفتح نافذة أو ينفذ أمر يمنع في الأوفلاين.
-    if (target.closest('button, a, [role="button"], [onclick], .header-btn, .category, .category-btn, .new-category-btn, .tools-btn, .slider-btn, .floating-new-btn, .add-mini, .availability-mini, .customer-card, .customer-admin-card, .request-submit-btn, .cart-btn, .activation-btn, .alert-primary, .alert-secondary')) return true;
+    if (target.closest('button, a, [role="button"], [onclick], .header-btn, .category-btn, .new-category-btn, .tools-btn, .floating-new-btn, .add-mini, .availability-mini, .customer-card, .customer-admin-card, .request-submit-btn, .cart-btn, .activation-btn, .alert-primary, .alert-secondary')) return true;
 
     // أي لمس داخل نافذة غير البحث يمنع إذا النافذة موجودة.
     if (target.closest('.cart-modal, #offersModal, #newItemsModal, .request-modal, .request-admin-modal, .request-track-modal, .stats-modal, .customers-admin-modal, .customer-profile-modal, .invoice-track-modal, .invoice-admin-modal, .customer-blocked-overlay, .assal-debug-popup')) return true;
@@ -38394,6 +38449,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     var t = e.target;
     if (!t || !t.matches) return;
     if (t.matches('#searchInput')) return;
+    if (t.closest && t.closest('#wholesaleSuggestions, .wholesale-suggestions, .search-related-modal, .search-window, .search-modal')) return;
     if (t.matches('input, textarea, select, [contenteditable="true"]')) {
       try { t.blur(); } catch(_) {}
       try { e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation(); } catch(_) {}
@@ -38401,12 +38457,12 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     }
   }, true);
 
-  function guardFunction(name){
+  function guardFunction(name, allowWhenOffline){
     try {
       var original = window[name];
       if (typeof original !== 'function' || original.__assalOfflineGuarded) return;
       var wrapped = function(){
-        if (isOfflineMode()) {
+        if (!allowWhenOffline && isOfflineMode()) {
           showOfflineToast();
           return false;
         }
@@ -38425,11 +38481,18 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       // الطلبات/المحادثات/الزبائن
       'openRequestModal', 'openRequestAdminModal', 'openRequestTrackModal', 'openNewChatFromTrackModal',
       'openCustomersAdminModal', 'openCustomerProfileModal',
-      // السلة والفواتير والتوافقات إن وجدت بهذه الأسماء
-      'openCartModal', 'openInvoiceAdminModal', 'openInvoiceTrackModal', 'openCompatibilityModal', 'openWholesaleSuggestions',
+      // السلة والفواتير
+      'openCartModal', 'openInvoiceAdminModal', 'openInvoiceTrackModal',
       // البحث الصوتي ممنوع في الأوفلاين
       'startAssalVoiceSearch'
-    ].forEach(guardFunction);
+    ].forEach(function(name){ guardFunction(name, false); });
+
+    // دوال البحث واختيار الصنف تبقى مسموحة بالأوفلاين.
+    [
+      'filterCategory', 'searchItems', 'clearSearch', 'searchCompatibilitiesAdmin',
+      'toggleWholesaleMode', 'showWholesaleSuggestions', 'hideWholesaleSuggestions',
+      'searchWholesaleItems', 'openCompatibilityModal', 'openWholesaleSuggestions'
+    ].forEach(function(name){ guardFunction(name, true); });
   }
 
   guardKnownOpeners();
