@@ -3019,6 +3019,14 @@ h1 {
     /* animation: none; */ /* أو احذف السطر ده نهائي */
 }
 
+
+/* ASSAL OFFLINE NEWS BADGE ONLY: بدل البادج الأحمر العائم */
+.breaking-news.assal-news-offline-badge {
+    background: linear-gradient(135deg, #7f1d1d, #dc2626) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 12px rgba(220, 38, 38, .58) !important;
+}
+
 @keyframes pulse {
     0% { transform: scale(1); opacity: 1; }
     100% { transform: scale(1.1); opacity: 0.9; }
@@ -23732,6 +23740,12 @@ function setAssalOfflineNewsTicker() {
 
   if (badge) {
     badge.textContent = '📴 أوفلاين';
+    badge.classList.add('assal-news-offline-badge');
+    try {
+      badge.style.background = 'linear-gradient(135deg, #7f1d1d, #dc2626)';
+      badge.style.color = '#ffffff';
+      badge.style.boxShadow = '0 0 12px rgba(220, 38, 38, .58)';
+    } catch (_) {}
   }
 
   assalResetTickerInlineStyle(ticker);
@@ -23903,6 +23917,12 @@ function applyManualLightNewsBarState() {
     }
 
     badge.textContent = '🔥 تقنيات';
+    badge.classList.remove('assal-news-offline-badge');
+    try {
+        badge.style.background = '';
+        badge.style.color = '';
+        badge.style.boxShadow = '';
+    } catch (_) {}
     ticker.style.animation = '';
     ticker.style.position = '';
     ticker.title = '';
@@ -36437,6 +36457,15 @@ html.assal-offline-mode #assalOfflineBanner{
     .assal-offline-card{border-radius:26px;padding:25px 18px 21px}
     .assal-offline-title{font-size:22px}
 }
+/* ASSAL FINAL: إلغاء البادج الأحمر العائم نهائياً؛ الاعتماد على شريط الأخبار فقط */
+#assalOfflineBanner,
+#assalOfflineBanner.is-visible,
+#assalOfflineBanner.is-online{
+    display:none !important;
+    opacity:0 !important;
+    visibility:hidden !important;
+    pointer-events:none !important;
+}
 </style>
 <div id="assalOfflineBanner" aria-live="polite">
     <span class="assal-offline-dot"></span>
@@ -36486,26 +36515,19 @@ html.assal-offline-mode #assalOfflineBanner{
 
     function showBanner(){
         ensure();
-        if (!banner) return;
         clearTimeout(onlineHideTimer);
-        banner.classList.remove('is-online');
-        if (bannerText) {
-            bannerText.textContent = 'أنت في نسخة الأوفلاين';
-        }
         try { document.documentElement.classList.add('assal-offline-mode'); } catch(_){}
-        banner.classList.add('is-visible');
+        /* لا نعرض البادج الأحمر العائم بعد الآن؛ حالة الأوفلاين تظهر في شريط الأخبار فقط */
+        if (banner) banner.classList.remove('is-visible','is-online');
+        try { if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') window.__ASSAL_APPLY_NEWS_BAR_STATE__(); } catch(_){}
     }
 
     function showOnline(){
         ensure();
-        if (!banner) return;
         clearTimeout(onlineHideTimer);
-        if (bannerText) bannerText.textContent = 'أنت الآن في نسخة الأونلاين';
         try { document.documentElement.classList.remove('assal-offline-mode'); } catch(_){}
-        banner.classList.add('is-visible','is-online');
-        onlineHideTimer = setTimeout(function(){
-            banner.classList.remove('is-visible','is-online');
-        }, 1600);
+        if (banner) banner.classList.remove('is-visible','is-online');
+        try { if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') window.__ASSAL_APPLY_NEWS_BAR_STATE__(); } catch(_){}
     }
 
     window.showAssalOfflineState = function(fullScreen){
@@ -36565,6 +36587,15 @@ html.assal-offline-mode #assalOfflineBanner{
 }
 #assalOfflineBanner.is-visible{
     transform:translate3d(-50%,0,0) !important;
+}
+/* ASSAL FINAL: البادج العائم مخفي حتى لو حاولت سكربتات التثبيت إظهاره */
+#assalOfflineBanner,
+#assalOfflineBanner.is-visible,
+#assalOfflineBanner.is-online{
+    display:none !important;
+    opacity:0 !important;
+    visibility:hidden !important;
+    pointer-events:none !important;
 }
 @media (max-width:480px){
     #assalOfflineBanner{
@@ -36644,7 +36675,7 @@ html.assal-offline-mode #assalOfflineBanner{
         }else{
             try{
                 var banner = document.getElementById('assalOfflineBanner');
-                if(banner) banner.classList.add('is-visible');
+                if(banner) banner.classList.remove('is-visible','is-online');
             }catch(_){}
         }
         scheduleForce();
