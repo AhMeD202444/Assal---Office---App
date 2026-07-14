@@ -12009,6 +12009,8 @@ html.low-end-device .results-container {
 .assal-community-action-ok{ background:linear-gradient(135deg,#0f766e,#06b6d4); }
 .assal-community-action-ok.danger{ background:linear-gradient(135deg,#991b1b,#ef4444); }
 .assal-community-mini-action{ touch-action:manipulation; }
+
+
 </style>
 
 <style id="support-chat-messenger-upgrade">
@@ -20778,6 +20780,257 @@ try {
 } catch (_) {}
 
 
+
+/* ===== ASSAL ADMIN BATTERY GROUP SEARCH FINAL =====
+   يجمع صفوف البطاريات المرتبطة بسعر أول صف، ويعرضها للأدمن في بطاقة واحدة. */
+function assalBatteryNormalizeText(value) {
+    return String(value ?? "").trim().replace(/\s+/g, " ");
+}
+
+function assalBatteryFindHeader(sheet, acceptedNames) {
+    if (!sheet || !sheet["!ref"]) return null;
+    const range = XLSX.utils.decode_range(sheet["!ref"]);
+    const wanted = acceptedNames.map(x => String(x).trim().toLowerCase());
+    const maxHeaderRows = Math.min(range.e.r, range.s.r + 5);
+
+    for (let r = range.s.r; r <= maxHeaderRows; r++) {
+        for (let c = range.s.c; c <= range.e.c; c++) {
+            const cell = sheet[XLSX.utils.encode_cell({ r, c })];
+            const value = assalBatteryNormalizeText(cell && (cell.v ?? cell.w));
+            if (value && wanted.includes(value.toLowerCase())) {
+                return { row: r, col: c };
+            }
+        }
+    }
+    return null;
+}
+
+function assalBatteryResolvePriceAnchorRow(sheet, priceCol, rowIndex, seen) {
+    seen = seen || new Set();
+    if (!sheet || rowIndex < 0 || seen.has(rowIndex)) return rowIndex;
+    seen.add(rowIndex);
+
+    const addr = XLSX.utils.encode_cell({ r: rowIndex, c: priceCol });
+    const cell = sheet[addr];
+    const formula = cell && typeof cell.f === "string" ? cell.f.trim() : "";
+
+    if (!formula) return rowIndex;
+
+    const colLetters = XLSX.utils.encode_col(priceCol);
+    const directRef = new RegExp("(?:'[^']+'!)?\\$?" + colLetters + "\\$?(\\d+)", "i");
+    const match = formula.match(directRef);
+    if (!match) return rowIndex;
+
+    const targetRow = Math.max(0, Number(match[1]) - 1);
+    if (targetRow === rowIndex) return rowIndex;
+    return assalBatteryResolvePriceAnchorRow(sheet, priceCol, targetRow, seen);
+}
+
+function assalAnnotateBatteryRows(rows, sheet) {
+    if (!Array.isArray(rows) || !rows.length || !sheet) return rows;
+
+    const itemHeader = assalBatteryFindHeader(sheet, ["Item Name", "Item", "Name"]);
+    const priceHeader = assalBatteryFindHeader(sheet, ["Price"]);
+    const modelHeader = assalBatteryFindHeader(sheet, ["Model"]);
+
+    const headerRow = itemHeader ? itemHeader.row : (priceHeader ? priceHeader.row : 0);
+    const priceCol = priceHeader ? priceHeader.col : 1;
+    const dataStartRow = headerRow + 1;
+
+    rows.forEach((row, index) => {
+        if (!row || typeof row !== "object") return;
+        const sheetRowIndex = dataStartRow + index;
+        const anchorRowIndex = assalBatteryResolvePriceAnchorRow(sheet, priceCol, sheetRowIndex);
+
+        row.__assalBatterySheetRow = sheetRowIndex + 1;
+        row.__assalBatteryGroupKey = "row:" + (anchorRowIndex + 1);
+
+        if (modelHeader) {
+            const modelCell = sheet[XLSX.utils.encode_cell({ r: sheetRowIndex, c: modelHeader.col })];
+            const modelValue = assalBatteryNormalizeText(modelCell && (modelCell.v ?? modelCell.w));
+            if (modelValue && !assalBatteryNormalizeText(row["Model"])) row["Model"] = modelValue;
+        }
+    });
+
+    return rows;
+}
+
+function assalBuildBatteryGroups(allItems) {
+    const groups = [];
+    const groupByKey = new Map();
+    let fallbackRun = 0;
+    let previousFallbackModel = null;
+
+    (Array.isArray(allItems) ? allItems : []).forEach((item, index) => {
+        if (!item || typeof item !== "object") return;
+
+        const model = assalBatteryNormalizeText(
+            item["Model"] ?? item["MODEL"] ?? item["موديل"] ?? item["الموديل"]
+        );
+        let key = assalBatteryNormalizeText(item.__assalBatteryGroupKey);
+
+        // احتياط للنسخ المخزونة القديمة التي لا تحتوي بيانات ربط الصيغ.
+        if (!key) {
+            const normalizedModel = model.toLowerCase();
+            if (normalizedModel) {
+                if (normalizedModel !== previousFallbackModel) fallbackRun++;
+                previousFallbackModel = normalizedModel;
+                key = "fallback-model:" + fallbackRun + ":" + normalizedModel;
+            } else {
+                previousFallbackModel = null;
+                fallbackRun++;
+                key = "fallback-row:" + fallbackRun + ":" + index;
+            }
+        }
+
+        let group = groupByKey.get(key);
+        if (!group) {
+            group = {
+                key,
+                items: [],
+                names: [],
+                price: "",
+                discountPrice: "",
+                model: ""
+            };
+            groupByKey.set(key, group);
+            groups.push(group);
+        }
+
+        group.items.push(item);
+
+        const name = assalBatteryNormalizeText(item["Item Name"] ?? item["Item"] ?? item["Name"]);
+        if (name && !group.names.includes(name)) group.names.push(name);
+
+        if (!assalBatteryNormalizeText(group.price) && assalBatteryNormalizeText(item["Price"])) {
+            group.price = item["Price"];
+        }
+        if (!assalBatteryNormalizeText(group.discountPrice) && assalBatteryNormalizeText(item["Discount Price"])) {
+            group.discountPrice = item["Discount Price"];
+        }
+        if (!group.model && model) group.model = model;
+    });
+
+    return groups;
+}
+
+function assalBatteryCleanDisplayName(value) {
+    return assalBatteryNormalizeText(value)
+        .replace(/^BATTERY(?:\s*[-:])?\s*/i, "")
+        .trim();
+}
+
+function assalBatteryDetectFamilyPrefix(tokens) {
+    if (!Array.isArray(tokens) || tokens.length < 2) return [];
+
+    // أول كلمة تحتوي رقماً تُعد بداية الموديل غالباً:
+    // HUAWEI HONOR | 8X ، SAMSUNG | A145 ، XIAOMI REDMI NOTE | 11
+    const modelStart = tokens.findIndex(token => /\d/.test(String(token || "")));
+    if (modelStart > 0) return tokens.slice(0, modelStart);
+
+    // احتياط للأسماء التي لا تحتوي أرقاماً: نبقي آخر جزء كموديل.
+    return tokens.slice(0, Math.max(1, tokens.length - 1));
+}
+
+function assalBatteryStartsWithTokens(tokens, prefixTokens) {
+    if (!Array.isArray(tokens) || !Array.isArray(prefixTokens)) return false;
+    if (!prefixTokens.length || tokens.length <= prefixTokens.length) return false;
+
+    for (let i = 0; i < prefixTokens.length; i++) {
+        if (String(tokens[i] || "").toUpperCase() !== String(prefixTokens[i] || "").toUpperCase()) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function assalBuildBatteryCompactTitle(names, model) {
+    const cleanNames = [];
+    (Array.isArray(names) ? names : []).forEach(name => {
+        const clean = assalBatteryCleanDisplayName(name);
+        if (clean && !cleanNames.some(existing => existing.toUpperCase() === clean.toUpperCase())) {
+            cleanNames.push(clean);
+        }
+    });
+
+    if (!cleanNames.length) return "BATTERY";
+
+    const parts = [];
+    let activePrefix = [];
+
+    cleanNames.forEach((name, index) => {
+        const tokens = name.split(/\s+/).filter(Boolean);
+
+        if (index === 0) {
+            parts.push(name);
+            activePrefix = assalBatteryDetectFamilyPrefix(tokens);
+            return;
+        }
+
+        if (assalBatteryStartsWithTokens(tokens, activePrefix)) {
+            const shortName = tokens.slice(activePrefix.length).join(" ").trim();
+            parts.push(shortName || name);
+            return;
+        }
+
+        // عند الانتقال إلى ماركة/سلسلة ثانية نعرض اسمها كاملاً،
+        // ثم نختصر العناصر التالية التابعة لها.
+        parts.push(name);
+        activePrefix = assalBatteryDetectFamilyPrefix(tokens);
+    });
+
+    let title = parts.join(" / ");
+    const cleanModel = assalBatteryNormalizeText(model);
+    if (cleanModel && !title.toUpperCase().includes(cleanModel.toUpperCase())) {
+        title += ` (${cleanModel})`;
+    }
+    return title;
+}
+
+function assalExpandAdminBatteryResults(matchedItems, allItems) {
+    const isAdmin = typeof isAdminUser === "function" && isAdminUser();
+    if (!isAdmin || String(currentCategory || "").toUpperCase() !== "BATTERY") {
+        return matchedItems;
+    }
+
+    const groups = assalBuildBatteryGroups(allItems);
+    const itemToGroup = new Map();
+
+    groups.forEach(group => {
+        group.items.forEach(item => itemToGroup.set(item, group));
+    });
+
+    const orderedGroups = [];
+    const seen = new Set();
+
+    (Array.isArray(matchedItems) ? matchedItems : []).forEach(item => {
+        const group = itemToGroup.get(item);
+        if (!group || seen.has(group.key)) return;
+        seen.add(group.key);
+        orderedGroups.push(group);
+    });
+
+    return orderedGroups.map(group => ({
+        __assalBatteryGroup: true,
+        __assalBatteryGroupKey: group.key,
+        __assalBatteryItems: group.names,
+        __assalBatteryModel: group.model,
+        "Item Name": assalBuildBatteryCompactTitle(group.names, group.model),
+        "Price": group.price,
+        "Discount Price": group.discountPrice
+    }));
+}
+
+function assalEscapeBatteryHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+/* ===== /ASSAL ADMIN BATTERY GROUP SEARCH FINAL ===== */
+
 async function loadExcelFiles() {
     try {
         if (!dropboxMainFile) {
@@ -20901,7 +21154,9 @@ async function loadExcelFiles() {
         // تحميل البيانات من كل ورقة
         database.LCD = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["LCD"] || {}, { defval: null });
         database.HUAWEI = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HUAWEI"] || {}, { defval: null });
-        database.BATTERY = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BATTERY"] || {}, { defval: null });
+        const assalBatterySheet = mainWorkbook.Sheets["BATTERY"] || {};
+        database.BATTERY = XLSX.utils.sheet_to_json(assalBatterySheet, { defval: null });
+        assalAnnotateBatteryRows(database.BATTERY, assalBatterySheet);
         database.HOUSING = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["HOUSING"] || {}, { defval: null });
         database.BACK = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["BACK"] || {}, { defval: null });
         database.CAMERA = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["CAMERA"] || {}, { defval: null });
@@ -23290,6 +23545,9 @@ if (!currentCategory) {
         }) || [];
     }
     // ====== نهاية التعديل ======
+
+    // للأدمن فقط في BATTERY: إذا تطابق أي عنصر، اعرض مجموعته كاملة ببطاقة واحدة.
+    results = assalExpandAdminBatteryResults(results, items);
 
     if (results.length === 0) {
         console.log(`لا توجد نتائج مطابقة في فئة ${currentCategory} للبحث: ${query}`);
