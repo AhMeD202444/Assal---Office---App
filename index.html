@@ -23433,6 +23433,20 @@ function displayResults(results) {
         resultsContainer.style.display = "flex";
         resultsContainer.scrollIntoView({ behavior: "smooth", block: "start" });
         toggleScrollToTopButton();
+
+        // بعد رسم نتائج بحث التوافقات فعلياً، ننهي جلسة البحث
+        // بنفس المسار المعتمد للبحث الصوتي/زر البحث/Enter:
+        // إزالة الفوكس + إغلاق الكيبورد + إنزال الـDock + إزالة طبقة الظلال.
+        setTimeout(() => {
+            try {
+                if (typeof window.__ASSAL_FINISH_SEARCH_SESSION__ === "function") {
+                    window.__ASSAL_FINISH_SEARCH_SESSION__();
+                } else {
+                    const searchInput = document.getElementById("searchInput");
+                    if (searchInput) searchInput.blur();
+                }
+            } catch (_) {}
+        }, 45);
     });
 }
 
