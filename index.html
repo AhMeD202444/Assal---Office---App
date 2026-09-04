@@ -15968,6 +15968,11 @@ html.low-end-device .assal-compat-feed-popup{
     pointer-events:none;
 }
 .assal-search-dock-category span{pointer-events:none;}
+.assal-search-dock-category:focus,
+.assal-search-dock-category:focus-visible{
+    outline:none !important;
+    box-shadow:inherit;
+}
 .assal-search-dock-category:active{transform:scale(.97);}
 .assal-search-dock-category.is-active{
     color:#f0fdfa;
@@ -23132,6 +23137,19 @@ function handleAssalVoiceSearchText(text) {
     setTimeout(() => {
         searchAssalVoiceCurrentCategory(value, { source: "voice", updateInput: true });
         setAssalVoiceButtonListening(false);
+
+        // Voice search follows the exact same successful-search finish path:
+        // remove focus, close keyboard, remove blur, return dock, keep results visible.
+        setTimeout(() => {
+            try {
+                if (typeof window.__ASSAL_FINISH_SEARCH_SESSION__ === "function") {
+                    window.__ASSAL_FINISH_SEARCH_SESSION__();
+                } else {
+                    const searchInput = document.getElementById("searchInput");
+                    if (searchInput) searchInput.blur();
+                }
+            } catch (_) {}
+        }, 35);
     }, 430);
 }
 
@@ -39473,8 +39491,8 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 <!-- ===== ASSAL PREMIUM SEARCH FOCUS DOCK FINAL ===== -->
 <script id="assalPremiumSearchFocusDockFinal">
 (function(){
-  if (window.__ASSAL_SEARCH_DOCK_STATE_MACHINE_FINAL__) return;
-  window.__ASSAL_SEARCH_DOCK_STATE_MACHINE_FINAL__ = true;
+  if (window.__ASSAL_SEARCH_DOCK_FOCUS_VOICE_STABLE_FINAL__) return;
+  window.__ASSAL_SEARCH_DOCK_FOCUS_VOICE_STABLE_FINAL__ = true;
 
   function boot(){
     const input = document.getElementById('searchInput');
@@ -39482,8 +39500,8 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     const sourceSlider = document.getElementById('slider');
     const searchButton = document.getElementById('searchBtn');
 
-    if (!input || !dock || dock.dataset.assalStateMachineDockBound === '1') return;
-    dock.dataset.assalStateMachineDockBound = '1';
+    if (!input || !dock || dock.dataset.assalFocusVoiceStableBound === '1') return;
+    dock.dataset.assalFocusVoiceStableBound = '1';
 
     const STATE_IDLE = 'idle';
     const STATE_OPEN = 'open';
@@ -39511,6 +39529,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     let railMoved = false;
     let railStartX = 0;
     let railStartY = 0;
+    let railPointerId = null;
 
     let lastKnownViewportHeight = 0;
     let keyboardLikelyOpen = false;
@@ -39655,33 +39674,51 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       if (!compactTrack) return;
 
       const selectedKey = getSelectedCategoryKey();
-      let selectedBtn = null;
+      let selectedPill = null;
 
-      compactTrack.querySelectorAll('.assal-search-dock-category').forEach(btn => {
-        const isActive = btn.dataset.category === selectedKey;
-        btn.classList.toggle('is-active', isActive);
-        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-        if (isActive) selectedBtn = btn;
+      compactTrack.querySelectorAll('.assal-search-dock-category').forEach(pill => {
+        const isActive = pill.dataset.category === selectedKey;
+        pill.classList.toggle('is-active', isActive);
+        pill.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        if (isActive) selectedPill = pill;
       });
 
-      if (center && selectedBtn && compactTrack) {
+      if (center && selectedPill) {
         try {
-          const targetLeft = selectedBtn.offsetLeft - ((compactTrack.clientWidth - selectedBtn.offsetWidth) / 2);
+          const targetLeft = selectedPill.offsetLeft - ((compactTrack.clientWidth - selectedPill.offsetWidth) / 2);
           compactTrack.scrollLeft = Math.max(0, targetLeft);
         } catch(_) {}
       }
     }
 
+    function focusNow(){
+      if (state !== STATE_OPEN) return false;
+
+      try {
+        if (document.activeElement === input) return true;
+        input.focus({ preventScroll:true });
+        return document.activeElement === input;
+      } catch(_) {
+        try {
+          input.focus();
+          return document.activeElement === input;
+        } catch(__) {
+          return false;
+        }
+      }
+    }
+
     function safeRefocus(delay){
       clearTimeout(refocusTimer);
+
+      // Important: never issue a second focus call when focus is already correct.
+      if (document.activeElement === input) return;
+
       refocusTimer = setTimeout(() => {
         if (state !== STATE_OPEN || pointerInsideRail) return;
-        try {
-          if (document.activeElement !== input) input.focus({preventScroll:true});
-        } catch(_) {
-          try { input.focus(); } catch(__) {}
-        }
-      }, typeof delay === 'number' ? delay : 60);
+        if (document.activeElement === input) return;
+        focusNow();
+      }, typeof delay === 'number' ? delay : 70);
     }
 
     function buildCompactCategories(){
@@ -39702,54 +39739,88 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       compactTrack.className = 'assal-search-dock-categories-track';
       compactRail.appendChild(compactTrack);
 
-      // One pointer path only. No duplicate touch + pointer handlers.
+      // One pointer path only. The rail itself never becomes focusable.
       compactTrack.addEventListener('pointerdown', function(e){
         if (state !== STATE_OPEN) return;
+
         pointerInsideRail = true;
         railMoved = false;
+        railPointerId = e.pointerId;
         railStartX = Number(e.clientX || 0);
         railStartY = Number(e.clientY || 0);
       }, true);
 
       compactTrack.addEventListener('pointermove', function(e){
         if (!pointerInsideRail) return;
+        if (railPointerId !== null && e.pointerId !== railPointerId) return;
+
         const dx = Math.abs(Number(e.clientX || 0) - railStartX);
         const dy = Math.abs(Number(e.clientY || 0) - railStartY);
+
         if (dx > 7 || dy > 7) railMoved = true;
       }, {passive:true});
 
-      function finishRailGesture(){
+      function finishRailGesture(e){
         if (!pointerInsideRail) return;
+        if (railPointerId !== null && e && e.pointerId !== railPointerId) return;
+
+        const wasMoved = railMoved;
+        const target = e && e.target && e.target.closest
+          ? e.target.closest('.assal-search-dock-category')
+          : null;
+
         pointerInsideRail = false;
+        railPointerId = null;
 
-        // Don't close dock. Restore input focus once, after gesture ends.
-        safeRefocus(80);
+        // Select only on a real tap, never after a horizontal scroll.
+        if (!wasMoved && target && state === STATE_OPEN) {
+          const key = target.dataset.category || '';
 
-        setTimeout(() => {
-          railMoved = false;
-        }, 140);
+          if (key) {
+            try {
+              if (typeof window.filterCategory === 'function') {
+                window.filterCategory(key);
+              }
+            } catch(_) {}
+
+            syncCompactActive(true);
+          }
+        }
+
+        railMoved = false;
+
+        // Normally focus never left input because pills are DIVs.
+        // If Android did transiently drop it, restore only once after gesture.
+        if (state === STATE_OPEN && document.activeElement !== input) {
+          safeRefocus(85);
+        }
       }
 
       compactTrack.addEventListener('pointerup', finishRailGesture, true);
-      compactTrack.addEventListener('pointercancel', finishRailGesture, true);
-      compactTrack.addEventListener('lostpointercapture', finishRailGesture, true);
+      compactTrack.addEventListener('pointercancel', function(e){
+        pointerInsideRail = false;
+        railMoved = false;
+        railPointerId = null;
+        if (state === STATE_OPEN && document.activeElement !== input) safeRefocus(90);
+      }, true);
 
       originals.forEach(original => {
         const key = extractCategoryKey(original);
         if (!key) return;
 
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'assal-search-dock-category';
-        btn.dataset.category = key;
-        btn.tabIndex = -1;
-        btn.setAttribute('aria-pressed','false');
+        // DIV instead of BUTTON: cannot steal text-input focus on mobile.
+        const pill = document.createElement('div');
+        pill.className = 'assal-search-dock-category';
+        pill.dataset.category = key;
+        pill.setAttribute('role','button');
+        pill.setAttribute('aria-pressed','false');
+        pill.setAttribute('tabindex','-1');
 
         const icon = original.querySelector('i');
         if (icon) {
           const i = document.createElement('i');
           i.className = icon.className;
-          btn.appendChild(i);
+          pill.appendChild(i);
         }
 
         const label = document.createElement('span');
@@ -39757,36 +39828,9 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         label.textContent = originalLabel
           ? String(originalLabel.textContent || '').trim()
           : key;
-        btn.appendChild(label);
+        pill.appendChild(label);
 
-        // Prevent category pill from stealing text focus.
-        btn.addEventListener('pointerdown', function(e){
-          try { e.preventDefault(); } catch(_) {}
-        }, true);
-
-        btn.addEventListener('click', function(e){
-          try { e.preventDefault(); } catch(_) {}
-          if (state !== STATE_OPEN) return;
-
-          // If user actually scrolled, do not treat the final release as a click.
-          if (railMoved) {
-            safeRefocus(70);
-            return;
-          }
-
-          try {
-            if (typeof window.filterCategory === 'function') {
-              window.filterCategory(key);
-            } else {
-              original.click();
-            }
-          } catch(_) {}
-
-          syncCompactActive(true);
-          safeRefocus(70);
-        }, false);
-
-        compactTrack.appendChild(btn);
+        compactTrack.appendChild(pill);
       });
 
       ensureHost().appendChild(compactRail);
@@ -39797,26 +39841,26 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       if (state !== STATE_OPEN || !host) return;
 
       const m = getTargetMetrics();
+
       host.style.left = m.centerX + 'px';
       host.style.top = m.top + 'px';
       host.style.width = m.width + 'px';
 
       const v = ensureVeil();
 
-      // Blur covers the whole visible app from below the fixed header to the keyboard.
+      // Blur covers all app content from below header to the keyboard.
       v.style.top = Math.ceil(getHeaderBottom()) + 'px';
     }
 
     function openDock(){
-      if (state !== STATE_IDLE || !isMobileSearchContext()) return;
+      if (state !== STATE_IDLE || !isMobileSearchContext()) return false;
 
       const first = preFocusRect && preFocusRect.width && preFocusRect.height
         ? preFocusRect
         : dock.getBoundingClientRect();
 
-      if (!first.width || !first.height) return;
+      if (!first.width || !first.height) return false;
 
-      // Important: clear only timers that belong to idle/open flow.
       clearTimeout(closeTimer);
       clearTimeout(refocusTimer);
       clearTimeout(viewportTimer);
@@ -39831,6 +39875,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       ensureHost();
       ensureVeil();
 
+      // Re-parent while still inside the user's pointer gesture.
       host.appendChild(dock);
       buildCompactCategories();
 
@@ -39839,7 +39884,10 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
       applyLayout();
 
-      // One FLIP animation only at open. No re-animation during category selection.
+      // Critical Android/WebView fix:
+      // request focus synchronously in the SAME user gesture after re-parenting.
+      focusNow();
+
       const last = dock.getBoundingClientRect();
       const dx = first.left - last.left;
       const dy = first.top - last.top;
@@ -39857,8 +39905,8 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
         if (veil) veil.classList.add('is-visible');
 
-        // Focus once after DOM move. No focus loops.
-        safeRefocus(35);
+        // Backup only; it does nothing when focus is already correct.
+        safeRefocus(45);
 
         setTimeout(() => {
           if (state === STATE_OPEN) {
@@ -39868,6 +39916,8 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
           }
         }, 285);
       });
+
+      return true;
     }
 
     function restoreDockHome(){
@@ -39883,7 +39933,8 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     }
 
     function finalizeClose(){
-      // This function is never cancelled once close starts.
+      clearTimeout(returnTimer);
+
       restoreDockHome();
 
       dock.classList.remove('assal-search-dock');
@@ -39907,6 +39958,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
       pointerInsideRail = false;
       railMoved = false;
+      railPointerId = null;
 
       homeParent = null;
       homeNextSibling = null;
@@ -39921,11 +39973,11 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
       state = STATE_CLOSING;
 
-      // Once closing begins, never cancel this cleanup.
       clearTimeout(closeTimer);
       clearTimeout(refocusTimer);
       clearTimeout(viewportTimer);
 
+      // Explicit end of search session.
       try { input.blur(); } catch(_) {}
 
       if (veil) veil.classList.remove('is-visible');
@@ -39945,8 +39997,33 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       dock.style.transition = 'transform .255s cubic-bezier(.22,.82,.23,1)';
       dock.style.transform = `translate3d(${dx}px,${dy}px,0) scaleX(${sx})`;
 
+      // Once closing begins, this cleanup is never cancelled.
       returnTimer = setTimeout(finalizeClose, 275);
     }
+
+    function finishSearchSession(){
+      if (state === STATE_OPEN) {
+        closeDock();
+      } else {
+        // Even outside dock, voice/manual completed search should not leave keyboard focus behind.
+        try { input.blur(); } catch(_) {}
+      }
+    }
+
+    // Expose a single end-point for voice search and any future search method.
+    window.__ASSAL_FINISH_SEARCH_SESSION__ = finishSearchSession;
+    window.__ASSAL_CLOSE_SEARCH_DOCK__ = closeDock;
+    window.__ASSAL_OPEN_SEARCH_DOCK__ = function(){
+      if (state === STATE_IDLE) {
+        try { preFocusRect = dock.getBoundingClientRect(); } catch(_) { preFocusRect = null; }
+        return openDock();
+      }
+      if (state === STATE_OPEN) {
+        focusNow();
+        return true;
+      }
+      return false;
+    };
 
     function isInsideFloatingUI(target){
       try {
@@ -39962,17 +40039,17 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       }
     }
 
-    // Open from pointerdown before browser focus can be affected by DOM re-parenting.
+    // Open before normal click focus, and focus synchronously.
     input.addEventListener('pointerdown', function(){
       if (state === STATE_IDLE) {
         try { preFocusRect = dock.getBoundingClientRect(); } catch(_) { preFocusRect = null; }
         openDock();
       } else if (state === STATE_OPEN) {
-        safeRefocus(0);
+        focusNow();
       }
     }, true);
 
-    // Keyboard/accessibility fallback only.
+    // Accessibility/keyboard fallback.
     input.addEventListener('focus', function(){
       if (state === STATE_IDLE && isMobileSearchContext()) {
         try { preFocusRect = dock.getBoundingClientRect(); } catch(_) { preFocusRect = null; }
@@ -39980,42 +40057,44 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       }
     }, true);
 
-    // Blur is ignored while the dock is open. Closing is explicit, not blur-driven.
+    // Transient Android blur never closes the dock.
     input.addEventListener('blur', function(){
       if (state !== STATE_OPEN) return;
       if (pointerInsideRail) return;
 
       updateKeyboardState();
 
-      // Android/WebView may transiently blur during keyboard/viewport changes.
-      if (keyboardLikelyOpen) safeRefocus(80);
-    }, true);
-
-    // Search button: preserve original search handler, then close.
-    if (searchButton) {
-      searchButton.addEventListener('click', function(){
-        if (state !== STATE_OPEN) return;
-        setTimeout(closeDock, 30);
-      }, false);
-    }
-
-    // Enter: preserve current search logic first, then close.
-    input.addEventListener('keydown', function(e){
-      if (e.key === 'Enter') {
-        setTimeout(closeDock, 30);
-      } else if (e.key === 'Escape') {
-        closeDock();
+      if (keyboardLikelyOpen && document.activeElement !== input) {
+        safeRefocus(90);
       }
     }, true);
 
-    // A genuine outside press ends the search session.
+    // Search button: original search runs first, then unified finish.
+    if (searchButton) {
+      searchButton.addEventListener('click', function(){
+        if (state === STATE_OPEN) {
+          setTimeout(finishSearchSession, 30);
+        }
+      }, false);
+    }
+
+    // Enter / Escape.
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') {
+        setTimeout(finishSearchSession, 30);
+      } else if (e.key === 'Escape') {
+        finishSearchSession();
+      }
+    }, true);
+
+    // Only a genuine outside press closes the session.
     document.addEventListener('pointerdown', function(e){
       if (state !== STATE_OPEN) return;
       if (isInsideFloatingUI(e.target)) return;
-      closeDock();
+      finishSearchSession();
     }, true);
 
-    // Reflect category changes made elsewhere without animation.
+    // Reflect original category changes without any animated scroll/focus churn.
     try {
       if (sourceSlider && window.MutationObserver) {
         const observer = new MutationObserver(function(){
@@ -40034,15 +40113,20 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       if (state !== STATE_OPEN) return;
 
       clearTimeout(viewportTimer);
+
       viewportTimer = setTimeout(() => {
         if (state !== STATE_OPEN) return;
+
         updateKeyboardState();
         applyLayout();
 
-        // Never close from viewport changes or category scrolling.
-        // Only restore focus after Android transient blur.
-        if (!pointerInsideRail && keyboardLikelyOpen && document.activeElement !== input) {
-          safeRefocus(90);
+        // No closing from viewport changes. No focus churn while user scrolls categories.
+        if (
+          !pointerInsideRail &&
+          keyboardLikelyOpen &&
+          document.activeElement !== input
+        ) {
+          safeRefocus(100);
         }
       }, 45);
     }
@@ -40056,7 +40140,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     }
 
     document.addEventListener('visibilitychange', function(){
-      if (document.hidden && state === STATE_OPEN) closeDock();
+      if (document.hidden && state === STATE_OPEN) finishSearchSession();
     });
   }
 
