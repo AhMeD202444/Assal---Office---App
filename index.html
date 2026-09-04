@@ -15524,6 +15524,318 @@ html.low-end-device .assal-community-write-row{
   })();
 </script>
 
+<style id="assal-admin-compat-feed-premium-search-dock-final-style">
+/* ===== ASSAL ADMIN: شريط التوافقات الجديدة ===== */
+.news-bar.assal-admin-compat-active{
+    cursor:pointer;
+    border-color:rgba(34,211,238,.28);
+    background:
+      linear-gradient(135deg, rgba(8,145,178,.11), rgba(15,23,42,.30)),
+      rgba(0,0,0,.26);
+}
+.news-bar.assal-admin-compat-active .news-ticker-container,
+.news-bar.assal-admin-compat-active #newsTicker{
+    cursor:pointer;
+}
+.breaking-news.assal-admin-compat-badge{
+    background:linear-gradient(135deg,#0f766e,#0891b2) !important;
+    color:#ecfeff !important;
+    box-shadow:0 0 14px rgba(34,211,238,.28) !important;
+    border:1px solid rgba(165,243,252,.16);
+    user-select:none;
+}
+.breaking-news.assal-admin-compat-badge.assal-admin-compat-offline{
+    background:linear-gradient(135deg,#7f1d1d,#b91c1c) !important;
+    box-shadow:0 0 13px rgba(220,38,38,.34) !important;
+}
+.assal-admin-compat-ticker-item{
+    display:inline-flex !important;
+    align-items:center;
+    gap:7px;
+    margin-inline:14px !important;
+    direction:ltr !important;
+    unicode-bidi:plaintext !important;
+}
+.assal-admin-compat-ticker-item i{
+    color:#67e8f9;
+    font-size:12px;
+}
+html.low-end-device.assal-admin-compat-news .news-bar{
+    display:flex !important;
+}
+html.low-end-device.assal-admin-compat-news #newsTicker{
+    animation:none !important;
+}
+
+/* نافذة التوافقات الجديدة */
+.assal-compat-feed-container.swal2-backdrop-show{
+    background:rgba(2,8,23,.72) !important;
+    backdrop-filter:blur(10px) saturate(125%) !important;
+    -webkit-backdrop-filter:blur(10px) saturate(125%) !important;
+}
+.assal-compat-feed-popup{
+    width:min(720px,94vw) !important;
+    max-width:720px !important;
+    padding:0 !important;
+    border-radius:24px !important;
+    overflow:hidden !important;
+    color:#f8fafc !important;
+    background:
+      radial-gradient(circle at 14% 0%,rgba(34,211,238,.16),transparent 36%),
+      radial-gradient(circle at 100% 100%,rgba(59,130,246,.14),transparent 40%),
+      linear-gradient(145deg,rgba(15,23,42,.99),rgba(8,15,29,.99)) !important;
+    border:1px solid rgba(165,243,252,.12) !important;
+    box-shadow:0 28px 80px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.05) !important;
+    font-family:'Cairo','Tajawal',sans-serif !important;
+}
+.assal-compat-feed-popup .swal2-html-container{
+    margin:0 !important;
+    padding:0 !important;
+    overflow:visible !important;
+}
+.assal-compat-feed-popup .swal2-close{
+    width:36px !important;
+    height:36px !important;
+    min-width:36px !important;
+    min-height:36px !important;
+    margin:12px 12px 0 auto !important;
+    border-radius:999px !important;
+    color:#fecaca !important;
+    background:rgba(127,29,29,.72) !important;
+    border:1px solid rgba(248,113,113,.20) !important;
+    box-shadow:0 8px 20px rgba(0,0,0,.24) !important;
+}
+.assal-compat-feed-shell{
+    direction:rtl;
+    text-align:right;
+    padding:0 16px 18px;
+}
+.assal-compat-feed-head{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:0 2px 14px;
+    border-bottom:1px solid rgba(255,255,255,.07);
+}
+.assal-compat-feed-head-icon{
+    width:48px;
+    height:48px;
+    min-width:48px;
+    border-radius:17px;
+    display:grid;
+    place-items:center;
+    color:#e6fffb;
+    font-size:20px;
+    background:linear-gradient(145deg,#0f766e,#0891b2);
+    box-shadow:0 12px 28px rgba(8,145,178,.24), inset 0 1px 0 rgba(255,255,255,.15);
+}
+.assal-compat-feed-head-copy{min-width:0;flex:1;}
+.assal-compat-feed-title{
+    margin:0;
+    font-size:19px;
+    line-height:1.3;
+    font-weight:900;
+    color:#f8fafc;
+}
+.assal-compat-feed-subtitle{
+    margin-top:4px;
+    font-size:11.5px;
+    font-weight:700;
+    color:rgba(207,250,254,.62);
+}
+.assal-compat-feed-count{
+    flex:0 0 auto;
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:900;
+    color:#cffafe;
+    background:rgba(8,145,178,.12);
+    border:1px solid rgba(103,232,249,.14);
+}
+.assal-compat-feed-list{
+    margin-top:12px;
+    max-height:min(58vh,520px);
+    overflow-y:auto;
+    display:grid;
+    gap:8px;
+    padding:1px 2px 2px;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+}
+.assal-compat-feed-list::-webkit-scrollbar{display:none;}
+.assal-compat-feed-card{
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:10px;
+    align-items:start;
+    padding:11px 12px;
+    border-radius:16px;
+    background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(8,145,178,.045));
+    border:1px solid rgba(255,255,255,.075);
+    box-shadow:0 8px 20px rgba(0,0,0,.13);
+}
+.assal-compat-feed-badges{
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:5px;
+    min-width:52px;
+}
+.assal-compat-feed-type,
+.assal-compat-feed-new{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:24px;
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:9.5px;
+    line-height:1;
+    font-weight:900;
+    white-space:nowrap;
+}
+.assal-compat-feed-type{
+    color:#d9fffb;
+    background:rgba(20,184,166,.13);
+    border:1px solid rgba(94,234,212,.14);
+}
+.assal-compat-feed-new{
+    color:#fef3c7;
+    background:rgba(245,158,11,.12);
+    border:1px solid rgba(251,191,36,.15);
+}
+.assal-compat-feed-text{
+    direction:ltr;
+    unicode-bidi:plaintext;
+    text-align:left;
+    font-size:12.5px;
+    line-height:1.72;
+    font-weight:800;
+    color:#f8fafc;
+    overflow-wrap:anywhere;
+}
+.assal-compat-feed-empty{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-height:180px;
+    padding:24px 14px;
+    text-align:center;
+    color:rgba(226,232,240,.78);
+}
+.assal-compat-feed-empty i{font-size:28px;color:#67e8f9;opacity:.72;}
+.assal-compat-feed-empty strong{font-size:14px;color:#f8fafc;}
+.assal-compat-feed-empty span{font-size:11.5px;line-height:1.65;}
+@media(max-width:520px){
+    .assal-compat-feed-shell{padding:0 11px 13px;}
+    .assal-compat-feed-head{gap:9px;padding-bottom:11px;}
+    .assal-compat-feed-head-icon{width:42px;height:42px;min-width:42px;border-radius:15px;font-size:17px;}
+    .assal-compat-feed-title{font-size:16px;}
+    .assal-compat-feed-subtitle{font-size:10px;}
+    .assal-compat-feed-count{font-size:9.5px;padding:5px 8px;}
+    .assal-compat-feed-card{padding:9px 9px;gap:8px;border-radius:14px;}
+    .assal-compat-feed-badges{min-width:48px;}
+    .assal-compat-feed-type,.assal-compat-feed-new{font-size:8.7px;padding:4px 6px;}
+    .assal-compat-feed-text{font-size:11.2px;line-height:1.68;}
+}
+html.low-end-device .assal-compat-feed-container.swal2-backdrop-show,
+html.low-end-device .assal-compat-feed-popup{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+}
+
+/* ===== ASSAL PREMIUM SEARCH FOCUS DOCK ===== */
+.assal-search-dock-slot{
+    display:block;
+    width:100%;
+    pointer-events:none;
+    visibility:hidden;
+}
+.assal-search-dock-veil{
+    position:fixed;
+    left:0;
+    right:0;
+    z-index:1988;
+    pointer-events:none;
+    opacity:0;
+    background:linear-gradient(180deg,rgba(4,12,24,.82),rgba(4,12,24,.46) 62%,rgba(4,12,24,0));
+    backdrop-filter:blur(7px);
+    -webkit-backdrop-filter:blur(7px);
+    transition:opacity .24s ease;
+}
+.assal-search-dock-veil.is-visible{opacity:1;}
+.search-container.assal-search-dock{
+    position:fixed !important;
+    z-index:1994 !important;
+    margin:0 !important;
+    padding:5px !important;
+    box-sizing:border-box !important;
+    border-radius:25px !important;
+    isolation:isolate;
+    background:
+      radial-gradient(circle at 18% -20%,rgba(34,211,238,.13),transparent 42%),
+      linear-gradient(145deg,rgba(26,42,61,.96),rgba(12,22,39,.97)) !important;
+    border:1px solid rgba(148,210,230,.18) !important;
+    box-shadow:
+      0 18px 44px rgba(0,0,0,.38),
+      0 0 0 1px rgba(255,255,255,.025),
+      inset 0 1px 0 rgba(255,255,255,.08) !important;
+    backdrop-filter:blur(18px) saturate(135%);
+    -webkit-backdrop-filter:blur(18px) saturate(135%);
+    transform-origin:center center;
+    transition:
+      transform .285s cubic-bezier(.22,.82,.23,1),
+      box-shadow .24s ease,
+      border-color .24s ease,
+      background .24s ease !important;
+    will-change:transform;
+}
+.search-container.assal-search-dock::after{
+    content:"";
+    position:absolute;
+    inset:-1px;
+    z-index:-1;
+    border-radius:inherit;
+    pointer-events:none;
+    box-shadow:0 0 24px rgba(34,211,238,.10);
+}
+.search-container.assal-search-dock #searchInput{
+    border-color:rgba(103,232,249,.28) !important;
+    background:rgba(2,8,23,.54) !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 0 0 1px rgba(34,211,238,.025) !important;
+    color:#ffffff !important;
+    caret-color:#67e8f9 !important;
+}
+.search-container.assal-search-dock #searchInput:focus{
+    border-color:rgba(103,232,249,.46) !important;
+    box-shadow:0 0 0 3px rgba(34,211,238,.07),inset 0 1px 0 rgba(255,255,255,.05) !important;
+}
+.search-container.assal-search-dock .search-placeholder-label{
+    color:rgba(226,248,255,.52) !important;
+}
+.search-container.assal-search-dock-returning{
+    pointer-events:none;
+}
+@media(max-width:768px){
+    .search-container.assal-search-dock{
+        border-radius:23px !important;
+        padding:5px !important;
+    }
+}
+html.low-end-device .assal-search-dock-veil{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    background:linear-gradient(180deg,rgba(4,12,24,.88),rgba(4,12,24,.28),transparent);
+}
+html.low-end-device .search-container.assal-search-dock{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    box-shadow:0 12px 30px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.05) !important;
+}
+</style>
 
 
     <script>
@@ -15820,6 +16132,15 @@ function setAdminUser(isAdmin, profile = null) {
     updateRequestAdminHeaderBtn();
     updateRequestCustomerEntryPoints();
     updateRequestAdminFloatingBtn();
+
+    // حدّث شريط الأخبار/التوافقات فور تبديل نوع الحساب.
+    try {
+        setTimeout(() => {
+            if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') {
+                window.__ASSAL_APPLY_NEWS_BAR_STATE__();
+            }
+        }, 0);
+    } catch (_) {}
 
     try {
         if (typeof window.syncDeviceContextToNative === 'function') {
@@ -22930,13 +23251,17 @@ function escapeHtml(str) {
         .replace(/'/g, "&#039;");
 }
 
-async function loadCompatibilitiesFile() {
-    if (compatLoaded && Array.isArray(compatDatabase) && compatDatabase.length) {
+async function loadCompatibilitiesFile(options = {}) {
+    const forceRefresh = !!(options && options.force === true);
+    const silent = !!(options && options.silent === true);
+
+    if (!forceRefresh && compatLoaded && Array.isArray(compatDatabase) && compatDatabase.length) {
         return { success: true, source: "memory" };
     }
 
     try {
-        const response = await fetch(dropboxSimilaritesFile, { cache: "no-store" });
+        const liveCompatUrl = dropboxSimilaritesFile + (dropboxSimilaritesFile.includes("?") ? "&" : "?") + "assalFeed=" + Date.now();
+        const response = await fetch(liveCompatUrl, { cache: "no-store" });
         if (!response.ok) throw new Error("تعذر تحميل ملف التوافقات.");
 
         const arrayBuffer = await response.arrayBuffer();
@@ -22981,14 +23306,16 @@ async function loadCompatibilitiesFile() {
 
         const offlineNow = (typeof assalIsBrowserOffline === "function" && assalIsBrowserOffline()) || (navigator.onLine === false);
 
-        showExitLikeAlert({
-            icon: "fas fa-exclamation-circle",
-            title: offlineNow ? "التوافقات غير محفوظة" : "خطأ",
-            message: offlineNow
-                ? assalCompatOfflineMissingMessage()
-                : "ما كدرنا نحمّل ملف التوافقات. تأكد من النت أو الرابط.",
-            confirmText: "موافق"
-        });
+        if (!silent) {
+            showExitLikeAlert({
+                icon: "fas fa-exclamation-circle",
+                title: offlineNow ? "التوافقات غير محفوظة" : "خطأ",
+                message: offlineNow
+                    ? assalCompatOfflineMissingMessage()
+                    : "ما كدرنا نحمّل ملف التوافقات. تأكد من النت أو الرابط.",
+                confirmText: "موافق"
+            });
+        }
 
         return { success: false, message: err?.message || "error" };
     }
@@ -24097,6 +24424,8 @@ async function refreshData() {
         }
 
  let newsInterval = null;
+let assalAdminCompatFeedItems = [];
+let assalAdminCompatFeedRefreshPromise = null;
 
 const ASSAL_OFFLINE_NEWS_MESSAGES = [
   '📴 أنت تستخدم نسخة محفوظة من آخر اتصال ناجح بالإنترنت',
@@ -24133,7 +24462,243 @@ function assalResetTickerInlineStyle(ticker) {
   ticker.style.direction = '';
 }
 
+function assalCompatFeedEscape(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function assalCompatFeedNewValue(row) {
+  if (!row || typeof row !== 'object') return '';
+  if (row.New !== undefined) return row.New;
+  if (row.NEW !== undefined) return row.NEW;
+  if (row.new !== undefined) return row.new;
+  return '';
+}
+
+function assalIsNewCompatibilityRow(row) {
+  const item = String(pickCompatText(row) || pickItemName(row) || '').trim();
+  if (!item || item === 'بدون اسم') return false;
+  // قاعدة الشيت المطلوبة: وجود 1 يعني اعتيادي، ومسح الـ 1 (خلية فارغة) يعني توافق جديد.
+  return String(assalCompatFeedNewValue(row) ?? '').trim() === '';
+}
+
+function assalCompatFeedType(row, itemText) {
+  const raw = String((row && (row.Category ?? row.CATEGORY ?? row.category)) ?? '').trim();
+  if (raw && raw !== '1' && raw !== '0') return raw;
+  const first = String(itemText || '').trim().split(/\s+/)[0] || '';
+  if (first && first.length <= 14) return first.toUpperCase();
+  return 'توافق';
+}
+
+function assalBuildAdminNewCompatItems(rows) {
+  const items = [];
+  (Array.isArray(rows) ? rows : []).forEach((row, index) => {
+    if (!assalIsNewCompatibilityRow(row)) return;
+    const itemText = String(pickCompatText(row) || pickItemName(row) || '').trim();
+    if (!itemText) return;
+    items.push({
+      row,
+      index,
+      text: itemText,
+      type: assalCompatFeedType(row, itemText)
+    });
+  });
+  return items;
+}
+
+function assalSetAdminCompatInteractionState(enabled) {
+  const newsBar = document.querySelector('.news-bar');
+  if (!newsBar) return;
+  if (enabled) {
+    newsBar.classList.add('assal-admin-compat-active');
+    newsBar.setAttribute('role', 'button');
+    newsBar.setAttribute('tabindex', '0');
+    newsBar.setAttribute('aria-label', 'فتح التوافقات الجديدة');
+  } else {
+    newsBar.classList.remove('assal-admin-compat-active');
+    newsBar.removeAttribute('role');
+    newsBar.removeAttribute('tabindex');
+    newsBar.removeAttribute('aria-label');
+  }
+}
+
+function assalRenderAdminCompatTicker(items, options = {}) {
+  const newsBar = document.querySelector('.news-bar');
+  const badge = document.querySelector('.breaking-news');
+  const ticker = document.getElementById('newsTicker');
+  const tickerContainer = document.querySelector('.news-ticker-container');
+  if (!newsBar || !badge || !ticker) return;
+
+  const offline = !!options.offline;
+  const hasItems = Array.isArray(items) && items.length > 0;
+
+  newsBar.style.display = 'flex';
+  assalSetAdminCompatInteractionState(true);
+
+  badge.textContent = '🔗 توافقات';
+  badge.classList.remove('assal-news-offline-badge');
+  badge.classList.add('assal-admin-compat-badge');
+  badge.classList.toggle('assal-admin-compat-offline', offline);
+  try {
+    badge.style.background = '';
+    badge.style.color = '';
+    badge.style.boxShadow = '';
+  } catch (_) {}
+
+  if (tickerContainer) tickerContainer.style.justifyContent = '';
+  assalResetTickerInlineStyle(ticker);
+
+  if (hasItems) {
+    const prefix = offline
+      ? '<span class="assal-admin-compat-ticker-item"><i class="fas fa-wifi-slash"></i>أوفلاين • آخر توافقات محفوظة</span> | '
+      : '';
+    ticker.innerHTML = prefix + items.map(item => {
+      const safeText = assalCompatFeedEscape(item.text);
+      return `<span class="assal-admin-compat-ticker-item"><i class="fas fa-link"></i>${safeText}</span>`;
+    }).join(' | ');
+    ticker.title = offline
+      ? `آخر توافقات محفوظة - ${items.length} توافق جديد`
+      : `${items.length} توافق جديد`;
+  } else {
+    ticker.innerHTML = offline
+      ? '<span class="assal-admin-compat-ticker-item"><i class="fas fa-wifi-slash"></i>أوفلاين • لا توجد توافقات جديدة محفوظة حالياً</span>'
+      : '<span class="assal-admin-compat-ticker-item"><i class="fas fa-circle-check"></i>لا توجد توافقات جديدة حالياً</span>';
+    ticker.title = ticker.textContent || '';
+  }
+
+  if (window.__ASSAL_LOW_END_DEVICE__) {
+    ticker.style.animation = 'none';
+    ticker.style.position = 'relative';
+    ticker.style.whiteSpace = 'nowrap';
+    ticker.style.overflow = 'hidden';
+    ticker.style.textOverflow = 'ellipsis';
+    ticker.style.textAlign = 'center';
+    ticker.style.justifyContent = 'center';
+    ticker.style.direction = 'rtl';
+  } else {
+    try {
+      ticker.style.animation = 'none';
+      void ticker.offsetWidth;
+      ticker.style.animation = 'scrollText 60s linear infinite';
+    } catch (_) {}
+  }
+}
+
+async function refreshAssalAdminCompatFeed(options = {}) {
+  if (!(typeof isAdminUser === 'function' && isAdminUser())) return [];
+  // إذا أكو تحديث جاري، نعيد نفس الوعد حتى ما نسوي طلبين للشيت بنفس اللحظة.
+  if (assalAdminCompatFeedRefreshPromise) return assalAdminCompatFeedRefreshPromise;
+
+  const offline = (typeof shouldShowAssalOfflineNews === 'function' && shouldShowAssalOfflineNews()) || navigator.onLine === false;
+  const forceNetwork = !!options.force && !offline;
+
+  const runner = (async () => {
+    const res = await loadCompatibilitiesFile({ force: forceNetwork, silent: true });
+    if (res && res.success && Array.isArray(compatDatabase)) {
+      assalAdminCompatFeedItems = assalBuildAdminNewCompatItems(compatDatabase);
+    }
+    assalRenderAdminCompatTicker(assalAdminCompatFeedItems, {
+      offline: offline || (res && res.source === 'offline-cache') || !!window.__ASSAL_COMPAT_USING_OFFLINE_CACHE__
+    });
+    return assalAdminCompatFeedItems;
+  })();
+
+  assalAdminCompatFeedRefreshPromise = runner;
+  try {
+    return await runner;
+  } finally {
+    if (assalAdminCompatFeedRefreshPromise === runner) assalAdminCompatFeedRefreshPromise = null;
+  }
+}
+
+function assalCompatFeedModalHtml(items) {
+  const list = Array.isArray(items) ? items : [];
+  const offline = (typeof shouldShowAssalOfflineNews === 'function' && shouldShowAssalOfflineNews()) || navigator.onLine === false || !!window.__ASSAL_COMPAT_USING_OFFLINE_CACHE__;
+  const sourceLine = offline ? 'آخر نسخة توافقات محفوظة على الجهاز' : 'مباشرة من شيت التوافقات الخاص بكادر عسل';
+  const body = list.length
+    ? list.map(item => `
+        <div class="assal-compat-feed-card">
+          <div class="assal-compat-feed-badges">
+            <span class="assal-compat-feed-type">${assalCompatFeedEscape(item.type)}</span>
+            <span class="assal-compat-feed-new">جديد</span>
+          </div>
+          <div class="assal-compat-feed-text">${assalCompatFeedEscape(item.text)}</div>
+        </div>`).join('')
+    : `
+        <div class="assal-compat-feed-empty">
+          <i class="fas fa-link"></i>
+          <strong>ماكو توافقات جديدة حالياً</strong>
+          <span>أي سطر تمسح منه الرقم 1 من عمود New في شيت التوافقات راح يظهر هنا تلقائياً.</span>
+        </div>`;
+
+  return `
+    <div class="assal-compat-feed-shell">
+      <div class="assal-compat-feed-head">
+        <div class="assal-compat-feed-head-icon"><i class="fas fa-link"></i></div>
+        <div class="assal-compat-feed-head-copy">
+          <h3 class="assal-compat-feed-title">التوافقات الجديدة</h3>
+          <div class="assal-compat-feed-subtitle">${assalCompatFeedEscape(sourceLine)}</div>
+        </div>
+        <div class="assal-compat-feed-count">${list.length} جديد</div>
+      </div>
+      <div class="assal-compat-feed-list">${body}</div>
+    </div>`;
+}
+
+async function openAssalAdminCompatibilityFeedModal() {
+  if (!(typeof isAdminUser === 'function' && isAdminUser())) return;
+  if (!Array.isArray(assalAdminCompatFeedItems) || assalAdminCompatFeedItems.length === 0) {
+    await refreshAssalAdminCompatFeed({ force: navigator.onLine !== false });
+  }
+  if (!window.Swal || typeof window.Swal.fire !== 'function') return;
+
+  Swal.fire({
+    html: assalCompatFeedModalHtml(assalAdminCompatFeedItems),
+    showConfirmButton: false,
+    showCloseButton: true,
+    allowOutsideClick: true,
+    allowEscapeKey: true,
+    customClass: {
+      container: 'assal-compat-feed-container search-related-modal',
+      popup: 'assal-compat-feed-popup search-related-modal'
+    },
+    didOpen: () => { try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch (_) {} },
+    willClose: () => { try { setTimeout(() => { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); }, 0); } catch (_) {} }
+  });
+}
+window.openAssalAdminCompatibilityFeedModal = openAssalAdminCompatibilityFeedModal;
+
+function assalBindAdminCompatFeedClicks() {
+  const newsBar = document.querySelector('.news-bar');
+  if (!newsBar || newsBar.dataset.assalCompatFeedBound === '1') return;
+  newsBar.dataset.assalCompatFeedBound = '1';
+
+  newsBar.addEventListener('click', function(event){
+    if (!(typeof isAdminUser === 'function' && isAdminUser())) return;
+    if (!newsBar.classList.contains('assal-admin-compat-active')) return;
+    event.preventDefault();
+    openAssalAdminCompatibilityFeedModal();
+  });
+  newsBar.addEventListener('keydown', function(event){
+    if (!(typeof isAdminUser === 'function' && isAdminUser())) return;
+    if (!newsBar.classList.contains('assal-admin-compat-active')) return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    openAssalAdminCompatibilityFeedModal();
+  });
+}
+
 function setAssalOfflineNewsTicker() {
+  // الأدمن يبقى على شريط التوافقات حتى بالأوفلاين، مع توضيح أن البيانات محفوظة.
+  if (typeof isAdminUser === 'function' && isAdminUser()) {
+    refreshAssalAdminCompatFeed({ force: false });
+    return;
+  }
+
   const newsBar = document.querySelector('.news-bar');
   const badge = document.querySelector('.breaking-news');
   const ticker = document.getElementById('newsTicker');
@@ -24144,6 +24709,7 @@ function setAssalOfflineNewsTicker() {
 
   if (badge) {
     badge.textContent = '📴 أوفلاين';
+    badge.classList.remove('assal-admin-compat-badge', 'assal-admin-compat-offline');
     badge.classList.add('assal-news-offline-badge');
     try {
       badge.style.background = 'linear-gradient(135deg, #7f1d1d, #dc2626)';
@@ -24167,18 +24733,21 @@ function shouldShowAssalOfflineNews() {
 }
 
 async function fetchTechNews() {
+  // حساب الأدمن لا يحمل أخبار التقنية نهائياً؛ مكانها شريط التوافقات.
+  if (typeof isAdminUser === 'function' && isAdminUser()) {
+    await refreshAssalAdminCompatFeed({ force: false });
+    return;
+  }
   if (window.__ASSAL_LOW_END_DEVICE__) return;
   if (shouldShowAssalOfflineNews()) {
     setAssalOfflineNewsTicker();
     return;
   }
-  // RSS شغال (بديل عن AITnews لأن feed مالته صار مو RSS)
-const FEED = "http://feeds.feedburner.com/arabhardware";
 
+  const FEED = "http://feeds.feedburner.com/arabhardware";
   const ticker = document.getElementById("newsTicker");
   if (!ticker) return;
 
-  // JSONP helper (يتجاوز CORS لأن يعتمد <script>)
   function jsonp(url, callbackParam = "callback", timeoutMs = 15000) {
     return new Promise((resolve, reject) => {
       const cb = "__rss_cb_" + Date.now() + "_" + Math.random().toString(16).slice(2);
@@ -24212,10 +24781,7 @@ const FEED = "http://feeds.feedburner.com/arabhardware";
   }
 
   try {
-    // rss2json يدعم JSONP عن طريق callback
-    const apiUrl =
-      `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(FEED)}&count=10`;
-
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(FEED)}&count=10`;
     const data = await jsonp(apiUrl, "callback");
 
     if (!data || (data.status && data.status !== "ok")) {
@@ -24239,12 +24805,20 @@ const FEED = "http://feeds.feedburner.com/arabhardware";
   }
 }
 
-
 function restartNewsTicker() {
     const ticker = document.querySelector(".news-ticker");
     const resultsContainer = document.getElementById("results");
 
-    if (ticker && resultsContainer.style.display !== "flex") { // فقط إذا النتائج مو معروضة
+    if (typeof isAdminUser === 'function' && isAdminUser()) {
+        if (ticker && !window.__ASSAL_LOW_END_DEVICE__) {
+            ticker.style.animation = "none";
+            void ticker.offsetWidth;
+            ticker.style.animation = "scrollText 60s linear infinite";
+        }
+        return;
+    }
+
+    if (ticker && resultsContainer.style.display !== "flex") {
         ticker.style.animation = "none";
         void ticker.offsetWidth;
         ticker.style.animation = "scrollText 60s linear infinite";
@@ -24252,20 +24826,31 @@ function restartNewsTicker() {
 }
 
 function refreshNewsTicker() {
+    if (typeof isAdminUser === 'function' && isAdminUser()) {
+        refreshAssalAdminCompatFeed({ force: navigator.onLine !== false });
+        return;
+    }
     if (window.__ASSAL_LOW_END_DEVICE__) return;
     const resultsContainer = document.getElementById("results");
 
-    if (resultsContainer.style.display !== "flex") { // فقط إذا النتائج مو معروضة
-        fetchTechNews(); // جلب الأخبار
-        restartNewsTicker(); // إعادة تشغيل الحركة
+    if (resultsContainer.style.display !== "flex") {
+        fetchTechNews();
+        restartNewsTicker();
     }
 }
 
-// دوال التحكم بالتحديث
 function startNewsUpdates() {
+    if (typeof isAdminUser === 'function' && isAdminUser()) {
+        if (!newsInterval && !window.__ASSAL_LOW_END_DEVICE__) {
+            newsInterval = setInterval(() => {
+                refreshAssalAdminCompatFeed({ force: navigator.onLine !== false });
+            }, 60000);
+        }
+        return;
+    }
     if (window.__ASSAL_LOW_END_DEVICE__) return;
     if (!newsInterval) {
-        newsInterval = setInterval(fetchTechNews, 60000); // تحديث كل دقيقة
+        newsInterval = setInterval(fetchTechNews, 60000);
     }
 }
 
@@ -24276,7 +24861,6 @@ function stopNewsUpdates() {
     }
 }
 
-// التشغيل الأولي والتحكم
 function applyManualLightNewsBarState() {
     const root = document.documentElement;
     const newsBar = document.querySelector('.news-bar');
@@ -24286,11 +24870,26 @@ function applyManualLightNewsBarState() {
     const diag = window.__ASSAL_LOW_END_DIAGNOSTICS__ || {};
     const manualMode = String(diag.manualOverride || '').toLowerCase();
     const isManualLight = manualMode === 'on';
-    const isAutoLight = false; // الوضع الخفيف لم يعد يتفعل تلقائياً؛ فقط يدوي.
+    const isAutoLight = false;
+    const admin = typeof isAdminUser === 'function' && isAdminUser();
 
     root.classList.remove('manual-light-news');
+    root.classList.toggle('assal-admin-compat-news', admin);
 
     if (!newsBar || !badge || !ticker) return;
+
+    if (admin) {
+        stopNewsUpdates();
+        // بالأدمن، شريط التوافقات يبقى ظاهر حتى في الوضع الخفيف؛ الحركة فقط تنطفئ على الجهاز الخفيف.
+        newsBar.style.display = 'flex';
+        assalBindAdminCompatFeedClicks();
+        refreshAssalAdminCompatFeed({ force: !shouldShowAssalOfflineNews() });
+        startNewsUpdates();
+        return;
+    }
+
+    assalSetAdminCompatInteractionState(false);
+    badge.classList.remove('assal-admin-compat-badge', 'assal-admin-compat-offline');
 
     if (shouldShowAssalOfflineNews()) {
         root.classList.remove('manual-light-news');
@@ -24303,9 +24902,8 @@ function applyManualLightNewsBarState() {
         root.classList.add('manual-light-news');
         newsBar.style.display = 'flex';
         badge.textContent = '⚡ خفيف';
-        if (tickerContainer) {
-            tickerContainer.style.justifyContent = 'center';
-        }
+        badge.classList.remove('assal-news-offline-badge');
+        if (tickerContainer) tickerContainer.style.justifyContent = 'center';
         ticker.textContent = 'تم تفعيل الوضع الخفيف يدوياً في هاتفك';
         ticker.title = ticker.textContent;
         ticker.style.animation = 'none';
@@ -24327,22 +24925,15 @@ function applyManualLightNewsBarState() {
         badge.style.color = '';
         badge.style.boxShadow = '';
     } catch (_) {}
-    ticker.style.animation = '';
-    ticker.style.position = '';
+    assalResetTickerInlineStyle(ticker);
     ticker.title = '';
-    ticker.style.whiteSpace = '';
-    ticker.style.overflow = '';
-    ticker.style.textOverflow = '';
-    ticker.style.textAlign = '';
-    ticker.style.justifyContent = '';
-    ticker.style.direction = '';
 
     if (window.__ASSAL_LOW_END_DEVICE__) {
         newsBar.style.display = 'none';
         stopNewsUpdates();
     } else {
         newsBar.style.display = 'flex';
-        fetchTechNews(); // تحميل أولي
+        fetchTechNews();
         startNewsUpdates();
     }
 }
@@ -24390,18 +24981,18 @@ document.getElementById("results").addEventListener("transitionend", () => {
 
 // التعامل مع الأحداث الأخرى
 document.addEventListener("click", function(event) {
-    if (event.target.closest(".swal2-popup") || event.target.classList.contains("swal2-close") || 
+    if (event.target.closest(".swal2-popup") || event.target.classList.contains("swal2-close") ||
         event.target.classList.contains("swal2-confirm") || event.target.classList.contains("swal2-cancel")) {
-        setTimeout(refreshNewsTicker, 500); // تحديث الأخبار بعد إغلاق النافذة
+        setTimeout(refreshNewsTicker, 500);
     }
 });
 
 window.addEventListener("pageshow", function() {
-    refreshNewsTicker(); // إعادة تشغيل الأخبار بعد العودة
+    refreshNewsTicker();
 });
 
 window.addEventListener("load", function() {
-    refreshNewsTicker(); // إعادة تشغيل الأخبار عند التحميل
+    refreshNewsTicker();
 });
 
 
@@ -38696,6 +39287,244 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 })();
 </script>
 
+<!-- ===== ASSAL PREMIUM SEARCH FOCUS DOCK FINAL ===== -->
+<script id="assalPremiumSearchFocusDockFinal">
+(function(){
+  if (window.__ASSAL_PREMIUM_SEARCH_FOCUS_DOCK_FINAL__) return;
+  window.__ASSAL_PREMIUM_SEARCH_FOCUS_DOCK_FINAL__ = true;
+
+  function boot(){
+    const input = document.getElementById('searchInput');
+    const dock = input && input.closest ? input.closest('.search-container') : null;
+    if (!input || !dock || dock.dataset.assalPremiumDockBound === '1') return;
+    dock.dataset.assalPremiumDockBound = '1';
+
+    let slot = null;
+    let veil = null;
+    let active = false;
+    let returning = false;
+    let activatedAt = 0;
+    let savedScrollY = 0;
+    let closeTimer = null;
+    let cleanupTimer = null;
+    let preFocusRect = null;
+    let preFocusScrollY = 0;
+    let preFocusAt = 0;
+
+    function isMobileSearchContext(){
+      try {
+        return window.matchMedia('(max-width: 900px), (pointer: coarse), (hover: none)').matches;
+      } catch(_) {
+        return window.innerWidth <= 900;
+      }
+    }
+
+    function getViewport(){
+      const vv = window.visualViewport;
+      return {
+        left: vv ? Number(vv.offsetLeft || 0) : 0,
+        top: vv ? Number(vv.offsetTop || 0) : 0,
+        width: vv ? Number(vv.width || window.innerWidth) : window.innerWidth,
+        height: vv ? Number(vv.height || window.innerHeight) : window.innerHeight
+      };
+    }
+
+    function getDockMetrics(){
+      const vp = getViewport();
+      const margin = vp.width <= 430 ? 8 : 12;
+      const maxWidth = Math.min(760, vp.width - (margin * 2));
+      const width = Math.max(240, maxWidth);
+      const left = vp.left + ((vp.width - width) / 2);
+      const header = document.querySelector('.header');
+      let headerHeight = 44;
+      try {
+        if (header) headerHeight = Math.max(44, Math.round(header.getBoundingClientRect().height || 44));
+      } catch(_) {}
+      const top = vp.top + headerHeight + 7;
+      return { left, top, width, vp };
+    }
+
+    function ensureVeil(){
+      if (veil && veil.isConnected) return veil;
+      veil = document.createElement('div');
+      veil.className = 'assal-search-dock-veil';
+      veil.setAttribute('aria-hidden','true');
+      document.body.appendChild(veil);
+      return veil;
+    }
+
+    function applyDockMetrics(){
+      if (!active || !dock) return;
+      const m = getDockMetrics();
+      dock.style.left = m.left + 'px';
+      dock.style.top = m.top + 'px';
+      dock.style.width = m.width + 'px';
+
+      const v = ensureVeil();
+      v.style.top = Math.max(m.vp.top + 44, m.top - 8) + 'px';
+      v.style.height = Math.max(82, dock.getBoundingClientRect().height + 27) + 'px';
+    }
+
+    function createSlot(firstRect){
+      if (slot && slot.isConnected) return;
+      const cs = window.getComputedStyle(dock);
+      slot = document.createElement('div');
+      slot.className = 'assal-search-dock-slot';
+      slot.style.height = Math.max(1, firstRect.height) + 'px';
+      slot.style.marginTop = cs.marginTop;
+      slot.style.marginBottom = cs.marginBottom;
+      slot.style.marginLeft = cs.marginLeft;
+      slot.style.marginRight = cs.marginRight;
+      dock.parentNode.insertBefore(slot, dock);
+    }
+
+    function softlyRestoreInitialScroll(){
+      if (!active) return;
+      if ((Date.now() - activatedAt) > 520) return;
+      try {
+        if (Math.abs(window.scrollY - savedScrollY) > 3) {
+          window.scrollTo({ top: savedScrollY, left: window.scrollX, behavior: 'auto' });
+        }
+      } catch(_) {}
+    }
+
+    function activate(){
+      if (active || returning || !isMobileSearchContext()) return;
+      clearTimeout(closeTimer);
+      clearTimeout(cleanupTimer);
+
+      const recentPointer = (Date.now() - preFocusAt) < 650 && preFocusRect && preFocusRect.width && preFocusRect.height;
+      const first = recentPointer ? preFocusRect : dock.getBoundingClientRect();
+      if (!first.width || !first.height) return;
+
+      active = true;
+      activatedAt = Date.now();
+      savedScrollY = recentPointer ? preFocusScrollY : (window.scrollY || 0);
+      createSlot(first);
+      ensureVeil();
+
+      dock.classList.add('assal-search-dock');
+      document.body.classList.add('assal-search-dock-body');
+      applyDockMetrics();
+
+      const last = dock.getBoundingClientRect();
+      const dx = first.left - last.left;
+      const dy = first.top - last.top;
+      const sx = last.width ? Math.max(.82, Math.min(1.18, first.width / last.width)) : 1;
+
+      dock.style.transition = 'none';
+      dock.style.transform = `translate3d(${dx}px, ${dy}px, 0) scaleX(${sx})`;
+      void dock.offsetWidth;
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (!active) return;
+          dock.style.transition = '';
+          dock.style.transform = 'translate3d(0,0,0) scaleX(1)';
+          if (veil) veil.classList.add('is-visible');
+        });
+      });
+
+      setTimeout(softlyRestoreInitialScroll, 70);
+      setTimeout(softlyRestoreInitialScroll, 240);
+      setTimeout(softlyRestoreInitialScroll, 430);
+    }
+
+    function cleanupAfterReturn(){
+      returning = false;
+      active = false;
+      dock.classList.remove('assal-search-dock','assal-search-dock-returning');
+      dock.style.left = '';
+      dock.style.top = '';
+      dock.style.width = '';
+      dock.style.transform = '';
+      dock.style.transition = '';
+      document.body.classList.remove('assal-search-dock-body');
+      if (slot && slot.parentNode) slot.parentNode.removeChild(slot);
+      slot = null;
+      if (veil) {
+        veil.classList.remove('is-visible');
+        setTimeout(() => {
+          try { if (veil && veil.parentNode && !active) veil.parentNode.removeChild(veil); } catch(_) {}
+          if (!active) veil = null;
+        }, 260);
+      }
+    }
+
+    function deactivate(){
+      clearTimeout(closeTimer);
+      if (!active || returning) return;
+      returning = true;
+
+      const current = dock.getBoundingClientRect();
+      const target = slot && slot.isConnected ? slot.getBoundingClientRect() : current;
+      const dx = target.left - current.left;
+      const dy = target.top - current.top;
+      const sx = current.width ? Math.max(.82, Math.min(1.18, target.width / current.width)) : 1;
+
+      dock.classList.add('assal-search-dock-returning');
+      if (veil) veil.classList.remove('is-visible');
+      dock.style.transform = `translate3d(${dx}px, ${dy}px, 0) scaleX(${sx})`;
+
+      clearTimeout(cleanupTimer);
+      cleanupTimer = setTimeout(cleanupAfterReturn, 300);
+    }
+
+    function scheduleDeactivate(){
+      clearTimeout(closeTimer);
+      closeTimer = setTimeout(() => {
+        const ae = document.activeElement;
+        if (ae && dock.contains(ae) && ae === input) return;
+        deactivate();
+      }, 145);
+    }
+
+    input.addEventListener('focus', activate, true);
+    input.addEventListener('blur', scheduleDeactivate, true);
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') {
+        try { input.blur(); } catch(_) {}
+        scheduleDeactivate();
+      }
+    }, true);
+
+    // إذا لمس المستخدم نفس الحقل مرة ثانية بعد blur لحظي، لا نخلي الدوك يختفي ويظهر.
+    input.addEventListener('pointerdown', function(){
+      clearTimeout(closeTimer);
+      try {
+        preFocusRect = dock.getBoundingClientRect();
+        preFocusScrollY = window.scrollY || 0;
+        preFocusAt = Date.now();
+      } catch(_) {
+        preFocusRect = null;
+        preFocusScrollY = window.scrollY || 0;
+        preFocusAt = Date.now();
+      }
+      if (!active && isMobileSearchContext()) setTimeout(() => { if (document.activeElement === input) activate(); }, 0);
+    }, true);
+
+    function viewportChanged(){
+      if (!active || returning) return;
+      requestAnimationFrame(applyDockMetrics);
+    }
+    window.addEventListener('resize', viewportChanged, {passive:true});
+    window.addEventListener('orientationchange', viewportChanged, {passive:true});
+    if (window.visualViewport && typeof window.visualViewport.addEventListener === 'function') {
+      window.visualViewport.addEventListener('resize', viewportChanged, {passive:true});
+      window.visualViewport.addEventListener('scroll', viewportChanged, {passive:true});
+    }
+
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden && active) deactivate();
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
+  else boot();
+  setTimeout(boot, 500);
+})();
+</script>
+
 <!-- ===== ASSAL OFFLINE SEARCH-ONLY GUARD FINAL - SEARCH WINDOWS SAFE ===== -->
 <script id="assalOfflineSearchOnlyGuardFinal">
 (function(){
@@ -38825,6 +39654,9 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
     // أي نافذة/عنصر خاص بالبحث أو التوافقات أو اقتراحات الجملة يسمح بالتعامل داخله.
     if (target.closest('.wholesale-suggestions, .wholesale-suggestion-item, .compatibility-results, .compat-results, .search-related-modal, .search-window, .search-modal')) return true;
+
+    // شريط التوافقات الجديد للأدمن ونافذته يعتمدون على بيانات التوافقات المحفوظة، لذلك مسموحين بالأوفلاين.
+    if (target.closest('.news-bar.assal-admin-compat-active, .assal-compat-feed-popup, .assal-compat-feed-shell')) return true;
 
     // السماح بالتمرير/اللمس داخل النتائج نفسها، لكن ليس أزرار النتائج مثل السلة أو الاستعلام.
     var inResults = target.closest('#results, .results, .results-container');
