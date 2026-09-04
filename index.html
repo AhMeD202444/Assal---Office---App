@@ -15915,6 +15915,137 @@ html.low-end-device .search-container.assal-search-dock{
     -webkit-backdrop-filter:none !important;
     box-shadow:0 11px 26px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.05) !important;
 }
+
+/* ===== ASSAL SEARCH DOCK: COMPACT CATEGORIES RAIL ===== */
+.assal-search-dock-categories{
+    width:100%;
+    box-sizing:border-box;
+    margin-top:7px;
+    padding:5px 6px;
+    border-radius:16px;
+    overflow:hidden;
+    pointer-events:auto;
+    opacity:0;
+    transform:translate3d(0,8px,0);
+    background:
+      linear-gradient(145deg,rgba(15,23,42,.955),rgba(8,15,29,.97));
+    border:1px solid rgba(148,210,230,.13);
+    box-shadow:
+      0 10px 24px rgba(0,0,0,.22),
+      inset 0 1px 0 rgba(255,255,255,.045);
+    backdrop-filter:blur(14px) saturate(125%);
+    -webkit-backdrop-filter:blur(14px) saturate(125%);
+    transition:
+      transform .29s cubic-bezier(.22,.82,.23,1),
+      opacity .20s ease,
+      border-color .20s ease,
+      background .20s ease;
+    will-change:transform,opacity;
+}
+.assal-search-dock-categories.is-visible{
+    opacity:1;
+    transform:translate3d(0,0,0);
+}
+.assal-search-dock-categories-track{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    overscroll-behavior-x:contain;
+    scroll-behavior:smooth;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    touch-action:pan-x;
+    padding:1px;
+}
+.assal-search-dock-categories-track::-webkit-scrollbar{
+    display:none;
+}
+.assal-search-dock-category{
+    flex:0 0 auto;
+    min-width:58px;
+    height:31px;
+    padding:0 9px;
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:999px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    color:rgba(241,245,249,.80);
+    background:rgba(255,255,255,.045);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+    font-family:'Cairo','Tajawal',sans-serif;
+    font-size:10px;
+    line-height:1;
+    font-weight:800;
+    white-space:nowrap;
+    cursor:pointer;
+    user-select:none;
+    -webkit-user-select:none;
+    -webkit-tap-highlight-color:transparent;
+    transition:
+      transform .14s ease,
+      color .18s ease,
+      background .18s ease,
+      border-color .18s ease,
+      box-shadow .18s ease;
+}
+.assal-search-dock-category i{
+    font-size:10px;
+    color:rgba(148,210,230,.85);
+    pointer-events:none;
+}
+.assal-search-dock-category span{
+    pointer-events:none;
+}
+.assal-search-dock-category:hover{
+    color:#f8fafc;
+    border-color:rgba(103,232,249,.18);
+    background:rgba(34,211,238,.075);
+}
+.assal-search-dock-category:active{
+    transform:scale(.96);
+}
+.assal-search-dock-category.is-active{
+    color:#f0fdfa;
+    border-color:rgba(94,234,212,.23);
+    background:
+      linear-gradient(135deg,rgba(13,148,136,.24),rgba(8,145,178,.19));
+    box-shadow:
+      0 4px 12px rgba(8,145,178,.12),
+      inset 0 1px 0 rgba(255,255,255,.055);
+}
+.assal-search-dock-category.is-active i{
+    color:#99f6e4;
+}
+@media(max-width:520px){
+    .assal-search-dock-categories{
+        margin-top:6px;
+        padding:4px 5px;
+        border-radius:15px;
+    }
+    .assal-search-dock-categories-track{
+        gap:5px;
+    }
+    .assal-search-dock-category{
+        min-width:54px;
+        height:29px;
+        padding:0 8px;
+        gap:4px;
+        font-size:9.4px;
+    }
+    .assal-search-dock-category i{
+        font-size:9.5px;
+    }
+}
+html.low-end-device .assal-search-dock-categories{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    box-shadow:0 8px 20px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.035);
+}
 </style>
 
 
@@ -39385,18 +39516,22 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 <!-- ===== ASSAL PREMIUM SEARCH FOCUS DOCK FINAL ===== -->
 <script id="assalPremiumSearchFocusDockFinal">
 (function(){
-  if (window.__ASSAL_PREMIUM_SEARCH_FOCUS_DOCK_LOCK_FINAL__) return;
-  window.__ASSAL_PREMIUM_SEARCH_FOCUS_DOCK_LOCK_FINAL__ = true;
+  if (window.__ASSAL_PREMIUM_SEARCH_DOCK_COMPACT_CATEGORIES_FINAL__) return;
+  window.__ASSAL_PREMIUM_SEARCH_DOCK_COMPACT_CATEGORIES_FINAL__ = true;
 
   function boot(){
     const input = document.getElementById('searchInput');
     const dock = input && input.closest ? input.closest('.search-container') : null;
-    if (!input || !dock || dock.dataset.assalPremiumDockFocusLockBound === '1') return;
-    dock.dataset.assalPremiumDockFocusLockBound = '1';
+    const sourceSlider = document.getElementById('slider');
+
+    if (!input || !dock || dock.dataset.assalPremiumDockCompactBound === '1') return;
+    dock.dataset.assalPremiumDockCompactBound = '1';
 
     let slot = null;
     let host = null;
     let veil = null;
+    let compactRail = null;
+    let compactTrack = null;
 
     let active = false;
     let returning = false;
@@ -39413,7 +39548,6 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     let homeRect = null;
 
     let preFocusRect = null;
-    let preFocusAt = 0;
     let activationAt = 0;
     let lastPointerInsideAt = 0;
     let lastKnownViewportHeight = 0;
@@ -39439,15 +39573,14 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     function updateKeyboardState(){
       try {
         const vp = getViewport();
-        if (!lastKnownViewportHeight) lastKnownViewportHeight = Math.max(vp.height, window.innerHeight || vp.height);
+        if (!lastKnownViewportHeight) {
+          lastKnownViewportHeight = Math.max(vp.height, window.innerHeight || vp.height);
+        }
 
         const baseHeight = Math.max(lastKnownViewportHeight, window.innerHeight || vp.height);
         const shrink = baseHeight - vp.height;
-
-        // عتبة محافظة لأن بعض WebView يغير الارتفاع قليلاً حتى بدون كيبورد.
         keyboardLikelyOpen = shrink > 120;
 
-        // نخزن أكبر ارتفاع طبيعي نراه فقط لما الكيبورد مو مفتوح.
         if (!keyboardLikelyOpen && vp.height > lastKnownViewportHeight) {
           lastKnownViewportHeight = vp.height;
         }
@@ -39462,12 +39595,14 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       const vp = getViewport();
       const header = document.querySelector('.header');
       let bottom = vp.top + 44;
+
       try {
         if (header) {
           const r = header.getBoundingClientRect();
           bottom = Math.max(bottom, r.bottom);
         }
       } catch(_) {}
+
       return bottom;
     }
 
@@ -39475,7 +39610,9 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       const vp = getViewport();
       const safeMargin = vp.width <= 430 ? 9 : 12;
 
-      let desiredWidth = homeRect && homeRect.width ? homeRect.width : (vp.width - safeMargin * 2);
+      let desiredWidth = homeRect && homeRect.width
+        ? homeRect.width
+        : (vp.width - safeMargin * 2);
 
       try {
         const appContainer = document.querySelector('.container');
@@ -39487,33 +39624,171 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
       desiredWidth = Math.max(240, Math.min(desiredWidth, vp.width - safeMargin * 2));
 
-      const centerX = vp.left + (vp.width / 2);
-      const top = Math.max(vp.top + 7, getHeaderBottom() + 8);
-
-      return { vp, width: desiredWidth, centerX, top };
+      return {
+        vp,
+        width: desiredWidth,
+        centerX: vp.left + (vp.width / 2),
+        top: Math.max(vp.top + 7, getHeaderBottom() + 8)
+      };
     }
 
     function ensureHost(){
       if (host && host.isConnected) return host;
+
       host = document.createElement('div');
       host.className = 'assal-search-dock-host';
       host.setAttribute('aria-hidden','false');
       document.body.appendChild(host);
+
       return host;
     }
 
     function ensureVeil(){
       if (veil && veil.isConnected) return veil;
+
       veil = document.createElement('div');
       veil.className = 'assal-search-dock-veil';
       veil.setAttribute('aria-hidden','true');
       document.body.appendChild(veil);
+
       return veil;
+    }
+
+    function extractCategoryKey(el){
+      try {
+        const onclick = String(el.getAttribute('onclick') || '');
+        const m = onclick.match(/filterCategory\s*\(\s*['"]([^'"]+)['"]\s*\)/i);
+        return m ? m[1] : '';
+      } catch(_) {
+        return '';
+      }
+    }
+
+    function getSelectedCategoryKey(){
+      try {
+        const selected = document.querySelector('#slider .category.active');
+        if (selected) return extractCategoryKey(selected);
+      } catch(_) {}
+
+      try {
+        if (typeof window.currentCategory === 'string') return window.currentCategory;
+      } catch(_) {}
+
+      return '';
+    }
+
+    function syncCompactActive(scrollIntoView){
+      if (!compactTrack) return;
+
+      const selectedKey = getSelectedCategoryKey();
+      let selectedButton = null;
+
+      compactTrack.querySelectorAll('.assal-search-dock-category').forEach(btn => {
+        const on = btn.dataset.category === selectedKey;
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        if (on) selectedButton = btn;
+      });
+
+      if (scrollIntoView && selectedButton) {
+        try {
+          selectedButton.scrollIntoView({
+            behavior: document.documentElement.classList.contains('low-end-device') ? 'auto' : 'smooth',
+            inline: 'center',
+            block: 'nearest'
+          });
+        } catch(_) {}
+      }
+    }
+
+    function buildCompactCategories(){
+      if (compactRail && compactRail.isConnected) {
+        syncCompactActive(false);
+        return compactRail;
+      }
+
+      const originalItems = sourceSlider
+        ? Array.from(sourceSlider.querySelectorAll('.category'))
+        : [];
+
+      compactRail = document.createElement('div');
+      compactRail.className = 'assal-search-dock-categories';
+      compactRail.setAttribute('aria-label','الأصناف');
+
+      compactTrack = document.createElement('div');
+      compactTrack.className = 'assal-search-dock-categories-track';
+      compactRail.appendChild(compactTrack);
+
+      originalItems.forEach(original => {
+        const key = extractCategoryKey(original);
+        if (!key) return;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'assal-search-dock-category';
+        btn.dataset.category = key;
+        btn.setAttribute('aria-pressed','false');
+
+        const icon = original.querySelector('i');
+        if (icon) {
+          const i = document.createElement('i');
+          i.className = icon.className;
+          btn.appendChild(i);
+        }
+
+        const label = document.createElement('span');
+        const originalLabel = original.querySelector('span');
+        label.textContent = originalLabel
+          ? String(originalLabel.textContent || '').trim()
+          : key;
+        btn.appendChild(label);
+
+        btn.addEventListener('pointerdown', function(e){
+          lastPointerInsideAt = Date.now();
+          beginTypingSession();
+          // يمنع الزر من سرقة focus الكتابة من input.
+          try { e.preventDefault(); } catch(_) {}
+        }, true);
+
+        btn.addEventListener('touchstart', function(){
+          lastPointerInsideAt = Date.now();
+          beginTypingSession();
+        }, {passive:true, capture:true});
+
+        btn.addEventListener('click', function(e){
+          try { e.preventDefault(); } catch(_) {}
+
+          lastPointerInsideAt = Date.now();
+          beginTypingSession();
+
+          try {
+            if (typeof window.filterCategory === 'function') {
+              window.filterCategory(key);
+            } else {
+              original.click();
+            }
+          } catch(_) {}
+
+          setTimeout(() => {
+            syncCompactActive(true);
+            safeFocus();
+          }, 0);
+        }, true);
+
+        compactTrack.appendChild(btn);
+      });
+
+      ensureHost().appendChild(compactRail);
+      syncCompactActive(false);
+
+      return compactRail;
     }
 
     function createSlot(firstRect){
       if (slot && slot.isConnected) return;
+
       const cs = window.getComputedStyle(dock);
+
       slot = document.createElement('div');
       slot.className = 'assal-search-dock-slot';
       slot.style.height = Math.max(1, firstRect.height) + 'px';
@@ -39521,26 +39796,29 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       slot.style.marginBottom = cs.marginBottom;
       slot.style.marginLeft = cs.marginLeft;
       slot.style.marginRight = cs.marginRight;
+
       dock.parentNode.insertBefore(slot, dock);
     }
 
     function applyHostMetrics(){
       if (!active || !host || !dock) return;
+
       const m = getTargetMetrics();
 
       host.style.left = m.centerX + 'px';
       host.style.top = m.top + 'px';
       host.style.width = m.width + 'px';
 
-      const dockRect = dock.getBoundingClientRect();
+      const hostRect = host.getBoundingClientRect();
       const v = ensureVeil();
 
-      // التعتيم يبدأ أسفل الدوك حتى لا يغطي حافته أو ظله.
-      v.style.top = Math.ceil(dockRect.bottom + 7) + 'px';
+      // التعتيم يبدأ تحت كامل مجموعة البحث + الأصناف.
+      v.style.top = Math.ceil(hostRect.bottom + 7) + 'px';
     }
 
     function safeFocus(){
       clearTimeout(refocusTimer);
+
       refocusTimer = setTimeout(() => {
         if (!typingSessionActive || returning) return;
 
@@ -39582,8 +39860,9 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       ensureHost();
       ensureVeil();
 
-      // النقل يتم قبل الفوكس الفعلي حتى ما نفقد التركيز بسبب re-parent للـinput.
+      // نفس شريط البحث ينتقل إلى طبقة مستقلة.
       host.appendChild(dock);
+      buildCompactCategories();
 
       dock.classList.add('assal-search-dock');
       document.body.classList.add('assal-search-dock-body');
@@ -39593,38 +39872,60 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       const last = dock.getBoundingClientRect();
       const dx = first.left - last.left;
       const dy = first.top - last.top;
-      const sx = last.width ? Math.max(.84, Math.min(1.16, first.width / last.width)) : 1;
+      const sx = last.width
+        ? Math.max(.84, Math.min(1.16, first.width / last.width))
+        : 1;
 
       dock.style.transition = 'none';
       dock.style.transform = `translate3d(${dx}px, ${dy}px, 0) scaleX(${sx})`;
+
+      if (compactRail) {
+        compactRail.style.transition = 'none';
+        compactRail.style.opacity = '0';
+        compactRail.style.transform = `translate3d(0, ${Math.max(10, Math.min(32, Math.abs(dy) * .16))}px, 0)`;
+      }
+
       void dock.offsetWidth;
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (!active) return;
+
           dock.style.transition = '';
           dock.style.transform = 'translate3d(0,0,0) scaleX(1)';
+
+          if (compactRail) {
+            compactRail.style.transition = '';
+            compactRail.style.opacity = '';
+            compactRail.style.transform = '';
+            compactRail.classList.add('is-visible');
+          }
+
           if (veil) veil.classList.add('is-visible');
 
-          // بعد اكتمال النقل نثبت الفوكس بشكل صريح.
           try {
             input.focus({ preventScroll: true });
           } catch(_) {
             try { input.focus(); } catch(__) {}
           }
 
-          // حماية ثانية من blur لحظي أثناء فتح الكيبورد.
+          syncCompactActive(true);
           safeFocus();
+
+          setTimeout(() => {
+            if (active && !returning) applyHostMetrics();
+          }, 50);
         });
       });
     }
 
     function activateFallback(){
       if (active || returning || !isMobileSearchContext()) return;
+
       try {
         preFocusRect = dock.getBoundingClientRect();
-        preFocusAt = Date.now();
       } catch(_) {}
+
       activateFromPointer();
     }
 
@@ -39657,6 +39958,10 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       if (slot && slot.parentNode) slot.parentNode.removeChild(slot);
       slot = null;
 
+      if (compactRail && compactRail.parentNode) compactRail.parentNode.removeChild(compactRail);
+      compactRail = null;
+      compactTrack = null;
+
       if (host && host.parentNode) host.parentNode.removeChild(host);
       host = null;
 
@@ -39664,8 +39969,11 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         veil.classList.remove('is-visible');
         const oldVeil = veil;
         veil = null;
+
         setTimeout(() => {
-          try { if (oldVeil && oldVeil.parentNode) oldVeil.parentNode.removeChild(oldVeil); } catch(_) {}
+          try {
+            if (oldVeil && oldVeil.parentNode) oldVeil.parentNode.removeChild(oldVeil);
+          } catch(_) {}
         }, 240);
       }
 
@@ -39679,8 +39987,6 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       clearTimeout(refocusTimer);
 
       if (!active || returning) return;
-
-      // لا ننزل الدوك أثناء جلسة كتابة إلا بطلب حقيقي وصريح.
       if (!force && typingSessionActive) return;
 
       typingSessionActive = false;
@@ -39696,11 +40002,19 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
       const dx = target.left - current.left;
       const dy = target.top - current.top;
-      const sx = current.width ? Math.max(.84, Math.min(1.16, target.width / current.width)) : 1;
+      const sx = current.width
+        ? Math.max(.84, Math.min(1.16, target.width / current.width))
+        : 1;
 
       dock.classList.add('assal-search-dock-returning');
 
       if (veil) veil.classList.remove('is-visible');
+
+      if (compactRail) {
+        compactRail.classList.remove('is-visible');
+        compactRail.style.opacity = '0';
+        compactRail.style.transform = 'translate3d(0,-6px,0)';
+      }
 
       dock.style.transform = `translate3d(${dx}px, ${dy}px, 0) scaleX(${sx})`;
 
@@ -39714,7 +40028,6 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       closeTimer = setTimeout(() => {
         if (!active || returning) return;
 
-        // blur خلال أول لحظات فتح الكيبورد نعتبره blur وهمي ونرجع الفوكس.
         const justActivated = (Date.now() - activationAt) < 900;
         const stillInsideInteraction = (Date.now() - lastPointerInsideAt) < 500;
         const ae = document.activeElement;
@@ -39728,37 +40041,43 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
             keyboardLikelyOpen ||
             stillInsideInteraction ||
             ae === input ||
-            (ae && dock.contains(ae))
+            (ae && dock.contains(ae)) ||
+            (ae && compactRail && compactRail.contains(ae))
           )
         ) {
           safeFocus();
           return;
         }
 
-        // إذا الكيبورد فعلاً انغلق والفوكس خارج الدوك، ننهي جلسة الكتابة.
         typingSessionActive = false;
         deactivate(true);
       }, 180);
     }
 
     function isInsideDockTarget(target){
-      try { return !!(target && (target === dock || dock.contains(target))); }
-      catch(_) { return false; }
+      try {
+        return !!(
+          target &&
+          (
+            target === dock ||
+            dock.contains(target) ||
+            (compactRail && compactRail.contains(target))
+          )
+        );
+      } catch(_) {
+        return false;
+      }
     }
 
-    // الأهم: نجهز وننقل الدوك في pointerdown قبل أن يمنح المتصفح الفوكس للـinput.
     input.addEventListener('pointerdown', function(){
       clearTimeout(closeTimer);
-
       lastPointerInsideAt = Date.now();
       beginTypingSession();
 
       try {
         preFocusRect = dock.getBoundingClientRect();
-        preFocusAt = Date.now();
       } catch(_) {
         preFocusRect = null;
-        preFocusAt = Date.now();
       }
 
       if (!active && isMobileSearchContext()) {
@@ -39768,26 +40087,39 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       }
     }, true);
 
-    // touchstart fallback لبعض WebView القديمة.
     input.addEventListener('touchstart', function(){
       lastPointerInsideAt = Date.now();
+
       if (!active && isMobileSearchContext()) {
         beginTypingSession();
+
         try {
           preFocusRect = dock.getBoundingClientRect();
-          preFocusAt = Date.now();
         } catch(_) {}
+
         activateFromPointer();
       }
     }, {passive:true, capture:true});
 
-    // focus يبقى fallback فقط، مو المحرك الرئيسي.
     input.addEventListener('focus', function(){
       beginTypingSession();
       if (!active && isMobileSearchContext()) activateFallback();
     }, true);
 
     input.addEventListener('blur', handlePotentialBlur, true);
+
+    const searchButton = document.getElementById('searchBtn');
+    if (searchButton) {
+      searchButton.addEventListener('click', function(){
+        // نخلي حدث البحث الأصلي يشتغل، وبعده نغلق الكيبورد ونزيل الفوكس تلقائياً.
+        setTimeout(() => {
+          typingSessionActive = false;
+          clearTimeout(refocusTimer);
+          try { input.blur(); } catch(_) {}
+          deactivate(true);
+        }, 35);
+      }, false);
+    }
 
     input.addEventListener('keydown', function(e){
       if (e.key === 'Escape') {
@@ -39798,21 +40130,16 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       }
 
       if (e.key === 'Enter') {
-        // نسمح للتطبيق ينفذ البحث أولاً، وبعدها نخلي الدوك يبقى إذا الكيبورد بعده مفتوح.
+        // نخلي منطق البحث الحالي ينفذ أولاً، وبعدها نغلق الكيبورد ونرجع الدوك.
         setTimeout(() => {
-          updateKeyboardState();
-          if (keyboardLikelyOpen) {
-            beginTypingSession();
-            safeFocus();
-          } else {
-            typingSessionActive = false;
-            deactivate(true);
-          }
-        }, 80);
+          typingSessionActive = false;
+          clearTimeout(refocusTimer);
+          try { input.blur(); } catch(_) {}
+          deactivate(true);
+        }, 35);
       }
     }, true);
 
-    // أي لمس داخل الدوك لا يعتبر خروج.
     ['pointerdown','mousedown','touchstart','click'].forEach(ev => {
       dock.addEventListener(ev, function(){
         lastPointerInsideAt = Date.now();
@@ -39820,7 +40147,6 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       }, true);
     });
 
-    // الضغط الحقيقي خارج الدوك ينهي الجلسة.
     document.addEventListener('pointerdown', function(e){
       if (!active || returning) return;
       if (isInsideDockTarget(e.target)) return;
@@ -39837,20 +40163,34 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       deactivate(true);
     }, {passive:true, capture:true});
 
+    // أي تغيير على اختيار الصنف الأصلي ينعكس على الشريط المصغر.
+    try {
+      if (sourceSlider && window.MutationObserver) {
+        const categoryObserver = new MutationObserver(function(){
+          if (active) syncCompactActive(true);
+        });
+
+        categoryObserver.observe(sourceSlider, {
+          subtree:true,
+          attributes:true,
+          attributeFilter:['class']
+        });
+      }
+    } catch(_) {}
+
     function viewportChanged(){
       if (!active || returning) return;
 
       clearTimeout(viewportTimer);
+
       viewportTimer = setTimeout(() => {
         updateKeyboardState();
         applyHostMetrics();
 
-        // إذا الكيبورد مفتوح والفوكس ضاع لحظياً، نرجعه بدون إنزال الدوك.
         if (typingSessionActive && keyboardLikelyOpen && document.activeElement !== input) {
           safeFocus();
         }
 
-        // إذا الكيبورد انغلق فعلياً والفوكس خارج الدوك، نرجع الشريط.
         if (
           active &&
           typingSessionActive &&
