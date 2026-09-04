@@ -39385,27 +39385,38 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 <!-- ===== ASSAL PREMIUM SEARCH FOCUS DOCK FINAL ===== -->
 <script id="assalPremiumSearchFocusDockFinal">
 (function(){
-  if (window.__ASSAL_PREMIUM_SEARCH_FOCUS_DOCK_PORTAL_FINAL__) return;
-  window.__ASSAL_PREMIUM_SEARCH_FOCUS_DOCK_PORTAL_FINAL__ = true;
+  if (window.__ASSAL_PREMIUM_SEARCH_FOCUS_DOCK_LOCK_FINAL__) return;
+  window.__ASSAL_PREMIUM_SEARCH_FOCUS_DOCK_LOCK_FINAL__ = true;
 
   function boot(){
     const input = document.getElementById('searchInput');
     const dock = input && input.closest ? input.closest('.search-container') : null;
-    if (!input || !dock || dock.dataset.assalPremiumDockPortalBound === '1') return;
-    dock.dataset.assalPremiumDockPortalBound = '1';
+    if (!input || !dock || dock.dataset.assalPremiumDockFocusLockBound === '1') return;
+    dock.dataset.assalPremiumDockFocusLockBound = '1';
 
     let slot = null;
     let host = null;
     let veil = null;
+
     let active = false;
     let returning = false;
+    let typingSessionActive = false;
+    let keyboardLikelyOpen = false;
+
     let closeTimer = null;
     let cleanupTimer = null;
+    let refocusTimer = null;
+    let viewportTimer = null;
+
     let homeParent = null;
     let homeNextSibling = null;
     let homeRect = null;
+
     let preFocusRect = null;
     let preFocusAt = 0;
+    let activationAt = 0;
+    let lastPointerInsideAt = 0;
+    let lastKnownViewportHeight = 0;
 
     function isMobileSearchContext(){
       try {
@@ -39423,6 +39434,28 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         width: vv ? Number(vv.width || window.innerWidth) : window.innerWidth,
         height: vv ? Number(vv.height || window.innerHeight) : window.innerHeight
       };
+    }
+
+    function updateKeyboardState(){
+      try {
+        const vp = getViewport();
+        if (!lastKnownViewportHeight) lastKnownViewportHeight = Math.max(vp.height, window.innerHeight || vp.height);
+
+        const baseHeight = Math.max(lastKnownViewportHeight, window.innerHeight || vp.height);
+        const shrink = baseHeight - vp.height;
+
+        // عتبة محافظة لأن بعض WebView يغير الارتفاع قليلاً حتى بدون كيبورد.
+        keyboardLikelyOpen = shrink > 120;
+
+        // نخزن أكبر ارتفاع طبيعي نراه فقط لما الكيبورد مو مفتوح.
+        if (!keyboardLikelyOpen && vp.height > lastKnownViewportHeight) {
+          lastKnownViewportHeight = vp.height;
+        }
+
+        return keyboardLikelyOpen;
+      } catch(_) {
+        return false;
+      }
     }
 
     function getHeaderBottom(){
@@ -39443,6 +39476,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       const safeMargin = vp.width <= 430 ? 9 : 12;
 
       let desiredWidth = homeRect && homeRect.width ? homeRect.width : (vp.width - safeMargin * 2);
+
       try {
         const appContainer = document.querySelector('.container');
         if (appContainer) {
@@ -39453,7 +39487,6 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
       desiredWidth = Math.max(240, Math.min(desiredWidth, vp.width - safeMargin * 2));
 
-      // التمركز يتم على الـ visual viewport نفسه، وليس على parent قديم أو transform خارجي.
       const centerX = vp.left + (vp.width / 2);
       const top = Math.max(vp.top + 7, getHeaderBottom() + 8);
 
@@ -39494,26 +39527,53 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     function applyHostMetrics(){
       if (!active || !host || !dock) return;
       const m = getTargetMetrics();
+
       host.style.left = m.centerX + 'px';
       host.style.top = m.top + 'px';
       host.style.width = m.width + 'px';
 
       const dockRect = dock.getBoundingClientRect();
       const v = ensureVeil();
-      // يبدأ التعتيم من تحت الدوك حصراً حتى لا يغطي حدوده أو ظله العلوي.
+
+      // التعتيم يبدأ أسفل الدوك حتى لا يغطي حافته أو ظله.
       v.style.top = Math.ceil(dockRect.bottom + 7) + 'px';
     }
 
-    function activate(){
-      if (active || returning || !isMobileSearchContext()) return;
+    function safeFocus(){
+      clearTimeout(refocusTimer);
+      refocusTimer = setTimeout(() => {
+        if (!typingSessionActive || returning) return;
+
+        try {
+          if (document.activeElement !== input) {
+            input.focus({ preventScroll: true });
+          }
+        } catch(_) {
+          try { input.focus(); } catch(__) {}
+        }
+      }, 35);
+    }
+
+    function beginTypingSession(){
+      typingSessionActive = true;
       clearTimeout(closeTimer);
       clearTimeout(cleanupTimer);
+      clearTimeout(refocusTimer);
+    }
 
-      const recentPointer = (Date.now() - preFocusAt) < 650 && preFocusRect && preFocusRect.width && preFocusRect.height;
-      const first = recentPointer ? preFocusRect : dock.getBoundingClientRect();
+    function activateFromPointer(){
+      if (active || returning || !isMobileSearchContext()) return;
+
+      const first = preFocusRect && preFocusRect.width && preFocusRect.height
+        ? preFocusRect
+        : dock.getBoundingClientRect();
+
       if (!first.width || !first.height) return;
 
+      beginTypingSession();
+
       active = true;
+      activationAt = Date.now();
       homeParent = dock.parentNode;
       homeNextSibling = dock.nextSibling;
       homeRect = first;
@@ -39522,8 +39582,9 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       ensureHost();
       ensureVeil();
 
-      // نقل نفس شريط البحث إلى طبقة مستقلة أعلى body يحرره من overflow / shadow / stacking contexts.
+      // النقل يتم قبل الفوكس الفعلي حتى ما نفقد التركيز بسبب re-parent للـinput.
       host.appendChild(dock);
+
       dock.classList.add('assal-search-dock');
       document.body.classList.add('assal-search-dock-body');
 
@@ -39544,8 +39605,27 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
           dock.style.transition = '';
           dock.style.transform = 'translate3d(0,0,0) scaleX(1)';
           if (veil) veil.classList.add('is-visible');
+
+          // بعد اكتمال النقل نثبت الفوكس بشكل صريح.
+          try {
+            input.focus({ preventScroll: true });
+          } catch(_) {
+            try { input.focus(); } catch(__) {}
+          }
+
+          // حماية ثانية من blur لحظي أثناء فتح الكيبورد.
+          safeFocus();
         });
       });
+    }
+
+    function activateFallback(){
+      if (active || returning || !isMobileSearchContext()) return;
+      try {
+        preFocusRect = dock.getBoundingClientRect();
+        preFocusAt = Date.now();
+      } catch(_) {}
+      activateFromPointer();
     }
 
     function restoreDockToHome(){
@@ -39562,8 +39642,11 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
     function cleanupAfterReturn(){
       restoreDockToHome();
+
       returning = false;
       active = false;
+      typingSessionActive = false;
+      keyboardLikelyOpen = false;
 
       dock.classList.remove('assal-search-dock','assal-search-dock-returning');
       dock.style.transform = '';
@@ -39591,13 +39674,21 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       homeRect = null;
     }
 
-    function deactivate(){
+    function deactivate(force){
       clearTimeout(closeTimer);
+      clearTimeout(refocusTimer);
+
       if (!active || returning) return;
+
+      // لا ننزل الدوك أثناء جلسة كتابة إلا بطلب حقيقي وصريح.
+      if (!force && typingSessionActive) return;
+
+      typingSessionActive = false;
       returning = true;
 
       const current = dock.getBoundingClientRect();
       const target = slot && slot.isConnected ? slot.getBoundingClientRect() : homeRect;
+
       if (!target) {
         cleanupAfterReturn();
         return;
@@ -39608,34 +39699,60 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       const sx = current.width ? Math.max(.84, Math.min(1.16, target.width / current.width)) : 1;
 
       dock.classList.add('assal-search-dock-returning');
+
       if (veil) veil.classList.remove('is-visible');
+
       dock.style.transform = `translate3d(${dx}px, ${dy}px, 0) scaleX(${sx})`;
 
       clearTimeout(cleanupTimer);
       cleanupTimer = setTimeout(cleanupAfterReturn, 305);
     }
 
-    function scheduleDeactivate(){
+    function handlePotentialBlur(){
       clearTimeout(closeTimer);
+
       closeTimer = setTimeout(() => {
+        if (!active || returning) return;
+
+        // blur خلال أول لحظات فتح الكيبورد نعتبره blur وهمي ونرجع الفوكس.
+        const justActivated = (Date.now() - activationAt) < 900;
+        const stillInsideInteraction = (Date.now() - lastPointerInsideAt) < 500;
         const ae = document.activeElement;
-        if (ae && dock.contains(ae) && ae === input) return;
-        deactivate();
-      }, 150);
+
+        updateKeyboardState();
+
+        if (
+          typingSessionActive &&
+          (
+            justActivated ||
+            keyboardLikelyOpen ||
+            stillInsideInteraction ||
+            ae === input ||
+            (ae && dock.contains(ae))
+          )
+        ) {
+          safeFocus();
+          return;
+        }
+
+        // إذا الكيبورد فعلاً انغلق والفوكس خارج الدوك، ننهي جلسة الكتابة.
+        typingSessionActive = false;
+        deactivate(true);
+      }, 180);
     }
 
-    input.addEventListener('focus', activate, true);
-    input.addEventListener('blur', scheduleDeactivate, true);
+    function isInsideDockTarget(target){
+      try { return !!(target && (target === dock || dock.contains(target))); }
+      catch(_) { return false; }
+    }
 
-    input.addEventListener('keydown', function(e){
-      if (e.key === 'Escape') {
-        try { input.blur(); } catch(_) {}
-        scheduleDeactivate();
-      }
-    }, true);
-
+    // الأهم: نجهز وننقل الدوك في pointerdown قبل أن يمنح المتصفح الفوكس للـinput.
     input.addEventListener('pointerdown', function(){
       clearTimeout(closeTimer);
+
+      lastPointerInsideAt = Date.now();
+      beginTypingSession();
+
       try {
         preFocusRect = dock.getBoundingClientRect();
         preFocusAt = Date.now();
@@ -39643,22 +39760,108 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         preFocusRect = null;
         preFocusAt = Date.now();
       }
+
       if (!active && isMobileSearchContext()) {
-        setTimeout(() => {
-          if (document.activeElement === input) activate();
-        }, 0);
+        activateFromPointer();
+      } else if (active) {
+        safeFocus();
       }
     }, true);
 
+    // touchstart fallback لبعض WebView القديمة.
+    input.addEventListener('touchstart', function(){
+      lastPointerInsideAt = Date.now();
+      if (!active && isMobileSearchContext()) {
+        beginTypingSession();
+        try {
+          preFocusRect = dock.getBoundingClientRect();
+          preFocusAt = Date.now();
+        } catch(_) {}
+        activateFromPointer();
+      }
+    }, {passive:true, capture:true});
+
+    // focus يبقى fallback فقط، مو المحرك الرئيسي.
+    input.addEventListener('focus', function(){
+      beginTypingSession();
+      if (!active && isMobileSearchContext()) activateFallback();
+    }, true);
+
+    input.addEventListener('blur', handlePotentialBlur, true);
+
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') {
+        typingSessionActive = false;
+        try { input.blur(); } catch(_) {}
+        deactivate(true);
+        return;
+      }
+
+      if (e.key === 'Enter') {
+        // نسمح للتطبيق ينفذ البحث أولاً، وبعدها نخلي الدوك يبقى إذا الكيبورد بعده مفتوح.
+        setTimeout(() => {
+          updateKeyboardState();
+          if (keyboardLikelyOpen) {
+            beginTypingSession();
+            safeFocus();
+          } else {
+            typingSessionActive = false;
+            deactivate(true);
+          }
+        }, 80);
+      }
+    }, true);
+
+    // أي لمس داخل الدوك لا يعتبر خروج.
+    ['pointerdown','mousedown','touchstart','click'].forEach(ev => {
+      dock.addEventListener(ev, function(){
+        lastPointerInsideAt = Date.now();
+        if (active) beginTypingSession();
+      }, true);
+    });
+
+    // الضغط الحقيقي خارج الدوك ينهي الجلسة.
+    document.addEventListener('pointerdown', function(e){
+      if (!active || returning) return;
+      if (isInsideDockTarget(e.target)) return;
+
+      typingSessionActive = false;
+      deactivate(true);
+    }, true);
+
+    document.addEventListener('touchstart', function(e){
+      if (!active || returning) return;
+      if (isInsideDockTarget(e.target)) return;
+
+      typingSessionActive = false;
+      deactivate(true);
+    }, {passive:true, capture:true});
+
     function viewportChanged(){
       if (!active || returning) return;
-      requestAnimationFrame(() => {
+
+      clearTimeout(viewportTimer);
+      viewportTimer = setTimeout(() => {
+        updateKeyboardState();
         applyHostMetrics();
-        // بعد تغير حجم الـ visualViewport بسبب الكيبورد نعيد التمركز مرة ثانية بعد استقرار الحركة.
-        setTimeout(() => {
-          if (active && !returning) applyHostMetrics();
-        }, 80);
-      });
+
+        // إذا الكيبورد مفتوح والفوكس ضاع لحظياً، نرجعه بدون إنزال الدوك.
+        if (typingSessionActive && keyboardLikelyOpen && document.activeElement !== input) {
+          safeFocus();
+        }
+
+        // إذا الكيبورد انغلق فعلياً والفوكس خارج الدوك، نرجع الشريط.
+        if (
+          active &&
+          typingSessionActive &&
+          !keyboardLikelyOpen &&
+          (Date.now() - activationAt) > 700 &&
+          document.activeElement !== input
+        ) {
+          typingSessionActive = false;
+          deactivate(true);
+        }
+      }, 55);
     }
 
     window.addEventListener('resize', viewportChanged, {passive:true});
@@ -39670,12 +39873,18 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     }
 
     document.addEventListener('visibilitychange', function(){
-      if (document.hidden && active) deactivate();
+      if (document.hidden && active) {
+        typingSessionActive = false;
+        deactivate(true);
+      }
     });
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
-  else boot();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, {once:true});
+  } else {
+    boot();
+  }
 
   setTimeout(boot, 500);
 })();
