@@ -15807,7 +15807,7 @@ html.low-end-device .assal-compat-feed-popup{
     -webkit-backdrop-filter:none !important;
 }
 
-/* ===== ASSAL PREMIUM SEARCH DOCK — STABLE STATE MACHINE FINAL ===== */
+/* ===== ASSAL PREMIUM SEARCH DOCK — NO REPARENT / ANDROID STABLE FINAL ===== */
 .assal-search-dock-slot{
     display:block;
     width:100%;
@@ -15815,58 +15815,80 @@ html.low-end-device .assal-compat-feed-popup{
     visibility:hidden;
 }
 
-/* Full-screen blur layer below the fixed header and above app content */
+/*
+  While the original search node is fixed, neutralize only the container
+  properties that can turn a fixed descendant into a container-local layer.
+  The DOM node itself never moves.
+*/
+.container.assal-search-mode-container{
+    -webkit-backdrop-filter:none !important;
+    backdrop-filter:none !important;
+    transform:none !important;
+    filter:none !important;
+    perspective:none !important;
+    contain:none !important;
+    isolation:auto !important;
+    overflow:visible !important;
+    will-change:auto !important;
+    animation-play-state:paused !important;
+}
+
+/* Persistent full overlay: created once and kept alive to avoid Android GPU flashes. */
 .assal-search-dock-veil{
     position:fixed;
     left:0;
     right:0;
-    bottom:0;
+    bottom:-64px;
     z-index:2147482600;
     pointer-events:none;
     opacity:0;
-    background:rgba(3,10,22,.28);
-    backdrop-filter:blur(8px) saturate(118%);
-    -webkit-backdrop-filter:blur(8px) saturate(118%);
-    transition:opacity .18s ease;
+    visibility:hidden;
+    background:rgba(3,10,22,.38);
+    -webkit-backdrop-filter:blur(7px) saturate(116%);
+    backdrop-filter:blur(7px) saturate(116%);
+    transition:opacity .16s linear, visibility 0s linear .16s;
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
     will-change:opacity;
 }
-.assal-search-dock-veil.is-visible{opacity:1;}
+.assal-search-dock-veil.is-visible{
+    opacity:1;
+    visibility:visible;
+    transition:opacity .16s linear;
+}
 
-/* One stable floating host for search + compact categories */
-.assal-search-dock-host{
+/* One body-level visual shell only for the unified shadow/background. */
+.assal-search-dock-shell{
     position:fixed;
-    z-index:2147482800;
+    z-index:2147482740;
     pointer-events:none;
-    margin:0;
-    padding:5px;
+    opacity:0;
+    visibility:hidden;
     box-sizing:border-box;
-    transform:translateX(-50%);
-    overflow:visible !important;
-    isolation:isolate;
     border-radius:27px;
     background:
       radial-gradient(circle at 16% -18%,rgba(34,211,238,.09),transparent 42%),
       linear-gradient(145deg,rgba(15,23,42,.985),rgba(7,14,27,.992));
     border:1px solid rgba(148,210,230,.13);
     box-shadow:
-      0 20px 48px rgba(0,0,0,.46),
-      0 9px 20px rgba(0,0,0,.26),
+      0 22px 50px rgba(0,0,0,.48),
+      0 10px 22px rgba(0,0,0,.28),
       0 0 0 1px rgba(255,255,255,.022),
       inset 0 1px 0 rgba(255,255,255,.045);
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
 }
-.assal-search-dock-host > .search-container,
-.assal-search-dock-host > .assal-search-dock-categories{
-    pointer-events:auto;
+.assal-search-dock-shell.is-visible{
+    opacity:1;
+    visibility:visible;
 }
 
-/* Search bar itself stays visually light; host owns the main depth */
+/* SAME original search element; fixed only by CSS, never appended elsewhere. */
 .search-container.assal-search-dock{
-    position:relative !important;
-    inset:auto !important;
-    left:auto !important;
-    top:auto !important;
-    right:auto !important;
-    width:100% !important;
+    position:fixed !important;
+    z-index:2147482800 !important;
     margin:0 !important;
     padding:5px !important;
     box-sizing:border-box !important;
@@ -15874,13 +15896,15 @@ html.low-end-device .assal-compat-feed-popup{
     overflow:visible !important;
     isolation:isolate;
     background:
-      radial-gradient(circle at 18% -20%,rgba(34,211,238,.105),transparent 42%),
+      radial-gradient(circle at 18% -20%,rgba(34,211,238,.10),transparent 42%),
       linear-gradient(145deg,rgba(26,42,61,.975),rgba(12,22,39,.985)) !important;
     border:1px solid rgba(148,210,230,.17) !important;
     box-shadow:
       0 5px 13px rgba(0,0,0,.13),
       inset 0 1px 0 rgba(255,255,255,.065) !important;
     transform-origin:center center;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
     will-change:transform;
 }
 .search-container.assal-search-dock::after{
@@ -15907,37 +15931,45 @@ html.low-end-device .assal-compat-feed-popup{
     color:rgba(226,248,255,.52) !important;
 }
 
-/* Compact category rail */
+/* Compact categories live independently in body; same exact width as search dock. */
 .assal-search-dock-categories{
-    width:100%;
+    position:fixed;
+    z-index:2147482800;
     box-sizing:border-box;
-    margin-top:6px;
     padding:4px 5px;
     border-radius:15px;
     overflow:hidden;
     pointer-events:auto;
-    opacity:1;
-    transform:none;
+    opacity:0;
+    visibility:hidden;
     background:linear-gradient(145deg,rgba(255,255,255,.032),rgba(8,145,178,.022));
     border:1px solid rgba(148,210,230,.085);
     box-shadow:
       0 4px 10px rgba(0,0,0,.09),
       inset 0 1px 0 rgba(255,255,255,.03);
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+}
+.assal-search-dock-categories.is-visible{
+    opacity:1;
+    visibility:visible;
 }
 .assal-search-dock-categories-track{
     width:100%;
     display:flex;
     align-items:center;
     gap:5px;
-    overflow-x:auto;
-    overflow-y:hidden;
-    overscroll-behavior-x:contain;
-    -webkit-overflow-scrolling:touch;
+    overflow:hidden;
     scrollbar-width:none;
-    touch-action:pan-x;
+    touch-action:none;
+    user-select:none;
+    -webkit-user-select:none;
+    -webkit-tap-highlight-color:transparent;
     padding:1px;
+    cursor:grab;
 }
-.assal-search-dock-categories-track::-webkit-scrollbar{display:none;}
+.assal-search-dock-categories-track:active{cursor:grabbing;}
 .assal-search-dock-category{
     flex:0 0 auto;
     min-width:54px;
@@ -15957,7 +15989,7 @@ html.low-end-device .assal-compat-feed-popup{
     line-height:1;
     font-weight:800;
     white-space:nowrap;
-    cursor:pointer;
+    pointer-events:auto;
     user-select:none;
     -webkit-user-select:none;
     -webkit-tap-highlight-color:transparent;
@@ -15968,12 +16000,6 @@ html.low-end-device .assal-compat-feed-popup{
     pointer-events:none;
 }
 .assal-search-dock-category span{pointer-events:none;}
-.assal-search-dock-category:focus,
-.assal-search-dock-category:focus-visible{
-    outline:none !important;
-    box-shadow:inherit;
-}
-.assal-search-dock-category:active{transform:scale(.97);}
 .assal-search-dock-category.is-active{
     color:#f0fdfa;
     border-color:rgba(94,234,212,.22);
@@ -15985,24 +16011,17 @@ html.low-end-device .assal-compat-feed-popup{
 .assal-search-dock-category.is-active i{color:#99f6e4;}
 
 @media(max-width:520px){
-    .assal-search-dock-host{
-        padding:5px;
-        border-radius:24px;
-    }
-    .search-container.assal-search-dock{
-        border-radius:22px !important;
-    }
+    .assal-search-dock-shell{border-radius:24px;}
+    .search-container.assal-search-dock{border-radius:22px !important;}
 }
 
-/* low-end: no backdrop blur to avoid white flashes */
+/* Low-end remains stable without expensive blur. */
 html.low-end-device .assal-search-dock-veil{
-    backdrop-filter:none !important;
     -webkit-backdrop-filter:none !important;
-    background:rgba(3,10,22,.42);
+    backdrop-filter:none !important;
+    background:rgba(3,10,22,.55);
 }
-html.low-end-device .assal-search-dock-host{
-    backdrop-filter:none !important;
-    -webkit-backdrop-filter:none !important;
+html.low-end-device .assal-search-dock-shell{
     box-shadow:
       0 16px 34px rgba(0,0,0,.39),
       0 7px 15px rgba(0,0,0,.22),
@@ -39491,50 +39510,43 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 <!-- ===== ASSAL PREMIUM SEARCH FOCUS DOCK FINAL ===== -->
 <script id="assalPremiumSearchFocusDockFinal">
 (function(){
-  if (window.__ASSAL_SEARCH_DOCK_FOCUS_VOICE_STABLE_FINAL__) return;
-  window.__ASSAL_SEARCH_DOCK_FOCUS_VOICE_STABLE_FINAL__ = true;
+  if (window.__ASSAL_SEARCH_DOCK_NO_REPARENT_STABLE_FINAL__) return;
+  window.__ASSAL_SEARCH_DOCK_NO_REPARENT_STABLE_FINAL__ = true;
 
   function boot(){
     const input = document.getElementById('searchInput');
     const dock = input && input.closest ? input.closest('.search-container') : null;
     const sourceSlider = document.getElementById('slider');
     const searchButton = document.getElementById('searchBtn');
+    const appContainer = dock && dock.closest ? dock.closest('.container') : document.querySelector('.container');
 
-    if (!input || !dock || dock.dataset.assalFocusVoiceStableBound === '1') return;
-    dock.dataset.assalFocusVoiceStableBound = '1';
+    if (!input || !dock || dock.dataset.assalNoReparentDockBound === '1') return;
+    dock.dataset.assalNoReparentDockBound = '1';
 
-    const STATE_IDLE = 'idle';
-    const STATE_OPEN = 'open';
-    const STATE_CLOSING = 'closing';
-
-    let state = STATE_IDLE;
+    const IDLE = 'idle';
+    const OPEN = 'open';
+    const CLOSING = 'closing';
+    let state = IDLE;
 
     let slot = null;
-    let host = null;
     let veil = null;
+    let shell = null;
     let compactRail = null;
     let compactTrack = null;
 
-    let homeParent = null;
-    let homeNextSibling = null;
     let homeRect = null;
-    let preFocusRect = null;
-
-    let closeTimer = null;
     let returnTimer = null;
-    let refocusTimer = null;
     let viewportTimer = null;
 
-    let pointerInsideRail = false;
-    let railMoved = false;
+    let railPointerActive = false;
+    let railPointerId = null;
     let railStartX = 0;
     let railStartY = 0;
-    let railPointerId = null;
+    let railStartScrollLeft = 0;
+    let railMoved = false;
+    let railStartPill = null;
 
-    let lastKnownViewportHeight = 0;
-    let keyboardLikelyOpen = false;
-
-    function isMobileSearchContext(){
+    function isMobile(){
       try {
         return window.matchMedia('(max-width: 900px), (pointer: coarse), (hover: none)').matches;
       } catch(_) {
@@ -39552,90 +39564,57 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       };
     }
 
-    function updateKeyboardState(){
-      try {
-        const vp = getViewport();
-
-        if (!lastKnownViewportHeight) {
-          lastKnownViewportHeight = Math.max(vp.height, window.innerHeight || vp.height);
-        }
-
-        const baseHeight = Math.max(lastKnownViewportHeight, window.innerHeight || vp.height);
-        keyboardLikelyOpen = (baseHeight - vp.height) > 120;
-
-        if (!keyboardLikelyOpen && vp.height > lastKnownViewportHeight) {
-          lastKnownViewportHeight = vp.height;
-        }
-
-        return keyboardLikelyOpen;
-      } catch(_) {
-        keyboardLikelyOpen = false;
-        return false;
-      }
-    }
-
     function getHeaderBottom(){
       const vp = getViewport();
       const header = document.querySelector('.header');
       let bottom = vp.top + 44;
-
       try {
-        if (header) {
-          const r = header.getBoundingClientRect();
-          bottom = Math.max(bottom, r.bottom);
-        }
+        if (header) bottom = Math.max(bottom, header.getBoundingClientRect().bottom);
       } catch(_) {}
-
       return bottom;
     }
 
-    function getTargetMetrics(){
+    function getMetrics(){
       const vp = getViewport();
-      const safeMargin = vp.width <= 430 ? 9 : 12;
+      const margin = vp.width <= 430 ? 9 : 12;
 
-      let desiredWidth = homeRect && homeRect.width
-        ? homeRect.width
-        : (vp.width - safeMargin * 2);
-
+      let width = homeRect && homeRect.width ? homeRect.width : (vp.width - margin * 2);
       try {
-        const appContainer = document.querySelector('.container');
         if (appContainer) {
-          const cr = appContainer.getBoundingClientRect();
-          if (cr.width > 220) desiredWidth = Math.min(desiredWidth, cr.width);
+          const r = appContainer.getBoundingClientRect();
+          if (r.width > 220) width = Math.min(width, r.width);
         }
       } catch(_) {}
 
-      desiredWidth = Math.max(240, Math.min(desiredWidth, vp.width - safeMargin * 2));
+      width = Math.max(240, Math.min(width, vp.width - margin * 2));
 
       return {
         vp,
-        width: desiredWidth,
-        centerX: vp.left + vp.width / 2,
+        width,
+        left: vp.left + ((vp.width - width) / 2),
         top: Math.max(vp.top + 7, getHeaderBottom() + 8)
       };
     }
 
-    function ensureHost(){
-      if (host && host.isConnected) return host;
-      host = document.createElement('div');
-      host.className = 'assal-search-dock-host';
-      document.body.appendChild(host);
-      return host;
-    }
+    function ensurePersistentLayers(){
+      if (!veil || !veil.isConnected) {
+        veil = document.createElement('div');
+        veil.className = 'assal-search-dock-veil';
+        veil.setAttribute('aria-hidden','true');
+        document.body.appendChild(veil);
+      }
 
-    function ensureVeil(){
-      if (veil && veil.isConnected) return veil;
-      veil = document.createElement('div');
-      veil.className = 'assal-search-dock-veil';
-      veil.setAttribute('aria-hidden','true');
-      document.body.appendChild(veil);
-      return veil;
+      if (!shell || !shell.isConnected) {
+        shell = document.createElement('div');
+        shell.className = 'assal-search-dock-shell';
+        shell.setAttribute('aria-hidden','true');
+        document.body.appendChild(shell);
+      }
     }
 
     function createSlot(rect){
       if (slot && slot.isConnected) return;
-
-      const cs = window.getComputedStyle(dock);
+      const cs = getComputedStyle(dock);
       slot = document.createElement('div');
       slot.className = 'assal-search-dock-slot';
       slot.style.height = Math.max(1, rect.height) + 'px';
@@ -39643,7 +39622,6 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       slot.style.marginBottom = cs.marginBottom;
       slot.style.marginLeft = cs.marginLeft;
       slot.style.marginRight = cs.marginRight;
-
       dock.parentNode.insertBefore(slot, dock);
     }
 
@@ -39662,74 +39640,38 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         const selected = document.querySelector('#slider .category.active');
         if (selected) return extractCategoryKey(selected);
       } catch(_) {}
-
       try {
         if (typeof window.currentCategory === 'string') return window.currentCategory;
       } catch(_) {}
-
       return '';
     }
 
     function syncCompactActive(center){
       if (!compactTrack) return;
 
-      const selectedKey = getSelectedCategoryKey();
-      let selectedPill = null;
+      const key = getSelectedCategoryKey();
+      let selected = null;
 
       compactTrack.querySelectorAll('.assal-search-dock-category').forEach(pill => {
-        const isActive = pill.dataset.category === selectedKey;
-        pill.classList.toggle('is-active', isActive);
-        pill.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-        if (isActive) selectedPill = pill;
+        const active = pill.dataset.category === key;
+        pill.classList.toggle('is-active', active);
+        pill.setAttribute('aria-pressed', active ? 'true' : 'false');
+        if (active) selected = pill;
       });
 
-      if (center && selectedPill) {
+      if (center && selected) {
         try {
-          const targetLeft = selectedPill.offsetLeft - ((compactTrack.clientWidth - selectedPill.offsetWidth) / 2);
-          compactTrack.scrollLeft = Math.max(0, targetLeft);
+          const target = selected.offsetLeft - ((compactTrack.clientWidth - selected.offsetWidth) / 2);
+          compactTrack.scrollLeft = Math.max(0, target);
         } catch(_) {}
       }
     }
 
-    function focusNow(){
-      if (state !== STATE_OPEN) return false;
-
-      try {
-        if (document.activeElement === input) return true;
-        input.focus({ preventScroll:true });
-        return document.activeElement === input;
-      } catch(_) {
-        try {
-          input.focus();
-          return document.activeElement === input;
-        } catch(__) {
-          return false;
-        }
-      }
-    }
-
-    function safeRefocus(delay){
-      clearTimeout(refocusTimer);
-
-      // Important: never issue a second focus call when focus is already correct.
-      if (document.activeElement === input) return;
-
-      refocusTimer = setTimeout(() => {
-        if (state !== STATE_OPEN || pointerInsideRail) return;
-        if (document.activeElement === input) return;
-        focusNow();
-      }, typeof delay === 'number' ? delay : 70);
-    }
-
-    function buildCompactCategories(){
+    function buildRail(){
       if (compactRail && compactRail.isConnected) {
         syncCompactActive(false);
         return;
       }
-
-      const originals = sourceSlider
-        ? Array.from(sourceSlider.querySelectorAll('.category'))
-        : [];
 
       compactRail = document.createElement('div');
       compactRail.className = 'assal-search-dock-categories';
@@ -39739,76 +39681,14 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       compactTrack.className = 'assal-search-dock-categories-track';
       compactRail.appendChild(compactTrack);
 
-      // One pointer path only. The rail itself never becomes focusable.
-      compactTrack.addEventListener('pointerdown', function(e){
-        if (state !== STATE_OPEN) return;
-
-        pointerInsideRail = true;
-        railMoved = false;
-        railPointerId = e.pointerId;
-        railStartX = Number(e.clientX || 0);
-        railStartY = Number(e.clientY || 0);
-      }, true);
-
-      compactTrack.addEventListener('pointermove', function(e){
-        if (!pointerInsideRail) return;
-        if (railPointerId !== null && e.pointerId !== railPointerId) return;
-
-        const dx = Math.abs(Number(e.clientX || 0) - railStartX);
-        const dy = Math.abs(Number(e.clientY || 0) - railStartY);
-
-        if (dx > 7 || dy > 7) railMoved = true;
-      }, {passive:true});
-
-      function finishRailGesture(e){
-        if (!pointerInsideRail) return;
-        if (railPointerId !== null && e && e.pointerId !== railPointerId) return;
-
-        const wasMoved = railMoved;
-        const target = e && e.target && e.target.closest
-          ? e.target.closest('.assal-search-dock-category')
-          : null;
-
-        pointerInsideRail = false;
-        railPointerId = null;
-
-        // Select only on a real tap, never after a horizontal scroll.
-        if (!wasMoved && target && state === STATE_OPEN) {
-          const key = target.dataset.category || '';
-
-          if (key) {
-            try {
-              if (typeof window.filterCategory === 'function') {
-                window.filterCategory(key);
-              }
-            } catch(_) {}
-
-            syncCompactActive(true);
-          }
-        }
-
-        railMoved = false;
-
-        // Normally focus never left input because pills are DIVs.
-        // If Android did transiently drop it, restore only once after gesture.
-        if (state === STATE_OPEN && document.activeElement !== input) {
-          safeRefocus(85);
-        }
-      }
-
-      compactTrack.addEventListener('pointerup', finishRailGesture, true);
-      compactTrack.addEventListener('pointercancel', function(e){
-        pointerInsideRail = false;
-        railMoved = false;
-        railPointerId = null;
-        if (state === STATE_OPEN && document.activeElement !== input) safeRefocus(90);
-      }, true);
+      const originals = sourceSlider
+        ? Array.from(sourceSlider.querySelectorAll('.category'))
+        : [];
 
       originals.forEach(original => {
         const key = extractCategoryKey(original);
         if (!key) return;
 
-        // DIV instead of BUTTON: cannot steal text-input focus on mobile.
         const pill = document.createElement('div');
         pill.className = 'assal-search-dock-category';
         pill.dataset.category = key;
@@ -39825,69 +39705,179 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
         const label = document.createElement('span');
         const originalLabel = original.querySelector('span');
-        label.textContent = originalLabel
-          ? String(originalLabel.textContent || '').trim()
-          : key;
+        label.textContent = originalLabel ? String(originalLabel.textContent || '').trim() : key;
         pill.appendChild(label);
 
         compactTrack.appendChild(pill);
       });
 
-      ensureHost().appendChild(compactRail);
+      /*
+        Custom horizontal gesture.
+        preventDefault() happens on pointerdown, so Android never transfers
+        text focus away from searchInput and never starts hiding the IME.
+      */
+      compactTrack.addEventListener('pointerdown', function(e){
+        if (state !== OPEN) return;
+
+        try { e.preventDefault(); } catch(_) {}
+
+        railPointerActive = true;
+        railPointerId = e.pointerId;
+        railStartX = Number(e.clientX || 0);
+        railStartY = Number(e.clientY || 0);
+        railStartScrollLeft = compactTrack.scrollLeft;
+        railMoved = false;
+        railStartPill = e.target && e.target.closest
+          ? e.target.closest('.assal-search-dock-category')
+          : null;
+
+        try { compactTrack.setPointerCapture(e.pointerId); } catch(_) {}
+      }, {passive:false, capture:true});
+
+      compactTrack.addEventListener('pointermove', function(e){
+        if (!railPointerActive) return;
+        if (railPointerId !== null && e.pointerId !== railPointerId) return;
+
+        try { e.preventDefault(); } catch(_) {}
+
+        const dx = Number(e.clientX || 0) - railStartX;
+        const dy = Number(e.clientY || 0) - railStartY;
+
+        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) railMoved = true;
+
+        compactTrack.scrollLeft = railStartScrollLeft - dx;
+      }, {passive:false});
+
+      function endRailPointer(e, cancelled){
+        if (!railPointerActive) return;
+        if (railPointerId !== null && e && e.pointerId !== railPointerId) return;
+
+        try { if (e) e.preventDefault(); } catch(_) {}
+        try {
+          if (e && compactTrack.hasPointerCapture && compactTrack.hasPointerCapture(e.pointerId)) {
+            compactTrack.releasePointerCapture(e.pointerId);
+          }
+        } catch(_) {}
+
+        const choosePill = !cancelled && !railMoved ? railStartPill : null;
+
+        railPointerActive = false;
+        railPointerId = null;
+        railMoved = false;
+        railStartPill = null;
+
+        if (choosePill && state === OPEN) {
+          const key = choosePill.dataset.category || '';
+          if (key) {
+            try {
+              if (typeof window.filterCategory === 'function') {
+                window.filterCategory(key);
+              }
+            } catch(_) {}
+            syncCompactActive(true);
+          }
+        }
+
+        /*
+          Do NOT refocus when focus is already correct.
+          With preventDefault above, it should remain on the input and the
+          keyboard therefore never starts its hide/show animation.
+        */
+        if (state === OPEN && document.activeElement !== input) {
+          try { input.focus({preventScroll:true}); } catch(_) {
+            try { input.focus(); } catch(__) {}
+          }
+        }
+      }
+
+      compactTrack.addEventListener('pointerup', function(e){ endRailPointer(e, false); }, {passive:false, capture:true});
+      compactTrack.addEventListener('pointercancel', function(e){ endRailPointer(e, true); }, {passive:false, capture:true});
+
+      document.body.appendChild(compactRail);
       syncCompactActive(false);
     }
 
+    function setContainerSearchMode(on){
+      if (!appContainer) return;
+      appContainer.classList.toggle('assal-search-mode-container', !!on);
+    }
+
     function applyLayout(){
-      if (state !== STATE_OPEN || !host) return;
+      if (state !== OPEN) return;
 
-      const m = getTargetMetrics();
+      const m = getMetrics();
+      const railGap = 6;
 
-      host.style.left = m.centerX + 'px';
-      host.style.top = m.top + 'px';
-      host.style.width = m.width + 'px';
+      dock.style.left = m.left + 'px';
+      dock.style.top = m.top + 'px';
+      dock.style.width = m.width + 'px';
 
-      const v = ensureVeil();
+      const dockRect = dock.getBoundingClientRect();
 
-      // Blur covers all app content from below header to the keyboard.
-      v.style.top = Math.ceil(getHeaderBottom()) + 'px';
+      if (compactRail) {
+        compactRail.style.left = m.left + 'px';
+        compactRail.style.top = Math.ceil(dockRect.bottom + railGap) + 'px';
+        compactRail.style.width = m.width + 'px';
+      }
+
+      const railRect = compactRail ? compactRail.getBoundingClientRect() : null;
+      const shellBottom = railRect ? railRect.bottom : dockRect.bottom;
+
+      if (shell) {
+        shell.style.left = (m.left - 5) + 'px';
+        shell.style.top = (m.top - 5) + 'px';
+        shell.style.width = (m.width + 10) + 'px';
+        shell.style.height = Math.max(1, shellBottom - m.top + 10) + 'px';
+      }
+
+      if (veil) {
+        veil.style.top = Math.floor(getHeaderBottom()) + 'px';
+      }
+    }
+
+    function focusInSameGesture(){
+      /*
+        Because the input is never re-parented, normal pointer default focus
+        usually succeeds. This synchronous fallback remains inside user gesture.
+      */
+      if (document.activeElement === input) return true;
+      try {
+        input.focus({preventScroll:true});
+        return document.activeElement === input;
+      } catch(_) {
+        try {
+          input.focus();
+          return document.activeElement === input;
+        } catch(__) {
+          return false;
+        }
+      }
     }
 
     function openDock(){
-      if (state !== STATE_IDLE || !isMobileSearchContext()) return false;
+      if (state !== IDLE || !isMobile()) return false;
 
-      const first = preFocusRect && preFocusRect.width && preFocusRect.height
-        ? preFocusRect
-        : dock.getBoundingClientRect();
-
+      const first = dock.getBoundingClientRect();
       if (!first.width || !first.height) return false;
 
-      clearTimeout(closeTimer);
-      clearTimeout(refocusTimer);
+      clearTimeout(returnTimer);
       clearTimeout(viewportTimer);
 
-      state = STATE_OPEN;
-
-      homeParent = dock.parentNode;
-      homeNextSibling = dock.nextSibling;
       homeRect = first;
-
       createSlot(first);
-      ensureHost();
-      ensureVeil();
+      ensurePersistentLayers();
+      buildRail();
+      setContainerSearchMode(true);
 
-      // Re-parent while still inside the user's pointer gesture.
-      host.appendChild(dock);
-      buildCompactCategories();
-
-      dock.classList.add('assal-search-dock');
+      state = OPEN;
       document.body.classList.add('assal-search-dock-body');
+      dock.classList.add('assal-search-dock');
 
       applyLayout();
 
-      // Critical Android/WebView fix:
-      // request focus synchronously in the SAME user gesture after re-parenting.
-      focusNow();
-
+      /*
+        FLIP visual motion only. The element stays in its original DOM parent.
+      */
       const last = dock.getBoundingClientRect();
       const dx = first.left - last.left;
       const dy = first.top - last.top;
@@ -39897,90 +39887,79 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       dock.style.transform = `translate3d(${dx}px,${dy}px,0) scaleX(${sx})`;
       void dock.offsetWidth;
 
-      requestAnimationFrame(() => {
-        if (state !== STATE_OPEN) return;
+      if (compactRail) compactRail.classList.add('is-visible');
+      if (shell) shell.classList.add('is-visible');
+      if (veil) veil.classList.add('is-visible');
 
-        dock.style.transition = 'transform .265s cubic-bezier(.22,.82,.23,1)';
+      requestAnimationFrame(() => {
+        if (state !== OPEN) return;
+        dock.style.transition = 'transform .255s cubic-bezier(.22,.82,.23,1)';
         dock.style.transform = 'translate3d(0,0,0) scaleX(1)';
 
-        if (veil) veil.classList.add('is-visible');
-
-        // Backup only; it does nothing when focus is already correct.
-        safeRefocus(45);
-
         setTimeout(() => {
-          if (state === STATE_OPEN) {
-            dock.style.transition = '';
-            syncCompactActive(true);
-            applyLayout();
-          }
-        }, 285);
+          if (state !== OPEN) return;
+          dock.style.transition = '';
+          syncCompactActive(true);
+          applyLayout();
+        }, 270);
       });
 
       return true;
     }
 
-    function restoreDockHome(){
-      try {
-        if (homeParent) {
-          if (homeNextSibling && homeNextSibling.parentNode === homeParent) {
-            homeParent.insertBefore(dock, homeNextSibling);
-          } else {
-            homeParent.appendChild(dock);
-          }
-        }
-      } catch(_) {}
-    }
-
     function finalizeClose(){
       clearTimeout(returnTimer);
 
-      restoreDockHome();
-
       dock.classList.remove('assal-search-dock');
+      dock.style.left = '';
+      dock.style.top = '';
+      dock.style.width = '';
       dock.style.transition = '';
       dock.style.transform = '';
 
       if (slot && slot.parentNode) slot.parentNode.removeChild(slot);
       slot = null;
 
-      if (compactRail && compactRail.parentNode) compactRail.parentNode.removeChild(compactRail);
-      compactRail = null;
-      compactTrack = null;
+      if (compactRail) {
+        compactRail.classList.remove('is-visible');
+        compactRail.style.left = '';
+        compactRail.style.top = '';
+        compactRail.style.width = '';
+      }
 
-      if (host && host.parentNode) host.parentNode.removeChild(host);
-      host = null;
+      if (shell) {
+        shell.classList.remove('is-visible');
+        shell.style.left = '';
+        shell.style.top = '';
+        shell.style.width = '';
+        shell.style.height = '';
+      }
 
-      if (veil && veil.parentNode) veil.parentNode.removeChild(veil);
-      veil = null;
+      if (veil) veil.classList.remove('is-visible');
 
+      setContainerSearchMode(false);
       document.body.classList.remove('assal-search-dock-body');
 
-      pointerInsideRail = false;
-      railMoved = false;
+      railPointerActive = false;
       railPointerId = null;
-
-      homeParent = null;
-      homeNextSibling = null;
+      railMoved = false;
+      railStartPill = null;
       homeRect = null;
-      preFocusRect = null;
 
-      state = STATE_IDLE;
+      state = IDLE;
     }
 
     function closeDock(){
-      if (state !== STATE_OPEN) return;
+      if (state !== OPEN) return;
 
-      state = STATE_CLOSING;
-
-      clearTimeout(closeTimer);
-      clearTimeout(refocusTimer);
+      state = CLOSING;
       clearTimeout(viewportTimer);
 
-      // Explicit end of search session.
       try { input.blur(); } catch(_) {}
 
       if (veil) veil.classList.remove('is-visible');
+      if (compactRail) compactRail.classList.remove('is-visible');
+      if (shell) shell.classList.remove('is-visible');
 
       const current = dock.getBoundingClientRect();
       const target = slot && slot.isConnected ? slot.getBoundingClientRect() : homeRect;
@@ -39994,38 +39973,36 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       const dy = target.top - current.top;
       const sx = current.width ? Math.max(.86, Math.min(1.14, target.width / current.width)) : 1;
 
-      dock.style.transition = 'transform .255s cubic-bezier(.22,.82,.23,1)';
+      dock.style.transition = 'transform .245s cubic-bezier(.22,.82,.23,1)';
       dock.style.transform = `translate3d(${dx}px,${dy}px,0) scaleX(${sx})`;
 
-      // Once closing begins, this cleanup is never cancelled.
-      returnTimer = setTimeout(finalizeClose, 275);
+      returnTimer = setTimeout(finalizeClose, 260);
     }
 
     function finishSearchSession(){
-      if (state === STATE_OPEN) {
+      if (state === OPEN) {
         closeDock();
       } else {
-        // Even outside dock, voice/manual completed search should not leave keyboard focus behind.
         try { input.blur(); } catch(_) {}
       }
     }
 
-    // Expose a single end-point for voice search and any future search method.
     window.__ASSAL_FINISH_SEARCH_SESSION__ = finishSearchSession;
     window.__ASSAL_CLOSE_SEARCH_DOCK__ = closeDock;
     window.__ASSAL_OPEN_SEARCH_DOCK__ = function(){
-      if (state === STATE_IDLE) {
-        try { preFocusRect = dock.getBoundingClientRect(); } catch(_) { preFocusRect = null; }
-        return openDock();
+      if (state === IDLE) {
+        openDock();
+        focusInSameGesture();
+        return state === OPEN;
       }
-      if (state === STATE_OPEN) {
-        focusNow();
+      if (state === OPEN) {
+        focusInSameGesture();
         return true;
       }
       return false;
     };
 
-    function isInsideFloatingUI(target){
+    function targetInsideDockUI(target){
       try {
         return !!(
           target &&
@@ -40039,46 +40016,46 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       }
     }
 
-    // Open before normal click focus, and focus synchronously.
+    /*
+      OPEN: pointerdown changes only CSS position; no DOM move.
+      We DO NOT preventDefault, so Android's native text focus/IME path remains intact.
+    */
     input.addEventListener('pointerdown', function(){
-      if (state === STATE_IDLE) {
-        try { preFocusRect = dock.getBoundingClientRect(); } catch(_) { preFocusRect = null; }
+      if (state === IDLE) {
         openDock();
-      } else if (state === STATE_OPEN) {
-        focusNow();
       }
     }, true);
 
-    // Accessibility/keyboard fallback.
+    /*
+      Click is still the same user gesture. If a WebView failed to apply its
+      normal focus after the fixed-position change, force it here synchronously.
+    */
+    input.addEventListener('click', function(){
+      if (state === OPEN && document.activeElement !== input) {
+        focusInSameGesture();
+      }
+    }, true);
+
+    /* Keyboard/accessibility fallback. */
     input.addEventListener('focus', function(){
-      if (state === STATE_IDLE && isMobileSearchContext()) {
-        try { preFocusRect = dock.getBoundingClientRect(); } catch(_) { preFocusRect = null; }
+      if (state === IDLE && isMobile()) {
         openDock();
       }
     }, true);
 
-    // Transient Android blur never closes the dock.
-    input.addEventListener('blur', function(){
-      if (state !== STATE_OPEN) return;
-      if (pointerInsideRail) return;
+    /*
+      Do not close or refocus on blur.
+      Blur may be transient on Android. Search/Enter/outside/voice are the only
+      explicit close paths. Category interaction prevents blur at source.
+    */
+    input.addEventListener('blur', function(){}, true);
 
-      updateKeyboardState();
-
-      if (keyboardLikelyOpen && document.activeElement !== input) {
-        safeRefocus(90);
-      }
-    }, true);
-
-    // Search button: original search runs first, then unified finish.
     if (searchButton) {
       searchButton.addEventListener('click', function(){
-        if (state === STATE_OPEN) {
-          setTimeout(finishSearchSession, 30);
-        }
+        if (state === OPEN) setTimeout(finishSearchSession, 30);
       }, false);
     }
 
-    // Enter / Escape.
     input.addEventListener('keydown', function(e){
       if (e.key === 'Enter') {
         setTimeout(finishSearchSession, 30);
@@ -40087,20 +40064,18 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       }
     }, true);
 
-    // Only a genuine outside press closes the session.
     document.addEventListener('pointerdown', function(e){
-      if (state !== STATE_OPEN) return;
-      if (isInsideFloatingUI(e.target)) return;
+      if (state !== OPEN) return;
+      if (railPointerActive) return;
+      if (targetInsideDockUI(e.target)) return;
       finishSearchSession();
     }, true);
 
-    // Reflect original category changes without any animated scroll/focus churn.
     try {
       if (sourceSlider && window.MutationObserver) {
         const observer = new MutationObserver(function(){
-          if (state === STATE_OPEN) syncCompactActive(false);
+          if (state === OPEN) syncCompactActive(false);
         });
-
         observer.observe(sourceSlider, {
           subtree:true,
           attributes:true,
@@ -40110,25 +40085,11 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     } catch(_) {}
 
     function viewportChanged(){
-      if (state !== STATE_OPEN) return;
-
+      if (state !== OPEN) return;
       clearTimeout(viewportTimer);
-
       viewportTimer = setTimeout(() => {
-        if (state !== STATE_OPEN) return;
-
-        updateKeyboardState();
-        applyLayout();
-
-        // No closing from viewport changes. No focus churn while user scrolls categories.
-        if (
-          !pointerInsideRail &&
-          keyboardLikelyOpen &&
-          document.activeElement !== input
-        ) {
-          safeRefocus(100);
-        }
-      }, 45);
+        if (state === OPEN) applyLayout();
+      }, 40);
     }
 
     window.addEventListener('resize', viewportChanged, {passive:true});
@@ -40140,8 +40101,15 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     }
 
     document.addEventListener('visibilitychange', function(){
-      if (document.hidden && state === STATE_OPEN) finishSearchSession();
+      if (document.hidden && state === OPEN) finishSearchSession();
     });
+
+    /*
+      Pre-create expensive composited layers once, while idle.
+      They remain hidden instead of being constructed/destroyed for every focus.
+    */
+    ensurePersistentLayers();
+    buildRail();
   }
 
   if (document.readyState === 'loading') {
