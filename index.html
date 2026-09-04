@@ -15567,25 +15567,27 @@ html.low-end-device.assal-admin-compat-news #newsTicker{
     animation:none !important;
 }
 
-/* نافذة التوافقات الجديدة */
+/* نافذة التوافقات الجديدة — ASSAL Clean Premium */
 .assal-compat-feed-container.swal2-backdrop-show{
-    background:rgba(2,8,23,.72) !important;
-    backdrop-filter:blur(10px) saturate(125%) !important;
-    -webkit-backdrop-filter:blur(10px) saturate(125%) !important;
+    background:rgba(2,8,23,.76) !important;
+    backdrop-filter:blur(11px) saturate(122%) !important;
+    -webkit-backdrop-filter:blur(11px) saturate(122%) !important;
 }
 .assal-compat-feed-popup{
-    width:min(720px,94vw) !important;
-    max-width:720px !important;
+    width:min(680px,calc(100vw - 24px)) !important;
+    max-width:680px !important;
     padding:0 !important;
     border-radius:24px !important;
     overflow:hidden !important;
     color:#f8fafc !important;
     background:
-      radial-gradient(circle at 14% 0%,rgba(34,211,238,.16),transparent 36%),
-      radial-gradient(circle at 100% 100%,rgba(59,130,246,.14),transparent 40%),
-      linear-gradient(145deg,rgba(15,23,42,.99),rgba(8,15,29,.99)) !important;
-    border:1px solid rgba(165,243,252,.12) !important;
-    box-shadow:0 28px 80px rgba(0,0,0,.58), inset 0 1px 0 rgba(255,255,255,.05) !important;
+      radial-gradient(circle at 8% 0%,rgba(34,211,238,.11),transparent 34%),
+      radial-gradient(circle at 100% 100%,rgba(59,130,246,.10),transparent 42%),
+      linear-gradient(145deg,rgba(15,23,42,.995),rgba(7,14,27,.995)) !important;
+    border:1px solid rgba(148,210,230,.13) !important;
+    box-shadow:
+      0 30px 90px rgba(0,0,0,.62),
+      inset 0 1px 0 rgba(255,255,255,.045) !important;
     font-family:'Cairo','Tajawal',sans-serif !important;
 }
 .assal-compat-feed-popup .swal2-html-container{
@@ -15594,101 +15596,143 @@ html.low-end-device.assal-admin-compat-news #newsTicker{
     overflow:visible !important;
 }
 .assal-compat-feed-popup .swal2-close{
-    width:36px !important;
-    height:36px !important;
-    min-width:36px !important;
-    min-height:36px !important;
-    margin:12px 12px 0 auto !important;
-    border-radius:999px !important;
-    color:#fecaca !important;
-    background:rgba(127,29,29,.72) !important;
-    border:1px solid rgba(248,113,113,.20) !important;
-    box-shadow:0 8px 20px rgba(0,0,0,.24) !important;
+    display:none !important;
 }
 .assal-compat-feed-shell{
     direction:rtl;
     text-align:right;
-    padding:0 16px 18px;
+    padding:16px;
 }
 .assal-compat-feed-head{
-    display:flex;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
     align-items:center;
     gap:12px;
-    padding:0 2px 14px;
-    border-bottom:1px solid rgba(255,255,255,.07);
+    padding:2px 2px 15px;
+    border-bottom:1px solid rgba(255,255,255,.075);
+}
+.assal-compat-feed-head-main{
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:11px;
 }
 .assal-compat-feed-head-icon{
-    width:48px;
-    height:48px;
-    min-width:48px;
-    border-radius:17px;
+    width:42px;
+    height:42px;
+    min-width:42px;
+    border-radius:14px;
     display:grid;
     place-items:center;
-    color:#e6fffb;
-    font-size:20px;
-    background:linear-gradient(145deg,#0f766e,#0891b2);
-    box-shadow:0 12px 28px rgba(8,145,178,.24), inset 0 1px 0 rgba(255,255,255,.15);
+    color:#e9feff;
+    font-size:17px;
+    background:linear-gradient(145deg,rgba(15,118,110,.98),rgba(8,145,178,.98));
+    border:1px solid rgba(165,243,252,.13);
+    box-shadow:0 9px 22px rgba(8,145,178,.20), inset 0 1px 0 rgba(255,255,255,.12);
 }
-.assal-compat-feed-head-copy{min-width:0;flex:1;}
+.assal-compat-feed-head-copy{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
 .assal-compat-feed-title{
     margin:0;
-    font-size:19px;
-    line-height:1.3;
+    font-size:18px;
+    line-height:1.25;
     font-weight:900;
     color:#f8fafc;
 }
-.assal-compat-feed-subtitle{
-    margin-top:4px;
-    font-size:11.5px;
-    font-weight:700;
-    color:rgba(207,250,254,.62);
+.assal-compat-feed-head-meta{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+}
+.assal-compat-feed-count,
+.assal-compat-feed-status{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:24px;
+    padding:4px 9px;
+    border-radius:999px;
+    font-size:9.8px;
+    line-height:1;
+    font-weight:900;
+    white-space:nowrap;
 }
 .assal-compat-feed-count{
-    flex:0 0 auto;
-    padding:6px 10px;
-    border-radius:999px;
-    font-size:11px;
-    font-weight:900;
-    color:#cffafe;
+    color:#d8fbff;
     background:rgba(8,145,178,.12);
-    border:1px solid rgba(103,232,249,.14);
+    border:1px solid rgba(103,232,249,.15);
+}
+.assal-compat-feed-status{
+    color:#cbd5e1;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.07);
+}
+.assal-compat-feed-close{
+    width:36px;
+    height:36px;
+    min-width:36px;
+    border:0;
+    border-radius:12px;
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+    color:#ffe4e6;
+    background:linear-gradient(145deg,rgba(127,29,29,.90),rgba(153,27,27,.82));
+    border:1px solid rgba(248,113,113,.16);
+    box-shadow:0 8px 18px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.06);
+    transition:transform .16s ease, filter .16s ease, background .16s ease;
+}
+.assal-compat-feed-close i{
+    font-size:15px;
+    pointer-events:none;
+}
+.assal-compat-feed-close:hover{
+    filter:brightness(1.08);
+    transform:translateY(-1px);
+}
+.assal-compat-feed-close:active{
+    transform:scale(.95);
 }
 .assal-compat-feed-list{
     margin-top:12px;
-    max-height:min(58vh,520px);
+    max-height:min(58vh,500px);
     overflow-y:auto;
     display:grid;
-    gap:8px;
-    padding:1px 2px 2px;
+    grid-template-columns:1fr;
+    gap:9px;
+    padding:1px 1px 2px;
     scrollbar-width:none;
     -ms-overflow-style:none;
 }
 .assal-compat-feed-list::-webkit-scrollbar{display:none;}
 .assal-compat-feed-card{
-    display:grid;
-    grid-template-columns:auto 1fr;
-    gap:10px;
-    align-items:start;
-    padding:11px 12px;
-    border-radius:16px;
-    background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(8,145,178,.045));
-    border:1px solid rgba(255,255,255,.075);
-    box-shadow:0 8px 20px rgba(0,0,0,.13);
-}
-.assal-compat-feed-badges{
     display:flex;
     flex-direction:column;
-    align-items:stretch;
-    gap:5px;
-    min-width:52px;
+    gap:9px;
+    padding:12px 13px 13px;
+    border-radius:17px;
+    background:
+      linear-gradient(135deg,rgba(255,255,255,.052),rgba(8,145,178,.035));
+    border:1px solid rgba(255,255,255,.075);
+    box-shadow:0 8px 22px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.025);
+}
+.assal-compat-feed-card-top{
+    display:flex;
+    align-items:center;
+    gap:6px;
 }
 .assal-compat-feed-type,
 .assal-compat-feed-new{
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    min-height:24px;
-    padding:4px 8px;
+    min-height:25px;
+    padding:4px 9px;
     border-radius:999px;
     font-size:9.5px;
     line-height:1;
@@ -15697,49 +15741,65 @@ html.low-end-device.assal-admin-compat-news #newsTicker{
 }
 .assal-compat-feed-type{
     color:#d9fffb;
-    background:rgba(20,184,166,.13);
-    border:1px solid rgba(94,234,212,.14);
+    background:rgba(20,184,166,.12);
+    border:1px solid rgba(94,234,212,.15);
 }
 .assal-compat-feed-new{
     color:#fef3c7;
-    background:rgba(245,158,11,.12);
-    border:1px solid rgba(251,191,36,.15);
+    background:rgba(245,158,11,.10);
+    border:1px solid rgba(251,191,36,.14);
 }
 .assal-compat-feed-text{
     direction:ltr;
     unicode-bidi:plaintext;
     text-align:left;
-    font-size:12.5px;
-    line-height:1.72;
+    font-size:12.6px;
+    line-height:1.7;
     font-weight:800;
     color:#f8fafc;
     overflow-wrap:anywhere;
 }
 .assal-compat-feed-empty{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
+    min-height:160px;
+    display:grid;
+    place-items:center;
+    align-content:center;
     gap:8px;
-    min-height:180px;
     padding:24px 14px;
     text-align:center;
-    color:rgba(226,232,240,.78);
+    color:rgba(226,232,240,.74);
 }
-.assal-compat-feed-empty i{font-size:28px;color:#67e8f9;opacity:.72;}
-.assal-compat-feed-empty strong{font-size:14px;color:#f8fafc;}
-.assal-compat-feed-empty span{font-size:11.5px;line-height:1.65;}
+.assal-compat-feed-empty i{
+    font-size:26px;
+    color:#67e8f9;
+    opacity:.70;
+}
+.assal-compat-feed-empty strong{
+    font-size:14px;
+    color:#f8fafc;
+}
+.assal-compat-feed-empty span{
+    font-size:11.5px;
+    line-height:1.65;
+}
+@media(min-width:700px){
+    .assal-compat-feed-list{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+}
 @media(max-width:520px){
-    .assal-compat-feed-shell{padding:0 11px 13px;}
-    .assal-compat-feed-head{gap:9px;padding-bottom:11px;}
-    .assal-compat-feed-head-icon{width:42px;height:42px;min-width:42px;border-radius:15px;font-size:17px;}
+    .assal-compat-feed-shell{padding:13px;}
+    .assal-compat-feed-head{gap:10px;padding-bottom:12px;}
+    .assal-compat-feed-head-main{gap:9px;}
+    .assal-compat-feed-head-icon{
+        width:38px;height:38px;min-width:38px;border-radius:13px;font-size:15px;
+    }
     .assal-compat-feed-title{font-size:16px;}
-    .assal-compat-feed-subtitle{font-size:10px;}
-    .assal-compat-feed-count{font-size:9.5px;padding:5px 8px;}
-    .assal-compat-feed-card{padding:9px 9px;gap:8px;border-radius:14px;}
-    .assal-compat-feed-badges{min-width:48px;}
-    .assal-compat-feed-type,.assal-compat-feed-new{font-size:8.7px;padding:4px 6px;}
-    .assal-compat-feed-text{font-size:11.2px;line-height:1.68;}
+    .assal-compat-feed-count,.assal-compat-feed-status{font-size:9px;padding:4px 8px;min-height:22px;}
+    .assal-compat-feed-close{width:34px;height:34px;min-width:34px;border-radius:11px;}
+    .assal-compat-feed-card{padding:11px 11px 12px;gap:8px;border-radius:15px;}
+    .assal-compat-feed-type,.assal-compat-feed-new{font-size:8.9px;padding:4px 8px;min-height:23px;}
+    .assal-compat-feed-text{font-size:11.5px;line-height:1.68;}
 }
 html.low-end-device .assal-compat-feed-container.swal2-backdrop-show,
 html.low-end-device .assal-compat-feed-popup{
@@ -15747,50 +15807,70 @@ html.low-end-device .assal-compat-feed-popup{
     -webkit-backdrop-filter:none !important;
 }
 
-/* ===== ASSAL PREMIUM SEARCH FOCUS DOCK ===== */
+/* ===== ASSAL PREMIUM SEARCH FOCUS DOCK — BODY PORTAL ===== */
 .assal-search-dock-slot{
     display:block;
     width:100%;
     pointer-events:none;
     visibility:hidden;
 }
+.assal-search-dock-host{
+    position:fixed;
+    z-index:2147482800;
+    pointer-events:none;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    transform:translateX(-50%);
+    overflow:visible !important;
+    isolation:isolate;
+}
+.assal-search-dock-host > .search-container{
+    pointer-events:auto;
+}
 .assal-search-dock-veil{
     position:fixed;
     left:0;
     right:0;
-    z-index:1988;
+    bottom:0;
+    z-index:2147482700;
     pointer-events:none;
     opacity:0;
-    background:linear-gradient(180deg,rgba(4,12,24,.82),rgba(4,12,24,.46) 62%,rgba(4,12,24,0));
-    backdrop-filter:blur(7px);
-    -webkit-backdrop-filter:blur(7px);
-    transition:opacity .24s ease;
+    background:linear-gradient(180deg,rgba(4,12,24,.12),rgba(4,12,24,.42) 20%,rgba(4,12,24,.10) 78%,rgba(4,12,24,0));
+    backdrop-filter:blur(5px);
+    -webkit-backdrop-filter:blur(5px);
+    transition:opacity .22s ease;
 }
 .assal-search-dock-veil.is-visible{opacity:1;}
 .search-container.assal-search-dock{
-    position:fixed !important;
-    z-index:1994 !important;
+    position:relative !important;
+    inset:auto !important;
+    left:auto !important;
+    top:auto !important;
+    right:auto !important;
+    width:100% !important;
     margin:0 !important;
     padding:5px !important;
     box-sizing:border-box !important;
     border-radius:25px !important;
+    overflow:visible !important;
     isolation:isolate;
     background:
-      radial-gradient(circle at 18% -20%,rgba(34,211,238,.13),transparent 42%),
-      linear-gradient(145deg,rgba(26,42,61,.96),rgba(12,22,39,.97)) !important;
-    border:1px solid rgba(148,210,230,.18) !important;
+      radial-gradient(circle at 18% -20%,rgba(34,211,238,.12),transparent 42%),
+      linear-gradient(145deg,rgba(26,42,61,.985),rgba(12,22,39,.99)) !important;
+    border:1px solid rgba(148,210,230,.20) !important;
     box-shadow:
-      0 18px 44px rgba(0,0,0,.38),
+      0 14px 34px rgba(0,0,0,.34),
       0 0 0 1px rgba(255,255,255,.025),
-      inset 0 1px 0 rgba(255,255,255,.08) !important;
-    backdrop-filter:blur(18px) saturate(135%);
-    -webkit-backdrop-filter:blur(18px) saturate(135%);
+      inset 0 1px 0 rgba(255,255,255,.085) !important;
+    backdrop-filter:blur(16px) saturate(132%);
+    -webkit-backdrop-filter:blur(16px) saturate(132%);
     transform-origin:center center;
     transition:
-      transform .285s cubic-bezier(.22,.82,.23,1),
-      box-shadow .24s ease,
-      border-color .24s ease,
-      background .24s ease !important;
+      transform .29s cubic-bezier(.22,.82,.23,1),
+      box-shadow .22s ease,
+      border-color .22s ease,
+      background .22s ease !important;
     will-change:transform;
 }
 .search-container.assal-search-dock::after{
@@ -15800,21 +15880,21 @@ html.low-end-device .assal-compat-feed-popup{
     z-index:-1;
     border-radius:inherit;
     pointer-events:none;
-    box-shadow:0 0 24px rgba(34,211,238,.10);
+    box-shadow:0 0 20px rgba(34,211,238,.09);
 }
 .search-container.assal-search-dock #searchInput{
-    border-color:rgba(103,232,249,.28) !important;
-    background:rgba(2,8,23,.54) !important;
+    border-color:rgba(103,232,249,.30) !important;
+    background:rgba(2,8,23,.58) !important;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 0 0 1px rgba(34,211,238,.025) !important;
     color:#ffffff !important;
     caret-color:#67e8f9 !important;
 }
 .search-container.assal-search-dock #searchInput:focus{
-    border-color:rgba(103,232,249,.46) !important;
-    box-shadow:0 0 0 3px rgba(34,211,238,.07),inset 0 1px 0 rgba(255,255,255,.05) !important;
+    border-color:rgba(103,232,249,.48) !important;
+    box-shadow:0 0 0 3px rgba(34,211,238,.065),inset 0 1px 0 rgba(255,255,255,.05) !important;
 }
 .search-container.assal-search-dock .search-placeholder-label{
-    color:rgba(226,248,255,.52) !important;
+    color:rgba(226,248,255,.54) !important;
 }
 .search-container.assal-search-dock-returning{
     pointer-events:none;
@@ -15828,12 +15908,12 @@ html.low-end-device .assal-compat-feed-popup{
 html.low-end-device .assal-search-dock-veil{
     backdrop-filter:none !important;
     -webkit-backdrop-filter:none !important;
-    background:linear-gradient(180deg,rgba(4,12,24,.88),rgba(4,12,24,.28),transparent);
+    background:linear-gradient(180deg,rgba(4,12,24,.10),rgba(4,12,24,.30),transparent);
 }
 html.low-end-device .search-container.assal-search-dock{
     backdrop-filter:none !important;
     -webkit-backdrop-filter:none !important;
-    box-shadow:0 12px 30px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.05) !important;
+    box-shadow:0 11px 26px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.05) !important;
 }
 </style>
 
@@ -24618,11 +24698,11 @@ async function refreshAssalAdminCompatFeed(options = {}) {
 function assalCompatFeedModalHtml(items) {
   const list = Array.isArray(items) ? items : [];
   const offline = (typeof shouldShowAssalOfflineNews === 'function' && shouldShowAssalOfflineNews()) || navigator.onLine === false || !!window.__ASSAL_COMPAT_USING_OFFLINE_CACHE__;
-  const sourceLine = offline ? 'آخر نسخة توافقات محفوظة على الجهاز' : 'مباشرة من شيت التوافقات الخاص بكادر عسل';
+
   const body = list.length
     ? list.map(item => `
         <div class="assal-compat-feed-card">
-          <div class="assal-compat-feed-badges">
+          <div class="assal-compat-feed-card-top">
             <span class="assal-compat-feed-type">${assalCompatFeedEscape(item.type)}</span>
             <span class="assal-compat-feed-new">جديد</span>
           </div>
@@ -24632,18 +24712,25 @@ function assalCompatFeedModalHtml(items) {
         <div class="assal-compat-feed-empty">
           <i class="fas fa-link"></i>
           <strong>ماكو توافقات جديدة حالياً</strong>
-          <span>أي سطر تمسح منه الرقم 1 من عمود New في شيت التوافقات راح يظهر هنا تلقائياً.</span>
+          <span>راح تظهر التوافقات الجديدة هنا تلقائياً.</span>
         </div>`;
 
   return `
     <div class="assal-compat-feed-shell">
       <div class="assal-compat-feed-head">
-        <div class="assal-compat-feed-head-icon"><i class="fas fa-link"></i></div>
-        <div class="assal-compat-feed-head-copy">
-          <h3 class="assal-compat-feed-title">التوافقات الجديدة</h3>
-          <div class="assal-compat-feed-subtitle">${assalCompatFeedEscape(sourceLine)}</div>
+        <div class="assal-compat-feed-head-main">
+          <div class="assal-compat-feed-head-icon"><i class="fas fa-link"></i></div>
+          <div class="assal-compat-feed-head-copy">
+            <h3 class="assal-compat-feed-title">التوافقات الجديدة</h3>
+            <div class="assal-compat-feed-head-meta">
+              <span class="assal-compat-feed-count">${list.length} جديد</span>
+              ${offline ? '<span class="assal-compat-feed-status"><i class="fas fa-wifi-slash" style="margin-left:5px"></i>محفوظة</span>' : ''}
+            </div>
+          </div>
         </div>
-        <div class="assal-compat-feed-count">${list.length} جديد</div>
+        <button type="button" class="assal-compat-feed-close" aria-label="إغلاق">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
       <div class="assal-compat-feed-list">${body}</div>
     </div>`;
@@ -24659,15 +24746,23 @@ async function openAssalAdminCompatibilityFeedModal() {
   Swal.fire({
     html: assalCompatFeedModalHtml(assalAdminCompatFeedItems),
     showConfirmButton: false,
-    showCloseButton: true,
+    showCloseButton: false,
     allowOutsideClick: true,
     allowEscapeKey: true,
     customClass: {
       container: 'assal-compat-feed-container search-related-modal',
       popup: 'assal-compat-feed-popup search-related-modal'
     },
-    didOpen: () => { try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch (_) {} },
-    willClose: () => { try { setTimeout(() => { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); }, 0); } catch (_) {} }
+    didOpen: () => {
+      try {
+        const closeBtn = document.querySelector('.assal-compat-feed-popup .assal-compat-feed-close');
+        if (closeBtn) closeBtn.addEventListener('click', () => Swal.close(), { once:true });
+      } catch (_) {}
+      try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch (_) {}
+    },
+    willClose: () => {
+      try { setTimeout(() => { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); }, 0); } catch (_) {}
+    }
   });
 }
 window.openAssalAdminCompatibilityFeedModal = openAssalAdminCompatibilityFeedModal;
@@ -39290,25 +39385,26 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 <!-- ===== ASSAL PREMIUM SEARCH FOCUS DOCK FINAL ===== -->
 <script id="assalPremiumSearchFocusDockFinal">
 (function(){
-  if (window.__ASSAL_PREMIUM_SEARCH_FOCUS_DOCK_FINAL__) return;
-  window.__ASSAL_PREMIUM_SEARCH_FOCUS_DOCK_FINAL__ = true;
+  if (window.__ASSAL_PREMIUM_SEARCH_FOCUS_DOCK_PORTAL_FINAL__) return;
+  window.__ASSAL_PREMIUM_SEARCH_FOCUS_DOCK_PORTAL_FINAL__ = true;
 
   function boot(){
     const input = document.getElementById('searchInput');
     const dock = input && input.closest ? input.closest('.search-container') : null;
-    if (!input || !dock || dock.dataset.assalPremiumDockBound === '1') return;
-    dock.dataset.assalPremiumDockBound = '1';
+    if (!input || !dock || dock.dataset.assalPremiumDockPortalBound === '1') return;
+    dock.dataset.assalPremiumDockPortalBound = '1';
 
     let slot = null;
+    let host = null;
     let veil = null;
     let active = false;
     let returning = false;
-    let activatedAt = 0;
-    let savedScrollY = 0;
     let closeTimer = null;
     let cleanupTimer = null;
+    let homeParent = null;
+    let homeNextSibling = null;
+    let homeRect = null;
     let preFocusRect = null;
-    let preFocusScrollY = 0;
     let preFocusAt = 0;
 
     function isMobileSearchContext(){
@@ -39329,19 +39425,48 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       };
     }
 
-    function getDockMetrics(){
+    function getHeaderBottom(){
       const vp = getViewport();
-      const margin = vp.width <= 430 ? 8 : 12;
-      const maxWidth = Math.min(760, vp.width - (margin * 2));
-      const width = Math.max(240, maxWidth);
-      const left = vp.left + ((vp.width - width) / 2);
       const header = document.querySelector('.header');
-      let headerHeight = 44;
+      let bottom = vp.top + 44;
       try {
-        if (header) headerHeight = Math.max(44, Math.round(header.getBoundingClientRect().height || 44));
+        if (header) {
+          const r = header.getBoundingClientRect();
+          bottom = Math.max(bottom, r.bottom);
+        }
       } catch(_) {}
-      const top = vp.top + headerHeight + 7;
-      return { left, top, width, vp };
+      return bottom;
+    }
+
+    function getTargetMetrics(){
+      const vp = getViewport();
+      const safeMargin = vp.width <= 430 ? 9 : 12;
+
+      let desiredWidth = homeRect && homeRect.width ? homeRect.width : (vp.width - safeMargin * 2);
+      try {
+        const appContainer = document.querySelector('.container');
+        if (appContainer) {
+          const cr = appContainer.getBoundingClientRect();
+          if (cr.width > 220) desiredWidth = Math.min(desiredWidth, cr.width);
+        }
+      } catch(_) {}
+
+      desiredWidth = Math.max(240, Math.min(desiredWidth, vp.width - safeMargin * 2));
+
+      // التمركز يتم على الـ visual viewport نفسه، وليس على parent قديم أو transform خارجي.
+      const centerX = vp.left + (vp.width / 2);
+      const top = Math.max(vp.top + 7, getHeaderBottom() + 8);
+
+      return { vp, width: desiredWidth, centerX, top };
+    }
+
+    function ensureHost(){
+      if (host && host.isConnected) return host;
+      host = document.createElement('div');
+      host.className = 'assal-search-dock-host';
+      host.setAttribute('aria-hidden','false');
+      document.body.appendChild(host);
+      return host;
     }
 
     function ensureVeil(){
@@ -39351,18 +39476,6 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       veil.setAttribute('aria-hidden','true');
       document.body.appendChild(veil);
       return veil;
-    }
-
-    function applyDockMetrics(){
-      if (!active || !dock) return;
-      const m = getDockMetrics();
-      dock.style.left = m.left + 'px';
-      dock.style.top = m.top + 'px';
-      dock.style.width = m.width + 'px';
-
-      const v = ensureVeil();
-      v.style.top = Math.max(m.vp.top + 44, m.top - 8) + 'px';
-      v.style.height = Math.max(82, dock.getBoundingClientRect().height + 27) + 'px';
     }
 
     function createSlot(firstRect){
@@ -39378,14 +39491,17 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       dock.parentNode.insertBefore(slot, dock);
     }
 
-    function softlyRestoreInitialScroll(){
-      if (!active) return;
-      if ((Date.now() - activatedAt) > 520) return;
-      try {
-        if (Math.abs(window.scrollY - savedScrollY) > 3) {
-          window.scrollTo({ top: savedScrollY, left: window.scrollX, behavior: 'auto' });
-        }
-      } catch(_) {}
+    function applyHostMetrics(){
+      if (!active || !host || !dock) return;
+      const m = getTargetMetrics();
+      host.style.left = m.centerX + 'px';
+      host.style.top = m.top + 'px';
+      host.style.width = m.width + 'px';
+
+      const dockRect = dock.getBoundingClientRect();
+      const v = ensureVeil();
+      // يبدأ التعتيم من تحت الدوك حصراً حتى لا يغطي حدوده أو ظله العلوي.
+      v.style.top = Math.ceil(dockRect.bottom + 7) + 'px';
     }
 
     function activate(){
@@ -39398,19 +39514,25 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       if (!first.width || !first.height) return;
 
       active = true;
-      activatedAt = Date.now();
-      savedScrollY = recentPointer ? preFocusScrollY : (window.scrollY || 0);
+      homeParent = dock.parentNode;
+      homeNextSibling = dock.nextSibling;
+      homeRect = first;
+
       createSlot(first);
+      ensureHost();
       ensureVeil();
 
+      // نقل نفس شريط البحث إلى طبقة مستقلة أعلى body يحرره من overflow / shadow / stacking contexts.
+      host.appendChild(dock);
       dock.classList.add('assal-search-dock');
       document.body.classList.add('assal-search-dock-body');
-      applyDockMetrics();
+
+      applyHostMetrics();
 
       const last = dock.getBoundingClientRect();
       const dx = first.left - last.left;
       const dy = first.top - last.top;
-      const sx = last.width ? Math.max(.82, Math.min(1.18, first.width / last.width)) : 1;
+      const sx = last.width ? Math.max(.84, Math.min(1.16, first.width / last.width)) : 1;
 
       dock.style.transition = 'none';
       dock.style.transform = `translate3d(${dx}px, ${dy}px, 0) scaleX(${sx})`;
@@ -39424,31 +39546,49 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
           if (veil) veil.classList.add('is-visible');
         });
       });
+    }
 
-      setTimeout(softlyRestoreInitialScroll, 70);
-      setTimeout(softlyRestoreInitialScroll, 240);
-      setTimeout(softlyRestoreInitialScroll, 430);
+    function restoreDockToHome(){
+      try {
+        if (homeParent) {
+          if (homeNextSibling && homeNextSibling.parentNode === homeParent) {
+            homeParent.insertBefore(dock, homeNextSibling);
+          } else {
+            homeParent.appendChild(dock);
+          }
+        }
+      } catch(_) {}
     }
 
     function cleanupAfterReturn(){
+      restoreDockToHome();
       returning = false;
       active = false;
+
       dock.classList.remove('assal-search-dock','assal-search-dock-returning');
-      dock.style.left = '';
-      dock.style.top = '';
-      dock.style.width = '';
       dock.style.transform = '';
       dock.style.transition = '';
+
       document.body.classList.remove('assal-search-dock-body');
+
       if (slot && slot.parentNode) slot.parentNode.removeChild(slot);
       slot = null;
+
+      if (host && host.parentNode) host.parentNode.removeChild(host);
+      host = null;
+
       if (veil) {
         veil.classList.remove('is-visible');
+        const oldVeil = veil;
+        veil = null;
         setTimeout(() => {
-          try { if (veil && veil.parentNode && !active) veil.parentNode.removeChild(veil); } catch(_) {}
-          if (!active) veil = null;
-        }, 260);
+          try { if (oldVeil && oldVeil.parentNode) oldVeil.parentNode.removeChild(oldVeil); } catch(_) {}
+        }, 240);
       }
+
+      homeParent = null;
+      homeNextSibling = null;
+      homeRect = null;
     }
 
     function deactivate(){
@@ -39457,17 +39597,22 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       returning = true;
 
       const current = dock.getBoundingClientRect();
-      const target = slot && slot.isConnected ? slot.getBoundingClientRect() : current;
+      const target = slot && slot.isConnected ? slot.getBoundingClientRect() : homeRect;
+      if (!target) {
+        cleanupAfterReturn();
+        return;
+      }
+
       const dx = target.left - current.left;
       const dy = target.top - current.top;
-      const sx = current.width ? Math.max(.82, Math.min(1.18, target.width / current.width)) : 1;
+      const sx = current.width ? Math.max(.84, Math.min(1.16, target.width / current.width)) : 1;
 
       dock.classList.add('assal-search-dock-returning');
       if (veil) veil.classList.remove('is-visible');
       dock.style.transform = `translate3d(${dx}px, ${dy}px, 0) scaleX(${sx})`;
 
       clearTimeout(cleanupTimer);
-      cleanupTimer = setTimeout(cleanupAfterReturn, 300);
+      cleanupTimer = setTimeout(cleanupAfterReturn, 305);
     }
 
     function scheduleDeactivate(){
@@ -39476,11 +39621,12 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         const ae = document.activeElement;
         if (ae && dock.contains(ae) && ae === input) return;
         deactivate();
-      }, 145);
+      }, 150);
     }
 
     input.addEventListener('focus', activate, true);
     input.addEventListener('blur', scheduleDeactivate, true);
+
     input.addEventListener('keydown', function(e){
       if (e.key === 'Escape') {
         try { input.blur(); } catch(_) {}
@@ -39488,27 +39634,36 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       }
     }, true);
 
-    // إذا لمس المستخدم نفس الحقل مرة ثانية بعد blur لحظي، لا نخلي الدوك يختفي ويظهر.
     input.addEventListener('pointerdown', function(){
       clearTimeout(closeTimer);
       try {
         preFocusRect = dock.getBoundingClientRect();
-        preFocusScrollY = window.scrollY || 0;
         preFocusAt = Date.now();
       } catch(_) {
         preFocusRect = null;
-        preFocusScrollY = window.scrollY || 0;
         preFocusAt = Date.now();
       }
-      if (!active && isMobileSearchContext()) setTimeout(() => { if (document.activeElement === input) activate(); }, 0);
+      if (!active && isMobileSearchContext()) {
+        setTimeout(() => {
+          if (document.activeElement === input) activate();
+        }, 0);
+      }
     }, true);
 
     function viewportChanged(){
       if (!active || returning) return;
-      requestAnimationFrame(applyDockMetrics);
+      requestAnimationFrame(() => {
+        applyHostMetrics();
+        // بعد تغير حجم الـ visualViewport بسبب الكيبورد نعيد التمركز مرة ثانية بعد استقرار الحركة.
+        setTimeout(() => {
+          if (active && !returning) applyHostMetrics();
+        }, 80);
+      });
     }
+
     window.addEventListener('resize', viewportChanged, {passive:true});
     window.addEventListener('orientationchange', viewportChanged, {passive:true});
+
     if (window.visualViewport && typeof window.visualViewport.addEventListener === 'function') {
       window.visualViewport.addEventListener('resize', viewportChanged, {passive:true});
       window.visualViewport.addEventListener('scroll', viewportChanged, {passive:true});
@@ -39521,6 +39676,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
   else boot();
+
   setTimeout(boot, 500);
 })();
 </script>
@@ -39673,7 +39829,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     if (target.closest('#assalOfflineRetryBtn, .assal-offline-retry')) return true;
 
     // أزرار الإغلاق فقط مسموحة حتى إذا كانت نافذة مفتوحة قبل انقطاع النت.
-    if (target.closest('.swal2-close, .swal2-cancel, .close-modal-btn, .cart-x, .assal-voice-close')) return true;
+    if (target.closest('.swal2-close, .swal2-cancel, .close-modal-btn, .cart-x, .assal-voice-close, .assal-compat-feed-close')) return true;
 
     // نوافذ تنبيهات البحث المحلية مثل: حقل فارغ / اختيار الصنف أولاً.
     // هاي لازم تبقى قابلة للضغط بالأوفلاين حتى زر (موافق/تمام) يشتغل ولا يتصادم ويا الحارس.
