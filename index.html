@@ -15819,11 +15819,23 @@ html.low-end-device .assal-compat-feed-popup{
     z-index:2147482800;
     pointer-events:none;
     margin:0;
-    padding:0;
+    padding:5px;
     box-sizing:border-box;
     transform:translateX(-50%);
     overflow:visible !important;
     isolation:isolate;
+    border-radius:27px;
+    background:
+      radial-gradient(circle at 16% -18%,rgba(34,211,238,.10),transparent 42%),
+      linear-gradient(145deg,rgba(15,23,42,.965),rgba(7,14,27,.985));
+    border:1px solid rgba(148,210,230,.12);
+    box-shadow:
+      0 18px 44px rgba(0,0,0,.42),
+      0 8px 18px rgba(0,0,0,.26),
+      0 0 0 1px rgba(255,255,255,.025),
+      inset 0 1px 0 rgba(255,255,255,.045);
+    backdrop-filter:blur(16px) saturate(128%);
+    -webkit-backdrop-filter:blur(16px) saturate(128%);
 }
 .assal-search-dock-host > .search-container{
     pointer-events:auto;
@@ -15860,9 +15872,9 @@ html.low-end-device .assal-compat-feed-popup{
       linear-gradient(145deg,rgba(26,42,61,.985),rgba(12,22,39,.99)) !important;
     border:1px solid rgba(148,210,230,.20) !important;
     box-shadow:
-      0 14px 34px rgba(0,0,0,.34),
-      0 0 0 1px rgba(255,255,255,.025),
-      inset 0 1px 0 rgba(255,255,255,.085) !important;
+      0 5px 14px rgba(0,0,0,.16),
+      0 0 0 1px rgba(255,255,255,.022),
+      inset 0 1px 0 rgba(255,255,255,.075) !important;
     backdrop-filter:blur(16px) saturate(132%);
     -webkit-backdrop-filter:blur(16px) saturate(132%);
     transform-origin:center center;
@@ -15905,6 +15917,14 @@ html.low-end-device .assal-compat-feed-popup{
         padding:5px !important;
     }
 }
+html.low-end-device .assal-search-dock-host{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    box-shadow:
+      0 16px 34px rgba(0,0,0,.38),
+      0 7px 15px rgba(0,0,0,.22),
+      inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
 html.low-end-device .assal-search-dock-veil{
     backdrop-filter:none !important;
     -webkit-backdrop-filter:none !important;
@@ -15928,11 +15948,11 @@ html.low-end-device .search-container.assal-search-dock{
     opacity:0;
     transform:translate3d(0,8px,0);
     background:
-      linear-gradient(145deg,rgba(15,23,42,.955),rgba(8,15,29,.97));
-    border:1px solid rgba(148,210,230,.13);
+      linear-gradient(145deg,rgba(255,255,255,.035),rgba(8,145,178,.025));
+    border:1px solid rgba(148,210,230,.095);
     box-shadow:
-      0 10px 24px rgba(0,0,0,.22),
-      inset 0 1px 0 rgba(255,255,255,.045);
+      0 4px 10px rgba(0,0,0,.10),
+      inset 0 1px 0 rgba(255,255,255,.035);
     backdrop-filter:blur(14px) saturate(125%);
     -webkit-backdrop-filter:blur(14px) saturate(125%);
     transition:
@@ -39552,6 +39572,13 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     let lastPointerInsideAt = 0;
     let lastKnownViewportHeight = 0;
 
+    // حماية خاصة لسحب شريط الأصناف أفقياً.
+    let categoryGestureActive = false;
+    let categoryGestureMoved = false;
+    let categoryGestureStartX = 0;
+    let categoryGestureStartY = 0;
+    let categoryGestureReleaseTimer = null;
+
     function isMobileSearchContext(){
       try {
         return window.matchMedia('(max-width: 900px), (pointer: coarse), (hover: none)').matches;
@@ -39701,6 +39728,40 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       }
     }
 
+    function beginCategoryGesture(clientX, clientY){
+      clearTimeout(categoryGestureReleaseTimer);
+      categoryGestureActive = true;
+      categoryGestureMoved = false;
+      categoryGestureStartX = Number(clientX || 0);
+      categoryGestureStartY = Number(clientY || 0);
+      lastPointerInsideAt = Date.now();
+      beginTypingSession();
+    }
+
+    function updateCategoryGesture(clientX, clientY){
+      if (!categoryGestureActive) return;
+
+      const dx = Math.abs(Number(clientX || 0) - categoryGestureStartX);
+      const dy = Math.abs(Number(clientY || 0) - categoryGestureStartY);
+
+      if (dx > 7 || dy > 7) categoryGestureMoved = true;
+      lastPointerInsideAt = Date.now();
+    }
+
+    function endCategoryGesture(){
+      if (!categoryGestureActive) return;
+
+      categoryGestureActive = false;
+      lastPointerInsideAt = Date.now();
+
+      clearTimeout(categoryGestureReleaseTimer);
+      categoryGestureReleaseTimer = setTimeout(() => {
+        if (!active || returning) return;
+        beginTypingSession();
+        safeFocus();
+      }, 90);
+    }
+
     function buildCompactCategories(){
       if (compactRail && compactRail.isConnected) {
         syncCompactActive(false);
@@ -39718,6 +39779,31 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       compactTrack = document.createElement('div');
       compactTrack.className = 'assal-search-dock-categories-track';
       compactRail.appendChild(compactTrack);
+
+      // سحب أفقي كامل بدون فقدان جلسة البحث أو إنزال الدوك.
+      compactTrack.addEventListener('pointerdown', function(e){
+        beginCategoryGesture(e.clientX, e.clientY);
+      }, true);
+
+      compactTrack.addEventListener('pointermove', function(e){
+        updateCategoryGesture(e.clientX, e.clientY);
+      }, {passive:true});
+
+      compactTrack.addEventListener('pointerup', endCategoryGesture, true);
+      compactTrack.addEventListener('pointercancel', endCategoryGesture, true);
+
+      compactTrack.addEventListener('touchstart', function(e){
+        const t = e.touches && e.touches[0];
+        if (t) beginCategoryGesture(t.clientX, t.clientY);
+      }, {passive:true, capture:true});
+
+      compactTrack.addEventListener('touchmove', function(e){
+        const t = e.touches && e.touches[0];
+        if (t) updateCategoryGesture(t.clientX, t.clientY);
+      }, {passive:true});
+
+      compactTrack.addEventListener('touchend', endCategoryGesture, {passive:true, capture:true});
+      compactTrack.addEventListener('touchcancel', endCategoryGesture, {passive:true, capture:true});
 
       originalItems.forEach(original => {
         const key = extractCategoryKey(original);
@@ -39746,17 +39832,19 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         btn.addEventListener('pointerdown', function(e){
           lastPointerInsideAt = Date.now();
           beginTypingSession();
-          // يمنع الزر من سرقة focus الكتابة من input.
+          // الزر لا يأخذ الفوكس من حقل البحث.
           try { e.preventDefault(); } catch(_) {}
         }, true);
 
-        btn.addEventListener('touchstart', function(){
-          lastPointerInsideAt = Date.now();
-          beginTypingSession();
-        }, {passive:true, capture:true});
-
         btn.addEventListener('click', function(e){
           try { e.preventDefault(); } catch(_) {}
+
+          // إذا كانت الحركة سحب فعلي، لا نحسبها اختيار صنف.
+          if (categoryGestureMoved) {
+            categoryGestureMoved = false;
+            safeFocus();
+            return;
+          }
 
           lastPointerInsideAt = Date.now();
           beginTypingSession();
@@ -39948,6 +40036,9 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       active = false;
       typingSessionActive = false;
       keyboardLikelyOpen = false;
+      categoryGestureActive = false;
+      categoryGestureMoved = false;
+      clearTimeout(categoryGestureReleaseTimer);
 
       dock.classList.remove('assal-search-dock','assal-search-dock-returning');
       dock.style.transform = '';
@@ -40037,6 +40128,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         if (
           typingSessionActive &&
           (
+            categoryGestureActive ||
             justActivated ||
             keyboardLikelyOpen ||
             stillInsideInteraction ||
@@ -40149,6 +40241,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
     document.addEventListener('pointerdown', function(e){
       if (!active || returning) return;
+      if (categoryGestureActive) return;
       if (isInsideDockTarget(e.target)) return;
 
       typingSessionActive = false;
@@ -40157,6 +40250,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
     document.addEventListener('touchstart', function(e){
       if (!active || returning) return;
+      if (categoryGestureActive) return;
       if (isInsideDockTarget(e.target)) return;
 
       typingSessionActive = false;
@@ -40194,6 +40288,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         if (
           active &&
           typingSessionActive &&
+          !categoryGestureActive &&
           !keyboardLikelyOpen &&
           (Date.now() - activationAt) > 700 &&
           document.activeElement !== input
