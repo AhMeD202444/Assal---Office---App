@@ -15807,13 +15807,32 @@ html.low-end-device .assal-compat-feed-popup{
     -webkit-backdrop-filter:none !important;
 }
 
-/* ===== ASSAL PREMIUM SEARCH FOCUS DOCK — BODY PORTAL ===== */
+/* ===== ASSAL PREMIUM SEARCH DOCK — STABLE STATE MACHINE FINAL ===== */
 .assal-search-dock-slot{
     display:block;
     width:100%;
     pointer-events:none;
     visibility:hidden;
 }
+
+/* Full-screen blur layer below the fixed header and above app content */
+.assal-search-dock-veil{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:2147482600;
+    pointer-events:none;
+    opacity:0;
+    background:rgba(3,10,22,.28);
+    backdrop-filter:blur(8px) saturate(118%);
+    -webkit-backdrop-filter:blur(8px) saturate(118%);
+    transition:opacity .18s ease;
+    will-change:opacity;
+}
+.assal-search-dock-veil.is-visible{opacity:1;}
+
+/* One stable floating host for search + compact categories */
 .assal-search-dock-host{
     position:fixed;
     z-index:2147482800;
@@ -15826,34 +15845,21 @@ html.low-end-device .assal-compat-feed-popup{
     isolation:isolate;
     border-radius:27px;
     background:
-      radial-gradient(circle at 16% -18%,rgba(34,211,238,.10),transparent 42%),
-      linear-gradient(145deg,rgba(15,23,42,.965),rgba(7,14,27,.985));
-    border:1px solid rgba(148,210,230,.12);
+      radial-gradient(circle at 16% -18%,rgba(34,211,238,.09),transparent 42%),
+      linear-gradient(145deg,rgba(15,23,42,.985),rgba(7,14,27,.992));
+    border:1px solid rgba(148,210,230,.13);
     box-shadow:
-      0 18px 44px rgba(0,0,0,.42),
-      0 8px 18px rgba(0,0,0,.26),
-      0 0 0 1px rgba(255,255,255,.025),
+      0 20px 48px rgba(0,0,0,.46),
+      0 9px 20px rgba(0,0,0,.26),
+      0 0 0 1px rgba(255,255,255,.022),
       inset 0 1px 0 rgba(255,255,255,.045);
-    backdrop-filter:blur(16px) saturate(128%);
-    -webkit-backdrop-filter:blur(16px) saturate(128%);
 }
-.assal-search-dock-host > .search-container{
+.assal-search-dock-host > .search-container,
+.assal-search-dock-host > .assal-search-dock-categories{
     pointer-events:auto;
 }
-.assal-search-dock-veil{
-    position:fixed;
-    left:0;
-    right:0;
-    bottom:0;
-    z-index:2147482700;
-    pointer-events:none;
-    opacity:0;
-    background:linear-gradient(180deg,rgba(4,12,24,.12),rgba(4,12,24,.42) 20%,rgba(4,12,24,.10) 78%,rgba(4,12,24,0));
-    backdrop-filter:blur(5px);
-    -webkit-backdrop-filter:blur(5px);
-    transition:opacity .22s ease;
-}
-.assal-search-dock-veil.is-visible{opacity:1;}
+
+/* Search bar itself stays visually light; host owns the main depth */
 .search-container.assal-search-dock{
     position:relative !important;
     inset:auto !important;
@@ -15864,25 +15870,17 @@ html.low-end-device .assal-compat-feed-popup{
     margin:0 !important;
     padding:5px !important;
     box-sizing:border-box !important;
-    border-radius:25px !important;
+    border-radius:23px !important;
     overflow:visible !important;
     isolation:isolate;
     background:
-      radial-gradient(circle at 18% -20%,rgba(34,211,238,.12),transparent 42%),
-      linear-gradient(145deg,rgba(26,42,61,.985),rgba(12,22,39,.99)) !important;
-    border:1px solid rgba(148,210,230,.20) !important;
+      radial-gradient(circle at 18% -20%,rgba(34,211,238,.105),transparent 42%),
+      linear-gradient(145deg,rgba(26,42,61,.975),rgba(12,22,39,.985)) !important;
+    border:1px solid rgba(148,210,230,.17) !important;
     box-shadow:
-      0 5px 14px rgba(0,0,0,.16),
-      0 0 0 1px rgba(255,255,255,.022),
-      inset 0 1px 0 rgba(255,255,255,.075) !important;
-    backdrop-filter:blur(16px) saturate(132%);
-    -webkit-backdrop-filter:blur(16px) saturate(132%);
+      0 5px 13px rgba(0,0,0,.13),
+      inset 0 1px 0 rgba(255,255,255,.065) !important;
     transform-origin:center center;
-    transition:
-      transform .29s cubic-bezier(.22,.82,.23,1),
-      box-shadow .22s ease,
-      border-color .22s ease,
-      background .22s ease !important;
     will-change:transform;
 }
 .search-container.assal-search-dock::after{
@@ -15892,113 +15890,70 @@ html.low-end-device .assal-compat-feed-popup{
     z-index:-1;
     border-radius:inherit;
     pointer-events:none;
-    box-shadow:0 0 20px rgba(34,211,238,.09);
+    box-shadow:0 0 18px rgba(34,211,238,.07);
 }
 .search-container.assal-search-dock #searchInput{
-    border-color:rgba(103,232,249,.30) !important;
+    border-color:rgba(103,232,249,.29) !important;
     background:rgba(2,8,23,.58) !important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 0 0 1px rgba(34,211,238,.025) !important;
-    color:#ffffff !important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04) !important;
+    color:#fff !important;
     caret-color:#67e8f9 !important;
 }
 .search-container.assal-search-dock #searchInput:focus{
-    border-color:rgba(103,232,249,.48) !important;
-    box-shadow:0 0 0 3px rgba(34,211,238,.065),inset 0 1px 0 rgba(255,255,255,.05) !important;
+    border-color:rgba(103,232,249,.46) !important;
+    box-shadow:0 0 0 2px rgba(34,211,238,.055),inset 0 1px 0 rgba(255,255,255,.045) !important;
 }
 .search-container.assal-search-dock .search-placeholder-label{
-    color:rgba(226,248,255,.54) !important;
-}
-.search-container.assal-search-dock-returning{
-    pointer-events:none;
-}
-@media(max-width:768px){
-    .search-container.assal-search-dock{
-        border-radius:23px !important;
-        padding:5px !important;
-    }
-}
-html.low-end-device .assal-search-dock-host{
-    backdrop-filter:none !important;
-    -webkit-backdrop-filter:none !important;
-    box-shadow:
-      0 16px 34px rgba(0,0,0,.38),
-      0 7px 15px rgba(0,0,0,.22),
-      inset 0 1px 0 rgba(255,255,255,.035) !important;
-}
-html.low-end-device .assal-search-dock-veil{
-    backdrop-filter:none !important;
-    -webkit-backdrop-filter:none !important;
-    background:linear-gradient(180deg,rgba(4,12,24,.10),rgba(4,12,24,.30),transparent);
-}
-html.low-end-device .search-container.assal-search-dock{
-    backdrop-filter:none !important;
-    -webkit-backdrop-filter:none !important;
-    box-shadow:0 11px 26px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.05) !important;
+    color:rgba(226,248,255,.52) !important;
 }
 
-/* ===== ASSAL SEARCH DOCK: COMPACT CATEGORIES RAIL ===== */
+/* Compact category rail */
 .assal-search-dock-categories{
     width:100%;
     box-sizing:border-box;
-    margin-top:7px;
-    padding:5px 6px;
-    border-radius:16px;
+    margin-top:6px;
+    padding:4px 5px;
+    border-radius:15px;
     overflow:hidden;
     pointer-events:auto;
-    opacity:0;
-    transform:translate3d(0,8px,0);
-    background:
-      linear-gradient(145deg,rgba(255,255,255,.035),rgba(8,145,178,.025));
-    border:1px solid rgba(148,210,230,.095);
-    box-shadow:
-      0 4px 10px rgba(0,0,0,.10),
-      inset 0 1px 0 rgba(255,255,255,.035);
-    backdrop-filter:blur(14px) saturate(125%);
-    -webkit-backdrop-filter:blur(14px) saturate(125%);
-    transition:
-      transform .29s cubic-bezier(.22,.82,.23,1),
-      opacity .20s ease,
-      border-color .20s ease,
-      background .20s ease;
-    will-change:transform,opacity;
-}
-.assal-search-dock-categories.is-visible{
     opacity:1;
-    transform:translate3d(0,0,0);
+    transform:none;
+    background:linear-gradient(145deg,rgba(255,255,255,.032),rgba(8,145,178,.022));
+    border:1px solid rgba(148,210,230,.085);
+    box-shadow:
+      0 4px 10px rgba(0,0,0,.09),
+      inset 0 1px 0 rgba(255,255,255,.03);
 }
 .assal-search-dock-categories-track{
     width:100%;
     display:flex;
     align-items:center;
-    gap:6px;
+    gap:5px;
     overflow-x:auto;
     overflow-y:hidden;
     overscroll-behavior-x:contain;
-    scroll-behavior:smooth;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:none;
     touch-action:pan-x;
     padding:1px;
 }
-.assal-search-dock-categories-track::-webkit-scrollbar{
-    display:none;
-}
+.assal-search-dock-categories-track::-webkit-scrollbar{display:none;}
 .assal-search-dock-category{
     flex:0 0 auto;
-    min-width:58px;
-    height:31px;
-    padding:0 9px;
-    border:1px solid rgba(255,255,255,.07);
+    min-width:54px;
+    height:29px;
+    padding:0 8px;
+    border:1px solid rgba(255,255,255,.065);
     border-radius:999px;
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    gap:5px;
+    gap:4px;
     color:rgba(241,245,249,.80);
-    background:rgba(255,255,255,.045);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+    background:rgba(255,255,255,.043);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.022);
     font-family:'Cairo','Tajawal',sans-serif;
-    font-size:10px;
+    font-size:9.4px;
     line-height:1;
     font-weight:800;
     white-space:nowrap;
@@ -16006,65 +15961,47 @@ html.low-end-device .search-container.assal-search-dock{
     user-select:none;
     -webkit-user-select:none;
     -webkit-tap-highlight-color:transparent;
-    transition:
-      transform .14s ease,
-      color .18s ease,
-      background .18s ease,
-      border-color .18s ease,
-      box-shadow .18s ease;
 }
 .assal-search-dock-category i{
-    font-size:10px;
-    color:rgba(148,210,230,.85);
+    font-size:9.5px;
+    color:rgba(148,210,230,.84);
     pointer-events:none;
 }
-.assal-search-dock-category span{
-    pointer-events:none;
-}
-.assal-search-dock-category:hover{
-    color:#f8fafc;
-    border-color:rgba(103,232,249,.18);
-    background:rgba(34,211,238,.075);
-}
-.assal-search-dock-category:active{
-    transform:scale(.96);
-}
+.assal-search-dock-category span{pointer-events:none;}
+.assal-search-dock-category:active{transform:scale(.97);}
 .assal-search-dock-category.is-active{
     color:#f0fdfa;
-    border-color:rgba(94,234,212,.23);
-    background:
-      linear-gradient(135deg,rgba(13,148,136,.24),rgba(8,145,178,.19));
+    border-color:rgba(94,234,212,.22);
+    background:linear-gradient(135deg,rgba(13,148,136,.22),rgba(8,145,178,.18));
     box-shadow:
-      0 4px 12px rgba(8,145,178,.12),
-      inset 0 1px 0 rgba(255,255,255,.055);
+      0 4px 11px rgba(8,145,178,.11),
+      inset 0 1px 0 rgba(255,255,255,.05);
 }
-.assal-search-dock-category.is-active i{
-    color:#99f6e4;
-}
+.assal-search-dock-category.is-active i{color:#99f6e4;}
+
 @media(max-width:520px){
-    .assal-search-dock-categories{
-        margin-top:6px;
-        padding:4px 5px;
-        border-radius:15px;
+    .assal-search-dock-host{
+        padding:5px;
+        border-radius:24px;
     }
-    .assal-search-dock-categories-track{
-        gap:5px;
-    }
-    .assal-search-dock-category{
-        min-width:54px;
-        height:29px;
-        padding:0 8px;
-        gap:4px;
-        font-size:9.4px;
-    }
-    .assal-search-dock-category i{
-        font-size:9.5px;
+    .search-container.assal-search-dock{
+        border-radius:22px !important;
     }
 }
-html.low-end-device .assal-search-dock-categories{
+
+/* low-end: no backdrop blur to avoid white flashes */
+html.low-end-device .assal-search-dock-veil{
     backdrop-filter:none !important;
     -webkit-backdrop-filter:none !important;
-    box-shadow:0 8px 20px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.035);
+    background:rgba(3,10,22,.42);
+}
+html.low-end-device .assal-search-dock-host{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    box-shadow:
+      0 16px 34px rgba(0,0,0,.39),
+      0 7px 15px rgba(0,0,0,.22),
+      inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
 </style>
 
@@ -39536,16 +39473,23 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 <!-- ===== ASSAL PREMIUM SEARCH FOCUS DOCK FINAL ===== -->
 <script id="assalPremiumSearchFocusDockFinal">
 (function(){
-  if (window.__ASSAL_PREMIUM_SEARCH_DOCK_COMPACT_CATEGORIES_FINAL__) return;
-  window.__ASSAL_PREMIUM_SEARCH_DOCK_COMPACT_CATEGORIES_FINAL__ = true;
+  if (window.__ASSAL_SEARCH_DOCK_STATE_MACHINE_FINAL__) return;
+  window.__ASSAL_SEARCH_DOCK_STATE_MACHINE_FINAL__ = true;
 
   function boot(){
     const input = document.getElementById('searchInput');
     const dock = input && input.closest ? input.closest('.search-container') : null;
     const sourceSlider = document.getElementById('slider');
+    const searchButton = document.getElementById('searchBtn');
 
-    if (!input || !dock || dock.dataset.assalPremiumDockCompactBound === '1') return;
-    dock.dataset.assalPremiumDockCompactBound = '1';
+    if (!input || !dock || dock.dataset.assalStateMachineDockBound === '1') return;
+    dock.dataset.assalStateMachineDockBound = '1';
+
+    const STATE_IDLE = 'idle';
+    const STATE_OPEN = 'open';
+    const STATE_CLOSING = 'closing';
+
+    let state = STATE_IDLE;
 
     let slot = null;
     let host = null;
@@ -39553,31 +39497,23 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     let compactRail = null;
     let compactTrack = null;
 
-    let active = false;
-    let returning = false;
-    let typingSessionActive = false;
-    let keyboardLikelyOpen = false;
-
-    let closeTimer = null;
-    let cleanupTimer = null;
-    let refocusTimer = null;
-    let viewportTimer = null;
-
     let homeParent = null;
     let homeNextSibling = null;
     let homeRect = null;
-
     let preFocusRect = null;
-    let activationAt = 0;
-    let lastPointerInsideAt = 0;
-    let lastKnownViewportHeight = 0;
 
-    // حماية خاصة لسحب شريط الأصناف أفقياً.
-    let categoryGestureActive = false;
-    let categoryGestureMoved = false;
-    let categoryGestureStartX = 0;
-    let categoryGestureStartY = 0;
-    let categoryGestureReleaseTimer = null;
+    let closeTimer = null;
+    let returnTimer = null;
+    let refocusTimer = null;
+    let viewportTimer = null;
+
+    let pointerInsideRail = false;
+    let railMoved = false;
+    let railStartX = 0;
+    let railStartY = 0;
+
+    let lastKnownViewportHeight = 0;
+    let keyboardLikelyOpen = false;
 
     function isMobileSearchContext(){
       try {
@@ -39600,13 +39536,13 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     function updateKeyboardState(){
       try {
         const vp = getViewport();
+
         if (!lastKnownViewportHeight) {
           lastKnownViewportHeight = Math.max(vp.height, window.innerHeight || vp.height);
         }
 
         const baseHeight = Math.max(lastKnownViewportHeight, window.innerHeight || vp.height);
-        const shrink = baseHeight - vp.height;
-        keyboardLikelyOpen = shrink > 120;
+        keyboardLikelyOpen = (baseHeight - vp.height) > 120;
 
         if (!keyboardLikelyOpen && vp.height > lastKnownViewportHeight) {
           lastKnownViewportHeight = vp.height;
@@ -39614,6 +39550,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
         return keyboardLikelyOpen;
       } catch(_) {
+        keyboardLikelyOpen = false;
         return false;
       }
     }
@@ -39654,31 +39591,41 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       return {
         vp,
         width: desiredWidth,
-        centerX: vp.left + (vp.width / 2),
+        centerX: vp.left + vp.width / 2,
         top: Math.max(vp.top + 7, getHeaderBottom() + 8)
       };
     }
 
     function ensureHost(){
       if (host && host.isConnected) return host;
-
       host = document.createElement('div');
       host.className = 'assal-search-dock-host';
-      host.setAttribute('aria-hidden','false');
       document.body.appendChild(host);
-
       return host;
     }
 
     function ensureVeil(){
       if (veil && veil.isConnected) return veil;
-
       veil = document.createElement('div');
       veil.className = 'assal-search-dock-veil';
       veil.setAttribute('aria-hidden','true');
       document.body.appendChild(veil);
-
       return veil;
+    }
+
+    function createSlot(rect){
+      if (slot && slot.isConnected) return;
+
+      const cs = window.getComputedStyle(dock);
+      slot = document.createElement('div');
+      slot.className = 'assal-search-dock-slot';
+      slot.style.height = Math.max(1, rect.height) + 'px';
+      slot.style.marginTop = cs.marginTop;
+      slot.style.marginBottom = cs.marginBottom;
+      slot.style.marginLeft = cs.marginLeft;
+      slot.style.marginRight = cs.marginRight;
+
+      dock.parentNode.insertBefore(slot, dock);
     }
 
     function extractCategoryKey(el){
@@ -39704,71 +39651,46 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       return '';
     }
 
-    function syncCompactActive(scrollIntoView){
+    function syncCompactActive(center){
       if (!compactTrack) return;
 
       const selectedKey = getSelectedCategoryKey();
-      let selectedButton = null;
+      let selectedBtn = null;
 
       compactTrack.querySelectorAll('.assal-search-dock-category').forEach(btn => {
-        const on = btn.dataset.category === selectedKey;
-        btn.classList.toggle('is-active', on);
-        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-        if (on) selectedButton = btn;
+        const isActive = btn.dataset.category === selectedKey;
+        btn.classList.toggle('is-active', isActive);
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        if (isActive) selectedBtn = btn;
       });
 
-      if (scrollIntoView && selectedButton) {
+      if (center && selectedBtn && compactTrack) {
         try {
-          selectedButton.scrollIntoView({
-            behavior: document.documentElement.classList.contains('low-end-device') ? 'auto' : 'smooth',
-            inline: 'center',
-            block: 'nearest'
-          });
+          const targetLeft = selectedBtn.offsetLeft - ((compactTrack.clientWidth - selectedBtn.offsetWidth) / 2);
+          compactTrack.scrollLeft = Math.max(0, targetLeft);
         } catch(_) {}
       }
     }
 
-    function beginCategoryGesture(clientX, clientY){
-      clearTimeout(categoryGestureReleaseTimer);
-      categoryGestureActive = true;
-      categoryGestureMoved = false;
-      categoryGestureStartX = Number(clientX || 0);
-      categoryGestureStartY = Number(clientY || 0);
-      lastPointerInsideAt = Date.now();
-      beginTypingSession();
-    }
-
-    function updateCategoryGesture(clientX, clientY){
-      if (!categoryGestureActive) return;
-
-      const dx = Math.abs(Number(clientX || 0) - categoryGestureStartX);
-      const dy = Math.abs(Number(clientY || 0) - categoryGestureStartY);
-
-      if (dx > 7 || dy > 7) categoryGestureMoved = true;
-      lastPointerInsideAt = Date.now();
-    }
-
-    function endCategoryGesture(){
-      if (!categoryGestureActive) return;
-
-      categoryGestureActive = false;
-      lastPointerInsideAt = Date.now();
-
-      clearTimeout(categoryGestureReleaseTimer);
-      categoryGestureReleaseTimer = setTimeout(() => {
-        if (!active || returning) return;
-        beginTypingSession();
-        safeFocus();
-      }, 90);
+    function safeRefocus(delay){
+      clearTimeout(refocusTimer);
+      refocusTimer = setTimeout(() => {
+        if (state !== STATE_OPEN || pointerInsideRail) return;
+        try {
+          if (document.activeElement !== input) input.focus({preventScroll:true});
+        } catch(_) {
+          try { input.focus(); } catch(__) {}
+        }
+      }, typeof delay === 'number' ? delay : 60);
     }
 
     function buildCompactCategories(){
       if (compactRail && compactRail.isConnected) {
         syncCompactActive(false);
-        return compactRail;
+        return;
       }
 
-      const originalItems = sourceSlider
+      const originals = sourceSlider
         ? Array.from(sourceSlider.querySelectorAll('.category'))
         : [];
 
@@ -39780,32 +39702,39 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       compactTrack.className = 'assal-search-dock-categories-track';
       compactRail.appendChild(compactTrack);
 
-      // سحب أفقي كامل بدون فقدان جلسة البحث أو إنزال الدوك.
+      // One pointer path only. No duplicate touch + pointer handlers.
       compactTrack.addEventListener('pointerdown', function(e){
-        beginCategoryGesture(e.clientX, e.clientY);
+        if (state !== STATE_OPEN) return;
+        pointerInsideRail = true;
+        railMoved = false;
+        railStartX = Number(e.clientX || 0);
+        railStartY = Number(e.clientY || 0);
       }, true);
 
       compactTrack.addEventListener('pointermove', function(e){
-        updateCategoryGesture(e.clientX, e.clientY);
+        if (!pointerInsideRail) return;
+        const dx = Math.abs(Number(e.clientX || 0) - railStartX);
+        const dy = Math.abs(Number(e.clientY || 0) - railStartY);
+        if (dx > 7 || dy > 7) railMoved = true;
       }, {passive:true});
 
-      compactTrack.addEventListener('pointerup', endCategoryGesture, true);
-      compactTrack.addEventListener('pointercancel', endCategoryGesture, true);
+      function finishRailGesture(){
+        if (!pointerInsideRail) return;
+        pointerInsideRail = false;
 
-      compactTrack.addEventListener('touchstart', function(e){
-        const t = e.touches && e.touches[0];
-        if (t) beginCategoryGesture(t.clientX, t.clientY);
-      }, {passive:true, capture:true});
+        // Don't close dock. Restore input focus once, after gesture ends.
+        safeRefocus(80);
 
-      compactTrack.addEventListener('touchmove', function(e){
-        const t = e.touches && e.touches[0];
-        if (t) updateCategoryGesture(t.clientX, t.clientY);
-      }, {passive:true});
+        setTimeout(() => {
+          railMoved = false;
+        }, 140);
+      }
 
-      compactTrack.addEventListener('touchend', endCategoryGesture, {passive:true, capture:true});
-      compactTrack.addEventListener('touchcancel', endCategoryGesture, {passive:true, capture:true});
+      compactTrack.addEventListener('pointerup', finishRailGesture, true);
+      compactTrack.addEventListener('pointercancel', finishRailGesture, true);
+      compactTrack.addEventListener('lostpointercapture', finishRailGesture, true);
 
-      originalItems.forEach(original => {
+      originals.forEach(original => {
         const key = extractCategoryKey(original);
         if (!key) return;
 
@@ -39813,6 +39742,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         btn.type = 'button';
         btn.className = 'assal-search-dock-category';
         btn.dataset.category = key;
+        btn.tabIndex = -1;
         btn.setAttribute('aria-pressed','false');
 
         const icon = original.querySelector('i');
@@ -39829,25 +39759,20 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
           : key;
         btn.appendChild(label);
 
+        // Prevent category pill from stealing text focus.
         btn.addEventListener('pointerdown', function(e){
-          lastPointerInsideAt = Date.now();
-          beginTypingSession();
-          // الزر لا يأخذ الفوكس من حقل البحث.
           try { e.preventDefault(); } catch(_) {}
         }, true);
 
         btn.addEventListener('click', function(e){
           try { e.preventDefault(); } catch(_) {}
+          if (state !== STATE_OPEN) return;
 
-          // إذا كانت الحركة سحب فعلي، لا نحسبها اختيار صنف.
-          if (categoryGestureMoved) {
-            categoryGestureMoved = false;
-            safeFocus();
+          // If user actually scrolled, do not treat the final release as a click.
+          if (railMoved) {
+            safeRefocus(70);
             return;
           }
-
-          lastPointerInsideAt = Date.now();
-          beginTypingSession();
 
           try {
             if (typeof window.filterCategory === 'function') {
@@ -39857,78 +39782,33 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
             }
           } catch(_) {}
 
-          setTimeout(() => {
-            syncCompactActive(true);
-            safeFocus();
-          }, 0);
-        }, true);
+          syncCompactActive(true);
+          safeRefocus(70);
+        }, false);
 
         compactTrack.appendChild(btn);
       });
 
       ensureHost().appendChild(compactRail);
       syncCompactActive(false);
-
-      return compactRail;
     }
 
-    function createSlot(firstRect){
-      if (slot && slot.isConnected) return;
-
-      const cs = window.getComputedStyle(dock);
-
-      slot = document.createElement('div');
-      slot.className = 'assal-search-dock-slot';
-      slot.style.height = Math.max(1, firstRect.height) + 'px';
-      slot.style.marginTop = cs.marginTop;
-      slot.style.marginBottom = cs.marginBottom;
-      slot.style.marginLeft = cs.marginLeft;
-      slot.style.marginRight = cs.marginRight;
-
-      dock.parentNode.insertBefore(slot, dock);
-    }
-
-    function applyHostMetrics(){
-      if (!active || !host || !dock) return;
+    function applyLayout(){
+      if (state !== STATE_OPEN || !host) return;
 
       const m = getTargetMetrics();
-
       host.style.left = m.centerX + 'px';
       host.style.top = m.top + 'px';
       host.style.width = m.width + 'px';
 
-      const hostRect = host.getBoundingClientRect();
       const v = ensureVeil();
 
-      // التعتيم يبدأ تحت كامل مجموعة البحث + الأصناف.
-      v.style.top = Math.ceil(hostRect.bottom + 7) + 'px';
+      // Blur covers the whole visible app from below the fixed header to the keyboard.
+      v.style.top = Math.ceil(getHeaderBottom()) + 'px';
     }
 
-    function safeFocus(){
-      clearTimeout(refocusTimer);
-
-      refocusTimer = setTimeout(() => {
-        if (!typingSessionActive || returning) return;
-
-        try {
-          if (document.activeElement !== input) {
-            input.focus({ preventScroll: true });
-          }
-        } catch(_) {
-          try { input.focus(); } catch(__) {}
-        }
-      }, 35);
-    }
-
-    function beginTypingSession(){
-      typingSessionActive = true;
-      clearTimeout(closeTimer);
-      clearTimeout(cleanupTimer);
-      clearTimeout(refocusTimer);
-    }
-
-    function activateFromPointer(){
-      if (active || returning || !isMobileSearchContext()) return;
+    function openDock(){
+      if (state !== STATE_IDLE || !isMobileSearchContext()) return;
 
       const first = preFocusRect && preFocusRect.width && preFocusRect.height
         ? preFocusRect
@@ -39936,10 +39816,13 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
       if (!first.width || !first.height) return;
 
-      beginTypingSession();
+      // Important: clear only timers that belong to idle/open flow.
+      clearTimeout(closeTimer);
+      clearTimeout(refocusTimer);
+      clearTimeout(viewportTimer);
 
-      active = true;
-      activationAt = Date.now();
+      state = STATE_OPEN;
+
       homeParent = dock.parentNode;
       homeNextSibling = dock.nextSibling;
       homeRect = first;
@@ -39948,76 +39831,46 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       ensureHost();
       ensureVeil();
 
-      // نفس شريط البحث ينتقل إلى طبقة مستقلة.
       host.appendChild(dock);
       buildCompactCategories();
 
       dock.classList.add('assal-search-dock');
       document.body.classList.add('assal-search-dock-body');
 
-      applyHostMetrics();
+      applyLayout();
 
+      // One FLIP animation only at open. No re-animation during category selection.
       const last = dock.getBoundingClientRect();
       const dx = first.left - last.left;
       const dy = first.top - last.top;
-      const sx = last.width
-        ? Math.max(.84, Math.min(1.16, first.width / last.width))
-        : 1;
+      const sx = last.width ? Math.max(.86, Math.min(1.14, first.width / last.width)) : 1;
 
       dock.style.transition = 'none';
-      dock.style.transform = `translate3d(${dx}px, ${dy}px, 0) scaleX(${sx})`;
-
-      if (compactRail) {
-        compactRail.style.transition = 'none';
-        compactRail.style.opacity = '0';
-        compactRail.style.transform = `translate3d(0, ${Math.max(10, Math.min(32, Math.abs(dy) * .16))}px, 0)`;
-      }
-
+      dock.style.transform = `translate3d(${dx}px,${dy}px,0) scaleX(${sx})`;
       void dock.offsetWidth;
 
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (!active) return;
+        if (state !== STATE_OPEN) return;
 
-          dock.style.transition = '';
-          dock.style.transform = 'translate3d(0,0,0) scaleX(1)';
+        dock.style.transition = 'transform .265s cubic-bezier(.22,.82,.23,1)';
+        dock.style.transform = 'translate3d(0,0,0) scaleX(1)';
 
-          if (compactRail) {
-            compactRail.style.transition = '';
-            compactRail.style.opacity = '';
-            compactRail.style.transform = '';
-            compactRail.classList.add('is-visible');
+        if (veil) veil.classList.add('is-visible');
+
+        // Focus once after DOM move. No focus loops.
+        safeRefocus(35);
+
+        setTimeout(() => {
+          if (state === STATE_OPEN) {
+            dock.style.transition = '';
+            syncCompactActive(true);
+            applyLayout();
           }
-
-          if (veil) veil.classList.add('is-visible');
-
-          try {
-            input.focus({ preventScroll: true });
-          } catch(_) {
-            try { input.focus(); } catch(__) {}
-          }
-
-          syncCompactActive(true);
-          safeFocus();
-
-          setTimeout(() => {
-            if (active && !returning) applyHostMetrics();
-          }, 50);
-        });
+        }, 285);
       });
     }
 
-    function activateFallback(){
-      if (active || returning || !isMobileSearchContext()) return;
-
-      try {
-        preFocusRect = dock.getBoundingClientRect();
-      } catch(_) {}
-
-      activateFromPointer();
-    }
-
-    function restoreDockToHome(){
+    function restoreDockHome(){
       try {
         if (homeParent) {
           if (homeNextSibling && homeNextSibling.parentNode === homeParent) {
@@ -40029,22 +39882,13 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       } catch(_) {}
     }
 
-    function cleanupAfterReturn(){
-      restoreDockToHome();
+    function finalizeClose(){
+      // This function is never cancelled once close starts.
+      restoreDockHome();
 
-      returning = false;
-      active = false;
-      typingSessionActive = false;
-      keyboardLikelyOpen = false;
-      categoryGestureActive = false;
-      categoryGestureMoved = false;
-      clearTimeout(categoryGestureReleaseTimer);
-
-      dock.classList.remove('assal-search-dock','assal-search-dock-returning');
-      dock.style.transform = '';
+      dock.classList.remove('assal-search-dock');
       dock.style.transition = '';
-
-      document.body.classList.remove('assal-search-dock-body');
+      dock.style.transform = '';
 
       if (slot && slot.parentNode) slot.parentNode.removeChild(slot);
       slot = null;
@@ -40056,102 +39900,59 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       if (host && host.parentNode) host.parentNode.removeChild(host);
       host = null;
 
-      if (veil) {
-        veil.classList.remove('is-visible');
-        const oldVeil = veil;
-        veil = null;
+      if (veil && veil.parentNode) veil.parentNode.removeChild(veil);
+      veil = null;
 
-        setTimeout(() => {
-          try {
-            if (oldVeil && oldVeil.parentNode) oldVeil.parentNode.removeChild(oldVeil);
-          } catch(_) {}
-        }, 240);
-      }
+      document.body.classList.remove('assal-search-dock-body');
+
+      pointerInsideRail = false;
+      railMoved = false;
 
       homeParent = null;
       homeNextSibling = null;
       homeRect = null;
+      preFocusRect = null;
+
+      state = STATE_IDLE;
     }
 
-    function deactivate(force){
+    function closeDock(){
+      if (state !== STATE_OPEN) return;
+
+      state = STATE_CLOSING;
+
+      // Once closing begins, never cancel this cleanup.
       clearTimeout(closeTimer);
       clearTimeout(refocusTimer);
+      clearTimeout(viewportTimer);
 
-      if (!active || returning) return;
-      if (!force && typingSessionActive) return;
+      try { input.blur(); } catch(_) {}
 
-      typingSessionActive = false;
-      returning = true;
+      if (veil) veil.classList.remove('is-visible');
 
       const current = dock.getBoundingClientRect();
       const target = slot && slot.isConnected ? slot.getBoundingClientRect() : homeRect;
 
       if (!target) {
-        cleanupAfterReturn();
+        finalizeClose();
         return;
       }
 
       const dx = target.left - current.left;
       const dy = target.top - current.top;
-      const sx = current.width
-        ? Math.max(.84, Math.min(1.16, target.width / current.width))
-        : 1;
+      const sx = current.width ? Math.max(.86, Math.min(1.14, target.width / current.width)) : 1;
 
-      dock.classList.add('assal-search-dock-returning');
+      dock.style.transition = 'transform .255s cubic-bezier(.22,.82,.23,1)';
+      dock.style.transform = `translate3d(${dx}px,${dy}px,0) scaleX(${sx})`;
 
-      if (veil) veil.classList.remove('is-visible');
-
-      if (compactRail) {
-        compactRail.classList.remove('is-visible');
-        compactRail.style.opacity = '0';
-        compactRail.style.transform = 'translate3d(0,-6px,0)';
-      }
-
-      dock.style.transform = `translate3d(${dx}px, ${dy}px, 0) scaleX(${sx})`;
-
-      clearTimeout(cleanupTimer);
-      cleanupTimer = setTimeout(cleanupAfterReturn, 305);
+      returnTimer = setTimeout(finalizeClose, 275);
     }
 
-    function handlePotentialBlur(){
-      clearTimeout(closeTimer);
-
-      closeTimer = setTimeout(() => {
-        if (!active || returning) return;
-
-        const justActivated = (Date.now() - activationAt) < 900;
-        const stillInsideInteraction = (Date.now() - lastPointerInsideAt) < 500;
-        const ae = document.activeElement;
-
-        updateKeyboardState();
-
-        if (
-          typingSessionActive &&
-          (
-            categoryGestureActive ||
-            justActivated ||
-            keyboardLikelyOpen ||
-            stillInsideInteraction ||
-            ae === input ||
-            (ae && dock.contains(ae)) ||
-            (ae && compactRail && compactRail.contains(ae))
-          )
-        ) {
-          safeFocus();
-          return;
-        }
-
-        typingSessionActive = false;
-        deactivate(true);
-      }, 180);
-    }
-
-    function isInsideDockTarget(target){
+    function isInsideFloatingUI(target){
       try {
         return !!(
           target &&
           (
-            target === dock ||
             dock.contains(target) ||
             (compactRail && compactRail.contains(target))
           )
@@ -40161,110 +39962,67 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       }
     }
 
+    // Open from pointerdown before browser focus can be affected by DOM re-parenting.
     input.addEventListener('pointerdown', function(){
-      clearTimeout(closeTimer);
-      lastPointerInsideAt = Date.now();
-      beginTypingSession();
-
-      try {
-        preFocusRect = dock.getBoundingClientRect();
-      } catch(_) {
-        preFocusRect = null;
-      }
-
-      if (!active && isMobileSearchContext()) {
-        activateFromPointer();
-      } else if (active) {
-        safeFocus();
+      if (state === STATE_IDLE) {
+        try { preFocusRect = dock.getBoundingClientRect(); } catch(_) { preFocusRect = null; }
+        openDock();
+      } else if (state === STATE_OPEN) {
+        safeRefocus(0);
       }
     }, true);
 
-    input.addEventListener('touchstart', function(){
-      lastPointerInsideAt = Date.now();
-
-      if (!active && isMobileSearchContext()) {
-        beginTypingSession();
-
-        try {
-          preFocusRect = dock.getBoundingClientRect();
-        } catch(_) {}
-
-        activateFromPointer();
-      }
-    }, {passive:true, capture:true});
-
+    // Keyboard/accessibility fallback only.
     input.addEventListener('focus', function(){
-      beginTypingSession();
-      if (!active && isMobileSearchContext()) activateFallback();
+      if (state === STATE_IDLE && isMobileSearchContext()) {
+        try { preFocusRect = dock.getBoundingClientRect(); } catch(_) { preFocusRect = null; }
+        openDock();
+      }
     }, true);
 
-    input.addEventListener('blur', handlePotentialBlur, true);
+    // Blur is ignored while the dock is open. Closing is explicit, not blur-driven.
+    input.addEventListener('blur', function(){
+      if (state !== STATE_OPEN) return;
+      if (pointerInsideRail) return;
 
-    const searchButton = document.getElementById('searchBtn');
+      updateKeyboardState();
+
+      // Android/WebView may transiently blur during keyboard/viewport changes.
+      if (keyboardLikelyOpen) safeRefocus(80);
+    }, true);
+
+    // Search button: preserve original search handler, then close.
     if (searchButton) {
       searchButton.addEventListener('click', function(){
-        // نخلي حدث البحث الأصلي يشتغل، وبعده نغلق الكيبورد ونزيل الفوكس تلقائياً.
-        setTimeout(() => {
-          typingSessionActive = false;
-          clearTimeout(refocusTimer);
-          try { input.blur(); } catch(_) {}
-          deactivate(true);
-        }, 35);
+        if (state !== STATE_OPEN) return;
+        setTimeout(closeDock, 30);
       }, false);
     }
 
+    // Enter: preserve current search logic first, then close.
     input.addEventListener('keydown', function(e){
-      if (e.key === 'Escape') {
-        typingSessionActive = false;
-        try { input.blur(); } catch(_) {}
-        deactivate(true);
-        return;
-      }
-
       if (e.key === 'Enter') {
-        // نخلي منطق البحث الحالي ينفذ أولاً، وبعدها نغلق الكيبورد ونرجع الدوك.
-        setTimeout(() => {
-          typingSessionActive = false;
-          clearTimeout(refocusTimer);
-          try { input.blur(); } catch(_) {}
-          deactivate(true);
-        }, 35);
+        setTimeout(closeDock, 30);
+      } else if (e.key === 'Escape') {
+        closeDock();
       }
     }, true);
 
-    ['pointerdown','mousedown','touchstart','click'].forEach(ev => {
-      dock.addEventListener(ev, function(){
-        lastPointerInsideAt = Date.now();
-        if (active) beginTypingSession();
-      }, true);
-    });
-
+    // A genuine outside press ends the search session.
     document.addEventListener('pointerdown', function(e){
-      if (!active || returning) return;
-      if (categoryGestureActive) return;
-      if (isInsideDockTarget(e.target)) return;
-
-      typingSessionActive = false;
-      deactivate(true);
+      if (state !== STATE_OPEN) return;
+      if (isInsideFloatingUI(e.target)) return;
+      closeDock();
     }, true);
 
-    document.addEventListener('touchstart', function(e){
-      if (!active || returning) return;
-      if (categoryGestureActive) return;
-      if (isInsideDockTarget(e.target)) return;
-
-      typingSessionActive = false;
-      deactivate(true);
-    }, {passive:true, capture:true});
-
-    // أي تغيير على اختيار الصنف الأصلي ينعكس على الشريط المصغر.
+    // Reflect category changes made elsewhere without animation.
     try {
       if (sourceSlider && window.MutationObserver) {
-        const categoryObserver = new MutationObserver(function(){
-          if (active) syncCompactActive(true);
+        const observer = new MutationObserver(function(){
+          if (state === STATE_OPEN) syncCompactActive(false);
         });
 
-        categoryObserver.observe(sourceSlider, {
+        observer.observe(sourceSlider, {
           subtree:true,
           attributes:true,
           attributeFilter:['class']
@@ -40273,30 +40031,20 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     } catch(_) {}
 
     function viewportChanged(){
-      if (!active || returning) return;
+      if (state !== STATE_OPEN) return;
 
       clearTimeout(viewportTimer);
-
       viewportTimer = setTimeout(() => {
+        if (state !== STATE_OPEN) return;
         updateKeyboardState();
-        applyHostMetrics();
+        applyLayout();
 
-        if (typingSessionActive && keyboardLikelyOpen && document.activeElement !== input) {
-          safeFocus();
+        // Never close from viewport changes or category scrolling.
+        // Only restore focus after Android transient blur.
+        if (!pointerInsideRail && keyboardLikelyOpen && document.activeElement !== input) {
+          safeRefocus(90);
         }
-
-        if (
-          active &&
-          typingSessionActive &&
-          !categoryGestureActive &&
-          !keyboardLikelyOpen &&
-          (Date.now() - activationAt) > 700 &&
-          document.activeElement !== input
-        ) {
-          typingSessionActive = false;
-          deactivate(true);
-        }
-      }, 55);
+      }, 45);
     }
 
     window.addEventListener('resize', viewportChanged, {passive:true});
@@ -40308,10 +40056,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     }
 
     document.addEventListener('visibilitychange', function(){
-      if (document.hidden && active) {
-        typingSessionActive = false;
-        deactivate(true);
-      }
+      if (document.hidden && state === STATE_OPEN) closeDock();
     });
   }
 
