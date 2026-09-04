@@ -39535,6 +39535,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     let compactTrack = null;
 
     let homeRect = null;
+    let pendingHomeRect = null;
     let returnTimer = null;
     let viewportTimer = null;
 
@@ -39719,7 +39720,10 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       compactTrack.addEventListener('pointerdown', function(e){
         if (state !== OPEN) return;
 
+        // Prevent Android from transferring focus away from the text input.
+        // This stops the keyboard from starting its down/up animation.
         try { e.preventDefault(); } catch(_) {}
+        try { e.stopPropagation(); } catch(_) {}
 
         railPointerActive = true;
         railPointerId = e.pointerId;
@@ -39753,6 +39757,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         if (railPointerId !== null && e && e.pointerId !== railPointerId) return;
 
         try { if (e) e.preventDefault(); } catch(_) {}
+        try { if (e) e.stopPropagation(); } catch(_) {}
         try {
           if (e && compactTrack.hasPointerCapture && compactTrack.hasPointerCapture(e.pointerId)) {
             compactTrack.releasePointerCapture(e.pointerId);
@@ -39779,15 +39784,10 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         }
 
         /*
-          Do NOT refocus when focus is already correct.
-          With preventDefault above, it should remain on the input and the
-          keyboard therefore never starts its hide/show animation.
+          Important: NEVER issue a second focus command after category
+          interaction. The focus is protected at pointerdown instead.
+          Re-focusing here was what made Android start a visible IME dip/rise.
         */
-        if (state === OPEN && document.activeElement !== input) {
-          try { input.focus({preventScroll:true}); } catch(_) {
-            try { input.focus(); } catch(__) {}
-          }
-        }
       }
 
       compactTrack.addEventListener('pointerup', function(e){ endRailPointer(e, false); }, {passive:false, capture:true});
@@ -39857,7 +39857,14 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     function openDock(){
       if (state !== IDLE || !isMobile()) return false;
 
-      const first = dock.getBoundingClientRect();
+      const first = (
+        pendingHomeRect &&
+        pendingHomeRect.width &&
+        pendingHomeRect.height
+      ) ? pendingHomeRect : dock.getBoundingClientRect();
+
+      pendingHomeRect = null;
+
       if (!first.width || !first.height) return false;
 
       clearTimeout(returnTimer);
@@ -39945,6 +39952,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       railMoved = false;
       railStartPill = null;
       homeRect = null;
+      pendingHomeRect = null;
 
       state = IDLE;
     }
@@ -39991,14 +39999,27 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     window.__ASSAL_CLOSE_SEARCH_DOCK__ = closeDock;
     window.__ASSAL_OPEN_SEARCH_DOCK__ = function(){
       if (state === IDLE) {
-        openDock();
+        try {
+          pendingHomeRect = dock.getBoundingClientRect();
+        } catch(_) {
+          pendingHomeRect = null;
+        }
+
         focusInSameGesture();
+
+        // focus event opens the dock; if focus was already present, open directly.
+        if (state === IDLE && document.activeElement === input) {
+          openDock();
+        }
+
         return state === OPEN;
       }
+
       if (state === OPEN) {
-        focusInSameGesture();
+        if (document.activeElement !== input) focusInSameGesture();
         return true;
       }
+
       return false;
     };
 
@@ -40017,30 +40038,40 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     }
 
     /*
-      OPEN: pointerdown changes only CSS position; no DOM move.
-      We DO NOT preventDefault, so Android's native text focus/IME path remains intact.
+      FIRST TOUCH:
+      Do not move the search bar here.
+      Android must finish its normal input focus / keyboard request first.
+      We only remember the original visual rectangle.
     */
     input.addEventListener('pointerdown', function(){
-      if (state === IDLE) {
+      if (state !== IDLE) return;
+
+      try {
+        pendingHomeRect = dock.getBoundingClientRect();
+      } catch(_) {
+        pendingHomeRect = null;
+      }
+    }, true);
+
+    /*
+      Open only AFTER the input is genuinely focused.
+      No re-parenting and no extra focus call are needed.
+    */
+    input.addEventListener('focus', function(){
+      if (state === IDLE && isMobile()) {
         openDock();
       }
     }, true);
 
     /*
-      Click is still the same user gesture. If a WebView failed to apply its
-      normal focus after the fixed-position change, force it here synchronously.
+      Rare WebView fallback: if the native click did not focus the input,
+      request focus only. The focus event itself will open the dock.
     */
     input.addEventListener('click', function(){
-      if (state === OPEN && document.activeElement !== input) {
-        focusInSameGesture();
-      }
-    }, true);
+      if (state !== IDLE) return;
+      if (document.activeElement === input) return;
 
-    /* Keyboard/accessibility fallback. */
-    input.addEventListener('focus', function(){
-      if (state === IDLE && isMobile()) {
-        openDock();
-      }
+      focusInSameGesture();
     }, true);
 
     /*
