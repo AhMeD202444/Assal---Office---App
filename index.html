@@ -15533,11 +15533,22 @@ html.low-end-device .assal-community-write-row{
       linear-gradient(135deg, rgba(8,145,178,.11), rgba(15,23,42,.30)),
       rgba(0,0,0,.26);
 }
+.news-bar.assal-admin-compat-active{
+    flex-direction:row !important;
+}
+.news-bar.assal-admin-compat-active .news-ticker-container{
+    order:1 !important;
+    min-width:0;
+}
 .news-bar.assal-admin-compat-active .news-ticker-container,
 .news-bar.assal-admin-compat-active #newsTicker{
     cursor:pointer;
 }
 .breaking-news.assal-admin-compat-badge{
+    order:0 !important;
+    margin-left:0 !important;
+    margin-right:8px !important;
+    flex:0 0 auto;
     background:linear-gradient(135deg,#0f766e,#0891b2) !important;
     color:#ecfeff !important;
     box-shadow:0 0 14px rgba(34,211,238,.28) !important;
@@ -15559,6 +15570,11 @@ html.low-end-device .assal-community-write-row{
 .assal-admin-compat-ticker-item i{
     color:#67e8f9;
     font-size:12px;
+}
+@keyframes assalAdminCompatScrollRTL{
+    /* يبدأ مرئياً فور فتح الواجهة، ثم يتحرك من اليمين إلى اليسار */
+    from{ transform:translateX(0%); }
+    to{ transform:translateX(-100%); }
 }
 html.low-end-device.assal-admin-compat-news .news-bar{
     display:flex !important;
@@ -16212,6 +16228,136 @@ function isAdminUser() {
     return localStorage.getItem(ADMIN_FLAG_KEY) === "true";
 }
 
+/* ===== ASSAL COMPAT SUBSCRIPTION ACCESS: مستقل تماماً عن صلاحية الأدمن ===== */
+const ASSAL_COMPAT_ACCESS_KEY = 'assalCompatAccess';
+const ASSAL_COMPAT_ACCESS_DEVICE_KEY = 'assalCompatAccessDeviceId';
+const ASSAL_COMPAT_ACCESS_CODE_KEY = 'assalCompatAccessCode';
+const ASSAL_COMPAT_ACCESS_CHECKED_AT_KEY = 'assalCompatAccessCheckedAt';
+const ASSAL_COMPAT_FIRESTORE_PROJECT_ID = 'assal-office';
+const ASSAL_COMPAT_FIRESTORE_API_KEY = 'AIzaSyD_Nqmd2X3UY0mkK31QXKd-6B9KLE3ipYA';
+
+function hasCachedCompatSubscriptionAccess() {
+    try {
+        const granted = localStorage.getItem(ASSAL_COMPAT_ACCESS_KEY) === 'true';
+        if (!granted) return false;
+
+        const storedPassword = String(localStorage.getItem('password') || '').trim();
+        const compatDeviceId = String(localStorage.getItem('deviceId') || '').trim();
+        const accessCode = String(localStorage.getItem(ASSAL_COMPAT_ACCESS_CODE_KEY) || '').trim();
+        const accessDeviceId = String(localStorage.getItem(ASSAL_COMPAT_ACCESS_DEVICE_KEY) || '').trim();
+
+        if (!storedPassword || !compatDeviceId) return false;
+        if (accessCode && accessCode !== storedPassword) return false;
+        if (accessDeviceId && accessDeviceId !== compatDeviceId) return false;
+        return true;
+    } catch (_) {
+        return false;
+    }
+}
+
+function canUseCompatibilities() {
+    return isAdminUser() || hasCachedCompatSubscriptionAccess();
+}
+
+function setCompatSubscriptionAccess(granted, details = {}) {
+    try {
+        if (!granted) {
+            localStorage.removeItem(ASSAL_COMPAT_ACCESS_KEY);
+            localStorage.removeItem(ASSAL_COMPAT_ACCESS_DEVICE_KEY);
+            localStorage.removeItem(ASSAL_COMPAT_ACCESS_CODE_KEY);
+            localStorage.removeItem(ASSAL_COMPAT_ACCESS_CHECKED_AT_KEY);
+            return;
+        }
+
+        const code = String(details.code || localStorage.getItem('password') || '').trim();
+        const deviceId = String(details.deviceId || localStorage.getItem('deviceId') || '').trim();
+        if (!code || !deviceId) return;
+
+        localStorage.setItem(ASSAL_COMPAT_ACCESS_KEY, 'true');
+        localStorage.setItem(ASSAL_COMPAT_ACCESS_CODE_KEY, code);
+        localStorage.setItem(ASSAL_COMPAT_ACCESS_DEVICE_KEY, deviceId);
+        localStorage.setItem(ASSAL_COMPAT_ACCESS_CHECKED_AT_KEY, String(Date.now()));
+    } catch (_) {}
+}
+
+function syncCompatAccessUi() {
+    try { updateAdminCompatBtn(); } catch (_) {}
+    try {
+        if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === 'function') {
+            window.__ASSAL_APPLY_NEWS_BAR_STATE__();
+        }
+    } catch (_) {}
+}
+
+let assalCompatAccessVerifyPromise = null;
+async function verifyStoredCompatSubscriptionAccess(options = {}) {
+    if (isAdminUser()) {
+        syncCompatAccessUi();
+        return true;
+    }
+
+    const storedPassword = String(localStorage.getItem('password') || '').trim();
+    const compatDeviceId = String(localStorage.getItem('deviceId') || '').trim();
+    if (!storedPassword || !compatDeviceId) {
+        setCompatSubscriptionAccess(false);
+        syncCompatAccessUi();
+        return false;
+    }
+
+    if (navigator.onLine === false) {
+        syncCompatAccessUi();
+        return hasCachedCompatSubscriptionAccess();
+    }
+
+    if (assalCompatAccessVerifyPromise) return assalCompatAccessVerifyPromise;
+
+    const runner = (async () => {
+        try {
+            const docId = encodeURIComponent(storedPassword);
+            const url = `https://firestore.googleapis.com/v1/projects/${ASSAL_COMPAT_FIRESTORE_PROJECT_ID}/databases/(default)/documents/passwords/${docId}?key=${encodeURIComponent(ASSAL_COMPAT_FIRESTORE_API_KEY)}`;
+            const response = await fetch(url, { method: 'GET', cache: 'no-store' });
+
+            if (response.status === 404) {
+                setCompatSubscriptionAccess(false);
+                syncCompatAccessUi();
+                return false;
+            }
+            if (!response.ok) {
+                // فشل اتصال/صلاحية عابر: لا نسحب آخر صلاحية صحيحة محفوظة.
+                syncCompatAccessUi();
+                return hasCachedCompatSubscriptionAccess();
+            }
+
+            const doc = await response.json();
+            const fields = doc && doc.fields ? doc.fields : {};
+            const used = fields.used && fields.used.booleanValue === true;
+            const boundDeviceId = String((fields.deviceId && fields.deviceId.stringValue) || '').trim();
+            const valid = used && !!boundDeviceId && boundDeviceId === compatDeviceId;
+
+            setCompatSubscriptionAccess(valid, {
+                code: storedPassword,
+                deviceId: compatDeviceId
+            });
+            syncCompatAccessUi();
+            return valid;
+        } catch (err) {
+            console.warn('ASSAL compat access verification failed:', err);
+            // بالأخطاء الشبكية نحافظ على آخر صلاحية صحيحة حتى يبقى الأوفلاين شغال.
+            syncCompatAccessUi();
+            return hasCachedCompatSubscriptionAccess();
+        }
+    })();
+
+    assalCompatAccessVerifyPromise = runner;
+    try {
+        return await runner;
+    } finally {
+        if (assalCompatAccessVerifyPromise === runner) assalCompatAccessVerifyPromise = null;
+    }
+}
+window.canUseCompatibilities = canUseCompatibilities;
+window.verifyStoredCompatSubscriptionAccess = verifyStoredCompatSubscriptionAccess;
+
 function getAdminAccountCode() {
     return (localStorage.getItem(ADMIN_ACCOUNT_CODE_KEY) || '').trim();
 }
@@ -16350,10 +16496,10 @@ function setAdminUser(isAdmin, profile = null) {
 function updateAdminCompatBtn() {
     const btn = document.getElementById("adminCompatBtn");
     if (!btn) return;
-    const ok = isAdminUser();
+    const ok = canUseCompatibilities();
     btn.disabled = !ok;
     btn.classList.toggle("is-disabled", !ok);
-    btn.title = ok ? "بحث التوافقات" : "هذه الخاصية حصرا لكادر مكتب عسل";
+    btn.title = ok ? "بحث التوافقات" : "هذه الخاصية متاحة لكادر مكتب عسل أو مشتركي التوافقات";
 }
 
 function updateAdminWholesaleBtn() {
@@ -19568,6 +19714,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     updateAdminCompatBtn();
+    // تحقق هادئ من اشتراك التوافقات للمستخدم العادي بدون منحه أي صلاحية أدمن.
+    setTimeout(() => {
+        try { verifyStoredCompatSubscriptionAccess({ silent: true }); } catch (_) {}
+    }, 350);
     updateAdminWholesaleBtn();
     updateStatsBtn();
     updateCustomersAdminHeaderBtn();
@@ -23655,9 +23805,14 @@ function displayCompatResults(results) {
 }
 
 async function searchCompatibilitiesAdmin() {
-    // ❌ مو أدمن
-    if (!isAdminUser()) {
-        showStaffOnlyPopup();
+    // الصلاحية مستقلة: كادر عسل أو مشترك توافقات فعّال.
+    if (!canUseCompatibilities()) {
+        showExitLikeAlert({
+            icon: "fas fa-user-lock",
+            title: "وصول محدود",
+            message: "هذه الخاصية متاحة لكادر مكتب عسل أو مشتركي التوافقات",
+            confirmText: "موافق"
+        });
         return;
     }
 
@@ -24802,13 +24957,13 @@ function assalRenderAdminCompatTicker(items, options = {}) {
     try {
       ticker.style.animation = 'none';
       void ticker.offsetWidth;
-      ticker.style.animation = 'scrollText 60s linear infinite';
+      ticker.style.animation = 'assalAdminCompatScrollRTL 60s linear infinite';
     } catch (_) {}
   }
 }
 
 async function refreshAssalAdminCompatFeed(options = {}) {
-  if (!(typeof isAdminUser === 'function' && isAdminUser())) return [];
+  if (!(typeof canUseCompatibilities === 'function' && canUseCompatibilities())) return [];
   // إذا أكو تحديث جاري، نعيد نفس الوعد حتى ما نسوي طلبين للشيت بنفس اللحظة.
   if (assalAdminCompatFeedRefreshPromise) return assalAdminCompatFeedRefreshPromise;
 
@@ -24876,7 +25031,7 @@ function assalCompatFeedModalHtml(items) {
 }
 
 async function openAssalAdminCompatibilityFeedModal() {
-  if (!(typeof isAdminUser === 'function' && isAdminUser())) return;
+  if (!(typeof canUseCompatibilities === 'function' && canUseCompatibilities())) return;
   if (!Array.isArray(assalAdminCompatFeedItems) || assalAdminCompatFeedItems.length === 0) {
     await refreshAssalAdminCompatFeed({ force: navigator.onLine !== false });
   }
@@ -24912,13 +25067,13 @@ function assalBindAdminCompatFeedClicks() {
   newsBar.dataset.assalCompatFeedBound = '1';
 
   newsBar.addEventListener('click', function(event){
-    if (!(typeof isAdminUser === 'function' && isAdminUser())) return;
+    if (!(typeof canUseCompatibilities === 'function' && canUseCompatibilities())) return;
     if (!newsBar.classList.contains('assal-admin-compat-active')) return;
     event.preventDefault();
     openAssalAdminCompatibilityFeedModal();
   });
   newsBar.addEventListener('keydown', function(event){
-    if (!(typeof isAdminUser === 'function' && isAdminUser())) return;
+    if (!(typeof canUseCompatibilities === 'function' && canUseCompatibilities())) return;
     if (!newsBar.classList.contains('assal-admin-compat-active')) return;
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
@@ -24928,7 +25083,7 @@ function assalBindAdminCompatFeedClicks() {
 
 function setAssalOfflineNewsTicker() {
   // الأدمن يبقى على شريط التوافقات حتى بالأوفلاين، مع توضيح أن البيانات محفوظة.
-  if (typeof isAdminUser === 'function' && isAdminUser()) {
+  if (typeof canUseCompatibilities === 'function' && canUseCompatibilities()) {
     refreshAssalAdminCompatFeed({ force: false });
     return;
   }
@@ -24968,7 +25123,7 @@ function shouldShowAssalOfflineNews() {
 
 async function fetchTechNews() {
   // حساب الأدمن لا يحمل أخبار التقنية نهائياً؛ مكانها شريط التوافقات.
-  if (typeof isAdminUser === 'function' && isAdminUser()) {
+  if (typeof canUseCompatibilities === 'function' && canUseCompatibilities()) {
     await refreshAssalAdminCompatFeed({ force: false });
     return;
   }
@@ -25043,7 +25198,7 @@ function restartNewsTicker() {
     const ticker = document.querySelector(".news-ticker");
     const resultsContainer = document.getElementById("results");
 
-    if (typeof isAdminUser === 'function' && isAdminUser()) {
+    if (typeof canUseCompatibilities === 'function' && canUseCompatibilities()) {
         if (ticker && !window.__ASSAL_LOW_END_DEVICE__) {
             ticker.style.animation = "none";
             void ticker.offsetWidth;
@@ -25060,7 +25215,7 @@ function restartNewsTicker() {
 }
 
 function refreshNewsTicker() {
-    if (typeof isAdminUser === 'function' && isAdminUser()) {
+    if (typeof canUseCompatibilities === 'function' && canUseCompatibilities()) {
         refreshAssalAdminCompatFeed({ force: navigator.onLine !== false });
         return;
     }
@@ -25074,7 +25229,7 @@ function refreshNewsTicker() {
 }
 
 function startNewsUpdates() {
-    if (typeof isAdminUser === 'function' && isAdminUser()) {
+    if (typeof canUseCompatibilities === 'function' && canUseCompatibilities()) {
         if (!newsInterval && !window.__ASSAL_LOW_END_DEVICE__) {
             newsInterval = setInterval(() => {
                 refreshAssalAdminCompatFeed({ force: navigator.onLine !== false });
@@ -25105,14 +25260,14 @@ function applyManualLightNewsBarState() {
     const manualMode = String(diag.manualOverride || '').toLowerCase();
     const isManualLight = manualMode === 'on';
     const isAutoLight = false;
-    const admin = typeof isAdminUser === 'function' && isAdminUser();
+    const compatAccess = typeof canUseCompatibilities === 'function' && canUseCompatibilities();
 
     root.classList.remove('manual-light-news');
-    root.classList.toggle('assal-admin-compat-news', admin);
+    root.classList.toggle('assal-admin-compat-news', compatAccess);
 
     if (!newsBar || !badge || !ticker) return;
 
-    if (admin) {
+    if (compatAccess) {
         stopNewsUpdates();
         // بالأدمن، شريط التوافقات يبقى ظاهر حتى في الوضع الخفيف؛ الحركة فقط تنطفئ على الجهاز الخفيف.
         newsBar.style.display = 'flex';
@@ -25179,6 +25334,7 @@ window.addEventListener('offline', function(){
     try { applyManualLightNewsBarState(); } catch (_) {}
 });
 window.addEventListener('online', function(){
+    try { verifyStoredCompatSubscriptionAccess({ silent: true }); } catch (_) {}
     try { applyManualLightNewsBarState(); } catch (_) {}
     try {
         setTimeout(function(){
