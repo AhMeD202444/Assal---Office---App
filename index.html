@@ -7441,6 +7441,38 @@ input, textarea, [contenteditable="true"] {
   margin-right: auto;            /* توسيط العناصر البلوكية */
 }
 
+
+/* ===== ASSAL SIMI STARTUP IMAGE AD ===== */
+#adModal .ad-shell.ad-theme-simi{
+  width: min(620px, 100%);
+  background: #06152b;
+}
+#adModal .ad-shell.ad-theme-simi .ad-topbar{
+  padding: 10px 12px;
+  background: rgba(3,12,28,.96);
+}
+#adModal .ad-shell.ad-theme-simi .ad-body{
+  padding: 0 !important;
+  overflow: auto;
+  background: #06152b;
+}
+#adModal .ad-shell.ad-theme-simi .simi-startup-ad{
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: calc(100svh - 86px);
+  object-fit: contain;
+  object-position: center;
+  margin: 0 auto;
+  background: #06152b;
+}
+@supports not (height: 100svh){
+  #adModal .ad-shell.ad-theme-simi .simi-startup-ad{
+    max-height: calc(100vh - 86px);
+  }
+}
+
 #adModal .ad-actions{
   justify-content: center;        /* توسيط الازرار */
 }
@@ -27249,9 +27281,10 @@ function closeContactModal(){
      "paid_ads"            => إعلان مدفوع (للمحل/طلب عمل/عرض حاجة)
      "sponsor_iphone_back" => إعلان مُعلن: أظهر آيفون (07706032703)
      "instant_inquiry_feature" => إعلان ميزة الاستعلام الفوري مع معرض صور
+     "simi_subscription"       => إعلان اشتراك التوافقات من الصورة images/SIMI.PNG
 
    ========================================================== */
-const AD_CHOICE = "off"; // <<< الإعلان الجديد مفعل افتراضياً
+const AD_CHOICE = "simi_subscription"; // <<< إعلان التوافقات مفعل حالياً؛ غيّرها إلى "off" لإطفائه
 
 // خيارات اضافية (اختياري)
 const AD_DELAY_MS = 120;                 // تأخير أخف حتى يظهر الإعلان أسرع بدون ما يزعج
@@ -27855,6 +27888,25 @@ function renderInstantInquiryFeature(){
 }
 
 
+  function renderSimiSubscriptionAd(){
+    setTheme("ad-theme-simi");
+    const body = bodyEl();
+    if (!body) return;
+
+    body.innerHTML = `
+      <img
+        class="simi-startup-ad"
+        src="images/SIMI.png"
+        alt="إعلان اشتراك التوافقات"
+        loading="eager"
+        decoding="async"
+        draggable="false"
+        onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<div style=&quot;padding:28px 18px;color:#fff;font-family:Cairo,sans-serif;text-align:center&quot;>تعذر تحميل صورة الإعلان.<br>تأكد من وجود الملف <b>images/SIMI.PNG</b> بنفس الاسم تماماً.</div>');"
+      />
+    `;
+  }
+
+
 
   function showByKey(keyRaw){
     bindClose();
@@ -27878,6 +27930,7 @@ function renderInstantInquiryFeature(){
     else if (key === "paid_ads") renderPaidAds();
     else if (key === "sponsor_iphone_back") renderSponsorAd();
     else if (key === "instant_inquiry_feature") renderInstantInquiryFeature();
+    else if (key === "simi_subscription") renderSimiSubscriptionAd();
 
     else return;
 
