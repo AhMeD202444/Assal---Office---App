@@ -3108,6 +3108,33 @@ input, textarea, [contenteditable="true"]{
         let isModalOpen = false;
         let newSimilaritiesCount = 0;
 
+        /* ===== مشاركة حالة اشتراك التوافقات مع الواجهة الرئيسية ===== */
+        const ASSAL_COMPAT_ACCESS_KEY = 'assalCompatAccess';
+        const ASSAL_COMPAT_ACCESS_DEVICE_KEY = 'assalCompatAccessDeviceId';
+        const ASSAL_COMPAT_ACCESS_CODE_KEY = 'assalCompatAccessCode';
+        const ASSAL_COMPAT_ACCESS_CHECKED_AT_KEY = 'assalCompatAccessCheckedAt';
+
+        function setSharedCompatAccess(granted, password = '', deviceId = '') {
+            try {
+                if (!granted) {
+                    localStorage.removeItem(ASSAL_COMPAT_ACCESS_KEY);
+                    localStorage.removeItem(ASSAL_COMPAT_ACCESS_DEVICE_KEY);
+                    localStorage.removeItem(ASSAL_COMPAT_ACCESS_CODE_KEY);
+                    localStorage.removeItem(ASSAL_COMPAT_ACCESS_CHECKED_AT_KEY);
+                    return;
+                }
+
+                const code = String(password || localStorage.getItem('password') || '').trim();
+                const dev = String(deviceId || localStorage.getItem('deviceId') || '').trim();
+                if (!code || !dev) return;
+
+                localStorage.setItem(ASSAL_COMPAT_ACCESS_KEY, 'true');
+                localStorage.setItem(ASSAL_COMPAT_ACCESS_CODE_KEY, code);
+                localStorage.setItem(ASSAL_COMPAT_ACCESS_DEVICE_KEY, dev);
+                localStorage.setItem(ASSAL_COMPAT_ACCESS_CHECKED_AT_KEY, String(Date.now()));
+            } catch (_) {}
+        }
+
         const notifications = [
             "توافقات دقيقة بضغطة زر!",
             "اشتراكك يوفر وقتك وجهدك!",
@@ -3889,6 +3916,7 @@ async function verifyPassword(password, db) {
 
     // ❌ كلمة مرور غلط
     if (!doc.exists) {
+      setSharedCompatAccess(false);
       await Swal.fire({
         title: 'خطأ',
         html: `
@@ -3937,6 +3965,7 @@ async function verifyPassword(password, db) {
       });
 
       localStorage.setItem("password", password);
+      setSharedCompatAccess(true, password, deviceId);
       await loadSimilaritesData();
       updateNotes();
 
@@ -3970,6 +3999,7 @@ async function verifyPassword(password, db) {
     // ✅ مستخدم قبل: نفس الجهاز
     if (data.deviceId === deviceId) {
       localStorage.setItem("password", password);
+      setSharedCompatAccess(true, password, deviceId);
       await loadSimilaritesData();
       updateNotes();
 
@@ -4000,6 +4030,7 @@ async function verifyPassword(password, db) {
     }
 
     // ❌ مستخدمة بجهاز ثاني
+  setSharedCompatAccess(false);
   await fireLoginStyle({
   html: `
     <div class="pro-dialog login-dialog">
