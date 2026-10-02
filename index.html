@@ -14541,7 +14541,6 @@ html.low-end-device .assal-community-write-row{
         <div class="assal-sub-manager-brand-copy">
           <div class="assal-sub-manager-kicker"><i class="fa-solid fa-shield-halved"></i><span>لوحة المالك</span></div>
           <div class="assal-sub-manager-title" id="assalSubManagerTitle">إدارة اشتراكات التوافقات</div>
-          <div class="assal-sub-manager-subtitle">إنشاء الاشتراكات ومتابعتها وإيقافها وتجديدها وإصدار بطاقة أنيقة جاهزة للزبون</div>
         </div>
       </div>
       <div class="assal-sub-manager-top-actions">
@@ -41511,6 +41510,12 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     const card = document.getElementById('assalSubManagerCardView');
     if (!list || !create || !card) return;
     list.hidden = view !== 'list'; create.hidden = view !== 'create'; card.hidden = view !== 'card';
+    const shell = document.querySelector('#assalOwnerSubscriptionManager .assal-sub-manager-shell');
+    if (shell) {
+      shell.classList.toggle('is-card-view', view === 'card');
+      shell.classList.toggle('is-list-view', view === 'list');
+      shell.classList.toggle('is-create-view', view === 'create');
+    }
     if (view === 'create') { const name = document.getElementById('assalSubName'); setTimeout(function(){ try { if (name) name.focus({preventScroll:true}); } catch (_) {} }, 80); }
     const body = document.querySelector('#assalOwnerSubscriptionManager .assal-sub-manager-body'); if (body) body.scrollTop = 0;
   }
@@ -42461,3 +42466,142 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 }
 </style>
 <!-- ===== /ASSAL OWNER SUBSCRIPTIONS PHASE 10 ===== -->
+
+<!-- ===== ASSAL OWNER SUBSCRIPTIONS PHASE 11: COMPACT CENTERED CARD + ACTION GRID POLISH FINAL ===== -->
+<style id="assal-owner-subscriptions-phase11-ui-polish-final">
+/*
+  UI-only refinement on top of PHASE10.
+  - Keeps list/create manager logic and Firestore behavior untouched.
+  - Makes card preview shell content-sized and visually centered.
+  - Normalizes subscription action buttons into a clean two-column grid.
+  - Reduces the exaggerated bottom safe gap while preserving a small touch-safe margin.
+  - Removes visual space reserved for the old explanatory subtitle.
+*/
+
+/* Header: title-focused, tighter and cleaner after removing the explanatory sentence. */
+#assalOwnerSubscriptionManager .assal-sub-manager-top{
+  padding:15px 18px !important;
+}
+#assalOwnerSubscriptionManager .assal-sub-manager-brand-copy{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+#assalOwnerSubscriptionManager .assal-sub-manager-title{
+  margin-top:0 !important;
+}
+
+/* Subscription-card action area: stable 2-column grid. */
+#assalOwnerSubscriptionManager .assal-sub-item-actions.is-manage{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:9px !important;
+  align-items:stretch !important;
+  justify-content:stretch !important;
+  margin-top:13px !important;
+}
+#assalOwnerSubscriptionManager .assal-sub-item-actions.is-manage .assal-sub-item-btn{
+  width:100% !important;
+  min-width:0 !important;
+  min-height:42px !important;
+  height:auto !important;
+  padding:8px 10px !important;
+  justify-content:center !important;
+  text-align:center !important;
+  line-height:1.25 !important;
+}
+/* When the action count is odd (3, 5...), the final action becomes a full-width footer button. */
+#assalOwnerSubscriptionManager .assal-sub-item-actions.is-manage .assal-sub-item-btn:last-child:nth-child(odd){
+  grid-column:1 / -1 !important;
+}
+
+/* PHASE10 kept 68px below the list for maximum safety; trim it to a subtle visual finish. */
+@media (max-width:700px){
+  #assalOwnerSubscriptionManager .assal-sub-manager-top{
+    padding:12px 12px !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-brand-icon{
+    width:38px !important;
+    height:38px !important;
+    min-width:38px !important;
+    border-radius:12px !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-title{
+    font-size:16px !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-kicker{
+    margin-bottom:2px !important;
+  }
+
+  /* List/create views stay full and independently scrollable, but without the huge dead space at the end. */
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell:not(.is-card-view) .assal-sub-manager-body{
+    padding:11px 11px calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+    scroll-padding-bottom:calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-list > .assal-sub-item:last-child{
+    margin-bottom:0 !important;
+  }
+
+  /* Card view: content-sized shell centered by the manager overlay instead of occupying the full phone height. */
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell.is-card-view{
+    width:min(100%,760px) !important;
+    height:auto !important;
+    min-height:0 !important;
+    max-height:calc(100dvh - 32px) !important;
+    margin:auto !important;
+    overflow:hidden !important;
+    border-radius:22px !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell.is-card-view .assal-sub-manager-body{
+    flex:0 1 auto !important;
+    height:auto !important;
+    min-height:0 !important;
+    max-height:calc(100dvh - 106px) !important;
+    padding:11px !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    scroll-padding-bottom:10px !important;
+    -webkit-overflow-scrolling:touch !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell.is-card-view #assalSubManagerCardView{
+    min-height:0 !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell.is-card-view .assal-sub-card-compact-shell{
+    gap:9px !important;
+    padding:0 !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell.is-card-view .assal-sub-card-image-preview{
+    min-height:0 !important;
+    max-height:min(46dvh,430px) !important;
+    padding:6px !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell.is-card-view .assal-sub-card-image-preview img{
+    max-height:min(calc(46dvh - 12px),418px) !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell.is-card-view .assal-sub-card-image-loading{
+    min-height:150px !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell.is-card-view .assal-sub-card-actions-compact{
+    margin:0 !important;
+    gap:8px !important;
+  }
+}
+
+/* Extra-short phones: preserve the same centered concept while allowing only the inside to scroll. */
+@media (max-width:700px) and (max-height:620px){
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell.is-card-view{
+    max-height:calc(100dvh - 16px) !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell.is-card-view .assal-sub-manager-body{
+    max-height:calc(100dvh - 88px) !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell.is-card-view .assal-sub-card-image-preview{
+    max-height:38dvh !important;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell.is-card-view .assal-sub-card-image-preview img{
+    max-height:calc(38dvh - 12px) !important;
+  }
+}
+</style>
+<!-- ===== /ASSAL OWNER SUBSCRIPTIONS PHASE 11 ===== -->
+
