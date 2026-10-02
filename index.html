@@ -17095,24 +17095,66 @@ async function verifyStoredCompatSubscriptionAccess(options = {}) {
     const runner = (async () => {
         try {
             const docId = encodeURIComponent(storedPassword);
-            const url = `https://firestore.googleapis.com/v1/projects/${ASSAL_COMPAT_FIRESTORE_PROJECT_ID}/databases/(default)/documents/passwords/${docId}?key=${encodeURIComponent(ASSAL_COMPAT_FIRESTORE_API_KEY)}`;
-            const response = await fetch(url, { method: 'GET', cache: 'no-store' });
+            const baseUrl = `https://firestore.googleapis.com/v1/projects/${ASSAL_COMPAT_FIRESTORE_PROJECT_ID}/databases/(default)/documents`;
+            const apiKeyPart = `?key=${encodeURIComponent(ASSAL_COMPAT_FIRESTORE_API_KEY)}`;
 
-            if (response.status === 404) {
-                setCompatSubscriptionAccess(false);
+            /*
+             * النظام الجديد أولاً: compatSubscriptions
+             * مهم جداً: لا نمسح الصلاحية لمجرد أن الكود غير موجود في passwords،
+             * لأن الاشتراكات الجديدة لم تعد محفوظة هناك.
+             */
+            const newUrl = `${baseUrl}/compatSubscriptions/${docId}${apiKeyPart}`;
+            const newResponse = await fetch(newUrl, { method: 'GET', cache: 'no-store' });
+
+            if (newResponse.ok) {
+                const doc = await newResponse.json();
+                const fields = doc && doc.fields ? doc.fields : {};
+                const status = String((fields.status && fields.status.stringValue) || 'pending').trim().toLowerCase();
+                const boundDeviceId = String((fields.deviceId && fields.deviceId.stringValue) || '').trim();
+                const expiresRaw = fields.expiresAtMs
+                    ? (fields.expiresAtMs.integerValue ?? fields.expiresAtMs.doubleValue ?? 0)
+                    : 0;
+                const expiresAtMs = Number(expiresRaw || 0);
+                const valid = status === 'active'
+                    && !!boundDeviceId
+                    && boundDeviceId === compatDeviceId
+                    && expiresAtMs > Date.now();
+
+                setCompatSubscriptionAccess(valid, {
+                    code: storedPassword,
+                    deviceId: compatDeviceId
+                });
                 syncCompatAccessUi();
-                return false;
+                return valid;
             }
-            if (!response.ok) {
-                // فشل اتصال/صلاحية عابر: لا نسحب آخر صلاحية صحيحة محفوظة.
+
+            if (newResponse.status !== 404) {
+                // خطأ اتصال/صلاحية عابر: لا نسحب آخر صلاحية صحيحة محفوظة.
                 syncCompatAccessUi();
                 return hasCachedCompatSubscriptionAccess();
             }
 
-            const doc = await response.json();
-            const fields = doc && doc.fields ? doc.fields : {};
-            const used = fields.used && fields.used.booleanValue === true;
-            const boundDeviceId = String((fields.deviceId && fields.deviceId.stringValue) || '').trim();
+            /*
+             * توافق رجعي كامل: إذا الكود مو موجود بالنظام الجديد،
+             * نرجع إلى passwords القديمة بدون كسر أي مشترك سابق.
+             */
+            const legacyUrl = `${baseUrl}/passwords/${docId}${apiKeyPart}`;
+            const legacyResponse = await fetch(legacyUrl, { method: 'GET', cache: 'no-store' });
+
+            if (legacyResponse.status === 404) {
+                setCompatSubscriptionAccess(false);
+                syncCompatAccessUi();
+                return false;
+            }
+            if (!legacyResponse.ok) {
+                syncCompatAccessUi();
+                return hasCachedCompatSubscriptionAccess();
+            }
+
+            const legacyDoc = await legacyResponse.json();
+            const legacyFields = legacyDoc && legacyDoc.fields ? legacyDoc.fields : {};
+            const used = legacyFields.used && legacyFields.used.booleanValue === true;
+            const boundDeviceId = String((legacyFields.deviceId && legacyFields.deviceId.stringValue) || '').trim();
             const valid = used && !!boundDeviceId && boundDeviceId === compatDeviceId;
 
             setCompatSubscriptionAccess(valid, {
@@ -28707,7 +28749,7 @@ function renderInstantInquiryFeature(){
     body.innerHTML = `
       <img
         class="simi-startup-ad"
-        src="images/SIMI.png"
+        src="images/SIMI.PNG"
         alt="إعلان اشتراك التوافقات"
         loading="eager"
         decoding="async"
