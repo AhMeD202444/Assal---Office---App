@@ -3135,6 +3135,110 @@ input, textarea, [contenteditable="true"]{
             } catch (_) {}
         }
 
+
+        /* ===== نظام الاشتراكات الجديد + كاش تفاصيل الاشتراك ===== */
+        const ASSAL_COMPAT_SUBS_COLLECTION = 'compatSubscriptions';
+        const ASSAL_COMPAT_SUB_INFO_KEY = 'assalCompatSubscriptionInfo';
+        let currentCompatSubscriptionInfo = null;
+
+        function saveCompatSubscriptionInfo(info) {
+            try {
+                currentCompatSubscriptionInfo = info && typeof info === 'object' ? { ...info } : null;
+                if (currentCompatSubscriptionInfo) {
+                    localStorage.setItem(ASSAL_COMPAT_SUB_INFO_KEY, JSON.stringify(currentCompatSubscriptionInfo));
+                } else {
+                    localStorage.removeItem(ASSAL_COMPAT_SUB_INFO_KEY);
+                }
+            } catch (_) {}
+        }
+
+        function getCompatSubscriptionInfo() {
+            if (currentCompatSubscriptionInfo && typeof currentCompatSubscriptionInfo === 'object') {
+                return currentCompatSubscriptionInfo;
+            }
+            try {
+                const raw = localStorage.getItem(ASSAL_COMPAT_SUB_INFO_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') return null;
+                currentCompatSubscriptionInfo = parsed;
+                return parsed;
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function getCompatPlanMeta(data = {}) {
+            const durationMinutes = Number(data.durationMinutes || 0);
+            const durationDays = Number(data.durationDays || 0);
+            const rawType = String(data.planType || data.subscriptionType || data.type || '').toLowerCase();
+            const isTrial = rawType === 'trial' || rawType === 'test' || durationMinutes > 0;
+
+            let durationMs = 0;
+            if (durationMinutes > 0) durationMs = Math.round(durationMinutes * 60000);
+            else if (durationDays > 0) durationMs = Math.round(durationDays * 86400000);
+
+            let planName = 'اشتراك سنوي';
+            if (isTrial) {
+                if (durationMinutes === 60) planName = 'تيست — ساعة واحدة';
+                else if (durationMinutes > 0) planName = `تيست — ${durationMinutes} دقيقة`;
+                else planName = 'اشتراك تجريبي';
+            } else if (durationDays > 0 && durationDays !== 365) {
+                planName = `اشتراك — ${durationDays} يوم`;
+            } else if (durationDays === 365) {
+                planName = 'اشتراك سنوي — 365 يوم';
+            }
+
+            return { isTrial, durationMinutes, durationDays, durationMs, planName };
+        }
+
+        function buildCompatSubscriptionInfo(code, data = {}, source = 'new') {
+            const plan = getCompatPlanMeta(data);
+            return {
+                source,
+                code: String(code || ''),
+                customerName: String(data.customerName || data.name || ''),
+                customerPhone: String(data.customerPhone || data.phone || ''),
+                customerAddress: String(data.customerAddress || data.address || ''),
+                note: String(data.note || ''),
+                status: String(data.status || (source === 'legacy' ? 'active' : 'pending')).toLowerCase(),
+                deviceId: String(data.deviceId || ''),
+                activatedAtMs: Number(data.activatedAtMs || 0) || null,
+                expiresAtMs: Number(data.expiresAtMs || 0) || null,
+                createdAtMs: Number(data.createdAtMs || 0) || null,
+                durationMinutes: plan.durationMinutes,
+                durationDays: plan.durationDays,
+                durationMs: plan.durationMs,
+                planName: source === 'legacy' ? 'اشتراك سابق' : plan.planName,
+                isTrial: source === 'legacy' ? false : plan.isTrial
+            };
+        }
+
+        function formatCompatDate(ms) {
+            const value = Number(ms || 0);
+            if (!value) return '—';
+            try {
+                return new Intl.DateTimeFormat('ar-IQ', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit'
+                }).format(new Date(value));
+            } catch (_) {
+                return new Date(value).toLocaleString();
+            }
+        }
+
+        function formatCompatRemaining(ms) {
+            const value = Math.max(0, Number(ms || 0));
+            if (!value) return 'منتهي';
+            const totalMinutes = Math.ceil(value / 60000);
+            const days = Math.floor(totalMinutes / 1440);
+            const hours = Math.floor((totalMinutes % 1440) / 60);
+            const minutes = totalMinutes % 60;
+            if (days > 0) return hours > 0 ? `${days} يوم و ${hours} ساعة` : `${days} يوم`;
+            if (hours > 0) return minutes > 0 ? `${hours} ساعة و ${minutes} دقيقة` : `${hours} ساعة`;
+            return `${Math.max(1, minutes)} دقيقة`;
+        }
+
         const notifications = [
             "توافقات دقيقة بضغطة زر!",
             "اشتراكك يوفر وقتك وجهدك!",
@@ -3402,15 +3506,58 @@ function triggerAnimation() {
 
 
        function showSubscriptionDetails() {
-  const planName = 'مميز';
-  const startDate = '2025-01-01';
-  const endDate = '2026-01-01';
+  const info = getCompatSubscriptionInfo();
 
-  let daysLeft = null;
-  try {
-    const diff = new Date(endDate) - new Date();
-    daysLeft = Math.max(0, Math.ceil(diff / 86400000));
-  } catch (e) {}
+  if (!info) {
+    Swal.fire({
+      title: 'تفاصيل الاشتراك',
+      html: `
+        <div class="pro-dialog">
+          <div class="pro-hero">
+            <div class="pro-hero-icon pro-hero-icon-gold"><i class="fas fa-crown"></i></div>
+            <div class="pro-hero-text">
+              <div class="pro-hero-title">اشتراك التوافقات</div>
+              <div class="pro-hero-sub">لا توجد تفاصيل اشتراك محفوظة حالياً على هذا الجهاز.</div>
+            </div>
+          </div>
+        </div>
+      `,
+      showCloseButton: true,
+      showConfirmButton: false,
+      allowOutsideClick: true,
+      allowEscapeKey: true,
+      customClass: {
+        container: 'pro-refresh-container',
+        popup: 'swal2-popup activation-popup pro-popup stats-popup',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container'
+      }
+    }).then(() => triggerAnimation());
+    return;
+  }
+
+  const now = Date.now();
+  const isLegacy = info.source === 'legacy';
+  const status = String(info.status || '').toLowerCase();
+  const activeRemaining = info.expiresAtMs ? Math.max(0, Number(info.expiresAtMs) - now) : null;
+  const effectiveExpired = !isLegacy && !!info.expiresAtMs && activeRemaining <= 0;
+
+  let statusLabel = 'غير مفعل';
+  let statusClass = 'pro-chip-gold';
+  if (isLegacy) statusLabel = 'نشط — نظام سابق';
+  else if (status === 'paused') statusLabel = 'موقوف';
+  else if (status === 'expired' || effectiveExpired) statusLabel = 'منتهي';
+  else if (status === 'active') statusLabel = 'فعّال';
+
+  let remainingText = 'يبدأ من أول تفعيل';
+  if (isLegacy) remainingText = 'اشتراك سابق بدون مدة رقمية محفوظة';
+  else if (status === 'paused') remainingText = 'الاشتراك موقوف حالياً';
+  else if (status === 'expired' || effectiveExpired) remainingText = 'انتهت مدة الاشتراك';
+  else if (status === 'active' && activeRemaining !== null) remainingText = formatCompatRemaining(activeRemaining);
+
+  const startText = isLegacy ? 'نظام سابق' : (info.activatedAtMs ? formatCompatDate(info.activatedAtMs) : 'من أول تفعيل');
+  const endText = isLegacy ? 'غير محدد' : (info.expiresAtMs ? formatCompatDate(info.expiresAtMs) : 'يتحدد عند أول تفعيل');
+  const customerName = String(info.customerName || '').trim();
 
   Swal.fire({
     title: 'تفاصيل الاشتراك',
@@ -3419,8 +3566,8 @@ function triggerAnimation() {
         <div class="pro-hero">
           <div class="pro-hero-icon pro-hero-icon-gold"><i class="fas fa-crown"></i></div>
           <div class="pro-hero-text">
-            <div class="pro-hero-title">اشتراك ${planName}</div>
-            <div class="pro-hero-sub">جاهز للشغل الثقيل — تجربة مرتّبة ومضمونـة</div>
+            <div class="pro-hero-title">${info.planName || 'اشتراك التوافقات'}</div>
+            <div class="pro-hero-sub">${customerName ? `المشترك: <span>${customerName}</span>` : 'اشتراك التوافقات على هذا الجهاز'}</div>
           </div>
         </div>
 
@@ -3428,39 +3575,30 @@ function triggerAnimation() {
           <div class="pro-pill">
             <i class="fas fa-calendar-alt"></i>
             <span>يبدأ</span>
-            <b>${startDate}</b>
+            <b>${startText}</b>
           </div>
           <div class="pro-pill">
             <i class="fas fa-calendar-check"></i>
             <span>ينتهي</span>
-            <b>${endDate}</b>
+            <b>${endText}</b>
           </div>
         </div>
 
-        ${daysLeft !== null ? `
-          <div class="pro-banner">
-            <i class="fas fa-hourglass-half"></i>
-            <span>المتبقي على الانتهاء</span>
-            <b>${daysLeft} يوم</b>
-          </div>
-        ` : ''}
+        <div class="pro-banner">
+          <i class="fas fa-hourglass-half"></i>
+          <span>${status === 'active' && !effectiveExpired ? 'المتبقي' : 'الحالة'}</span>
+          <b>${remainingText}</b>
+        </div>
 
         <div class="pro-card pro-card-wide">
           <div class="pro-card-top">
-            <span class="pro-card-label"><i class="fas fa-gem"></i> مميزات الاشتراك</span>
-            <span class="pro-chip pro-chip-gold">Premium</span>
+            <span class="pro-card-label"><i class="fas fa-key"></i> رمز الاشتراك</span>
+            <span class="pro-chip ${statusClass}">${statusLabel}</span>
           </div>
-
-          <ul class="pro-list">
-            <li><i class="fas fa-check-circle"></i> توافقات أدق ونتائج أسرع</li>
-            <li><i class="fas fa-check-circle"></i> تحديثات يومية للتوافقات</li>
-            <li><i class="fas fa-check-circle"></i> تجربة واجهة أنظف وأسهل بالشغل</li>
-            <li><i class="fas fa-check-circle"></i> دعم أفضل للمشتركين</li>
-          </ul>
-
+          <div class="pro-number" style="font-size:18px;direction:ltr;word-break:break-all;">${String(info.code || '—')}</div>
           <div class="pro-note">
             <i class="fas fa-shield-alt"></i>
-            <span>ملاحظة: بيانات اشتراكك محفوظة بأمان داخل التطبيق.</span>
+            <span>${isLegacy ? 'هذا الرمز يعمل عبر نظام الاشتراكات السابق.' : 'مدة الاشتراك تُحسب من أول تفعيل على الجهاز المسجل.'}</span>
           </div>
         </div>
       </div>
@@ -3469,17 +3607,12 @@ function triggerAnimation() {
     showConfirmButton: false,
     allowOutsideClick: true,
     allowEscapeKey: true,
-    
-    
     customClass: {
-  container: 'pro-refresh-container',   // ✅ نفس طبقة الظلال مال refresh
- popup: 'swal2-popup activation-popup pro-popup stats-popup',
-  title: 'swal2-title',
-  htmlContainer: 'swal2-html-container',
-  
-}
-
-    
+      container: 'pro-refresh-container',
+      popup: 'swal2-popup activation-popup pro-popup stats-popup',
+      title: 'swal2-title',
+      htmlContainer: 'swal2-html-container'
+    }
   }).then(() => {
     triggerAnimation();
   });
@@ -3809,7 +3942,7 @@ updateNotes();
       <div class="pro-hero-text">
         <div class="pro-hero-title">دخول محمي</div>
         <div class="pro-hero-sub">
-          أدخل كلمة المرور حتى تفتح <span>التوافقات</span> وتستخدم كل الميزات.
+          أدخل رمز الاشتراك حتى تفتح <span>التوافقات</span> وتستخدم كل الميزات.
         </div>
       </div>
     </div>
@@ -3823,7 +3956,7 @@ iconHtml: '<i class="fas fa-lock"></i>',
 
 
     input: 'password',
-    inputPlaceholder: 'كلمة المرور',
+    inputPlaceholder: 'رمز الاشتراك',
     inputAttributes: {
       autocapitalize: 'off',
       autocomplete: 'current-password',
@@ -3866,7 +3999,7 @@ didOpen: () => {
     preConfirm: () => {
       const v = (Swal.getInput()?.value || '').trim();
       if (!v) {
-        Swal.showValidationMessage('رجاءً اكتب كلمة المرور أولاً.');
+        Swal.showValidationMessage('رجاءً اكتب رمز الاشتراك أولاً.');
         return false;
       }
       return v;
@@ -3877,25 +4010,17 @@ didOpen: () => {
 }
 
 
-async function verifyPassword(password, db) {
-
-  // Loader (نفس أسلوب الريفريش)
-  Swal.fire({
+function showCompatVerifyLoader() {
+  return Swal.fire({
     html: `
       <div class="prx">
         <div class="prx-frame">
-          <div class="prx-ring">
-            <i class="fas fa-spinner"></i>
-          </div>
-
+          <div class="prx-ring"><i class="fas fa-spinner"></i></div>
           <div>
             <div class="prx-title">جاري التحقق</div>
             <div class="prx-sub">يرجى الانتظار…</div>
             <div class="prx-bar"><span style="width:65%"></span></div>
-            <div class="prx-meta">
-              <span>اتصال</span>
-              <b>...</b>
-            </div>
+            <div class="prx-meta"><span>اتصال</span><b>...</b></div>
           </div>
         </div>
       </div>
@@ -3909,178 +4034,257 @@ async function verifyPassword(password, db) {
       popup: 'pro-refresh-popup login-loading'
     }
   });
+}
 
-  try {
-    const codeRef = db.collection('passwords').doc(password);
-    const doc = await codeRef.get();
-
-    // ❌ كلمة مرور غلط
-    if (!doc.exists) {
-      setSharedCompatAccess(false);
-      await Swal.fire({
-        title: 'خطأ',
-        html: `
-          <div class="pro-dialog login-dialog">
-            <div class="pro-hero">
-              <div class="pro-hero-icon" style="background:linear-gradient(135deg, rgba(220,20,60,.25), rgba(139,0,0,.18));">
-                <i class="fas fa-circle-xmark"></i>
-              </div>
-              <div class="pro-hero-text">
-                <div class="pro-hero-title">كلمة المرور غير صحيحة</div>
-                <div class="pro-hero-sub">
-                  مبين بعدك ما مفعل <span>الخدمة</span> — فعل دخولك وخليك <span>مميز</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        `,
-        showConfirmButton: true,
-        confirmButtonText: 'حاول مرة أخرى',
-        timer: 5000,
-        timerProgressBar: true,
-        allowOutsideClick: false,
-        allowEscapeKey: true,
-        customClass: {
-          container: 'pro-refresh-container',
-          popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
-          title: 'swal2-title',
-          htmlContainer: 'swal2-html-container',
-          confirmButton: 'login-confirm danger'
-        }
-      });
-
-      triggerAnimation();
-      return false;
-    }
-
-    const data = doc.data();
-    const deviceId = await getDeviceId();
-
-    // ✅ أول استخدام
-    if (!data.used) {
-      await codeRef.update({
-        deviceId: deviceId,
-        used: true,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      localStorage.setItem("password", password);
-      setSharedCompatAccess(true, password, deviceId);
-      await loadSimilaritesData();
-      updateNotes();
-
-      // ✅ نجاح (بدون زر – يختفي وحده)
-      await Swal.fire({
-        html: `
-          <div class="prx-done">
-            <i class="fas fa-check-circle"></i>
-            <div>
-              <h3>تم الدخول بنجاح</h3>
-              <p>تم تفعيل كلمة المرور ✅</p>
-            </div>
-          </div>
-        `,
-        timer: 1400,
-        timerProgressBar: true,
-        showConfirmButton: false,
-        showCloseButton: false,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        customClass: {
-          container: 'pro-refresh-container',
-          popup: 'pro-success-popup login-success'
-        }
-      });
-
-      triggerAnimation();
-      return true;
-    }
-
-    // ✅ مستخدم قبل: نفس الجهاز
-    if (data.deviceId === deviceId) {
-      localStorage.setItem("password", password);
-      setSharedCompatAccess(true, password, deviceId);
-      await loadSimilaritesData();
-      updateNotes();
-
-      await Swal.fire({
-        html: `
-          <div class="prx-done">
-            <i class="fas fa-check-circle"></i>
-            <div>
-              <h3>تم الدخول بنجاح</h3>
-              <p>كلمة المرور صحيحة ✅</p>
-            </div>
-          </div>
-        `,
-        timer: 1200,
-        timerProgressBar: true,
-        showConfirmButton: false,
-        showCloseButton: false,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        customClass: {
-          container: 'pro-refresh-container',
-          popup: 'pro-success-popup login-success'
-        }
-      });
-
-      triggerAnimation();
-      return true;
-    }
-
-    // ❌ مستخدمة بجهاز ثاني
-  setSharedCompatAccess(false);
-  await fireLoginStyle({
-  html: `
-    <div class="pro-dialog login-dialog">
-      <div class="pro-hero">
-        <div class="pro-hero-icon" style="background:linear-gradient(135deg, rgba(220,20,60,.25), rgba(139,0,0,.18));">
-          <i class="fas fa-triangle-exclamation"></i>
-        </div>
-        <div class="pro-hero-text">
-          <div class="pro-hero-title">غير مسموح</div>
-          <div class="pro-hero-sub">كلمة المرور مستخدمة على جهاز آخر!</div>
+async function showCompatLoginSuccess(message, timer = 1300) {
+  await Swal.fire({
+    html: `
+      <div class="prx-done">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <h3>تم الدخول بنجاح</h3>
+          <p>${message}</p>
         </div>
       </div>
-    </div>
-  `,
-  showConfirmButton: true,
-  confirmButtonText: 'حاول مرة أخرى',
-  timer: 3200,
-  timerProgressBar: true,
-  allowOutsideClick: false,
-  allowEscapeKey: true,
-  customClass: {
-    popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
-    confirmButton: 'login-confirm danger'
+    `,
+    timer,
+    timerProgressBar: true,
+    showConfirmButton: false,
+    showCloseButton: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    customClass: {
+      container: 'pro-refresh-container',
+      popup: 'pro-success-popup login-success'
+    }
+  });
+}
+
+async function showCompatDenied(title, subtitle, icon = 'fa-triangle-exclamation', timer = 3600) {
+  setSharedCompatAccess(false);
+  await fireLoginStyle({
+    html: `
+      <div class="pro-dialog login-dialog">
+        <div class="pro-hero">
+          <div class="pro-hero-icon" style="background:linear-gradient(135deg, rgba(220,20,60,.25), rgba(139,0,0,.18));">
+            <i class="fas ${icon}"></i>
+          </div>
+          <div class="pro-hero-text">
+            <div class="pro-hero-title">${title}</div>
+            <div class="pro-hero-sub">${subtitle}</div>
+          </div>
+        </div>
+      </div>
+    `,
+    showConfirmButton: true,
+    confirmButtonText: 'حاول مرة أخرى',
+    timer,
+    timerProgressBar: true,
+    allowOutsideClick: false,
+    allowEscapeKey: true,
+    customClass: {
+      popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
+      confirmButton: 'login-confirm danger'
+    }
+  });
+  triggerAnimation();
+  return false;
+}
+
+async function completeCompatLogin(password, deviceId, info, message, timer = 1250) {
+  localStorage.setItem('password', password);
+  setSharedCompatAccess(true, password, deviceId);
+  saveCompatSubscriptionInfo(info);
+  await loadSimilaritesData();
+  updateNotes();
+  await showCompatLoginSuccess(message, timer);
+  triggerAnimation();
+  return true;
+}
+
+async function verifyNewCompatSubscription(password, db, doc) {
+  const data = doc.data() || {};
+  const codeRef = db.collection(ASSAL_COMPAT_SUBS_COLLECTION).doc(password);
+  const deviceId = await getDeviceId();
+  const status = String(data.status || 'pending').toLowerCase();
+  const plan = getCompatPlanMeta(data);
+  const activatedAtMs = Number(data.activatedAtMs || 0) || null;
+  const expiresAtMs = Number(data.expiresAtMs || 0) || null;
+  const savedDeviceId = String(data.deviceId || '');
+
+  if (status === 'paused') {
+    saveCompatSubscriptionInfo(buildCompatSubscriptionInfo(password, data, 'new'));
+    return showCompatDenied('الاشتراك موقوف', 'تم إيقاف هذا الاشتراك مؤقتاً من إدارة مكتب عسل.', 'fa-pause-circle', 4200);
   }
-});
 
+  if (status === 'expired') {
+    saveCompatSubscriptionInfo(buildCompatSubscriptionInfo(password, data, 'new'));
+    return showCompatDenied('انتهى الاشتراك', 'انتهت مدة هذا الاشتراك. راجع مكتب عسل لتجديده.', 'fa-hourglass-end', 4300);
+  }
 
+  /* أول تفعيل: السنة/التيست يبدأان هنا فقط */
+  if (status === 'pending' && !activatedAtMs && !expiresAtMs && !savedDeviceId) {
+    if (!plan.durationMs || plan.durationMs <= 0) {
+      return showCompatDenied('بيانات الاشتراك غير مكتملة', 'مدة هذا الاشتراك غير محددة. يرجى مراجعة مكتب عسل.', 'fa-circle-exclamation', 4300);
+    }
+
+    const nowMs = Date.now();
+    const endMs = nowMs + plan.durationMs;
+
+    await codeRef.update({
+      status: 'active',
+      deviceId: deviceId,
+      activatedAtMs: nowMs,
+      expiresAtMs: endMs,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAtMs: nowMs
+    });
+
+    const merged = {
+      ...data,
+      status: 'active',
+      deviceId: deviceId,
+      activatedAtMs: nowMs,
+      expiresAtMs: endMs,
+      updatedAtMs: nowMs
+    };
+    const info = buildCompatSubscriptionInfo(password, merged, 'new');
+    const activationMessage = plan.isTrial
+      ? `تم تشغيل ${plan.planName} من هذه اللحظة ✅`
+      : 'تم تفعيل الاشتراك وبدأت مدة الـ 365 يوم ✅';
+
+    return completeCompatLogin(password, deviceId, info, activationMessage, 1500);
+  }
+
+  if (status === 'active') {
+    if (!expiresAtMs) {
+      return showCompatDenied('بيانات الاشتراك غير مكتملة', 'لا يوجد تاريخ انتهاء صالح لهذا الاشتراك.', 'fa-circle-exclamation', 4200);
+    }
+
+    if (Date.now() >= expiresAtMs) {
+      const expiredInfo = buildCompatSubscriptionInfo(password, { ...data, status: 'expired' }, 'new');
+      saveCompatSubscriptionInfo(expiredInfo);
+      return showCompatDenied('انتهى الاشتراك', 'انتهت مدة هذا الاشتراك. راجع مكتب عسل لتجديده.', 'fa-hourglass-end', 4300);
+    }
+
+    if (!savedDeviceId || savedDeviceId !== deviceId) {
+      saveCompatSubscriptionInfo(buildCompatSubscriptionInfo(password, data, 'new'));
+      return showCompatDenied('غير مسموح', 'رمز الاشتراك مستخدم على جهاز آخر!', 'fa-triangle-exclamation', 3500);
+    }
+
+    const info = buildCompatSubscriptionInfo(password, data, 'new');
+    const remaining = expiresAtMs - Date.now();
+    const message = info.isTrial
+      ? `التيست فعّال — المتبقي ${formatCompatRemaining(remaining)} ✅`
+      : 'رمز الاشتراك صحيح والاشتراك فعّال ✅';
+    return completeCompatLogin(password, deviceId, info, message, 1200);
+  }
+
+  return showCompatDenied('حالة الاشتراك غير صالحة', 'تعذر استخدام هذا الاشتراك بحالته الحالية. يرجى مراجعة مكتب عسل.', 'fa-circle-exclamation', 4300);
+}
+
+async function verifyLegacyCompatPassword(password, db, legacyDoc) {
+  const codeRef = db.collection('passwords').doc(password);
+  const doc = legacyDoc || await codeRef.get();
+
+  if (!doc.exists) {
+    setSharedCompatAccess(false);
+    saveCompatSubscriptionInfo(null);
+    await Swal.fire({
+      title: 'خطأ',
+      html: `
+        <div class="pro-dialog login-dialog">
+          <div class="pro-hero">
+            <div class="pro-hero-icon" style="background:linear-gradient(135deg, rgba(220,20,60,.25), rgba(139,0,0,.18));">
+              <i class="fas fa-circle-xmark"></i>
+            </div>
+            <div class="pro-hero-text">
+              <div class="pro-hero-title">رمز الاشتراك غير صحيح</div>
+              <div class="pro-hero-sub">تأكد من الرمز وحاول مرة أخرى.</div>
+            </div>
+          </div>
+        </div>
+      `,
+      showConfirmButton: true,
+      confirmButtonText: 'حاول مرة أخرى',
+      timer: 5000,
+      timerProgressBar: true,
+      allowOutsideClick: false,
+      allowEscapeKey: true,
+      customClass: {
+        container: 'pro-refresh-container',
+        popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container',
+        confirmButton: 'login-confirm danger'
+      }
+    });
     triggerAnimation();
     return false;
+  }
+
+  const data = doc.data() || {};
+  const deviceId = await getDeviceId();
+
+  if (!data.used) {
+    await codeRef.update({
+      deviceId: deviceId,
+      used: true,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    const info = buildCompatSubscriptionInfo(password, { ...data, used: true, deviceId }, 'legacy');
+    return completeCompatLogin(password, deviceId, info, 'تم تفعيل الرمز القديم بنجاح ✅', 1400);
+  }
+
+  if (String(data.deviceId || '') === deviceId) {
+    const info = buildCompatSubscriptionInfo(password, data, 'legacy');
+    return completeCompatLogin(password, deviceId, info, 'رمز الاشتراك صحيح ✅', 1200);
+  }
+
+  saveCompatSubscriptionInfo(buildCompatSubscriptionInfo(password, data, 'legacy'));
+  return showCompatDenied('غير مسموح', 'رمز الاشتراك مستخدم على جهاز آخر!', 'fa-triangle-exclamation', 3200);
+}
+
+async function verifyPassword(password, db) {
+  showCompatVerifyLoader();
+
+  try {
+    const cleanPassword = String(password || '').trim();
+    if (!cleanPassword) return false;
+
+    /* 1) النظام الجديد أولاً */
+    const newRef = db.collection(ASSAL_COMPAT_SUBS_COLLECTION).doc(cleanPassword);
+    const newDoc = await newRef.get();
+    if (newDoc.exists) {
+      return await verifyNewCompatSubscription(cleanPassword, db, newDoc);
+    }
+
+    /* 2) Fallback للأكواد القديمة بدون كسر أي مشترك سابق */
+    const legacyRef = db.collection('passwords').doc(cleanPassword);
+    const legacyDoc = await legacyRef.get();
+    return await verifyLegacyCompatPassword(cleanPassword, db, legacyDoc);
 
   } catch (error) {
+    console.error('COMPAT_VERIFY_ERROR', error);
     await fireLoginStyle({
-  title: 'خطأ',
-  text: error.message.includes('offline')
-    ? 'أنت غير متصل بالإنترنت. يرجى التحقق من الاتصال.'
-    : 'حدث خطأ: ' + error.message,
-  icon: 'info',
-  iconHtml: error.message.includes('offline')
-    ? '<i class="fas fa-wifi-slash"></i>'
-    : '<i class="fas fa-triangle-exclamation"></i>',
-  showConfirmButton: true,
-  confirmButtonText: 'حاول مرة أخرى',
-  allowOutsideClick: false,
-  allowEscapeKey: true,
-  customClass: {
-    popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
-    confirmButton: 'login-confirm danger'
-  }
-});
-
+      title: 'خطأ',
+      text: String(error && error.message || '').includes('offline')
+        ? 'أنت غير متصل بالإنترنت. يرجى التحقق من الاتصال.'
+        : 'حدث خطأ: ' + (error && error.message ? error.message : 'تعذر التحقق من الاشتراك'),
+      icon: 'info',
+      iconHtml: String(error && error.message || '').includes('offline')
+        ? '<i class="fas fa-wifi-slash"></i>'
+        : '<i class="fas fa-triangle-exclamation"></i>',
+      showConfirmButton: true,
+      confirmButtonText: 'حاول مرة أخرى',
+      allowOutsideClick: false,
+      allowEscapeKey: true,
+      customClass: {
+        popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
+        confirmButton: 'login-confirm danger'
+      }
+    });
 
     triggerAnimation();
     return false;
@@ -4108,7 +4312,7 @@ function fireLoginStyle(opts = {}) {
 
  window.onload = async function() {
 
-        // ✅ DEV MODE: تعطيل Firebase + تعطيل كلمة المرور مؤقتاً
+        // ✅ DEV MODE: تعطيل Firebase + تعطيل رمز الاشتراك مؤقتاً
         if (DEV_NO_FIREBASE) {
             const result = await loadExcelFiles();
             if (result.success) {
