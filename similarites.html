@@ -2973,6 +2973,93 @@ input, textarea, [contenteditable="true"]{
 
         
         
+
+/* =========================================================
+   ASSAL Compat Phase 2 — Mobile Keyboard Safe Login
+   يحافظ على نافذة رمز الاشتراك داخل الجزء المرئي فوق الكيبورد
+   ========================================================= */
+.pro-refresh-container.swal2-container.assal-login-viewport{
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 8px 10px !important;
+}
+
+.pro-refresh-container.swal2-container.assal-login-viewport .login-popup.swal2-popup{
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  margin: auto !important;
+  width: min(94vw, 420px) !important;
+  max-width: 420px !important;
+  max-height: calc(100% - 8px) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* وقت صعود الكيبورد نقلل الزخارف فقط حتى يبقى الحقل والأزرار مرتبة */
+.pro-refresh-container.swal2-container.assal-login-viewport.assal-keyboard-visible{
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 5px 8px !important;
+}
+
+.pro-refresh-container.swal2-container.assal-login-viewport.assal-keyboard-visible .login-popup.swal2-popup{
+  padding: 10px 12px 9px !important;
+  max-height: calc(100% - 4px) !important;
+}
+
+.pro-refresh-container.swal2-container.assal-login-viewport.assal-keyboard-visible .login-top-icon.swal2-icon{
+  width: 48px !important;
+  height: 48px !important;
+  margin: 4px auto 2px !important;
+}
+
+.pro-refresh-container.swal2-container.assal-login-viewport.assal-keyboard-visible .login-top-icon.swal2-icon i{
+  font-size: 21px !important;
+}
+
+.pro-refresh-container.swal2-container.assal-login-viewport.assal-keyboard-visible .swal2-title{
+  margin: 2px 0 4px !important;
+  font-size: 18px !important;
+}
+
+.pro-refresh-container.swal2-container.assal-login-viewport.assal-keyboard-visible .login-popup .pro-hero{
+  padding: 8px 10px !important;
+  margin-bottom: 2px !important;
+  gap: 8px !important;
+}
+
+.pro-refresh-container.swal2-container.assal-login-viewport.assal-keyboard-visible .login-popup .pro-hero-icon{
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+}
+
+.pro-refresh-container.swal2-container.assal-login-viewport.assal-keyboard-visible .login-popup .pro-hero-sub{
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+}
+
+.pro-refresh-container.swal2-container.assal-login-viewport.assal-keyboard-visible .login-popup .swal2-input.login-input{
+  height: 42px !important;
+  margin: 7px 0 6px !important;
+}
+
+.pro-refresh-container.swal2-container.assal-login-viewport.assal-keyboard-visible .login-popup .swal2-actions{
+  margin-top: 5px !important;
+  gap: 8px !important;
+}
+
+.pro-refresh-container.swal2-container.assal-login-viewport.assal-keyboard-visible .login-popup .swal2-actions button{
+  padding: 8px 13px !important;
+  min-height: 40px !important;
+}
+
     </style>
 </head>
 <body>
@@ -3930,6 +4017,73 @@ updateNotes();
         }
     }
 
+
+  /* ===== Mobile keyboard / VisualViewport helper ===== */
+  let assalLoginViewportCleanup = null;
+
+  function cleanupAssalLoginViewport() {
+    if (typeof assalLoginViewportCleanup === 'function') {
+      try { assalLoginViewportCleanup(); } catch (_) {}
+    }
+    assalLoginViewportCleanup = null;
+  }
+
+  function bindAssalLoginToVisualViewport() {
+    cleanupAssalLoginViewport();
+
+    const container = Swal.getContainer();
+    const popup = Swal.getPopup();
+    if (!container || !popup) return;
+
+    container.classList.add('assal-login-viewport');
+
+    const vv = window.visualViewport || null;
+    const initialHeight = Math.max(
+      Number(vv && vv.height) || 0,
+      Number(window.innerHeight) || 0
+    );
+
+    const sync = () => {
+      if (!document.body.contains(container)) return;
+
+      const visibleHeight = Math.max(1, Number(vv && vv.height) || Number(window.innerHeight) || 1);
+      const visibleWidth = Math.max(1, Number(vv && vv.width) || Number(window.innerWidth) || 1);
+      const offsetTop = Math.max(0, Number(vv && vv.offsetTop) || 0);
+      const offsetLeft = Math.max(0, Number(vv && vv.offsetLeft) || 0);
+      const keyboardVisible = visibleHeight < (initialHeight - 110);
+
+      container.classList.toggle('assal-keyboard-visible', keyboardVisible);
+
+      /* نعتمد الـ visual viewport نفسه حتى لا تبقى النافذة خلف الكيبورد */
+      container.style.setProperty('top', offsetTop + 'px', 'important');
+      container.style.setProperty('left', offsetLeft + 'px', 'important');
+      container.style.setProperty('right', 'auto', 'important');
+      container.style.setProperty('bottom', 'auto', 'important');
+      container.style.setProperty('width', visibleWidth + 'px', 'important');
+      container.style.setProperty('height', visibleHeight + 'px', 'important');
+      container.style.setProperty('min-height', visibleHeight + 'px', 'important');
+
+      popup.style.setProperty('max-height', Math.max(230, visibleHeight - 10) + 'px', 'important');
+    };
+
+    sync();
+
+    if (vv) {
+      vv.addEventListener('resize', sync);
+      vv.addEventListener('scroll', sync);
+    }
+    window.addEventListener('resize', sync);
+
+    assalLoginViewportCleanup = () => {
+      if (vv) {
+        vv.removeEventListener('resize', sync);
+        vv.removeEventListener('scroll', sync);
+      }
+      window.removeEventListener('resize', sync);
+      container.classList.remove('assal-login-viewport', 'assal-keyboard-visible');
+    };
+  }
+
   async function showPasswordPrompt() {
   const { value: password } = await Swal.fire({
     title: 'دخول محمي',
@@ -3983,16 +4137,22 @@ iconHtml: '<i class="fas fa-lock"></i>',
     },
 
 didOpen: () => {
+  bindAssalLoginToVisualViewport();
+
   const input = Swal.getInput();
   if (!input) return;
 
-  const isMobile = window.matchMedia('(pointer:coarse)').matches; // موبايل/تاتش
-  if (isMobile) return; // ✅ يمنع الومضة بالموبايل
+  const isMobile = window.matchMedia('(pointer:coarse)').matches;
+  if (isMobile) return; // نخلي المستخدم يفتح الكيبورد بنفسه بدون قفزة أولية
 
   setTimeout(() => {
     try { input.focus({ preventScroll: true }); }
     catch (e) { input.focus(); }
-  }, 250); // ✅ نخليه بعد ما يخلص أنيميشن النافذة
+  }, 250);
+},
+
+willClose: () => {
+  cleanupAssalLoginViewport();
 },
 
 
@@ -4060,6 +4220,45 @@ async function showCompatLoginSuccess(message, timer = 1300) {
   });
 }
 
+
+const ASSAL_COMPAT_VERIFY_RETURN_INDEX = '__ASSAL_RETURN_INDEX__';
+
+async function showCompatPausedAndReturn(password, data) {
+  setSharedCompatAccess(false);
+  saveCompatSubscriptionInfo(buildCompatSubscriptionInfo(password, data, 'new'));
+
+  await fireLoginStyle({
+    html: `
+      <div class="pro-dialog login-dialog">
+        <div class="pro-hero">
+          <div class="pro-hero-icon" style="background:linear-gradient(135deg, rgba(240,180,35,.26), rgba(120,88,18,.18));">
+            <i class="fas fa-pause-circle"></i>
+          </div>
+          <div class="pro-hero-text">
+            <div class="pro-hero-title">الاشتراك موقوف</div>
+            <div class="pro-hero-sub">تم إيقاف هذا الاشتراك مؤقتاً من إدارة مكتب عسل.</div>
+          </div>
+        </div>
+      </div>
+    `,
+    showConfirmButton: true,
+    confirmButtonText: 'موافق',
+    showCancelButton: false,
+    timer: undefined,
+    timerProgressBar: false,
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    customClass: {
+      popup: 'swal2-popup activation-popup pro-popup login-popup login-fail',
+      confirmButton: 'login-confirm danger'
+    }
+  });
+
+  /* الموقوف لا نطلب منه رمزاً جديداً؛ نرجعه مباشرة للرئيسية */
+  navigatePreservingAppVersion('index.html');
+  return ASSAL_COMPAT_VERIFY_RETURN_INDEX;
+}
+
 async function showCompatDenied(title, subtitle, icon = 'fa-triangle-exclamation', timer = 3600) {
   setSharedCompatAccess(false);
   await fireLoginStyle({
@@ -4113,8 +4312,7 @@ async function verifyNewCompatSubscription(password, db, doc) {
   const savedDeviceId = String(data.deviceId || '');
 
   if (status === 'paused') {
-    saveCompatSubscriptionInfo(buildCompatSubscriptionInfo(password, data, 'new'));
-    return showCompatDenied('الاشتراك موقوف', 'تم إيقاف هذا الاشتراك مؤقتاً من إدارة مكتب عسل.', 'fa-pause-circle', 4200);
+    return showCompatPausedAndReturn(password, data);
   }
 
   if (status === 'expired') {
@@ -4358,15 +4556,20 @@ function fireLoginStyle(opts = {}) {
         const storedPassword = localStorage.getItem("password");
         if (storedPassword) {
             const success = await verifyPassword(storedPassword, db);
+
+            /* الاشتراك الموقوف يرجع للرئيسية بعد موافق ولا نفتح إدخال رمز جديد */
+            if (success === ASSAL_COMPAT_VERIFY_RETURN_INDEX) return;
+
             if (!success) {
                 while (true) {
                     const password = await showPasswordPrompt();
                     if (!password) {
                         navigatePreservingAppVersion('index.html');
-                        break;
+                        return;
                     }
-                    const success = await verifyPassword(password, db);
-                    if (success) break;
+                    const retryResult = await verifyPassword(password, db);
+                    if (retryResult === ASSAL_COMPAT_VERIFY_RETURN_INDEX) return;
+                    if (retryResult) break;
                 }
             }
         } else {
@@ -4374,9 +4577,10 @@ function fireLoginStyle(opts = {}) {
                 const password = await showPasswordPrompt();
                 if (!password) {
                     navigatePreservingAppVersion('index.html');
-                    break;
+                    return;
                 }
                 const success = await verifyPassword(password, db);
+                if (success === ASSAL_COMPAT_VERIFY_RETURN_INDEX) return;
                 if (success) break;
             }
         }
