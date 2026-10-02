@@ -17307,15 +17307,99 @@ function normalizeAvailabilityBranchKey(value = '') {
         .replace(/^_+|_+$/g, '') || 'admin';
 }
 
+/*
+  داخل استعلامات التوفر فقط: حساب المالك يعمل بصفة فرع بعقوبة.
+  هذا لا يغيّر role أو صلاحيات المالك بأي مكان آخر من التطبيق.
+*/
+const ASSAL_AVAILABILITY_BRANCH_LABELS = Object.freeze({
+    baqubah: 'مكتب عسل فرع بعقوبة',
+    tahrir: 'مكتب عسل فرع التحرير',
+    hay: 'مكتب عسل فرع الحي',
+    baladruz: 'مكتب عسل فرع بلدروز'
+});
+
+/* كل استعلام موجود قبل هذا القطع يُعد منجزاً سابقاً لبعقوبة فقط. */
+const ASSAL_AVAILABILITY_BAQUBAH_BASELINE_CUTOFF_MS = 1790957220000; // 2026-10-02 19:07 +03:00
+
+function getAvailabilityResponderIdentity() {
+    const role = String(typeof getAdminRole === 'function' ? getAdminRole() : '').trim().toLowerCase();
+    const accountCode = String(getAdminAccountCode() || '').trim().toLowerCase();
+    const accountLabel = String(getAdminAccountLabel() || '').trim();
+
+    if (role === 'owner' || accountCode === 'owner') {
+        const label = ASSAL_AVAILABILITY_BRANCH_LABELS.baqubah;
+        return {
+            key: 'baqubah',
+            label,
+            actingOwnerAsBaqubah: true,
+            aliases: Array.from(new Set([
+                'baqubah',
+                normalizeAvailabilityBranchKey(label),
+                normalizeAvailabilityBranchKey(accountLabel),
+                normalizeAvailabilityBranchKey('مالك النظام'),
+                'owner'
+            ].filter(Boolean)))
+        };
+    }
+
+    if (Object.prototype.hasOwnProperty.call(ASSAL_AVAILABILITY_BRANCH_LABELS, accountCode)) {
+        const label = ASSAL_AVAILABILITY_BRANCH_LABELS[accountCode];
+        return {
+            key: accountCode,
+            label,
+            actingOwnerAsBaqubah: false,
+            aliases: Array.from(new Set([
+                accountCode,
+                normalizeAvailabilityBranchKey(label),
+                normalizeAvailabilityBranchKey(accountLabel)
+            ].filter(Boolean)))
+        };
+    }
+
+    const fallbackKey = normalizeAvailabilityBranchKey(accountCode || accountLabel || 'admin');
+    return {
+        key: fallbackKey,
+        label: accountLabel || 'مكتب عسل',
+        actingOwnerAsBaqubah: false,
+        aliases: Array.from(new Set([fallbackKey, normalizeAvailabilityBranchKey(accountLabel)].filter(Boolean)))
+    };
+}
+
 function getCurrentAvailabilityAdminBranchKey() {
-    return normalizeAvailabilityBranchKey(getAdminAccountLabel() || getAdminAccountCode() || 'admin');
+    return getAvailabilityResponderIdentity().key;
+}
+
+function getCurrentAvailabilityAdminBranchLabel() {
+    return getAvailabilityResponderIdentity().label;
+}
+
+function getAvailabilityBranchAliases(branchKey = getCurrentAvailabilityAdminBranchKey()) {
+    const identity = getAvailabilityResponderIdentity();
+    if (String(branchKey || '') === identity.key) return identity.aliases || [identity.key];
+    const canonicalLabel = ASSAL_AVAILABILITY_BRANCH_LABELS[String(branchKey || '').toLowerCase()] || '';
+    return Array.from(new Set([
+        String(branchKey || ''),
+        normalizeAvailabilityBranchKey(branchKey),
+        canonicalLabel ? normalizeAvailabilityBranchKey(canonicalLabel) : ''
+    ].filter(Boolean)));
 }
 
 function isAvailabilityArchivedForBranch(req, branchKey = getCurrentAvailabilityAdminBranchKey()) {
     if (!req) return false;
+    const key = String(branchKey || getCurrentAvailabilityAdminBranchKey());
+
+    /* تصفير تاريخي مدروس: استعلامات بعقوبة الموجودة قبل اعتماد النظام الحالي تبقى محفوظة ولكن تُعامل كأرشيف. */
+    if (key === 'baqubah') {
+        const requestTime = Number(req.createdAt || req.updatedAt || 0);
+        if (requestTime > 0 && requestTime <= ASSAL_AVAILABILITY_BAQUBAH_BASELINE_CUTOFF_MS) return true;
+    }
+
     const map = req.archivedForBranches && typeof req.archivedForBranches === 'object' ? req.archivedForBranches : null;
-    if (map && Object.prototype.hasOwnProperty.call(map, branchKey)) {
-        return !!map[branchKey];
+    if (map) {
+        const aliases = getAvailabilityBranchAliases(key);
+        for (const alias of aliases) {
+            if (Object.prototype.hasOwnProperty.call(map, alias) && !!map[alias]) return true;
+        }
     }
     return !!req.archivedForAdmin;
 }
@@ -32416,8 +32500,9 @@ ${actionText} ${safeBranch}`;
       console.error('Failed to read availability request before reply:', err);
     }
 
-    const branchLabel = getAdminAccountLabel() || 'مكتب عسل';
-    const branchKey = getCurrentAvailabilityAdminBranchKey();
+    const responder = getAvailabilityResponderIdentity();
+    const branchLabel = responder.label || 'مكتب عسل';
+    const branchKey = responder.key || getCurrentAvailabilityAdminBranchKey();
     const replyText = buildAvailabilityReplyText(safeState, branchLabel, itemName, itemCategory);
 
     await update(ref(db), {
@@ -32431,12 +32516,14 @@ ${actionText} ${safeBranch}`;
         seenByAdmin: true,
         seenByCustomer: false,
         branchLabel,
+        branchKey,
         availabilityState: safeState
       },
       [`${AVAILABILITY_REQUEST_PATH}/${requestId}/updatedAt`]: now,
       [`${AVAILABILITY_REQUEST_PATH}/${requestId}/status`]: 'answered',
       [`${AVAILABILITY_REQUEST_PATH}/${requestId}/lastAvailabilityStatus`]: safeState,
       [`${AVAILABILITY_REQUEST_PATH}/${requestId}/lastAnsweredByBranch`]: branchLabel,
+      [`${AVAILABILITY_REQUEST_PATH}/${requestId}/lastAnsweredByBranchKey`]: branchKey,
       [`${AVAILABILITY_REQUEST_PATH}/${requestId}/archivedForBranches/${branchKey}`]: true,
       [`${AVAILABILITY_REQUEST_PATH}/${requestId}/customerArchived`]: false
     });
@@ -41367,6 +41454,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
   const SUB_DURATION_DAYS = 365;
   const SUB_TRIAL_MINUTES = 60;
   const SUB_DAY_MS = 86400000;
+  const SUB_RENEW_WINDOW_MS = 5 * SUB_DAY_MS; // آخر خمسة أيام فعلية = 120 ساعة
   const QR_LIB_SRC = 'https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js';
   const ASSAL_OFFICE_AUTH_PROJECT_ID = 'assal-office';
 
@@ -41584,14 +41672,30 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     return `متبقي ${days} يوم`;
   }
 
+  function getAnnualRenewalEligibility(row, statusInfo = null){
+    const plan = getSubscriptionPlanMeta(row);
+    if (plan.isTrial) return { allowed:false, reason:'trial' };
+    const status = statusInfo || computeStatusInfo(row);
+    if (status.key === 'pending') return { allowed:false, reason:'pending' };
+    if (status.key === 'expired') return { allowed:true, reason:'expired', remainingMs:0 };
+    const end = Number(row?.expiresAtMs || 0);
+    if (!end) return { allowed:false, reason:'no_end' };
+    const remainingMs = end - Date.now();
+    if (remainingMs <= SUB_RENEW_WINDOW_MS) return { allowed:true, reason:'last_5_days', remainingMs };
+    return { allowed:false, reason:'too_early', remainingMs };
+  }
+
   function getSubscriptionActionButtonsHtml(row, status, plan){
     const code = escapeHtml(String(row.code || row.id || ''));
     const rawStatus = String(row?.status || 'pending').toLowerCase();
     const controls = [];
     if (plan.isTrial) {
       controls.push(`<button type="button" class="assal-sub-item-btn is-convert" onclick="convertCompatTrialToAnnual('${code}')"><i class="fa-solid fa-arrow-up-right-dots"></i><span>تحويل إلى سنوي</span></button>`);
-    } else if (status.key !== 'pending') {
-      controls.push(`<button type="button" class="assal-sub-item-btn is-renew" onclick="renewCompatSubscriptionAnnual('${code}')"><i class="fa-solid fa-calendar-plus"></i><span>تجديد سنة</span></button>`);
+    } else {
+      const renewal = getAnnualRenewalEligibility(row, status);
+      const disabledAttr = renewal.allowed ? '' : ' disabled aria-disabled="true"';
+      const renewTitle = renewal.allowed ? 'تجديد الاشتراك سنة' : (status.key === 'pending' ? 'يتاح التجديد بعد بدء الاشتراك وعند الدخول في آخر 5 أيام فعلية' : 'يتاح التجديد عند بقاء 5 أيام فعلية أو أقل');
+      controls.push(`<button type="button" class="assal-sub-item-btn is-renew${renewal.allowed ? '' : ' is-disabled'}"${disabledAttr} title="${escapeHtml(renewTitle)}" onclick="renewCompatSubscriptionAnnual('${code}')"><i class="fa-solid fa-calendar-plus"></i><span>تجديد سنة</span></button>`);
     }
     if (status.key === 'active') {
       controls.push(`<button type="button" class="assal-sub-item-btn is-danger" onclick="pauseCompatSubscription('${code}')"><i class="fa-solid fa-pause"></i><span>إيقاف</span></button>`);
@@ -42048,7 +42152,12 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     const plan = getSubscriptionPlanMeta(row);
     if (plan.isTrial) { showToast('استخدم تحويل إلى سنوي للتيست', 'info'); return false; }
     const status = computeStatusInfo(row);
-    if (status.key === 'pending') { showToast('الاشتراك لم يبدأ بعد', 'info', 'مدته السنوية ستبدأ تلقائياً من أول تفعيل'); return false; }
+    const renewal = getAnnualRenewalEligibility(row, status);
+    if (!renewal.allowed) {
+      if (status.key === 'pending') { showToast('الاشتراك لم يبدأ بعد', 'info', 'التجديد يتاح بعد التفعيل وعند الدخول في آخر 5 أيام فعلية'); return false; }
+      showToast('التجديد غير متاح حالياً', 'info', 'يتفعّل زر تجديد سنة عند بقاء 5 أيام فعلية أو أقل (120 ساعة)');
+      return false;
+    }
     const currentEnd = Number(row.expiresAtMs || 0);
     const stillRunning = currentEnd > Date.now();
     const msg = stillRunning ? 'ستُضاف 365 يوم فوق تاريخ الانتهاء الحالي ولن تضيع الأيام المتبقية.' : 'ستبدأ سنة جديدة من وقت التجديد الحالي مع بقاء نفس الكود والجهاز.';
@@ -42604,4 +42713,22 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 }
 </style>
 <!-- ===== /ASSAL OWNER SUBSCRIPTIONS PHASE 11 ===== -->
+
+<!-- ===== ASSAL OWNER SUBSCRIPTIONS PHASE 12: 5-DAY RENEW WINDOW + BAQUBAH AVAILABILITY IDENTITY ===== -->
+<style id="assal-owner-subscriptions-phase12-renew-availability-final">
+#assalOwnerSubscriptionManager .assal-sub-item-btn.is-renew:disabled,
+#assalOwnerSubscriptionManager .assal-sub-item-btn.is-renew.is-disabled{
+  opacity:.42 !important;
+  filter:saturate(.45) !important;
+  cursor:not-allowed !important;
+  transform:none !important;
+  box-shadow:none !important;
+}
+#assalOwnerSubscriptionManager .assal-sub-item-btn.is-renew:disabled:hover,
+#assalOwnerSubscriptionManager .assal-sub-item-btn.is-renew.is-disabled:hover{
+  transform:none !important;
+  background:rgba(146,64,14,.28) !important;
+}
+</style>
+<!-- ===== END ASSAL OWNER SUBSCRIPTIONS PHASE 12 ===== -->
 
