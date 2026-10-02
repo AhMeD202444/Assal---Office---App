@@ -14314,6 +14314,30 @@ html.low-end-device .assal-community-write-row{
 .assal-sub-card-image-loading{display:flex;align-items:center;justify-content:center;gap:9px;min-height:180px;color:#cbd5e1;font-size:12px;font-weight:900;text-align:center}
 .assal-sub-card-actions-compact{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;margin-top:0!important}
 .assal-sub-card-actions-compact button{width:100%!important;min-width:0!important;min-height:42px!important;justify-content:center!important}
+
+/* ===== Phase 8: plan selector + management actions ===== */
+.assal-sub-plan-block{margin-top:11px;padding:11px;border-radius:17px;background:rgba(15,23,42,.56);border:1px solid rgba(148,163,184,.11)}
+.assal-sub-plan-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+.assal-sub-plan-head>div{display:flex;align-items:center;gap:7px;color:#e2e8f0;font-size:10.5px;font-weight:950}.assal-sub-plan-head>div i{color:#67e8f9}
+.assal-sub-plan-head small{font-size:9px;color:rgba(148,163,184,.72);font-weight:800}
+.assal-sub-plan-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.assal-sub-plan-option{position:relative;min-height:62px;border-radius:15px;border:1px solid rgba(148,163,184,.12);background:rgba(2,8,23,.35);color:#e2e8f0;padding:9px 10px;display:flex;align-items:center;gap:9px;text-align:right;font-family:inherit;cursor:pointer;transition:.18s ease}
+.assal-sub-plan-option:hover{transform:translateY(-1px);border-color:rgba(103,232,249,.24);background:rgba(8,47,73,.28)}
+.assal-sub-plan-option.is-selected{background:linear-gradient(135deg,rgba(13,148,136,.18),rgba(37,99,235,.16));border-color:rgba(103,232,249,.30);box-shadow:0 0 0 2px rgba(34,211,238,.05) inset}
+.assal-sub-plan-icon{width:37px;height:37px;min-width:37px;border-radius:12px;display:grid;place-items:center;background:rgba(16,185,129,.14);border:1px solid rgba(52,211,153,.15);color:#6ee7b7}.assal-sub-plan-icon.is-trial{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.16);color:#fbbf24}
+.assal-sub-plan-copy{display:flex;flex-direction:column;gap:2px;min-width:0}.assal-sub-plan-copy strong{font-size:11.5px;font-weight:950;color:#f8fafc}.assal-sub-plan-copy small{font-size:8.8px;font-weight:800;color:rgba(203,213,225,.65)}
+.assal-sub-plan-check{margin-right:auto;color:#67e8f9;opacity:0;transform:scale(.8);transition:.18s ease}.assal-sub-plan-option.is-selected .assal-sub-plan-check{opacity:1;transform:scale(1)}
+.assal-sub-year-pill.is-trial{background:rgba(146,64,14,.18);border-color:rgba(245,158,11,.18);color:#fef3c7}
+.assal-sub-item-head-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.assal-sub-plan-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;font-size:8.5px;font-weight:900;white-space:nowrap;background:rgba(8,145,178,.11);border:1px solid rgba(125,211,252,.13);color:#bae6fd}
+.assal-sub-plan-badge.is-trial{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.15);color:#fde68a}
+.assal-sub-item-btn.is-danger{color:#fecdd3;background:rgba(127,29,29,.30);border-color:rgba(248,113,113,.17)}
+.assal-sub-item-btn.is-danger:hover{background:rgba(153,27,27,.38)}
+.assal-sub-item-btn.is-success{color:#d1fae5;background:rgba(6,95,70,.30);border-color:rgba(52,211,153,.16)}
+.assal-sub-item-btn.is-renew{color:#fef3c7;background:rgba(146,64,14,.28);border-color:rgba(245,158,11,.17)}
+.assal-sub-item-btn.is-convert{color:#fef9c3;background:linear-gradient(135deg,rgba(161,98,7,.32),rgba(8,145,178,.20));border-color:rgba(250,204,21,.18)}
+.assal-sub-item-actions.is-manage{justify-content:flex-start}
+
 @media (max-width:700px){
   #assalOwnerSubscriptionManager.assal-sub-manager{align-items:center!important;justify-content:center!important;padding:8px!important}
   #assalOwnerSubscriptionManager .assal-sub-manager-shell{max-height:calc(100dvh - 16px)!important;border-radius:22px!important}
@@ -14321,6 +14345,72 @@ html.low-end-device .assal-community-write-row{
   .assal-sub-card-image-preview img{max-height:calc(42vh - 12px);border-radius:15px}
   .assal-sub-card-actions-compact{grid-template-columns:1fr 1fr!important}
   .assal-sub-card-actions-compact .assal-sub-download-btn{grid-column:1/-1}
+  .assal-sub-plan-head{align-items:flex-start;flex-direction:column;gap:3px}
+  .assal-sub-plan-picker{grid-template-columns:1fr 1fr}
+  .assal-sub-plan-option{padding:8px;gap:7px;min-height:58px}
+  .assal-sub-plan-icon{width:33px;height:33px;min-width:33px}
+  .assal-sub-plan-copy small{font-size:8px}
+}
+</style>
+
+<style id="assal-sub-action-confirm-final-style">
+/* ===== OWNER SUBSCRIPTION ACTION CONFIRMATION - ABOVE MANAGER ===== */
+.swal2-container.assal-sub-action-layer{
+  z-index:2147483647!important;
+  padding:16px!important;
+  background:
+    radial-gradient(circle at 18% 10%,rgba(56,189,248,.16),transparent 34%),
+    radial-gradient(circle at 84% 92%,rgba(20,184,166,.12),transparent 36%),
+    rgba(2,8,23,.76)!important;
+  -webkit-backdrop-filter:blur(16px) saturate(125%)!important;
+  backdrop-filter:blur(16px) saturate(125%)!important;
+}
+.swal2-popup.assal-sub-action-popup{
+  width:min(92vw,430px)!important;
+  min-height:0!important;
+  height:auto!important;
+  margin:0!important;
+  padding:16px 16px 14px!important;
+  border-radius:24px!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(56,189,248,.10),transparent 36%),
+    linear-gradient(160deg,#111c31,#081321)!important;
+  border:1px solid rgba(148,163,184,.17)!important;
+  box-shadow:0 34px 110px rgba(0,0,0,.68),0 0 0 1px rgba(255,255,255,.025) inset!important;
+  color:#f8fafc!important;
+  font-family:'Cairo','Tajawal',sans-serif!important;
+}
+.assal-sub-action-popup .swal2-html-container{margin:0!important;padding:0!important;overflow:visible!important;max-height:none!important;color:inherit!important}
+.assal-sub-action-popup .swal2-actions{width:100%!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important;margin:13px 0 0!important}
+.assal-sub-action-popup .swal2-actions button{margin:0!important;width:100%!important;min-width:0!important;height:44px!important;border-radius:14px!important;font-family:'Cairo','Tajawal',sans-serif!important;font-size:12px!important;font-weight:950!important;box-shadow:none!important}
+.assal-sub-action-popup .assal-sub-action-confirm-btn{background:linear-gradient(135deg,#0e7490,#2563eb)!important;color:#fff!important;border:1px solid rgba(125,211,252,.20)!important}
+.assal-sub-action-popup.is-pause .assal-sub-action-confirm-btn{background:linear-gradient(135deg,#991b1b,#be123c)!important;border-color:rgba(251,113,133,.22)!important}
+.assal-sub-action-popup.is-resume .assal-sub-action-confirm-btn{background:linear-gradient(135deg,#047857,#0f766e)!important;border-color:rgba(52,211,153,.20)!important}
+.assal-sub-action-popup.is-renew .assal-sub-action-confirm-btn{background:linear-gradient(135deg,#b45309,#ca8a04)!important;border-color:rgba(250,204,21,.20)!important}
+.assal-sub-action-popup.is-convert .assal-sub-action-confirm-btn{background:linear-gradient(135deg,#7c3aed,#0891b2)!important;border-color:rgba(167,139,250,.20)!important}
+.assal-sub-action-popup .assal-sub-action-cancel-btn{background:rgba(255,255,255,.06)!important;color:#cbd5e1!important;border:1px solid rgba(148,163,184,.14)!important}
+.assal-sub-action-popup button:hover{transform:translateY(-1px)!important;filter:brightness(1.07)!important}
+.assal-sub-action-popup button:active{transform:scale(.985)!important}
+.assal-sub-action-card{direction:rtl;text-align:center;padding:2px 1px 0}
+.assal-sub-action-icon{width:64px;height:64px;margin:0 auto 11px;border-radius:21px;display:grid;place-items:center;font-size:25px;color:#e0f2fe;background:linear-gradient(145deg,rgba(14,165,233,.20),rgba(37,99,235,.16));border:1px solid rgba(125,211,252,.16);box-shadow:0 15px 34px rgba(0,0,0,.28)}
+.assal-sub-action-card.is-pause .assal-sub-action-icon{color:#fecdd3;background:linear-gradient(145deg,rgba(190,24,93,.24),rgba(153,27,27,.18));border-color:rgba(251,113,133,.18)}
+.assal-sub-action-card.is-resume .assal-sub-action-icon{color:#d1fae5;background:linear-gradient(145deg,rgba(5,150,105,.22),rgba(15,118,110,.18));border-color:rgba(52,211,153,.18)}
+.assal-sub-action-card.is-renew .assal-sub-action-icon{color:#fef3c7;background:linear-gradient(145deg,rgba(217,119,6,.24),rgba(202,138,4,.17));border-color:rgba(250,204,21,.18)}
+.assal-sub-action-card.is-convert .assal-sub-action-icon{color:#ede9fe;background:linear-gradient(145deg,rgba(124,58,237,.24),rgba(8,145,178,.18));border-color:rgba(167,139,250,.18)}
+.assal-sub-action-kicker{font-size:10px;font-weight:950;color:#67e8f9;letter-spacing:.03em;margin-bottom:3px}
+.assal-sub-action-title{font-size:19px;line-height:1.45;font-weight:950;color:#fff}
+.assal-sub-action-text{margin:8px auto 0;max-width:360px;font-size:11.5px;line-height:1.95;font-weight:750;color:#cbd5e1}
+.assal-sub-action-target{margin-top:11px;padding:10px 11px;border-radius:16px;background:rgba(2,8,23,.34);border:1px solid rgba(148,163,184,.10);display:grid;gap:4px}
+.assal-sub-action-target strong{font-size:12px;color:#f8fafc;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.assal-sub-action-target span{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:10.5px;direction:ltr;color:#93c5fd;font-weight:850}
+.assal-sub-action-note{margin-top:9px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:9.5px;color:#94a3b8;font-weight:800}
+@media(max-width:520px){
+  .swal2-container.assal-sub-action-layer{padding:10px!important}
+  .swal2-popup.assal-sub-action-popup{width:min(94vw,390px)!important;padding:14px 13px 12px!important;border-radius:21px!important}
+  .assal-sub-action-icon{width:58px;height:58px;border-radius:19px;font-size:22px;margin-bottom:9px}
+  .assal-sub-action-title{font-size:17px}.assal-sub-action-text{font-size:10.8px;line-height:1.85}
+  .assal-sub-action-popup .swal2-actions button{height:42px!important;font-size:11.5px!important}
 }
 </style>
 
@@ -14451,7 +14541,7 @@ html.low-end-device .assal-community-write-row{
         <div class="assal-sub-manager-brand-copy">
           <div class="assal-sub-manager-kicker"><i class="fa-solid fa-shield-halved"></i><span>لوحة المالك</span></div>
           <div class="assal-sub-manager-title" id="assalSubManagerTitle">إدارة اشتراكات التوافقات</div>
-          <div class="assal-sub-manager-subtitle">مركز واحد لإنشاء الاشتراكات ومتابعة حالتها وإصدار بطاقة أنيقة جاهزة للزبون</div>
+          <div class="assal-sub-manager-subtitle">إنشاء الاشتراكات ومتابعتها وإيقافها وتجديدها وإصدار بطاقة أنيقة جاهزة للزبون</div>
         </div>
       </div>
       <div class="assal-sub-manager-top-actions">
@@ -14530,13 +14620,32 @@ html.low-end-device .assal-community-write-row{
             </div>
           </div>
 
+          <div class="assal-sub-plan-block">
+            <div class="assal-sub-plan-head">
+              <div><i class="fa-solid fa-sliders"></i><span>نوع الاشتراك</span></div>
+              <small>مدة الاشتراك تبدأ فقط من أول تفعيل</small>
+            </div>
+            <div class="assal-sub-plan-picker" role="radiogroup" aria-label="نوع الاشتراك">
+              <button id="assalSubPlanAnnual" type="button" class="assal-sub-plan-option is-selected" data-plan="annual" role="radio" aria-checked="true" onclick="selectCompatSubscriptionPlan('annual')">
+                <span class="assal-sub-plan-icon"><i class="fa-solid fa-shield-halved"></i></span>
+                <span class="assal-sub-plan-copy"><strong>سنوي</strong><small>365 يوم من أول تفعيل</small></span>
+                <span class="assal-sub-plan-check"><i class="fa-solid fa-circle-check"></i></span>
+              </button>
+              <button id="assalSubPlanTrial" type="button" class="assal-sub-plan-option" data-plan="trial" role="radio" aria-checked="false" onclick="selectCompatSubscriptionPlan('trial')">
+                <span class="assal-sub-plan-icon is-trial"><i class="fa-solid fa-stopwatch"></i></span>
+                <span class="assal-sub-plan-copy"><strong>تيست</strong><small>ساعة واحدة من أول تفعيل</small></span>
+                <span class="assal-sub-plan-check"><i class="fa-solid fa-circle-check"></i></span>
+              </button>
+            </div>
+          </div>
+
           <div class="assal-sub-code-panel">
             <div class="assal-sub-code-meta">
               <div class="assal-sub-code-label">معاينة كود الاشتراك</div>
               <div class="assal-sub-code-value" id="assalSubPreviewCode">ASSAL-••••-••••</div>
               <div class="assal-sub-code-note">يتولد تلقائياً عند الحفظ ثم تظهر بطاقة المشترك مع QR Code وتنزيل مباشر للصورة</div>
             </div>
-            <div class="assal-sub-year-pill"><strong>365 يوم</strong><span>تبدأ من أول تفعيل</span></div>
+            <div class="assal-sub-year-pill" id="assalSubDurationPill"><strong id="assalSubDurationStrong">365 يوم</strong><span id="assalSubDurationCaption">تبدأ من أول تفعيل</span></div>
           </div>
 
           <div class="assal-sub-form-actions">
@@ -28749,7 +28858,7 @@ function renderInstantInquiryFeature(){
     body.innerHTML = `
       <img
         class="simi-startup-ad"
-        src="images/SIMI.PNG"
+        src="images/SIMI.png"
         alt="إعلان اشتراك التوافقات"
         loading="eager"
         decoding="async"
@@ -41257,6 +41366,8 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
   const SUB_COLLECTION = 'compatSubscriptions';
   const SUB_DURATION_DAYS = 365;
+  const SUB_TRIAL_MINUTES = 60;
+  const SUB_DAY_MS = 86400000;
   const QR_LIB_SRC = 'https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js';
   const ASSAL_OFFICE_AUTH_PROJECT_ID = 'assal-office';
 
@@ -41271,6 +41382,8 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
   let qrLoaderPromise = null;
   let compatSubFirestoreToolsPromise = null;
   let subscriptionCardImageState = { blob:null, url:'', row:null };
+  let currentCreatePlan = 'annual';
+  let subscriptionActionBusy = false;
 
   function getOwnerToolButton(){ return document.getElementById('ownerSmartHeaderBtn'); }
 
@@ -41377,7 +41490,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
           db = mod.getFirestore(app);
         } catch (err) { throw err; }
       }
-      return { db, collection: mod.collection, doc: mod.doc, getDoc: mod.getDoc, getDocs: mod.getDocs, setDoc: mod.setDoc, serverTimestamp: mod.serverTimestamp };
+      return { db, collection: mod.collection, doc: mod.doc, getDoc: mod.getDoc, getDocs: mod.getDocs, setDoc: mod.setDoc, updateDoc: mod.updateDoc, serverTimestamp: mod.serverTimestamp };
     }).catch((err) => { compatSubFirestoreToolsPromise = null; throw err; });
     return compatSubFirestoreToolsPromise;
   }
@@ -41407,10 +41520,82 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 
   async function generateUniqueSubscriptionCode(tools){ for (let i=0;i<10;i++) { const code = makePreviewCode(); const snap = await tools.getDoc(tools.doc(tools.db, SUB_COLLECTION, code)); if (!snap.exists()) return code; } return 'ASSAL-' + Date.now().toString(36).toUpperCase(); }
 
+  function getSubscriptionPlanMeta(row){
+    const durationMinutes = Number(row?.durationMinutes || 0);
+    const durationDays = Number(row?.durationDays || 0);
+    const rawType = String(row?.planType || row?.subscriptionType || row?.type || '').toLowerCase();
+    const isTrial = rawType === 'trial' || rawType === 'test' || durationMinutes > 0;
+    if (isTrial) {
+      const mins = durationMinutes > 0 ? durationMinutes : SUB_TRIAL_MINUTES;
+      return {
+        key:'trial', isTrial:true, durationMinutes:mins, durationDays:0,
+        label: mins === 60 ? 'تيست — ساعة واحدة' : `تيست — ${mins} دقيقة`,
+        shortLabel: mins === 60 ? 'تيست ساعة' : `تيست ${mins} دقيقة`,
+        cardHint: mins === 60 ? 'تبدأ تجربة الساعة من أول تفعيل وتستمر 60 دقيقة.' : `تبدأ التجربة من أول تفعيل وتستمر ${mins} دقيقة.`
+      };
+    }
+    const days = durationDays > 0 ? durationDays : SUB_DURATION_DAYS;
+    return {
+      key:'annual', isTrial:false, durationMinutes:0, durationDays:days,
+      label: days === 365 ? 'اشتراك سنوي — 365 يوم' : `اشتراك — ${days} يوم`,
+      shortLabel: days === 365 ? 'سنوي 365 يوم' : `${days} يوم`,
+      cardHint: days === 365 ? 'يبدأ الاشتراك لمدة 365 يوم كاملة من أول تفعيل.' : `يبدأ الاشتراك لمدة ${days} يوم من أول تفعيل.`
+    };
+  }
+
   function computeStatusInfo(row){
-    const rawStatus = String(row?.status || 'pending').toLowerCase(); const expiresAtMs = Number(row?.expiresAtMs || 0); const now = Date.now(); let status = rawStatus;
-    if (status === 'active' && expiresAtMs && expiresAtMs <= now) status = 'expired'; if (!status || status === 'new') status = 'pending';
-    switch (status) { case 'active': return { key:'active', label:'فعّال', icon:'fa-circle-check' }; case 'expired': return { key:'expired', label:'منتهي', icon:'fa-hourglass-end' }; case 'paused': return { key:'paused', label:'موقوف', icon:'fa-ban' }; default: return { key:'pending', label:'غير مفعل بعد', icon:'fa-hourglass-half' }; }
+    const rawStatus = String(row?.status || 'pending').toLowerCase();
+    const expiresAtMs = Number(row?.expiresAtMs || 0);
+    const now = Date.now();
+    let status = rawStatus;
+    if (status === 'active' && expiresAtMs && expiresAtMs <= now) status = 'expired';
+    if (!status || status === 'new') status = 'pending';
+    switch (status) {
+      case 'active': return { key:'active', label:'فعّال', icon:'fa-circle-check' };
+      case 'expired': return { key:'expired', label:'منتهي', icon:'fa-hourglass-end' };
+      case 'paused': return { key:'paused', label:'موقوف', icon:'fa-ban' };
+      default: return { key:'pending', label:'غير مفعل بعد', icon:'fa-hourglass-half' };
+    }
+  }
+
+  function formatSubscriptionEnd(row){
+    const end = Number(row?.expiresAtMs || 0);
+    return end ? formatDateTime(end) : 'يتحدد عند أول تفعيل';
+  }
+
+  function getSubscriptionRemainingLabel(row){
+    const end = Number(row?.expiresAtMs || 0);
+    if (!end) return '';
+    const diff = end - Date.now();
+    if (diff <= 0) return 'انتهت المدة';
+    const plan = getSubscriptionPlanMeta(row);
+    if (plan.isTrial) {
+      const mins = Math.max(1, Math.ceil(diff / 60000));
+      if (mins < 60) return `متبقي ${mins} دقيقة`;
+      const hours = Math.floor(mins / 60), rem = mins % 60;
+      return rem ? `متبقي ${hours} س ${rem} د` : `متبقي ${hours} ساعة`;
+    }
+    const days = Math.max(1, Math.ceil(diff / SUB_DAY_MS));
+    return `متبقي ${days} يوم`;
+  }
+
+  function getSubscriptionActionButtonsHtml(row, status, plan){
+    const code = escapeHtml(String(row.code || row.id || ''));
+    const rawStatus = String(row?.status || 'pending').toLowerCase();
+    const controls = [];
+    if (plan.isTrial) {
+      controls.push(`<button type="button" class="assal-sub-item-btn is-convert" onclick="convertCompatTrialToAnnual('${code}')"><i class="fa-solid fa-arrow-up-right-dots"></i><span>تحويل إلى سنوي</span></button>`);
+    } else if (status.key !== 'pending') {
+      controls.push(`<button type="button" class="assal-sub-item-btn is-renew" onclick="renewCompatSubscriptionAnnual('${code}')"><i class="fa-solid fa-calendar-plus"></i><span>تجديد سنة</span></button>`);
+    }
+    if (status.key === 'active') {
+      controls.push(`<button type="button" class="assal-sub-item-btn is-danger" onclick="pauseCompatSubscription('${code}')"><i class="fa-solid fa-pause"></i><span>إيقاف</span></button>`);
+    } else if (rawStatus === 'paused') {
+      controls.push(`<button type="button" class="assal-sub-item-btn is-success" onclick="resumeCompatSubscription('${code}')"><i class="fa-solid fa-play"></i><span>استئناف</span></button>`);
+    }
+    controls.push(`<button type="button" class="assal-sub-item-btn" onclick="copyCompatSubscriptionCode('${code}')"><i class="fa-solid fa-copy"></i><span>نسخ الرمز</span></button>`);
+    controls.push(`<button type="button" class="assal-sub-item-btn is-primary" onclick="openCompatSubscriptionCardByCode('${code}')"><i class="fa-solid fa-image"></i><span>البطاقة</span></button>`);
+    return controls.join('');
   }
 
   function updateStats(rows){
@@ -41441,26 +41626,34 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       `, '');
       return;
     }
-    const html = filteredRows.map((row) => { const status = computeStatusInfo(row); return `
+    const html = filteredRows.map((row) => {
+      const status = computeStatusInfo(row);
+      const plan = getSubscriptionPlanMeta(row);
+      const remaining = getSubscriptionRemainingLabel(row);
+      const endText = formatSubscriptionEnd(row);
+      return `
         <article class="assal-sub-item" style="--sub-item-accent:${status.key === 'active' ? '#34d399' : status.key === 'expired' ? '#f59e0b' : status.key === 'paused' ? '#fb7185' : '#22d3ee'}">
           <div class="assal-sub-item-head">
             <div>
               <div class="assal-sub-item-title">${escapeHtml(shortText(row.customerName,'بدون اسم'))}</div>
               <div class="assal-sub-item-phone">${escapeHtml(shortText(row.customerPhone,'بدون رقم'))}</div>
             </div>
-            <span class="assal-sub-status is-${status.key}"><i class="fa-solid ${status.icon}"></i><span>${status.label}</span></span>
+            <div class="assal-sub-item-head-side">
+              <span class="assal-sub-status is-${status.key}"><i class="fa-solid ${status.icon}"></i><span>${status.label}</span></span>
+              <span class="assal-sub-plan-badge ${plan.isTrial ? 'is-trial' : ''}"><i class="fa-solid ${plan.isTrial ? 'fa-stopwatch' : 'fa-shield-halved'}"></i><span>${escapeHtml(plan.shortLabel)}</span></span>
+            </div>
           </div>
           <div class="assal-sub-item-code">${escapeHtml(shortText(row.code || row.id || '—'))}</div>
           <div class="assal-sub-item-meta">
-            <div class="assal-sub-mini"><span>تاريخ الإنشاء</span><strong>${escapeHtml(formatDateTime(row.createdAtMs))}</strong></div>
             <div class="assal-sub-mini"><span>بداية الاشتراك</span><strong>${escapeHtml(row.activatedAtMs ? formatDateTime(row.activatedAtMs) : 'من أول تفعيل')}</strong></div>
+            <div class="assal-sub-mini"><span>انتهاء الاشتراك</span><strong>${escapeHtml(endText)}${remaining ? `<small style="display:block;margin-top:2px;color:rgba(125,211,252,.75);font-size:8px">${escapeHtml(remaining)}</small>` : ''}</strong></div>
           </div>
-          <div class="assal-sub-item-actions">
-            <button type="button" class="assal-sub-item-btn" onclick="copyCompatSubscriptionCode('${escapeHtml(String(row.code || row.id || ''))}')"><i class="fa-solid fa-copy"></i><span>نسخ الرمز</span></button>
-            <button type="button" class="assal-sub-item-btn is-primary" onclick="openCompatSubscriptionCardByCode('${escapeHtml(String(row.code || row.id || ''))}')"><i class="fa-solid fa-image"></i><span>البطاقة</span></button>
+          <div class="assal-sub-item-actions is-manage">
+            ${getSubscriptionActionButtonsHtml(row, status, plan)}
           </div>
         </article>
-      `; }).join('');
+      `;
+    }).join('');
     renderListHost(`<div class="assal-sub-list">${html}</div>`, '');
   }
 
@@ -41557,10 +41750,11 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     cardTextR(ctx,'كارد اشتراك رسمي • جاهز للتحميل والإرسال للزبون',1325,191,700,22,'rgba(226,232,240,.80)',740);
 
     const status=computeStatusInfo(row);
+    const plan=getSubscriptionPlanMeta(row);
     const statusFill=status.key==='active'?'rgba(16,185,129,.18)':status.key==='expired'?'rgba(245,158,11,.18)':status.key==='paused'?'rgba(244,63,94,.18)':'rgba(34,211,238,.16)';
     const statusStroke=status.key==='active'?'rgba(52,211,153,.34)':status.key==='expired'?'rgba(245,158,11,.34)':status.key==='paused'?'rgba(244,63,94,.34)':'rgba(34,211,238,.30)';
     cardFillRound(ctx,70,72,255,62,31,statusFill,statusStroke,1.5); cardTextC(ctx,status.label,197,103,900,21,'#ecfeff',215);
-    cardFillRound(ctx,70,148,350,62,31,'rgba(8,145,178,.15)','rgba(125,211,252,.22)',1.5); cardTextC(ctx,'اشتراك سنوي — 365 يوم',245,179,900,21,'#e0f2fe',310);
+    cardFillRound(ctx,70,148,350,62,31,plan.isTrial?'rgba(146,64,14,.20)':'rgba(8,145,178,.15)',plan.isTrial?'rgba(245,158,11,.26)':'rgba(125,211,252,.22)',1.5); cardTextC(ctx,plan.label,245,179,900,21,plan.isTrial?'#fef3c7':'#e0f2fe',310);
 
     // panels
     const mainX=535, mainY=250, mainW=995, mainH=545;
@@ -41584,7 +41778,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     const code=shortText(row.code||row.id||'—');
     cardFillRound(ctx,mainX+inner+22,mainY+330,mainW-inner*2-44,70,20,'rgba(2,8,23,.48)','rgba(148,163,184,.12)');
     cardTextC(ctx,code,mainX+mainW/2,mainY+365,900,38,'#ffffff',mainW-inner*2-100,'ltr');
-    cardTextR(ctx,'يبدأ الاشتراك لمدة 365 يوم كاملة من أول تفعيل.',mainX+mainW-inner-22,mainY+419,800,18,'rgba(226,232,240,.80)',mainW-inner*2-44);
+    cardTextR(ctx,plan.cardHint,mainX+mainW-inner-22,mainY+419,800,18,'rgba(226,232,240,.80)',mainW-inner*2-44);
 
     const startText=getSubscriptionStartText(row), createdText=cardDateOnly(row.createdAtMs);
     cardFillRound(ctx,xR,mainY+456,half,66,20,'rgba(255,255,255,.035)','rgba(148,163,184,.10)');
@@ -41630,7 +41824,33 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     }
   }
 
-  function resetCreateForm(){ ['assalSubName','assalSubPhone','assalSubAddress','assalSubNote'].forEach((id) => { const el = document.getElementById(id); if (el) el.value = ''; }); const preview = document.getElementById('assalSubPreviewCode'); if (preview) preview.textContent = makePreviewCode(); const saveBtn = document.getElementById('assalSubSaveBtn'); if (saveBtn) { saveBtn.disabled = false; saveBtn.classList.remove('is-busy'); } }
+  function syncCreatePlanUi(){
+    const annualBtn = document.getElementById('assalSubPlanAnnual');
+    const trialBtn = document.getElementById('assalSubPlanTrial');
+    const pill = document.getElementById('assalSubDurationPill');
+    const strong = document.getElementById('assalSubDurationStrong');
+    const caption = document.getElementById('assalSubDurationCaption');
+    const isTrial = currentCreatePlan === 'trial';
+    if (annualBtn) { annualBtn.classList.toggle('is-selected', !isTrial); annualBtn.setAttribute('aria-checked', String(!isTrial)); }
+    if (trialBtn) { trialBtn.classList.toggle('is-selected', isTrial); trialBtn.setAttribute('aria-checked', String(isTrial)); }
+    if (pill) pill.classList.toggle('is-trial', isTrial);
+    if (strong) strong.textContent = isTrial ? 'ساعة واحدة' : '365 يوم';
+    if (caption) caption.textContent = 'تبدأ من أول تفعيل';
+  }
+
+  window.selectCompatSubscriptionPlan = function(plan){
+    currentCreatePlan = String(plan || '').toLowerCase() === 'trial' ? 'trial' : 'annual';
+    syncCreatePlanUi();
+    return false;
+  };
+
+  function resetCreateForm(){
+    ['assalSubName','assalSubPhone','assalSubAddress','assalSubNote'].forEach((id) => { const el = document.getElementById(id); if (el) el.value = ''; });
+    currentCreatePlan = 'annual';
+    syncCreatePlanUi();
+    const preview = document.getElementById('assalSubPreviewCode'); if (preview) preview.textContent = makePreviewCode();
+    const saveBtn = document.getElementById('assalSubSaveBtn'); if (saveBtn) { saveBtn.disabled = false; saveBtn.classList.remove('is-busy'); }
+  }
 
   function applyLiveInputGuards(){
     const phone = document.getElementById('assalSubPhone');
@@ -41671,7 +41891,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
   window.copyCurrentCompatSubscriptionCode = function(){ return window.copyCompatSubscriptionCode(currentCardSubscription?.code || currentCardSubscription?.id || ''); };
   window.openCompatSubscriptionCardByCode = function(code){ const row = getRowByCode(code); if (!row) { showToast('تعذر العثور على الاشتراك', 'error'); return false; } fillCardView(row); return true; };
 
-  function getFormPayload(){ const payload = { customerName: document.getElementById('assalSubName')?.value || '', customerPhone: document.getElementById('assalSubPhone')?.value || '', customerAddress: document.getElementById('assalSubAddress')?.value || '', note: document.getElementById('assalSubNote')?.value || '' }; payload.customerName = String(payload.customerName).trim(); payload.customerPhone = normalizeDigits(payload.customerPhone).slice(0,11); payload.customerAddress = String(payload.customerAddress).trim(); payload.note = String(payload.note).trim(); return payload; }
+  function getFormPayload(){ const payload = { customerName: document.getElementById('assalSubName')?.value || '', customerPhone: document.getElementById('assalSubPhone')?.value || '', customerAddress: document.getElementById('assalSubAddress')?.value || '', note: document.getElementById('assalSubNote')?.value || '', planType: currentCreatePlan === 'trial' ? 'trial' : 'annual' }; payload.customerName = String(payload.customerName).trim(); payload.customerPhone = normalizeDigits(payload.customerPhone).slice(0,11); payload.customerAddress = String(payload.customerAddress).trim(); payload.note = String(payload.note).trim(); return payload; }
   function validateFormPayload(payload){
     if (!payload.customerName || payload.customerName.length < 2 || !hasAnyLetter(payload.customerName)) { showToast('اكتب اسم المشترك بشكل صحيح', 'error', 'الاسم يجب أن يحتوي على حروف وليس أرقاماً فقط'); try { document.getElementById('assalSubName')?.focus(); } catch (_) {} return false; }
     if (/^\d+$/.test(normalizeDigits(payload.customerName))) { showToast('حقل الاسم لا يقبل رقماً فقط', 'error'); try { document.getElementById('assalSubName')?.focus(); } catch (_) {} return false; }
@@ -41691,13 +41911,197 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
       const tools = await getCompatSubscriptionFirestoreTools(); const code = await generateUniqueSubscriptionCode(tools); const nowMs = Date.now();
       const creatorLabel = typeof window.getAdminAccountLabel === 'function' ? String(window.getAdminAccountLabel() || '').trim() : 'مالك النظام';
       const creatorUid = window.assalSecureAuth?.getCurrentUid ? String(window.assalSecureAuth.getCurrentUid() || '').trim() : '';
-      const row = { code, customerName: payload.customerName, customerPhone: payload.customerPhone, customerAddress: payload.customerAddress, note: payload.note, status: 'pending', durationDays: SUB_DURATION_DAYS, activationMode: 'first_activation', createdAt: tools.serverTimestamp(), createdAtMs: nowMs, updatedAt: tools.serverTimestamp(), updatedAtMs: nowMs, activatedAtMs: null, expiresAtMs: null, createdByUid: creatorUid, createdByLabel: creatorLabel };
+      const isTrial = payload.planType === 'trial';
+      const row = {
+        code,
+        customerName: payload.customerName,
+        customerPhone: payload.customerPhone,
+        customerAddress: payload.customerAddress,
+        note: payload.note,
+        status: 'pending',
+        planType: isTrial ? 'trial' : 'annual',
+        subscriptionType: isTrial ? 'trial' : 'annual',
+        durationDays: isTrial ? 0 : SUB_DURATION_DAYS,
+        durationMinutes: isTrial ? SUB_TRIAL_MINUTES : 0,
+        activationMode: 'first_activation',
+        createdAt: tools.serverTimestamp(), createdAtMs: nowMs,
+        updatedAt: tools.serverTimestamp(), updatedAtMs: nowMs,
+        activatedAtMs: null, expiresAtMs: null, deviceId: null,
+        createdByUid: creatorUid, createdByLabel: creatorLabel,
+        renewalCount: 0
+      };
       await tools.setDoc(tools.doc(tools.db, SUB_COLLECTION, code), row);
-      const clientRow = { id: code, ...row }; subscriptionsRows = [clientRow].concat(subscriptionsRows.filter((item) => String(item.code || item.id) !== code)); renderSubscriptionsList(); fillCardView(clientRow); showToast('تم إنشاء الاشتراك بنجاح', 'success', code);
+      const clientRow = { id: code, ...row };
+      subscriptionsRows = [clientRow].concat(subscriptionsRows.filter((item) => String(item.code || item.id) !== code));
+      renderSubscriptionsList();
+      await fillCardView(clientRow);
+      showToast(isTrial ? 'تم إنشاء تيست ساعة بنجاح' : 'تم إنشاء الاشتراك السنوي بنجاح', 'success', code);
     } catch (err) {
       console.error('COMPAT_SUB_SAVE_ERROR', err); showToast('تعذر حفظ الاشتراك', 'error', err?.message || 'تحقق من قواعد Firestore');
     } finally { if (saveBtn) { saveBtn.disabled = false; saveBtn.classList.remove('is-busy'); } }
     return false;
+  };
+
+  async function confirmSubscriptionAction(row, kind, title, text, confirmText){
+    const safeKind = ['pause','resume','renew','convert'].includes(kind) ? kind : 'renew';
+    const iconMap = { pause:'fa-pause', resume:'fa-play', renew:'fa-calendar-plus', convert:'fa-arrow-up-right-dots' };
+    const name = escapeHtml(shortText(row?.customerName, 'مشترك بدون اسم'));
+    const code = escapeHtml(String(row?.code || row?.id || '').trim());
+    try {
+      if (window.Swal && typeof window.Swal.fire === 'function') {
+        const result = await window.Swal.fire({
+          html: `
+            <div class="assal-sub-action-card is-${safeKind}">
+              <div class="assal-sub-action-icon"><i class="fa-solid ${iconMap[safeKind]}"></i></div>
+              <div class="assal-sub-action-kicker">تأكيد إدارة الاشتراك</div>
+              <div class="assal-sub-action-title">${escapeHtml(title)}</div>
+              <div class="assal-sub-action-text">${escapeHtml(text)}</div>
+              <div class="assal-sub-action-target">
+                <strong>${name}</strong>
+                <span>${code}</span>
+              </div>
+              <div class="assal-sub-action-note"><i class="fa-solid fa-shield-halved"></i><span>لن تُنفذ العملية قبل تأكيدك</span></div>
+            </div>`,
+          showCancelButton: true,
+          showConfirmButton: true,
+          confirmButtonText: confirmText,
+          cancelButtonText: 'رجوع',
+          buttonsStyling: false,
+          reverseButtons: false,
+          focusCancel: true,
+          allowOutsideClick: false,
+          allowEscapeKey: true,
+          customClass: {
+            container:'assal-sub-action-layer',
+            popup:`assal-sub-action-popup is-${safeKind}`,
+            htmlContainer:'assal-sub-action-html',
+            actions:'assal-sub-action-actions',
+            confirmButton:'assal-sub-action-confirm-btn',
+            cancelButton:'assal-sub-action-cancel-btn'
+          }
+        });
+        return !!result.isConfirmed;
+      }
+    } catch (err) { console.warn('COMPAT_SUB_CONFIRM_UI_ERROR', err); }
+    try { return window.confirm(`${title}\n\n${text}\n\n${String(row?.customerName || '')} — ${String(row?.code || row?.id || '')}`); } catch (_) { return false; }
+  }
+
+  function syncLocalSubscriptionRow(code, patch){
+    const row = getRowByCode(code); if (!row) return null;
+    Object.keys(patch || {}).forEach((key) => { if (key !== 'updatedAt') row[key] = patch[key]; });
+    if (currentCardSubscription && String(currentCardSubscription.code || currentCardSubscription.id || '') === String(code)) currentCardSubscription = row;
+    revokeSubscriptionCardImage();
+    renderSubscriptionsList();
+    return row;
+  }
+
+  async function runSubscriptionAdminUpdate(code, patchFactory, successTitle, successSub=''){
+    if (!ownerCanManageSubscriptions() || subscriptionActionBusy) return false;
+    const row = getRowByCode(code); if (!row) { showToast('تعذر العثور على الاشتراك', 'error'); return false; }
+    subscriptionActionBusy = true;
+    try {
+      const tools = await getCompatSubscriptionFirestoreTools();
+      const patch = await patchFactory(row, tools);
+      if (!patch) return false;
+      await tools.updateDoc(tools.doc(tools.db, SUB_COLLECTION, String(row.code || row.id)), patch);
+      syncLocalSubscriptionRow(String(row.code || row.id), patch);
+      showToast(successTitle, 'success', successSub || String(row.code || row.id));
+      return true;
+    } catch (err) {
+      console.error('COMPAT_SUB_ADMIN_UPDATE_ERROR', err);
+      showToast('تعذر تنفيذ العملية', 'error', err?.message || 'تحقق من الاتصال والصلاحيات');
+      return false;
+    } finally { subscriptionActionBusy = false; }
+  }
+
+  window.pauseCompatSubscription = async function(code){
+    const row = getRowByCode(code); if (!row) return false;
+    if (computeStatusInfo(row).key !== 'active') { showToast('يمكن إيقاف الاشتراك الفعّال فقط', 'info'); return false; }
+    const ok = await confirmSubscriptionAction(row, 'pause', 'إيقاف الاشتراك؟', 'سيُمنع المشترك من الدخول فوراً، لكن مدة الاشتراك ستستمر بالحساب أثناء الإيقاف.', 'إيقاف الاشتراك');
+    if (!ok) return false;
+    return runSubscriptionAdminUpdate(code, async (_row, tools) => {
+      const now = Date.now();
+      return { status:'paused', pausedAtMs:now, updatedAt:tools.serverTimestamp(), updatedAtMs:now };
+    }, 'تم إيقاف الاشتراك');
+  };
+
+  window.resumeCompatSubscription = async function(code){
+    const row = getRowByCode(code); if (!row) return false;
+    if (String(row.status || '').toLowerCase() !== 'paused') { showToast('هذا الاشتراك غير موقوف', 'info'); return false; }
+    const end = Number(row.expiresAtMs || 0);
+    if (end && end <= Date.now()) { showToast('مدة الاشتراك انتهت', 'error', 'جدده أو حوّل التيست إلى سنوي قبل الاستئناف'); return false; }
+    const ok = await confirmSubscriptionAction(row, 'resume', 'استئناف الاشتراك؟', 'سيعود المشترك للدخول بنفس الكود وعلى نفس الجهاز، بدون إضافة أيام جديدة.', 'استئناف الاشتراك');
+    if (!ok) return false;
+    return runSubscriptionAdminUpdate(code, async (_row, tools) => {
+      const now = Date.now();
+      return { status:'active', resumedAtMs:now, updatedAt:tools.serverTimestamp(), updatedAtMs:now };
+    }, 'تم استئناف الاشتراك');
+  };
+
+  window.renewCompatSubscriptionAnnual = async function(code){
+    const row = getRowByCode(code); if (!row) return false;
+    const plan = getSubscriptionPlanMeta(row);
+    if (plan.isTrial) { showToast('استخدم تحويل إلى سنوي للتيست', 'info'); return false; }
+    const status = computeStatusInfo(row);
+    if (status.key === 'pending') { showToast('الاشتراك لم يبدأ بعد', 'info', 'مدته السنوية ستبدأ تلقائياً من أول تفعيل'); return false; }
+    const currentEnd = Number(row.expiresAtMs || 0);
+    const stillRunning = currentEnd > Date.now();
+    const msg = stillRunning ? 'ستُضاف 365 يوم فوق تاريخ الانتهاء الحالي ولن تضيع الأيام المتبقية.' : 'ستبدأ سنة جديدة من وقت التجديد الحالي مع بقاء نفس الكود والجهاز.';
+    const ok = await confirmSubscriptionAction(row, 'renew', 'تجديد الاشتراك سنة؟', msg, 'تجديد سنة');
+    if (!ok) return false;
+    return runSubscriptionAdminUpdate(code, async (freshRow, tools) => {
+      const now = Date.now();
+      const end = Number(freshRow.expiresAtMs || 0);
+      const rawStatus = String(freshRow.status || '').toLowerCase();
+      const base = end > now ? end : now;
+      const newEnd = base + (SUB_DURATION_DAYS * SUB_DAY_MS);
+      const patch = {
+        planType:'annual', subscriptionType:'annual', durationDays:SUB_DURATION_DAYS, durationMinutes:0,
+        expiresAtMs:newEnd,
+        lastRenewedAtMs:now,
+        renewalCount:Number(freshRow.renewalCount || 0) + 1,
+        updatedAt:tools.serverTimestamp(), updatedAtMs:now
+      };
+      if (end <= now) {
+        patch.activatedAtMs = now;
+        patch.status = rawStatus === 'paused' ? 'paused' : 'active';
+      }
+      return patch;
+    }, 'تم تجديد الاشتراك سنة');
+  };
+
+  window.convertCompatTrialToAnnual = async function(code){
+    const row = getRowByCode(code); if (!row) return false;
+    const plan = getSubscriptionPlanMeta(row);
+    if (!plan.isTrial) { showToast('الاشتراك سنوي بالفعل', 'info'); return false; }
+    const status = computeStatusInfo(row);
+    const pending = status.key === 'pending';
+    const msg = pending
+      ? 'سيصبح هذا الكود اشتراكاً سنوياً 365 يوم، وتبدأ السنة عند أول تفعيل.'
+      : 'سيتم تحويل نفس الكود ونفس الجهاز إلى اشتراك سنوي كامل لمدة 365 يوم من الآن.';
+    const ok = await confirmSubscriptionAction(row, 'convert', 'تحويل التيست إلى سنوي؟', msg, 'تحويل إلى سنوي');
+    if (!ok) return false;
+    return runSubscriptionAdminUpdate(code, async (freshRow, tools) => {
+      const now = Date.now();
+      const rawStatus = String(freshRow.status || 'pending').toLowerCase();
+      const hasDevice = !!String(freshRow.deviceId || '').trim();
+      const isPending = rawStatus === 'pending' && !Number(freshRow.activatedAtMs || 0) && !hasDevice;
+      const patch = {
+        planType:'annual', subscriptionType:'annual', durationDays:SUB_DURATION_DAYS, durationMinutes:0,
+        convertedFromTrialAtMs:now,
+        updatedAt:tools.serverTimestamp(), updatedAtMs:now
+      };
+      if (isPending) {
+        patch.status = 'pending';
+        patch.activatedAtMs = null;
+        patch.expiresAtMs = null;
+      } else {
+        patch.status = rawStatus === 'paused' ? 'paused' : 'active';
+        patch.activatedAtMs = now;
+        patch.expiresAtMs = now + (SUB_DURATION_DAYS * SUB_DAY_MS);
+      }
+      return patch;
+    }, 'تم تحويل التيست إلى اشتراك سنوي');
   };
 
   window.downloadCurrentCompatSubscriptionCard = async function(){
@@ -41981,3 +42385,79 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
   window.assalOfflineGuardToast = showOfflineToast;
 })();
 </script>
+
+<!-- ===== ASSAL OWNER SUBSCRIPTIONS PHASE 10: MOBILE SCROLL + LAST CARD SAFE AREA FINAL ===== -->
+<style id="assal-owner-subscriptions-phase10-mobile-scroll-fix">
+/*
+  Fixes the subscriptions manager on touch devices while the global modal-lock
+  intentionally freezes the page behind it. The manager itself remains vertically
+  scrollable and the last subscription card can be lifted fully above the Android
+  navigation area so its action buttons never stay clipped below the viewport.
+*/
+#assalOwnerSubscriptionManager,
+#assalOwnerSubscriptionManager .assal-sub-manager-shell,
+#assalOwnerSubscriptionManager .assal-sub-manager-body,
+#assalOwnerSubscriptionManager #assalSubManagerListView,
+#assalOwnerSubscriptionManager #assalSubListHost,
+#assalOwnerSubscriptionManager .assal-sub-list{
+  touch-action:pan-y !important;
+}
+
+#assalOwnerSubscriptionManager .assal-sub-manager-body{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior-y:contain !important;
+  scroll-behavior:smooth;
+  scroll-padding-bottom:24px;
+}
+
+@media (max-width:700px){
+  #assalOwnerSubscriptionManager.assal-sub-manager{
+    align-items:center !important;
+    justify-content:center !important;
+    padding:8px !important;
+  }
+
+  #assalOwnerSubscriptionManager .assal-sub-manager-shell{
+    display:flex !important;
+    flex-direction:column !important;
+    width:100% !important;
+    height:calc(100dvh - 16px) !important;
+    max-height:calc(100dvh - 16px) !important;
+    min-height:0 !important;
+    overflow:hidden !important;
+  }
+
+  #assalOwnerSubscriptionManager .assal-sub-manager-top{
+    flex:0 0 auto !important;
+  }
+
+  #assalOwnerSubscriptionManager .assal-sub-manager-body{
+    flex:1 1 auto !important;
+    min-height:0 !important;
+    max-height:none !important;
+    height:auto !important;
+    padding:11px 11px calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    -webkit-overflow-scrolling:touch !important;
+    overscroll-behavior-y:contain !important;
+    touch-action:pan-y !important;
+    scroll-padding-bottom:calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #assalOwnerSubscriptionManager #assalSubManagerListView,
+  #assalOwnerSubscriptionManager #assalSubListHost,
+  #assalOwnerSubscriptionManager .assal-sub-list,
+  #assalOwnerSubscriptionManager .assal-sub-item{
+    touch-action:pan-y !important;
+  }
+
+  /* Keep the last card's action row comfortably inside the usable viewport. */
+  #assalOwnerSubscriptionManager .assal-sub-list > .assal-sub-item:last-child{
+    margin-bottom:4px !important;
+  }
+}
+</style>
+<!-- ===== /ASSAL OWNER SUBSCRIPTIONS PHASE 10 ===== -->
