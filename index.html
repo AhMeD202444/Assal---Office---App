@@ -14302,6 +14302,25 @@ html.low-end-device .assal-community-write-row{
   .assal-sub-card-actions{display:grid;grid-template-columns:1fr 1fr}.assal-sub-card-actions button{width:100%}.assal-sub-download-btn{min-width:0}
 }
 </style>
+
+<style id="assal-owner-subscriptions-phase23-card-download-feedback-style">
+/* ===== ASSAL PHASE 23: CARD DOWNLOAD FEEDBACK =====
+   - Keep the global elegant toast above the owner subscription manager.
+   - Lock the subscription-card download button while saving.
+   - Show a spinner + "جاري الحفظ…" until the feedback toast finishes.
+===== /ASSAL PHASE 23 ===== */
+.elegant-top-toast{z-index:2147483600!important}
+.assal-sub-download-btn.is-busy{
+  opacity:.58!important;
+  cursor:wait!important;
+  pointer-events:none!important;
+  filter:saturate(.72);
+}
+.assal-sub-download-spinner{display:none}
+.assal-sub-download-btn.is-busy .assal-sub-download-icon{display:none}
+.assal-sub-download-btn.is-busy .assal-sub-download-spinner{display:inline-flex}
+.assal-sub-download-btn.is-busy .assal-sub-download-label{opacity:.92}
+</style>
 <style id="assal-owner-subscriptions-compact-card-final-style">
 /* ===== FINAL: centered modal + true canvas card preview ===== */
 #assalOwnerSubscriptionManager.assal-sub-manager{align-items:center!important;justify-content:center!important;padding:12px!important}
@@ -14670,7 +14689,7 @@ html.low-end-device .assal-community-write-row{
           <div class="assal-sub-card-actions assal-sub-card-actions-compact">
             <button type="button" class="assal-sub-secondary-btn" onclick="showCompatSubscriptionListView()"><i class="fa-solid fa-table-list"></i><span>كل الاشتراكات</span></button>
             <button type="button" class="assal-sub-secondary-btn" onclick="copyCurrentCompatSubscriptionCode()"><i class="fa-solid fa-copy"></i><span>نسخ الرمز</span></button>
-            <button type="button" class="assal-sub-primary-btn assal-sub-download-btn" onclick="downloadCurrentCompatSubscriptionCard()"><i class="fa-solid fa-download"></i><span>تحميل البطاقة</span></button>
+            <button type="button" id="assalSubDownloadCardBtn" class="assal-sub-primary-btn assal-sub-download-btn" onclick="downloadCurrentCompatSubscriptionCard()"><i class="fa-solid fa-download assal-sub-download-icon"></i><i class="fa-solid fa-spinner fa-spin assal-sub-download-spinner" aria-hidden="true"></i><span class="assal-sub-download-label">تحميل البطاقة</span></button>
           </div>
         </div>
       </div>
@@ -42459,7 +42478,28 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     });
   }
 
+  let compatSubscriptionCardDownloadBusy=false;
+  const COMPAT_SUB_CARD_FEEDBACK_HOLD_MS=2700;
+
+  function setCompatSubscriptionCardDownloadBusy(busy){
+    const btn=document.getElementById('assalSubDownloadCardBtn');
+    if(!btn)return;
+    btn.disabled=!!busy;
+    btn.classList.toggle('is-busy',!!busy);
+    btn.setAttribute('aria-busy',busy?'true':'false');
+    const label=btn.querySelector('.assal-sub-download-label');
+    if(label)label.textContent=busy?'جاري الحفظ…':'تحميل البطاقة';
+  }
+
+  function waitCompatSubscriptionCardFeedback(){
+    return new Promise(resolve=>setTimeout(resolve,COMPAT_SUB_CARD_FEEDBACK_HOLD_MS));
+  }
+
   window.downloadCurrentCompatSubscriptionCard = async function(){
+    if(compatSubscriptionCardDownloadBusy)return false;
+    compatSubscriptionCardDownloadBusy=true;
+    setCompatSubscriptionCardDownloadBusy(true);
+
     const code=String(currentCardSubscription?.code||currentCardSubscription?.id||'ASSAL-SUB').trim();
     try{
       if(!subscriptionCardImageState.blob || subscriptionCardImageState.row!==currentCardSubscription){
@@ -42475,14 +42515,25 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         const saved=window.Android.saveSubscriptionCardPng(dataUrl,fileName);
         if(saved===true||saved==='true'){
           showToast('تم حفظ بطاقة الاشتراك في الصور','success',fileName);
+          await waitCompatSubscriptionCardFeedback();
           return true;
         }
         throw new Error('NATIVE_CARD_SAVE_FAILED');
       }
 
       const a=document.createElement('a'); a.href=subscriptionCardImageState.url; a.download=fileName; document.body.appendChild(a); a.click(); setTimeout(()=>{try{a.remove();}catch(_){}},0);
-      showToast('تم تجهيز بطاقة الاشتراك للتحميل','success',a.download); return true;
-    }catch(err){console.error('COMPAT_SUB_DOWNLOAD_ERROR',err);showToast('تعذر تحميل البطاقة','error',err?.message||'');return false;}
+      showToast('تم تجهيز بطاقة الاشتراك للتحميل','success',a.download);
+      await waitCompatSubscriptionCardFeedback();
+      return true;
+    }catch(err){
+      console.error('COMPAT_SUB_DOWNLOAD_ERROR',err);
+      showToast('تعذر تحميل البطاقة','error',err?.message||'');
+      await waitCompatSubscriptionCardFeedback();
+      return false;
+    }finally{
+      compatSubscriptionCardDownloadBusy=false;
+      setCompatSubscriptionCardDownloadBusy(false);
+    }
   };
 
   function bindSearch(){ if (boundSearch) return; const input = document.getElementById('assalSubSearchInput'); if (!input) return; boundSearch = true; input.addEventListener('input', function(){ renderSubscriptionsList(); }); }
