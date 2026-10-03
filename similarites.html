@@ -4004,13 +4004,46 @@ updateNotes();
 
     async function getDeviceId() {
         try {
-            let deviceId = localStorage.getItem('deviceId');
-            if (!deviceId) {
-                const fp = await FingerprintJS.load();
-                const result = await fp.get();
-                deviceId = result.visitorId;
-                localStorage.setItem('deviceId', deviceId);
+            /*
+             * نحافظ أولاً على أي Device ID قديم مخزون حتى لا نكسر
+             * الاشتراكات المفعلة سابقاً على نفس تثبيت التطبيق.
+             */
+            let deviceId = String(localStorage.getItem('deviceId') || '').trim();
+            if (deviceId) {
+                return deviceId;
             }
+
+            /*
+             * داخل تطبيق Android فقط: نفضّل الـ Native ANDROID_ID الثابت.
+             * هذا المسار لا يعمل في المتصفح العادي، فيبقى FingerprintJS كـ fallback.
+             */
+            try {
+                if (
+                    window.Android &&
+                    typeof window.Android.getStableDeviceId === 'function'
+                ) {
+                    const nativeDeviceId = String(
+                        window.Android.getStableDeviceId() || ''
+                    ).trim();
+
+                    if (nativeDeviceId) {
+                        localStorage.setItem('deviceId', nativeDeviceId);
+                        return nativeDeviceId;
+                    }
+                }
+            } catch (nativeError) {
+                console.warn('ASSAL_NATIVE_DEVICE_ID_FALLBACK', nativeError);
+            }
+
+            const fp = await FingerprintJS.load();
+            const result = await fp.get();
+            deviceId = String((result && result.visitorId) || '').trim();
+
+            if (!deviceId) {
+                throw new Error('Unable to resolve device id');
+            }
+
+            localStorage.setItem('deviceId', deviceId);
             return deviceId;
         } catch (error) {
             throw error;
