@@ -442,6 +442,7 @@
       (function(){
         const isLowEnd = !!window.__ASSAL_LOW_END_DEVICE__;
         const GSAP_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js';
+        const HTML2CANVAS_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
               const JSPDF_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
         const AUTOTABLE_SRC = 'https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js';
 
@@ -16246,7 +16247,7 @@ html.low-end-device .assal-community-write-row{
   // لذلك نطلب الصلاحية بأمان عند أول لمسة داخل نسخة Home Screen فقط.
   (function setupAssalIOSWebPushPermissionGesture() {
     try {
-      if (isAssalAndroidNative()) return;
+      if (isAssalProbablyNativeAndroidApp()) return;
       if (!isAssalIOSDevice()) return;
       if (!isAssalStandaloneWebApp()) return;
       if (typeof Notification === 'undefined') return;
@@ -28159,7 +28160,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
   const btn = document.getElementById("printPdfBtn");
-  if (!btn) return console.error("❌ زر PDF غير موجود: printPdfBtn");
+  if (!btn) return;
 
   btn.addEventListener("click", async () => {
     try {
@@ -28381,7 +28382,7 @@ function closeContactModal(){
      "paid_ads"            => إعلان مدفوع (للمحل/طلب عمل/عرض حاجة)
      "sponsor_iphone_back" => إعلان مُعلن: أظهر آيفون (07706032703)
      "instant_inquiry_feature" => إعلان ميزة الاستعلام الفوري مع معرض صور
-     "simi_subscription"       => إعلان اشتراك التوافقات من الصورة images/SIMI.PNG
+     "simi_subscription"       => إعلان اشتراك التوافقات من الصورة images/SIMI.png
 
    ========================================================== */
 const AD_CHOICE = "simi_subscription"; // <<< إعلان التوافقات مفعل حالياً؛ غيّرها إلى "off" لإطفائه
@@ -29001,7 +29002,7 @@ function renderInstantInquiryFeature(){
         loading="eager"
         decoding="async"
         draggable="false"
-        onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<div style=&quot;padding:28px 18px;color:#fff;font-family:Cairo,sans-serif;text-align:center&quot;>تعذر تحميل صورة الإعلان.<br>تأكد من وجود الملف <b>images/SIMI.PNG</b> بنفس الاسم تماماً.</div>');"
+        onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<div style=&quot;padding:28px 18px;color:#fff;font-family:Cairo,sans-serif;text-align:center&quot;>تعذر تحميل صورة الإعلان.<br>تأكد من وجود الملف <b>images/SIMI.png</b> بنفس الاسم تماماً.</div>');"
       />
     `;
   }
@@ -43241,13 +43242,15 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
   overflow:hidden;
   isolation:isolate;
   box-sizing:border-box;
-  transition:width .25s cubic-bezier(.22,.82,.22,1),min-width .25s cubic-bezier(.22,.82,.22,1),height .2s ease,border-radius .2s ease,background-color .18s ease,border-color .18s ease,box-shadow .2s ease;
+  transition:width .25s cubic-bezier(.22,.82,.22,1),min-width .25s cubic-bezier(.22,.82,.22,1),height .2s ease,border-radius .2s ease,background-color .18s ease,border-color .18s ease,box-shadow .2s ease,padding .23s cubic-bezier(.22,.82,.22,1);
   will-change:width;
 }
 .assal-header-tools-hub.is-open{
   width:var(--assal-tools-open-width);
   min-width:var(--assal-tools-open-width);
   height:36px;
+  padding-left:6px;
+  padding-right:7px;
   min-height:36px;
   border-radius:11px;
   background:linear-gradient(135deg,rgba(12,22,39,.99),rgba(22,35,59,.99));
@@ -43323,8 +43326,8 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
   pointer-events:none;
 }
 .assal-header-tools-hub.is-open .assal-tools-rail{
-  width:calc(var(--assal-tools-open-width) - 30px);
-  padding:0 4px 0 14px;
+  width:calc(var(--assal-tools-open-width) - 43px);
+  padding:0 7px 0 14px;
   opacity:1;
   transform:translateX(0);
   pointer-events:auto;
@@ -43373,8 +43376,8 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 .assal-header-tools-hub .assal-tools-item:active{transform:scale(.95) !important;}
 .assal-header-tools-hub .assal-tools-item:hover{filter:brightness(1.08);}
 .assal-header-tools-hub .assal-tools-item .header-cart-badge{
-  top:-6px !important;
-  right:-8px !important;
+  top:-2px !important;
+  right:-6px !important;
   min-width:17px !important;
   height:17px !important;
   padding:0 5px !important;
@@ -43426,8 +43429,8 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
   .assal-header-tools-hub .assal-tools-item i{font-size:12px !important;}
   .assal-header-tools-hub{max-width:calc(100vw - 44px);}
   .assal-header-tools-hub .assal-tools-item .header-cart-badge{
-    top:-8px !important;
-    right:-9px !important;
+    top:-1px !important;
+    right:-6px !important;
     min-width:16px !important;
     height:16px !important;
     padding:0 4px !important;
@@ -43498,9 +43501,10 @@ html.low-end-device .header-buttons > .assal-static-header-btn{
     if (!rail || !hub) return 30;
     const items = Array.from(rail.querySelectorAll('.assal-tools-item')).filter(isActuallyVisible);
     const count = items.length;
-    /* launcher 30 + separator/padding 18 + original-size icons 30 + comfortable gaps 6 */
-    const wanted = 30 + (count ? (18 + count * 30 + Math.max(0, count - 1) * 6) : 0);
-    const viewportCap = Math.max(30, Math.min(232, window.innerWidth - 48));
+    /* launcher 30 + outer edge breathing 13 + separator/padding 18 + original-size icons 30 + comfortable gaps 6 */
+    const edgeBreathing = count ? 13 : 0;
+    const wanted = 30 + edgeBreathing + (count ? (18 + count * 30 + Math.max(0, count - 1) * 6) : 0);
+    const viewportCap = Math.max(30, Math.min(248, window.innerWidth - 44));
     return Math.min(wanted, viewportCap);
   }
 
@@ -43923,3 +43927,11 @@ html.low-end-device .header-buttons > .assal-static-header-btn{
 })();
 </script>
 <!-- ===== /ASSAL PHASE 17 ===== -->
+
+
+<!-- ===== ASSAL PHASE 18: HEADER TOOLS – BADGE INSET + EDGE BREATHING =====
+  Visual-only refinement on PHASE 17:
+  - Internal tool badges moved slightly downward so they stay fully visible.
+  - Open hub gets balanced left/right inner breathing space.
+  - No permission, counter, navigation, Firebase, subscription, or business logic changes.
+===== /ASSAL PHASE 18 ===== -->
