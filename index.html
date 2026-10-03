@@ -42448,6 +42448,17 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     }, 'تم تحويل التيست إلى اشتراك سنوي');
   };
 
+  function compatSubscriptionBlobToDataUrl(blob){
+    return new Promise((resolve,reject)=>{
+      try{
+        const reader=new FileReader();
+        reader.onload=()=>typeof reader.result==='string'&&reader.result?resolve(reader.result):reject(new Error('CARD_DATA_URL_EMPTY'));
+        reader.onerror=()=>reject(reader.error||new Error('CARD_DATA_URL_READ_FAILED'));
+        reader.readAsDataURL(blob);
+      }catch(err){reject(err);}
+    });
+  }
+
   window.downloadCurrentCompatSubscriptionCard = async function(){
     const code=String(currentCardSubscription?.code||currentCardSubscription?.id||'ASSAL-SUB').trim();
     try{
@@ -42456,7 +42467,20 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
         setSubscriptionCardLoading(); revokeSubscriptionCardImage();
         const blob=await makeSubscriptionCardBlob(currentCardSubscription); subscriptionCardImageState.blob=blob; subscriptionCardImageState.url=URL.createObjectURL(blob); subscriptionCardImageState.row=currentCardSubscription; showSubscriptionCardImage();
       }
-      const a=document.createElement('a'); a.href=subscriptionCardImageState.url; a.download='ASSAL_SUB_CARD_'+code.replace(/[^A-Za-z0-9_-]+/g,'_')+'.png'; document.body.appendChild(a); a.click(); setTimeout(()=>{try{a.remove();}catch(_){}},0);
+
+      const fileName='ASSAL_SUB_CARD_'+code.replace(/[^A-Za-z0-9_-]+/g,'_')+'.png';
+
+      if(window.Android&&typeof window.Android.saveSubscriptionCardPng==='function'){
+        const dataUrl=await compatSubscriptionBlobToDataUrl(subscriptionCardImageState.blob);
+        const saved=window.Android.saveSubscriptionCardPng(dataUrl,fileName);
+        if(saved===true||saved==='true'){
+          showToast('تم حفظ بطاقة الاشتراك في الصور','success',fileName);
+          return true;
+        }
+        throw new Error('NATIVE_CARD_SAVE_FAILED');
+      }
+
+      const a=document.createElement('a'); a.href=subscriptionCardImageState.url; a.download=fileName; document.body.appendChild(a); a.click(); setTimeout(()=>{try{a.remove();}catch(_){}},0);
       showToast('تم تجهيز بطاقة الاشتراك للتحميل','success',a.download); return true;
     }catch(err){console.error('COMPAT_SUB_DOWNLOAD_ERROR',err);showToast('تعذر تحميل البطاقة','error',err?.message||'');return false;}
   };
