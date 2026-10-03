@@ -14575,12 +14575,19 @@ html.low-end-device .assal-community-write-row{
         </div>
 
         <div class="assal-sub-toolbar">
-          <div class="assal-sub-search">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input id="assalSubSearchInput" type="search" placeholder="البحث بالاسم أو الهاتف أو كود الاشتراك" aria-label="البحث في الاشتراكات">
+          <div class="assal-sub-search-tools">
+            <div class="assal-sub-search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input id="assalSubSearchInput" type="search" placeholder="البحث بالاسم أو الهاتف أو كود الاشتراك" aria-label="البحث في الاشتراكات">
+            </div>
+            <button id="assalSubFilterBtn" type="button" class="assal-sub-filter-btn" onclick="openCompatSubscriptionFilters()" title="فلترة الاشتراكات" aria-label="فلترة الاشتراكات">
+              <i class="fa-solid fa-filter"></i>
+              <span id="assalSubFilterBadge" class="assal-sub-filter-badge" hidden>0</span>
+            </button>
           </div>
           <button type="button" class="assal-sub-primary-btn" onclick="openCompatSubscriptionCreateView()"><i class="fa-solid fa-plus"></i><span>اشتراك جديد</span></button>
         </div>
+        <div id="assalSubFilterSummary" class="assal-sub-filter-summary" hidden></div>
 
         <div id="assalSubListHost" class="assal-sub-empty is-loading">
           <div class="assal-sub-empty-art"><i class="fa-solid fa-loader"></i></div>
@@ -14664,6 +14671,54 @@ html.low-end-device .assal-community-write-row{
             <button type="button" class="assal-sub-secondary-btn" onclick="copyCurrentCompatSubscriptionCode()"><i class="fa-solid fa-copy"></i><span>نسخ الرمز</span></button>
             <button type="button" class="assal-sub-primary-btn assal-sub-download-btn" onclick="downloadCurrentCompatSubscriptionCard()"><i class="fa-solid fa-download"></i><span>تحميل البطاقة</span></button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="assalSubFilterSheet" class="assal-sub-filter-sheet" aria-hidden="true" hidden onclick="if(event.target===this) closeCompatSubscriptionFilters()">
+      <div class="assal-sub-filter-panel" role="dialog" aria-modal="true" aria-labelledby="assalSubFilterTitle">
+        <div class="assal-sub-filter-handle" aria-hidden="true"></div>
+        <div class="assal-sub-filter-head">
+          <div class="assal-sub-filter-head-copy">
+            <strong id="assalSubFilterTitle">فلترة الاشتراكات</strong>
+          </div>
+          <button type="button" class="assal-sub-filter-close" onclick="closeCompatSubscriptionFilters()" aria-label="إغلاق الفلترة"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="assal-sub-filter-group">
+          <div class="assal-sub-filter-group-title"><span>الحالة</span><small>اختر حالة واحدة</small></div>
+          <div class="assal-sub-filter-chips" data-filter-group="status">
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="all" onclick="setCompatSubscriptionFilterDraft('status','all')"><span>الكل</span><em data-filter-count="status:all">0</em></button>
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="active" onclick="setCompatSubscriptionFilterDraft('status','active')"><span>فعّال</span><em data-filter-count="status:active">0</em></button>
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="near" onclick="setCompatSubscriptionFilterDraft('status','near')"><span>قريب الانتهاء</span><em data-filter-count="status:near">0</em></button>
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="paused" onclick="setCompatSubscriptionFilterDraft('status','paused')"><span>موقوف</span><em data-filter-count="status:paused">0</em></button>
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="expired" onclick="setCompatSubscriptionFilterDraft('status','expired')"><span>منتهي</span><em data-filter-count="status:expired">0</em></button>
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="pending" onclick="setCompatSubscriptionFilterDraft('status','pending')"><span>غير مفعّل</span><em data-filter-count="status:pending">0</em></button>
+          </div>
+        </div>
+
+        <div class="assal-sub-filter-group">
+          <div class="assal-sub-filter-group-title"><span>نوع الاشتراك</span><small>سنوي أو تيست</small></div>
+          <div class="assal-sub-filter-chips" data-filter-group="plan">
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="all" onclick="setCompatSubscriptionFilterDraft('plan','all')"><span>الكل</span><em data-filter-count="plan:all">0</em></button>
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="annual" onclick="setCompatSubscriptionFilterDraft('plan','annual')"><span>سنوي</span><em data-filter-count="plan:annual">0</em></button>
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="trial" onclick="setCompatSubscriptionFilterDraft('plan','trial')"><span>تيست</span><em data-filter-count="plan:trial">0</em></button>
+          </div>
+        </div>
+
+        <div class="assal-sub-filter-group">
+          <div class="assal-sub-filter-group-title"><span>الترتيب</span><small>طريقة عرض النتائج</small></div>
+          <div class="assal-sub-filter-chips" data-filter-group="sort">
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="newest" onclick="setCompatSubscriptionFilterDraft('sort','newest')"><span>الأحدث</span></button>
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="oldest" onclick="setCompatSubscriptionFilterDraft('sort','oldest')"><span>الأقدم</span></button>
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="expiring" onclick="setCompatSubscriptionFilterDraft('sort','expiring')"><span>الأقرب انتهاءً</span></button>
+            <button type="button" class="assal-sub-filter-chip" data-filter-value="farthest" onclick="setCompatSubscriptionFilterDraft('sort','farthest')"><span>الأبعد انتهاءً</span></button>
+          </div>
+        </div>
+
+        <div class="assal-sub-filter-actions">
+          <button type="button" class="assal-sub-filter-reset" onclick="resetCompatSubscriptionFiltersDraft()"><i class="fa-solid fa-arrow-rotate-left"></i><span>إعادة تعيين</span></button>
+          <button type="button" class="assal-sub-filter-apply" onclick="applyCompatSubscriptionFilters()"><i class="fa-solid fa-check"></i><span>تطبيق الفلترة</span></button>
         </div>
       </div>
     </div>
@@ -41471,6 +41526,9 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
   let subscriptionCardImageState = { blob:null, url:'', row:null };
   let currentCreatePlan = 'annual';
   let subscriptionActionBusy = false;
+  const SUB_FILTER_DEFAULTS = Object.freeze({ status:'all', plan:'all', sort:'newest' });
+  let subscriptionFilters = { ...SUB_FILTER_DEFAULTS };
+  let subscriptionFilterDraft = { ...SUB_FILTER_DEFAULTS };
 
   function getOwnerToolButton(){ return document.getElementById('ownerSmartHeaderBtn'); }
 
@@ -41714,23 +41772,193 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     Object.keys(map).forEach((id) => { const el = document.getElementById(id); if (el) el.textContent = String(map[id]); });
   }
 
+  function isNearExpirySubscription(row){
+    const plan = getSubscriptionPlanMeta(row);
+    if (plan.isTrial) return false;
+    const status = computeStatusInfo(row);
+    if (status.key !== 'active') return false;
+    const end = Number(row?.expiresAtMs || 0);
+    if (!end) return false;
+    const remaining = end - Date.now();
+    return remaining > 0 && remaining <= SUB_RENEW_WINDOW_MS;
+  }
+
+  function getSubscriptionFilterCounts(){
+    const counts = {
+      status:{ all:subscriptionsRows.length, active:0, near:0, paused:0, expired:0, pending:0 },
+      plan:{ all:subscriptionsRows.length, annual:0, trial:0 }
+    };
+    subscriptionsRows.forEach((row) => {
+      const status = computeStatusInfo(row).key;
+      if (Object.prototype.hasOwnProperty.call(counts.status, status)) counts.status[status] += 1;
+      if (isNearExpirySubscription(row)) counts.status.near += 1;
+      const plan = getSubscriptionPlanMeta(row);
+      counts.plan[plan.isTrial ? 'trial' : 'annual'] += 1;
+    });
+    return counts;
+  }
+
+  function setFilterCountText(key, value){
+    const el = document.querySelector(`[data-filter-count="${key}"]`);
+    if (el) el.textContent = String(value);
+  }
+
+  function syncSubscriptionFilterCounts(){
+    const counts = getSubscriptionFilterCounts();
+    Object.keys(counts.status).forEach((key) => setFilterCountText(`status:${key}`, counts.status[key]));
+    Object.keys(counts.plan).forEach((key) => setFilterCountText(`plan:${key}`, counts.plan[key]));
+  }
+
+  function syncSubscriptionFilterSheetUi(){
+    ['status','plan','sort'].forEach((group) => {
+      const value = String(subscriptionFilterDraft[group] || SUB_FILTER_DEFAULTS[group]);
+      document.querySelectorAll(`#assalSubFilterSheet [data-filter-group="${group}"] .assal-sub-filter-chip`).forEach((btn) => {
+        const selected = String(btn.dataset.filterValue || '') === value;
+        btn.classList.toggle('is-selected', selected);
+        btn.setAttribute('aria-pressed', String(selected));
+      });
+    });
+    syncSubscriptionFilterCounts();
+  }
+
+  function hasActiveSubscriptionFilters(){
+    return subscriptionFilters.status !== 'all' || subscriptionFilters.plan !== 'all' || subscriptionFilters.sort !== 'newest';
+  }
+
+  function updateSubscriptionFilterSummary(){
+    const badge = document.getElementById('assalSubFilterBadge');
+    const btn = document.getElementById('assalSubFilterBtn');
+    const summary = document.getElementById('assalSubFilterSummary');
+    const parts = [];
+    const statusLabels = { active:'فعّال', near:'قريب الانتهاء', paused:'موقوف', expired:'منتهي', pending:'غير مفعّل' };
+    const planLabels = { annual:'سنوي', trial:'تيست' };
+    const sortLabels = { oldest:'الأقدم', expiring:'الأقرب انتهاءً', farthest:'الأبعد انتهاءً' };
+    let activeCount = 0;
+    if (subscriptionFilters.status !== 'all') { activeCount += 1; parts.push(statusLabels[subscriptionFilters.status] || subscriptionFilters.status); }
+    if (subscriptionFilters.plan !== 'all') { activeCount += 1; parts.push(planLabels[subscriptionFilters.plan] || subscriptionFilters.plan); }
+    if (subscriptionFilters.sort !== 'newest') { activeCount += 1; parts.push(sortLabels[subscriptionFilters.sort] || subscriptionFilters.sort); }
+    if (badge) { badge.hidden = activeCount === 0; badge.textContent = String(activeCount); }
+    if (btn) btn.classList.toggle('is-active', activeCount > 0);
+    if (summary) {
+      summary.hidden = activeCount === 0;
+      summary.innerHTML = activeCount ? `<i class="fa-solid fa-filter-circle-xmark"></i><span>${parts.map(escapeHtml).join(' <b>•</b> ')}</span><button type="button" onclick="clearCompatSubscriptionFilters()" aria-label="مسح الفلترة"><i class="fa-solid fa-xmark"></i></button>` : '';
+    }
+  }
+
+  function sortSubscriptionRows(rows){
+    const mode = subscriptionFilters.sort;
+    return rows.slice().sort((a,b) => {
+      if (mode === 'oldest') return Number(a.createdAtMs || 0) - Number(b.createdAtMs || 0);
+      if (mode === 'expiring' || mode === 'farthest') {
+        const ae = Number(a.expiresAtMs || 0), be = Number(b.expiresAtMs || 0);
+        if (!ae && !be) return Number(b.createdAtMs || 0) - Number(a.createdAtMs || 0);
+        if (!ae) return 1;
+        if (!be) return -1;
+        return mode === 'expiring' ? ae - be : be - ae;
+      }
+      return Number(b.createdAtMs || 0) - Number(a.createdAtMs || 0);
+    });
+  }
+
   function getSearchFilteredRows(){
-    const input = document.getElementById('assalSubSearchInput'); const q = normalizeForSearch(input ? input.value : ''); if (!q) return subscriptionsRows.slice();
-    return subscriptionsRows.filter((row) => { const hay = normalizeForSearch([row.customerName, row.customerPhone, row.customerAddress, row.code, row.note].join(' ')); return q.split(' ').every(part => hay.includes(part)); });
+    const input = document.getElementById('assalSubSearchInput');
+    const q = normalizeForSearch(input ? input.value : '');
+    let rows = subscriptionsRows.slice();
+    if (q) {
+      const parts = q.split(' ').filter(Boolean);
+      rows = rows.filter((row) => {
+        const hay = normalizeForSearch([row.customerName, row.customerPhone, row.customerAddress, row.code, row.note].join(' '));
+        return parts.every(part => hay.includes(part));
+      });
+    }
+    if (subscriptionFilters.status !== 'all') {
+      if (subscriptionFilters.status === 'near') rows = rows.filter(isNearExpirySubscription);
+      else rows = rows.filter((row) => computeStatusInfo(row).key === subscriptionFilters.status);
+    }
+    if (subscriptionFilters.plan !== 'all') {
+      rows = rows.filter((row) => {
+        const plan = getSubscriptionPlanMeta(row);
+        return subscriptionFilters.plan === 'trial' ? plan.isTrial : !plan.isTrial;
+      });
+    }
+    return sortSubscriptionRows(rows);
+  }
+
+  window.openCompatSubscriptionFilters = function(){
+    const sheet = document.getElementById('assalSubFilterSheet');
+    if (!sheet) return false;
+    subscriptionFilterDraft = { ...subscriptionFilters };
+    syncSubscriptionFilterSheetUi();
+    sheet.hidden = false;
+    sheet.setAttribute('aria-hidden','false');
+    requestAnimationFrame(() => sheet.classList.add('is-open'));
+    return true;
+  };
+
+  window.closeCompatSubscriptionFilters = function(){
+    const sheet = document.getElementById('assalSubFilterSheet');
+    if (!sheet || sheet.hidden) return false;
+    sheet.classList.remove('is-open');
+    sheet.setAttribute('aria-hidden','true');
+    setTimeout(() => { if (!sheet.classList.contains('is-open')) sheet.hidden = true; }, 180);
+    return true;
+  };
+
+  window.setCompatSubscriptionFilterDraft = function(group, value){
+    if (!['status','plan','sort'].includes(group)) return false;
+    subscriptionFilterDraft[group] = String(value || SUB_FILTER_DEFAULTS[group]);
+    syncSubscriptionFilterSheetUi();
+    return true;
+  };
+
+  window.resetCompatSubscriptionFiltersDraft = function(){
+    subscriptionFilterDraft = { ...SUB_FILTER_DEFAULTS };
+    syncSubscriptionFilterSheetUi();
+    return true;
+  };
+
+  window.applyCompatSubscriptionFilters = function(){
+    subscriptionFilters = { ...subscriptionFilterDraft };
+    updateSubscriptionFilterSummary();
+    renderSubscriptionsList();
+    window.closeCompatSubscriptionFilters();
+    const body = document.querySelector('#assalOwnerSubscriptionManager .assal-sub-manager-body');
+    if (body) body.scrollTop = 0;
+    return true;
+  };
+
+  window.clearCompatSubscriptionFilters = function(){
+    subscriptionFilters = { ...SUB_FILTER_DEFAULTS };
+    subscriptionFilterDraft = { ...SUB_FILTER_DEFAULTS };
+    updateSubscriptionFilterSummary();
+    renderSubscriptionsList();
+    return true;
+  };
+
+  function resetSubscriptionFiltersForOpen(){
+    subscriptionFilters = { ...SUB_FILTER_DEFAULTS };
+    subscriptionFilterDraft = { ...SUB_FILTER_DEFAULTS };
+    updateSubscriptionFilterSummary();
+    const sheet = document.getElementById('assalSubFilterSheet');
+    if (sheet) { sheet.classList.remove('is-open'); sheet.hidden = true; sheet.setAttribute('aria-hidden','true'); }
   }
 
   function renderListHost(contentHtml, cls=''){ const host = document.getElementById('assalSubListHost'); if (!host) return; host.className = cls ? cls : ''; host.innerHTML = contentHtml; }
 
   function renderSubscriptionsList(){
-    filteredRows = getSearchFilteredRows(); updateStats(subscriptionsRows);
+    filteredRows = getSearchFilteredRows(); updateStats(subscriptionsRows); updateSubscriptionFilterSummary();
     if (!filteredRows.length) {
       const searching = normalizeForSearch(document.getElementById('assalSubSearchInput')?.value || '') !== '';
+      const filtering = hasActiveSubscriptionFilters();
+      const title = searching ? 'لا توجد نتائج مطابقة' : (filtering ? 'لا توجد اشتراكات ضمن هذه الفلترة' : 'لا توجد اشتراكات بعد');
+      const textMsg = searching ? 'جرّب البحث بالاسم أو الهاتف أو رمز الاشتراك.' : (filtering ? 'غيّر اختيارات الفلترة أو امسحها حتى تظهر بقية الاشتراكات.' : 'ابدأ بإنشاء أول اشتراك، وبعد الحفظ ستظهر البطاقة الأنيقة الجاهزة للتحميل والإرسال للزبون.');
+      const hint = searching ? 'عدّل كلمات البحث' : (filtering ? 'عدّل الفلترة' : 'أنشئ اشتراكاً جديداً للبدء');
       renderListHost(`
         <div class="assal-sub-empty">
-          <div class="assal-sub-empty-art"><i class="fa-solid fa-id-card-clip"></i></div>
-          <div class="assal-sub-empty-title">${searching ? 'لا توجد نتائج مطابقة' : 'لا توجد اشتراكات بعد'}</div>
-          <div class="assal-sub-empty-text">${searching ? 'جرّب البحث بالاسم أو الهاتف أو رمز الاشتراك.' : 'ابدأ بإنشاء أول اشتراك، وبعد الحفظ ستظهر البطاقة الأنيقة الجاهزة للتحميل والإرسال للزبون.'}</div>
-          <div class="assal-sub-phase-chip"><i class="fa-solid fa-sparkles"></i><span>${searching ? 'عدّل كلمات البحث' : 'أنشئ اشتراكاً جديداً للبدء'}</span></div>
+          <div class="assal-sub-empty-art"><i class="fa-solid ${filtering ? 'fa-filter-circle-xmark' : 'fa-id-card-clip'}"></i></div>
+          <div class="assal-sub-empty-title">${title}</div>
+          <div class="assal-sub-empty-text">${textMsg}</div>
+          <div class="assal-sub-phase-chip"><i class="fa-solid fa-sparkles"></i><span>${hint}</span></div>
         </div>
       `, '');
       return;
@@ -41989,12 +42217,13 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     const modal = document.getElementById('assalOwnerSubscriptionManager'); if (!modal) return false;
     const ownerLabel = document.getElementById('assalSubOwnerLabel');
     try { const label = typeof window.getAdminAccountLabel === 'function' ? String(window.getAdminAccountLabel() || '').trim() : ''; if (ownerLabel) ownerLabel.textContent = label || 'مالك النظام'; } catch (_) {}
+    resetSubscriptionFiltersForOpen();
     setManagerView('list'); modal.classList.add('is-open'); modal.setAttribute('aria-hidden','false');
     try { if (typeof window.syncGlobalModalLock === 'function') window.syncGlobalModalLock(); } catch (_) {}
     loadSubscriptions(true); return true;
   };
 
-  window.closeCompatSubscriptionManagerModal = function(){ const modal = document.getElementById('assalOwnerSubscriptionManager'); if (!modal) return; modal.classList.remove('is-open'); modal.setAttribute('aria-hidden','true'); setManagerView('list'); try { if (typeof window.syncGlobalModalLock === 'function') setTimeout(window.syncGlobalModalLock,0); } catch (_) {} };
+  window.closeCompatSubscriptionManagerModal = function(){ const modal = document.getElementById('assalOwnerSubscriptionManager'); if (!modal) return; try { window.closeCompatSubscriptionFilters(); } catch (_) {} modal.classList.remove('is-open'); modal.setAttribute('aria-hidden','true'); setManagerView('list'); try { if (typeof window.syncGlobalModalLock === 'function') setTimeout(window.syncGlobalModalLock,0); } catch (_) {} };
 
   window.copyCompatSubscriptionCode = async function(code){ const clean = String(code || '').trim(); if (!clean) return false; try { if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(clean); else { const t = document.createElement('textarea'); t.value = clean; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); } showToast('تم نسخ رمز الاشتراك', 'success', clean); return true; } catch (_) { showToast('تعذر نسخ الرمز', 'error'); return false; } };
   window.copyCurrentCompatSubscriptionCode = function(){ return window.copyCompatSubscriptionCode(currentCardSubscription?.code || currentCardSubscription?.id || ''); };
@@ -42239,7 +42468,7 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
     bindSearch(); resetCreateForm(); applyLiveInputGuards(); window.updateOwnerHeaderTool();
   }
 
-  document.addEventListener('keydown', function(ev){ if (ev.key !== 'Escape') return; const modal = document.getElementById('assalOwnerSubscriptionManager'); if (modal && modal.classList.contains('is-open')) { ev.preventDefault(); window.closeCompatSubscriptionManagerModal(); } });
+  document.addEventListener('keydown', function(ev){ if (ev.key !== 'Escape') return; const sheet = document.getElementById('assalSubFilterSheet'); if (sheet && !sheet.hidden && sheet.classList.contains('is-open')) { ev.preventDefault(); window.closeCompatSubscriptionFilters(); return; } const modal = document.getElementById('assalOwnerSubscriptionManager'); if (modal && modal.classList.contains('is-open')) { ev.preventDefault(); window.closeCompatSubscriptionManagerModal(); } });
   document.addEventListener('visibilitychange', function(){ if (!document.hidden) window.updateOwnerHeaderTool(); });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initManagerInteractions, {once:true}); else initManagerInteractions();
@@ -42732,3 +42961,965 @@ html.low-end-device .assal-private-clean-dialog *{animation:none !important;tran
 </style>
 <!-- ===== END ASSAL OWNER SUBSCRIPTIONS PHASE 12 ===== -->
 
+<!-- ===== ASSAL OWNER SUBSCRIPTIONS PHASE 13: MOBILE FILTER SHEET FINAL ===== -->
+<style id="assal-owner-subscriptions-phase13-mobile-filter-sheet-final">
+/* Compact search + one filter control; no permanent button clutter on phones. */
+#assalOwnerSubscriptionManager .assal-sub-search-tools{
+  min-width:0;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 42px;
+  gap:8px;
+  align-items:center;
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-btn{
+  position:relative;
+  width:42px;
+  height:42px;
+  border:1px solid rgba(125,211,252,.14);
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+  color:#bae6fd;
+  background:linear-gradient(145deg,rgba(15,23,42,.86),rgba(8,47,73,.62));
+  box-shadow:0 8px 18px rgba(0,0,0,.16);
+  cursor:pointer;
+  transition:transform .16s ease,filter .16s ease,border-color .16s ease,background .16s ease;
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+#assalOwnerSubscriptionManager .assal-sub-filter-btn:active{transform:scale(.97)}
+#assalOwnerSubscriptionManager .assal-sub-filter-btn.is-active{
+  color:#ecfeff;
+  border-color:rgba(34,211,238,.34);
+  background:linear-gradient(145deg,rgba(8,145,178,.36),rgba(37,99,235,.26));
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-badge{
+  position:absolute;
+  top:-5px;
+  left:-5px;
+  min-width:18px;
+  height:18px;
+  padding:0 5px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#0ea5e9;
+  color:#fff;
+  border:2px solid #0f172a;
+  font-size:8px;
+  font-weight:950;
+  box-shadow:0 6px 14px rgba(2,132,199,.26);
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-badge[hidden]{display:none!important}
+
+#assalOwnerSubscriptionManager .assal-sub-filter-summary{
+  margin:-4px 2px 10px;
+  min-height:30px;
+  padding:6px 8px 6px 10px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:#dbeafe;
+  background:linear-gradient(135deg,rgba(14,116,144,.13),rgba(30,64,175,.10));
+  border:1px solid rgba(125,211,252,.11);
+  font-size:9.5px;
+  font-weight:850;
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-summary[hidden]{display:none!important}
+#assalOwnerSubscriptionManager .assal-sub-filter-summary>i{color:#67e8f9;font-size:10px}
+#assalOwnerSubscriptionManager .assal-sub-filter-summary>span{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#assalOwnerSubscriptionManager .assal-sub-filter-summary b{color:rgba(148,163,184,.62);padding:0 2px}
+#assalOwnerSubscriptionManager .assal-sub-filter-summary button{
+  width:24px;height:24px;border:0;border-radius:8px;display:grid;place-items:center;flex:0 0 auto;
+  color:#cbd5e1;background:rgba(15,23,42,.54);cursor:pointer;font-size:9px;
+}
+
+/* Bottom sheet lives inside the owner manager, keeping the app page untouched. */
+#assalOwnerSubscriptionManager .assal-sub-filter-sheet{
+  position:absolute;
+  inset:0;
+  z-index:40;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+  background:rgba(2,8,23,.48);
+  -webkit-backdrop-filter:blur(6px);
+  backdrop-filter:blur(6px);
+  opacity:0;
+  transition:opacity .18s ease;
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-sheet[hidden]{display:none!important}
+#assalOwnerSubscriptionManager .assal-sub-filter-sheet.is-open{opacity:1}
+#assalOwnerSubscriptionManager .assal-sub-filter-panel{
+  width:min(610px,calc(100% - 4px));
+  max-height:min(620px,calc(100% - 28px));
+  overflow:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding:9px 12px calc(12px + env(safe-area-inset-bottom,0px));
+  border-radius:22px;
+  color:#f8fafc;
+  background:
+    radial-gradient(circle at 92% -8%,rgba(34,211,238,.11),transparent 34%),
+    linear-gradient(160deg,rgba(15,23,42,.995),rgba(7,17,31,.995));
+  border:1px solid rgba(148,163,184,.15);
+  box-shadow:0 24px 70px rgba(0,0,0,.48),0 0 0 1px rgba(255,255,255,.025) inset;
+  transform:translateY(18px) scale(.985);
+  transition:transform .2s cubic-bezier(.2,.8,.2,1);
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-sheet.is-open .assal-sub-filter-panel{transform:translateY(0) scale(1)}
+#assalOwnerSubscriptionManager .assal-sub-filter-handle{
+  width:38px;height:4px;border-radius:999px;margin:1px auto 8px;background:rgba(148,163,184,.34);
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+#assalOwnerSubscriptionManager .assal-sub-filter-head-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+#assalOwnerSubscriptionManager .assal-sub-filter-head-copy{flex:1;align-items:flex-start;justify-content:center}
+#assalOwnerSubscriptionManager .assal-sub-filter-kicker{font-size:8.5px;font-weight:900;color:#67e8f9;display:flex;align-items:center;gap:5px}
+#assalOwnerSubscriptionManager .assal-sub-filter-head-copy strong{font-size:15px;line-height:1.25;font-weight:950}
+#assalOwnerSubscriptionManager .assal-sub-filter-close{
+  width:32px;height:32px;border:1px solid rgba(248,113,113,.14);border-radius:11px;display:grid;place-items:center;
+  color:#fecaca;background:rgba(127,29,29,.46);cursor:pointer;flex:0 0 auto;
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-group{padding:9px 0;border-top:1px solid rgba(148,163,184,.08)}
+#assalOwnerSubscriptionManager .assal-sub-filter-group-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+#assalOwnerSubscriptionManager .assal-sub-filter-group-title span{font-size:10.5px;font-weight:950;color:#e2e8f0}
+#assalOwnerSubscriptionManager .assal-sub-filter-group-title small{font-size:8px;font-weight:800;color:rgba(148,163,184,.62)}
+#assalOwnerSubscriptionManager .assal-sub-filter-chips{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:1px 1px 4px;
+  scroll-snap-type:x proximity;
+  scrollbar-width:none;
+  touch-action:pan-x;
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-chips::-webkit-scrollbar{display:none}
+#assalOwnerSubscriptionManager .assal-sub-filter-chip{
+  flex:0 0 auto;
+  min-height:34px;
+  padding:0 10px;
+  border-radius:11px;
+  border:1px solid rgba(148,163,184,.11);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  scroll-snap-align:start;
+  color:#cbd5e1;
+  background:rgba(15,23,42,.60);
+  font-family:inherit;
+  font-size:9.5px;
+  font-weight:900;
+  white-space:nowrap;
+  cursor:pointer;
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-chip em{
+  min-width:18px;height:18px;padding:0 5px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;
+  font-style:normal;font-size:7.5px;font-weight:950;color:#94a3b8;background:rgba(255,255,255,.045);
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-chip.is-selected{
+  color:#ecfeff;
+  border-color:rgba(34,211,238,.29);
+  background:linear-gradient(135deg,rgba(8,145,178,.30),rgba(37,99,235,.22));
+  box-shadow:0 7px 16px rgba(8,145,178,.10);
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-chip.is-selected em{color:#cffafe;background:rgba(34,211,238,.13)}
+#assalOwnerSubscriptionManager .assal-sub-filter-actions{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr);gap:8px;padding-top:9px;border-top:1px solid rgba(148,163,184,.08)}
+#assalOwnerSubscriptionManager .assal-sub-filter-actions button{
+  min-height:40px;border-radius:12px;border:1px solid rgba(148,163,184,.11);display:flex;align-items:center;justify-content:center;gap:7px;
+  font-family:inherit;font-size:10px;font-weight:950;cursor:pointer;
+}
+#assalOwnerSubscriptionManager .assal-sub-filter-reset{color:#cbd5e1;background:rgba(30,41,59,.66)}
+#assalOwnerSubscriptionManager .assal-sub-filter-apply{color:#ecfeff;background:linear-gradient(135deg,#0f8b88,#1674a6 56%,#4055c7);box-shadow:0 10px 22px rgba(8,145,178,.15)}
+
+@media (max-width:700px){
+  #assalOwnerSubscriptionManager .assal-sub-toolbar{grid-template-columns:1fr!important;gap:7px!important}
+  #assalOwnerSubscriptionManager .assal-sub-search-tools{grid-template-columns:minmax(0,1fr) 40px;gap:7px}
+  #assalOwnerSubscriptionManager .assal-sub-filter-btn{width:40px;height:40px;border-radius:12px}
+  #assalOwnerSubscriptionManager .assal-sub-filter-sheet{
+    padding:12px;
+    align-items:center;
+    justify-content:center;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-filter-panel{
+    width:min(94vw,560px);
+    max-height:min(82dvh,590px);
+    padding:8px 10px calc(10px + env(safe-area-inset-bottom,0px));
+    border-radius:20px;
+    margin:auto;
+  }
+  #assalOwnerSubscriptionManager .assal-sub-filter-group{padding:8px 0}
+  #assalOwnerSubscriptionManager .assal-sub-filter-chip{min-height:33px;padding:0 9px;font-size:9px}
+  #assalOwnerSubscriptionManager .assal-sub-filter-actions button{min-height:39px}
+}
+</style>
+<!-- ===== /ASSAL OWNER SUBSCRIPTIONS PHASE 13 ===== -->
+
+
+
+
+<!-- ===== ASSAL PHASE 16: HEADER TOOLS – ORIGINAL BUTTONS + SEPARATOR ===== -->
+<style id="assal-header-tools-hub-phase16-style">
+/*
+  PHASE 16 – Header Tools visual refinement
+  - نفس حركة PHASE 15 بدون تغيير الوظائف أو الصلاحيات.
+  - زر الأدوات يبقى بحجم زر الهيدر الأصلي.
+  - الأزرار داخل الشريط تحتفظ بشكلها/خلفيتها/حجمها الأصلي بدل توحيدها بلون باهت.
+  - فاصل عمودي واحد فقط بين زر الأدوات وبقية الأزرار.
+  - خلفية الشريط أوضح وأعمق، مع مسافات لمس مريحة ومن دون مؤثرات ثقيلة.
+*/
+.header-buttons{
+  overflow:visible !important;
+}
+
+/* مراسي التناوب القديمة تبقى للمنطق الداخلي فقط. */
+.header-buttons > .refresh-btn.assal-legacy-header-cycle-anchor,
+.header-buttons > #ownerSmartHeaderBtn.assal-legacy-owner-tool-anchor{
+  display:none !important;
+}
+
+.header-buttons > .assal-static-header-btn,
+.assal-header-tools-hub,
+.assal-header-tools-hub .assal-tools-launcher,
+.assal-header-tools-hub .assal-tools-item{
+  width:30px;
+  min-width:30px;
+  height:30px;
+  min-height:30px;
+}
+
+/* الأزرار المستقلة تبقى بنفس قياس الهيدر. */
+.header-buttons > .assal-static-header-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;
+  color:#fff;
+  cursor:pointer;
+  box-shadow:0 2px 4px rgba(0,0,0,.2);
+  -webkit-tap-highlight-color:transparent;
+  transition:width .22s cubic-bezier(.22,.8,.22,1),min-width .22s cubic-bezier(.22,.8,.22,1),opacity .16s ease,transform .22s cubic-bezier(.22,.8,.22,1),background-color .18s ease;
+  overflow:hidden;
+  flex:0 0 auto;
+}
+.header-buttons > .assal-static-header-btn i{font-size:13px;line-height:1;filter:drop-shadow(0 1px 2px rgba(0,0,0,.28));}
+.header-buttons > .assal-static-header-btn:active{transform:scale(.95);}
+.header-buttons > .assal-static-refresh-btn{background:linear-gradient(135deg,#6B7280,#4B5563);}
+.header-buttons > .assal-static-logout-btn{
+  background:linear-gradient(135deg,#8d1728,#67101d);
+  border-color:rgba(251,113,133,.13);
+}
+.header-buttons > .assal-static-subscriptions-btn{
+  background:linear-gradient(135deg,#0f7894,#2859a6);
+  border-color:rgba(103,232,249,.14);
+}
+
+/* الحاوية: وهي مغلقة شفافة تماماً، لذلك ما يظهر غير زر الأدوات نفسه. */
+.assal-header-tools-hub{
+  --assal-tools-open-width:30px;
+  position:relative;
+  display:flex;
+  flex-direction:row;
+  direction:ltr;
+  align-items:center;
+  justify-content:flex-start;
+  flex:0 0 auto;
+  width:30px;
+  min-width:30px;
+  max-width:calc(100vw - 48px);
+  height:30px;
+  min-height:30px;
+  border-radius:9px;
+  background:transparent;
+  border:1px solid transparent;
+  box-shadow:none;
+  overflow:hidden;
+  isolation:isolate;
+  box-sizing:border-box;
+  transition:width .25s cubic-bezier(.22,.82,.22,1),min-width .25s cubic-bezier(.22,.82,.22,1),height .2s ease,border-radius .2s ease,background-color .18s ease,border-color .18s ease,box-shadow .2s ease;
+  will-change:width;
+}
+.assal-header-tools-hub.is-open{
+  width:var(--assal-tools-open-width);
+  min-width:var(--assal-tools-open-width);
+  height:36px;
+  min-height:36px;
+  border-radius:11px;
+  background:linear-gradient(135deg,rgba(12,22,39,.99),rgba(22,35,59,.99));
+  border-color:rgba(125,211,252,.20);
+  box-shadow:0 8px 22px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+/* زر الأدوات نفسه = زر هيدر طبيعي، وليس جزءاً باهتاً من الخلفية. */
+.assal-header-tools-hub .assal-tools-launcher{
+  position:relative;
+  z-index:3;
+  flex:0 0 30px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  margin:0;
+  border:0;
+  border-radius:8px;
+  color:#fff;
+  background:linear-gradient(135deg,#5A6388,#4A5275);
+  box-shadow:0 2px 4px rgba(0,0,0,.2);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .2s cubic-bezier(.22,.8,.22,1),background-color .18s ease,box-shadow .18s ease;
+  overflow:hidden;
+  clip-path:inset(0 0 0 0 round 8px);
+}
+.assal-header-tools-hub .assal-tools-launcher i{
+  font-size:13px;
+  line-height:1;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.28));
+  transition:transform .25s cubic-bezier(.22,.8,.22,1);
+}
+.assal-header-tools-hub.is-open .assal-tools-launcher{
+  background:linear-gradient(135deg,#667197,#4d587c);
+  box-shadow:0 3px 8px rgba(0,0,0,.28);
+}
+.assal-header-tools-hub.is-open .assal-tools-launcher i{transform:rotate(-90deg);}
+.assal-header-tools-hub .assal-tools-launcher:active{transform:scale(.95);}
+
+/* السكة الداخلية: مسافة مريحة + خط عمودي واحد فقط بعد زر الأدوات. */
+.assal-header-tools-hub .assal-tools-rail{
+  position:relative;
+  display:flex;
+  direction:ltr;
+  flex-direction:row;
+  align-items:center;
+  gap:6px;
+  height:30px;
+  width:0;
+  min-width:0;
+  padding:0;
+  box-sizing:border-box;
+  opacity:0;
+  transform:translateX(-7px);
+  pointer-events:none;
+  overflow:hidden;
+  transition:width .23s cubic-bezier(.22,.82,.22,1),opacity .14s ease,transform .23s cubic-bezier(.22,.82,.22,1),padding .23s cubic-bezier(.22,.82,.22,1);
+}
+.assal-header-tools-hub .assal-tools-rail::before{
+  content:"";
+  position:absolute;
+  left:6px;
+  top:5px;
+  bottom:5px;
+  width:1px;
+  border-radius:999px;
+  background:linear-gradient(to bottom,transparent,rgba(186,230,253,.72),transparent);
+  opacity:0;
+  transform:scaleY(.55);
+  transition:opacity .16s ease,transform .2s ease;
+  pointer-events:none;
+}
+.assal-header-tools-hub.is-open .assal-tools-rail{
+  width:calc(var(--assal-tools-open-width) - 30px);
+  padding:0 4px 0 14px;
+  opacity:1;
+  transform:translateX(0);
+  pointer-events:auto;
+  overflow:visible;
+}
+.assal-header-tools-hub.is-open .assal-tools-rail::before{
+  opacity:1;
+  transform:scaleY(1);
+}
+
+/*
+  مهم: لا نفرض background/border/color جديد على أدوات السكة.
+  كل زر يحتفظ بكلاسات الهيدر الأصلية، لذلك يرجع شكله وحجمه الأصليان.
+*/
+.assal-header-tools-hub .assal-tools-item{
+  flex:0 0 30px !important;
+  width:30px !important;
+  min-width:30px !important;
+  height:30px !important;
+  min-height:30px !important;
+  margin:0 !important;
+  padding:0 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  border-radius:8px !important;
+  opacity:0;
+  transform:translateX(-5px) scale(.94);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:opacity .15s ease,transform .2s cubic-bezier(.22,.8,.22,1),filter .16s ease !important;
+  overflow:visible !important;
+  clip-path:none !important;
+  box-shadow:0 2px 4px rgba(0,0,0,.2) !important;
+}
+.assal-header-tools-hub.is-open .assal-tools-item{opacity:1;transform:translateX(0) scale(1);}
+.assal-header-tools-hub.is-open .assal-tools-item:nth-child(2){transition-delay:.025s !important;}
+.assal-header-tools-hub.is-open .assal-tools-item:nth-child(3){transition-delay:.05s !important;}
+.assal-header-tools-hub.is-open .assal-tools-item:nth-child(4){transition-delay:.075s !important;}
+.assal-header-tools-hub.is-open .assal-tools-item:nth-child(5){transition-delay:.10s !important;}
+.assal-header-tools-hub .assal-tools-item i{
+  font-size:13px !important;
+  line-height:1 !important;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.28));
+}
+.assal-header-tools-hub .assal-tools-item:active{transform:scale(.95) !important;}
+.assal-header-tools-hub .assal-tools-item:hover{filter:brightness(1.08);}
+.assal-header-tools-hub .assal-tools-item .header-cart-badge{
+  top:-6px !important;
+  right:-8px !important;
+  min-width:17px !important;
+  height:17px !important;
+  padding:0 5px !important;
+  font-size:10px !important;
+}
+
+/* لا نلوّن الأيقونات نفسها؛ اللون الأصلي الأبيض يرجع مثل ما كان قبل الدمج. */
+.assal-header-tools-hub .assal-tools-customers,
+.assal-header-tools-hub .assal-tools-performance,
+.assal-header-tools-hub .assal-tools-stats,
+.assal-header-tools-hub .assal-tools-invoices,
+.assal-header-tools-hub .assal-tools-community{color:#fff !important;}
+
+/* فتح الأدوات: الأزرار الخارجية تختفي، والـHub ينساب إلى موضع زر الخروج. */
+.header-buttons.assal-tools-mode{gap:0 !important;}
+.header-buttons.assal-tools-mode > button:not(.assal-tools-preserve){
+  width:0 !important;
+  min-width:0 !important;
+  max-width:0 !important;
+  padding-left:0 !important;
+  padding-right:0 !important;
+  margin:0 !important;
+  border-width:0 !important;
+  opacity:0 !important;
+  transform:scale(.78) !important;
+  pointer-events:none !important;
+  overflow:hidden !important;
+  visibility:hidden;
+  transition:width .22s cubic-bezier(.22,.8,.22,1),min-width .22s cubic-bezier(.22,.8,.22,1),max-width .22s cubic-bezier(.22,.8,.22,1),opacity .12s ease,transform .2s ease !important;
+}
+.header-buttons.assal-tools-mode > .assal-header-tools-hub{
+  visibility:visible !important;
+  opacity:1 !important;
+  pointer-events:auto !important;
+}
+
+@media(max-width:520px){
+  .header-buttons > .assal-static-header-btn,
+  .assal-header-tools-hub,
+  .assal-header-tools-hub .assal-tools-launcher,
+  .assal-header-tools-hub .assal-tools-item{
+    width:30px;
+    min-width:30px;
+    height:30px;
+    min-height:30px;
+  }
+  .header-buttons > .assal-static-header-btn i,
+  .assal-header-tools-hub .assal-tools-launcher i,
+  .assal-header-tools-hub .assal-tools-item i{font-size:12px !important;}
+  .assal-header-tools-hub{max-width:calc(100vw - 44px);}
+  .assal-header-tools-hub .assal-tools-item .header-cart-badge{
+    top:-8px !important;
+    right:-9px !important;
+    min-width:16px !important;
+    height:16px !important;
+    padding:0 4px !important;
+    font-size:9px !important;
+  }
+}
+
+html.low-end-device .assal-header-tools-hub,
+html.low-end-device .assal-header-tools-hub .assal-tools-rail,
+html.low-end-device .assal-header-tools-hub .assal-tools-item,
+html.low-end-device .header-buttons > .assal-static-header-btn{
+  transition-duration:.16s !important;
+  box-shadow:none !important;
+}
+</style>
+
+
+<script id="assal-header-tools-hub-phase16-script">
+(function(){
+  'use strict';
+
+  const HUB_ID = 'assalHeaderToolsHub';
+  const LAUNCHER_ID = 'assalHeaderToolsLauncher';
+  const RAIL_ID = 'assalHeaderToolsRail';
+  const SUB_BTN_ID = 'assalSubscriptionsHeaderBtn';
+  const STATIC_REFRESH_ID = 'assalStaticRefreshBtn';
+  const STATIC_LOGOUT_ID = 'assalStaticLogoutBtn';
+  let initialized = false;
+  let open = false;
+  let permissionProbe = null;
+
+  function byId(id){ return document.getElementById(id); }
+
+  function makeButton(id, className, title, iconClass){
+    const btn = document.createElement('button');
+    btn.id = id;
+    btn.type = 'button';
+    btn.className = className;
+    btn.setAttribute('title', title);
+    btn.setAttribute('aria-label', title);
+    btn.innerHTML = '<i class="' + iconClass + '"></i>';
+    return btn;
+  }
+
+  function isActuallyVisible(el){
+    if (!el || !document.documentElement.contains(el)) return false;
+    const cs = window.getComputedStyle ? getComputedStyle(el) : null;
+    if (!cs) return el.style.display !== 'none';
+    return cs.display !== 'none' && cs.visibility !== 'hidden';
+  }
+
+  function canManageSubscriptions(){
+    try {
+      return typeof window.canManageCompatSubscriptions === 'function'
+        && window.canManageCompatSubscriptions() === true;
+    } catch (_) { return false; }
+  }
+
+  function syncSubscriptionButton(){
+    const btn = byId(SUB_BTN_ID);
+    if (!btn) return;
+    btn.style.display = canManageSubscriptions() ? 'inline-flex' : 'none';
+  }
+
+  function calcHubOpenWidth(){
+    const rail = byId(RAIL_ID);
+    const hub = byId(HUB_ID);
+    if (!rail || !hub) return 30;
+    const items = Array.from(rail.querySelectorAll('.assal-tools-item')).filter(isActuallyVisible);
+    const count = items.length;
+    /* launcher 30 + separator/padding 18 + original-size icons 30 + comfortable gaps 6 */
+    const wanted = 30 + (count ? (18 + count * 30 + Math.max(0, count - 1) * 6) : 0);
+    const viewportCap = Math.max(30, Math.min(232, window.innerWidth - 48));
+    return Math.min(wanted, viewportCap);
+  }
+
+  function refreshHubMetrics(){
+    const hub = byId(HUB_ID);
+    if (!hub) return;
+    hub.style.setProperty('--assal-tools-open-width', calcHubOpenWidth() + 'px');
+  }
+
+  function setToolsOpen(next){
+    const headerButtons = document.querySelector('.header-buttons');
+    const hub = byId(HUB_ID);
+    const launcher = byId(LAUNCHER_ID);
+    if (!headerButtons || !hub || !launcher) return;
+
+    open = !!next;
+    if (open) {
+      syncSubscriptionButton();
+      refreshHubMetrics();
+      headerButtons.classList.add('assal-tools-mode');
+      /* frame واحد حتى يبدأ الانكماش ثم يتمدد الشريط بنعومة */
+      requestAnimationFrame(() => hub.classList.add('is-open'));
+    } else {
+      hub.classList.remove('is-open');
+      /* نخلي انكماش الـHub يسبق رجوع باقي الأزرار بجزء بسيط حتى ما يصير تداخل */
+      setTimeout(() => {
+        if (!open) headerButtons.classList.remove('assal-tools-mode');
+      }, 115);
+    }
+    launcher.setAttribute('aria-expanded', open ? 'true' : 'false');
+    launcher.setAttribute('title', open ? 'إغلاق الأدوات' : 'الأدوات');
+    launcher.setAttribute('aria-label', open ? 'إغلاق الأدوات' : 'فتح الأدوات');
+  }
+
+  function toggleTools(){ setToolsOpen(!open); }
+
+  function openExistingLogout(){
+    /* نستعمل نافذة الخروج الأصلية نفسها، ونترك منطق التنظيف الحالي كما هو. */
+    const overlay = byId('assalLogoutConfirmOverlay');
+    if (overlay) {
+      const approve = overlay.querySelector('#assalLogoutConfirmApprove');
+      overlay.classList.add('show');
+      overlay.setAttribute('aria-hidden','false');
+      if (approve) {
+        approve.disabled = false;
+        approve.innerHTML = '<i class="fa-solid fa-check"></i><span>موافق</span>';
+      }
+      try {
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+      } catch (_) {}
+      return;
+    }
+
+    /* احتياط إذا ضغط المستخدم قبل إنشاء نافذة الخروج الأصلية. */
+    const legacy = document.querySelector('.header-buttons > .refresh-btn.assal-legacy-header-cycle-anchor');
+    if (legacy) {
+      legacy.dataset.headerActionMode = 'logout';
+      legacy.click();
+    }
+  }
+
+  function createStaticButtons(headerButtons, legacyRefresh){
+    if (!byId(STATIC_LOGOUT_ID)) {
+      const logout = makeButton(
+        STATIC_LOGOUT_ID,
+        'header-btn assal-static-header-btn assal-static-logout-btn',
+        'تسجيل الخروج',
+        'fa-solid fa-right-from-bracket'
+      );
+      logout.addEventListener('click', openExistingLogout);
+      headerButtons.insertBefore(logout, legacyRefresh || headerButtons.firstChild);
+    }
+
+    if (!byId(STATIC_REFRESH_ID)) {
+      const refresh = makeButton(
+        STATIC_REFRESH_ID,
+        'header-btn assal-static-header-btn assal-static-refresh-btn',
+        'تحديث البيانات',
+        'fas fa-arrows-rotate'
+      );
+      refresh.addEventListener('click', function(){
+        try { if (typeof window.refreshData === 'function') window.refreshData(); }
+        catch (err) { console.error('ASSAL static refresh:', err); }
+      });
+      const logout = byId(STATIC_LOGOUT_ID);
+      if (logout && logout.nextSibling) headerButtons.insertBefore(refresh, logout.nextSibling);
+      else headerButtons.appendChild(refresh);
+    }
+
+    if (!byId(SUB_BTN_ID)) {
+      const sub = makeButton(
+        SUB_BTN_ID,
+        'header-btn assal-static-header-btn assal-static-subscriptions-btn',
+        'إدارة اشتراكات التوافقات',
+        'fas fa-id-card'
+      );
+      sub.style.display = 'none';
+      sub.addEventListener('click', function(){
+        try {
+          if (typeof window.openCompatSubscriptionManagerModal === 'function') {
+            window.openCompatSubscriptionManagerModal();
+          }
+        } catch (err) { console.error('ASSAL subscriptions header:', err); }
+      });
+      const refresh = byId(STATIC_REFRESH_ID);
+      if (refresh && refresh.nextSibling) headerButtons.insertBefore(sub, refresh.nextSibling);
+      else headerButtons.appendChild(sub);
+    }
+  }
+
+  function moveHeaderToolIntoRail(id, rail, extraClass){
+    const btn = byId(id);
+    if (!btn || !rail) return null;
+    btn.classList.add('assal-tools-item');
+    if (extraClass) btn.classList.add(extraClass);
+    rail.appendChild(btn);
+    return btn;
+  }
+
+  function createToolsHub(headerButtons){
+    let hub = byId(HUB_ID);
+    if (hub) return hub;
+
+    hub = document.createElement('div');
+    hub.id = HUB_ID;
+    hub.className = 'assal-header-tools-hub assal-tools-preserve';
+
+    const launcher = makeButton(
+      LAUNCHER_ID,
+      'assal-tools-launcher',
+      'الأدوات',
+      'fas fa-screwdriver-wrench'
+    );
+    launcher.setAttribute('aria-expanded','false');
+    launcher.addEventListener('click', function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      toggleTools();
+    });
+
+    const rail = document.createElement('div');
+    rail.id = RAIL_ID;
+    rail.className = 'assal-tools-rail';
+
+    hub.appendChild(launcher);
+    hub.appendChild(rail);
+    headerButtons.appendChild(hub);
+
+    /* 1) الزبائن */
+    moveHeaderToolIntoRail('customersAdminHeaderBtn', rail, 'assal-tools-customers');
+
+    /* 2) إعداد الأداء: زر جديد نظيف، بينما زر التناوب القديم يبقى مخفياً كمرساة داخلية. */
+    const perf = makeButton(
+      'assalToolsPerformanceBtn',
+      'header-btn header-icon-btn debug-btn assal-tools-item assal-tools-performance',
+      'إعداد الأداء',
+      'fas fa-stethoscope'
+    );
+    perf.addEventListener('click', function(){
+      try { if (typeof window.openPerfDebugModal === 'function') window.openPerfDebugModal(); }
+      catch (err) { console.error('ASSAL performance tool:', err); }
+    });
+    rail.appendChild(perf);
+
+    /* 3) الإحصائيات */
+    moveHeaderToolIntoRail('statsBtn', rail, 'assal-tools-stats');
+
+    /* 4) متابعة الفواتير - يحتفظ بنفس الصلاحيات والعداد والمنطق الأصلي. */
+    moveHeaderToolIntoRail('invoiceAdminHeaderBtn', rail, 'assal-tools-invoices');
+
+    /* 5) مجتمع عسل */
+    const community = makeButton(
+      'assalToolsCommunityBtn',
+      'header-btn header-icon-btn assal-tools-item assal-tools-community',
+      'مجتمع عسل',
+      'fas fa-comments'
+    );
+    community.addEventListener('click', function(){
+      try {
+        if (typeof window.openAssalCommunitySpaceFromEntry === 'function') window.openAssalCommunitySpaceFromEntry();
+        else if (typeof window.openAssalCommunitySpace === 'function') window.openAssalCommunitySpace();
+      } catch (err) { console.error('ASSAL community tool:', err); }
+    });
+    rail.appendChild(community);
+
+    /* بعد اختيار أداة نعيد الهيدر لوضعه الطبيعي؛ الوظيفة نفسها لا تتغير. */
+    rail.addEventListener('click', function(ev){
+      const btn = ev.target && ev.target.closest ? ev.target.closest('.assal-tools-item') : null;
+      if (!btn) return;
+      setTimeout(() => setToolsOpen(false), 90);
+    });
+
+    return hub;
+  }
+
+  function initialize(){
+    if (initialized) return;
+    const headerButtons = document.querySelector('.header-buttons');
+    if (!headerButtons) return;
+    initialized = true;
+
+    /* نخفي زر refresh القديم فقط بصرياً حتى يظل منطق نافذة الخروج القديم صالحاً كمرجع آمن. */
+    const legacyRefresh = headerButtons.querySelector('.refresh-btn');
+    if (legacyRefresh) {
+      legacyRefresh.classList.add('assal-legacy-header-cycle-anchor');
+      legacyRefresh.setAttribute('aria-hidden','true');
+      legacyRefresh.tabIndex = -1;
+    }
+
+    /* نوقف الزر المتناوب أداء/اشتراكات بصرياً؛ الأداء ينتقل للأدوات والاشتراكات تصبح مستقلة. */
+    const legacyOwnerTool = byId('ownerSmartHeaderBtn');
+    if (legacyOwnerTool) {
+      legacyOwnerTool.classList.add('assal-legacy-owner-tool-anchor');
+      legacyOwnerTool.classList.remove('debug-btn');
+      legacyOwnerTool.setAttribute('aria-hidden','true');
+      legacyOwnerTool.tabIndex = -1;
+    }
+
+    createStaticButtons(headerButtons, legacyRefresh);
+    createToolsHub(headerButtons);
+    syncSubscriptionButton();
+    refreshHubMetrics();
+    try { if (typeof window.updatePerfDebugButtonState === 'function') window.updatePerfDebugButtonState(); } catch (_) {}
+
+    /* ربط تحديث صلاحية المالك بدون تغيير منطق الصلاحيات الأصلي. */
+    try {
+      const prevUpdateOwnerHeaderTool = window.updateOwnerHeaderTool;
+      if (typeof prevUpdateOwnerHeaderTool === 'function' && !prevUpdateOwnerHeaderTool.__assalPhase15Wrapped) {
+        const wrapped = function(){
+          const out = prevUpdateOwnerHeaderTool.apply(this, arguments);
+          setTimeout(syncSubscriptionButton, 0);
+          return out;
+        };
+        wrapped.__assalPhase15Wrapped = true;
+        window.updateOwnerHeaderTool = wrapped;
+      }
+    } catch (_) {}
+
+    /* فحص قصير فقط أثناء الإقلاع لأن staffProfile قد يصل بعد رسم الهيدر. */
+    let tries = 0;
+    clearInterval(permissionProbe);
+    permissionProbe = setInterval(function(){
+      tries += 1;
+      syncSubscriptionButton();
+      if (tries >= 16 || canManageSubscriptions()) {
+        clearInterval(permissionProbe);
+        permissionProbe = null;
+      }
+    }, 500);
+
+    window.addEventListener('resize', function(){ if (open) refreshHubMetrics(); }, { passive:true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize, { once:true });
+  } else {
+    initialize();
+  }
+  window.addEventListener('load', function(){
+    initialize();
+    setTimeout(function(){ syncSubscriptionButton(); refreshHubMetrics(); }, 500);
+  }, { once:true });
+
+  /* أدوات صغيرة للفحص اليدوي بدون الاعتماد عليها في التشغيل الطبيعي. */
+  window.assalHeaderToolsOpen = function(){ setToolsOpen(true); };
+  window.assalHeaderToolsClose = function(){ setToolsOpen(false); };
+})();
+</script>
+<!-- ===== /ASSAL PHASE 16 ===== -->
+
+
+<!-- ===== ASSAL PHASE 17: HEADER TOOLS – TOTAL BADGE ===== -->
+<style id="assal-header-tools-total-badge-phase17-style">
+/*
+  PHASE 17 – عداد موحّد على زر الأدوات
+  - يجمع العدادات الرقمية الظاهرة من الأزرار الموجودة فعلياً داخل درج الأدوات.
+  - نفس ستايل عدادات الهيدر الأصلية عبر header-cart-badge.
+  - لا يظهر إذا كان المجموع صفراً.
+  - لا يغيّر أي عداد أصلي أو صلاحية أو وظيفة داخل الأدوات.
+*/
+.assal-header-tools-hub .assal-tools-launcher{
+  position:relative !important;
+  overflow:visible !important;
+  clip-path:none !important;
+}
+.assal-header-tools-hub .assal-tools-launcher .assal-tools-total-badge{
+  top:-8px !important;
+  right:-8px !important;
+  min-width:16px !important;
+  height:16px !important;
+  padding:0 4px !important;
+  font-size:9px !important;
+  line-height:1 !important;
+  z-index:10020 !important;
+  pointer-events:none !important;
+  transform:none !important;
+}
+.assal-header-tools-hub .assal-tools-launcher .assal-tools-total-badge.is-hidden{
+  display:none !important;
+}
+</style>
+
+<script id="assal-header-tools-total-badge-phase17-script">
+(function(){
+  'use strict';
+
+  const HUB_ID = 'assalHeaderToolsHub';
+  const LAUNCHER_ID = 'assalHeaderToolsLauncher';
+  const RAIL_ID = 'assalHeaderToolsRail';
+  const BADGE_ID = 'assalHeaderToolsTotalBadge';
+  let observer = null;
+  let scheduled = false;
+
+  function byId(id){ return document.getElementById(id); }
+
+  function isToolVisible(btn){
+    if (!btn || !document.documentElement.contains(btn)) return false;
+    try {
+      const cs = getComputedStyle(btn);
+      return cs.display !== 'none' && cs.visibility !== 'hidden';
+    } catch (_) {
+      return btn.style.display !== 'none';
+    }
+  }
+
+  function readBadgeNumber(badge){
+    if (!badge) return 0;
+    const raw = String(badge.textContent || '').trim();
+    if (!raw) return 0;
+    const western = raw
+      .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+      .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+    const match = western.match(/\d+/);
+    if (!match) return 0;
+    const n = Number(match[0]);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }
+
+  function ensureTotalBadge(){
+    const launcher = byId(LAUNCHER_ID);
+    if (!launcher) return null;
+    let badge = byId(BADGE_ID);
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = BADGE_ID;
+      badge.className = 'header-cart-badge assal-tools-total-badge is-hidden';
+      badge.textContent = '0';
+      badge.setAttribute('aria-hidden','true');
+      launcher.appendChild(badge);
+    }
+    return badge;
+  }
+
+  function calculateTotal(){
+    const rail = byId(RAIL_ID);
+    if (!rail) return 0;
+    let total = 0;
+    const tools = Array.from(rail.querySelectorAll('.assal-tools-item'));
+    tools.forEach(btn => {
+      if (!isToolVisible(btn)) return;
+      const badges = Array.from(btn.querySelectorAll('.header-cart-badge'));
+      badges.forEach(badge => { total += readBadgeNumber(badge); });
+    });
+    return total;
+  }
+
+  function syncTotalBadge(){
+    scheduled = false;
+    const badge = ensureTotalBadge();
+    if (!badge) return;
+    const total = calculateTotal();
+    badge.textContent = String(total);
+    badge.classList.toggle('is-hidden', total <= 0);
+  }
+
+  function scheduleSync(){
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(syncTotalBadge);
+  }
+
+  function attachObserver(){
+    const rail = byId(RAIL_ID);
+    if (!rail) return false;
+    if (observer) observer.disconnect();
+    observer = new MutationObserver(scheduleSync);
+    observer.observe(rail, {
+      subtree:true,
+      childList:true,
+      characterData:true,
+      attributes:true,
+      attributeFilter:['style','class','hidden','aria-hidden']
+    });
+    scheduleSync();
+    return true;
+  }
+
+  function initialize(){
+    if (attachObserver()) return;
+    let tries = 0;
+    const timer = setInterval(function(){
+      tries += 1;
+      if (attachObserver() || tries >= 30) clearInterval(timer);
+    }, 250);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize, { once:true });
+  } else {
+    initialize();
+  }
+
+  window.addEventListener('load', function(){
+    setTimeout(function(){ attachObserver(); syncTotalBadge(); }, 450);
+  }, { once:true });
+
+  /* للاستدعاء اليدوي عند الحاجة من أي تحديث لاحق، بدون الاعتماد عليه بالتشغيل الطبيعي. */
+  window.refreshAssalHeaderToolsTotalBadge = syncTotalBadge;
+})();
+</script>
+<!-- ===== /ASSAL PHASE 17 ===== -->
