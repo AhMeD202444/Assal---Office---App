@@ -3061,11 +3061,2099 @@ input, textarea, [contenteditable="true"]{
 }
 
     </style>
+
+<style id="assal-reference-redesign-phase4-style">
+:root{
+  --rr-bg1:#08111f;
+  --rr-bg2:#0d1a2b;
+  --rr-panel:rgba(13,26,43,.86);
+  --rr-panel-2:rgba(17,34,56,.82);
+  --rr-line:rgba(132,176,226,.16);
+  --rr-line-soft:rgba(255,255,255,.08);
+  --rr-text:#edf6ff;
+  --rr-muted:#8094ad;
+  --rr-blue:#5fb3ff;
+  --rr-teal:#45d5c2;
+  --rr-gold:#f1c96d;
+  --rr-red:#8e2632;
+  --rr-shadow:0 18px 52px rgba(0,0,0,.40);
+  --rr-modal-shadow:0 30px 90px rgba(0,0,0,.62),0 12px 36px rgba(0,0,0,.32);
+}
+
+html,body{
+  background:
+    radial-gradient(900px 480px at 100% -10%,rgba(46,131,214,.16),transparent 64%),
+    radial-gradient(780px 520px at -20% 50%,rgba(45,212,191,.08),transparent 66%),
+    linear-gradient(180deg,#07101c 0%,#0a1422 48%,#07111d 100%) !important;
+  color:var(--rr-text) !important;
+}
+
+.header{
+  height:48px !important;
+  padding:0 13px !important;
+  background:rgba(6,14,25,.90) !important;
+  border-bottom:1px solid rgba(132,176,226,.12) !important;
+  box-shadow:0 8px 28px rgba(0,0,0,.30) !important;
+  -webkit-backdrop-filter:blur(15px);
+  backdrop-filter:blur(15px);
+}
+.header-title{
+  color:#e8f3ff !important;
+  font-size:15px !important;
+  font-weight:900 !important;
+  text-shadow:none !important;
+}
+.header-buttons{gap:7px !important}
+.header-btn{
+  width:34px !important;
+  height:34px !important;
+  padding:0 !important;
+  border-radius:11px !important;
+  justify-content:center !important;
+  clip-path:none !important;
+  background:rgba(255,255,255,.055) !important;
+  border:1px solid rgba(255,255,255,.075) !important;
+  box-shadow:0 7px 18px rgba(0,0,0,.22) !important;
+  transition:transform .16s ease,background .16s ease !important;
+}
+.header-btn:hover{transform:translateY(-1px) !important}
+.header-btn:active{transform:scale(.96) !important}
+.back-btn{background:rgba(142,38,50,.36) !important;color:#ffd9de !important}
+.refresh-btn{background:rgba(49,104,161,.27) !important;color:#d8ecff !important}
+.notes-btn{background:rgba(20,130,119,.24) !important;color:#c7fff6 !important;padding:0 !important}
+.notes-count{
+  top:-5px !important;
+  right:-5px !important;
+  transform:none !important;
+  width:17px !important;
+  height:17px !important;
+  border:2px solid #08111f !important;
+  font-size:8px !important;
+  background:#d13b55 !important;
+}
+
+.container{
+  width:min(calc(100% - 16px),760px) !important;
+  max-width:760px !important;
+  margin:12px auto 24px !important;
+  padding:14px !important;
+  gap:10px !important;
+  border-radius:25px !important;
+  background:
+    linear-gradient(145deg,rgba(17,34,56,.82),rgba(8,19,33,.88)) !important;
+  border:1px solid rgba(132,176,226,.12) !important;
+  box-shadow:0 24px 70px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.035) !important;
+  backdrop-filter:blur(12px) !important;
+  animation:none !important;
+}
+
+.notification-container{
+  min-height:76px !important;
+  margin:0 !important;
+  border-radius:19px !important;
+  padding:9px 12px !important;
+  background:
+    linear-gradient(135deg,rgba(95,179,255,.07),rgba(69,213,194,.035)) !important;
+  border:1px solid rgba(132,176,226,.11) !important;
+  box-shadow:0 10px 28px rgba(0,0,0,.18) !important;
+}
+.logo-container{
+  width:58px !important;
+  height:58px !important;
+  border-radius:18px !important;
+  background:rgba(255,255,255,.035) !important;
+  border:1px solid rgba(132,176,226,.12) !important;
+  box-shadow:0 10px 26px rgba(0,0,0,.26) !important;
+}
+.logo-container img{
+  width:44px !important;
+  height:44px !important;
+  object-fit:contain !important;
+  border-radius:12px !important;
+}
+.notification{
+  border-radius:15px !important;
+  background:rgba(5,14,25,.38) !important;
+  border:1px solid rgba(255,255,255,.05) !important;
+  box-shadow:none !important;
+}
+.notification-text{
+  color:#cfe2f6 !important;
+  font-size:11px !important;
+  text-shadow:none !important;
+}
+
+.news-bar{
+  height:44px !important;
+  padding:6px 8px !important;
+  border-radius:15px !important;
+  background:rgba(6,17,30,.72) !important;
+  border:1px solid rgba(132,176,226,.11) !important;
+  box-shadow:0 10px 26px rgba(0,0,0,.17) !important;
+}
+.breaking-news{
+  height:30px !important;
+  padding:0 12px !important;
+  border-radius:10px !important;
+  background:linear-gradient(135deg,#8e2632,#b33b4b) !important;
+  box-shadow:0 8px 20px rgba(142,38,50,.22) !important;
+  font-size:10px !important;
+}
+.news-ticker-container{
+  height:30px !important;
+  padding:0 8px !important;
+}
+.news-ticker{
+  font-size:10px !important;
+  color:#a8bbd0 !important;
+  gap:18px !important;
+}
+.news-ticker span{gap:6px !important}
+.news-ticker i{color:#63d9c8 !important}
+
+.categories{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:7px !important;
+  width:100% !important;
+}
+.category-btn,.new-category-btn{
+  width:100% !important;
+  max-width:none !important;
+  min-height:46px !important;
+  padding:7px 8px !important;
+  border-radius:14px !important;
+  background:linear-gradient(145deg,rgba(255,255,255,.052),rgba(255,255,255,.025)) !important;
+  border:1px solid rgba(132,176,226,.095) !important;
+  box-shadow:0 9px 22px rgba(0,0,0,.16) !important;
+  font-size:9.5px !important;
+  gap:6px !important;
+  transform:none !important;
+}
+.category-btn:hover,.new-category-btn:hover{
+  transform:translateY(-1px) !important;
+  background:linear-gradient(145deg,rgba(95,179,255,.11),rgba(69,213,194,.055)) !important;
+}
+.category-btn i,.new-category-btn i{
+  color:#78b9f2 !important;
+  font-size:11px !important;
+}
+.new-similarities-count{
+  position:static !important;
+  transform:none !important;
+  margin-right:auto !important;
+  width:20px !important;
+  height:20px !important;
+  font-size:8px !important;
+  background:rgba(209,59,85,.92) !important;
+  box-shadow:none !important;
+}
+
+.slider-container{
+  min-height:88px !important;
+  padding:7px 35px !important;
+  border-radius:18px !important;
+  background:rgba(5,15,27,.44) !important;
+  border:1px solid rgba(132,176,226,.09) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025) !important;
+}
+.slider{
+  gap:7px !important;
+  padding:4px 1px !important;
+}
+.category{
+  width:68px !important;
+  height:68px !important;
+  padding:6px 4px !important;
+  border-radius:16px !important;
+  background:linear-gradient(145deg,rgba(255,255,255,.05),rgba(255,255,255,.02)) !important;
+  border:1px solid rgba(132,176,226,.09) !important;
+  box-shadow:0 8px 18px rgba(0,0,0,.16) !important;
+  transform:none !important;
+}
+.category i{
+  width:29px !important;
+  height:29px !important;
+  margin:0 0 5px !important;
+  border-radius:10px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:rgba(95,179,255,.075) !important;
+  color:#83c2f8 !important;
+  font-size:12px !important;
+  transform:none !important;
+}
+.category span{
+  max-width:60px !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  font-size:8px !important;
+  line-height:1.25 !important;
+  color:#9eafc4 !important;
+}
+.category:hover{
+  transform:translateY(-2px) !important;
+  background:linear-gradient(145deg,rgba(95,179,255,.10),rgba(69,213,194,.05)) !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.20) !important;
+}
+.category.active{
+  transform:none !important;
+  background:linear-gradient(145deg,rgba(48,125,190,.28),rgba(23,126,113,.20)) !important;
+  border-color:rgba(95,179,255,.24) !important;
+  box-shadow:0 0 0 2px rgba(95,179,255,.05),0 10px 24px rgba(0,0,0,.22) !important;
+}
+.category.active i{
+  background:rgba(69,213,194,.12) !important;
+  color:#8cf1e2 !important;
+}
+.category.active span{color:#e5f3ff !important}
+.slider-btn{
+  width:30px !important;
+  height:30px !important;
+  padding:0 !important;
+  clip-path:none !important;
+  border-radius:10px !important;
+  background:rgba(95,179,255,.10) !important;
+  color:#b8ddff !important;
+  border:1px solid rgba(95,179,255,.10) !important;
+  box-shadow:0 7px 16px rgba(0,0,0,.20) !important;
+  font-size:10px !important;
+}
+.slider-btn:hover{transform:translateY(-50%) scale(1.03) !important}
+.slider-btn:active{transform:translateY(-50%) scale(.96) !important}
+
+.search-container{
+  margin:2px 0 6px !important;
+  padding:4px !important;
+  border-radius:19px !important;
+  background:rgba(4,13,24,.60) !important;
+  border:1px solid rgba(95,179,255,.14) !important;
+  box-shadow:0 14px 34px rgba(0,0,0,.22) !important;
+}
+.search-container input{
+  height:50px !important;
+  padding:8px 52px 8px 16px !important;
+  border:0 !important;
+  border-radius:15px !important;
+  background:#081423 !important;
+  color:#f4f9ff !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025) !important;
+  font-size:13px !important;
+  direction:ltr !important;
+  text-align:left !important;
+}
+.search-container input::placeholder{
+  color:#5e728a !important;
+}
+.search-container input:focus{
+  box-shadow:0 0 0 3px rgba(95,179,255,.075),inset 0 1px 0 rgba(255,255,255,.025) !important;
+}
+.search-container button{
+  right:9px !important;
+  width:38px !important;
+  height:38px !important;
+  border-radius:12px !important;
+  clip-path:none !important;
+  background:linear-gradient(135deg,#4c9fe9,#2ebba8) !important;
+  box-shadow:0 8px 20px rgba(41,147,182,.22) !important;
+  font-size:12px !important;
+}
+.search-container button:hover{transform:translateY(-50%) scale(1.03) !important}
+
+.results-container{
+  width:100% !important;
+  max-width:none !important;
+  margin:2px auto 0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+}
+.products-grid{
+  gap:8px !important;
+  width:100% !important;
+}
+
+.result-card.assal-reference-result{
+  width:100% !important;
+  max-width:none !important;
+  min-height:94px !important;
+  margin:0 !important;
+  padding:12px !important;
+  border-radius:19px !important;
+  display:grid !important;
+  grid-template-columns:40px 1fr 34px !important;
+  align-items:start !important;
+  gap:10px !important;
+  cursor:default !important;
+  background:
+    radial-gradient(260px 120px at 100% 0%,rgba(95,179,255,.055),transparent 72%),
+    linear-gradient(145deg,rgba(17,34,56,.94),rgba(8,20,35,.97)) !important;
+  border:1px solid rgba(132,176,226,.10) !important;
+  box-shadow:0 14px 34px rgba(0,0,0,.24) !important;
+  clip-path:none !important;
+  transform:none !important;
+}
+.result-card.assal-reference-result:hover{
+  transform:none !important;
+  box-shadow:0 16px 38px rgba(0,0,0,.27) !important;
+}
+.assal-reference-result-icon{
+  width:40px;
+  height:40px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#8ac7fb;
+  background:rgba(95,179,255,.075);
+  border:1px solid rgba(95,179,255,.10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.assal-reference-result-body{min-width:0}
+.assal-reference-result-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:4px;
+}
+.assal-reference-result-category{
+  color:#738ba6;
+  font-size:7.8px;
+  font-weight:850;
+}
+.assal-reference-result-status{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  color:#58d4c1;
+  font-size:7.5px;
+  font-weight:850;
+}
+.assal-reference-result-status i{font-size:6px}
+.result-card.assal-reference-result h4{
+  margin:0 !important;
+  padding:0 !important;
+  color:#edf6ff !important;
+  font-size:12.5px !important;
+  line-height:1.6 !important;
+  font-weight:900 !important;
+  text-align:left !important;
+  direction:ltr !important;
+  unicode-bidi:plaintext !important;
+  text-shadow:none !important;
+  overflow-wrap:anywhere;
+}
+.assal-reference-related-label{
+  margin-top:7px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  color:#526a84;
+  font-size:7.3px;
+  font-weight:800;
+}
+.assal-reference-related-label i{color:#5da6e4}
+.assal-reference-related{
+  margin-top:5px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  direction:ltr;
+  justify-content:flex-start;
+}
+.assal-reference-related span{
+  min-height:24px;
+  max-width:100%;
+  padding:4px 7px;
+  border-radius:8px;
+  display:inline-flex;
+  align-items:center;
+  color:#aabbd0;
+  background:rgba(255,255,255,.032);
+  border:1px solid rgba(255,255,255,.055);
+  font-size:8.5px;
+  line-height:1.35;
+  font-weight:750;
+  direction:ltr;
+  unicode-bidi:plaintext;
+  overflow-wrap:anywhere;
+}
+.assal-reference-save{
+  width:34px !important;
+  height:34px !important;
+  min-width:34px !important;
+  min-height:34px !important;
+  margin:0 !important;
+  padding:0 !important;
+  border-radius:11px !important;
+  border:1px solid rgba(69,213,194,.10) !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  color:#7de3d4 !important;
+  background:rgba(69,213,194,.075) !important;
+  box-shadow:0 7px 18px rgba(0,0,0,.17) !important;
+  font-size:10px !important;
+}
+.assal-reference-save.is-saved{
+  color:#f1d789 !important;
+  background:rgba(241,201,109,.075) !important;
+  border-color:rgba(241,201,109,.11) !important;
+}
+
+/* Modal redesign while preserving original modal structures */
+#newItemsModal{
+  position:fixed !important;
+  top:50% !important;
+  left:50% !important;
+  right:auto !important;
+  bottom:auto !important;
+  transform:translate(-50%,-50%) scale(.98) !important;
+  width:min(92vw,560px) !important;
+  max-height:78vh !important;
+  margin:0 !important;
+  padding:16px !important;
+  border-radius:24px !important;
+  background:
+    radial-gradient(360px 170px at 100% 0%,rgba(95,179,255,.07),transparent 72%),
+    linear-gradient(145deg,#111d2e,#091522) !important;
+  border:1px solid rgba(132,176,226,.14) !important;
+  box-shadow:var(--rr-modal-shadow) !important;
+  backdrop-filter:blur(16px) !important;
+}
+#newItemsModal h2{
+  margin:2px 0 12px !important;
+  color:#edf6ff !important;
+  font-size:15px !important;
+  text-align:center !important;
+}
+#newItemsModal .close-modal-btn{
+  top:12px !important;
+  right:12px !important;
+  left:auto !important;
+  width:34px !important;
+  height:34px !important;
+  border-radius:50% !important;
+  background:#7f2330 !important;
+  color:#fff !important;
+  box-shadow:0 9px 22px rgba(127,35,48,.30) !important;
+}
+#newItemsModal .modal-content{
+  max-height:60vh !important;
+  padding:3px !important;
+}
+#newItemsModal .new-item-card{
+  margin-bottom:8px !important;
+  border-radius:16px !important;
+  background:rgba(7,18,31,.70) !important;
+  border:1px solid rgba(132,176,226,.09) !important;
+  box-shadow:0 9px 24px rgba(0,0,0,.20) !important;
+}
+#newItemsModal .category-circle{
+  background:rgba(95,179,255,.075) !important;
+  color:#8fcaff !important;
+  border:1px solid rgba(95,179,255,.09) !important;
+}
+#newItemsModal .item-details h4{
+  color:#dcecff !important;
+  font-size:10px !important;
+  direction:ltr !important;
+  unicode-bidi:plaintext !important;
+  text-align:left !important;
+}
+#newItemsModal .new-badge{
+  background:rgba(69,213,194,.075) !important;
+  color:#80e3d4 !important;
+  border:1px solid rgba(69,213,194,.09) !important;
+}
+
+.notes-drawer{
+  position:fixed !important;
+  top:50% !important;
+  left:50% !important;
+  right:auto !important;
+  transform:translate(-50%,-50%) scale(.96) !important;
+  width:min(90vw,430px) !important;
+  height:auto !important;
+  max-height:76vh !important;
+  padding:16px !important;
+  border-radius:23px !important;
+  background:
+    radial-gradient(300px 150px at 100% 0%,rgba(69,213,194,.055),transparent 72%),
+    linear-gradient(145deg,#111d2e,#091522) !important;
+  border:1px solid rgba(132,176,226,.13) !important;
+  box-shadow:var(--rr-modal-shadow) !important;
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+  transition:opacity .18s ease,transform .18s ease,visibility .18s ease !important;
+}
+.notes-drawer.active{
+  transform:translate(-50%,-50%) scale(1) !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+}
+.notes-drawer h3{
+  margin:1px 42px 13px 0 !important;
+  color:#edf6ff !important;
+  font-size:14px !important;
+  text-align:right !important;
+}
+.notes-drawer .close-btn{
+  top:12px !important;
+  right:12px !important;
+  left:auto !important;
+  width:34px !important;
+  height:34px !important;
+  border-radius:50% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:#7f2330 !important;
+  color:#fff !important;
+  box-shadow:0 9px 22px rgba(127,35,48,.30) !important;
+}
+.notes-items-container{
+  max-height:60vh !important;
+  overflow:auto !important;
+}
+.notes-item{
+  border-radius:14px !important;
+  background:rgba(7,18,31,.72) !important;
+  border:1px solid rgba(132,176,226,.08) !important;
+  box-shadow:0 8px 20px rgba(0,0,0,.17) !important;
+}
+.note-name{
+  color:#cfe0f2 !important;
+  font-size:9px !important;
+  direction:ltr !important;
+  unicode-bidi:plaintext !important;
+  text-align:left !important;
+}
+.note-remove{
+  border-radius:10px !important;
+  background:rgba(127,35,48,.34) !important;
+  color:#ffd8dd !important;
+  box-shadow:none !important;
+}
+
+/* SweetAlert / subscription / statistics dialogs */
+body > .swal2-container,
+.pro-refresh-container.swal2-container{
+  align-items:center !important;
+  justify-content:center !important;
+  padding:16px !important;
+}
+.swal2-popup,
+.pro-popup.swal2-popup,
+.activation-popup.swal2-popup{
+  margin:auto !important;
+  border-radius:23px !important;
+  border:1px solid rgba(132,176,226,.13) !important;
+  box-shadow:var(--rr-modal-shadow) !important;
+}
+
+.scroll-to-top{
+  width:38px !important;
+  height:38px !important;
+  border-radius:12px !important;
+  background:linear-gradient(135deg,#3e8acb,#289b8b) !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.28) !important;
+}
+footer{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+footer p{
+  color:#455d76 !important;
+  font-size:8px !important;
+}
+
+@media(max-width:560px){
+  .container{
+    width:calc(100% - 12px) !important;
+    padding:10px !important;
+    border-radius:21px !important;
+  }
+  .notification-container{min-height:68px !important}
+  .logo-container{width:52px !important;height:52px !important}
+  .logo-container img{width:40px !important;height:40px !important}
+  .categories{gap:5px !important}
+  .category-btn,.new-category-btn{
+    min-height:42px !important;
+    padding:6px 5px !important;
+    font-size:8px !important;
+  }
+  .slider-container{padding-left:32px !important;padding-right:32px !important}
+  .category{width:64px !important;height:64px !important}
+  .result-card.assal-reference-result{
+    grid-template-columns:36px 1fr 32px !important;
+    gap:8px !important;
+    padding:10px !important;
+  }
+  .assal-reference-result-icon{width:36px;height:36px;border-radius:12px}
+}
+</style>
+
+
+<style id="assal-reference-phase5-corrected-style">
+html,body,
+button,input,textarea,select,
+.swal2-container,.swal2-popup,.swal2-title,.swal2-html-container{
+  font-family:'Cairo',sans-serif !important;
+}
+
+/* ===== Hero: preserve logo + preserve its GSAP movement ===== */
+.notification-container.assal-compat-hero{
+  position:relative !important;
+  width:100% !important;
+  height:92px !important;
+  min-height:92px !important;
+  margin:0 !important;
+  padding:11px 12px !important;
+  overflow:hidden !important;
+  border-radius:20px !important;
+  background:
+    radial-gradient(380px 130px at 12% 0%,rgba(95,179,255,.10),transparent 72%),
+    linear-gradient(135deg,rgba(15,34,57,.93),rgba(7,20,34,.96)) !important;
+  border:1px solid rgba(126,186,239,.14) !important;
+  box-shadow:0 14px 34px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.03) !important;
+}
+
+/* Logo/notification stay separate and animate exactly through the old GSAP function */
+.assal-compat-hero .logo-container,
+.assal-compat-hero .notification{
+  position:absolute !important;
+  top:14px !important;
+  right:13px !important;
+  left:auto !important;
+  width:64px !important;
+  height:64px !important;
+  border-radius:19px !important;
+  clip-path:none !important;
+  overflow:hidden !important;
+}
+
+.assal-compat-hero .logo-container{
+  z-index:3 !important;
+  background:rgba(255,255,255,.045) !important;
+  border:1px solid rgba(126,186,239,.13) !important;
+  box-shadow:0 10px 25px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+.assal-compat-hero .logo-container img{
+  width:100% !important;
+  height:100% !important;
+  padding:7px !important;
+  object-fit:contain !important;
+  border-radius:17px !important;
+}
+
+.assal-compat-hero .notification{
+  z-index:4 !important;
+  padding:5px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:linear-gradient(145deg,#266da4,#178e83) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  box-shadow:0 10px 25px rgba(0,0,0,.25) !important;
+}
+
+.assal-compat-hero .notification-text{
+  max-width:54px !important;
+  padding:2px !important;
+  color:#fff !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:7.2px !important;
+  line-height:1.35 !important;
+  font-weight:850 !important;
+  text-align:center !important;
+  letter-spacing:0 !important;
+  text-shadow:none !important;
+}
+
+.assal-compat-hero-copy{
+  position:relative;
+  z-index:2;
+  height:100%;
+  margin-right:80px;
+  padding:4px 4px 3px 2px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  text-align:right;
+}
+
+.assal-compat-hero-title{
+  color:#f1f7ff;
+  font-size:21px;
+  line-height:1.28;
+  font-weight:950;
+  letter-spacing:-.02em;
+}
+
+.assal-compat-hero-line{
+  width:78px;
+  height:2px;
+  margin:5px 0 5px auto;
+  border-radius:999px;
+  background:linear-gradient(90deg,#45d5c2,#5fb3ff);
+  box-shadow:0 0 12px rgba(95,179,255,.13);
+}
+
+.assal-compat-hero-sub{
+  max-width:390px;
+  color:#8195ad;
+  font-size:8.2px;
+  line-height:1.65;
+  font-weight:680;
+}
+
+/* ===== Keep the reference page rhythm compact ===== */
+.container{
+  gap:9px !important;
+}
+.news-bar{
+  margin:0 !important;
+}
+.categories{
+  margin:0 !important;
+}
+.slider-container{
+  margin:0 !important;
+}
+.search-container{
+  margin:1px 0 3px !important;
+}
+
+/* ===== Result cards: no 2x2 grid, natural flow ===== */
+.result-card.assal-corrected-result{
+  min-height:90px !important;
+  padding:12px !important;
+  border-radius:19px !important;
+  background:
+    radial-gradient(260px 110px at 100% 0%,rgba(95,179,255,.06),transparent 72%),
+    linear-gradient(145deg,rgba(16,34,56,.95),rgba(7,19,33,.98)) !important;
+  border:1px solid rgba(126,186,239,.11) !important;
+  box-shadow:0 13px 32px rgba(0,0,0,.23),inset 0 1px 0 rgba(255,255,255,.02) !important;
+}
+
+.result-card.assal-corrected-result h4{
+  margin-top:2px !important;
+  color:#f0f7ff !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:12.2px !important;
+  line-height:1.72 !important;
+  font-weight:950 !important;
+  direction:ltr !important;
+  unicode-bidi:plaintext !important;
+  text-align:left !important;
+}
+
+.assal-reference-related-label{
+  margin-top:8px !important;
+  padding-top:7px;
+  border-top:1px solid rgba(126,186,239,.065);
+  display:flex !important;
+  align-items:center !important;
+  gap:5px !important;
+}
+
+.assal-reference-related-label b{
+  min-width:18px;
+  height:18px;
+  margin-right:1px;
+  padding:0 5px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:#84e4d5;
+  background:rgba(69,213,194,.07);
+  border:1px solid rgba(69,213,194,.09);
+  font-size:7px;
+}
+
+.assal-reference-related{
+  margin-top:6px !important;
+  display:flex !important;
+  flex-wrap:wrap !important;
+  gap:5px !important;
+  direction:ltr !important;
+  justify-content:flex-start !important;
+}
+
+.assal-reference-related span{
+  width:auto !important;
+  min-width:0 !important;
+  min-height:27px !important;
+  padding:5px 8px !important;
+  border-radius:9px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  color:#afc0d3 !important;
+  background:rgba(255,255,255,.035) !important;
+  border:1px solid rgba(126,186,239,.07) !important;
+  font-size:8.3px !important;
+  line-height:1.4 !important;
+  font-weight:750 !important;
+  white-space:normal !important;
+  text-align:center !important;
+  direction:ltr !important;
+  unicode-bidi:plaintext !important;
+}
+
+.assal-inline-empty{
+  min-height:140px;
+  padding:20px;
+  border-radius:19px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background:rgba(7,18,31,.58);
+  border:1px dashed rgba(126,186,239,.12);
+  box-shadow:0 10px 25px rgba(0,0,0,.16);
+}
+.assal-inline-empty-icon{
+  width:42px;
+  height:42px;
+  margin-bottom:9px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#83c5ff;
+  background:rgba(95,179,255,.075);
+  border:1px solid rgba(95,179,255,.09);
+}
+.assal-inline-empty strong{
+  color:#d2e2f3;
+  font-size:10.8px;
+  font-weight:900;
+}
+.assal-inline-empty small{
+  max-width:285px;
+  margin-top:4px;
+  color:#657b93;
+  font-size:8px;
+  line-height:1.7;
+  font-weight:700;
+}
+
+/* ===== Instant-search visual hint, tiny and non-intrusive ===== */
+.search-container::after{
+  content:'فوري';
+  position:absolute;
+  left:10px;
+  top:-7px;
+  z-index:3;
+  min-width:29px;
+  height:15px;
+  padding:0 6px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#75d8c8;
+  background:#0a1726;
+  border:1px solid rgba(69,213,194,.10);
+  font-size:6.4px;
+  font-weight:900;
+}
+
+/* ===== True centered overlays for custom windows ===== */
+html.assal-modal-lock,
+body.assal-modal-lock{
+  overflow:hidden !important;
+}
+
+.assal-centered-overlay,
+.notes-drawer.assal-centered-overlay,
+#newItemsModal.assal-centered-overlay{
+  position:fixed !important;
+  inset:0 !important;
+  top:0 !important;
+  left:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  width:100vw !important;
+  height:100vh !important;
+  max-width:none !important;
+  max-height:none !important;
+  margin:0 !important;
+  padding:14px !important;
+  transform:none !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:rgba(1,6,13,.72) !important;
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+  z-index:2147483000 !important;
+  transition:opacity .18s ease,visibility .18s ease !important;
+}
+
+#newItemsModal.assal-centered-overlay.is-open,
+.notes-drawer.assal-centered-overlay.active{
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+}
+
+.assal-centered-panel{
+  position:relative;
+  width:min(92vw,500px);
+  max-height:min(82vh,650px);
+  overflow:hidden;
+  border-radius:24px;
+  background:
+    radial-gradient(360px 170px at 100% 0%,rgba(95,179,255,.075),transparent 72%),
+    linear-gradient(145deg,#112035,#091522);
+  border:1px solid rgba(126,186,239,.15);
+  box-shadow:0 34px 100px rgba(0,0,0,.66),0 14px 38px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.03);
+  transform:scale(.97);
+  transition:transform .20s cubic-bezier(.22,1,.36,1);
+}
+
+#newItemsModal.is-open .assal-centered-panel,
+.notes-drawer.active .assal-centered-panel{
+  transform:scale(1);
+}
+
+.assal-new-items-panel{
+  width:min(92vw,550px);
+}
+.assal-notes-panel{
+  width:min(92vw,440px);
+}
+
+.assal-centered-head{
+  min-height:64px;
+  padding:12px 13px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border-bottom:1px solid rgba(126,186,239,.075);
+  background:rgba(255,255,255,.012);
+}
+
+.assal-centered-head-copy{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.assal-centered-head-icon{
+  flex:0 0 36px;
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#8cc9ff;
+  background:rgba(95,179,255,.075);
+  border:1px solid rgba(95,179,255,.09);
+}
+
+.assal-centered-head-copy small{
+  display:block;
+  color:#607892;
+  font-size:7.2px;
+  font-weight:800;
+}
+
+.assal-centered-head-copy h2,
+.assal-centered-head-copy h3{
+  margin:1px 0 0 !important;
+  padding:0 !important;
+  color:#edf6ff !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:13.5px !important;
+  line-height:1.4 !important;
+  font-weight:950 !important;
+  text-align:right !important;
+}
+
+/* Elegant X: dark glass burgundy, not a loud red blob */
+.assal-elegant-close,
+#newItemsModal .assal-elegant-close,
+.notes-drawer .assal-elegant-close{
+  position:static !important;
+  top:auto !important;
+  right:auto !important;
+  left:auto !important;
+  flex:0 0 33px !important;
+  width:33px !important;
+  height:33px !important;
+  min-width:33px !important;
+  min-height:33px !important;
+  padding:0 !important;
+  border-radius:50% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  color:#fff !important;
+  background:rgba(126,37,49,.48) !important;
+  border:1px solid rgba(255,154,164,.16) !important;
+  box-shadow:0 8px 20px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.08) !important;
+  font-size:10px !important;
+  cursor:pointer !important;
+}
+
+.assal-elegant-close:hover{
+  background:rgba(146,43,56,.62) !important;
+}
+
+#newItemsModal .modal-content{
+  max-height:min(64vh,500px) !important;
+  overflow:auto !important;
+  padding:11px !important;
+}
+
+.notes-items-container{
+  max-height:min(64vh,480px) !important;
+  overflow:auto !important;
+  padding:11px !important;
+}
+
+#newItemsModal .new-item-card,
+.notes-item{
+  margin:0 0 7px !important;
+  border-radius:15px !important;
+  background:linear-gradient(145deg,rgba(7,20,34,.82),rgba(6,16,28,.91)) !important;
+  border:1px solid rgba(126,186,239,.075) !important;
+  box-shadow:0 9px 22px rgba(0,0,0,.18) !important;
+}
+
+.note-name{
+  color:#cfdeee !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:8.6px !important;
+  line-height:1.6 !important;
+  direction:ltr !important;
+  unicode-bidi:plaintext !important;
+  text-align:left !important;
+}
+
+/* ===== SweetAlert windows: center + softer redesign + shadow ===== */
+body > .swal2-container,
+.pro-refresh-container.swal2-container{
+  align-items:center !important;
+  justify-content:center !important;
+  padding:14px !important;
+  background:rgba(1,6,13,.68) !important;
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+}
+
+.swal2-popup,
+.pro-refresh-container .swal2-popup{
+  margin:auto !important;
+  border-radius:24px !important;
+  background:
+    radial-gradient(380px 175px at 100% 0%,rgba(95,179,255,.07),transparent 72%),
+    linear-gradient(145deg,#112035,#091522) !important;
+  border:1px solid rgba(126,186,239,.14) !important;
+  box-shadow:0 34px 105px rgba(0,0,0,.66),0 14px 40px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.03) !important;
+}
+
+.swal2-popup .swal2-close{
+  top:11px !important;
+  right:11px !important;
+  left:auto !important;
+  width:33px !important;
+  height:33px !important;
+  border-radius:50% !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  color:#fff !important;
+  background:rgba(126,37,49,.48) !important;
+  border:1px solid rgba(255,154,164,.16) !important;
+  box-shadow:0 8px 20px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.08) !important;
+  font-size:18px !important;
+  line-height:1 !important;
+}
+
+/* Avoid old custom positioning/animation fighting the centered windows */
+#newItemsModal,
+#newItemsModal.is-open,
+.notes-drawer,
+.notes-drawer.active{
+  animation:none !important;
+}
+
+/* Mobile fine-tuning */
+@media(max-width:560px){
+  .notification-container.assal-compat-hero{
+    height:88px !important;
+    min-height:88px !important;
+    padding:10px !important;
+  }
+
+  .assal-compat-hero .logo-container,
+  .assal-compat-hero .notification{
+    top:14px !important;
+    right:11px !important;
+    width:60px !important;
+    height:60px !important;
+  }
+
+  .assal-compat-hero-copy{
+    margin-right:72px;
+    padding-left:0;
+  }
+
+  .assal-compat-hero-title{
+    font-size:18px;
+  }
+
+  .assal-compat-hero-line{
+    width:64px;
+    margin-top:4px;
+    margin-bottom:4px;
+  }
+
+  .assal-compat-hero-sub{
+    font-size:7.3px;
+    line-height:1.55;
+  }
+
+  .assal-reference-related{
+    gap:4px !important;
+  }
+
+  .assal-reference-related span{
+    min-height:26px !important;
+    padding:5px 7px !important;
+    font-size:7.8px !important;
+  }
+
+  .assal-centered-overlay,
+  .notes-drawer.assal-centered-overlay,
+  #newItemsModal.assal-centered-overlay{
+    padding:10px !important;
+  }
+
+  .assal-centered-panel{
+    width:min(95vw,500px);
+    max-height:86vh;
+  }
+}
+</style>
+
+
+<style id="assal-phase6-precise-layout-style">
+/* ===== Header identity only ===== */
+.assal-compat-header-title{
+  display:flex !important;
+  align-items:center !important;
+  gap:7px !important;
+  color:#edf7ff !important;
+}
+.assal-compat-header-mark{
+  width:27px;
+  height:27px;
+  border-radius:9px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:#83dfcf;
+  background:linear-gradient(145deg,rgba(69,213,194,.12),rgba(95,179,255,.08));
+  border:1px solid rgba(95,179,255,.10);
+  font-size:9px;
+}
+.assal-compat-header-title > span:last-child{
+  font-size:14px;
+  font-weight:950;
+}
+
+/* ===== MAIN container: natural height only ===== */
+.container{
+  width:min(calc(100% - 10px),760px) !important;
+  margin:5px auto 6px !important;
+  padding:11px !important;
+  gap:8px !important;
+  border-radius:23px !important;
+  min-height:0 !important;
+}
+
+/* ===== Hero: LEFT text / RIGHT animated large circular logo ===== */
+.notification-container.assal-compat-hero{
+  position:relative !important;
+  width:100% !important;
+  height:164px !important;
+  min-height:164px !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) 160px !important;
+  direction:ltr !important;
+  align-items:center !important;
+  gap:5px !important;
+  border-radius:22px !important;
+  background:
+    radial-gradient(440px 170px at 100% 0%,rgba(95,179,255,.12),transparent 70%),
+    radial-gradient(330px 150px at 0% 100%,rgba(69,213,194,.065),transparent 74%),
+    linear-gradient(135deg,rgba(15,35,59,.96),rgba(7,20,34,.985)) !important;
+  border:1px solid rgba(126,186,239,.16) !important;
+  box-shadow:0 18px 42px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.035) !important;
+}
+
+/* The animation is isolated inside its own right-side stage,
+   so the moving logo never crosses over the text. */
+.assal-compat-logo-stage{
+  position:relative;
+  grid-column:2;
+  width:160px;
+  height:160px;
+  align-self:center;
+  justify-self:end;
+  overflow:hidden;
+  direction:ltr;
+}
+
+/* The existing GSAP animation still targets these same IDs. */
+.assal-compat-hero .logo-container,
+.assal-compat-hero .notification{
+  position:absolute !important;
+  inset:0 !important;
+  top:0 !important;
+  right:auto !important;
+  bottom:auto !important;
+  left:0 !important;
+  width:160px !important;
+  height:160px !important;
+  border-radius:50% !important;
+  clip-path:circle(80px at center) !important;
+  overflow:hidden !important;
+}
+
+.assal-compat-hero .logo-container{
+  padding:0 !important;
+  background:rgba(255,255,255,.035) !important;
+  border:1px solid rgba(145,201,247,.15) !important;
+  box-shadow:0 16px 38px rgba(0,0,0,.31),inset 0 1px 0 rgba(255,255,255,.045) !important;
+}
+
+.assal-compat-hero .logo-container img{
+  width:100% !important;
+  height:100% !important;
+  padding:0 !important;
+  object-fit:cover !important;
+  border-radius:50% !important;
+}
+
+.assal-compat-hero .notification{
+  padding:14px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:linear-gradient(45deg,#4682B4,#20B2AA) !important;
+  border:2px solid rgba(99,179,237,.38) !important;
+  box-shadow:0 16px 38px rgba(0,0,0,.31),0 0 28px rgba(32,178,170,.10) !important;
+}
+
+.assal-compat-hero .notification-text{
+  max-width:128px !important;
+  padding:8px !important;
+  color:#fff !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:12px !important;
+  line-height:1.55 !important;
+  font-weight:850 !important;
+  text-align:center !important;
+  letter-spacing:0 !important;
+  text-shadow:0 0 7px rgba(255,255,255,.16) !important;
+}
+
+/* Copy is in the LEFT section and centered within that section */
+.assal-compat-hero-copy{
+  grid-column:1;
+  min-width:0;
+  height:100% !important;
+  margin:0 !important;
+  padding:16px 10px 16px 15px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  direction:rtl !important;
+  text-align:center !important;
+}
+
+.assal-compat-hero-title{
+  max-width:100%;
+  color:#f4f9ff !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:24px !important;
+  line-height:1.34 !important;
+  font-weight:950 !important;
+  letter-spacing:-.025em !important;
+  white-space:normal !important;
+}
+
+.assal-compat-hero-line{
+  width:96px !important;
+  height:2px !important;
+  margin:8px auto 7px !important;
+  border-radius:999px !important;
+  background:linear-gradient(90deg,#45d5c2,#5fb3ff) !important;
+  box-shadow:0 0 14px rgba(95,179,255,.16) !important;
+}
+
+.assal-compat-hero-sub{
+  max-width:100% !important;
+  color:#8297af !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:9px !important;
+  line-height:1.55 !important;
+  font-weight:800 !important;
+  white-space:nowrap !important;
+}
+
+/* ===== Vertical premium actions ===== */
+.categories.assal-vertical-actions{
+  width:100% !important;
+  display:flex !important;
+  flex-direction:column !important;
+  grid-template-columns:none !important;
+  gap:7px !important;
+  margin:0 !important;
+}
+
+.assal-vertical-actions .assal-action-card{
+  position:relative;
+  width:100% !important;
+  max-width:none !important;
+  min-height:54px !important;
+  padding:7px 10px !important;
+  margin:0 !important;
+  display:grid !important;
+  grid-template-columns:40px minmax(0,1fr) auto !important;
+  align-items:center !important;
+  gap:10px !important;
+  border-radius:15px !important;
+  color:#eef6ff !important;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.052),rgba(255,255,255,.025)) !important;
+  border:1px solid rgba(126,186,239,.095) !important;
+  box-shadow:0 9px 22px rgba(0,0,0,.17),inset 0 1px 0 rgba(255,255,255,.018) !important;
+  font-family:'Cairo',sans-serif !important;
+  text-align:right !important;
+  transform:none !important;
+  cursor:pointer !important;
+}
+
+.assal-vertical-actions .assal-action-card:hover{
+  transform:translateY(-1px) !important;
+  background:
+    linear-gradient(145deg,rgba(95,179,255,.085),rgba(69,213,194,.038)) !important;
+  border-color:rgba(126,186,239,.15) !important;
+}
+
+.assal-action-icon{
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  border:1px solid rgba(255,255,255,.055);
+}
+.assal-action-icon-sub{
+  color:#f2d27d;
+  background:rgba(241,201,109,.075);
+}
+.assal-action-icon-stats{
+  color:#8fcaff;
+  background:rgba(95,179,255,.075);
+}
+.assal-action-icon-new{
+  color:#7fe2d2;
+  background:rgba(69,213,194,.075);
+}
+
+.assal-action-copy{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  direction:rtl;
+}
+.assal-action-copy strong{
+  color:#eaf4ff;
+  font-size:10.3px;
+  line-height:1.45;
+  font-weight:900;
+}
+.assal-action-copy small{
+  margin-top:2px;
+  color:#647b94;
+  font-size:7.5px;
+  line-height:1.4;
+  font-weight:700;
+}
+
+.assal-action-arrow,
+.assal-action-end{
+  min-width:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  color:#516b85;
+  font-size:8px;
+}
+
+.assal-vertical-actions .new-similarities-count{
+  position:static !important;
+  inset:auto !important;
+  transform:none !important;
+  width:auto !important;
+  min-width:22px !important;
+  height:22px !important;
+  margin:0 !important;
+  padding:0 6px !important;
+  border-radius:999px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  color:#ffcad2 !important;
+  background:rgba(209,59,85,.18) !important;
+  border:1px solid rgba(239,84,106,.16) !important;
+  box-shadow:none !important;
+  font-size:7.5px !important;
+  font-weight:900 !important;
+}
+
+/* ===== Secondary compatibilities: larger but natural wrap, never 2x2 ===== */
+.assal-reference-related{
+  margin-top:7px !important;
+  display:flex !important;
+  flex-wrap:wrap !important;
+  align-items:stretch !important;
+  justify-content:flex-start !important;
+  grid-template-columns:none !important;
+  gap:6px !important;
+  direction:ltr !important;
+}
+.assal-reference-related span{
+  width:auto !important;
+  flex:0 1 auto !important;
+  min-width:64px !important;
+  min-height:33px !important;
+  padding:7px 10px !important;
+  border-radius:10px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  color:#bdcad9 !important;
+  background:linear-gradient(145deg,rgba(255,255,255,.050),rgba(255,255,255,.024)) !important;
+  border:1px solid rgba(126,186,239,.085) !important;
+  box-shadow:0 5px 13px rgba(0,0,0,.10) !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:9.2px !important;
+  line-height:1.45 !important;
+  font-weight:800 !important;
+  text-align:center !important;
+  white-space:normal !important;
+  direction:ltr !important;
+  unicode-bidi:plaintext !important;
+}
+.assal-reference-related-label{
+  margin-top:9px !important;
+  padding-top:8px !important;
+}
+
+.result-card.assal-corrected-result h4{
+  color:#f4f9ff !important;
+  font-size:12.8px !important;
+  line-height:1.72 !important;
+  font-weight:950 !important;
+}
+
+/* ===== Keep top/bottom page spacing tighter; do NOT stretch container ===== */
+.news-bar,
+.slider-container,
+.search-container{
+  margin-top:0 !important;
+  margin-bottom:0 !important;
+}
+
+/* ===== Verification / refresh / immediate success: wider, centered, NO X ===== */
+.pro-refresh-container.swal2-container{
+  align-items:center !important;
+  justify-content:center !important;
+  padding:14px !important;
+}
+
+.pro-refresh-container .pro-refresh-popup.swal2-popup,
+.pro-refresh-container .pro-success-popup.swal2-popup,
+.pro-refresh-container .login-loading.swal2-popup,
+.pro-refresh-container .login-success.swal2-popup{
+  width:min(92vw,520px) !important;
+  max-width:520px !important;
+  min-height:auto !important;
+  margin:auto !important;
+  padding:20px !important;
+  border-radius:23px !important;
+  box-shadow:0 34px 105px rgba(0,0,0,.68),0 14px 40px rgba(0,0,0,.34) !important;
+}
+
+/* This overrides the old global .swal2-close display:flex!important rule. */
+.pro-refresh-container .pro-refresh-popup .swal2-close,
+.pro-refresh-container .pro-success-popup .swal2-close,
+.pro-refresh-container .login-loading .swal2-close,
+.pro-refresh-container .login-success .swal2-close{
+  display:none !important;
+}
+
+/* ===== Mobile ===== */
+@media(max-width:560px){
+  .container{
+    width:calc(100% - 8px) !important;
+    margin:4px auto 5px !important;
+    padding:9px !important;
+    gap:7px !important;
+  }
+
+  .notification-container.assal-compat-hero{
+    height:150px !important;
+    min-height:150px !important;
+    grid-template-columns:minmax(0,1fr) 142px !important;
+  }
+
+  .assal-compat-logo-stage{
+    width:142px !important;
+    height:142px !important;
+  }
+
+  .assal-compat-hero .logo-container,
+  .assal-compat-hero .notification{
+    width:142px !important;
+    height:142px !important;
+    clip-path:circle(71px at center) !important;
+  }
+
+  .assal-compat-hero .notification-text{
+    max-width:112px !important;
+    font-size:10.5px !important;
+  }
+
+  .assal-compat-hero-copy{
+    padding:13px 5px 13px 8px !important;
+  }
+
+  .assal-compat-hero-title{
+    font-size:19px !important;
+    line-height:1.38 !important;
+  }
+
+  .assal-compat-hero-line{
+    width:76px !important;
+    margin:6px auto 6px !important;
+  }
+
+  .assal-compat-hero-sub{
+    font-size:7.5px !important;
+  }
+
+  .assal-vertical-actions .assal-action-card{
+    min-height:52px !important;
+  }
+
+  .assal-reference-related span{
+    min-width:58px !important;
+    min-height:32px !important;
+    padding:7px 9px !important;
+    font-size:8.8px !important;
+  }
+}
+
+@media(max-width:370px){
+  .notification-container.assal-compat-hero{
+    height:140px !important;
+    min-height:140px !important;
+    grid-template-columns:minmax(0,1fr) 132px !important;
+  }
+
+  .assal-compat-logo-stage{
+    width:132px !important;
+    height:132px !important;
+  }
+
+  .assal-compat-hero .logo-container,
+  .assal-compat-hero .notification{
+    width:132px !important;
+    height:132px !important;
+    clip-path:circle(66px at center) !important;
+  }
+
+  .assal-compat-hero-title{
+    font-size:17.5px !important;
+  }
+
+  .assal-compat-hero-sub{
+    font-size:7px !important;
+  }
+}
+</style>
+
+
+<style id="assal-phase7-hero-alternate-results-style">
+/* ===== Slightly taller HERO only — logo size/layout stay exactly as PHASE6 ===== */
+.notification-container.assal-compat-hero{
+  height:184px !important;
+  min-height:184px !important;
+}
+
+/* The logo stage remains the same size; extra height becomes breathing room above/below it. */
+.assal-compat-logo-stage{
+  align-self:center !important;
+}
+
+/* ===== Visual separation between one compatibility result and the next ===== */
+.products-grid > .result-card.assal-corrected-result:nth-child(odd){
+  background:
+    radial-gradient(300px 120px at 100% 0%,rgba(95,179,255,.075),transparent 72%),
+    linear-gradient(145deg,rgba(16,34,57,.97),rgba(7,19,33,.985)) !important;
+  border-color:rgba(126,186,239,.13) !important;
+}
+
+.products-grid > .result-card.assal-corrected-result:nth-child(even){
+  background:
+    radial-gradient(300px 120px at 0% 0%,rgba(69,213,194,.075),transparent 72%),
+    linear-gradient(145deg,rgba(12,37,48,.97),rgba(7,23,34,.985)) !important;
+  border-color:rgba(92,203,187,.13) !important;
+}
+
+.products-grid > .result-card.assal-corrected-result:nth-child(odd) .assal-reference-result-icon{
+  background:rgba(95,179,255,.085) !important;
+  border-color:rgba(95,179,255,.11) !important;
+}
+
+.products-grid > .result-card.assal-corrected-result:nth-child(even) .assal-reference-result-icon{
+  color:#83e1d2 !important;
+  background:rgba(69,213,194,.085) !important;
+  border-color:rgba(69,213,194,.11) !important;
+}
+
+/* Mobile: enough height for the large circular logo without bloating the whole page */
+@media(max-width:560px){
+  .notification-container.assal-compat-hero{
+    height:170px !important;
+    min-height:170px !important;
+  }
+}
+
+@media(max-width:370px){
+  .notification-container.assal-compat-hero{
+    height:158px !important;
+    min-height:158px !important;
+  }
+}
+</style>
+
+
+<style id="assal-phase8-logo-stage-floating-arrows-style">
+/* ==========================================================
+   PHASE 8 — logo breathing room + invisible motion stage
+   ========================================================== */
+
+/* Shift the entire animated logo stage a little LEFT,
+   so the circle no longer feels stuck to the right edge. */
+.assal-compat-logo-stage{
+  transform:translateX(-12px) !important;
+
+  /* Critical: the stage itself must be visually invisible.
+     The HERO remains the only clipping boundary. */
+  overflow:visible !important;
+  background:transparent !important;
+  border:0 !important;
+  outline:0 !important;
+  box-shadow:none !important;
+}
+
+/* The large hero remains the single clean visual surface.
+   The moving logo may travel through the empty hero space,
+   but cannot escape the rounded outer hero. */
+.notification-container.assal-compat-hero{
+  overflow:hidden !important;
+}
+
+/* Keep logo/notification circles clean while moving.
+   No rectangular mask/border is allowed around their motion stage. */
+.assal-compat-logo-stage::before,
+.assal-compat-logo-stage::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* ==========================================================
+   "جديد التوافقات" icon — make the supported sync icon clear
+   ========================================================== */
+.assal-action-icon-new{
+  color:#83ead9 !important;
+  background:
+    linear-gradient(145deg,rgba(69,213,194,.11),rgba(95,179,255,.055)) !important;
+  border-color:rgba(69,213,194,.10) !important;
+}
+.assal-action-icon-new > i{
+  display:inline-block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  font-size:12px !important;
+  line-height:1 !important;
+}
+
+/* ==========================================================
+   Category strip — arrows float over the cards
+   ========================================================== */
+
+/* Remove the old "side blocks" feeling.
+   The strip now visually belongs to the main container itself. */
+.slider-container{
+  position:relative !important;
+  width:100% !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  gap:0 !important;
+}
+
+/* Keep enough scroll-padding so first/last categories remain usable,
+   while the arrow circles still look like they float ABOVE the strip. */
+.slider{
+  width:100% !important;
+  padding:4px 36px !important;
+  margin:0 !important;
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  scroll-padding-inline:38px !important;
+}
+
+/* True circular floating arrow buttons */
+.slider-btn{
+  position:absolute !important;
+  top:50% !important;
+  z-index:30 !important;
+
+  width:36px !important;
+  height:36px !important;
+  min-width:36px !important;
+  min-height:36px !important;
+  padding:0 !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  border-radius:50% !important;
+  clip-path:none !important;
+  overflow:visible !important;
+
+  color:#fff4d4 !important;
+  background:
+    linear-gradient(145deg,rgba(212,164,70,.94),rgba(159,112,39,.92)) !important;
+  border:1px solid rgba(255,222,151,.34) !important;
+
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.34),
+    0 0 0 3px rgba(214,169,79,.07),
+    0 0 18px rgba(214,169,79,.16),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+
+  -webkit-backdrop-filter:blur(7px);
+  backdrop-filter:blur(7px);
+
+  font-size:11px !important;
+  line-height:1 !important;
+
+  transform:translateY(-50%) !important;
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease,
+    filter .16s ease !important;
+}
+
+/* No square/black wrapper around the arrow icon */
+.slider-btn::before,
+.slider-btn::after{
+  content:none !important;
+  display:none !important;
+}
+.slider-btn i{
+  display:block !important;
+  margin:0 !important;
+  padding:0 !important;
+  color:inherit !important;
+  font-size:11px !important;
+  line-height:1 !important;
+  filter:none !important;
+}
+
+.slider-btn:hover{
+  transform:translateY(-50%) scale(1.06) !important;
+  filter:brightness(1.06) !important;
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.36),
+    0 0 0 4px rgba(214,169,79,.08),
+    0 0 22px rgba(214,169,79,.20),
+    inset 0 1px 0 rgba(255,255,255,.20) !important;
+}
+
+.slider-btn:active{
+  transform:translateY(-50%) scale(.94) !important;
+  filter:brightness(.96) !important;
+  box-shadow:
+    0 7px 18px rgba(0,0,0,.32),
+    0 0 0 2px rgba(214,169,79,.07),
+    inset 0 2px 7px rgba(78,48,12,.34) !important;
+}
+
+/* Float over the strip instead of occupying separate side lanes */
+.prev-btn{
+  left:4px !important;
+  right:auto !important;
+}
+.next-btn{
+  right:4px !important;
+  left:auto !important;
+}
+
+/* Mobile refinements */
+@media(max-width:560px){
+  .assal-compat-logo-stage{
+    transform:translateX(-9px) !important;
+  }
+
+  .slider{
+    padding-left:34px !important;
+    padding-right:34px !important;
+    scroll-padding-inline:36px !important;
+  }
+
+  .slider-btn{
+    width:34px !important;
+    height:34px !important;
+    min-width:34px !important;
+    min-height:34px !important;
+    font-size:10px !important;
+  }
+
+  .prev-btn{
+    left:3px !important;
+  }
+  .next-btn{
+    right:3px !important;
+  }
+}
+
+@media(max-width:370px){
+  .assal-compat-logo-stage{
+    transform:translateX(-7px) !important;
+  }
+
+  .slider-btn{
+    width:32px !important;
+    height:32px !important;
+    min-width:32px !important;
+    min-height:32px !important;
+  }
+}
+</style>
+
+
+<style id="assal-phase10-round-top-footer-match-style">
+/* ===== زر الصعود: دائري فعلياً ===== */
+.scroll-to-top{
+  width:40px !important;
+  height:40px !important;
+  min-width:40px !important;
+  min-height:40px !important;
+  padding:0 !important;
+  border-radius:50% !important;
+  clip-path:circle(20px at center) !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:linear-gradient(135deg,#3e9fd1,#2fb7a7) !important;
+  border:1px solid rgba(151,224,236,.18) !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+.scroll-to-top i{
+  margin:0 !important;
+  padding:0 !important;
+  color:#fff !important;
+  font-size:15px !important;
+  line-height:1 !important;
+}
+.scroll-to-top:hover{
+  transform:translateY(-2px) scale(1.03) !important;
+}
+
+/* ===== الفوتر: نفس لون وهوية الهيدر ===== */
+footer{
+  height:var(--appbar-h) !important;
+  min-height:var(--appbar-h) !important;
+  padding:0 12px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  background:rgba(6,14,25,.90) !important;
+  border:0 !important;
+  border-top:1px solid rgba(132,176,226,.12) !important;
+  box-shadow:0 -8px 28px rgba(0,0,0,.30) !important;
+
+  -webkit-backdrop-filter:blur(15px) !important;
+  backdrop-filter:blur(15px) !important;
+}
+
+footer p{
+  margin:0 !important;
+  padding:0 !important;
+  color:#d9e8f7 !important;
+  font-family:'Cairo',sans-serif !important;
+  font-size:10.5px !important;
+  line-height:1.4 !important;
+  font-weight:750 !important;
+  letter-spacing:.05px !important;
+  text-align:center !important;
+  opacity:.96 !important;
+}
+
+@media(max-width:560px){
+  .scroll-to-top{
+    width:40px !important;
+    height:40px !important;
+    min-width:40px !important;
+    min-height:40px !important;
+    clip-path:circle(20px at center) !important;
+  }
+
+  footer p{
+    font-size:10px !important;
+  }
+}
+</style>
+
+
+<style id="assal-phase11-result-card-color-separation-style">
+/* ===== PHASE 11: stronger visual separation between search-result cards ===== */
+.result-card.assal-reference-result{
+  position:relative !important;
+  overflow:hidden !important;
+}
+.result-card.assal-reference-result::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:3px;
+  border-radius:19px 0 0 19px;
+  background:linear-gradient(180deg,rgba(88,212,193,.95),rgba(83,155,255,.90));
+  opacity:.92;
+  pointer-events:none;
+}
+.result-card.assal-reference-result::after{
+  content:"";
+  position:absolute;
+  inset:1px;
+  border-radius:18px;
+  pointer-events:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+}
+.result-card.assal-reference-result:nth-child(odd){
+  background:
+    radial-gradient(280px 135px at 100% 0%,rgba(64,214,191,.11),transparent 72%),
+    linear-gradient(145deg,rgba(15,35,57,.96),rgba(7,20,34,.985)) !important;
+  border-color:rgba(80,201,186,.16) !important;
+  box-shadow:0 15px 34px rgba(0,0,0,.23), 0 0 0 1px rgba(80,201,186,.03) inset !important;
+}
+.result-card.assal-reference-result:nth-child(even){
+  background:
+    radial-gradient(280px 135px at 100% 0%,rgba(94,164,255,.12),transparent 72%),
+    linear-gradient(145deg,rgba(18,35,58,.965),rgba(8,18,34,.99)) !important;
+  border-color:rgba(110,168,244,.16) !important;
+  box-shadow:0 15px 34px rgba(0,0,0,.23), 0 0 0 1px rgba(110,168,244,.03) inset !important;
+}
+.result-card.assal-reference-result:nth-child(even)::before{
+  background:linear-gradient(180deg,rgba(105,171,255,.94),rgba(70,217,221,.90));
+}
+.result-card.assal-reference-result:nth-child(odd) .assal-reference-result-icon{
+  color:#7be5d0 !important;
+  background:rgba(69,213,194,.095) !important;
+  border-color:rgba(69,213,194,.14) !important;
+}
+.result-card.assal-reference-result:nth-child(even) .assal-reference-result-icon{
+  color:#8ecbff !important;
+  background:rgba(95,179,255,.095) !important;
+  border-color:rgba(95,179,255,.14) !important;
+}
+.result-card.assal-reference-result:nth-child(odd) .assal-reference-related span{
+  background:rgba(69,213,194,.048) !important;
+  border-color:rgba(69,213,194,.085) !important;
+  color:#c6e9e1 !important;
+}
+.result-card.assal-reference-result:nth-child(even) .assal-reference-related span{
+  background:rgba(95,179,255,.05) !important;
+  border-color:rgba(95,179,255,.085) !important;
+  color:#d1e4f6 !important;
+}
+.result-card.assal-reference-result + .result-card.assal-reference-result{
+  margin-top:2px !important;
+}
+</style>
+
+
+<style id="assal-phase12-searched-compat-badge-highlight-style">
+/* PHASE 12 — subtle highlight for the searched item inside related compatibilities */
+.result-card.assal-reference-result .assal-reference-related span.assal-search-hit{
+  color:#fff4ce !important;
+  background:
+    linear-gradient(145deg,rgba(221,177,78,.18),rgba(178,128,44,.10)) !important;
+  border-color:rgba(236,196,105,.34) !important;
+  box-shadow:
+    0 6px 16px rgba(0,0,0,.14),
+    0 0 0 1px rgba(236,196,105,.06),
+    inset 0 1px 0 rgba(255,255,255,.06) !important;
+  font-weight:900 !important;
+}
+</style>
+
 </head>
 <body>
     <!-- Header -->
     <header class="header">
-        <div class="header-title">مكتب عسل</div>
+        <div class="header-title assal-compat-header-title">
+          <span class="assal-compat-header-mark"><i class="fas fa-code-branch"></i></span>
+          <span>توافقات</span>
+        </div>
       
       
       <div class="header-buttons">
@@ -3088,20 +5176,41 @@ input, textarea, [contenteditable="true"]{
     </header>
 
     <!-- New Items Modal -->
-    <div id="newItemsModal">
-        <button class="close-modal-btn" onclick="closeNewItemsModal()"><i class="fas fa-times"></i></button>
-        <h2>توافقات جديدة</h2>
-        <div class="modal-content"></div>
+    <div id="newItemsModal" class="assal-centered-overlay" aria-hidden="true">
+        <section class="assal-centered-panel assal-new-items-panel" role="dialog" aria-modal="true" aria-label="توافقات جديدة">
+            <div class="assal-centered-head">
+                <div class="assal-centered-head-copy">
+                    <span class="assal-centered-head-icon"><i class="fas fa-sync"></i></span>
+                    <div>
+                        <small>آخر الإضافات</small>
+                        <h2>توافقات جديدة</h2>
+                    </div>
+                </div>
+                <button class="close-modal-btn assal-elegant-close" type="button" onclick="closeNewItemsModal()" aria-label="إغلاق">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-content"></div>
+        </section>
     </div>
 
     <div class="container">
         <!-- Logo -->
-        <div class="notification-container">
-            <div class="logo-container" id="logo">
-                <img src="images/logo.png" alt="Logo">
+        <div class="notification-container assal-compat-hero">
+            <div class="assal-compat-hero-copy">
+                <div class="assal-compat-hero-title">توافقات قطع الغيار</div>
+                <div class="assal-compat-hero-line"></div>
+                <div class="assal-compat-hero-sub">بحث سريع • نتائج دقيقة</div>
             </div>
-            <div class="notification" id="notification">
-                <div class="notification-text" id="notification-text"></div>
+
+            <div class="assal-compat-logo-stage" aria-label="شعار عسل">
+                <div class="logo-container" id="logo">
+                    <img src="images/logo.png" alt="Logo">
+                </div>
+
+                <div class="notification" id="notification">
+                    <div class="notification-text" id="notification-text"></div>
+                </div>
             </div>
         </div>
 
@@ -3113,13 +5222,36 @@ input, textarea, [contenteditable="true"]{
             </div>
         </div>
 
-        <!-- Categories -->
-        <div class="categories">
-            <button class="new-category-btn" onclick="showSubscriptionDetails()"><i class="fas fa-info-circle"></i> تفاصيل الاشتراك</button>
-            <button class="category-btn" onclick="showUsageStats()"><i class="fas fa-shopping-cart"></i> إحصائيات الاستخدام</button>
-            <button class="category-btn" onclick="showNewSimilarities()" title="جديد التوافقات">
-                <i class="fas fa-sync"></i> جديد التوافقات 
-                <span class="new-similarities-count" id="newSimilaritiesCount">0</span>
+        <!-- Premium Actions -->
+        <div class="categories assal-vertical-actions">
+            <button class="new-category-btn assal-action-card" onclick="showSubscriptionDetails()" type="button">
+                <span class="assal-action-icon assal-action-icon-sub"><i class="fas fa-crown"></i></span>
+                <span class="assal-action-copy">
+                    <strong>تفاصيل الاشتراك</strong>
+                    <small>الحالة والمدة المتبقية</small>
+                </span>
+                <span class="assal-action-arrow"><i class="fas fa-chevron-left"></i></span>
+            </button>
+
+            <button class="category-btn assal-action-card" onclick="showUsageStats()" type="button">
+                <span class="assal-action-icon assal-action-icon-stats"><i class="fas fa-chart-line"></i></span>
+                <span class="assal-action-copy">
+                    <strong>إحصائيات الاستخدام</strong>
+                    <small>ملخص البحث والمحفوظات</small>
+                </span>
+                <span class="assal-action-arrow"><i class="fas fa-chevron-left"></i></span>
+            </button>
+
+            <button class="category-btn assal-action-card" onclick="showNewSimilarities()" title="جديد التوافقات" type="button">
+                <span class="assal-action-icon assal-action-icon-new"><i class="fas fa-sync"></i></span>
+                <span class="assal-action-copy">
+                    <strong>جديد التوافقات</strong>
+                    <small>آخر الإضافات لقاعدة البيانات</small>
+                </span>
+                <span class="assal-action-end">
+                    <span class="new-similarities-count" id="newSimilaritiesCount">0</span>
+                    <i class="fas fa-chevron-left"></i>
+                </span>
             </button>
         </div>
 
@@ -3164,11 +5296,23 @@ input, textarea, [contenteditable="true"]{
         </div>
     </div>
 
-    <!-- Notes Drawer -->
-    <div class="notes-drawer" id="notesDrawer">
-        <i class="fas fa-times close-btn" onclick="toggleNotes()"></i>
-        <h3>سلة الملاحظات</h3>
-        <div class="notes-items-container" id="notesItems"></div>
+    <!-- Notes Window -->
+    <div class="notes-drawer assal-centered-overlay" id="notesDrawer" aria-hidden="true">
+        <section class="assal-centered-panel assal-notes-panel" role="dialog" aria-modal="true" aria-label="سلة الملاحظات">
+            <div class="assal-centered-head">
+                <div class="assal-centered-head-copy">
+                    <span class="assal-centered-head-icon"><i class="fas fa-bookmark"></i></span>
+                    <div>
+                        <small>المحفوظات</small>
+                        <h3>سلة الملاحظات</h3>
+                    </div>
+                </div>
+                <button class="close-btn assal-elegant-close" type="button" onclick="toggleNotes()" aria-label="إغلاق">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="notes-items-container" id="notesItems"></div>
+        </section>
     </div>
 
     <!-- Scroll to Top -->
@@ -3182,7 +5326,7 @@ input, textarea, [contenteditable="true"]{
     <script>
       
       
-      const DEV_NO_FIREBASE = false; // ✅ خليها true بس وقت التجربة
+      const DEV_NO_FIREBASE = false; // PRODUCTION: Firebase + subscription verification enabled
       
       
       
@@ -3495,16 +5639,14 @@ function triggerAnimation() {
 
   tl.to(logo, {
     x: 0,
+    y: 0,
     opacity: 1,
     scale: 1,
-    duration: 0.75,
-    ease: "power3.out"
+    duration: 0.86,
+    ease: "power2.out"
   });
 
-  // 7) subtle settle (تثبيت ناعم)
-  tl.to(logo, { y: -2, duration: 0.18, ease: "power2.out" })
-    .to(logo, { y: 0, duration: 0.22, ease: "power2.inOut" });
-
+  // 7) تثبيت مباشر وناعم بدون bounce إضافي — أخف على WebView
   // pause
   tl.to({}, { duration: 0.55 });
 }
@@ -3844,7 +5986,7 @@ function triggerAnimation() {
             if (newItems.length === 0) {
                 newSimilaritiesTicker.innerHTML = `<span>لا توجد توافقات جديدة حاليًا</span>`;
             } else {
-                const tickerItems = newItems.map(item => `<span><i class="fas fa-sync"></i> ${item["Item"]}</span>`);
+                const tickerItems = newItems.map(item => `<span><i class="fas fa-sparkles"></i> ${escapeCompatHtml(cleanCompatDisplayText(item["Item"]))}</span>`);
                 newSimilaritiesTicker.innerHTML = tickerItems.join(" | ");
             }
             return;
@@ -3870,7 +6012,7 @@ function triggerAnimation() {
         <div class="${circleClass}">${categoryName}</div>
         <div class="item-details">
             <div class="new-badge">جديد</div>
-            <h4><i class="${iconClass}"></i> ${item["Item"]}</h4>
+            <h4><i class="${iconClass}"></i> ${escapeCompatHtml(cleanCompatDisplayText(item["Item"]))}</h4>
             <!-- إزالة زر أضف إلى الملاحظات -->
         </div>
     `;
@@ -3908,57 +6050,37 @@ function triggerAnimation() {
     function openModal() {
         try {
             if (isModalOpen) return;
+
             const modal = document.getElementById("newItemsModal");
-            if (modal.style.display === "none" || !modal.style.display) {
-                modal.style.display = "flex";
-                modal.style.animation = "slideDownModal 0.5s ease-out forwards";
-                isModalOpen = true;
-                loadNewItems();
-            }
+            if (!modal) return;
+
+            modal.classList.add("is-open");
+            modal.setAttribute("aria-hidden", "false");
+            document.documentElement.classList.add("assal-modal-lock");
+            document.body.classList.add("assal-modal-lock");
+
+            isModalOpen = true;
+            loadNewItems();
         } catch (error) {
             console.error("Error in openModal:", error);
-          
-          fireLoginStyle({
-  title: 'خطأ',
-  html: `<p style="color:#ff4d4d;">حدث خطأ أثناء فتح النافذة: ${error.message}</p>`,
-  icon: 'info',
-  iconHtml: '<i class="fas fa-window-restore"></i>',
-  showConfirmButton: true,
-  confirmButtonText: 'موافق',
-  customClass: {
-    confirmButton: 'login-confirm danger'
-  }
-});
-
-          
+            isModalOpen = false;
         }
     }
 
     function closeNewItemsModal() {
         try {
             const modal = document.getElementById("newItemsModal");
-            modal.style.animation = "slideUpModal 0.5s ease-in forwards";
-            setTimeout(() => {
-                modal.style.display = "none";
-                isModalOpen = false;
-            }, 500);
+            if (modal) {
+                modal.classList.remove("is-open");
+                modal.setAttribute("aria-hidden", "true");
+            }
+
+            document.documentElement.classList.remove("assal-modal-lock");
+            document.body.classList.remove("assal-modal-lock");
+            isModalOpen = false;
         } catch (error) {
             console.error("Error in closeNewItemsModal:", error);
             isModalOpen = false;
-        
-        fireLoginStyle({
-  title: 'خطأ',
-  html: `<p style="color:#ff4d4d;">حدث خطأ أثناء إغلاق النافذة: ${error.message}</p>`,
-  icon: 'info',
-  iconHtml: '<i class="fas fa-window-close"></i>',
-  showConfirmButton: true,
-  confirmButtonText: 'موافق',
-  customClass: {
-    confirmButton: 'login-confirm danger'
-  }
-});
-
-        
         }
     }
 
@@ -4628,10 +6750,34 @@ function fireLoginStyle(opts = {}) {
     };
 
 
-    document.getElementById("searchInput").addEventListener("keydown", function(event) {
+    let assalInstantSearchTimer = null;
+    const assalCompatSearchInput = document.getElementById("searchInput");
+
+    assalCompatSearchInput.addEventListener("input", function() {
+        clearTimeout(assalInstantSearchTimer);
+
+        assalInstantSearchTimer = setTimeout(() => {
+            const value = assalCompatSearchInput.value.trim();
+
+            if (!value) {
+                document.getElementById("resultsContainer")?.classList.remove("visible");
+                const grid = document.getElementById("results");
+                if (grid) grid.innerHTML = "";
+
+                const scrollButton = document.querySelector('.scroll-to-top');
+                if (scrollButton) scrollButton.classList.remove('visible');
+                return;
+            }
+
+            searchItems({ countStat: false, scroll: false });
+        }, 220);
+    });
+
+    assalCompatSearchInput.addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
             event.preventDefault();
-            searchItems();
+            clearTimeout(assalInstantSearchTimer);
+            searchItems({ countStat: true, scroll: false });
         }
     });
 
@@ -4639,111 +6785,409 @@ function fireLoginStyle(opts = {}) {
         return str.replace(/\s+/g, '').toLowerCase();
     }
 
+    function cleanCompatDisplayText(value) {
+        return String(value == null ? '' : value)
+            .replace(/\s{2,}/g, ' ')
+            .replace(/\s*\/\s*/g, ' / ')
+            .replace(/\s*\|\s*/g, ' | ')
+            .replace(/\s*=\s*/g, ' = ')
+            .replace(/^[\s\/|=,\-]+|[\s\/|=,\-]+$/g, '')
+            .trim() || '—';
+    }
+
+    function escapeCompatHtml(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function splitCompatDisplayModels(value) {
+        const cleaned = cleanCompatDisplayText(value);
+        return cleaned
+            .split(/\s*(?:\/|\||=|↔|→|;|،)\s*/)
+            .map(x => x.trim())
+            .filter(Boolean);
+    }
+
+    function normalizeScreenDescriptor(value) {
+        const t = String(value || '')
+            .trim()
+            .toUpperCase()
+            .replace(/\s+/g, ' ');
+
+        if (!t) return '';
+
+        if (/^\(?\s*N\s*(?:\/|-)\s*F\s*\)?$/.test(t) || t === 'NF') return '(N/F)';
+        if (/^\(?\s*W\s*(?:\/|-)\s*F\s*\)?$/.test(t) || t === 'WF') return '(W/F)';
+        if (/^ORIGINAL\s+NEW$/.test(t)) return 'ORIGINAL NEW';
+        if (/^SAME\s+ORI$/.test(t)) return 'SAME ORI';
+        if (t === 'BLACK') return 'BLACK';
+        if (t === 'WHITE') return 'WHITE';
+        if (t === 'ORIGINAL') return 'ORIGINAL';
+        if (t === 'SAME') return 'SAME';
+        if (t === 'ORI') return 'ORI';
+
+        return '';
+    }
+
+    function orderScreenDescriptors(items) {
+        const raw = (items || []).map(normalizeScreenDescriptor).filter(Boolean);
+
+        // Merge SAME + ORI even if they came as separate tokens.
+        const merged = [];
+        for (let i = 0; i < raw.length; i++) {
+            if (raw[i] === 'SAME' && raw[i + 1] === 'ORI') {
+                merged.push('SAME ORI');
+                i++;
+            } else {
+                merged.push(raw[i]);
+            }
+        }
+
+        const unique = [...new Set(merged)];
+
+        // Canonical display order requested by the user.
+        const frame = unique.find(x => x === '(N/F)' || x === '(W/F)');
+        const color = unique.find(x => x === 'BLACK' || x === 'WHITE');
+
+        let quality = unique.find(x => x === 'ORIGINAL NEW' || x === 'SAME ORI');
+        if (!quality) quality = unique.find(x => x === 'ORIGINAL');
+
+        const leftovers = unique.filter(x =>
+            x !== frame &&
+            x !== color &&
+            x !== quality &&
+            x !== 'SAME' &&
+            x !== 'ORI'
+        );
+
+        return [frame, color, quality, ...leftovers].filter(Boolean);
+    }
+
+    function parseScreenCompatibility(rawValue) {
+        let raw = cleanCompatDisplayText(rawValue);
+
+        // Protect compound qualities before separator parsing.
+        raw = raw
+            .replace(/\bORIGINAL\s*(?:\/|\||=|,|;|،)?\s*NEW\b/gi, 'ORIGINAL NEW')
+            .replace(/\bSAME\s*(?:\/|\||=|,|;|،)?\s*ORI\b/gi, 'SAME ORI');
+
+        const descriptors = [];
+
+        // Extract descriptors from the ENTIRE row before splitting by "/".
+        // This prevents N/F and W/F from becoming secondary chips.
+        const descriptorRe =
+            /\(\s*N\s*(?:\/|-)\s*F\s*\)|\bN\s*(?:\/|-)\s*F\b|\bNF\b|\(\s*W\s*(?:\/|-)\s*F\s*\)|\bW\s*(?:\/|-)\s*F\b|\bWF\b|\bORIGINAL\s+NEW\b|\bSAME\s+ORI\b|\bBLACK\b|\bWHITE\b|\bORIGINAL\b|\bSAME\b|\bORI\b/gi;
+
+        let modelText = raw.replace(descriptorRe, (match) => {
+            const normalized = normalizeScreenDescriptor(match);
+            if (normalized) descriptors.push(normalized);
+            return ' ';
+        });
+
+        modelText = modelText
+            .replace(/\s{2,}/g, ' ')
+            .replace(/\s*\/\s*/g, ' / ')
+            .replace(/\s*\|\s*/g, ' | ')
+            .replace(/\s*=\s*/g, ' = ')
+            .replace(/\s*;\s*/g, ' ; ')
+            .replace(/\s*،\s*/g, ' ، ')
+            .replace(/^[\s\/|=,;،\-]+|[\s\/|=,;،\-]+$/g, '')
+            .trim();
+
+        const models = modelText
+            .split(/\s*(?:\/|\||=|↔|→|;|،)\s*/)
+            .map(x => x.replace(/\s{2,}/g, ' ').trim())
+            .filter(Boolean);
+
+        const primaryBase = models.shift() || '';
+        const orderedDescriptors = orderScreenDescriptors(descriptors);
+
+        const primary = [primaryBase, ...orderedDescriptors]
+            .filter(Boolean)
+            .join(' ')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+
+        const related = [];
+        const seen = new Set();
+
+        for (const sourceModel of models) {
+            // Second safety pass: no descriptor is allowed inside a secondary model.
+            const cleanedSecondary = String(sourceModel || '')
+                .replace(descriptorRe, ' ')
+                .replace(/\s{2,}/g, ' ')
+                .replace(/^[\s\/|=,;،\-]+|[\s\/|=,;،\-]+$/g, '')
+                .trim();
+
+            if (!cleanedSecondary) continue;
+
+            const key = cleanedSecondary.toUpperCase();
+            if (key === primaryBase.toUpperCase() || seen.has(key)) continue;
+
+            seen.add(key);
+            related.push(cleanedSecondary);
+        }
+
+        return {
+            primary: primary || cleanCompatDisplayText(rawValue),
+            related
+        };
+    }
+
+    function parseChargingBaseCompatibility(rawValue) {
+        const raw = cleanCompatDisplayText(rawValue);
+
+        // C/C is part of the charging-base item name, not a compatibility separator.
+        // Protect every C/C occurrence before the normal "/" splitter runs.
+        const marker = '__ASSAL_CC__';
+        const protectedText = raw.replace(/\bC\s*\/\s*C\b/gi, marker);
+
+        const parts = protectedText
+            .split(/\s*(?:\/|\||=|↔|→|;|،)\s*/)
+            .map(x => x.replace(new RegExp(marker, 'g'), 'C/C').replace(/\s{2,}/g, ' ').trim())
+            .filter(Boolean);
+
+        const primary = parts.shift() || raw;
+        const related = [];
+        const seen = new Set();
+
+        for (const item of parts) {
+            const clean = String(item || '').trim();
+            if (!clean) continue;
+
+            const key = clean.toUpperCase();
+            if (key === primary.toUpperCase() || seen.has(key)) continue;
+
+            seen.add(key);
+            related.push(clean);
+        }
+
+        return { primary, related };
+    }
+
+    function parseCompatDisplayItem(rawValue, category) {
+        const categoryKey = String(category);
+
+        if (categoryKey === '1') {
+            return parseScreenCompatibility(rawValue);
+        }
+
+        if (categoryKey === '8') {
+            return parseChargingBaseCompatibility(rawValue);
+        }
+
+        const parts = splitCompatDisplayModels(rawValue);
+        return {
+            primary: parts[0] || cleanCompatDisplayText(rawValue),
+            related: parts.slice(1)
+        };
+    }
+
+    function getCompatDisplayCategory(category) {
+        const map = {
+            '1':['شاشات','fas fa-tv'],
+            '2':['بطاريات','fas fa-battery-full'],
+            '3':['جرس النغمات','fas fa-bell'],
+            '4':['سماعة الاتصال','fas fa-headphones'],
+            '5':['كاميرات','fas fa-camera'],
+            '6':['عدسة الكاميرا','fas fa-camera-retro'],
+            '7':['بورد الشحن','fas fa-plug'],
+            '8':['قواعد الشحن','fas fa-charging-station'],
+            '9':['كونكتر الشاشة','fas fa-link'],
+            '10':['بصمات','fas fa-fingerprint'],
+            '11':['شريط الهيتفون','fas fa-headphones-alt'],
+            '12':['شريط البور والصوت','fas fa-volume-up'],
+            '13':['گلاسات','fas fa-shield-alt'],
+            '14':['شريط الهوم','fas fa-home'],
+            '15':['آيسيات','fas fa-microchip'],
+            '16':['فلاتات الشاشة','fas fa-film'],
+            '17':['هولدر السيم كارت','fas fa-sim-card'],
+            '18':['بصمات تحت الشاشة','fas fa-fingerprint'],
+            '19':['كيبلات الإشارة','fas fa-wifi'],
+            '20':['منوعة','fas fa-cubes']
+        };
+        const row = map[String(category)] || ['توافق','fas fa-code-branch'];
+        return {label:row[0], icon:row[1]};
+    }
+
+    function getCompatSearchResults() {
+        const queryText = String(document.getElementById("searchInput")?.value || '').trim();
+        let results = Array.isArray(database.SIMILARITES) ? database.SIMILARITES : [];
+
+        if (currentCategory && currentCategory !== 'all') {
+            results = results.filter(item => String(item.Category) === String(currentCategory));
+        }
+
+        if (queryText) {
+            const query = normalizeString(queryText);
+            results = results.filter(item => normalizeString(String(item["Item"] || '')).includes(query));
+        }
+
+        return { queryText, results };
+    }
+
     function filterByCategory(category) {
-        currentCategory = category;
+        currentCategory = String(category);
+
         document.querySelectorAll(".category").forEach(cat => cat.classList.remove("active"));
         const selectedCategory = document.querySelector(`.category[onclick="filterByCategory('${category}')"]`);
-        if (selectedCategory) {
-            selectedCategory.classList.add("active");
+        if (selectedCategory) selectedCategory.classList.add("active");
+
+        const queryText = String(document.getElementById("searchInput")?.value || '').trim();
+        const resultsContainer = document.getElementById("resultsContainer");
+        const productsGrid = document.getElementById("results");
+
+        // Selecting a category by itself must NOT dump all compatibilities.
+        // Results are shown only after the user has typed a search value.
+        if (!queryText) {
+            resultsContainer?.classList.remove('visible');
+            if (productsGrid) productsGrid.innerHTML = '';
+
+            const scrollButton = document.querySelector('.scroll-to-top');
+            if (scrollButton) scrollButton.classList.remove('visible');
+            return;
         }
-        let results = database.SIMILARITES || [];
-        if (category !== 'all') {
-            results = results.filter(item => String(item.Category) === category);
-        }
+
+        const { results } = getCompatSearchResults();
         displayResults(results);
-        scrollToResults();
+
         stats.searches++;
         localStorage.setItem('stats', JSON.stringify(stats));
     }
 
-    function searchItems() {
-        const searchInput = document.getElementById("searchInput").value.trim();
+    function searchItems(options = {}) {
+        const { queryText, results } = getCompatSearchResults();
         const resultsContainer = document.getElementById("resultsContainer");
 
-        if (!searchInput && !currentCategory) {
-  fireLoginStyle({
-    title: 'حقل فارغ',
-    text: 'يرجى اختيار صنف أو كتابة اسم العنصر قبل البحث',
-    icon: 'info',
-    iconHtml: '<i class="fas fa-triangle-exclamation"></i>',
-    showConfirmButton: true,
-    confirmButtonText: 'موافق',
-    showCancelButton: false,
-    allowOutsideClick: true,
-    allowEscapeKey: true,
-    customClass: {
-      confirmButton: 'login-confirm',
-    }
-  }).then(() => {
-    triggerAnimation();
-  });
+        // Search text is mandatory, even when a category is selected.
+        if (!queryText) {
+            resultsContainer?.classList.remove('visible');
+            const productsGrid = document.getElementById('results');
+            if (productsGrid) productsGrid.innerHTML = '';
 
-  resultsContainer.classList.remove('visible');
-  return;
-}
-
-
-        let results = database.SIMILARITES || [];
-        if (currentCategory && currentCategory !== 'all') {
-            results = results.filter(item => String(item.Category) === currentCategory); // تصحيح المتغير
-        }
-        if (searchInput) {
-            const query = normalizeString(searchInput);
-            results = results.filter(item => normalizeString(item["Item"]).includes(query));
+            const scrollButton = document.querySelector('.scroll-to-top');
+            if (scrollButton) scrollButton.classList.remove('visible');
+            return;
         }
 
-       if (results.length === 0) {
-  fireLoginStyle({
-    title: 'لا توجد نتائج',
-    text: 'ماكو توافقات بهذا الاسم أو الصنف',
-    icon: 'info',
-    iconHtml: '<i class="fas fa-magnifying-glass"></i>',
-    showConfirmButton: true,
-    confirmButtonText: 'موافق',
-    showCancelButton: false,
-    allowOutsideClick: true,
-    allowEscapeKey: true,
-    customClass: {
-      confirmButton: 'login-confirm',
-    }
-  }).then(() => {
-    triggerAnimation();
-  });
-
-  resultsContainer.classList.remove('visible');
-  return;
-}
-
-
-        stats.searches++;
-        localStorage.setItem('stats', JSON.stringify(stats));
         displayResults(results);
-        scrollToResults();
+
+        if (options.countStat !== false) {
+            stats.searches++;
+            localStorage.setItem('stats', JSON.stringify(stats));
+        }
+
+        if (options.scroll === true) {
+            scrollToResults();
+        }
     }
 
     function displayResults(results) {
         const resultsContainer = document.getElementById("resultsContainer");
         const productsGrid = document.getElementById("results");
-        productsGrid.innerHTML = results.map(item => `
-            <div class="result-card">
-                <img src="images/default.png" alt="Item Image" loading="lazy">
-                <h4>${item["Item"]}</h4>
-                <button onclick="addToNotes('${item["Item"]}')">أضف إلى الملاحظات</button>
-            </div>
-        `).join('');
+        const list = Array.isArray(results) ? results : [];
 
-        if (results.length > 0) {
+        if (!list.length) {
+            productsGrid.innerHTML = `
+                <div class="assal-inline-empty">
+                    <span class="assal-inline-empty-icon"><i class="fas fa-magnifying-glass"></i></span>
+                    <strong>ماكو توافق مطابق</strong>
+                    <small>جرّب جزء أقصر من اسم الموديل أو غيّر الصنف المختار.</small>
+                </div>
+            `;
             resultsContainer.classList.add('visible');
-        } else {
-            resultsContainer.classList.remove('visible');
+
+            const scrollButton = document.querySelector('.scroll-to-top');
+            if (scrollButton) scrollButton.classList.remove('visible');
+            return;
         }
+
+        productsGrid.innerHTML = list.map((item, index) => {
+            const rawItem = String(item?.["Item"] ?? '');
+            const parsed = parseCompatDisplayItem(rawItem, item?.Category);
+            const categoryMeta = getCompatDisplayCategory(item?.Category);
+            const primary = parsed.primary || cleanCompatDisplayText(rawItem);
+            const related = parsed.related || [];
+            const searchQuery = String(document.getElementById("searchInput")?.value || '').trim();
+            const normalizedSearchQuery = searchQuery ? normalizeString(searchQuery) : '';
+            const isSaved = Array.isArray(notes) && notes.some(n => String(n?.name || '') === rawItem);
+
+            return `
+                <article class="result-card assal-reference-result assal-corrected-result">
+                    <div class="assal-reference-result-icon">
+                        <i class="${categoryMeta.icon}"></i>
+                    </div>
+
+                    <div class="assal-reference-result-body">
+                        <div class="assal-reference-result-head">
+                            <span class="assal-reference-result-category">${escapeCompatHtml(categoryMeta.label)}</span>
+                            <span class="assal-reference-result-status"><i class="fas fa-circle-check"></i> توافق</span>
+                        </div>
+
+                        <h4>${escapeCompatHtml(primary)}</h4>
+
+                        ${related.length ? `
+                            <div class="assal-reference-related-label">
+                                <i class="fas fa-code-branch"></i>
+                                <span>يتوافق أيضاً مع</span>
+                                <b>${related.length}</b>
+                            </div>
+                            <div class="assal-reference-related">
+                                ${related.map(model => {
+                                    const isSearchHit = normalizedSearchQuery &&
+                                        normalizeString(String(model || '')).includes(normalizedSearchQuery);
+
+                                    return `<span class="${isSearchHit ? 'assal-search-hit' : ''}">${escapeCompatHtml(model)}</span>`;
+                                }).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <button class="assal-reference-save ${isSaved ? 'is-saved' : ''}" type="button"
+                            data-result-index="${index}"
+                            title="${isSaved ? 'محفوظ' : 'حفظ في الملاحظات'}"
+                            aria-label="${isSaved ? 'محفوظ' : 'حفظ في الملاحظات'}">
+                        <i class="${isSaved ? 'fas' : 'far'} fa-bookmark"></i>
+                    </button>
+                </article>
+            `;
+        }).join('');
+
+        productsGrid.querySelectorAll('.assal-reference-save').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = Number(this.dataset.resultIndex);
+                const row = list[idx];
+                const rawItem = String(row?.["Item"] ?? '');
+                if (!rawItem) return;
+
+                const existingIndex = Array.isArray(notes)
+                    ? notes.findIndex(n => String(n?.name || '') === rawItem)
+                    : -1;
+
+                if (existingIndex >= 0) {
+                    removeFromNotes(existingIndex);
+                    this.classList.remove('is-saved');
+                    this.innerHTML = '<i class="far fa-bookmark"></i>';
+                    this.title = 'حفظ في الملاحظات';
+                    this.setAttribute('aria-label', 'حفظ في الملاحظات');
+                } else {
+                    addToNotes(rawItem);
+                    this.classList.add('is-saved');
+                    this.innerHTML = '<i class="fas fa-bookmark"></i>';
+                    this.title = 'محفوظ';
+                    this.setAttribute('aria-label', 'محفوظ');
+                }
+            });
+        });
+
+        resultsContainer.classList.add('visible');
 
         const scrollButton = document.querySelector('.scroll-to-top');
-        if (results.length > 0) {
-            scrollButton.classList.add('visible');
-        } else {
-            scrollButton.classList.remove('visible');
-        }
+        if (scrollButton) scrollButton.classList.toggle('visible', list.length > 2);
     }
 
     function scrollToResults() {
@@ -4762,12 +7206,16 @@ function fireLoginStyle(opts = {}) {
 
  function toggleNotes() {
   const notesDrawer = document.getElementById('notesDrawer');
-  notesDrawer.classList.toggle('active');
+  if (!notesDrawer) return;
 
-  // إذا انفتحت السلة، حدّث المحتوى والعداد فوراً
-  if (notesDrawer.classList.contains('active')) {
-    updateNotes();
-  }
+  notesDrawer.classList.toggle('active');
+  const isOpen = notesDrawer.classList.contains('active');
+
+  notesDrawer.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+  document.documentElement.classList.toggle('assal-modal-lock', isOpen);
+  document.body.classList.toggle('assal-modal-lock', isOpen);
+
+  if (isOpen) updateNotes();
 }
 
 
@@ -4820,7 +7268,7 @@ function removeFromNotes(index) {
 
       const nameEl = document.createElement('div');
       nameEl.className = 'note-name';
-      nameEl.textContent = item?.name ?? '';
+      nameEl.textContent = cleanCompatDisplayText(item?.name ?? '');
 
       const btn = document.createElement('button');
       btn.className = 'note-remove';
@@ -5009,5 +7457,40 @@ async function refreshData() {
    
    
     </script>
+
+<script id="assal-reference-phase5-corrected-script">
+(function(){
+  'use strict';
+
+  const newItemsModal = document.getElementById('newItemsModal');
+  const notesModal = document.getElementById('notesDrawer');
+
+  if (newItemsModal) {
+    newItemsModal.addEventListener('click', function(ev){
+      if (ev.target === newItemsModal) closeNewItemsModal();
+    });
+  }
+
+  if (notesModal) {
+    notesModal.addEventListener('click', function(ev){
+      if (ev.target === notesModal) toggleNotes();
+    });
+  }
+
+  document.addEventListener('keydown', function(ev){
+    if (ev.key !== 'Escape') return;
+
+    if (newItemsModal?.classList.contains('is-open')) {
+      closeNewItemsModal();
+      return;
+    }
+
+    if (notesModal?.classList.contains('active')) {
+      toggleNotes();
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
