@@ -5872,6 +5872,73 @@ body{
 }
 </style>
 
+
+<style id="assal-phase21-fast-ticker-support-fix-style">
+/* ===== New similarities ticker: visible quickly ===== */
+.news-ticker{
+  animation:assalCompatTickerQuickStart 48s linear infinite !important;
+  will-change:transform;
+}
+
+@keyframes assalCompatTickerQuickStart{
+  0%{
+    transform:translateX(6%);
+  }
+  100%{
+    transform:translateX(-100%);
+  }
+}
+
+/* ===== Support modal: reserve a clean top strip for the X ===== */
+.assal-support-popup.swal2-popup{
+  padding:46px 14px 14px !important;
+}
+
+.assal-support-popup.swal2-popup .swal2-close{
+  top:10px !important;
+  left:12px !important;
+  right:auto !important;
+
+  width:30px !important;
+  min-width:30px !important;
+  height:30px !important;
+  min-height:30px !important;
+
+  margin:0 !important;
+  padding:0 !important;
+  border-radius:50% !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  font-size:17px !important;
+  line-height:1 !important;
+  color:#ffd8dc !important;
+  background:rgba(126,37,49,.34) !important;
+  border:1px solid rgba(255,154,164,.13) !important;
+  box-shadow:0 7px 17px rgba(0,0,0,.22) !important;
+
+  z-index:20 !important;
+}
+
+/* The header now starts below the close control, so nothing overlaps. */
+.assal-support-popup .assal-support-hero{
+  margin-top:0 !important;
+}
+
+@media(max-width:520px){
+  .assal-support-popup.swal2-popup{
+    padding:44px 12px 12px !important;
+  }
+
+  .assal-support-popup.swal2-popup .swal2-close{
+    top:9px !important;
+    left:10px !important;
+  }
+}
+</style>
+
 </head>
 <body>
     <!-- Header -->
@@ -5896,7 +5963,7 @@ body{
     <span class="notes-count" id="headerNotesCount">0</span>
   </button>
 
-  <button class="header-btn support-btn" type="button" onclick="showAssalSupport()" title="مراسلة الدعم" aria-label="مراسلة الدعم">
+  <button id="assalSupportHeaderBtn" class="header-btn support-btn" type="button" onclick="showAssalSupport()" title="مراسلة الدعم" aria-label="مراسلة الدعم" style="display:none">
     <i class="fas fa-headset"></i>
   </button>
 </div>
@@ -6767,6 +6834,27 @@ function showAssalSupport() {
   });
 }
 
+function syncAssalSupportButtonVisibility() {
+  const btn = document.getElementById('assalSupportHeaderBtn');
+  if (!btn) return;
+
+  try {
+    // Same admin flag used by the main Index page.
+    // Normal customer: isActivated=true AND isAdmin is not true.
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    const isActivated = localStorage.getItem('isActivated') === 'true';
+
+    btn.style.display = (!isAdmin && isActivated) ? 'inline-flex' : 'none';
+  } catch (_) {
+    // Privacy/storage failure: stay hidden rather than exposing staff-only UI.
+    btn.style.display = 'none';
+  }
+}
+
+syncAssalSupportButtonVisibility();
+window.addEventListener('pageshow', syncAssalSupportButtonVisibility);
+window.addEventListener('storage', syncAssalSupportButtonVisibility);
+
 
         function showNewSimilarities() {
             openModal();
@@ -6909,6 +6997,14 @@ function showAssalSupport() {
                 const tickerItems = newItems.map(item => `<span><i class="fas fa-sparkles"></i> ${escapeCompatHtml(cleanCompatDisplayText(item["Item"]))}</span>`);
                 newSimilaritiesTicker.innerHTML = tickerItems.join(" | ");
             }
+
+            // Start the REAL ticker immediately after its content is ready.
+            // Previously the animation had already been running on the loading
+            // placeholder, so the new text could remain off-screen for a while.
+            newSimilaritiesTicker.style.animation = 'none';
+            void newSimilaritiesTicker.offsetWidth;
+            newSimilaritiesTicker.style.animation = 'assalCompatTickerQuickStart 48s linear infinite';
+
             return;
         }
 
