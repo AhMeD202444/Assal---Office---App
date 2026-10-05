@@ -5416,6 +5416,462 @@ footer p{
 }
 </style>
 
+
+<style id="assal-phase15-index-bars-battery-support-style">
+:root{
+  --assal-index-header-h:44px;
+  --assal-index-footer-h:40px;
+}
+
+/* Header dimensions = current Index */
+.header{
+  height:var(--assal-index-header-h) !important;
+  min-height:var(--assal-index-header-h) !important;
+  padding:0 8px !important;
+}
+.header-buttons{
+  gap:4px !important;
+  align-items:center !important;
+}
+.header-btn{
+  width:30px !important;
+  min-width:30px !important;
+  height:30px !important;
+  min-height:30px !important;
+  padding:0 !important;
+  border-radius:8px !important;
+}
+.header-btn i{
+  font-size:13px !important;
+  line-height:1 !important;
+}
+.header-btn.support-btn{
+  background:
+    radial-gradient(circle at 24% 18%,rgba(255,231,156,.18),transparent 42%),
+    linear-gradient(135deg,rgba(190,137,46,.34),rgba(107,74,20,.25)) !important;
+  color:#ffe9ad !important;
+  border-color:rgba(238,190,91,.16) !important;
+}
+.header-btn.support-btn:hover{
+  background:
+    radial-gradient(circle at 24% 18%,rgba(255,238,181,.24),transparent 42%),
+    linear-gradient(135deg,rgba(212,155,53,.40),rgba(119,82,22,.30)) !important;
+}
+.notes-count{
+  top:-7px !important;
+  right:-7px !important;
+  width:16px !important;
+  min-width:16px !important;
+  height:16px !important;
+  padding:0 3px !important;
+  font-size:8px !important;
+  line-height:1 !important;
+}
+
+/* Footer dimensions = current Index */
+footer{
+  height:var(--assal-index-footer-h) !important;
+  min-height:var(--assal-index-footer-h) !important;
+  padding:0 8px !important;
+}
+footer p{
+  font-size:11.5px !important;
+  line-height:1.35 !important;
+  font-weight:800 !important;
+  letter-spacing:.08px !important;
+  color:#dceaf7 !important;
+}
+body{
+  padding-top:var(--assal-index-header-h) !important;
+  padding-bottom:var(--assal-index-footer-h) !important;
+}
+
+/* Voice: cleaner Assal sky -> teal */
+.search-container #voiceSearchBtn{
+  background:linear-gradient(135deg,#1397d5 0%,#18b7a6 100%) !important;
+  border:1px solid rgba(146,224,235,.24) !important;
+  color:#f7fdff !important;
+  box-shadow:
+    0 8px 20px rgba(15,132,174,.20),
+    inset 0 1px 0 rgba(255,255,255,.14) !important;
+}
+.search-container #voiceSearchBtn:hover{
+  background:linear-gradient(135deg,#18a8e6 0%,#20c2ae 100%) !important;
+}
+.search-container #voiceSearchBtn.is-listening{
+  background:linear-gradient(135deg,#ef4444,#f97316) !important;
+  border-color:rgba(255,188,148,.30) !important;
+}
+
+/* Support modal */
+.assal-support-popup.swal2-popup{
+  width:min(92vw,430px) !important;
+  padding:14px !important;
+  border-radius:24px !important;
+  overflow:hidden !important;
+}
+.assal-support-html{
+  width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+.assal-support-dialog{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  direction:rtl;
+  text-align:right;
+  font-family:'Cairo',sans-serif;
+  color:#eef7ff;
+}
+.assal-support-hero{
+  display:grid;
+  grid-template-columns:48px 1fr;
+  gap:11px;
+  align-items:center;
+  padding:12px;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 10% 0%,rgba(48,190,176,.15),transparent 52%),
+    linear-gradient(145deg,rgba(25,46,69,.86),rgba(12,26,43,.90));
+  border:1px solid rgba(119,190,216,.12);
+}
+.assal-support-hero-icon{
+  width:48px;
+  height:48px;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#ffe5a0;
+  font-size:18px;
+  background:linear-gradient(145deg,rgba(205,154,59,.22),rgba(116,78,17,.14));
+  border:1px solid rgba(236,194,102,.16);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+}
+.assal-support-hero-copy{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.assal-support-hero-copy small{
+  color:#7ca7c8;
+  font-size:8.5px;
+  font-weight:850;
+}
+.assal-support-hero-copy strong{
+  color:#f5fbff;
+  font-size:17px;
+  line-height:1.3;
+  font-weight:900;
+}
+.assal-support-hero-copy span{
+  color:#91a9be;
+  font-size:9px;
+  line-height:1.65;
+  font-weight:700;
+}
+.assal-support-status{
+  min-height:42px;
+  padding:8px 11px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:9px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+}
+.assal-support-status span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:9px;
+  font-weight:900;
+}
+.assal-support-status span i{font-size:6px}
+.assal-support-status b{
+  color:#dbe9f6;
+  font-size:9px;
+  font-weight:850;
+}
+.assal-support-status.is-active span{color:#67dfc6}
+.assal-support-status.is-active span i{color:#46d7b8}
+.assal-support-status.is-pending span{color:#edc56f}
+.assal-support-status.is-pending span i{color:#eebf56}
+.assal-support-status.is-paused span{color:#f5b86c}
+.assal-support-status.is-paused span i{color:#f1a94e}
+.assal-support-status.is-expired span{color:#ef8b96}
+.assal-support-status.is-expired span i{color:#e96b79}
+.assal-support-status.is-neutral span{color:#91a9be}
+.assal-support-status.is-neutral span i{color:#7189a1}
+.assal-support-account{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid rgba(122,169,205,.09);
+  background:rgba(8,20,34,.55);
+}
+.assal-support-account-row{
+  min-height:40px;
+  padding:8px 11px;
+  display:grid;
+  grid-template-columns:minmax(90px,.72fr) minmax(0,1.28fr);
+  align-items:center;
+  gap:8px;
+  border-bottom:1px solid rgba(255,255,255,.045);
+}
+.assal-support-account-row:last-child{border-bottom:0}
+.assal-support-account-row span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:#7994ad;
+  font-size:8.5px;
+  font-weight:800;
+}
+.assal-support-account-row span i{
+  width:13px;
+  color:#5ea7dc;
+  text-align:center;
+}
+.assal-support-account-row b{
+  min-width:0;
+  color:#e7f2fc;
+  font-size:9.2px;
+  font-weight:850;
+  text-align:left;
+  overflow-wrap:anywhere;
+}
+.assal-support-number{
+  min-height:38px;
+  padding:8px 11px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  background:rgba(34,197,94,.055);
+  border:1px solid rgba(34,197,94,.10);
+  color:#96e9ad;
+}
+.assal-support-number i{font-size:13px}
+.assal-support-number span{
+  font-size:8.5px;
+  font-weight:800;
+  margin-inline-end:auto;
+}
+.assal-support-number b{
+  color:#cef4d8;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.3px;
+}
+.assal-support-whatsapp-btn{
+  width:100%;
+  min-height:44px;
+  padding:9px 13px;
+  border:0;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  cursor:pointer;
+  font-family:'Cairo',sans-serif;
+  font-size:10.5px;
+  font-weight:900;
+  color:#fff;
+  background:linear-gradient(135deg,#22c55e,#07945a);
+  box-shadow:
+    0 10px 22px rgba(5,150,89,.18),
+    inset 0 1px 0 rgba(255,255,255,.14);
+  -webkit-tap-highlight-color:transparent;
+}
+.assal-support-whatsapp-btn i{font-size:15px}
+.assal-support-whatsapp-btn:active{transform:scale(.985)}
+
+@media(max-width:520px){
+  :root{--assal-index-header-h:46px}
+  .header{
+    height:46px !important;
+    min-height:46px !important;
+    padding:0 6px !important;
+  }
+  .header-buttons{gap:4px !important}
+  .header-btn{
+    width:30px !important;
+    min-width:30px !important;
+    height:30px !important;
+    min-height:30px !important;
+  }
+  .header-btn i{font-size:12px !important}
+  footer{
+    height:40px !important;
+    min-height:40px !important;
+  }
+  footer p{font-size:11px !important}
+  body{
+    padding-top:46px !important;
+    padding-bottom:40px !important;
+  }
+  .assal-support-popup.swal2-popup{
+    width:min(94vw,420px) !important;
+    padding:12px !important;
+  }
+}
+</style>
+
+
+<style id="assal-phase16-circular-search-buttons-style">
+/* ===== PHASE16: elegant circular Search + Voice controls ===== */
+
+.search-container #searchBtn,
+.search-container #voiceSearchBtn{
+  width:38px !important;
+  height:38px !important;
+  min-width:38px !important;
+  min-height:38px !important;
+  padding:0 !important;
+
+  border-radius:50% !important;
+  clip-path:circle(50% at 50% 50%) !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  border:1px solid rgba(255,255,255,.12) !important;
+  color:#ffffff !important;
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,.22),
+    inset 0 1px 0 rgba(255,255,255,.16) !important;
+
+  -webkit-tap-highlight-color:transparent !important;
+}
+
+/* Typed search: warm premium gold/amber */
+.search-container #searchBtn{
+  right:8px !important;
+  background:
+    linear-gradient(145deg,#d9a646 0%,#b77a27 100%) !important;
+  border-color:rgba(246,212,139,.24) !important;
+  box-shadow:
+    0 8px 20px rgba(157,104,28,.22),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+
+/* Voice search: clean cyan/teal */
+.search-container #voiceSearchBtn{
+  right:53px !important;
+  background:
+    linear-gradient(145deg,#22a8cf 0%,#159988 100%) !important;
+  border-color:rgba(142,228,224,.22) !important;
+  box-shadow:
+    0 8px 20px rgba(13,126,142,.22),
+    inset 0 1px 0 rgba(255,255,255,.16) !important;
+}
+
+.search-container #searchBtn i,
+.search-container #voiceSearchBtn i{
+  margin:0 !important;
+  padding:0 !important;
+  font-size:13px !important;
+  line-height:1 !important;
+}
+
+/* Keep the existing vertically-centered hover behavior without turning square */
+.search-container #searchBtn:hover{
+  background:
+    linear-gradient(145deg,#e3b451 0%,#c3842b 100%) !important;
+  transform:translateY(-50%) scale(1.04) !important;
+}
+
+.search-container #voiceSearchBtn:hover{
+  background:
+    linear-gradient(145deg,#29b5dc 0%,#19a692 100%) !important;
+  transform:translateY(-50%) scale(1.04) !important;
+}
+
+/* Listening state stays unmistakable */
+.search-container #voiceSearchBtn.is-listening{
+  background:linear-gradient(145deg,#ef4444,#f97316) !important;
+  border-color:rgba(255,190,153,.30) !important;
+  color:#fff !important;
+}
+</style>
+
+
+<style id="assal-phase17-royal-voice-color-style">
+/* PHASE17 — premium royal-blue voice button */
+.search-container #voiceSearchBtn{
+  background:
+    radial-gradient(circle at 28% 20%,rgba(255,255,255,.18),transparent 34%),
+    linear-gradient(145deg,#5148e5 0%,#3e63dc 48%,#2d9fd7 100%) !important;
+  border-color:rgba(174,190,255,.28) !important;
+  color:#ffffff !important;
+  box-shadow:
+    0 8px 22px rgba(66,78,196,.27),
+    0 0 0 1px rgba(113,156,255,.06),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+
+.search-container #voiceSearchBtn:hover{
+  background:
+    radial-gradient(circle at 28% 20%,rgba(255,255,255,.21),transparent 34%),
+    linear-gradient(145deg,#5b53ee 0%,#4770e5 48%,#35a9df 100%) !important;
+}
+
+.search-container #voiceSearchBtn:active{
+  transform:translateY(-50%) scale(.96) !important;
+}
+
+.search-container #voiceSearchBtn.is-listening{
+  background:linear-gradient(145deg,#ef4444,#f97316) !important;
+  border-color:rgba(255,190,153,.30) !important;
+  color:#fff !important;
+}
+</style>
+
+
+<style id="assal-phase18-centered-result-content-style">
+/* PHASE18 — centered result content */
+
+/* Main item title */
+.result-card.assal-reference-result h4,
+.result-card.assal-corrected-result h4{
+  width:100% !important;
+  text-align:center !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+
+/* "يتوافق أيضاً مع" label */
+.result-card.assal-reference-result .assal-reference-related-label{
+  width:100% !important;
+  justify-content:center !important;
+  text-align:center !important;
+}
+
+/* Compatibility badges */
+.result-card.assal-reference-result .assal-reference-related{
+  width:100% !important;
+  justify-content:center !important;
+  align-items:center !important;
+}
+
+/* Keep each badge natural-size; only the whole group is centered */
+.result-card.assal-reference-result .assal-reference-related > span{
+  flex:0 0 auto !important;
+  text-align:center !important;
+  justify-content:center !important;
+}
+</style>
+
 </head>
 <body>
     <!-- Header -->
@@ -5438,6 +5894,10 @@ footer p{
   <button class="header-btn notes-btn" onclick="toggleNotes()" title="عرض الملاحظات" aria-label="عرض الملاحظات">
     <i class="fas fa-sticky-note"></i>
     <span class="notes-count" id="headerNotesCount">0</span>
+  </button>
+
+  <button class="header-btn support-btn" type="button" onclick="showAssalSupport()" title="مراسلة الدعم" aria-label="مراسلة الدعم">
+    <i class="fas fa-headset"></i>
   </button>
 </div>
 
@@ -5556,7 +6016,7 @@ footer p{
 
         <!-- Search -->
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search for similarities..." aria-label="اكتب اسم الموديل أو استخدم البحث الصوتي" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" lang="en" inputmode="latin" dir="ltr">
+            <input type="text" id="searchInput" placeholder="Search for similarities..." aria-label="اكتب اسم الموديل أو استخدم البحث الصوتي" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" lang="en" inputmode="latin" enterkeyhint="search" dir="ltr">
             <button id="voiceSearchBtn" class="voice-search-btn" type="button" onclick="startAssalVoiceSearch()" title="بحث صوتي" aria-label="بحث صوتي"><i class="fas fa-microphone"></i></button>
             <button id="searchBtn" type="button" onclick="searchItems()"><i class="fas fa-search"></i></button>
         </div>
@@ -6135,6 +6595,172 @@ function triggerAnimation() {
       popup: 'swal2-popup activation-popup pro-popup stats-popup',
       title: 'swal2-title',
       htmlContainer: 'swal2-html-container'
+    }
+  }).then(() => {
+    triggerAnimation();
+  });
+}
+
+
+function getAssalSupportStatusMeta(info) {
+  if (!info) {
+    return { label: 'غير متوفر', cls: 'is-neutral', remaining: 'لا توجد بيانات اشتراك محفوظة' };
+  }
+
+  const now = Date.now();
+  const status = String(info.status || '').toLowerCase();
+  const isLegacy = info.source === 'legacy';
+  const remainingMs = info.expiresAtMs ? Math.max(0, Number(info.expiresAtMs) - now) : null;
+  const effectiveExpired = !isLegacy && !!info.expiresAtMs && remainingMs <= 0;
+
+  if (isLegacy) {
+    return { label: 'نشط — نظام سابق', cls: 'is-active', remaining: 'اشتراك سابق' };
+  }
+
+  if (status === 'paused') {
+    return { label: 'موقوف', cls: 'is-paused', remaining: 'الاشتراك موقوف حالياً' };
+  }
+
+  if (status === 'expired' || effectiveExpired) {
+    return { label: 'منتهي', cls: 'is-expired', remaining: 'انتهت مدة الاشتراك' };
+  }
+
+  if (status === 'active') {
+    return {
+      label: 'فعّال',
+      cls: 'is-active',
+      remaining: remainingMs !== null ? formatCompatRemaining(remainingMs) : 'فعّال'
+    };
+  }
+
+  return { label: 'بانتظار التفعيل', cls: 'is-pending', remaining: 'يبدأ من أول تفعيل' };
+}
+
+function buildAssalSupportWhatsAppMessage(info) {
+  const meta = getAssalSupportStatusMeta(info);
+  const lines = [
+    'السلام عليكم، أحتاج دعم بخصوص حساب توافقات عسل.',
+    ''
+  ];
+
+  if (info) {
+    if (String(info.customerName || '').trim()) {
+      lines.push(`الاسم: ${String(info.customerName).trim()}`);
+    }
+    if (String(info.customerPhone || '').trim()) {
+      lines.push(`الهاتف: ${String(info.customerPhone).trim()}`);
+    }
+    if (String(info.code || '').trim()) {
+      lines.push(`رمز الاشتراك: ${String(info.code).trim()}`);
+    }
+    if (String(info.planName || '').trim()) {
+      lines.push(`نوع الاشتراك: ${String(info.planName).trim()}`);
+    }
+    lines.push(`الحالة: ${meta.label}`);
+  }
+
+  lines.push('', 'يرجى مساعدتي، شكراً لكم.');
+  return lines.join('\n');
+}
+
+function openAssalSupportWhatsApp() {
+  const info = getCompatSubscriptionInfo();
+  const phone = '9647706032703';
+  const message = buildAssalSupportWhatsAppMessage(info);
+  const encoded = encodeURIComponent(message);
+
+  const appUrl = `whatsapp://send?phone=${phone}&text=${encoded}`;
+  const webUrl = `https://wa.me/${phone}?text=${encoded}`;
+
+  try {
+    if (window.Android) {
+      window.location.href = appUrl;
+      setTimeout(() => {
+        try {
+          if (document.visibilityState === 'visible') {
+            window.location.href = webUrl;
+          }
+        } catch (_) {}
+      }, 1200);
+      return;
+    }
+  } catch (_) {}
+
+  try {
+    const opened = window.open(webUrl, '_blank', 'noopener');
+    if (!opened) window.location.href = webUrl;
+  } catch (_) {
+    window.location.href = webUrl;
+  }
+}
+
+function showAssalSupport() {
+  const info = getCompatSubscriptionInfo();
+  const meta = getAssalSupportStatusMeta(info);
+
+  const safeName = escapeCompatHtml(String(info?.customerName || 'غير محفوظ').trim() || 'غير محفوظ');
+  const safePhone = escapeCompatHtml(String(info?.customerPhone || 'غير محفوظ').trim() || 'غير محفوظ');
+  const safeCode = escapeCompatHtml(String(info?.code || '—').trim() || '—');
+  const safePlan = escapeCompatHtml(String(info?.planName || 'اشتراك التوافقات').trim() || 'اشتراك التوافقات');
+  const safeRemaining = escapeCompatHtml(meta.remaining);
+  const safeStatus = escapeCompatHtml(meta.label);
+
+  Swal.fire({
+    html: `
+      <div class="assal-support-dialog">
+        <div class="assal-support-hero">
+          <span class="assal-support-hero-icon"><i class="fas fa-headset"></i></span>
+          <div class="assal-support-hero-copy">
+            <small>دعم مشتركي عسل</small>
+            <strong>مراسلة الدعم</strong>
+            <span>تفاصيل حسابك جاهزة حتى توصلنا رسالتك بسرعة.</span>
+          </div>
+        </div>
+
+        <div class="assal-support-status ${meta.cls}">
+          <span><i class="fas fa-circle"></i> ${safeStatus}</span>
+          <b>${safeRemaining}</b>
+        </div>
+
+        <div class="assal-support-account">
+          <div class="assal-support-account-row">
+            <span><i class="fas fa-user"></i> الاسم</span>
+            <b>${safeName}</b>
+          </div>
+          <div class="assal-support-account-row">
+            <span><i class="fas fa-phone"></i> الهاتف</span>
+            <b dir="ltr">${safePhone}</b>
+          </div>
+          <div class="assal-support-account-row">
+            <span><i class="fas fa-key"></i> رمز الاشتراك</span>
+            <b dir="ltr">${safeCode}</b>
+          </div>
+          <div class="assal-support-account-row">
+            <span><i class="fas fa-crown"></i> الاشتراك</span>
+            <b>${safePlan}</b>
+          </div>
+        </div>
+
+        <div class="assal-support-number">
+          <i class="fab fa-whatsapp"></i>
+          <span>رقم الدعم</span>
+          <b dir="ltr">07706032703</b>
+        </div>
+
+        <button class="assal-support-whatsapp-btn" type="button" onclick="openAssalSupportWhatsApp()">
+          <i class="fab fa-whatsapp"></i>
+          <span>راسل الدعم عبر واتساب</span>
+        </button>
+      </div>
+    `,
+    showConfirmButton: false,
+    showCloseButton: true,
+    allowOutsideClick: true,
+    allowEscapeKey: true,
+    customClass: {
+      container: 'pro-refresh-container assal-support-swal-container',
+      popup: 'swal2-popup activation-popup pro-popup assal-support-popup',
+      htmlContainer: 'swal2-html-container assal-support-html'
     }
   }).then(() => {
     triggerAnimation();
@@ -7072,6 +7698,12 @@ function fireLoginStyle(opts = {}) {
             event.preventDefault();
             clearTimeout(assalInstantSearchTimer);
             searchItems({ countStat: true, scroll: false });
+
+            if (window.matchMedia?.('(pointer: coarse)').matches || window.innerWidth <= 820) {
+                setTimeout(() => {
+                    try { this.blur(); } catch (_) {}
+                }, 0);
+            }
         }
     });
 
@@ -8720,11 +9352,191 @@ function fireLoginStyle(opts = {}) {
         return { primary, related };
     }
 
+        function parseBatteryCompatibility(rawValue) {
+        const raw = cleanCompatDisplayText(rawValue);
+        const collectedCodes = [];
+
+        const normalizeBatteryCode = value =>
+            String(value || '')
+                .trim()
+                .replace(/\s+/g, '')
+                .toUpperCase();
+
+        const isBatteryCode = value => {
+            const code = normalizeBatteryCode(value);
+
+            if (code.length < 4 || code.length > 30) return false;
+            if (!/[A-Z]/i.test(code) || !/\d/.test(code)) return false;
+
+            // Ordinary descriptors are not battery codes.
+            if (/^(?:[245]G|N\/F|W\/F)$/i.test(code)) return false;
+
+            // Strong battery-code prefixes used in the battery sheet/market.
+            // Generic phone model numbers such as A15/J730 stay excluded.
+            return /^(?:BL|BLP|BN|BM|BP|EB|HB|BA|BS|BK|BV|BT|BLC|C11P|HE|APN)[A-Z0-9._\/-]*$/i.test(code);
+        };
+
+        const addCode = value => {
+            const code = normalizeBatteryCode(value);
+
+            if (!isBatteryCode(code)) return false;
+
+            if (!collectedCodes.includes(code)) {
+                collectedCodes.push(code);
+            }
+
+            return true;
+        };
+
+        // Split "/" only when OUTSIDE parentheses.
+        // This keeps groups such as:
+        // (BL-5ABX / BL-5ABI / BL-5AAI / BL-5AAT)
+        // intact so we can inspect the entire group safely.
+        const splitOutsideParentheses = source => {
+            const output = [];
+            let current = '';
+            let depth = 0;
+
+            for (let i = 0; i < source.length; i++) {
+                const char = source[i];
+
+                if (char === '(') {
+                    depth++;
+                    current += char;
+                    continue;
+                }
+
+                if (char === ')') {
+                    depth = Math.max(0, depth - 1);
+                    current += char;
+                    continue;
+                }
+
+                if (char === '/' && depth === 0) {
+                    const part = current.trim();
+                    if (part) output.push(part);
+                    current = '';
+                    continue;
+                }
+
+                current += char;
+            }
+
+            const tail = current.trim();
+            if (tail) output.push(tail);
+
+            return output;
+        };
+
+        const rawSegments = splitOutsideParentheses(raw);
+        const cleanedSegments = [];
+
+        // A) Extract parenthesized battery-code groups from anywhere,
+        //    while preserving the model text around them.
+        //
+        // Supports BOTH:
+        //   ITEL P65 (BL-49NX | BL-S481 | BL-S4A1)
+        //   ITEL P65 (BL-5ABX / BL-5ABI / BL-5AAI / BL-5AAT)
+        //
+        // The group is removed only when EVERY separated piece is a
+        // valid battery code. This safely protects (5G), (N/F), (W/F).
+        rawSegments.forEach(segment => {
+            let working = String(segment || '').trim();
+
+            working = working.replace(/\(([^()]*)\)/g, (full, inner) => {
+                const rawInner = String(inner || '').trim();
+
+                // First try "|" separator. If not present, try "/" separator.
+                // We do not split ordinary descriptors unless all resulting
+                // pieces pass the strict battery-code test.
+                const pieces = rawInner
+                    .split(/\s*(?:\||\/)\s*/)
+                    .map(part => part.trim())
+                    .filter(Boolean);
+
+                if (!pieces.length || !pieces.every(isBatteryCode)) {
+                    return full;
+                }
+
+                pieces.forEach(addCode);
+                return '';
+            });
+
+            working = working
+                .replace(/\s{2,}/g, ' ')
+                .trim();
+
+            if (working) {
+                cleanedSegments.push(working);
+            }
+        });
+
+        // B) Naked pipe group as one segment:
+        //    BL-49NX | BL-49PT | BL-49ST
+        for (let i = 1; i < cleanedSegments.length; i++) {
+            const candidate = cleanedSegments[i];
+
+            if (!candidate.includes('|')) continue;
+
+            const pieces = candidate
+                .split('|')
+                .map(part => part.trim())
+                .filter(Boolean);
+
+            if (pieces.length < 2 || !pieces.every(isBatteryCode)) continue;
+
+            pieces.forEach(addCode);
+            cleanedSegments[i] = '';
+        }
+
+        let models = cleanedSegments.filter(Boolean);
+
+        // C) Collect a trailing run of standalone battery codes:
+        //    ... / BL-5ABX / BL-5ABI / BL-5AAI / BL-5AAT
+        const trailingCodes = [];
+
+        for (let i = models.length - 1; i >= 1; i--) {
+            const candidate = models[i];
+
+            if (!isBatteryCode(candidate)) {
+                break;
+            }
+
+            trailingCodes.unshift(normalizeBatteryCode(candidate));
+            models.splice(i, 1);
+        }
+
+        trailingCodes.forEach(addCode);
+
+        const primaryBase =
+            models.shift() ||
+            cleanCompatDisplayText(rawValue);
+
+        const codeSuffix = collectedCodes.length
+            ? `(${collectedCodes.join(' | ')})`
+            : '';
+
+        const primary = [primaryBase, codeSuffix]
+            .filter(Boolean)
+            .join(' ')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+
+        return {
+            primary: primary || cleanCompatDisplayText(rawValue),
+            related: models
+        };
+    }
+
     function parseCompatDisplayItem(rawValue, category) {
         const categoryKey = String(category);
 
         if (categoryKey === '1') {
             return parseScreenCompatibility(rawValue);
+        }
+
+        if (categoryKey === '2') {
+            return parseBatteryCompatibility(rawValue);
         }
 
         if (categoryKey === '8') {
