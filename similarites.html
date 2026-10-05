@@ -5146,6 +5146,276 @@ footer p{
 }
 </style>
 
+
+<style id="assal-phase14-voice-search-style">
+/* ===== PHASE14: Voice search ported from the current Index ===== */
+.search-container input{
+  padding-right:96px !important;
+}
+.search-container #searchBtn{
+  right:9px !important;
+}
+.search-container #voiceSearchBtn{
+  right:53px !important;
+  width:38px !important;
+  height:38px !important;
+  min-width:38px !important;
+  min-height:38px !important;
+  border-radius:12px !important;
+  clip-path:none !important;
+  background:linear-gradient(135deg,#6857d9,#31b7c9) !important;
+  box-shadow:0 8px 20px rgba(70,104,198,.24) !important;
+  z-index:6 !important;
+}
+.search-container #voiceSearchBtn.is-listening{
+  background:linear-gradient(135deg,#ef4444,#f97316) !important;
+  animation:assalCompatVoicePulse 1s ease-in-out infinite;
+}
+.search-container #voiceSearchBtn i{
+  line-height:1 !important;
+}
+@keyframes assalCompatVoicePulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.38),0 8px 20px rgba(70,104,198,.18)}
+  50%{box-shadow:0 0 0 8px rgba(239,68,68,0),0 8px 20px rgba(70,104,198,.18)}
+}
+
+.assal-voice-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+    background:
+        radial-gradient(circle at 50% 35%, rgba(0, 214, 255, .16), transparent 34%),
+        rgba(2, 8, 18, .72);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    opacity: 0;
+    transition: opacity .22s ease;
+}
+.assal-voice-overlay.is-open {
+    display: flex;
+    opacity: 1;
+}
+.assal-voice-card {
+    width: min(92vw, 390px);
+    border-radius: 32px;
+    padding: 24px 20px 20px;
+    direction: rtl;
+    text-align: center;
+    font-family: 'Cairo', sans-serif;
+    color: #f8fdff;
+    background:
+        linear-gradient(145deg, rgba(25, 44, 64, .94), rgba(10, 17, 33, .96)),
+        radial-gradient(circle at 50% 10%, rgba(52, 211, 153, .18), transparent 42%);
+    border: 1px solid rgba(148, 210, 230, .20);
+    box-shadow:
+        0 30px 75px rgba(0, 0, 0, .52),
+        inset 0 1px 0 rgba(255, 255, 255, .10),
+        0 0 0 1px rgba(255,255,255,.04);
+    position: relative;
+    overflow: hidden;
+    transform: translateY(12px) scale(.96);
+    transition: transform .26s cubic-bezier(.2,.9,.2,1);
+}
+.assal-voice-overlay.is-open .assal-voice-card {
+    transform: translateY(0) scale(1);
+}
+.assal-voice-card::before {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    top: -65px;
+    right: -45px;
+    background: radial-gradient(circle, rgba(34, 211, 238, .26), transparent 64%);
+    pointer-events: none;
+}
+.assal-voice-card::after {
+    content: "";
+    position: absolute;
+    inset: auto -24px -80px -24px;
+    height: 150px;
+    background: radial-gradient(circle at 50% 0%, rgba(20, 184, 166, .18), transparent 60%);
+    pointer-events: none;
+}
+.assal-voice-close {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 50%;
+    color: rgba(255,255,255,.88);
+    background: rgba(255,255,255,.07);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+}
+.assal-voice-kicker {
+    width: fit-content;
+    margin: 2px auto 14px;
+    padding: 7px 13px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .2px;
+    background: rgba(255,255,255,.09);
+    border: 1px solid rgba(255,255,255,.13);
+    color: #b7f8ff;
+    position: relative;
+    z-index: 1;
+}
+.assal-voice-orb-wrap {
+    width: 156px;
+    height: 156px;
+    margin: 0 auto 16px;
+    position: relative;
+    display: grid;
+    place-items: center;
+    z-index: 1;
+}
+.assal-voice-ring,
+.assal-voice-ring.second {
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 1px solid rgba(103, 232, 249, .34);
+    box-shadow: 0 0 38px rgba(34, 211, 238, .20);
+    animation: assalVoiceRing 1.75s ease-in-out infinite;
+}
+.assal-voice-ring.second {
+    inset: 0;
+    opacity: .45;
+    animation-delay: .45s;
+}
+.assal-voice-orb {
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 42px;
+    background: linear-gradient(145deg, #12d6cf, #2563eb 54%, #8b5cf6);
+    box-shadow: 0 18px 42px rgba(37, 99, 235, .36), 0 0 30px rgba(20, 184, 166, .30), inset 0 2px 0 rgba(255,255,255,.18);
+    transform: scale(calc(.92 + (var(--assal-voice-level, 0) * .16)));
+    transition: transform .08s linear, filter .14s ease;
+}
+.assal-voice-overlay.is-listening .assal-voice-orb {
+    animation: assalVoiceOrb 1.1s ease-in-out infinite;
+}
+.assal-voice-overlay.has-error .assal-voice-orb {
+    background: linear-gradient(145deg, #ef4444, #f97316);
+}
+.assal-voice-overlay.has-result .assal-voice-orb {
+    background: linear-gradient(145deg, #22c55e, #06b6d4);
+}
+.assal-voice-wave {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    gap: 5px;
+    height: 30px;
+    margin: 4px auto 8px;
+    position: relative;
+    z-index: 1;
+}
+.assal-voice-wave span {
+    width: 5px;
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #e0fbff, #22d3ee);
+    opacity: .76;
+    transform-origin: bottom;
+    animation: assalVoiceBars .9s ease-in-out infinite;
+}
+.assal-voice-wave span:nth-child(2){ animation-delay: .09s; }
+.assal-voice-wave span:nth-child(3){ animation-delay: .18s; }
+.assal-voice-wave span:nth-child(4){ animation-delay: .27s; }
+.assal-voice-wave span:nth-child(5){ animation-delay: .36s; }
+.assal-voice-overlay:not(.is-listening) .assal-voice-wave span { animation-play-state: paused; opacity: .36; }
+.assal-voice-title {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.35;
+    margin: 0 0 6px;
+    position: relative;
+    z-index: 1;
+}
+.assal-voice-subtitle {
+    min-height: 25px;
+    margin: 0 auto 14px;
+    color: rgba(235, 248, 255, .76);
+    font-size: 14px;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+}
+.assal-voice-live,
+.assal-voice-final {
+    position: relative;
+    z-index: 1;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(3, 10, 23, .30);
+    padding: 12px 14px;
+    margin-top: 10px;
+    text-align: right;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+.assal-voice-label {
+    font-size: 11px;
+    font-weight: 900;
+    color: rgba(183, 248, 255, .72);
+    margin-bottom: 5px;
+}
+.assal-voice-text {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+    min-height: 22px;
+    overflow-wrap: anywhere;
+}
+.assal-voice-final {
+    display: none;
+    background: linear-gradient(135deg, rgba(20,184,166,.16), rgba(59,130,246,.10));
+}
+.assal-voice-overlay.has-result .assal-voice-final {
+    display: block;
+}
+.assal-voice-final .assal-voice-text {
+    direction: ltr;
+    text-align: left;
+    color: #d9fffb;
+    letter-spacing: .4px;
+}
+@keyframes assalVoiceRing {
+    0%, 100% { transform: scale(.86); opacity: .68; }
+    50% { transform: scale(1.08); opacity: .18; }
+}
+@keyframes assalVoiceOrb {
+    0%, 100% { filter: drop-shadow(0 0 0 rgba(34,211,238,0)); }
+    50% { filter: drop-shadow(0 0 16px rgba(34,211,238,.36)); }
+}
+@keyframes assalVoiceBars {
+    0%, 100% { height: 9px; transform: scaleY(.75); }
+    50% { height: 27px; transform: scaleY(1.05); }
+}
+@media (max-width: 430px) {
+    .assal-voice-card { width: min(94vw, 360px); padding: 22px 17px 18px; border-radius: 28px; }
+    .assal-voice-orb-wrap { width: 142px; height: 142px; }
+    .assal-voice-orb { width: 96px; height: 96px; font-size: 38px; }
+    .assal-voice-title { font-size: 20px; }
+}
+</style>
+
 </head>
 <body>
     <!-- Header -->
@@ -5286,8 +5556,9 @@ footer p{
 
         <!-- Search -->
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search for similarities...">
-            <button onclick="searchItems()"><i class="fas fa-search"></i></button>
+            <input type="text" id="searchInput" placeholder="Search for similarities..." aria-label="اكتب اسم الموديل أو استخدم البحث الصوتي" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" lang="en" inputmode="latin" dir="ltr">
+            <button id="voiceSearchBtn" class="voice-search-btn" type="button" onclick="startAssalVoiceSearch()" title="بحث صوتي" aria-label="بحث صوتي"><i class="fas fa-microphone"></i></button>
+            <button id="searchBtn" type="button" onclick="searchItems()"><i class="fas fa-search"></i></button>
         </div>
 
         <!-- Results -->
@@ -5295,6 +5566,29 @@ footer p{
             <div class="products-grid" id="results"></div>
         </div>
     </div>
+
+<div id="assalVoiceOverlay" class="assal-voice-overlay" aria-hidden="true">
+    <div class="assal-voice-card" role="dialog" aria-modal="true" aria-label="نافذة البحث الصوتي">
+        <button class="assal-voice-close" type="button" onclick="cancelAssalVoiceSearchModal()" aria-label="إلغاء البحث الصوتي"><i class="fas fa-times"></i></button>
+        <div class="assal-voice-kicker">بحث صوتي عسل</div>
+        <div class="assal-voice-orb-wrap">
+            <div class="assal-voice-ring"></div>
+            <div class="assal-voice-ring second"></div>
+            <div class="assal-voice-orb"><i class="fas fa-microphone"></i></div>
+        </div>
+        <div class="assal-voice-wave" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        <h3 id="assalVoiceTitle" class="assal-voice-title">جاري الاستماع...</h3>
+        <p id="assalVoiceSubtitle" class="assal-voice-subtitle">احچي اسم المادة بوضوح</p>
+        <div class="assal-voice-live">
+            <div class="assal-voice-label">النص المسموع</div>
+            <div id="assalVoiceHeardText" class="assal-voice-text">بانتظار الصوت...</div>
+        </div>
+        <div id="assalVoiceFinalBox" class="assal-voice-final">
+            <div class="assal-voice-label">راح أبحث عن</div>
+            <div id="assalVoiceEnglishText" class="assal-voice-text">—</div>
+        </div>
+    </div>
+</div>
 
     <!-- Notes Window -->
     <div class="notes-drawer assal-centered-overlay" id="notesDrawer" aria-hidden="true">
@@ -6780,6 +7074,1463 @@ function fireLoginStyle(opts = {}) {
             searchItems({ countStat: true, scroll: false });
         }
     });
+
+    /* ================== ASSAL Voice Search Engine (Arabic/Iraqi -> English items) ================== */
+    function hasArabicText(str) {
+        return /[\u0600-\u06FF]/.test(String(str || ""));
+    }
+
+    const ASSAL_CATEGORY_LABELS_AR = {
+        "LCD": "شاشة",
+        "BATTERY": "بطارية",
+        "FLAT LCD": "فلات شاشة",
+        "SPEAKER": "سماعة اتصال",
+        "FLAT SPEAKER": "فلات سماعة",
+        "BUZZER": "جرس",
+        "HOUSING": "شاصي",
+        "BACK": "ظهر",
+        "CAMERA": "كاميرا",
+        "CHARGING": "بورد شحن",
+        "FINGER": "بصمة",
+        "POWER": "فلات بور",
+        "LENS": "عدسة كاميرا",
+        "HOLLDER": "هولدر سيم",
+        "IC": "آيسي شحن",
+        "VIBRATION": "هزاز",
+        "TOUCH": "بلازمة",
+        "SIGNAL CABLE": "كيبل الشاشة",
+        "CC": "قاعدة شحن",
+        "VOLUME": "فلات صوت",
+        "HUAWEI": "هواوي",
+        "HEADPHONE": "سماعة"
+    };
+
+    function getArabicCategoryLabel(category) {
+        const c = String(category || "").trim().toUpperCase();
+        return ASSAL_CATEGORY_LABELS_AR[c] || c || "غير محدد";
+    }
+
+    const ASSAL_VOICE_CATEGORY_ALIASES = [
+        { cat: "FLAT LCD", aliases: ["فلات شاشة", "فلات شاشه", "شريط شاشة", "شريط شاشه"] },
+        { cat: "FLAT SPEAKER", aliases: ["فلات سماعة", "فلات سماعه", "شريط سماعة", "شريط سماعه"] },
+        { cat: "SIGNAL CABLE", aliases: ["كيبل الشاشة", "كيبل الشاشه", "كيبل شاشة", "كيبل شاشه", "كيبل اشاشة", "كيبل اشاشه"] },
+        { cat: "LENS", aliases: ["عدسة كاميرا", "عدسه كاميرا", "عدسة كامرة", "عدسه كامره", "عدسة", "عدسه"] },
+        { cat: "HOLLDER", aliases: ["بيت سيم كارت", "بيت سيم", "هولدر سيم كارت", "هولدر سيت كارت", "هولدر سيم"] },
+        { cat: "VOLUME", aliases: ["فلات صوت", "شريط صوت", "فلات فاليوم", "شريط فاليوم", "فلات وليم", "شريط وليم"] },
+        { cat: "CHARGING", aliases: ["بورد شحن", "بورد الشحن", "سوكت شحن", "شحن"] },
+        { cat: "SPEAKER", aliases: ["سماعة اتصال", "سماعه اتصال"] },
+        { cat: "POWER", aliases: ["فلات بور", "شريط بور"] },
+        { cat: "IC", aliases: ["ايسي شحن", "ايسي الشحن", "اي سي شحن", "آيسي شحن"] },
+        { cat: "CC", aliases: ["قاعدة شحن", "قاعده شحن", "قاعدة الشحن", "قاعده الشحن"] },
+        { cat: "LCD", aliases: ["شاشة", "شاشه"] },
+        { cat: "BATTERY", aliases: ["بطارية", "بطاريه"] },
+        { cat: "BUZZER", aliases: ["جرس", "جرص"] },
+        { cat: "HOUSING", aliases: ["شاصي", "شاصي كامل", "فريم"] },
+        { cat: "BACK", aliases: ["ظهر", "باك"] },
+        { cat: "CAMERA", aliases: ["كاميرا", "كامرة", "كامره"] },
+        { cat: "FINGER", aliases: ["بصمة", "بصمه"] },
+        { cat: "VIBRATION", aliases: ["هزاز"] },
+        { cat: "TOUCH", aliases: ["بلازمة", "بلازمه", "تج", "تچ"] }
+    ];
+
+    const ASSAL_RELATED_VOICE_CATEGORIES = {
+        "IC": ["CHARGING", "CC"],
+        "CC": ["CHARGING", "IC"],
+        "CHARGING": ["CC", "IC"],
+        "CAMERA": ["LENS"],
+        "LENS": ["CAMERA"],
+        "SPEAKER": ["FLAT SPEAKER"],
+        "FLAT SPEAKER": ["SPEAKER"],
+        "LCD": ["FLAT LCD", "TOUCH"],
+        "FLAT LCD": ["LCD", "TOUCH"],
+        "TOUCH": ["LCD", "FLAT LCD"]
+    };
+
+    const ASSAL_VOICE_BRANDS = [
+        "SAMSUNG","IPHONE","APPLE","HUAWEI","HONOR","XIAOMI","REDMI","POCO","OPPO","REALME","VIVO","TECNO","INFINIX","NOKIA","MOTOROLA","LENOVO","TCL","ITEL","ZTE","ONEPLUS","GOOGLE","SONY","LG"
+    ];
+
+    const ASSAL_VOICE_PHRASE_MAP = {
+        // شركات / عبارات طويلة
+        "تي سي ال": "TCL",
+        "زد تي اي": "ZTE",
+        "ون بلس": "ONEPLUS",
+        "وان بلس": "ONEPLUS",
+        "جي تي": "GT",
+        "جيتي": "GT",
+        "برو ماكس": "PRO MAX",
+        "برو مكس": "PRO MAX",
+        "فايف جي": "5G",
+        "فور جي": "4G",
+        "اكس ار": "XR",
+        "اكس اس": "XS",
+        "اكس ماكس": "XS MAX",
+        "اكس اس ماكس": "XS MAX",
+        "اكس اس مكس": "XS MAX",
+        "اي فون": "IPHONE",
+        "اي جي": "LG",
+        "ال جي": "LG",
+        "الجي": "LG",
+        // أرقام مركبة عراقية
+        "واحد وعشرين": "21",
+        "واحد و عشرين": "21",
+        "احد وعشرين": "21",
+        "احد و عشرين": "21",
+        "اثنين وعشرين": "22",
+        "اثنين و عشرين": "22",
+        "ثنين وعشرين": "22",
+        "ثنين و عشرين": "22",
+        "ثلاثة وعشرين": "23",
+        "ثلاثه وعشرين": "23",
+        "ثلاث وعشرين": "23",
+        "اربعة وعشرين": "24",
+        "اربعه وعشرين": "24",
+        "اربع وعشرين": "24",
+        "خمسة وعشرين": "25",
+        "خمسه وعشرين": "25",
+        "خمس وعشرين": "25",
+        "همسة وعشرين": "25",
+        "همسه وعشرين": "25",
+        "ستة وعشرين": "26",
+        "سته وعشرين": "26",
+        "ست وعشرين": "26",
+        "سبعة وعشرين": "27",
+        "سبعه وعشرين": "27",
+        "سبع وعشرين": "27",
+        "ثمانية وعشرين": "28",
+        "ثمانيه وعشرين": "28",
+        "ثمنية وعشرين": "28",
+        "ثمنيه وعشرين": "28",
+        "ثمن وعشرين": "28",
+        "تسعة وعشرين": "29",
+        "تسعه وعشرين": "29",
+        "تسع وعشرين": "29",
+        "واحد وثلاثين": "31",
+        "واحد و ثلاثين": "31",
+        "اثنين وثلاثين": "32",
+        "ثنين وثلاثين": "32",
+        "ثلاثة وثلاثين": "33",
+        "ثلاثه وثلاثين": "33",
+        "ثلاث وثلاثين": "33",
+        "اربعة وثلاثين": "34",
+        "اربعه وثلاثين": "34",
+        "اربع وثلاثين": "34",
+        "خمسة وثلاثين": "35",
+        "خمسه وثلاثين": "35",
+        "خمس وثلاثين": "35",
+        "ستة وثلاثين": "36",
+        "سته وثلاثين": "36",
+        "سبعة وثلاثين": "37",
+        "سبعه وثلاثين": "37",
+        "ثمانية وثلاثين": "38",
+        "ثمانيه وثلاثين": "38",
+        "تسعة وثلاثين": "39",
+        "تسعه وثلاثين": "39",
+        "ست ميه وعشره": "610",
+        "ست مية وعشرة": "610",
+        "ستمية وعشرة": "610",
+        "ستميه وعشره": "610"
+    };
+
+    const ASSAL_VOICE_TOKEN_MAP = {
+        // شركات
+        "سامسونك": "SAMSUNG", "سامسونج": "SAMSUNG", "سامسنك": "SAMSUNG", "سمسونك": "SAMSUNG",
+        "ايفون": "IPHONE", "آيفون": "IPHONE", "ايقون": "IPHONE", "ايفن": "IPHONE", "ايفونه": "IPHONE", "ابل": "APPLE",
+        "هواوي": "HUAWEI", "هواويي": "HUAWEI",
+        "هونر": "HONOR", "اونر": "HONOR",
+        "شاومي": "XIAOMI", "شومي": "XIAOMI", "زياومي": "XIAOMI",
+        "ريدمي": "REDMI", "رادمي": "REDMI",
+        "بوكو": "POCO", "بكو": "POCO",
+        "اوبو": "OPPO", "اوبوو": "OPPO",
+        "ريلمي": "REALME", "ريلمي": "REALME",
+        "فيفو": "VIVO",
+        "تكنو": "TECNO", "تيكنو": "TECNO",
+        "انفنكس": "INFINIX", "انفنكنس": "INFINIX", "انفنيكس": "INFINIX", "انفنكيس": "INFINIX", "انفينيكس": "INFINIX",
+        "نوكيا": "NOKIA",
+        "موتورولا": "MOTOROLA", "متورولا": "MOTOROLA",
+        "لينوفو": "LENOVO",
+        "ايتل": "ITEL", "ايتيل": "ITEL",
+        "سوني": "SONY", "كوكل": "GOOGLE", "جوجل": "GOOGLE",
+        // كلمات موديلات
+        "هوت": "HOT", "سمارت": "SMART", "نوت": "NOTE", "نوتة": "NOTE", "نوته": "NOTE",
+        "بلاي": "PLAY", "بلي": "PLAY",
+        "برو": "PRO", "ماكس": "MAX", "مكس": "MAX", "بلس": "PLUS", "لايت": "LITE", "الترا": "ULTRA", "التراا": "ULTRA",
+        "برايم": "PRIME", "ماستر": "MASTER", "سبارك": "SPARK", "كامون": "CAMON", "بوفا": "POVA", "بوڤا": "POVA",
+        "زيرو": "ZERO", "نارزو": "NARZO", "رينو": "RENO", "فايند": "FIND", "تاب": "TAB", "ايباد": "IPAD", "اير": "AIR",
+        // حروف الموديلات
+        "اي": "A", "أيه": "A", "اية": "A", "اى": "A",
+        "ام": "M", "أم": "M", "اف": "F", "اس": "S", "جي": "G", "سي": "C", "تي": "T", "دي": "D", "بي": "B", "كي": "K", "ال": "L", "ار": "R", "يو": "U", "واي": "Y", "زد": "Z", "اكس": "X",
+        // أرقام
+        "صفر": "0", "زيرو": "0",
+        "واحد": "1", "وحد": "1", "ون": "1",
+        "اثنين": "2", "ثنين": "2", "تو": "2",
+        "ثلاثة": "3", "ثلاثه": "3", "ثلاث": "3", "تلاثة": "3", "تلاثه": "3", "تلاث": "3",
+        "اربعة": "4", "اربعه": "4", "اربع": "4", "فور": "4",
+        "خمسة": "5", "خمسه": "5", "خمس": "5", "همسة": "5", "همسه": "5",
+        "ستة": "6", "سته": "6", "ست": "6", "سكس": "6",
+        "سبعة": "7", "سبعه": "7", "سبع": "7", "سفن": "7",
+        "ثمانية": "8", "ثمانيه": "8", "ثمنية": "8", "ثمنيه": "8", "ثمن": "8", "ايت": "8",
+        "تسعة": "9", "تسعه": "9", "تسع": "9", "ناين": "9",
+        "عشرة": "10", "عشره": "10", "عشر": "10", "تن": "10",
+        "دعش": "11", "حدعش": "11", "احدعش": "11", "حداش": "11", "احداش": "11",
+        "اثنعش": "12", "ثنعش": "12", "اتنعش": "12", "اضنعش": "12", "ضنعش": "12", "اطنعش": "12", "طنعش": "12", "اثناش": "12", "اثناعش": "12",
+        "ثلطعش": "13", "ثلاثطعش": "13", "ثلاثتعش": "13",
+        "اربعطعش": "14", "اربعتعش": "14",
+        "خمسطعش": "15", "خمستعش": "15",
+        "ستعش": "16", "ستطعش": "16",
+        "سبعطعش": "17", "سبعتعش": "17",
+        "ثمنطعش": "18", "ثمنتعش": "18",
+        "تسعطعش": "19", "تسعتعش": "19",
+        "عشرين": "20", "ثلاثين": "30", "اربعين": "40", "خمسين": "50", "ستين": "60", "سبعين": "70", "ثمانين": "80", "تسعين": "90"
+    };
+
+    const ASSAL_VOICE_FILLERS = new Set(["مال", "موبايل", "جهاز", "قطعة", "قطعه", "حق", "على", "لل", "ل", "ال", "وي", "و", "اصلي", "اصليه", "وكالة", "وكاله", "تجاري", "نوع", "موديل"]);
+    const ASSAL_COMPACT_MODEL_WORDS = new Set(["HOT", "SMART", "NOTE", "SPARK", "CAMON", "POVA", "ZERO", "NARZO", "RENO", "FIND", "TAB", "GT", "K", "C", "Y", "X"]);
+    const ASSAL_SINGLE_MODEL_LETTERS = new Set(["A","M","F","S","G","C","T","D","B","K","L","R","U","Y","Z","X"]);
+
+    const ASSAL_VOICE_MARKET_ALIAS_MAP = {
+        // Samsung A / M market names -> official/service model codes
+        "A12": ["A125"], "A12S": ["A127"],
+        "A01": ["A015"], "A02S": ["A025"], "A03S": ["A037"], "A05": ["A055"], "A05S": ["A057"],
+        "A10": ["A105"], "A10S": ["A107"], "M10": ["M105"],
+        "A11": ["A115"], "A14": ["A145F", "A146P", "A146B"],
+        "A15": ["A155", "A156"], "A16": ["A165", "A166"],
+        "A20": ["A205"], "A20S": ["A207"], "A21S": ["A217"],
+        "A22": ["A225", "A226"], "A23": ["A235"], "A24": ["A245", "A246"], "A25": ["A256"],
+        "A30": ["A305"], "A50": ["A505"], "A3": ["A300"], "A5": ["A500"],
+        "A30S": ["A307"], "A31": ["A315"], "A32": ["A325", "A326"],
+        "A33": ["A336"], "A34": ["A345", "A346"], "A35": ["A356"],
+        "A51": ["A515"], "A52": ["A525", "A527", "A528"], "A52S": ["A527"],
+        "A53": ["A536"], "A54": ["A546"], "A55": ["A556"],
+        "A7": ["A700"], "A6": ["A600"], "A6PLUS": ["A605"],
+        "A70": ["A705"], "A71": ["A715"], "A72": ["A725"], "A73": ["A736"],
+        "A82018": ["A530"], "A8PLUS2018": ["A730"], "A72018": ["A750"], "A82017": ["A800"], "A8": ["A800"], "A80": ["A805"], "A92018": ["A920"],
+
+        // Samsung C / E / G / J market names
+        "C5": ["C500"], "C5PRO": ["C500PRO"], "C7": ["C700"], "C7PRO": ["C700PRO"], "C9": ["C900"], "C9PRO": ["C900PRO"],
+        "E5": ["E500"], "E7": ["E700"],
+        "G5PRIME": ["G570"], "G6PRIME": ["G610"], "G6PRIME2": ["G611"], "G6PRIMETO": ["G611"],
+        "J6": ["J600"], "J16": ["J120"], "J1SIX": ["J120"], "J2": ["J200"], "J2PRIME": ["J250"],
+        "J4": ["J400"], "J4PLUS": ["J410", "J415"], "J6PLUS": ["J610"],
+        "J5": ["J500"], "J56": ["J510"], "J5PRO": ["J530"],
+        "J7": ["J700"], "J76": ["J710"], "J7DUOS": ["J720"], "J7DOS": ["J720"],
+        "J7PRO": ["J730"], "J7CORE": ["J701"], "J8": ["J810"],
+        "M12": ["M125"],
+
+        // Samsung S edge family
+        "S6EDGE": ["S6EDGE"], "S6EDGEPLUS": ["S6EDGEPLUS"], "S7EDGE": ["S7EDGE"],
+
+        // Common speech/OCR corrections and compact-model fixes
+        "Y6B": ["Y6P"],
+        "Y6P": ["Y6P"],
+        "Y92019": ["Y92019"],
+        "SPARKGO2024": ["SPARKGO2024"],
+        "SPARKGO01": ["SPARKGO01"], "SPARKGO02": ["SPARKGO02"], "SPARKGO03": ["SPARKGO03"],
+        "IPHONE6S": ["IPHONE6S"],
+        "6S": ["6S"],
+        "IPHONE6SPLUS": ["IPHONE6SPLUS"],
+        "6SPLUS": ["6SPLUS"],
+        "ZERO20": ["ZERO20"], "ZERO30": ["ZERO30"], "ZERO40": ["ZERO40"],
+        "ZEROX": ["ZEROX"], "ZEROXPRO": ["ZEROXPRO"], "ZEROXNEO": ["ZEROXNEO"],
+        "NOVA9SE": ["NOVA9SE"]
+    };
+
+    const ASSAL_VOICE_EXTRA_PHRASE_MAP = {
+        // المركبات لازم قبل الحروف المفردة: HD / SE / FE / NE / GT / 5G
+        "اتش دي": "HD", "اش دي": "HD", "اج دي": "HD", "اچ دي": "HD", "هتش دي": "HD", "ايج دي": "HD", "ايتش دي": "HD", "هتش دي": "HD",
+        "اس اي": "SE", "اس ايه": "SE", "اس يي": "SE", "اس إي": "SE",
+        "اف اي": "FE", "اف ايه": "FE",
+        "ان اي": "NE", "ان ايه": "NE",
+        "جي تي": "GT", "جيتي": "GT",
+        "فايف جي": "5G", "فور جي": "4G",
+        "واي فاي": "WIFI", "وايفاي": "WIFI",
+        "سيم كارت": "SIM", "سيم كارد": "SIM",
+
+        // كلمات السوق المركبة
+        "برو ماكس": "PRO MAX", "برو مكس": "PRO MAX",
+        "اكس برو": "X PRO", "اكس نيو": "X NEO",
+        "سكس اس بلاس": "6 S PLUS", "ستة اس بلاس": "6 S PLUS", "سته اس بلاس": "6 S PLUS",
+        "سكس اس": "6 S", "ستة اس": "6 S", "سته اس": "6 S",
+        "زيرو اكس برو": "ZERO X PRO", "زيرو اكس نيو": "ZERO X NEO", "زيرو اكس": "ZERO X",
+        "زيرو عشرين": "ZERO 20", "زيرو ثلاثين": "ZERO 30", "زيرو تلاثين": "ZERO 30", "زيرو اربعين": "ZERO 40",
+        "سبارك كو صفر واحد": "SPARK GO 01", "سبارك گو صفر واحد": "SPARK GO 01", "سبارك جو صفر واحد": "SPARK GO 01", "سبارك غو صفر واحد": "SPARK GO 01",
+        "سبارك كو واحد": "SPARK GO 01", "سبارك كو وان": "SPARK GO 01", "سبارك گو واحد": "SPARK GO 01", "سبارك جو واحد": "SPARK GO 01",
+        "سبارك كو صفر اثنين": "SPARK GO 02", "سبارك كو صفر ثنين": "SPARK GO 02", "سبارك گو صفر اثنين": "SPARK GO 02", "سبارك جو صفر اثنين": "SPARK GO 02",
+        "سبارك كو اثنين": "SPARK GO 02", "سبارك كو ثنين": "SPARK GO 02", "سبارك كو تو": "SPARK GO 02",
+        "سبارك كو صفر ثلاثة": "SPARK GO 03", "سبارك كو صفر تلاثة": "SPARK GO 03", "سبارك گو صفر ثلاثة": "SPARK GO 03", "سبارك جو صفر ثلاثة": "SPARK GO 03",
+        "سبارك كو ثلاثة": "SPARK GO 03", "سبارك كو تلاثة": "SPARK GO 03", "سبارك كو ثري": "SPARK GO 03",
+        "سبارك كو": "SPARK GO", "سبارك كَو": "SPARK GO", "سبارك گو": "SPARK GO", "سبارك جو": "SPARK GO", "سبارك غو": "SPARK GO",
+
+        // Samsung direct speech helpers where generic letter rules can confuse J/G
+        "جي سكس برايم تو": "G6 PRIME 2", "جي سكس برايم توو": "G6 PRIME 2", "جي سكس برايم": "G6 PRIME", "جي فايف برايم": "G5 PRIME",
+        "جاي وان سكس": "J1 6", "جاي تو": "J2", "جاي ربع": "J2 PRIME",
+        "جاي فور بلاس": "J4 PLUS", "جاي فور": "J4", "جاي اربعه": "J4", "جاي اربعة": "J4",
+        "جاي سكس بلاس": "J6 PLUS", "جاي ستة بلاس": "J6 PLUS", "جاي سته بلاس": "J6 PLUS",
+        "جاي فايف سكس": "J5 6", "جاي فايف برو": "J5 PRO", "جاي خمسة برو": "J5 PRO", "جاي خمسه برو": "J5 PRO",
+        "جاي فايف": "J5", "جاي خمسة": "J5", "جاي خمسه": "J5",
+        "جاي سفن سكس": "J7 6", "جاي سبعة سكس": "J7 6", "جاي سبعه سكس": "J7 6",
+        "جاي سفن ديوس": "J7 DUOS", "جاي سفن دوس": "J7 DOS",
+        "جاي سفن برو": "J7 PRO", "جاي سبعة برو": "J7 PRO", "جاي سبعه برو": "J7 PRO",
+        "جاي سفن كور": "J7 CORE", "جاي سبعة كور": "J7 CORE", "جاي سبعه كور": "J7 CORE",
+        "جاي سفن": "J7", "جاي سبعة": "J7", "جاي سبعه": "J7", "جاي ثمانية": "J8", "جاي ثمانيه": "J8",
+
+        // Years often spoken without the full 20 prefix in market names
+        "الفين واثنين وعشرين": "2022", "الفين واثنين عشرين": "2022", "اثنين وعشرين": "22",
+        "الفين واثمنطعش": "2018", "الفين وثمنطعش": "2018", "الفين وثمنتعش": "2018",
+        "الفين واسبعطعش": "2017", "الفين وسبعطعش": "2017", "الفين وسبعتعش": "2017"
+    };
+    Object.assign(ASSAL_VOICE_PHRASE_MAP, ASSAL_VOICE_EXTRA_PHRASE_MAP);
+
+    const ASSAL_VOICE_EXTRA_TOKEN_MAP = {
+        // model/description words inside item names
+        "نوفا": "NOVA", "وايفاي": "WIFI", "واي فاي": "WIFI", "كيدز": "KIDS", "كيدس": "KIDS", "كدز": "KIDS", "سيم": "SIM",
+        "كارت": "", "كارد": "",
+        "كو": "GO", "گو": "GO", "جو": "GO", "غو": "GO",
+        "نيو": "NEW", "كامون": "CAMON", "كمون": "CAMON",
+        "تابلت": "TAB", "تاب": "TAB",
+        "دوس": "DOS", "ديوس": "DUOS", "كور": "CORE",
+        "ايج": "EDGE", "ايدج": "EDGE",
+        "ثري": "3", "فايف": "5", "سكس": "6", "سفن": "7", "ايت": "8", "ناين": "9",
+        "پ": "P", "پي": "P", "بيي": "P",
+        "آي": "I", "ائ": "I",
+        // ZERO هنا اسم سلسلة، أما "صفر" يبقى 0 للأكواد مثل A05/A025
+        "زيرو": "ZERO"
+    };
+    Object.assign(ASSAL_VOICE_TOKEN_MAP, ASSAL_VOICE_EXTRA_TOKEN_MAP);
+
+    Object.assign(ASSAL_VOICE_PHRASE_MAP, {
+        "واحد وخمسين": "51", "واحد و خمسين": "51", "احد وخمسين": "51", "احد و خمسين": "51",
+        "اثنين وخمسين": "52", "اثنين و خمسين": "52", "ثنين وخمسين": "52", "ثنين و خمسين": "52",
+        "ثلاثة وخمسين": "53", "ثلاثه وخمسين": "53", "ثلاث وخمسين": "53", "تلاثة وخمسين": "53", "تلاثه وخمسين": "53", "تلاث وخمسين": "53",
+        "اربعة وخمسين": "54", "اربعه وخمسين": "54", "اربع وخمسين": "54",
+        "خمسة وخمسين": "55", "خمسه وخمسين": "55", "خمس وخمسين": "55",
+        "واحد وسبعين": "71", "واحد و سبعين": "71", "احد وسبعين": "71", "احد و سبعين": "71",
+        "اثنين وسبعين": "72", "اثنين و سبعين": "72", "ثنين وسبعين": "72", "ثنين و سبعين": "72",
+        "ثلاثة وسبعين": "73", "ثلاثه وسبعين": "73", "ثلاث وسبعين": "73", "تلاثة وسبعين": "73", "تلاثه وسبعين": "73", "تلاث وسبعين": "73"
+    });
+    Object.assign(ASSAL_VOICE_TOKEN_MAP, { "سطعش": "16", "صطعش": "16", "سطنعش": "16" });
+
+
+    // إضافات أحمد الأخيرة - ملاحظات بحث صوتي دقيقة فوق القواعد الحالية
+    Object.assign(ASSAL_VOICE_PHRASE_MAP, {
+        // ZERO لازم يُفهم كسلسلة جهاز قبل أي تعامل معه كرقم صفر
+        "زيرو ثمانية اي": "ZERO 8I", "زيرو ثمانيه اي": "ZERO 8I", "زيرو ايت اي": "ZERO 8I", "زيرو ايت آي": "ZERO 8I",
+        "زيرو ثمانية": "ZERO 8", "زيرو ثمانيه": "ZERO 8", "زيرو ايت": "ZERO 8",
+        "زيرو عشرين": "ZERO 20", "زيرو ثلاثين": "ZERO 30", "زيرو تلاثين": "ZERO 30", "زيرو اربعين": "ZERO 40",
+
+        // Huawei MATE
+        "هواوي ميت": "HUAWEI MATE", "هواوي مايت": "HUAWEI MATE",
+
+        // Huawei P series: المايك أحياناً يسمع P كـ B
+        "هواوي بي اربعين بلاس": "HUAWEI P40 PLUS", "هواوي پي اربعين بلاس": "HUAWEI P40 PLUS",
+        "بي اربعين بلاس": "P40 PLUS", "پي اربعين بلاس": "P40 PLUS",
+        "هواوي بي اربعين": "HUAWEI P40", "هواوي پي اربعين": "HUAWEI P40",
+        "بي اربعين": "P40", "پي اربعين": "P40",
+
+        // BLACKVIEW + BV
+        "بلاك فيو": "BLACKVIEW", "بلاكفيو": "BLACKVIEW", "بي في": "BV",
+
+        // VISION / POP / Realme Q
+        "فيشن": "VISION", "فيجن": "VISION", "فيزون": "VISION", "فايزون": "VISION",
+        "بوب": "POP",
+        "ريلمي كيو": "REALME Q",
+
+        // VIVO Y + رقم + i: كلمة اي بعد رقم Y هنا غالباً I وليس A
+        "فيفو واي خمسطعش اي": "VIVO Y15I", "فيفو واي خمسة عشر اي": "VIVO Y15I", "فيفو واي خمسه عشر اي": "VIVO Y15I",
+        "فيفو واي اثنعش اي": "VIVO Y12I", "فيفو واي اضنعش اي": "VIVO Y12I", "فيفو واي اثني عشر اي": "VIVO Y12I",
+        "فيفو واي دعش اي": "VIVO Y11I", "فيفو واي عشرين اي": "VIVO Y20I", "فيفو واي واحد وعشرين اي": "VIVO Y21I"
+    });
+
+    Object.assign(ASSAL_VOICE_TOKEN_MAP, {
+        "ميت": "MATE", "مايت": "MATE",
+        "فيشن": "VISION", "فيجن": "VISION", "فيزون": "VISION", "فايزون": "VISION",
+        "بوب": "POP",
+        "كيو": "Q",
+        "بلاكفيو": "BLACKVIEW", "بلاك": "BLACK", "فيو": "VIEW",
+        "پي": "P", "پيي": "P", "بي": "B"
+    });
+
+    Object.assign(ASSAL_VOICE_MARKET_ALIAS_MAP, {
+        "ZERO8": ["ZERO8"], "ZERO8I": ["ZERO8I"],
+        "ZERO20": ["ZERO20"], "ZERO30": ["ZERO30"], "ZERO40": ["ZERO40"],
+        "P40": ["P40"], "P40PLUS": ["P40PLUS"],
+        "B40": ["P40"], "B40PLUS": ["P40PLUS"],
+        "Y11A": ["Y11I"], "Y12A": ["Y12I"], "Y15A": ["Y15I"], "Y20A": ["Y20I"], "Y21A": ["Y21I"]
+    });
+
+    if (!ASSAL_VOICE_BRANDS.includes("BLACKVIEW")) ASSAL_VOICE_BRANDS.push("BLACKVIEW");
+    ["MATE","VISION","POP","BLACKVIEW","BV"].forEach(w => ASSAL_COMPACT_MODEL_WORDS.add(w));
+    ["Q","P"].forEach(w => ASSAL_SINGLE_MODEL_LETTERS.add(w));
+
+
+    ["NOVA","IPHONE","REDMI","TECNO","INFINIX","HONOR","HUAWEI","REALME","OPPO","VIVO","WIFI","KIDS","SIM","GO","NEW","EDGE"].forEach(w => ASSAL_COMPACT_MODEL_WORDS.add(w));
+    ["I","P","E"].forEach(w => ASSAL_SINGLE_MODEL_LETTERS.add(w));
+
+    function assalVoiceCompactOnly(str) {
+        return assalCompactSearchText(str);
+    }
+
+    function assalVoiceCodeToDisplay(code) {
+        return String(code || "")
+            .replace(/([A-Z]+)(\d+)/g, "$1 $2")
+            .replace(/(\d+)([A-Z]+)/g, "$1$2")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function assalExpandVoiceMarketAliasVariants(variant) {
+        const compact = assalVoiceCompactOnly(variant);
+        if (!compact) return [];
+        const withoutSamsung = compact.replace(/^SAMSUNG/, "");
+        const probes = assalUniqueArray([compact, withoutSamsung]);
+        const out = [];
+
+        probes.forEach(probe => {
+            const official = ASSAL_VOICE_MARKET_ALIAS_MAP[probe];
+            if (official && official.length) {
+                official.forEach(code => {
+                    out.push(code);
+                    out.push(assalVoiceCodeToDisplay(code));
+                    if (compact.startsWith("SAMSUNG") && !String(code).startsWith("SAMSUNG")) {
+                        out.push("SAMSUNG " + assalVoiceCodeToDisplay(code));
+                    }
+                });
+            }
+        });
+
+        // Samsung M follows A-style market naming when available in data: M12 -> M125, M15 -> M155/M156 style where useful.
+        const m = withoutSamsung.match(/^M(\d{1,2})(S?)$/);
+        if (m) {
+            const aKey = "A" + m[1] + (m[2] || "");
+            const aOfficial = ASSAL_VOICE_MARKET_ALIAS_MAP[aKey];
+            if (aOfficial && aOfficial.length) {
+                aOfficial.forEach(code => {
+                    const mCode = String(code).replace(/^A/, "M");
+                    out.push(mCode);
+                    out.push(assalVoiceCodeToDisplay(mCode));
+                    if (compact.startsWith("SAMSUNG")) out.push("SAMSUNG " + assalVoiceCodeToDisplay(mCode));
+                });
+            }
+        }
+
+        return assalUniqueArray(out);
+    }
+
+    function assalIsSamsungMarketAliasKeyNeedingOfficialOnly(variant) {
+        const compact = assalVoiceCompactOnly(variant);
+        if (!compact) return false;
+        const key = compact.replace(/^SAMSUNG/, "");
+        const official = ASSAL_VOICE_MARKET_ALIAS_MAP[key];
+        if (!official || !official.length) return false;
+        // إذا الكود الرسمي نفس المفتاح، مثل S7EDGE، نتركه يطابق طبيعي.
+        return !official.map(x => assalVoiceCompactOnly(x)).includes(key);
+    }
+
+    function assalIsStrongAlphaNumericVariant(variant) {
+        const compact = assalVoiceCompactOnly(variant);
+        if (!compact) return false;
+        if (/\d+[A-Z]+/.test(compact)) return true;       // 14C / 6S / 12I / 7HD / 9SE
+        if (/[A-Z]+\d+[A-Z0-9]*/.test(compact) && compact.length >= 3) return true; // HOT12I / SPARKGO2024 / Y92019
+        return false;
+    }
+
+
+    function assalEscapeRegExp(str) {
+        return String(str).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function assalNormalizeArabicVoice(raw) {
+        return String(raw || "")
+            .toLowerCase()
+            .replace(/[أإآٱ]/g, "ا")
+            .replace(/[کك]/g, "ك")
+            .replace(/گ/g, "ك")
+            .replace(/چ/g, "ج")
+            .replace(/ى/g, "ي")
+            .replace(/ة/g, "ه")
+            .replace(/ؤ/g, "و")
+            .replace(/ئ/g, "ي")
+            .replace(/[ًٌٍَُِّْـ]/g, "")
+            .replace(/[،؛:!؟?.,_\-/\\()[\]{}+*=~`'"|<>]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function assalReplacePhrases(text, map) {
+        let out = ` ${assalNormalizeArabicVoice(text)} `;
+        const entries = Object.entries(map).sort((a, b) => b[0].length - a[0].length);
+        for (const [phrase, repl] of entries) {
+            const p = assalNormalizeArabicVoice(phrase);
+            if (!p) continue;
+            const rgx = new RegExp(`(^|\\s)${assalEscapeRegExp(p)}(?=\\s|$)`, "g");
+            out = out.replace(rgx, `$1 ${repl} `).replace(/\s+/g, " ");
+        }
+        return out.replace(/\s+/g, " ").trim();
+    }
+
+    function assalDetectVoiceCategories(rawText) {
+        let working = ` ${assalNormalizeArabicVoice(rawText)} `;
+        const preferred = [];
+        const matchedAliases = [];
+        const allAliases = [];
+
+        ASSAL_VOICE_CATEGORY_ALIASES.forEach(entry => {
+            entry.aliases.forEach(alias => allAliases.push({ cat: entry.cat, alias: assalNormalizeArabicVoice(alias) }));
+        });
+        allAliases.sort((a, b) => b.alias.length - a.alias.length);
+
+        for (const item of allAliases) {
+            if (!item.alias) continue;
+            const rgx = new RegExp(`(^|\\s)${assalEscapeRegExp(item.alias)}(?=\\s|$)`, "g");
+            if (rgx.test(working)) {
+                if (!preferred.includes(item.cat)) preferred.push(item.cat);
+                matchedAliases.push(item.alias);
+                working = working.replace(rgx, "$1 ").replace(/\s+/g, " ");
+            }
+        }
+
+        const expanded = [];
+        preferred.forEach(cat => {
+            if (!expanded.includes(cat)) expanded.push(cat);
+            (ASSAL_RELATED_VOICE_CATEGORIES[cat] || []).forEach(rel => {
+                if (!expanded.includes(rel)) expanded.push(rel);
+            });
+        });
+
+        return { preferredCategories: expanded, directCategories: preferred, cleanText: working.trim(), matchedAliases };
+    }
+
+    function assalMapVoiceToken(token) {
+        const raw = String(token || "").trim();
+        if (!raw) return "";
+        const lower = assalNormalizeArabicVoice(raw);
+        if (ASSAL_VOICE_FILLERS.has(lower)) return "";
+        if (/^[a-z0-9]+$/i.test(raw)) return raw.toUpperCase();
+        return ASSAL_VOICE_TOKEN_MAP[lower] || "";
+    }
+
+    function assalJoinVoiceModelTokens(tokens) {
+        const out = [];
+        for (let i = 0; i < tokens.length; i++) {
+            const cur = tokens[i];
+            const next = tokens[i + 1];
+            const next2 = tokens[i + 2];
+            const next3 = tokens[i + 3];
+
+            // SPARK GO 2024 / 01 / 02 / 03: كتلة قوية قبل أي تفكيك أو بحث ضعيف على الرقم.
+            if (cur === "SPARK" && next === "GO") {
+                if (/^\d{4}$/.test(next2 || "")) {
+                    out.push("SPARKGO" + next2);
+                    i += 2;
+                    continue;
+                }
+                if (next2 === "0" && /^[1-3]$/.test(next3 || "")) {
+                    out.push("SPARKGO0" + next3);
+                    i += 3;
+                    continue;
+                }
+                if (/^[1-3]$/.test(next2 || "")) {
+                    out.push("SPARKGO0" + next2);
+                    i += 2;
+                    continue;
+                }
+            }
+
+            // Honor X5/X6/X7/X8/X9 + 2022 بدون NEW أيضاً لازم يطابق نسخة NEW 2022.
+            if (cur === "X" && /^[5-9]$/.test(next || "") && /^\d{2,4}$/.test(next2 || "")) {
+                const year = next2.length === 2 ? "20" + next2 : next2;
+                if (year === "2022") {
+                    out.push("X" + next + year);
+                    i += 2;
+                    continue;
+                }
+            }
+
+            // ZERO series: ZERO 20/30/40 and ZERO X/PRO/NEO must stay ZERO, not 0.
+            if (cur === "ZERO" && (/^\d{1,4}$/.test(next || "") || next === "X")) {
+                if (next === "X" && (next2 === "PRO" || next2 === "NEO")) {
+                    out.push("ZERO" + next + next2);
+                    i += 2;
+                } else {
+                    out.push("ZERO" + next);
+                    i += 1;
+                }
+                continue;
+            }
+
+            // iPhone 6S / 6S PLUS and any number+letter(+PLUS) model.
+            if (/^\d{1,4}$/.test(cur) && ASSAL_SINGLE_MODEL_LETTERS.has(next || "")) {
+                if (next2 === "PLUS") {
+                    out.push(cur + next + "PLUS");
+                    i += 2;
+                } else {
+                    out.push(cur + next);
+                    i += 1;
+                }
+                continue;
+            }
+
+            // Honor X5 NEW 2022 must run before generic single-letter X+number handling.
+            if (cur === "X" && /^\d{1,2}$/.test(next || "") && next2 === "NEW" && /^\d{2,4}$/.test(next3 || "")) {
+                out.push("X" + next + "NEW" + (next3.length === 2 ? "20" + next3 : next3));
+                i += 3;
+                continue;
+            }
+
+            // A/M/F/J/C/G + number + optional letter/word, e.g. A12S, C5PRO, J7CORE, S6EDGE.
+            if (ASSAL_SINGLE_MODEL_LETTERS.has(cur) && /^\d{1,4}$/.test(next || "")) {
+                let numericPart = "";
+                let j = i + 1;
+                while (j < tokens.length && /^\d+$/.test(tokens[j]) && numericPart.length < 4) {
+                    numericPart += tokens[j];
+                    j++;
+                }
+                const tail = tokens[j] || "";
+                if (ASSAL_SINGLE_MODEL_LETTERS.has(tail)) {
+                    out.push(cur + numericPart + tail);
+                    i = j;
+                } else if (["PRO", "PLUS", "PRIME", "CORE", "DUOS", "DOS", "EDGE", "NEW", "NEO"].includes(tail)) {
+                    const tail2 = tokens[j + 1] || "";
+                    if (tail === "EDGE" && tail2 === "PLUS") {
+                        out.push(cur + numericPart + "EDGEPLUS");
+                        i = j + 1;
+                    } else {
+                        out.push(cur + numericPart + tail);
+                        i = j;
+                    }
+                } else {
+                    out.push(cur + numericPart);
+                    i = j - 1;
+                }
+                continue;
+            }
+
+            if (/^\d{1,4}$/.test(cur) && /^(G|GB)$/i.test(next || "")) {
+                out.push(cur + next.toUpperCase());
+                i += 1;
+                continue;
+            }
+
+            // HOT 12 I problem: spoken "اي" becomes A in Samsung, but after HOT+number it is usually I.
+            if (cur === "HOT" && /^\d{1,4}$/.test(next || "") && next2 === "A") {
+                out.push(cur + next + "I");
+                i += 2;
+                continue;
+            }
+
+            // X5 NEW 2022 / X6 / X7 / X8 / X9 Honor style must run before generic compact X+number.
+            if (cur === "X" && /^\d{1,2}$/.test(next || "")) {
+                if (next2 === "NEW" && /^\d{2,4}$/.test(next3 || "")) {
+                    out.push("X" + next + "NEW" + (next3.length === 2 ? "20" + next3 : next3));
+                    i += 3;
+                } else if (next2 === "NEW") {
+                    out.push("X" + next + "NEW");
+                    i += 2;
+                } else {
+                    out.push("X" + next);
+                    i += 1;
+                }
+                continue;
+            }
+
+            // Word + number + optional suffix: HOT12I, SMART7HD, NOVA9SE, TAB8SIM, SPARKGO2024.
+            if (ASSAL_COMPACT_MODEL_WORDS.has(cur) && /^\d{1,4}$/.test(next || "")) {
+                if (["HD", "SE", "FE", "NE", "GT", "SIM", "WIFI", "KIDS", "NEW", "PRO", "PLUS", "PLAY", "LITE", "PRIME", "CORE", "DUOS", "DOS", "EDGE", "4G", "5G", "I", "A", "S", "C", "D", "P", "B", "Q"].includes(next2 || "")) {
+                    out.push(cur + next + next2);
+                    i += 2;
+                } else {
+                    out.push(cur + next);
+                    i += 1;
+                }
+                continue;
+            }
+
+            // Word + GO + year: SPARK GO 2024 as one strong model.
+            if (ASSAL_COMPACT_MODEL_WORDS.has(cur) && next === "GO" && /^\d{4}$/.test(next2 || "")) {
+                out.push(cur + "GO" + next2);
+                i += 2;
+                continue;
+            }
+
+            // X5 NEW 2022 / X6 / X7 / X8 / X9 Honor style.
+            if (cur === "X" && /^\d{1,2}$/.test(next || "")) {
+                if (next2 === "NEW" && /^\d{2,4}$/.test(next3 || "")) {
+                    out.push("X" + next + "NEW" + (next3.length === 2 ? "20" + next3 : next3));
+                    i += 3;
+                } else if (next2 === "NEW") {
+                    out.push("X" + next + "NEW");
+                    i += 2;
+                } else {
+                    out.push("X" + next);
+                    i += 1;
+                }
+                continue;
+            }
+
+            out.push(cur);
+        }
+        return out;
+    }
+
+    function assalApplyVoicePostCorrections(query, rawText) {
+        let q = assalNormalizeLatinForCompare(query);
+        const rawNorm = assalNormalizeArabicVoice(rawText);
+
+        // تصحيح BLACK VIEW إذا تفككت كلمتين إنكليزيتين.
+        q = q.replace(/\bBLACK\s+VIEW\b/g, "BLACKVIEW");
+
+        // ZERO هنا اسم سلسلة جهاز، مو رقم صفر.
+        // مهم: نعالج حتى إذا محرك الصوت رجّعها أرقاماً جاهزة مثل 0 30 بدل زيرو ثلاثين.
+        q = q.replace(/^(INFINIX\s*)?0\s*8\s*(A|I)?$/g, function(_, brand, tail){
+            return (brand || "") + "ZERO8" + (tail ? "I" : "");
+        });
+        q = q.replace(/^(INFINIX\s*)?0\s*(20|30|40)$/g, function(_, brand, n){
+            return (brand || "") + "ZERO" + n;
+        });
+        q = q.replace(/\b(INFINIX|TECNO)\s*0\s*8\s*(A|I)?\b/g, function(_, brand, tail){
+            return brand + " ZERO8" + (tail ? "I" : "");
+        });
+        q = q.replace(/\b(INFINIX|TECNO)\s*0\s*(20|30|40)\b/g, function(_, brand, n){
+            return brand + " ZERO" + n;
+        });
+        q = q.replace(/\bZERO\s*8\s*(A|I)?\b/g, function(_, tail){ return "ZERO8" + (tail ? "I" : ""); });
+        q = q.replace(/\bZERO\s*(20|30|40)\b/g, "ZERO$1");
+        q = q.replace(/\bZERO\s*X\s*PRO\b/g, "ZEROXPRO");
+        q = q.replace(/\bZERO\s*X\s*NEO\b/g, "ZEROXNEO");
+        q = q.replace(/\bZERO\s*X\b/g, "ZEROX");
+
+        // Huawei P-series: المايك أحياناً يسمع P كـ B، لذلك B20/B20PRO/B40PLUS => P20/P20PRO/P40PLUS.
+        // التصحيح هنا مخصص لنمط B + رقم + إضافات موديل، ولا يحول كل حرف B عشوائياً.
+        q = q.replace(/\bHUAWEI\s+B\s*(\d{1,3})\s*(PRO|PLUS|LITE|5G)?\b/g, function(_, n, tail){
+            return "HUAWEI P" + n + (tail || "");
+        });
+        q = q.replace(/^B\s*(\d{1,3})\s*(PRO|PLUS|LITE|5G)?$/g, function(_, n, tail){
+            return "P" + n + (tail || "");
+        });
+        q = q.replace(/\bP\s*(\d{1,3})\s*(PRO|PLUS|LITE|5G)?\b/g, function(_, n, tail){
+            return "P" + n + (tail || "");
+        });
+
+        // VIVO Y*i: في هذا السياق "اي" بعد رقم Y تعني I وليس A.
+        if (/\bVIVO\b/.test(q) || /فيفو/.test(rawNorm)) {
+            q = q.replace(/\bY\s*(\d{1,2})\s*A\b/g, "Y$1I");
+        } else {
+            q = q.replace(/\bY\s*(11|12|15|20|21)\s*A\b/g, "Y$1I");
+        }
+        q = q.replace(/\bY\s*(\d{1,2})\s*I\b/g, "Y$1I");
+
+        // MATE / VISION / POP / BLACKVIEW / BV / Q: كتل قوية مع الرقم حتى لا يبحث على الرقم وحده.
+        q = q.replace(/\b(MATE|VISION|POP|BV|Q)\s*(\d{1,4})\s*(PRO|PLUS|4G|5G|LITE|I|A|C|D|P|B)?\b/g, function(_, word, n, tail){
+            return word + n + (tail || "");
+        });
+        q = q.replace(/\bBLACKVIEW\s+(TAB|A|BV)\s*(\d{1,4})\s*(PRO|PLUS|KIDS|WIFI|SIM|4G|5G)?\b/g, function(_, kind, n, tail){
+            return "BLACKVIEW" + kind + n + (tail || "");
+        });
+
+        // SPARK GO لازم تبقى كتلة، حتى لا يصير البحث على السنة/الرقم وحده.
+        q = q.replace(/\bSPARK\s*GO\s*2024\b/g, "SPARKGO2024");
+        q = q.replace(/\bSPARK\s*GO\s*0?\s*1\b/g, "SPARKGO01");
+        q = q.replace(/\bSPARK\s*GO\s*0?\s*2\b/g, "SPARKGO02");
+        q = q.replace(/\bSPARK\s*GO\s*0?\s*3\b/g, "SPARKGO03");
+
+        // ترتيب العرض/المقارنة لموديلات السنة مثل Y9 2019.
+        q = q.replace(/\b(Y)(\d)(20\d{2})\b/g, "$1$2 $3");
+
+        return q.replace(/\s+/g, " ").trim();
+    }
+
+    function assalVoiceToEnglishQuery(rawText) {
+        const detected = assalDetectVoiceCategories(rawText);
+        let cleaned = detected.cleanText;
+        cleaned = assalReplacePhrases(cleaned, ASSAL_VOICE_PHRASE_MAP);
+
+        const mapped = cleaned.split(/\s+/).map(assalMapVoiceToken).filter(Boolean);
+        const joined = assalJoinVoiceModelTokens(mapped);
+        let query = joined.join(" ").replace(/\s+/g, " ").trim().toUpperCase();
+        query = assalApplyVoicePostCorrections(query, rawText);
+
+        return {
+            raw: String(rawText || "").trim(),
+            query,
+            tokens: joined,
+            preferredCategories: detected.preferredCategories,
+            directCategories: detected.directCategories,
+            mentionedBrands: joined.filter(t => ASSAL_VOICE_BRANDS.includes(t))
+        };
+    }
+
+    function assalNormalizeLatinForCompare(str) {
+        return String(str || "")
+            .toUpperCase()
+            .replace(/[^A-Z0-9]+/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function assalCompactSearchText(str) {
+        return assalNormalizeLatinForCompare(str).replace(/\s+/g, "");
+    }
+
+    function assalUniqueArray(arr) {
+        return Array.from(new Set((arr || []).map(x => String(x || "").trim()).filter(Boolean)));
+    }
+
+    function assalAddSamsungZeroVariants(query) {
+        // مهم جداً: لا نضيف صفر قبل أرقام سامسونك بشكل عام.
+        // A25 لازم تطابق A256 فقط، وليس A025.
+        // A15 لازم تطابق A155/A156 فقط، وليس A015.
+        // الصفر يضاف فقط إذا الزبون نطقه صراحة: A01 / A02S / A05 / A05S.
+        return [query];
+    }
+
+    function assalExpandHonorX2022Variants(variant) {
+        const compact = assalVoiceCompactOnly(variant).replace(/^HUAWEI/, "").replace(/^HONOR/, "");
+        const out = [];
+        const m = compact.match(/^X([5-9])(NEW)?(2022|22)$/);
+        if (m) {
+            const n = m[1];
+            out.push("X" + n + "2022");
+            out.push("X" + n + " NEW 2022");
+            out.push("X" + n + "NEW2022");
+            out.push("HONOR X" + n + " 2022");
+            out.push("HONOR X" + n + " NEW 2022");
+            out.push("HUAWEI HONOR X" + n + " NEW 2022");
+        }
+        return assalUniqueArray(out);
+    }
+
+    function assalBuildVoiceQueryVariants(parsed) {
+        const base = assalNormalizeLatinForCompare(parsed.query);
+        let variants = [];
+        if (base) variants.push(base);
+
+        assalAddSamsungZeroVariants(base).forEach(v => variants.push(v));
+
+        const tokens = base.split(/\s+/).filter(Boolean);
+        const brandless = tokens.filter(t => !ASSAL_VOICE_BRANDS.includes(t)).join(" ");
+        if (brandless && brandless !== base) {
+            variants.push(brandless);
+            assalAddSamsungZeroVariants(brandless).forEach(v => variants.push(v));
+        }
+
+        // Market aliases: A12 -> A125, A12S -> A127, J7PRO -> J730, etc.
+        [...variants].forEach(v => {
+            assalExpandVoiceMarketAliasVariants(v).forEach(aliasVariant => variants.push(aliasVariant));
+        });
+
+        // Honor X5/X6/X7/X8/X9 2022: NEW اختيارية في النطق والبحث.
+        [...variants].forEach(v => {
+            assalExpandHonorX2022Variants(v).forEach(aliasVariant => variants.push(aliasVariant));
+        });
+
+        // Specific correction: speech engine often hears Y6P as Y6B.
+        [...variants].forEach(v => {
+            const c = assalVoiceCompactOnly(v);
+            if (c.includes("Y6B")) {
+                variants.push(v.replace(/Y\s*6\s*B/gi, "Y6P"));
+                variants.push("Y6P");
+            }
+        });
+
+        // احتمالات المسافة للعرض والمطابقة فقط، مع بقاء البحث القوي يمنع التوسيع على الرقم وحده.
+        const spaced = base.replace(/\b([A-Z]{2,})(\d{1,4})([A-Z0-9]*)\b/g, "$1 $2$3").replace(/\s+/g, " ").trim();
+        if (spaced && spaced !== base) variants.push(spaced);
+        if (brandless) {
+            const brandlessSpaced = brandless.replace(/\b([A-Z]{2,})(\d{1,4})([A-Z0-9]*)\b/g, "$1 $2$3").replace(/\s+/g, " ").trim();
+            if (brandlessSpaced && brandlessSpaced !== brandless) variants.push(brandlessSpaced);
+        }
+
+        let finalVariants = assalUniqueArray(variants);
+
+        // إذا المستخدم ذكر سامسونك بوضوح، لا نخلي اسم السوق القصير يطابق بالـ contains.
+        // مثال: SAMSUNG A52 أو A52 بعد ذكر سامسونك يجب أن يطلع A525/A527/A528 فقط، وليس A520.
+        const samsungMentioned = (parsed.mentionedBrands || []).includes("SAMSUNG") || assalVoiceCompactOnly(base).startsWith("SAMSUNG");
+        if (samsungMentioned) {
+            finalVariants = finalVariants.filter(v => !assalIsSamsungMarketAliasKeyNeedingOfficialOnly(v));
+        }
+
+        return finalVariants;
+    }
+
+    function assalBuildVoiceItemTokens(itemName) {
+        const baseTokens = (typeof tokenizeSmart === "function") ? tokenizeSmart(itemName) : assalNormalizeLatinForCompare(itemName).toLowerCase().split(/\s+/).filter(Boolean);
+        const out = baseTokens.slice();
+        for (let i = 0; i < baseTokens.length - 1; i++) {
+            const a = baseTokens[i];
+            const b = baseTokens[i + 1];
+            if (/^[a-z]{2,}$/i.test(a) && /^\d{1,4}$/.test(b)) out.push(a + b);
+            if (/^\d{1,4}$/.test(a) && /^[a-z]{1,2}$/i.test(b)) out.push(a + b);
+        }
+        return assalUniqueArray(out.map(t => String(t || "").toLowerCase()));
+    }
+
+    function assalVariantDigitTokensAreExact(itemName, variant) {
+        if (typeof tokenizeSmart !== "function") return true;
+        const qTokens = tokenizeSmart(variant).filter(t => /\d/.test(t));
+        if (qTokens.length === 0) return true;
+        const itemTokens = assalBuildVoiceItemTokens(itemName);
+        return qTokens.every(qt => itemTokens.includes(String(qt).toLowerCase()));
+    }
+
+    function assalVoiceBestMatchScore(itemName, variants) {
+        const name = String(itemName || "");
+        const itemCompact = assalCompactSearchText(name);
+        let best = 0;
+
+        for (const variant of variants) {
+            const v = assalNormalizeLatinForCompare(variant);
+            if (!v) continue;
+            const compact = assalCompactSearchText(v);
+            if (!compact) continue;
+
+            const isStrongModel = assalIsStrongAlphaNumericVariant(v);
+            const digitExact = assalVariantDigitTokensAreExact(name, v);
+
+            // Strong model queries like 14C / HOT12I / SMART7HD / SPARKGO2024 must match as one block.
+            // This prevents "14C" from showing every item that only contains 14.
+            if (isStrongModel) {
+                if (itemCompact.includes(compact)) best = Math.max(best, 1.15);
+                continue;
+            }
+
+            if (digitExact && itemCompact.includes(compact)) best = Math.max(best, 1.08);
+            if (typeof smartScore === "function") {
+                const sc = smartScore(name, v);
+                best = Math.max(best, digitExact ? sc : Math.min(sc, 0.45));
+            }
+        }
+        return best;
+    }
+
+    function shouldUseAssalVoiceSearch(rawText) {
+        return hasArabicText(rawText);
+    }
+
+    /* ================== ASSAL Compatibility Voice Adapter ==================
+       This adapter does NOT replace the existing compatibility search logic.
+       It converts speech using the same Index voice brain, optionally selects
+       a spoken compatibility category, then uses the current search first.
+       Only when the normal compatibility search returns zero rows, the same
+       Index voice variants are used as a safe fallback for market/service codes.
+       ====================================================================== */
+
+    const ASSAL_COMPAT_VOICE_CATEGORY_ALIASES = [
+        { category: "18", label: "بصمات تحت الشاشة", aliases: ["بصمات تحت الشاشة", "بصمه تحت الشاشه", "بصمة تحت الشاشة", "فنگر تحت الشاشة", "فنكر تحت الشاشة"] },
+        { category: "19", label: "كيبلات الإشارة", aliases: ["كيبلات الإشارة", "كيبلات الاشارة", "كيبل الإشارة", "كيبل الاشارة", "كيبلات الشبكة", "كيبل الشبكة"] },
+        { category: "16", label: "فلاتات الشاشة", aliases: ["فلاتات الشاشة", "فلاتات الشاشه", "فلات الشاشة", "فلات الشاشه", "شريط الشاشة", "شريط الشاشه"] },
+        { category: "17", label: "هولدر السيم كارت", aliases: ["هولدر السيم كارت", "هولدر سيم كارت", "هولدر السيم", "هولدر سيم", "بيت سيم كارت", "بيت السيم"] },
+        { category: "12", label: "شريط البور والصوت", aliases: ["شريط البور والصوت", "شريط البور و الصوت", "شريط البور", "فلات البور", "فلات بور", "شريط الصوت", "فلات الصوت", "فلات صوت", "شريط فاليوم", "فلات فاليوم"] },
+        { category: "11", label: "شريط الهيتفون", aliases: ["شريط الهيتفون", "شريط الهيدفون", "فلات الهيتفون", "فلات الهيدفون", "شريط سماعة الراس", "فلات سماعة الراس"] },
+        { category: "14", label: "شريط الهوم", aliases: ["شريط الهوم", "فلات الهوم", "فلات هوم", "شريط هوم"] },
+        { category: "13", label: "گلاسات", aliases: ["گلاسات", "كلاسات", "جلاسات", "كلاس", "گلاس"] },
+        { category: "15", label: "آيسيات", aliases: ["آيسيات", "ايسيات", "ايسيات", "اي سي", "آي سي", "ايسي", "ايسي شحن", "ايسي الشحن"] },
+        { category: "9",  label: "كونكتر الشاشة", aliases: ["كونكتر الشاشة", "كونكتر الشاشه", "كونكتر شاشة", "كونكتر شاشه", "كونكتر ال سي دي", "كونكتر lcd"] },
+        { category: "8",  label: "قواعد الشحن", aliases: ["قواعد الشحن", "قواعد شحن", "قاعدة الشحن", "قاعده الشحن", "قاعدة شحن", "قاعده شحن", "سي سي", "c c"] },
+        { category: "7",  label: "بورد الشحن", aliases: ["بورد الشحن", "بورد شحن", "بوردة الشحن", "بورده الشحن", "سوكت شحن", "فلات شحن"] },
+        { category: "6",  label: "عدسة الكاميرا", aliases: ["عدسة الكاميرا", "عدسه الكاميرا", "عدسة كاميرا", "عدسه كاميرا", "عدسة كامرة", "عدسه كامره", "عدسة", "عدسه"] },
+        { category: "4",  label: "سماعة الاتصال", aliases: ["سماعة الاتصال", "سماعه الاتصال", "سماعة مكالمات", "سماعه مكالمات", "سماعة اذن", "سماعه اذن"] },
+        { category: "3",  label: "جرس النغمات", aliases: ["جرس النغمات", "جرس نغمات", "جرس", "بزر", "بوزر"] },
+        { category: "5",  label: "كاميرات", aliases: ["كاميرات", "كاميرا", "كامرة", "كامره"] },
+        { category: "10", label: "بصمات", aliases: ["بصمات", "بصمة", "بصمه", "فنكر", "فنگر"] },
+        { category: "2",  label: "بطاريات", aliases: ["بطاريات", "بطارية", "بطاريه"] },
+        { category: "1",  label: "شاشات", aliases: ["شاشات", "شاشة", "شاشه", "ال سي دي", "lcd"] },
+        { category: "20", label: "منوعة", aliases: ["منوعة", "منوعه", "متفرقات"] }
+    ];
+
+    function detectAssalCompatVoiceCategory(rawText) {
+        const normalized = assalNormalizeArabicVoice(rawText);
+        if (!normalized) return null;
+
+        const haystack = ` ${normalized} `;
+        const candidates = [];
+
+        ASSAL_COMPAT_VOICE_CATEGORY_ALIASES.forEach(entry => {
+            (entry.aliases || []).forEach(alias => {
+                const normalizedAlias = assalNormalizeArabicVoice(alias);
+                if (!normalizedAlias) return;
+
+                candidates.push({
+                    category: entry.category,
+                    label: entry.label,
+                    alias: normalizedAlias
+                });
+            });
+        });
+
+        candidates.sort((a, b) => b.alias.length - a.alias.length);
+
+        for (const candidate of candidates) {
+            const rgx = new RegExp(`(^|\\s)${assalEscapeRegExp(candidate.alias)}(?=\\s|$)`);
+            if (rgx.test(haystack)) return candidate;
+        }
+
+        return null;
+    }
+
+    function setAssalCompatVoiceCategory(category) {
+        const target = String(category || "").trim();
+        if (!target) return;
+
+        currentCategory = target;
+
+        document.querySelectorAll(".category").forEach(cat => cat.classList.remove("active"));
+        const selected = document.querySelector(`.category[onclick="filterByCategory('${target}')"]`);
+        if (selected) selected.classList.add("active");
+    }
+
+    function getAssalCompatVoiceFallbackResults(rawVoiceText) {
+        const parsed = assalVoiceToEnglishQuery(rawVoiceText);
+        const variants = assalBuildVoiceQueryVariants(parsed);
+        let source = Array.isArray(database?.SIMILARITES) ? database.SIMILARITES : [];
+
+        if (currentCategory && currentCategory !== "all") {
+            source = source.filter(item => String(item?.Category) === String(currentCategory));
+        }
+
+        if (!variants.length || !source.length) return [];
+
+        const ranked = [];
+
+        source.forEach(item => {
+            const itemName = String(item?.["Item"] || "");
+            if (!itemName) return;
+
+            const score = assalVoiceBestMatchScore(itemName, variants);
+            if (score < 0.62) return;
+
+            ranked.push({ item, score, itemName });
+        });
+
+        ranked.sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            return a.itemName.length - b.itemName.length;
+        });
+
+        return ranked.slice(0, 150).map(row => row.item);
+    }
+
+    function searchAssalCompatVoice(rawVoiceText, options = {}) {
+        const raw = String(rawVoiceText || "").trim();
+        const input = document.getElementById("searchInput");
+        const englishQuery = getAssalVoiceEnglishQuery(raw);
+        const categoryMatch = detectAssalCompatVoiceCategory(raw);
+
+        if (categoryMatch?.category) {
+            setAssalCompatVoiceCategory(categoryMatch.category);
+        }
+
+        if (!englishQuery) {
+            showAssalVoiceModal("error", {
+                message: "سمعت الصنف، بس ما وصلني اسم موديل واضح. احچي اسم الموديل ويا الصنف."
+            });
+            return [];
+        }
+
+        if (input && options.updateInput !== false) {
+            input.value = englishQuery;
+            input.setAttribute("dir", "ltr");
+        }
+
+        // FIRST path: use the existing compatibility search exactly as it is.
+        const direct = getCompatSearchResults();
+        const directResults = Array.isArray(direct?.results) ? direct.results : [];
+
+        if (directResults.length) {
+            searchItems({
+                countStat: options.countStat !== false,
+                scroll: false
+            });
+
+            console.log("ASSAL Compatibility Voice Search", {
+                raw,
+                englishQuery,
+                category: currentCategory || "all",
+                detectedCategory: categoryMatch?.category || null,
+                mode: "current-search",
+                count: directResults.length
+            });
+
+            return directResults;
+        }
+
+        // Fallback only when the normal compatibility search returns zero rows.
+        const fallbackResults = getAssalCompatVoiceFallbackResults(raw);
+        displayResults(fallbackResults);
+
+        if (options.countStat !== false) {
+            try {
+                stats.searches++;
+                localStorage.setItem("stats", JSON.stringify(stats));
+            } catch (_) {}
+        }
+
+        console.log("ASSAL Compatibility Voice Search", {
+            raw,
+            englishQuery,
+            category: currentCategory || "all",
+            detectedCategory: categoryMatch?.category || null,
+            mode: "voice-variants-fallback",
+            count: fallbackResults.length
+        });
+
+        return fallbackResults;
+    }
+    /* ================== /ASSAL Compatibility Voice Adapter ================== */
+
+    let assalVoiceModalHideTimer = null;
+    let assalVoiceSafetyTimer = null;
+    let assalVoiceModalOpen = false;
+
+    function getAssalVoiceEnglishQuery(rawText) {
+        try {
+            const parsed = assalVoiceToEnglishQuery(rawText);
+            let q = assalNormalizeLatinForCompare(parsed.query) || String(rawText || "").trim();
+            q = q.replace(/\b(Y)(\d)(20\d{2})\b/g, "$1$2 $3");
+            q = q.replace(/\b(X[5-9])NEW(2022)\b/g, "$1 NEW $2");
+            q = q.replace(/\b(X[5-9])(2022)\b/g, "$1 $2");
+            q = q.replace(/\b(NOVA)\s*(\d+)\s*SE\b/g, "$1 $2SE");
+            q = q.replace(/\b(SPARK)\s*GO\s*(20\d{2}|0[1-3])\b/g, "$1 GO $2");
+            q = q.replace(/\b(SPARK)GO(20\d{2}|0[1-3])\b/g, "$1 GO $2");
+            q = q.replace(/\b(HOT|SMART|CAMON|TAB|MATE|VISION|POP|BV|Q)(\d{1,4})(HD|SE|I|SIM|WIFI|KIDS|PRO|PLUS|PLAY|LITE|4G|5G|C|A|D|P|B)?\b/g, function(_, a, n, tail){ return (a + " " + n + (tail || "")).trim(); });
+            q = q.replace(/\b(BLACKVIEW)(TAB|A|BV)(\d{1,4})(PRO|PLUS|KIDS|WIFI|SIM|4G|5G)?\b/g, function(_, brand, kind, n, tail){ return (brand + " " + kind + " " + n + (tail ? " " + tail : "")).trim(); });
+            q = q.replace(/\b(P\d{1,3})(PRO|PLUS|LITE|5G)\b/g, "$1 $2");
+            q = q.replace(/\b(ZERO)(8I|8|20|30|40)\b/g, "$1 $2");
+            q = q.replace(/\b(ZERO)X(PRO|NEO)?\b/g, function(_, a, b){ return (a + " X" + (b ? " " + b : "")).trim(); });
+            return q.replace(/\s+/g, " ").trim();
+        } catch (_) {
+            return String(rawText || "").trim();
+        }
+    }
+    function setAssalVoiceButtonListening(isListening) {
+        const btn = document.getElementById("voiceSearchBtn");
+        if (!btn) return;
+        btn.classList.toggle("is-listening", !!isListening);
+        btn.title = isListening ? "جاري الاستماع..." : "بحث صوتي";
+    }
+
+    function setAssalVoiceModalLevel(level) {
+        const overlay = document.getElementById("assalVoiceOverlay");
+        if (!overlay) return;
+        const n = Math.max(0, Math.min(1, Number(level) || 0));
+        overlay.style.setProperty("--assal-voice-level", String(n));
+    }
+
+    function showAssalVoiceModal(mode = "listening", data = {}) {
+        const overlay = document.getElementById("assalVoiceOverlay");
+        if (!overlay) return;
+
+        clearTimeout(assalVoiceModalHideTimer);
+        assalVoiceModalOpen = true;
+
+        const title = document.getElementById("assalVoiceTitle");
+        const subtitle = document.getElementById("assalVoiceSubtitle");
+        const heard = document.getElementById("assalVoiceHeardText");
+        const english = document.getElementById("assalVoiceEnglishText");
+
+        overlay.classList.remove("has-result", "has-error", "is-listening");
+        overlay.classList.add("is-open");
+        overlay.setAttribute("aria-hidden", "false");
+
+        if (mode === "ready") {
+            overlay.classList.add("is-listening");
+            if (title) title.textContent = "جاهز أسمعك...";
+            if (subtitle) subtitle.textContent = "احچي اسم المادة أو الموديل";
+            if (heard) heard.textContent = "بانتظار الصوت...";
+            if (english) english.textContent = "—";
+            setAssalVoiceModalLevel(0.08);
+            return;
+        }
+
+        if (mode === "hearing") {
+            overlay.classList.add("is-listening");
+            if (title) title.textContent = "جاري الاستماع...";
+            if (subtitle) subtitle.textContent = "استمر بالحچي، أني أسمعك";
+            if (data.text && heard) heard.textContent = data.text;
+            return;
+        }
+
+        if (mode === "processing") {
+            if (title) title.textContent = "جاري التحويل...";
+            if (subtitle) subtitle.textContent = "أحوّل النطق إلى بحث إنكليزي";
+            if (data.text && heard) heard.textContent = data.text;
+            setAssalVoiceModalLevel(0.18);
+            return;
+        }
+
+        if (mode === "result") {
+            overlay.classList.add("has-result");
+            if (title) title.textContent = "تم فهم البحث";
+            if (subtitle) subtitle.textContent = "راح أكتبه بالشريط وأبحث داخل التوافقات";
+            if (heard) heard.textContent = data.raw || "—";
+            if (english) english.textContent = data.english || "—";
+            setAssalVoiceModalLevel(0.3);
+            assalVoiceModalHideTimer = setTimeout(hideAssalVoiceModal, data.delay || 650);
+            return;
+        }
+
+        if (mode === "error") {
+            overlay.classList.add("has-error");
+            if (title) title.textContent = "ما سمعت الصوت بوضوح";
+            if (subtitle) subtitle.textContent = data.message || "جرّب مرة ثانية أو اكتب البحث يدوياً";
+            if (heard) heard.textContent = "—";
+            if (english) english.textContent = "—";
+            setAssalVoiceButtonListening(false);
+            setAssalVoiceModalLevel(0.05);
+            assalVoiceModalHideTimer = setTimeout(hideAssalVoiceModal, data.delay || 1800);
+            return;
+        }
+
+        overlay.classList.add("is-listening");
+        if (title) title.textContent = "جاري الاستماع...";
+        if (subtitle) subtitle.textContent = "احچي اسم المادة بوضوح";
+        if (heard) heard.textContent = "بانتظار الصوت...";
+        if (english) english.textContent = "—";
+        setAssalVoiceModalLevel(0.1);
+    }
+
+    function hideAssalVoiceModal() {
+        const overlay = document.getElementById("assalVoiceOverlay");
+        if (!overlay) return;
+        overlay.classList.remove("is-open", "is-listening", "has-result", "has-error");
+        overlay.setAttribute("aria-hidden", "true");
+        assalVoiceModalOpen = false;
+        setAssalVoiceModalLevel(0);
+        clearTimeout(assalVoiceModalHideTimer);
+        clearTimeout(assalVoiceSafetyTimer);
+    }
+
+    function cancelAssalVoiceSearchModal() {
+        try {
+            if (window.Android && typeof window.Android.cancelVoiceSearch === "function") {
+                window.Android.cancelVoiceSearch();
+            }
+        } catch (_) {}
+        setAssalVoiceButtonListening(false);
+        hideAssalVoiceModal();
+    }
+
+    function updateAssalVoicePartialText(text) {
+        const value = String(text || "").trim();
+        if (!value) return;
+        const heard = document.getElementById("assalVoiceHeardText");
+        const english = document.getElementById("assalVoiceEnglishText");
+        const overlay = document.getElementById("assalVoiceOverlay");
+        if (heard) heard.textContent = value;
+        if (english) english.textContent = getAssalVoiceEnglishQuery(value) || "—";
+        if (overlay) overlay.classList.add("has-result");
+    }
+
+    function handleAssalVoiceSearchText(text) {
+        const value = String(text || "").trim();
+        if (!value) {
+            showAssalVoiceModal("error", { message: "ما وصلني صوت واضح، جرّب مرة ثانية." });
+            return;
+        }
+
+        const detectedCategory = detectAssalCompatVoiceCategory(value);
+        if (detectedCategory?.category) {
+            setAssalCompatVoiceCategory(detectedCategory.category);
+        }
+
+        const englishQuery = getAssalVoiceEnglishQuery(value);
+        if (!englishQuery) {
+            showAssalVoiceModal("error", { message: "سمعت الصنف، بس ما وصلني اسم موديل واضح. احچي اسم الموديل ويا الصنف." });
+            return;
+        }
+
+        showAssalVoiceModal("result", {
+            raw: value,
+            english: englishQuery,
+            delay: 760
+        });
+
+        setTimeout(() => {
+            searchAssalCompatVoice(value, { updateInput: true, countStat: true });
+            setAssalVoiceButtonListening(false);
+
+            setTimeout(() => {
+                try {
+                    const searchInput = document.getElementById("searchInput");
+                    if (searchInput) searchInput.blur();
+                } catch (_) {}
+            }, 35);
+        }, 430);
+    }
+
+    window.handleAssalVoiceSearchText = handleAssalVoiceSearchText;
+    window.receiveAssalVoiceSearchText = handleAssalVoiceSearchText;
+    window.onAssalVoiceSearchResult = handleAssalVoiceSearchText;
+    window.receiveVoiceSearchText = handleAssalVoiceSearchText;
+    window.onVoiceSearchResult = handleAssalVoiceSearchText;
+    window.setAssalVoiceButtonListening = setAssalVoiceButtonListening;
+    window.showAssalVoiceModal = showAssalVoiceModal;
+    window.hideAssalVoiceModal = hideAssalVoiceModal;
+    window.cancelAssalVoiceSearchModal = cancelAssalVoiceSearchModal;
+    window.onAssalNativeVoiceStart = function(){
+        setAssalVoiceButtonListening(true);
+        showAssalVoiceModal("listening");
+    };
+    window.onAssalNativeVoiceReady = function(){
+        setAssalVoiceButtonListening(true);
+        showAssalVoiceModal("ready");
+    };
+    window.onAssalNativeVoiceBegin = function(){
+        setAssalVoiceButtonListening(true);
+        showAssalVoiceModal("hearing");
+    };
+    window.onAssalNativeVoiceLevel = function(level){
+        setAssalVoiceModalLevel(level);
+    };
+    window.onAssalNativeVoicePartial = function(text){
+        showAssalVoiceModal("hearing", { text });
+        updateAssalVoicePartialText(text);
+    };
+    window.onAssalNativeVoiceEnd = function(){
+        showAssalVoiceModal("processing");
+    };
+    window.onAssalNativeVoiceError = function(message){
+        showAssalVoiceModal("error", { message: message || "ما سمعت الصوت بوضوح، جرّب مرة ثانية." });
+    };
+
+
+    function clearAssalResultsBeforeVoiceSearch() {
+        try {
+            const resultsContainer = document.getElementById("resultsContainer");
+            const productsGrid = document.getElementById("results");
+
+            if (resultsContainer) resultsContainer.classList.remove("visible");
+            if (productsGrid) productsGrid.innerHTML = "";
+
+            const scrollButton = document.querySelector(".scroll-to-top");
+            if (scrollButton) scrollButton.classList.remove("visible");
+        } catch (e) {
+            console.warn("clearAssalResultsBeforeVoiceSearch failed:", e);
+        }
+    }
+
+    async function ensureAssalBrowserMicPermission() {
+        if (window.Android && typeof window.Android.startVoiceSearch === "function") {
+            return { ok: true, source: "android-native" };
+        }
+
+        if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function") {
+            return {
+                ok: false,
+                source: "browser",
+                message: "المتصفح ما يدعم طلب صلاحية المايك مباشرة. جرّب Chrome أو افتح الموقع عبر HTTPS."
+            };
+        }
+
+        let stream = null;
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            return { ok: true, source: "browser" };
+        } catch (err) {
+            console.warn("Browser microphone permission failed:", err);
+            const errorName = err && err.name ? String(err.name) : "";
+
+            let message = "يرجى السماح بالوصول للمايك من المتصفح حتى يشتغل البحث الصوتي.";
+            if (errorName === "NotAllowedError" || errorName === "PermissionDeniedError") {
+                message = "تم رفض صلاحية المايك. افتح إعدادات الموقع من علامة القفل وفعّل Microphone.";
+            } else if (errorName === "NotFoundError" || errorName === "DevicesNotFoundError") {
+                message = "ماكو مايك متاح على هذا الجهاز أو المتصفح ما كدر يوصله.";
+            } else if (errorName === "NotReadableError" || errorName === "TrackStartError") {
+                message = "الميكروفون مشغول بتطبيق ثاني. أغلق التطبيق الثاني وجرّب مرة ثانية.";
+            } else if (location.protocol !== "https:" && location.hostname !== "localhost") {
+                message = "صلاحية المايك تحتاج رابط HTTPS حتى تشتغل داخل المتصفح.";
+            }
+
+            return { ok: false, source: "browser", message };
+        } finally {
+            try {
+                if (stream) {
+                    stream.getTracks().forEach(track => {
+                        try { track.stop(); } catch (_) {}
+                    });
+                }
+            } catch (_) {}
+        }
+    }
+
+    async function startAssalVoiceSearch() {
+        try {
+            clearAssalResultsBeforeVoiceSearch();
+            setAssalVoiceButtonListening(true);
+            showAssalVoiceModal("listening");
+            clearTimeout(assalVoiceSafetyTimer);
+            assalVoiceSafetyTimer = setTimeout(() => {
+                if (assalVoiceModalOpen) {
+                    showAssalVoiceModal("error", { message: "طوّل الاستماع بدون نتيجة، جرّب مرة ثانية." });
+                    setAssalVoiceButtonListening(false);
+                }
+            }, 16000);
+
+            if (window.Android && typeof window.Android.startVoiceSearch === "function") {
+                window.Android.startVoiceSearch();
+                return;
+            }
+        } catch (e) {
+            console.warn("Android native voice failed:", e);
+        }
+
+        const micPermission = await ensureAssalBrowserMicPermission();
+        if (!micPermission.ok) {
+            clearTimeout(assalVoiceSafetyTimer);
+            setAssalVoiceButtonListening(false);
+            showAssalVoiceModal("error", { message: micPermission.message || "يرجى السماح بالوصول للمايك 🎤" });
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            clearTimeout(assalVoiceSafetyTimer);
+            setAssalVoiceButtonListening(false);
+            showAssalVoiceModal("error", { message: "المتصفح ما يدعم التعرف الصوتي. جرّب Google Chrome أو استخدم التطبيق." });
+            return;
+        }
+
+        const rec = new SpeechRecognition();
+        rec.lang = "ar-IQ";
+        rec.interimResults = true;
+        rec.maxAlternatives = 3;
+
+        rec.onstart = () => showAssalVoiceModal("ready");
+        rec.onspeechstart = () => showAssalVoiceModal("hearing");
+        rec.onspeechend = () => showAssalVoiceModal("processing");
+        rec.onresult = (event) => {
+            let finalText = "";
+            let partialText = "";
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const res = event.results[i];
+                const txt = res && res[0] ? String(res[0].transcript || "").trim() : "";
+                if (!txt) continue;
+                if (res.isFinal) finalText = txt;
+                else partialText = txt;
+            }
+            if (partialText) updateAssalVoicePartialText(partialText);
+            if (finalText) handleAssalVoiceSearchText(finalText);
+        };
+        rec.onerror = (event) => {
+            console.warn("Voice recognition error:", event);
+            clearTimeout(assalVoiceSafetyTimer);
+            setAssalVoiceButtonListening(false);
+            showAssalVoiceModal("error", { message: "ما سمعت الصوت بوضوح، جرّب مرة ثانية أو اكتب البحث يدوياً." });
+        };
+        rec.onend = () => {
+            clearTimeout(assalVoiceSafetyTimer);
+            setAssalVoiceButtonListening(false);
+        };
+
+        try {
+            rec.start();
+        } catch (err) {
+            console.warn("Voice recognition start failed:", err);
+            clearTimeout(assalVoiceSafetyTimer);
+            setAssalVoiceButtonListening(false);
+            showAssalVoiceModal("error", { message: "تعذر تشغيل المايك من المتصفح، جرّب مرة ثانية." });
+        }
+    }
+
 
     function normalizeString(str) {
         return str.replace(/\s+/g, '').toLowerCase();
