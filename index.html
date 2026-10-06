@@ -57766,7 +57766,6 @@ html.low-end-device .assal-private-clean-dialog *{
         document.execCommand("copy");
         t.remove();
       }
-      showToast("تم نسخ رمز الاشتراك", "success", clean);
       return true;
     } catch (_) {
       showToast("تعذر نسخ الرمز", "error");
@@ -58699,6 +58698,12 @@ html.low-end-device .assal-private-clean-dialog *{
     if (target.closest("#searchInput")) return true;
     if (target.closest("#searchBtn")) return true;
     if (target.closest("#clearBtn")) return true;
+
+    // أصناف لوحة البحث العائمة تعمل من البيانات المحفوظة بالأوفلاين.
+    if (target.closest(".assal-search-dock-categories")) return true;
+
+    // الصعود لأعلى الصفحة إجراء محلي لا يحتاج اتصالاً.
+    if (target.closest("#scrollToTopBtn")) return true;
 
     // اختيار الصنف داخل السلايدر وكل أزرار تمريره.
     if (
