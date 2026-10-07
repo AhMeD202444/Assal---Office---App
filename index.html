@@ -26918,9 +26918,11 @@ function assalScheduleIdleTask(task, timeout = 1600) {
   }
 }
 
+// لا نسمح لتحديث الشبكة أن ينافس أول فتح/أول Paint.
+// يبقى التحديث نفسه كما هو، لكن يبدأ بعد استقرار الواجهة فقط.
 function assalScheduleBackgroundPriceRefresh(snapshot) {
   if (assalIsBrowserOffline() || assalBackgroundRefreshPromise) return;
-  assalScheduleIdleTask(() => {
+  setTimeout(() => assalScheduleIdleTask(() => {
     if (assalBackgroundRefreshPromise) return;
     const expectedHash = String((snapshot && snapshot.contentHash) || "");
     assalBackgroundRefreshPromise = loadExcelFiles({
@@ -26946,7 +26948,7 @@ function assalScheduleBackgroundPriceRefresh(snapshot) {
       .finally(() => {
         assalBackgroundRefreshPromise = null;
       });
-  }, 1600);
+  }, 1800), 3200);
 }
 
 // تحميل بيانات التطبيق عند التشغيل: آخر نسخة محفوظة أولاً، ثم تحديث هادئ بالخلفية.
@@ -26989,20 +26991,65 @@ function runLowEndDeferred(task, delay = 2600) {
   }
 }
 
-// نبدأ تجهيز الأسعار من الكاش بمجرد اكتمال DOM بدل انتظار الصور والخطوط وحدث load.
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
+// ===== ASSAL STARTUP ISOLATION FINAL =====
+// مهم: لا نقرأ Snapshot ولا نفك بيانات كبيرة قبل window.load.
+// هذا يمنع IndexedDB/deserialization وأي عمل تابع للبيانات من تأخير تسليم
+// أول واجهة من WebView. بعد load نعطي المتصفح فريمين كاملين للرسم ثم نبدأ.
+let assalStartupDataScheduled = false;
+function assalRunAfterFirstPaint(task) {
+  if (typeof task !== "function") return;
+  const run = () => {
+    try {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTimeout(task, 0);
+        });
+      });
+    } catch (_) {
+      setTimeout(task, 34);
+    }
+  };
+  if (document.readyState === "complete") run();
+  else window.addEventListener("load", run, { once: true });
+}
+
+function assalScheduleStartupDataAfterFirstPaint() {
+  if (assalStartupDataScheduled) return;
+  assalStartupDataScheduled = true;
+  assalRunAfterFirstPaint(() => {
     try {
       const bypass = getMaintenanceBypass();
       const isActivated = localStorage.getItem("isActivated") === "true";
       if (maintenanceLock && !bypass) return;
       if (!isActivated && !bypass) return;
-      runAssalBootDataLoad();
-    } catch (_) {}
-  },
-  { once: true },
-);
+
+      runAssalBootDataLoad().then((result) => {
+        if (result && result.success) {
+          if (window.__ASSAL_PRODUCTION_DEBUG__ === true)
+            console.log("تم تحميل البيانات بنجاح، جارٍ تحميل العناصر الجديدة.");
+          try {
+            if (typeof assalScheduleSmartMetaWarmup === "function")
+              assalScheduleSmartMetaWarmup();
+          } catch (_) {}
+          if (window.__ASSAL_LOW_END_DEVICE__) {
+            runLowEndDeferred(() => {
+              try { loadNewItems(); }
+              catch (e) { console.warn("low-end deferred loadNewItems failed", e); }
+            }, 3200);
+          } else {
+            // بعد أول Paint، نفس السلوك السابق بدون منافسة مرحلة الإقلاع.
+            loadNewItems();
+          }
+          window.__ASSAL_PRICE_BACKGROUND_CHANGED__ = false;
+        } else if (result) {
+          console.warn("فشل تحميل البيانات:", result.message);
+        }
+      });
+    } catch (err) {
+      console.warn("ASSAL startup data scheduling failed:", err);
+    }
+  });
+}
 
 window.onload = function () {
   enforceLegacyAdminReactivation();
@@ -27070,29 +27117,9 @@ window.onload = function () {
     LuxAds.maybeShow();
   }
 
-  runAssalBootDataLoad().then((result) => {
-    if (result.success) {
-      console.log("تم تحميل البيانات بنجاح، جارٍ تحميل العناصر الجديدة.");
-      try {
-        if (typeof assalScheduleSmartMetaWarmup === "function")
-          assalScheduleSmartMetaWarmup();
-      } catch (_) {}
-      if (window.__ASSAL_LOW_END_DEVICE__) {
-        runLowEndDeferred(() => {
-          try {
-            loadNewItems();
-          } catch (e) {
-            console.warn("low-end deferred loadNewItems failed", e);
-          }
-        }, 3200);
-      } else {
-        loadNewItems();
-      }
-      window.__ASSAL_PRICE_BACKGROUND_CHANGED__ = false;
-    } else {
-      console.warn("فشل تحميل البيانات:", result.message);
-    }
-  });
+  // لا نبدأ بيانات الأسعار داخل نفس call stack لحدث load.
+  // أولاً نسمح للواجهة/الإعلان أن يُرسما، ثم يبدأ Cache-first بالخلفية.
+  assalScheduleStartupDataAfterFirstPaint();
 };
 
 // نافذة تفعيل التطبيق
@@ -29106,7 +29133,8 @@ async function loadNewItems() {
     }
   });
 
-  console.log(`إجمالي العناصر الجديدة: ${newItems.length}`, newItems);
+  if (window.__ASSAL_PRODUCTION_DEBUG__ === true)
+    console.log(`إجمالي العناصر الجديدة: ${newItems.length}`);
   newItemsCount.textContent = newItems.length;
 
   if (newItems.length === 0) {
@@ -57722,8 +57750,12 @@ html.low-end-device .assal-private-clean-dialog *{
 (function(){
   try {
     window.__ASSAL_NATIVE_PERFORMANCE_FOUNDATION__ = {
-  version: "2026-10-07-scroll-keyboard-no-white-v3",
+  version: "2026-10-07-fast-startup-keep-smoothness-v4",
   cacheFirstBoot: true,
+  startupWorkAfterLoad: true,
+  startupDataAfterFirstPaint: true,
+  earlyDOMContentDataLoad: false,
+  delayedBackgroundRefresh: true,
   singleExcelLoad: true,
   lazyXlsx: true,
   contentHashSkipParse: true,
