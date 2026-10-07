@@ -18553,6 +18553,7 @@ import {
   signOut as firebaseAuthSignOut,
   setPersistence,
   browserLocalPersistence,
+  onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
@@ -18632,23 +18633,90 @@ const assalAuthPersistenceReady = setPersistence(
   return null;
 });
 
+/*
+ * ASSAL AUTH READY GATE
+ * ---------------------
+ * Firebase restores a persisted user asynchronously on a cold WebView start.
+ * LocalStorage can already say "owner" while Auth.currentUser is still null.
+ * This lazy gate waits for the FIRST authoritative Auth state only when a secure
+ * feature needs it; it does not add work to the normal startup/render path.
+ */
+let assalOfficeAuthReadyPromise = null;
+function waitForAssalOfficeAuthReady() {
+  if (assalOfficeAuthReadyPromise) return assalOfficeAuthReadyPromise;
+
+  assalOfficeAuthReadyPromise = (async () => {
+    await assalAuthPersistenceReady;
+
+    // Firebase Auth 10.x exposes authStateReady(). Prefer it when available.
+    if (typeof assalOfficeAuth.authStateReady === "function") {
+      await assalOfficeAuth.authStateReady();
+      return assalOfficeAuth.currentUser || null;
+    }
+
+    // Defensive fallback for WebViews/builds where authStateReady is unavailable.
+    return await new Promise((resolve, reject) => {
+      let settled = false;
+      let unsubscribe = null;
+      const finish = (fn, value) => {
+        if (settled) return;
+        settled = true;
+        try { if (typeof unsubscribe === "function") unsubscribe(); } catch (_) {}
+        clearTimeout(timer);
+        fn(value);
+      };
+      const timer = setTimeout(() => {
+        finish(resolve, assalOfficeAuth.currentUser || null);
+      }, 8000);
+
+      try {
+        unsubscribe = onAuthStateChanged(
+          assalOfficeAuth,
+          (user) => finish(resolve, user || null),
+          (err) => finish(reject, err),
+        );
+      } catch (err) {
+        finish(reject, err);
+      }
+    });
+  })().catch((err) => {
+    // Allow a later user action to retry if initialization itself failed.
+    assalOfficeAuthReadyPromise = null;
+    throw err;
+  });
+
+  return assalOfficeAuthReadyPromise;
+}
+
 window.assalSecureAuth = Object.freeze({
   async signIn(email, password) {
     await assalAuthPersistenceReady;
-    return signInWithEmailAndPassword(
+    const credential = await signInWithEmailAndPassword(
       assalOfficeAuth,
       String(email || "").trim(),
       String(password || ""),
     );
+    // A fresh login becomes the new authoritative ready state immediately.
+    assalOfficeAuthReadyPromise = Promise.resolve(
+      credential?.user || assalOfficeAuth.currentUser || null,
+    );
+    return credential;
   },
   async signOutCurrent() {
     try {
       await firebaseAuthSignOut(assalOfficeAuth);
+      assalOfficeAuthReadyPromise = null;
       return true;
     } catch (err) {
       console.warn("Firebase Auth sign-out failed:", err);
       return false;
     }
+  },
+  async waitUntilReady() {
+    return await waitForAssalOfficeAuthReady();
+  },
+  getAuthAppName() {
+    return String(assalOfficeAuthApp?.name || "assalOfficeAuth");
   },
   getCurrentUser() {
     return assalOfficeAuth.currentUser || null;
@@ -57873,6 +57941,130 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     }
   }
 
+  const COMPAT_OWNER_AUTH_EMAIL = "owner@assal.app";
+  let compatOwnerAuthReadyPromise = null;
+
+  function waitMs(ms) {
+    return new Promise((resolve) => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
+  }
+
+  async function waitForCompatSecureAuthFacade(timeoutMs = 8000) {
+    const deadline = Date.now() + Math.max(1000, Number(timeoutMs) || 8000);
+    while (Date.now() < deadline) {
+      const auth = window.assalSecureAuth;
+      if (
+        auth &&
+        typeof auth.waitUntilReady === "function" &&
+        typeof auth.getCurrentUser === "function"
+      ) {
+        return auth;
+      }
+      await waitMs(40);
+    }
+    throw new Error("خدمة مصادقة المالك لم تجهز بعد. أغلق اللوحة وافتحها بعد لحظة.");
+  }
+
+  async function ensureCompatSubscriptionOwnerAuth(options = {}) {
+    const forceTokenRefresh = options.forceTokenRefresh === true;
+    const bypassCache = options.bypassCache === true || forceTokenRefresh;
+
+    if (!ownerCanManageSubscriptions()) {
+      throw new Error("هذا الحساب لا يملك صلاحية إدارة اشتراكات التوافقات.");
+    }
+
+    if (compatOwnerAuthReadyPromise && !bypassCache) {
+      return compatOwnerAuthReadyPromise;
+    }
+
+    const runner = (async () => {
+      const auth = await waitForCompatSecureAuthFacade();
+      const user = await auth.waitUntilReady();
+      if (!user) {
+        throw new Error("جلسة المالك في Firebase غير جاهزة. سجّل دخول المالك من جديد إذا استمرت الرسالة.");
+      }
+
+      const uid = String(user.uid || auth.getCurrentUid?.() || "").trim();
+      const email = String(user.email || auth.getCurrentEmail?.() || "")
+        .trim()
+        .toLowerCase();
+      const expectedUid = String(
+        typeof window.getAdminAuthUid === "function"
+          ? window.getAdminAuthUid() || ""
+          : "",
+      ).trim();
+      const role = String(
+        typeof window.getAdminRole === "function"
+          ? window.getAdminRole() || ""
+          : "",
+      )
+        .trim()
+        .toLowerCase();
+
+      if (role !== "owner") {
+        throw new Error("جلسة الإدارة الحالية ليست جلسة المالك.");
+      }
+      if (!uid || (expectedUid && uid !== expectedUid)) {
+        throw new Error("جلسة Firebase لا تطابق حساب المالك المسجل في التطبيق.");
+      }
+      if (email && email !== COMPAT_OWNER_AUTH_EMAIL) {
+        throw new Error("حساب Firebase الحالي ليس حساب المالك المعتمد.");
+      }
+
+      // Materialize a valid ID token before Firestore owner reads/writes.
+      if (typeof user.getIdToken === "function") {
+        await user.getIdToken(forceTokenRefresh);
+      }
+
+      return user;
+    })();
+
+    if (!bypassCache) compatOwnerAuthReadyPromise = runner;
+
+    try {
+      return await runner;
+    } finally {
+      // Cache only while the check is in flight. Every later Firestore action
+      // re-validates the CURRENT owner session without adding startup work.
+      if (!bypassCache && compatOwnerAuthReadyPromise === runner) {
+        compatOwnerAuthReadyPromise = null;
+      }
+    }
+  }
+
+  function isCompatSubscriptionPermissionError(err) {
+    const code = String(err?.code || "").toLowerCase();
+    const message = String(err?.message || "").toLowerCase();
+    return (
+      code.includes("permission-denied") ||
+      code.includes("firestore/permission-denied") ||
+      message.includes("missing or insufficient permissions") ||
+      message.includes("permission-denied")
+    );
+  }
+
+  async function runCompatSubscriptionFirestoreOperation(operation) {
+    if (typeof operation !== "function")
+      throw new Error("COMPAT_SUB_OPERATION_MISSING");
+
+    // Validate the live owner session before EVERY owner Firestore action.
+    await ensureCompatSubscriptionOwnerAuth();
+    const tools = await getCompatSubscriptionFirestoreTools();
+    try {
+      return await operation(tools);
+    } catch (err) {
+      if (!isCompatSubscriptionPermissionError(err)) throw err;
+
+      // A cold WebView can finish restoring Auth just as the first Firestore call starts.
+      // Force one fresh owner token and retry exactly once; never loop indefinitely.
+      await ensureCompatSubscriptionOwnerAuth({
+        forceTokenRefresh: true,
+        bypassCache: true,
+      });
+      await waitMs(90);
+      return await operation(tools);
+    }
+  }
+
   function applyOwnerToolMode(mode) {
     const btn = getOwnerToolButton();
     if (!btn) return;
@@ -58039,58 +58231,49 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
 
   function getCompatSubscriptionFirestoreTools() {
     if (compatSubFirestoreToolsPromise) return compatSubFirestoreToolsPromise;
-    compatSubFirestoreToolsPromise =
-      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")
-        .then(async (mod) => {
-          let db = null;
-          try {
-            if (
-              window.assalSecureAuth &&
-              typeof window.assalSecureAuth.getCurrentUser === "function"
-            ) {
-              const user = window.assalSecureAuth.getCurrentUser();
-              if (user && user.app) db = mod.getFirestore(user.app);
-            }
-          } catch (_) {}
-          if (!db) {
-            try {
-              const { initializeApp, getApps, getApp } =
-                await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-              const app = getApps().some(
-                (item) => item && item.name === "assalOfficeAuth",
-              )
-                ? getApp("assalOfficeAuth")
-                : initializeApp(
-                    {
-                      apiKey: "AIzaSyD_Nqmd2X3UY0mkK31QXKd-6B9KLE3ipYA",
-                      authDomain: "assal-office.firebaseapp.com",
-                      projectId: ASSAL_OFFICE_AUTH_PROJECT_ID,
-                      storageBucket: "assal-office.firebasestorage.app",
-                      messagingSenderId: "939160864143",
-                      appId: "1:939160864143:web:0900fffc74e4037898b7fa",
-                    },
-                    "assalOfficeAuth",
-                  );
-              db = mod.getFirestore(app);
-            } catch (err) {
-              throw err;
-            }
-          }
-          return {
-            db,
-            collection: mod.collection,
-            doc: mod.doc,
-            getDoc: mod.getDoc,
-            getDocs: mod.getDocs,
-            setDoc: mod.setDoc,
-            updateDoc: mod.updateDoc,
-            serverTimestamp: mod.serverTimestamp,
-          };
-        })
-        .catch((err) => {
-          compatSubFirestoreToolsPromise = null;
-          throw err;
-        });
+
+    compatSubFirestoreToolsPromise = (async () => {
+      // Never touch owner Firestore until Firebase Auth has restored the real user.
+      await ensureCompatSubscriptionOwnerAuth();
+
+      const [mod, appMod] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+        import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+      ]);
+
+      const app = appMod.getApps().some(
+        (item) => item && item.name === "assalOfficeAuth",
+      )
+        ? appMod.getApp("assalOfficeAuth")
+        : appMod.initializeApp(
+            {
+              apiKey: "AIzaSyD_Nqmd2X3UY0mkK31QXKd-6B9KLE3ipYA",
+              authDomain: "assal-office.firebaseapp.com",
+              projectId: ASSAL_OFFICE_AUTH_PROJECT_ID,
+              storageBucket: "assal-office.firebasestorage.app",
+              messagingSenderId: "939160864143",
+              appId: "1:939160864143:web:0900fffc74e4037898b7fa",
+            },
+            "assalOfficeAuth",
+          );
+
+      // Firestore and Auth are now guaranteed to use the SAME named Firebase app.
+      const db = mod.getFirestore(app);
+      return {
+        db,
+        collection: mod.collection,
+        doc: mod.doc,
+        getDoc: mod.getDoc,
+        getDocs: mod.getDocs,
+        setDoc: mod.setDoc,
+        updateDoc: mod.updateDoc,
+        serverTimestamp: mod.serverTimestamp,
+      };
+    })().catch((err) => {
+      compatSubFirestoreToolsPromise = null;
+      throw err;
+    });
+
     return compatSubFirestoreToolsPromise;
   }
 
@@ -58928,9 +59111,9 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     subscriptionsLoading = true;
     renderLoadingState();
     try {
-      const tools = await getCompatSubscriptionFirestoreTools();
-      const snap = await tools.getDocs(
-        tools.collection(tools.db, SUB_COLLECTION),
+      const snap = await runCompatSubscriptionFirestoreOperation(
+        (tools) =>
+          tools.getDocs(tools.collection(tools.db, SUB_COLLECTION)),
       );
       subscriptionsRows = [];
       snap.forEach((docSnap) => {
@@ -59858,8 +60041,10 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
         saveBtn.disabled = true;
         saveBtn.classList.add("is-busy");
       }
+      const code = await runCompatSubscriptionFirestoreOperation(
+        (tools) => generateUniqueSubscriptionCode(tools),
+      );
       const tools = await getCompatSubscriptionFirestoreTools();
-      const code = await generateUniqueSubscriptionCode(tools);
       const nowMs = Date.now();
       const creatorLabel =
         typeof window.getAdminAccountLabel === "function"
@@ -59892,7 +60077,12 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
         createdByLabel: creatorLabel,
         renewalCount: 0,
       };
-      await tools.setDoc(tools.doc(tools.db, SUB_COLLECTION, code), row);
+      await runCompatSubscriptionFirestoreOperation((authTools) =>
+        authTools.setDoc(
+          authTools.doc(authTools.db, SUB_COLLECTION, code),
+          row,
+        ),
+      );
       const clientRow = { id: code, ...row };
       subscriptionsRows = [clientRow].concat(
         subscriptionsRows.filter(
@@ -60063,9 +60253,15 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
       const tools = await getCompatSubscriptionFirestoreTools();
       const patch = await patchFactory(row, tools);
       if (!patch) return false;
-      await tools.updateDoc(
-        tools.doc(tools.db, SUB_COLLECTION, String(row.code || row.id)),
-        patch,
+      await runCompatSubscriptionFirestoreOperation((authTools) =>
+        authTools.updateDoc(
+          authTools.doc(
+            authTools.db,
+            SUB_COLLECTION,
+            String(row.code || row.id),
+          ),
+          patch,
+        ),
       );
       syncLocalSubscriptionRow(String(row.code || row.id), patch);
       showToast(
