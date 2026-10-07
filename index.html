@@ -31281,29 +31281,22 @@ body.assal-card-preview-lock{
 #assalResultPreviewModal{
   position:fixed;
   inset:0;
-  display:flex;
+  display:none;
   align-items:center;
   justify-content:center;
   padding:18px;
+  background:transparent;
+  z-index:250000;
+}
+#assalResultPreviewModal .assal-preview-backdrop{
+  position:absolute;
+  inset:0;
   background:rgba(2, 6, 23, .86);
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
   opacity:0;
-  visibility:hidden;
-  pointer-events:none;
-  transition:opacity .24s ease, visibility .24s ease;
-  z-index:250000;
-}
-#assalResultPreviewModal.show{
-  opacity:1;
-  visibility:visible;
-  pointer-events:auto;
-}
-#assalResultPreviewModal.assal-preview-preparing{
-  opacity:0 !important;
-  visibility:hidden !important;
-  pointer-events:none !important;
-  transition:none !important;
+  transition:opacity .25s ease;
+  z-index:0;
 }
 #assalResultPreviewModal .assal-preview-shell{
   width:min(94vw, 470px);
@@ -31311,16 +31304,15 @@ body.assal-card-preview-lock{
   display:grid;
   grid-template-rows:auto minmax(0,1fr) auto;
   position:relative;
+  z-index:1;
   border-radius:28px;
   overflow:hidden;
   background:linear-gradient(180deg, rgba(10,18,34,.985), rgba(12,23,43,.975));
   border:1px solid rgba(255,255,255,.09);
   box-shadow:0 30px 90px rgba(0,0,0,.52);
-  transform:translateY(14px) scale(.965);
-  transition:transform .26s cubic-bezier(.2,.8,.2,1);
-}
-#assalResultPreviewModal.show .assal-preview-shell{
-  transform:translateY(0) scale(1);
+  opacity:0;
+  transform:translateY(18px) scale(.98);
+  will-change:transform, opacity;
 }
 #assalResultPreviewModal .assal-preview-header{
   display:flex;
@@ -31501,6 +31493,7 @@ body.assal-card-preview-lock{
   modal.id = "assalResultPreviewModal";
   modal.setAttribute("aria-hidden", "true");
   modal.innerHTML = `
+    <div class="assal-preview-backdrop" aria-hidden="true"></div>
     <div class="assal-preview-shell" role="dialog" aria-modal="true" aria-label="معاينة الجهاز">
       <div class="assal-preview-header">
         <div class="assal-preview-header-main">
@@ -31529,7 +31522,11 @@ body.assal-card-preview-lock{
   document.body.appendChild(modal);
 
   modal.addEventListener("click", (event) => {
-    if (event.target === modal || event.target.closest(".assal-preview-close")) {
+    if (
+      event.target === modal ||
+      event.target.closest(".assal-preview-backdrop") ||
+      event.target.closest(".assal-preview-close")
+    ) {
       closeAssalResultPreviewModal();
     }
   });
@@ -31540,18 +31537,27 @@ async function openAssalResultPreviewModal(payload) {
   const modal = document.getElementById("assalResultPreviewModal");
   if (!modal) return;
 
+  const backdrop = modal.querySelector(".assal-preview-backdrop");
+  const shell = modal.querySelector(".assal-preview-shell");
   const imgEl = modal.querySelector(".assal-preview-image");
   const titleEl = modal.querySelector(".assal-preview-header-title");
   const deviceNameEl = modal.querySelector(".assal-preview-device-name");
   const categoryEl = modal.querySelector(".assal-preview-category-text");
-  if (!imgEl) return;
+  if (!imgEl || !shell || !backdrop) return;
 
-  // كل فتح جديد يلغي أي تجهيز سابق حتى لا تظهر صورة قديمة أو ومضة متأخرة.
+  // كل فتح جديد يلغي أي تجهيز سابق حتى لا تظهر صورة قديمة.
   const loadSeq = Number(modal.__assalPreviewLoadSeq || 0) + 1;
   modal.__assalPreviewLoadSeq = loadSeq;
-  modal.classList.remove("show");
-  modal.classList.add("assal-preview-preparing");
+  modal.__assalPreviewClosing = false;
+
+  // نفس فلسفة نافذة الإعلان: النافذة تبقى display:none أثناء تجهيز المحتوى.
+  modal.style.display = "none";
   modal.setAttribute("aria-hidden", "true");
+  backdrop.style.opacity = "0";
+  shell.style.transition = "none";
+  shell.style.opacity = "0";
+  shell.style.transform = "translateY(18px) scale(.98)";
+  shell.style.willChange = "transform, opacity";
 
   const imgSrc =
     assalSafeRemoteImageUrl(payload?.imgSrc || "") ||
@@ -31585,9 +31591,7 @@ async function openAssalResultPreviewModal(payload) {
       finishing = true;
 
       try {
-        if (typeof imgEl.decode === "function") {
-          await imgEl.decode();
-        }
+        if (typeof imgEl.decode === "function") await imgEl.decode();
       } catch (_) {}
 
       if (resolved) return;
@@ -31625,12 +31629,10 @@ async function openAssalResultPreviewModal(payload) {
 
     imgEl.src = imgSrc;
 
-    // الصور الموجودة بالكاش قد تكون جاهزة قبل وصول حدث load.
     if (imgEl.complete && imgEl.naturalWidth > 0) {
       Promise.resolve().then(finish);
     }
 
-    // حماية فقط: لا نترك النافذة معلقة إذا تعذر decode/load على جهاز معيّن.
     timer = setTimeout(() => {
       if (resolved) return;
       try {
@@ -31646,30 +31648,108 @@ async function openAssalResultPreviewModal(payload) {
   await waitUntilPrepared();
   if (modal.__assalPreviewLoadSeq !== loadSeq) return;
 
-  // أول Frame مرئي يكون بعد اكتمال الصورة والقص الذكي، لذلك لا تظهر الومضة.
+  // الصورة والقص جاهزان قبل أول Frame مرئي.
   imgEl.style.visibility = "visible";
-  await new Promise((resolve) => requestAnimationFrame(resolve));
-  if (modal.__assalPreviewLoadSeq !== loadSeq) return;
 
-  modal.classList.remove("assal-preview-preparing");
-  await new Promise((resolve) => requestAnimationFrame(resolve));
-  if (modal.__assalPreviewLoadSeq !== loadSeq) return;
-
-  modal.classList.add("show");
+  // نفس نافذة الإعلان حرفياً: display ثم حالة مخفية ثم double rAF.
+  backdrop.style.opacity = "0";
+  shell.style.transition = "none";
+  shell.style.opacity = "0";
+  shell.style.transform = "translateY(18px) scale(.98)";
+  modal.style.display = "flex";
   modal.setAttribute("aria-hidden", "false");
   document.documentElement.classList.add("assal-card-preview-lock");
   document.body.classList.add("assal-card-preview-lock");
+
+  try {
+    if (typeof syncGlobalModalLock === "function") syncGlobalModalLock();
+  } catch (_) {}
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (modal.__assalPreviewLoadSeq !== loadSeq || modal.__assalPreviewClosing) return;
+
+      backdrop.style.opacity = "1";
+
+      try {
+        if (window.gsap) {
+          shell.style.transition = "none";
+          gsap.fromTo(
+            shell,
+            { y: 18, opacity: 0, scale: 0.98 },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.55,
+              ease: "power3.out",
+              overwrite: true,
+            },
+          );
+        } else {
+          shell.style.transition = "transform .38s ease, opacity .38s ease";
+          shell.style.opacity = "1";
+          shell.style.transform = "translateY(0) scale(1)";
+        }
+      } catch (_) {
+        shell.style.transition = "transform .38s ease, opacity .38s ease";
+        shell.style.opacity = "1";
+        shell.style.transform = "translateY(0) scale(1)";
+      }
+    });
+  });
 }
 
 function closeAssalResultPreviewModal() {
   const modal = document.getElementById("assalResultPreviewModal");
-  if (!modal) return;
+  if (!modal || modal.__assalPreviewClosing) return;
+
+  modal.__assalPreviewClosing = true;
   modal.__assalPreviewLoadSeq = Number(modal.__assalPreviewLoadSeq || 0) + 1;
-  modal.classList.remove("show");
-  modal.classList.remove("assal-preview-preparing");
-  modal.setAttribute("aria-hidden", "true");
-  document.documentElement.classList.remove("assal-card-preview-lock");
-  document.body.classList.remove("assal-card-preview-lock");
+
+  const backdrop = modal.querySelector(".assal-preview-backdrop");
+  const shell = modal.querySelector(".assal-preview-shell");
+
+  try {
+    if (window.gsap && shell) {
+      gsap.to(shell, {
+        y: 10,
+        opacity: 0,
+        scale: 0.985,
+        duration: 0.28,
+        ease: "power2.in",
+        overwrite: true,
+      });
+    } else if (shell) {
+      shell.style.transition = "transform .26s ease, opacity .26s ease";
+      shell.style.opacity = "0";
+      shell.style.transform = "translateY(10px) scale(.985)";
+    }
+  } catch (_) {}
+
+  if (backdrop) backdrop.style.opacity = "0";
+
+  setTimeout(() => {
+    modal.style.display = "none";
+    modal.setAttribute("aria-hidden", "true");
+
+    if (shell) {
+      shell.style.transition = "none";
+      shell.style.opacity = "0";
+      shell.style.transform = "translateY(18px) scale(.98)";
+      shell.style.willChange = "transform, opacity";
+    }
+    if (backdrop) backdrop.style.opacity = "0";
+
+    document.documentElement.classList.remove("assal-card-preview-lock");
+    document.body.classList.remove("assal-card-preview-lock");
+
+    try {
+      if (typeof syncGlobalModalLock === "function") syncGlobalModalLock();
+    } catch (_) {}
+
+    modal.__assalPreviewClosing = false;
+  }, 260);
 }
 
 (function initAssalResultPreviewModalHooks() {
