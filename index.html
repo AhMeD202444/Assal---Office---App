@@ -19610,12 +19610,28 @@ html.low-end-device .assal-compat-feed-popup{
   backdrop-filter:none !important;
   -webkit-backdrop-filter:none !important;
 }
-/* ===== ASSAL PREMIUM SEARCH DOCK — NO REPARENT / ANDROID STABLE FINAL ===== */
+/* ===== ASSAL PREMIUM SEARCH DOCK — FROZEN BG / TRANSFORM-ONLY FLIGHT FINAL ===== */
 .assal-search-dock-slot{
   display:block;
   width:100%;
   pointer-events:none;
   visibility:hidden;
+}
+/*
+  أثناء جلسة البحث تتجمّد الحركة البصرية للخلفية فقط.
+  تجميد موجّه للعناصر المتحركة الرئيسية بدل body * حتى يبقى فتح البحث خفيفاً.
+  لا نستخدم position:fixed على body حتى لا ندخل بتعارض مع كيبورد Android/VisualViewport.
+*/
+body.assal-search-dock-body,
+body.assal-search-dock-body .container,
+body.assal-search-dock-body .news-ticker,
+body.assal-search-dock-body #newsTicker,
+body.assal-search-dock-body .notification,
+body.assal-search-dock-body .notification::before,
+body.assal-search-dock-body .logo-container,
+body.assal-search-dock-body .logo-container img,
+body.assal-search-dock-body .header-brand-logo::after{
+  animation-play-state:paused !important;
 }
 /*
   While the original search node is fixed, neutralize only the container
@@ -19633,8 +19649,13 @@ html.low-end-device .assal-compat-feed-popup{
   overflow:visible !important;
   will-change:auto !important;
   animation-play-state:paused !important;
+  transition:none !important;
 }
-/* Persistent full overlay: created once and kept alive to avoid Android GPU flashes. */
+/*
+  طبقة Blur واحدة فقط لجمالية البحث.
+  تُنشأ مرة واحدة، وتُفعّل بالكامل قبل حركة الـDock ثم تبقى ثابتة طول الرحلة.
+  لا يوجد transition للـblur/opacity أثناء الصعود، لذلك لا تتنافس مع transform الشريط.
+*/
 .assal-search-dock-veil{
   position:fixed;
   left:0;
@@ -19647,7 +19668,7 @@ html.low-end-device .assal-compat-feed-popup{
   background:rgba(3,10,22,.38);
   -webkit-backdrop-filter:blur(7px) saturate(116%);
   backdrop-filter:blur(7px) saturate(116%);
-  transition:opacity .16s linear, visibility 0s linear .16s;
+  transition:none !important;
   transform:translateZ(0);
   backface-visibility:hidden;
   -webkit-backface-visibility:hidden;
@@ -19656,7 +19677,6 @@ html.low-end-device .assal-compat-feed-popup{
 .assal-search-dock-veil.is-visible{
   opacity:1;
   visibility:visible;
-  transition:opacity .16s linear;
 }
 /* One body-level visual shell only for the unified shadow/background. */
 .assal-search-dock-shell{
@@ -19679,6 +19699,7 @@ html.low-end-device .assal-compat-feed-popup{
   transform:translateZ(0);
   backface-visibility:hidden;
   -webkit-backface-visibility:hidden;
+  transition:opacity .11s ease;
 }
 .assal-search-dock-shell.is-visible{
   opacity:1;
@@ -19729,6 +19750,26 @@ html.low-end-device .assal-compat-feed-popup{
 .search-container.assal-search-dock .search-placeholder-label{
   color:rgba(226,248,255,.52) !important;
 }
+/*
+  أثناء رحلة الصعود/الرجوع: نجمّد انتقالات العناصر الداخلية ونوقف الهالة فقط.
+  حركة الـDock نفسها تبقى transform فقط من JavaScript.
+*/
+.search-container.assal-search-flight #searchInput,
+.search-container.assal-search-flight button,
+.search-container.assal-search-flight .search-placeholder-label{
+  transition:none !important;
+}
+.search-container.assal-search-dock.assal-search-flight::after{
+  opacity:0 !important;
+  box-shadow:none !important;
+}
+.search-container.assal-search-dock.assal-search-flight{
+  box-shadow:0 8px 18px rgba(0,0,0,.24) !important;
+}
+.search-container.assal-search-dock.assal-search-flight #searchInput,
+.search-container.assal-search-dock.assal-search-flight #searchInput:focus{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.028) !important;
+}
 /* Compact categories live independently in body; same exact width as search dock. */
 .assal-search-dock-categories{
   position:fixed;
@@ -19748,6 +19789,7 @@ html.low-end-device .assal-compat-feed-popup{
   transform:translateZ(0);
   backface-visibility:hidden;
   -webkit-backface-visibility:hidden;
+  transition:opacity .11s ease;
 }
 .assal-search-dock-categories.is-visible{
   opacity:1;
@@ -19825,7 +19867,7 @@ html.low-end-device .assal-compat-feed-popup{
 html.low-end-device .assal-search-dock-veil{
   -webkit-backdrop-filter:none !important;
   backdrop-filter:none !important;
-  background:rgba(3,10,22,.55);
+  background:linear-gradient(180deg,rgba(3,10,22,.54),rgba(2,8,18,.66));
 }
 html.low-end-device .assal-search-dock-shell{
   box-shadow:
@@ -55961,6 +56003,10 @@ html.low-end-device .assal-private-clean-dialog *{
     let pendingHomeRect = null;
     let returnTimer = null;
     let viewportTimer = null;
+    let landingTimer = null;
+    let flightSerial = 0;
+    let flightActive = false;
+    let pendingViewportLayout = false;
 
     let railPointerActive = false;
     let railPointerId = null;
@@ -56342,48 +56388,111 @@ html.low-end-device .assal-private-clean-dialog *{
 
       clearTimeout(returnTimer);
       clearTimeout(viewportTimer);
+      clearTimeout(landingTimer);
+
+      const thisFlight = ++flightSerial;
+      flightActive = true;
+      pendingViewportLayout = false;
 
       homeRect = first;
       createSlot(first);
       ensurePersistentLayers();
       buildRail();
-      setContainerSearchMode(true);
-
-      state = OPEN;
-      document.body.classList.add("assal-search-dock-body");
-      dock.classList.add("assal-search-dock");
-
-      applyLayout();
 
       /*
-        FLIP visual motion only. The element stays in its original DOM parent.
+        PRE-BLUR خفيف ومدروس:
+        1) نجمّد فقط طبقات الخلفية المتحركة المهمة.
+        2) نفعّل طبقة blur الواحدة كاملة قبل أي حركة للـDock.
+        3) الشِل وشريط الأصناف يبقيان مخفيين إلى أن ينتهي الصعود.
+        هكذا أول فريم للحركة يكون فوق خلفية زجاجية ثابتة أصلاً، بدون fade أو flash.
       */
-      const last = dock.getBoundingClientRect();
-      const dx = first.left - last.left;
-      const dy = first.top - last.top;
-      const sx = last.width
-        ? Math.max(0.86, Math.min(1.14, first.width / last.width))
-        : 1;
+      document.body.classList.add("assal-search-dock-body");
+      if (veil) {
+        veil.style.top = Math.floor(getHeaderBottom()) + "px";
+        veil.classList.add("is-visible");
+        /* Force one committed style for the blur layer before dock flight. */
+        void veil.offsetWidth;
+      }
+      if (compactRail) compactRail.classList.remove("is-visible");
+      if (shell) shell.classList.remove("is-visible");
 
-      dock.style.transition = "none";
-      dock.style.transform = `translate3d(${dx}px,${dy}px,0) scaleX(${sx})`;
-      void dock.offsetWidth;
+      /*
+        نحجز حالة الفتح من الآن حتى لا يطلق focus/click فتحاً ثانياً
+        أثناء فريم تجهيز الـblur. الحركة نفسها لم تبدأ بعد.
+      */
+      state = OPEN;
 
-      if (compactRail) compactRail.classList.add("is-visible");
-      if (shell) shell.classList.add("is-visible");
-      if (veil) veil.classList.add("is-visible");
+      const finishLanding = () => {
+        if (thisFlight !== flightSerial || state !== OPEN || !flightActive)
+          return;
 
+        flightActive = false;
+        clearTimeout(landingTimer);
+        landingTimer = null;
+        dock.style.transition = "";
+        dock.style.transform = "translate3d(0,0,0)";
+        dock.classList.remove("assal-search-flight");
+
+        /*
+          نثبت القياسات النهائية أولاً، وبعدها فقط نظهر الشِل والأصناف.
+          هذا يمنع أي طبقات شفافة من الظهور أثناء حركة الصعود نفسها.
+        */
+        applyLayout();
+        syncCompactActive(true);
+
+        requestAnimationFrame(() => {
+          if (thisFlight !== flightSerial || state !== OPEN) return;
+          if (shell) shell.classList.add("is-visible");
+          if (compactRail) compactRail.classList.add("is-visible");
+
+          if (pendingViewportLayout) {
+            pendingViewportLayout = false;
+            applyLayout();
+          }
+        });
+      };
+
+      /*
+        أول rAF مخصص فقط حتى تُرسم طبقة الـblur كطبقة ثابتة.
+        بعدها نجهز شكل الـDock وموضع FLIP، والرAF الثاني يبدأ transform وحده.
+        لا blur ولا opacity ولا border يتحرك مع الشريط.
+      */
       requestAnimationFrame(() => {
-        if (state !== OPEN) return;
-        dock.style.transition = "transform .255s cubic-bezier(.22,.82,.23,1)";
-        dock.style.transform = "translate3d(0,0,0) scaleX(1)";
+        if (thisFlight !== flightSerial || state !== OPEN || !flightActive)
+          return;
 
-        setTimeout(() => {
-          if (state !== OPEN) return;
-          dock.style.transition = "";
-          syncCompactActive(true);
-          applyLayout();
-        }, 270);
+        dock.classList.add("assal-search-flight");
+        setContainerSearchMode(true);
+        dock.classList.add("assal-search-dock");
+        applyLayout();
+
+        const last = dock.getBoundingClientRect();
+        const dx = first.left - last.left;
+        const dy = first.top - last.top;
+
+        dock.style.transition = "none";
+        dock.style.transform = `translate3d(${dx}px,${dy}px,0)`;
+        void dock.offsetWidth;
+
+        requestAnimationFrame(() => {
+          if (thisFlight !== flightSerial || state !== OPEN || !flightActive)
+            return;
+
+          const onDockTransitionEnd = (event) => {
+            if (event.target === dock && event.propertyName === "transform") {
+              finishLanding();
+            }
+          };
+          dock.addEventListener("transitionend", onDockTransitionEnd, {
+            once: true,
+          });
+
+          dock.style.transition =
+            "transform .255s cubic-bezier(.22,.82,.23,1)";
+          dock.style.transform = "translate3d(0,0,0)";
+
+          landingTimer = setTimeout(finishLanding, 330);
+        });
       });
 
       return true;
@@ -56391,7 +56500,17 @@ html.low-end-device .assal-private-clean-dialog *{
 
     function finalizeClose() {
       clearTimeout(returnTimer);
+      clearTimeout(landingTimer);
+      landingTimer = null;
+      ++flightSerial;
+      flightActive = false;
+      pendingViewportLayout = false;
 
+      /*
+        نخلي transitions الداخلية متوقفة أثناء إعادة الشكل الطبيعي أيضاً،
+        حتى ما يظهر فلاش عكسي بعد رجوع الشريط إلى مكانه.
+      */
+      dock.classList.add("assal-search-flight");
       dock.classList.remove("assal-search-dock");
       dock.style.left = "";
       dock.style.top = "";
@@ -56417,10 +56536,12 @@ html.low-end-device .assal-private-clean-dialog *{
         shell.style.height = "";
       }
 
-      if (veil) veil.classList.remove("is-visible");
-
+      /*
+        نعيد تركيب الصفحة الأصلية والخلفية ما زالت محجوبة بالـveil الثابت.
+        بعدها نكشفها في الفريم التالي فقط.
+      */
       setContainerSearchMode(false);
-      document.body.classList.remove("assal-search-dock-body");
+      void dock.offsetWidth;
 
       railPointerActive = false;
       railPointerId = null;
@@ -56429,7 +56550,12 @@ html.low-end-device .assal-private-clean-dialog *{
       homeRect = null;
       pendingHomeRect = null;
 
-      state = IDLE;
+      requestAnimationFrame(() => {
+        dock.classList.remove("assal-search-flight");
+        if (veil) veil.classList.remove("is-visible");
+        document.body.classList.remove("assal-search-dock-body");
+        state = IDLE;
+      });
     }
 
     function closeDock() {
@@ -56437,14 +56563,23 @@ html.low-end-device .assal-private-clean-dialog *{
 
       state = CLOSING;
       clearTimeout(viewportTimer);
+      clearTimeout(landingTimer);
+      landingTimer = null;
+      ++flightSerial;
+      flightActive = false;
+      pendingViewportLayout = false;
 
       try {
         input.blur();
       } catch (_) {}
 
-      if (veil) veil.classList.remove("is-visible");
+      /*
+        نخفي الطبقات الإضافية قبل الرجوع، لكن نبقي الخلفية المجمدة/الداكنة
+        إلى أن يعود الشريط وتستقر الصفحة الأصلية بالكامل.
+      */
       if (compactRail) compactRail.classList.remove("is-visible");
       if (shell) shell.classList.remove("is-visible");
+      dock.classList.add("assal-search-flight");
 
       const current = dock.getBoundingClientRect();
       const target =
@@ -56457,14 +56592,11 @@ html.low-end-device .assal-private-clean-dialog *{
 
       const dx = target.left - current.left;
       const dy = target.top - current.top;
-      const sx = current.width
-        ? Math.max(0.86, Math.min(1.14, target.width / current.width))
-        : 1;
 
       dock.style.transition = "transform .245s cubic-bezier(.22,.82,.23,1)";
-      dock.style.transform = `translate3d(${dx}px,${dy}px,0) scaleX(${sx})`;
+      dock.style.transform = `translate3d(${dx}px,${dy}px,0)`;
 
-      returnTimer = setTimeout(finalizeClose, 260);
+      returnTimer = setTimeout(finalizeClose, 270);
     }
 
     function finishSearchSession() {
@@ -56621,9 +56753,19 @@ html.low-end-device .assal-private-clean-dialog *{
 
     function viewportChanged() {
       if (state !== OPEN) return;
+
+      /*
+        Android يرسل resize/scroll للـVisualViewport أثناء حركة الكيبورد.
+        لا نغيّر left/top للـDock وهو يطير لأن ذلك يخلق ghosting/وميض.
+      */
+      if (flightActive) {
+        pendingViewportLayout = true;
+        return;
+      }
+
       clearTimeout(viewportTimer);
       viewportTimer = setTimeout(() => {
-        if (state === OPEN) applyLayout();
+        if (state === OPEN && !flightActive) applyLayout();
       }, 40);
     }
 
