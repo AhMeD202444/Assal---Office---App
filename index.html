@@ -589,9 +589,6 @@
 })();
 </script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js">
-
-</script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
 
 </script>
@@ -600,6 +597,8 @@
 
 (function () {
   const isLowEnd = !!window.__ASSAL_LOW_END_DEVICE__;
+  const XLSX_SRC =
+    "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js";
   const GSAP_SRC =
     "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js";
   const HTML2CANVAS_SRC =
@@ -644,6 +643,10 @@
     });
   }
 
+  window.__ASSAL_ENSURE_XLSX__ = function () {
+    return loadScript(XLSX_SRC, () => !!window.XLSX);
+  };
+
   window.__ASSAL_ENSURE_GSAP__ = async function () {
     await loadScript(GSAP_SRC, () => !!window.gsap);
     return !!window.gsap;
@@ -667,21 +670,25 @@
   };
 
   if (!isLowEnd) {
+    /*
+      Startup خفيف: GSAP فقط يبقى جاهزاً للحركات الأساسية.
+      html2canvas + jsPDF + AutoTable لا نحتاجها عند فتح التطبيق؛
+      الدوال التي تستخدمها تستدعي __ASSAL_ENSURE_PDF_LIBS__ قبل العمل،
+      لذلك تبقى Lazy وتُحمّل فقط عند الطباعة/التصدير.
+    */
     document.write('<script src="' + GSAP_SRC + '"><\/script>');
-    document.write('<script src="' + HTML2CANVAS_SRC + '"><\/script>');
-    document.write('<script src="' + JSPDF_SRC + '"><\/script>');
-    document.write('<script src="' + AUTOTABLE_SRC + '"><\/script>');
   }
 })();
 </script>
 
 
 
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Montserrat:wght@400;600&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
 
 
     <style>
@@ -10238,11 +10245,17 @@ body.modal-lock #promoPopup *{
 }
 /* ===== STATS BACKDROP EXACT MATCH FOR ALL MODALS ===== */
 #overlay,
-.cart-modal,
-#adModal{
+.cart-modal{
   background: rgba(2,8,23,.62) !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
+}
+/* الإعلان عنده #adOverlay مستقل للعتامة والـ blur؛
+   خلي #adModal مجرد حاوية شفافة حتى ما نرسم blur كامل للشاشة مرتين. */
+#adModal{
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 #overlay{
   z-index: 9998 !important;
@@ -10275,11 +10288,15 @@ body.modal-lock #promoPopup *{
 /* mobile: same exact darkness as stats modal too */
 @media (max-width: 768px){
   #overlay,
-  .cart-modal,
-  #adModal{
+  .cart-modal{
     background: rgba(2,8,23,.62) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
+  }
+  #adModal{
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
   .cart-modal{
     padding: 12px !important;
@@ -14918,6 +14935,65 @@ html.low-end-device .assal-community-write-row{
   }
 }
 </style>
+
+
+<style id="assal-native-performance-governor-v1">
+/* Performance governor: no visual simplification.
+   The same gradients remain; they only pause while the user is actively moving the UI. */
+html.assal-ui-interacting body,
+html.assal-ui-interacting body > .container {
+  animation-play-state: paused !important;
+}
+html.assal-page-hidden body,
+html.assal-page-hidden body > .container {
+  animation-play-state: paused !important;
+}
+/* Same visual design; only freeze the 10s background gradient for the few frames used to build results. */
+html.assal-results-rendering body,
+html.assal-results-rendering body > .container {
+  animation-play-state: paused !important;
+}
+
+/* Skip paint/layout work for result cards that are far outside the viewport.
+   content-visibility is ignored automatically on older WebViews, so this is progressive-only. */
+@supports (content-visibility: auto) {
+  #results .result-card {
+    content-visibility: auto;
+    contain-intrinsic-size: 320px;
+  }
+}
+</style>
+<script id="assal-native-performance-governor-v1-script">
+(function(){
+  if (window.__ASSAL_NATIVE_PERF_GOVERNOR_V1__) return;
+  window.__ASSAL_NATIVE_PERF_GOVERNOR_V1__ = true;
+  let releaseTimer = 0;
+  let lastInteractionAt = 0;
+  const root = document.documentElement;
+  function releaseInteraction(){
+    const elapsed = performance.now() - lastInteractionAt;
+    if (elapsed < 155) {
+      releaseTimer = setTimeout(releaseInteraction, Math.max(24, 170 - elapsed));
+      return;
+    }
+    releaseTimer = 0;
+    root.classList.remove('assal-ui-interacting');
+  }
+  function markInteracting(){
+    lastInteractionAt = performance.now();
+    root.classList.add('assal-ui-interacting');
+    if (!releaseTimer) releaseTimer = setTimeout(releaseInteraction, 170);
+  }
+  window.addEventListener('scroll', markInteracting, {passive:true, capture:true});
+  window.addEventListener('touchstart', markInteracting, {passive:true, capture:true});
+  window.addEventListener('touchmove', markInteracting, {passive:true, capture:true});
+  window.addEventListener('pointerdown', markInteracting, {passive:true, capture:true});
+  document.addEventListener('input', markInteracting, {passive:true, capture:true});
+  document.addEventListener('visibilitychange', function(){
+    root.classList.toggle('assal-page-hidden', document.hidden);
+  }, {passive:true});
+})();
+</script>
 
 </head>
 <body>
@@ -19664,7 +19740,11 @@ body.assal-search-dock-body .header-brand-logo::after{
   z-index:2147482600;
   pointer-events:none;
   opacity:0;
-  visibility:hidden;
+  /*
+    تبقى الطبقة موجودة بصرياً في شجرة الرسم وهي شفافة تماماً بدل visibility:hidden.
+    هذا يقلل كلفة إنشاء طبقة الـbackdrop لأول ضغطة، من دون تشغيل أي حركة أو لمس.
+  */
+  visibility:visible;
   background:rgba(3,10,22,.38);
   -webkit-backdrop-filter:blur(7px) saturate(116%);
   backdrop-filter:blur(7px) saturate(116%);
@@ -19674,9 +19754,32 @@ body.assal-search-dock-body .header-brand-logo::after{
   -webkit-backface-visibility:hidden;
   will-change:opacity;
 }
+.assal-search-dock-veil.assal-search-blur-prewarm{
+  opacity:.001;
+}
 .assal-search-dock-veil.is-visible{
   opacity:1;
+}
+/* طبقة لمس شفافة: تمنع أي تفاعل خلف واجهة البحث العائمة بدون تغيير الشكل */
+.assal-search-dock-touch-blocker{
+  position:fixed;
+  inset:0;
+  z-index:2147482590;
+  display:block;
+  background:transparent;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  touch-action:none;
+  overscroll-behavior:contain;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.assal-search-dock-touch-blocker.is-active{
+  opacity:1;
   visibility:visible;
+  pointer-events:auto;
 }
 /* One body-level visual shell only for the unified shadow/background. */
 .assal-search-dock-shell{
@@ -21732,15 +21835,66 @@ function syncGlobalModalLock() {
   document.body.classList.toggle("modal-lock", shouldLock);
 }
 
-const globalLockObserver = new MutationObserver(() => syncGlobalModalLock());
-document.addEventListener("DOMContentLoaded", () => {
-  if (document.body) {
-    globalLockObserver.observe(document.body, {
-      childList: true,
-      subtree: true,
+let globalLockSyncFrame = 0;
+function scheduleGlobalModalLockSync() {
+  if (globalLockSyncFrame) return;
+  globalLockSyncFrame = requestAnimationFrame(() => {
+    globalLockSyncFrame = 0;
+    syncGlobalModalLock();
+  });
+}
+
+const ASSAL_MODAL_LOCK_TARGET_SELECTOR =
+  ".request-modal, .request-admin-modal, .request-track-modal, .stats-modal, " +
+  ".customer-profile-modal, .customers-admin-modal, .customer-blocked-overlay, " +
+  ".invoice-track-modal, .invoice-admin-modal, .activation-overlay, .swal2-container, " +
+  "#adModal, #adOverlay, #promoPopup, .assal-sub-manager";
+const assalObservedModalLockNodes = new WeakSet();
+const globalLockAttributeObserver = new MutationObserver(scheduleGlobalModalLockSync);
+
+function observeModalLockTargets(root) {
+  const nodes = [];
+  if (root && root.matches && root.matches(ASSAL_MODAL_LOCK_TARGET_SELECTOR))
+    nodes.push(root);
+  if (root && root.querySelectorAll)
+    root.querySelectorAll(ASSAL_MODAL_LOCK_TARGET_SELECTOR).forEach((el) => nodes.push(el));
+  nodes.forEach((el) => {
+    if (assalObservedModalLockNodes.has(el)) return;
+    assalObservedModalLockNodes.add(el);
+    globalLockAttributeObserver.observe(el, {
       attributes: true,
       attributeFilter: ["class", "style"],
     });
+  });
+}
+
+const globalLockObserver = new MutationObserver((mutations) => {
+  let needsSync = false;
+  mutations.forEach((mutation) => {
+    mutation.addedNodes.forEach((node) => {
+      if (node && node.nodeType === 1) {
+        observeModalLockTargets(node);
+        if (
+          (node.matches && node.matches(ASSAL_MODAL_LOCK_TARGET_SELECTOR)) ||
+          (node.querySelector && node.querySelector(ASSAL_MODAL_LOCK_TARGET_SELECTOR))
+        ) needsSync = true;
+      }
+    });
+    mutation.removedNodes.forEach((node) => {
+      if (
+        node && node.nodeType === 1 &&
+        ((node.matches && node.matches(ASSAL_MODAL_LOCK_TARGET_SELECTOR)) ||
+          (node.querySelector && node.querySelector(ASSAL_MODAL_LOCK_TARGET_SELECTOR)))
+      ) needsSync = true;
+    });
+  });
+  if (needsSync) scheduleGlobalModalLockSync();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.body) {
+    observeModalLockTargets(document.body);
+    globalLockObserver.observe(document.body, { childList: true, subtree: true });
   }
   syncGlobalModalLock();
 });
@@ -21806,17 +21960,29 @@ function bindModalBackdropDismissLocks() {
     .forEach(blockModalBackdropDismiss);
 }
 
-const backdropDismissLockObserver = new MutationObserver(() =>
-  bindModalBackdropDismissLocks(),
-);
+const ASSAL_BACKDROP_LOCK_TARGET_SELECTOR =
+  "#overlay, #promoPopup, #cartModal, #requestModal, #requestAdminModal, " +
+  "#requestTrackModal, #statsModal, #customerProfileModal, #customersAdminModal, " +
+  "#invoiceAdminModal, #availabilityAdminModal, #availabilityTrackModal, " +
+  "#activationOverlay, #adModal, #adOverlay, .cart-modal, .request-modal, " +
+  ".request-admin-modal, .request-track-modal, .stats-modal, .customer-profile-modal, " +
+  ".customers-admin-modal, .invoice-track-modal, .invoice-admin-modal, .activation-overlay";
+const backdropDismissLockObserver = new MutationObserver((mutations) => {
+  const relevant = mutations.some((mutation) =>
+    Array.from(mutation.addedNodes || []).some((node) =>
+      node && node.nodeType === 1 &&
+      ((node.matches && node.matches(ASSAL_BACKDROP_LOCK_TARGET_SELECTOR)) ||
+        (node.querySelector && node.querySelector(ASSAL_BACKDROP_LOCK_TARGET_SELECTOR))),
+    ),
+  );
+  if (relevant) bindModalBackdropDismissLocks();
+});
 document.addEventListener("DOMContentLoaded", () => {
   bindModalBackdropDismissLocks();
   if (document.body) {
     backdropDismissLockObserver.observe(document.body, {
       childList: true,
       subtree: true,
-      attributes: true,
-      attributeFilter: ["class", "style"],
     });
   }
 });
@@ -26651,11 +26817,73 @@ function clearMaintenanceBypass() {
 }
 
 let assalBootDataPromise = null;
+let assalBackgroundRefreshPromise = null;
 
-// تحميل بيانات التطبيق عند التشغيل
+function assalScheduleIdleTask(task, timeout = 1600) {
+  if (typeof task !== "function") return;
+  if (window.requestIdleCallback) {
+    requestIdleCallback(() => task(), { timeout });
+  } else {
+    setTimeout(task, Math.min(timeout, 650));
+  }
+}
+
+function assalScheduleBackgroundPriceRefresh(snapshot) {
+  if (assalIsBrowserOffline() || assalBackgroundRefreshPromise) return;
+  assalScheduleIdleTask(() => {
+    if (assalBackgroundRefreshPromise) return;
+    const expectedHash = String((snapshot && snapshot.contentHash) || "");
+    assalBackgroundRefreshPromise = loadExcelFiles({
+      expectedHash,
+      background: true,
+    })
+      .then((result) => {
+        if (result && result.success && !result.fromCache && !result.unchanged) {
+          if (document.readyState === "complete") {
+            try {
+              if (typeof loadNewItems === "function") loadNewItems();
+            } catch (_) {}
+          } else {
+            window.__ASSAL_PRICE_BACKGROUND_CHANGED__ = true;
+          }
+        }
+        return result;
+      })
+      .catch((err) => {
+        try { console.warn("ASSAL background price refresh failed:", err); } catch (_) {}
+        return null;
+      })
+      .finally(() => {
+        assalBackgroundRefreshPromise = null;
+      });
+  }, 1600);
+}
+
+// تحميل بيانات التطبيق عند التشغيل: آخر نسخة محفوظة أولاً، ثم تحديث هادئ بالخلفية.
 function runAssalBootDataLoad() {
   if (!assalBootDataPromise) {
-    assalBootDataPromise = loadExcelFiles();
+    assalBootDataPromise = (async () => {
+      const snapshot = await assalLoadPriceSnapshot();
+      if (snapshot && assalHasValidPriceData(snapshot.database)) {
+        assalApplyPriceSnapshot(snapshot, {
+          offline: assalIsBrowserOffline(),
+          reason: "startup-warm-cache",
+          precacheImages: false,
+          dispatchRestoreEvent: false,
+          loadNewItems: false,
+        });
+        if (!assalIsBrowserOffline()) assalScheduleBackgroundPriceRefresh(snapshot);
+        return {
+          success: true,
+          hasData: true,
+          fromCache: true,
+          warmStart: true,
+          offline: assalIsBrowserOffline(),
+          savedAt: snapshot.savedAt || 0,
+        };
+      }
+      return loadExcelFiles();
+    })();
   }
   return assalBootDataPromise;
 }
@@ -26670,6 +26898,21 @@ function runLowEndDeferred(task, delay = 2600) {
     setTimeout(task, delay);
   }
 }
+
+// نبدأ تجهيز الأسعار من الكاش بمجرد اكتمال DOM بدل انتظار الصور والخطوط وحدث load.
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    try {
+      const bypass = getMaintenanceBypass();
+      const isActivated = localStorage.getItem("isActivated") === "true";
+      if (maintenanceLock && !bypass) return;
+      if (!isActivated && !bypass) return;
+      runAssalBootDataLoad();
+    } catch (_) {}
+  },
+  { once: true },
+);
 
 window.onload = function () {
   enforceLegacyAdminReactivation();
@@ -26740,6 +26983,10 @@ window.onload = function () {
   runAssalBootDataLoad().then((result) => {
     if (result.success) {
       console.log("تم تحميل البيانات بنجاح، جارٍ تحميل العناصر الجديدة.");
+      try {
+        if (typeof assalScheduleSmartMetaWarmup === "function")
+          assalScheduleSmartMetaWarmup();
+      } catch (_) {}
       if (window.__ASSAL_LOW_END_DEVICE__) {
         runLowEndDeferred(() => {
           try {
@@ -26751,6 +26998,7 @@ window.onload = function () {
       } else {
         loadNewItems();
       }
+      window.__ASSAL_PRICE_BACKGROUND_CHANGED__ = false;
     } else {
       console.warn("فشل تحميل البيانات:", result.message);
     }
@@ -27704,41 +27952,69 @@ async function assalLoadPriceSnapshot() {
   }
 }
 
-async function assalRestorePriceSnapshot(reason) {
-  const snapshot = await assalLoadPriceSnapshot();
+function assalApplyPriceSnapshot(snapshot, options = {}) {
   if (!snapshot || !assalHasValidPriceData(snapshot.database)) return null;
+  const offline = options.offline === true;
+  const reason = options.reason || "snapshot";
 
   database = snapshot.database || {};
   allDatabase = Array.isArray(snapshot.allDatabase) ? snapshot.allDatabase : [];
-  assalUsingOfflineCachedData = true;
-  window.__ASSAL_USING_OFFLINE_PRICE_CACHE__ = true;
+  assalUsingOfflineCachedData = offline;
+  window.__ASSAL_USING_OFFLINE_PRICE_CACHE__ = offline;
   window.__ASSAL_PRICE_CACHE_SAVED_AT__ = snapshot.savedAt || 0;
 
   try {
-    refreshOffersUiCount();
+    if (typeof window.__ASSAL_CLEAR_SEARCH_META_CACHE__ === "function")
+      window.__ASSAL_CLEAR_SEARCH_META_CACHE__();
   } catch (_) {}
-  try {
-    if (typeof loadNewItems === "function") loadNewItems();
-  } catch (_) {}
-  try {
-    window.dispatchEvent(
-      new CustomEvent("assalOfflineDataRestored", {
-        detail: { reason, savedAt: snapshot.savedAt || 0 },
-      }),
-    );
-  } catch (_) {}
-  try {
-    if (typeof window.showAssalOfflineState === "function")
-      window.showAssalOfflineState(false);
-  } catch (_) {}
+  try { refreshOffersUiCount(); } catch (_) {}
+
+  if (options.loadNewItems !== false) {
+    try { if (typeof loadNewItems === "function") loadNewItems(); } catch (_) {}
+  }
+
+  if (offline) {
+    if (options.dispatchRestoreEvent !== false) {
+      try {
+        window.dispatchEvent(
+          new CustomEvent("assalOfflineDataRestored", {
+            detail: { reason, savedAt: snapshot.savedAt || 0 },
+          }),
+        );
+      } catch (_) {}
+    }
+    try {
+      if (typeof window.showAssalOfflineState === "function")
+        window.showAssalOfflineState(false);
+    } catch (_) {}
+  } else {
+    try {
+      if (typeof window.hideAssalOfflineState === "function")
+        window.hideAssalOfflineState();
+    } catch (_) {}
+  }
+
   try {
     if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === "function")
       window.__ASSAL_APPLY_NEWS_BAR_STATE__();
   } catch (_) {}
-  try {
-    assalPrecacheOfflineImagesFromDatabase(database);
-  } catch (_) {}
 
+  if (options.precacheImages !== false) {
+    try { assalPrecacheOfflineImagesFromDatabase(database); } catch (_) {}
+  }
+  return snapshot;
+}
+
+async function assalRestorePriceSnapshot(reason) {
+  const snapshot = await assalLoadPriceSnapshot();
+  if (!snapshot || !assalHasValidPriceData(snapshot.database)) return null;
+  assalApplyPriceSnapshot(snapshot, {
+    offline: true,
+    reason,
+    precacheImages: true,
+    dispatchRestoreEvent: true,
+    loadNewItems: false,
+  });
   console.warn("ASSAL: تم تشغيل آخر نسخة محفوظة من بيانات الأسعار.", {
     reason,
     savedAt: snapshot.savedAt,
@@ -27932,25 +28208,42 @@ function assalCollectImageUrlsFromDatabase(db) {
   return Array.from(urls).filter(Boolean);
 }
 
+let assalImagePrecacheToken = 0;
 async function assalPrecacheOfflineImagesFromDatabase(db) {
   try {
     if (!("caches" in window) || assalIsBrowserOffline()) return;
     const urls = assalCollectImageUrlsFromDatabase(db).slice(0, 350);
+    if (!urls.length) return;
+    const myToken = ++assalImagePrecacheToken;
     let i = 0;
 
     async function pump() {
-      const batch = urls.slice(i, i + 8);
-      i += 8;
+      if (myToken !== assalImagePrecacheToken || assalIsBrowserOffline()) return;
+      if (document.hidden) {
+        setTimeout(pump, 1200);
+        return;
+      }
+      const batch = urls.slice(i, i + 3);
+      i += 3;
       await Promise.all(
         batch.map((url) => assalCacheImageUrl(url).catch(() => false)),
       );
-      if (i < urls.length) setTimeout(pump, 120);
+      if (i < urls.length) {
+        if (window.requestIdleCallback) {
+          requestIdleCallback(() => pump(), { timeout: 900 });
+        } else {
+          setTimeout(pump, 420);
+        }
+      }
     }
-    pump();
+
+    if (window.requestIdleCallback) {
+      requestIdleCallback(() => pump(), { timeout: 3500 });
+    } else {
+      setTimeout(pump, 2200);
+    }
   } catch (err) {
-    try {
-      console.warn("ASSAL image precache failed:", err);
-    } catch (_) {}
+    try { console.warn("ASSAL image precache failed:", err); } catch (_) {}
   }
 }
 
@@ -28257,8 +28550,37 @@ function assalEscapeBatteryHtml(value) {
 }
 /* ===== /ASSAL ADMIN BATTERY GROUP SEARCH FINAL ===== */
 
+// بصمة خفيفة للملف: إذا لم يتغير XLSX نتجنب إعادة parsing لكل الشيتات.
+async function assalHashArrayBuffer(buffer) {
+  try {
+    if (!buffer || !window.crypto || !window.crypto.subtle) return "";
+    const digest = await window.crypto.subtle.digest("SHA-256", buffer);
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  } catch (_) {
+    return "";
+  }
+}
+
+let assalExcelNetworkPromise = null;
+function loadExcelFiles(options = {}) {
+  const dedupe = options.dedupe !== false;
+  if (dedupe && assalExcelNetworkPromise) return assalExcelNetworkPromise;
+
+  const task = loadExcelFilesCore(options);
+  if (!dedupe) return task;
+
+  let tracked = null;
+  tracked = Promise.resolve(task).finally(() => {
+    if (assalExcelNetworkPromise === tracked) assalExcelNetworkPromise = null;
+  });
+  assalExcelNetworkPromise = tracked;
+  return tracked;
+}
+
 // تحميل ملفات الأصناف والأسعار
-async function loadExcelFiles() {
+async function loadExcelFilesCore(options = {}) {
   try {
     if (!dropboxMainFile) {
       console.error("رابط ملف Excel غير معرف.");
@@ -28316,7 +28638,8 @@ async function loadExcelFiles() {
       };
     }
 
-    console.log("جارٍ تحميل ملف Excel من:", dropboxMainFile);
+    if (window.__ASSAL_PRODUCTION_DEBUG__ === true)
+      console.log("جارٍ تحميل ملف Excel من:", dropboxMainFile);
     let mainResponse;
     try {
       mainResponse = await fetch(dropboxMainFile, {
@@ -28388,6 +28711,29 @@ async function loadExcelFiles() {
     }
 
     const mainBuffer = await mainResponse.arrayBuffer();
+    const mainContentHash = await assalHashArrayBuffer(mainBuffer);
+    const expectedHash = String((options && options.expectedHash) || "");
+
+    if (
+      expectedHash &&
+      mainContentHash &&
+      expectedHash === mainContentHash &&
+      assalHasValidPriceData(database)
+    ) {
+      assalMarkOnlineFreshData();
+      return {
+        success: true,
+        hasData: true,
+        fromCache: false,
+        unchanged: true,
+        skippedParse: true,
+        savedAt: window.__ASSAL_PRICE_CACHE_SAVED_AT__ || 0,
+      };
+    }
+
+    if (typeof window.__ASSAL_ENSURE_XLSX__ === "function")
+      await window.__ASSAL_ENSURE_XLSX__();
+    if (!window.XLSX) throw new Error("تعذر تحميل مكتبة XLSX");
     const mainWorkbook = XLSX.read(mainBuffer, { type: "array" });
 
     // تهيئة الكائن database
@@ -28509,27 +28855,12 @@ async function loadExcelFiles() {
       defval: null,
     });
 
-    // تصحيح البيانات
+    // تصحيح البيانات — لا نطبع آلاف الكائنات في Console أثناء التشغيل الطبيعي.
     Object.keys(database).forEach((category) => {
-      console.log(
-        `فئة ${category}: ${database[category].length} عنصر`,
-        database[category],
-      );
       if (database[category].length === 0) {
         console.warn(`لا توجد بيانات في ورقة ${category}`);
-      } else {
-        database[category].slice(0, 5).forEach((item) => {
-          console.log(`عنصر في ${category}:`, {
-            name: item["Item Name"] || item["Item"],
-            price: item["Price"],
-            new: item["New"],
-            newType: typeof item["New"],
-            isNewEmpty:
-              item["New"] === "" ||
-              item["New"] === undefined ||
-              item["New"] === null,
-          });
-        });
+      } else if (window.__ASSAL_PRODUCTION_DEBUG__ === true) {
+        console.log(`فئة ${category}: ${database[category].length} عنصر`);
       }
     });
 
@@ -28569,8 +28900,13 @@ async function loadExcelFiles() {
       allDatabase,
       source: "google-sheet-xlsx",
       url: dropboxMainFile.replace(/([?&]t=)\d+/, "$1TIMESTAMP"),
+      contentHash: mainContentHash || "",
     });
     assalMarkOnlineFreshData();
+    try {
+      if (typeof window.__ASSAL_CLEAR_SEARCH_META_CACHE__ === "function")
+        window.__ASSAL_CLEAR_SEARCH_META_CACHE__();
+    } catch (_) {}
 
     try {
       refreshOffersUiCount();
@@ -30337,17 +30673,25 @@ function assalBuildVoiceItemTokens(itemName) {
   return assalUniqueArray(out.map((t) => String(t || "").toLowerCase()));
 }
 
-function assalVariantDigitTokensAreExact(itemName, variant) {
+function assalVariantDigitTokensAreExact(itemName, variant, preparedItemTokens) {
   if (typeof tokenizeSmart !== "function") return true;
-  const qTokens = tokenizeSmart(variant).filter((t) => /\d/.test(t));
+  const qMeta = typeof assalPrepareSmartQuery === "function"
+    ? assalPrepareSmartQuery(variant)
+    : null;
+  const qTokens = (qMeta ? qMeta.tokens : tokenizeSmart(variant)).filter((t) => /\d/.test(t));
   if (qTokens.length === 0) return true;
-  const itemTokens = assalBuildVoiceItemTokens(itemName);
+  const itemTokens = preparedItemTokens || assalBuildVoiceItemTokens(itemName);
   return qTokens.every((qt) => itemTokens.includes(String(qt).toLowerCase()));
 }
 
 function assalVoiceBestMatchScore(itemName, variants) {
   const name = String(itemName || "");
   const itemCompact = assalCompactSearchText(name);
+  const needsDigitTokens = Array.isArray(variants) && variants.some((v) => /\d/.test(String(v || "")));
+  const itemTokens = needsDigitTokens ? assalBuildVoiceItemTokens(name) : null;
+  const itemMeta = typeof assalGetSmartItemMeta === "function"
+    ? assalGetSmartItemMeta(name)
+    : null;
   let best = 0;
 
   for (const variant of variants) {
@@ -30357,7 +30701,7 @@ function assalVoiceBestMatchScore(itemName, variants) {
     if (!compact) continue;
 
     const isStrongModel = assalIsStrongAlphaNumericVariant(v);
-    const digitExact = assalVariantDigitTokensAreExact(name, v);
+    const digitExact = assalVariantDigitTokensAreExact(name, v, itemTokens);
 
     // Strong model queries like 14C / HOT12I / SMART7HD / SPARKGO2024 must match as one block.
     // This prevents "14C" from showing every item that only contains 14.
@@ -30369,7 +30713,10 @@ function assalVoiceBestMatchScore(itemName, variants) {
     if (digitExact && itemCompact.includes(compact))
       best = Math.max(best, 1.08);
     if (typeof smartScore === "function") {
-      const sc = smartScore(name, v);
+      const queryMeta = typeof assalPrepareSmartQuery === "function"
+        ? assalPrepareSmartQuery(v)
+        : undefined;
+      const sc = smartScore(name, v, itemMeta || undefined, queryMeta);
       best = Math.max(best, digitExact ? sc : Math.min(sc, 0.45));
     }
   }
@@ -31296,6 +31643,18 @@ function assalTunePhoneImageCrop(imgEl, mode = "card") {
 
             const shiftX = (0.5 - centerX) * 42;
             const shiftY = (0.5 - centerY) * 42;
+
+            // أثناء تجهيز صورة البطاقة نحسب أيضاً قص نافذة المعاينة مرة واحدة.
+            // هكذا فتح النافذة لاحقاً لا يحتاج Canvas/Decode جديد قبل الظهور.
+            if (mode !== "modal") {
+              const modalZoomRaw = dominantFill > 0 ? 0.90 / dominantFill : 1;
+              const modalZoom = Math.max(1, Math.min(1.18, modalZoomRaw));
+              imgEl.dataset.assalModalZoom = String(modalZoom);
+              imgEl.dataset.assalModalX = shiftX.toFixed(2) + "%";
+              imgEl.dataset.assalModalY = shiftY.toFixed(2) + "%";
+              imgEl.dataset.assalModalCropReady = "1";
+            }
+
             applyCrop(zoom, shiftX, shiftY, false);
             usedSmartBBox = true;
           }
@@ -31304,6 +31663,13 @@ function assalTunePhoneImageCrop(imgEl, mode = "card") {
     } catch (_) {}
 
     if (!usedSmartBBox) {
+      if (mode !== "modal") {
+        const modalFallbackZoom = nearSquare ? 1.05 : mediumShape ? 1.03 : 1.01;
+        imgEl.dataset.assalModalZoom = String(modalFallbackZoom);
+        imgEl.dataset.assalModalX = "0%";
+        imgEl.dataset.assalModalY = "0%";
+        imgEl.dataset.assalModalCropReady = "1";
+      }
       applyCrop(fallbackZoom, 0, 0, false);
     }
   } catch (_) {}
@@ -31357,15 +31723,14 @@ body.assal-card-preview-lock{
   will-change:transform, opacity;
 }
 #assalResultPreviewModal .assal-preview-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:14px 16px 10px;
+  position:relative;
+  display:block;
+  padding:58px 16px 10px;
   background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
   border-bottom:1px solid rgba(255,255,255,.06);
 }
 #assalResultPreviewModal .assal-preview-header-main{
+  width:100%;
   min-width:0;
   display:flex;
   align-items:center;
@@ -31385,6 +31750,7 @@ body.assal-card-preview-lock{
 }
 #assalResultPreviewModal .assal-preview-header-text{
   min-width:0;
+  flex:1 1 auto;
   display:flex;
   flex-direction:column;
   gap:2px;
@@ -31404,6 +31770,11 @@ body.assal-card-preview-lock{
   text-overflow:ellipsis;
 }
 #assalResultPreviewModal .assal-preview-close{
+  position:absolute;
+  top:12px;
+  right:12px;
+  left:auto;
+  z-index:4;
   width:40px;
   height:40px;
   border:none;
@@ -31508,7 +31879,7 @@ body.assal-card-preview-lock{
     border-radius:24px;
   }
   #assalResultPreviewModal .assal-preview-header{
-    padding:12px 13px 9px;
+    padding:54px 13px 9px;
   }
   #assalResultPreviewModal .assal-preview-body{
     padding:12px 13px 10px;
@@ -31574,130 +31945,146 @@ body.assal-card-preview-lock{
   });
 }
 
-async function openAssalResultPreviewModal(payload) {
+function openAssalResultPreviewModal(payload) {
   assalEnsureResultPreviewModal();
   const modal = document.getElementById("assalResultPreviewModal");
   if (!modal) return;
 
   const backdrop = modal.querySelector(".assal-preview-backdrop");
   const shell = modal.querySelector(".assal-preview-shell");
-  const imgEl = modal.querySelector(".assal-preview-image");
+  const imageWrap = modal.querySelector(".assal-preview-image-wrap");
+  let oldImg = modal.querySelector(".assal-preview-image");
   const titleEl = modal.querySelector(".assal-preview-header-title");
   const deviceNameEl = modal.querySelector(".assal-preview-device-name");
   const categoryEl = modal.querySelector(".assal-preview-category-text");
-  if (!imgEl || !shell || !backdrop) return;
+  if (!oldImg || !shell || !backdrop || !imageWrap) return;
 
-  // كل فتح جديد يلغي أي تجهيز سابق حتى لا تظهر صورة قديمة.
   const loadSeq = Number(modal.__assalPreviewLoadSeq || 0) + 1;
   modal.__assalPreviewLoadSeq = loadSeq;
   modal.__assalPreviewClosing = false;
 
-  // نفس فلسفة نافذة الإعلان: النافذة تبقى display:none أثناء تجهيز المحتوى.
+  // جهّز كل شيء وهو غير مرئي، لكن بدون انتظار decode قبل فتح النافذة.
   modal.style.display = "none";
   modal.setAttribute("aria-hidden", "true");
   backdrop.style.opacity = "0";
   shell.style.transition = "none";
   shell.style.opacity = "0";
-  shell.style.transform = "translateY(18px) scale(.98)";
+  shell.style.transform = "translateY(14px) scale(.985)";
   shell.style.willChange = "transform, opacity";
 
+  const sourceImage =
+    payload && payload.sourceImage instanceof HTMLImageElement
+      ? payload.sourceImage
+      : null;
+
+  const sourceReady = !!(
+    sourceImage &&
+    sourceImage.complete &&
+    Number(sourceImage.naturalWidth || 0) > 0 &&
+    Number(sourceImage.naturalHeight || 0) > 0
+  );
+
+  const preferredSrc = sourceReady
+    ? String(sourceImage.currentSrc || sourceImage.src || "")
+    : String(payload?.imgSrc || "");
+
   const imgSrc =
-    assalSafeRemoteImageUrl(payload?.imgSrc || "") ||
-    String(payload?.imgSrc || "images/default.png");
+    assalSafeRemoteImageUrl(preferredSrc) ||
+    preferredSrc ||
+    "images/default.png";
   const fallback = String(payload?.fallback || "images/default.png");
 
   const deviceName = String(payload?.name || "صورة الجهاز").trim() || "صورة الجهاز";
   const categoryText = String(payload?.category || "LCD").trim() || "LCD";
   const isPhoneImage = !!payload?.isPhoneImage;
 
-  if (titleEl) titleEl.textContent = deviceName.length > 34 ? deviceName.slice(0, 34) + "..." : deviceName;
+  if (titleEl)
+    titleEl.textContent =
+      deviceName.length > 40 ? deviceName.slice(0, 40) + "..." : deviceName;
   if (deviceNameEl) deviceNameEl.textContent = deviceName;
   if (categoryEl) categoryEl.textContent = categoryText;
 
-  imgEl.classList.remove("assal-smart-cover");
-  imgEl.style.visibility = "hidden";
+  // عنصر صورة جديد في كل فتح: لا يمكن أن يلمح المستخدم صورة الجلسة السابقة.
+  let imgEl;
+  if (sourceReady) {
+    // نفس الصورة المرئية في البطاقة محمّلة ومفكوكة أصلاً داخل WebView.
+    // clone يعطي أول Frame سريع بدون بوابة decode جديدة.
+    imgEl = sourceImage.cloneNode(false);
+  } else {
+    imgEl = document.createElement("img");
+    imgEl.src = imgSrc;
+  }
+
+  imgEl.className = "assal-preview-image";
+  imgEl.removeAttribute("style");
+  imgEl.removeAttribute("onload");
+  imgEl.removeAttribute("onerror");
+  imgEl.removeAttribute("data-assal-cache-src");
+  imgEl.removeAttribute("data-assal-fallback-src");
+  imgEl.removeAttribute("data-assal-fallback-used");
+  imgEl.alt = deviceName;
+  imgEl.setAttribute("data-assal-preview-fallback", fallback);
   imgEl.style.setProperty("--assal-phone-modal-zoom", "1");
   imgEl.style.setProperty("--assal-phone-modal-x", "0%");
   imgEl.style.setProperty("--assal-phone-modal-y", "0%");
-  imgEl.removeAttribute("data-assal-fallback-used");
-  imgEl.setAttribute("data-assal-preview-fallback", fallback);
-  imgEl.alt = deviceName;
 
-  const waitUntilPrepared = () => new Promise((resolve) => {
-    let resolved = false;
-    let finishing = false;
-    let timer = null;
+  // استعمل قص النافذة المحسوب مسبقاً أثناء تحميل صورة البطاقة.
+  let hasStoredCrop = false;
+  if (isPhoneImage && sourceReady && sourceImage?.dataset?.assalModalCropReady === "1") {
+    const modalZoom = Number(sourceImage.dataset.assalModalZoom || 1);
+    const modalX = String(sourceImage.dataset.assalModalX || "0%");
+    const modalY = String(sourceImage.dataset.assalModalY || "0%");
+    imgEl.style.setProperty("--assal-phone-modal-zoom", String(Math.max(1, Math.min(1.18, modalZoom))));
+    imgEl.style.setProperty("--assal-phone-modal-x", modalX);
+    imgEl.style.setProperty("--assal-phone-modal-y", modalY);
+    hasStoredCrop = true;
+  }
 
-    const finish = async () => {
-      if (resolved || finishing) return;
-      finishing = true;
+  // استبدال الصورة القديمة قبل أول Frame مرئي يمنع أي ومضة من معاينة سابقة.
+  oldImg.replaceWith(imgEl);
+  oldImg = null;
 
-      try {
-        if (typeof imgEl.decode === "function") await imgEl.decode();
-      } catch (_) {}
-
-      if (resolved) return;
-
-      try {
-        if (isPhoneImage && imgEl.naturalWidth > 0 && imgEl.naturalHeight > 0) {
-          assalTunePhoneImageCrop(imgEl, "modal");
-        }
-        if (window.assalCacheImageUrl && imgEl.naturalWidth > 0) {
-          window.assalCacheImageUrl(imgEl.currentSrc || imgEl.src);
-        }
-      } catch (_) {}
-
-      resolved = true;
-      if (timer) clearTimeout(timer);
-      resolve();
-    };
-
-    imgEl.onload = finish;
-    imgEl.onerror = function () {
-      const next = this.getAttribute("data-assal-preview-fallback") || "images/default.png";
-      if (this.getAttribute("data-assal-fallback-used") === "1") {
-        this.onerror = null;
-        if (!resolved) {
-          resolved = true;
-          if (timer) clearTimeout(timer);
-          resolve();
-        }
-        return;
+  const finalizeLoadedImage = () => {
+    if (modal.__assalPreviewLoadSeq !== loadSeq) return;
+    try {
+      if (
+        isPhoneImage &&
+        !hasStoredCrop &&
+        imgEl.naturalWidth > 0 &&
+        imgEl.naturalHeight > 0
+      ) {
+        assalTunePhoneImageCrop(imgEl, "modal");
       }
-      this.setAttribute("data-assal-fallback-used", "1");
-      finishing = false;
-      this.src = next;
-    };
+      if (window.assalCacheImageUrl && imgEl.naturalWidth > 0) {
+        window.assalCacheImageUrl(imgEl.currentSrc || imgEl.src);
+      }
+    } catch (_) {}
+  };
 
-    imgEl.src = imgSrc;
-
-    if (imgEl.complete && imgEl.naturalWidth > 0) {
-      Promise.resolve().then(finish);
+  imgEl.onload = finalizeLoadedImage;
+  imgEl.onerror = function () {
+    if (modal.__assalPreviewLoadSeq !== loadSeq) return;
+    const next = this.getAttribute("data-assal-preview-fallback") || "images/default.png";
+    if (this.getAttribute("data-assal-fallback-used") === "1") {
+      this.onerror = null;
+      return;
     }
+    this.setAttribute("data-assal-fallback-used", "1");
+    hasStoredCrop = false;
+    this.style.setProperty("--assal-phone-modal-zoom", "1");
+    this.style.setProperty("--assal-phone-modal-x", "0%");
+    this.style.setProperty("--assal-phone-modal-y", "0%");
+    this.src = next;
+  };
 
-    timer = setTimeout(() => {
-      if (resolved) return;
-      try {
-        if (isPhoneImage && imgEl.naturalWidth > 0 && imgEl.naturalHeight > 0) {
-          assalTunePhoneImageCrop(imgEl, "modal");
-        }
-      } catch (_) {}
-      resolved = true;
-      resolve();
-    }, 1800);
-  });
+  // إذا clone جاهز، نفّذ الكاش/الفallback بدون انتظار.
+  if (imgEl.complete && imgEl.naturalWidth > 0) {
+    finalizeLoadedImage();
+  } else if (!sourceReady && imgEl.src !== imgSrc) {
+    imgEl.src = imgSrc;
+  }
 
-  await waitUntilPrepared();
-  if (modal.__assalPreviewLoadSeq !== loadSeq) return;
-
-  // الصورة والقص جاهزان قبل أول Frame مرئي.
-  imgEl.style.visibility = "visible";
-
-  // نفس نافذة الإعلان حرفياً: display ثم حالة مخفية ثم double rAF.
-  backdrop.style.opacity = "0";
-  shell.style.transition = "none";
-  shell.style.opacity = "0";
-  shell.style.transform = "translateY(18px) scale(.98)";
+  // افتح فوراً بعد تجهيز DOM. لا يوجد await/decode قبل هذا السطر.
   modal.style.display = "flex";
   modal.setAttribute("aria-hidden", "false");
   document.documentElement.classList.add("assal-card-preview-lock");
@@ -31707,6 +32094,7 @@ async function openAssalResultPreviewModal(payload) {
     if (typeof syncGlobalModalLock === "function") syncGlobalModalLock();
   } catch (_) {}
 
+  // نفس حماية الومضة الناجحة: أول Frame مخفي ثم الحركة تبدأ بعد double rAF.
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       if (modal.__assalPreviewLoadSeq !== loadSeq || modal.__assalPreviewClosing) return;
@@ -31718,23 +32106,23 @@ async function openAssalResultPreviewModal(payload) {
           shell.style.transition = "none";
           gsap.fromTo(
             shell,
-            { y: 18, opacity: 0, scale: 0.98 },
+            { y: 14, opacity: 0, scale: 0.985 },
             {
               y: 0,
               opacity: 1,
               scale: 1,
-              duration: 0.55,
+              duration: 0.32,
               ease: "power3.out",
               overwrite: true,
             },
           );
         } else {
-          shell.style.transition = "transform .38s ease, opacity .38s ease";
+          shell.style.transition = "transform .30s cubic-bezier(.2,.8,.2,1), opacity .24s ease";
           shell.style.opacity = "1";
           shell.style.transform = "translateY(0) scale(1)";
         }
       } catch (_) {
-        shell.style.transition = "transform .38s ease, opacity .38s ease";
+        shell.style.transition = "transform .30s cubic-bezier(.2,.8,.2,1), opacity .24s ease";
         shell.style.opacity = "1";
         shell.style.transform = "translateY(0) scale(1)";
       }
@@ -31809,6 +32197,8 @@ function closeAssalResultPreviewModal() {
     if (!card) return;
     if (event.target.closest(".result-card-mini-actions") || event.target.closest("button") || event.target.closest("a")) return;
 
+    const sourceImage = card.querySelector("img.assal-phone-model-image, img");
+
     openAssalResultPreviewModal({
       name: assalDecodeCardPreviewValue(card.getAttribute("data-preview-name")),
       category: assalDecodeCardPreviewValue(card.getAttribute("data-preview-category")),
@@ -31817,6 +32207,7 @@ function closeAssalResultPreviewModal() {
       originalPrice: assalDecodeCardPreviewValue(card.getAttribute("data-preview-original-price")),
       discountPrice: assalDecodeCardPreviewValue(card.getAttribute("data-preview-discount-price")),
       isPhoneImage: card.getAttribute("data-preview-phone-image") === "1",
+      sourceImage,
     });
   });
 })();
@@ -31824,10 +32215,14 @@ function closeAssalResultPreviewModal() {
 // عرض نتائج بحث الأصناف
 function displayResults(results) {
   const resultsContainer = document.getElementById("results");
-  resultsContainer.innerHTML = "";
+  if (!resultsContainer) return;
 
+  const perfRoot = document.documentElement;
+  perfRoot.classList.add("assal-results-rendering");
+
+  let htmlContent = "";
   if (results.length === 0) {
-    resultsContainer.innerHTML =
+    htmlContent =
       `
             ` +
       '<div class="no-results">' +
@@ -31838,7 +32233,6 @@ function displayResults(results) {
       `
         `;
   } else {
-    let htmlContent = "";
     results.forEach((item) => {
       // جزء الصورة كما هو
       const catForItem =
@@ -31930,7 +32324,7 @@ function displayResults(results) {
         `
                     ${miniActions.length ? `<div class="result-card-mini-actions">${miniActions.join("")}</div>` : ""}
                     ` +
-        `<img class="${imgClass}" src="${imgSrc}" data-assal-cache-src="${imgSrc}" data-assal-fallback-src="${imgFallbackSrc}" onload="try{if(this.classList.contains('assal-phone-model-image')&&window.assalTunePhoneImageCrop)window.assalTunePhoneImageCrop(this,'card');if(window.assalCacheImageUrl)window.assalCacheImageUrl(this.getAttribute('data-assal-cache-src')||this.src)}catch(_){}" onerror="try{if(window.assalUseCachedImage)window.assalUseCachedImage(this);else this.src=(this.getAttribute('data-assal-fallback-src')||'images/default.png')}catch(_){this.src=(this.getAttribute('data-assal-fallback-src')||'images/default.png')}" alt="Item Image">` +
+        `<img class="${imgClass}" src="${imgSrc}" loading="lazy" decoding="async" data-assal-cache-src="${imgSrc}" data-assal-fallback-src="${imgFallbackSrc}" onload="try{if(this.classList.contains('assal-phone-model-image')&&window.assalTunePhoneImageCrop)window.assalTunePhoneImageCrop(this,'card');if(window.assalCacheImageUrl)window.assalCacheImageUrl(this.getAttribute('data-assal-cache-src')||this.src)}catch(_){}" onerror="try{if(window.assalUseCachedImage)window.assalUseCachedImage(this);else this.src=(this.getAttribute('data-assal-fallback-src')||'images/default.png')}catch(_){this.src=(this.getAttribute('data-assal-fallback-src')||'images/default.png')}" alt="Item Image">` +
         `
                     ` +
         "<h4>" +
@@ -31944,8 +32338,11 @@ function displayResults(results) {
             `;
     });
 
-    resultsContainer.innerHTML = htmlContent;
   }
+
+  // Single DOM commit: keep the previous frame intact while the HTML string is built,
+  // then swap once. This avoids an extra clear/layout/paint cycle.
+  resultsContainer.innerHTML = htmlContent;
 
   requestAnimationFrame(() => {
     resultsContainer.style.display = "flex";
@@ -31954,6 +32351,11 @@ function displayResults(results) {
       block: "start",
     });
     toggleScrollToTopButton();
+
+    // Release the background gradient only after the result DOM has reached the compositor.
+    requestAnimationFrame(() => {
+      perfRoot.classList.remove("assal-results-rendering");
+    });
   });
 }
 
@@ -31986,6 +32388,9 @@ async function loadCompatibilitiesFile(options = {}) {
     if (!response.ok) throw new Error("تعذر تحميل ملف التوافقات.");
 
     const arrayBuffer = await response.arrayBuffer();
+    if (typeof window.__ASSAL_ENSURE_XLSX__ === "function")
+      await window.__ASSAL_ENSURE_XLSX__();
+    if (!window.XLSX) throw new Error("تعذر تحميل مكتبة XLSX");
     const workbook = XLSX.read(arrayBuffer, { type: "array" });
 
     const preferredSheet =
@@ -32389,10 +32794,16 @@ function bestTokenMatchScore(qTok, itemTokens) {
     // ====== نهاية تعديل الموديلات ======
 
     // فزي خفيف للأخطاء الإملائية
-    const r = levenshteinRatio(t, qTok);
+    // Performance-safe prune: Levenshtein distance can never be smaller than the
+    // length difference. If even that theoretical best cannot reach the same
+    // threshold used below, skip the expensive DP matrix without changing results.
+    const requiredRatio = qTok.length <= 4 ? 0.82 : 0.75;
+    const maxLen = Math.max(t.length, qTok.length, 1);
+    const theoreticalBest = 1 - Math.abs(t.length - qTok.length) / maxLen;
+    if (theoreticalBest < requiredRatio) continue;
 
-    const ok =
-      (qTok.length <= 4 && r >= 0.82) || (qTok.length > 4 && r >= 0.75);
+    const r = levenshteinRatio(t, qTok);
+    const ok = r >= requiredRatio;
 
     if (ok) best = Math.max(best, r * 0.95);
   }
@@ -32400,23 +32811,140 @@ function bestTokenMatchScore(qTok, itemTokens) {
   return best;
 }
 
-function smartScore(itemName, userQuery) {
+const assalSmartItemMetaCache = new Map();
+function assalGetSmartItemMeta(itemName) {
+  const key = String(itemName || "");
+  let cached = assalSmartItemMetaCache.get(key);
+  if (cached) return cached;
+
+  const tokens = tokenizeSmart(key);
+  const tokens2 = tokens.slice();
+  for (let i = 0; i < tokens.length - 1; i++) {
+    const a = tokens[i];
+    const b = tokens[i + 1];
+    if (/^[a-z]{2,}$/i.test(a) && /^\d{1,4}$/.test(b)) tokens2.push(a + b);
+    if (/^\d{1,4}$/.test(a) && /^[a-z]{1,2}$/i.test(b)) tokens2.push(a + b);
+  }
+
+  const parenIndex = key.indexOf("(");
+  cached = {
+    itemNorm: normalizeForSmartSearch(key),
+    tokens,
+    tokens2,
+    tokenCount: tokens.length,
+    parenIndex,
+    parenBaseTokens:
+      parenIndex === -1 ? null : tokenizeSmart(key.slice(0, parenIndex).trim()),
+  };
+
+  if (assalSmartItemMetaCache.size > 18000) assalSmartItemMetaCache.clear();
+  assalSmartItemMetaCache.set(key, cached);
+  return cached;
+}
+
+window.__ASSAL_CLEAR_SEARCH_META_CACHE__ = function () {
+  assalSmartItemMetaCache.clear();
+  try { assalScheduleSmartMetaWarmup(); } catch (_) {}
+};
+
+/* Query parsing used to run once per item. Cache it once per distinct query instead. */
+const assalSmartQueryMetaCache = new Map();
+function assalPrepareSmartQuery(userQuery) {
+  const raw = String(userQuery || "");
+  let cached = assalSmartQueryMetaCache.get(raw);
+  if (cached) return cached;
+
+  const parenIndex = raw.indexOf("(");
+  const base = parenIndex === -1 ? "" : raw.slice(0, parenIndex).trim();
+  cached = {
+    raw,
+    parenIndex,
+    base,
+    baseTokens: parenIndex === -1 || !base ? [] : tokenizeSmart(base),
+    tokens: tokenizeSmart(raw),
+    norm: normalizeForSmartSearch(raw),
+  };
+
+  if (assalSmartQueryMetaCache.size > 128) assalSmartQueryMetaCache.clear();
+  assalSmartQueryMetaCache.set(raw, cached);
+  return cached;
+}
+
+/* Warm item metadata only while the browser is idle. This changes no result logic;
+   it only moves normalization/tokenization away from the first search tap. */
+let assalSmartMetaWarmupSerial = 0;
+function assalScheduleSmartMetaWarmup() {
+  const serial = ++assalSmartMetaWarmupSerial;
+  const start = () => {
+    if (serial !== assalSmartMetaWarmupSerial) return;
+    if (document.hidden) {
+      setTimeout(start, 700);
+      return;
+    }
+
+    const names = [];
+    const seen = new Set();
+    try {
+      Object.values(database || {}).forEach((rows) => {
+        if (!Array.isArray(rows)) return;
+        for (const item of rows) {
+          const name = item && (item["Item Name"] || item["Item"]);
+          if (!name) continue;
+          const key = String(name);
+          if (seen.has(key)) continue;
+          seen.add(key);
+          names.push(key);
+        }
+      });
+    } catch (_) {
+      return;
+    }
+
+    let index = 0;
+    const schedule = () => {
+      if (serial !== assalSmartMetaWarmupSerial || index >= names.length) return;
+      if (window.requestIdleCallback) {
+        requestIdleCallback(work, { timeout: 1400 });
+      } else {
+        setTimeout(() => work(null), 32);
+      }
+    };
+    const work = (deadline) => {
+      if (serial !== assalSmartMetaWarmupSerial) return;
+      if (document.hidden) {
+        setTimeout(schedule, 700);
+        return;
+      }
+      let count = 0;
+      while (index < names.length && count < 80) {
+        if (deadline && !deadline.didTimeout && deadline.timeRemaining() < 3) break;
+        assalGetSmartItemMeta(names[index++]);
+        count++;
+      }
+      schedule();
+    };
+    schedule();
+  };
+
+  setTimeout(start, 900);
+}
+
+function smartScore(itemName, userQuery, preparedItemMeta, preparedQueryMeta) {
   // ====== إضافة وضع القوس "(" (نسخة محسّنة) ======
   // يطابق آخر كلمات قبل القوس حتى "xs (" يجيب "iphone xs (" وما يجيب "xs max ("
-  const uq = String(userQuery || "");
-  const uParen = uq.indexOf("(");
+  const queryMeta = preparedQueryMeta || assalPrepareSmartQuery(userQuery);
+  const uq = queryMeta.raw;
+  const uParen = queryMeta.parenIndex;
   if (uParen !== -1) {
-    const base = uq.slice(0, uParen).trim();
+    const base = queryMeta.base;
     if (!base) return 0;
 
-    const iname = String(itemName || "");
-    const iParen = iname.indexOf("(");
+    const meta = preparedItemMeta || assalGetSmartItemMeta(itemName);
+    const iParen = meta.parenIndex;
     if (iParen === -1) return 0;
 
-    const itemBase = iname.slice(0, iParen).trim();
-
-    const baseTokens = tokenizeSmart(base);
-    const itemBaseTokens = tokenizeSmart(itemBase);
+    const baseTokens = queryMeta.baseTokens;
+    const itemBaseTokens = meta.parenBaseTokens || [];
 
     if (baseTokens.length === 0 || itemBaseTokens.length === 0) return 0;
     if (baseTokens.length > itemBaseTokens.length) return 0;
@@ -32431,35 +32959,20 @@ function smartScore(itemName, userQuery) {
   }
   // ====== نهاية إضافة القوس ======
 
-  const qTokens = tokenizeSmart(userQuery);
-  const iTokens = tokenizeSmart(itemName);
+  const qTokens = queryMeta.tokens;
+  const meta = preparedItemMeta || assalGetSmartItemMeta(itemName);
+  const iTokens = meta.tokens;
 
   if (qTokens.length === 0 || iTokens.length === 0) return 0;
 
-  const itemNorm = normalizeForSmartSearch(itemName);
-  const queryNorm = normalizeForSmartSearch(userQuery);
+  const itemNorm = meta.itemNorm;
+  const queryNorm = queryMeta.norm;
 
   // إذا الجملة كاملة موجودة داخل الايتم (أفضل شي)
   if (itemNorm.includes(queryNorm)) return 1;
 
-  // ====== التعديل هنا فقط ======
-  // نضيف توكنات مركبة حتى note 10 يصير note10
-  const iTokens2 = iTokens.slice();
-  for (let i = 0; i < iTokens.length - 1; i++) {
-    const a = iTokens[i];
-    const b = iTokens[i + 1];
-
-    // حرف+أرقام (note + 10 => note10)
-    if (/^[a-z]{2,}$/i.test(a) && /^\d{1,4}$/.test(b)) {
-      iTokens2.push(a + b);
-    }
-
-    // أرقام+حروف قصيرة (4 + g => 4g) إذا انقسمت
-    if (/^\d{1,4}$/.test(a) && /^[a-z]{1,2}$/i.test(b)) {
-      iTokens2.push(a + b);
-    }
-  }
-  // ====== نهاية التعديل ======
+  // نفس التوكنات المركبة القديمة، لكن محسوبة مرة واحدة لكل اسم عنصر.
+  const iTokens2 = meta.tokens2;
 
   // احسب لكل توكن بالبحث شكد يطابق
   const scores = qTokens.map((qt) => bestTokenMatchScore(qt, iTokens2));
@@ -32627,7 +33140,8 @@ function searchItems() {
       typeof smartScore === "function" &&
       typeof tokenizeSmart === "function"
     ) {
-      const qTokens = tokenizeSmart(searchInput);
+      const smartQueryMeta = assalPrepareSmartQuery(searchInput);
+      const qTokens = smartQueryMeta.tokens;
       const strictAnd = qTokens.length >= 2; // إذا كلمتين+ لازم كلهم ينطابقون
 
       results = items
@@ -32638,8 +33152,9 @@ function searchItems() {
             return null;
           }
 
-          const score = smartScore(itemName, searchInput);
-          return { item, itemName, score };
+          const itemMeta = assalGetSmartItemMeta(itemName);
+          const score = smartScore(itemName, searchInput, itemMeta, smartQueryMeta);
+          return { item, itemName, score, tokenCount: itemMeta.tokenCount };
         })
         .filter((x) => {
           if (!x) return false;
@@ -32654,8 +33169,8 @@ function searchItems() {
           if (d !== 0) return d;
 
           // 2) إذا السكور متساوي: الأقصر/الأقل كلمات أولاً (يفضّل HOT 50 4G على HOT 50 PRO PLUS 4G)
-          const aTok = tokenizeSmart(a.itemName).length;
-          const bTok = tokenizeSmart(b.itemName).length;
+          const aTok = a.tokenCount;
+          const bTok = b.tokenCount;
           if (aTok !== bTok) return aTok - bTok;
 
           // 3) إذا بعده تعادل: الأقصر بالحروف أولاً
@@ -32692,15 +33207,12 @@ function searchItems() {
   // للأدمن فقط في BATTERY: إذا تطابق أي عنصر، اعرض مجموعته كاملة ببطاقة واحدة.
   results = assalExpandAdminBatteryResults(results, items);
 
-  if (results.length === 0) {
-    console.log(
-      `لا توجد نتائج مطابقة في فئة ${currentCategory} للبحث: ${query}`,
-    );
-  } else {
-    console.log(
-      `تم العثور على ${results.length} نتيجة في فئة ${currentCategory}:`,
-      results,
-    );
+  if (window.__ASSAL_PRODUCTION_DEBUG__ === true) {
+    if (results.length === 0) {
+      console.log(`لا توجد نتائج مطابقة في فئة ${currentCategory} للبحث: ${query}`);
+    } else {
+      console.log(`تم العثور على ${results.length} نتيجة في فئة ${currentCategory}`);
+    }
   }
 
   displayResults(results);
@@ -33183,8 +33695,16 @@ document
   .getElementById("scrollToTopBtn")
   .addEventListener("click", scrollToTop);
 
-// الاستماع لحدث التمرير
-window.addEventListener("scroll", toggleScrollToTopButton);
+// الاستماع لحدث التمرير - مرة واحدة كحد أقصى لكل Frame
+let assalScrollTopButtonFrame = 0;
+function scheduleToggleScrollToTopButton() {
+  if (assalScrollTopButtonFrame) return;
+  assalScrollTopButtonFrame = requestAnimationFrame(() => {
+    assalScrollTopButtonFrame = 0;
+    toggleScrollToTopButton();
+  });
+}
+window.addEventListener("scroll", scheduleToggleScrollToTopButton, { passive: true });
 
 // تحديث حالة الزر عند التحميل الأولي
 document.addEventListener("DOMContentLoaded", toggleScrollToTopButton);
@@ -33381,9 +33901,8 @@ async function refreshData() {
   });
 }
 
-if (!window.__ASSAL_LOW_END_DEVICE__) {
-  loadExcelFiles();
-}
+// Startup data loading is owned exclusively by runAssalBootDataLoad().
+// This prevents a second XLSX download/parse racing the same boot.
 
 let newsInterval = null;
 let assalAdminCompatFeedItems = [];
@@ -36621,7 +37140,7 @@ function closeContactModal() {
 const AD_CHOICE = "simi_subscription_cta"; // الإعلان الجديد مع زر الاشتراك؛ الصورة فقط: "simi_subscription"؛ الإيقاف: "off"
 
 // خيارات اضافية (اختياري)
-const AD_DELAY_MS = 120; // تأخير أخف حتى يظهر الإعلان أسرع بدون ما يزعج
+const AD_DELAY_MS = 45; // بعد جاهزية بوابة التحديث: ظهور شبه فوري بدون قفزة بصرية
 const AD_SHOW_ONCE_PER_SESSION = false; // هذا الإعلان يطلع بكل مرة يفتح التطبيق
 
 const LuxAds = (() => {
@@ -36631,6 +37150,7 @@ const LuxAds = (() => {
   const shell = () => document.querySelector("#adModal .ad-shell");
   let duaTimer = null;
   let adCloseInProgress = false;
+  let preparedAdKey = "";
 
   function bindPress(el, handler) {
     if (!el || el.dataset.pressBound === "1") return;
@@ -36702,6 +37222,9 @@ const LuxAds = (() => {
     if (!o || !m) return;
 
     adCloseInProgress = false;
+    o.style.pointerEvents = "";
+    m.style.pointerEvents = "";
+    o.style.transition = "";
 
     // ابدأ بحالة مخفية حتى ما يطلع فلاش
     o.style.opacity = "0";
@@ -36765,35 +37288,80 @@ const LuxAds = (() => {
 
     safeClearTimers();
     const o = overlay(),
-      m = modal();
+      m = modal(),
+      s = shell();
     if (!o || !m) {
       adCloseInProgress = false;
       return;
     }
 
-    // GSAP exit
-    try {
-      if (window.gsap) {
-        gsap.to(shell(), {
-          y: 10,
-          opacity: 0,
-          scale: 0.985,
-          duration: 0.28,
-          ease: "power2.in",
-        });
-      }
-    } catch (e) {}
+    // أول فريم بعد الضغط لازم يحس المستخدم بالاستجابة فوراً.
+    // نوقف أي لمس إضافي ونخلي طبقة الـ overlay الواحدة فقط تتلاشى بسرعة.
+    m.style.pointerEvents = "none";
+    o.style.pointerEvents = "none";
+    o.style.transition = "opacity .16s ease-out";
 
-    o.style.opacity = "0";
-    setTimeout(() => {
+    let finished = false;
+    let fallbackTimer = 0;
+    const finishClose = () => {
+      if (finished) return;
+      finished = true;
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+
+      o.style.opacity = "0";
       o.style.display = "none";
       m.style.display = "none";
-      if (shell()) shell().style.opacity = "";
+      o.style.transition = "";
+      o.style.pointerEvents = "";
+      m.style.pointerEvents = "";
+
+      if (s) {
+        s.style.opacity = "";
+        s.style.transform = "";
+        s.style.transition = "";
+        s.style.willChange = "";
+      }
+
       try {
         if (typeof syncGlobalModalLock === "function") syncGlobalModalLock();
       } catch (e) {}
       adCloseInProgress = false;
-    }, 260);
+    };
+
+    // إخفاء الخلفية يبدأ فور الضغط، بدون انتظار مؤقت أعمى.
+    o.style.opacity = "0";
+
+    try {
+      if (window.gsap && s) {
+        // إذا المستخدم أغلق أثناء أنيميشن الفتح، أوقفه أولاً حتى ما يتصارع ويا الإغلاق.
+        try { gsap.killTweensOf(s); } catch (_) {}
+        gsap.to(s, {
+          y: 6,
+          opacity: 0,
+          scale: 0.992,
+          duration: 0.16,
+          ease: "power2.out",
+          overwrite: true,
+          onComplete: finishClose,
+        });
+        fallbackTimer = setTimeout(finishClose, 230);
+        return;
+      }
+    } catch (e) {}
+
+    // Fallback خفيف إذا GSAP غير متوفر: نفس الإحساس وبدون تأخير محسوس.
+    if (s) {
+      s.style.transition =
+        "transform .16s cubic-bezier(.16,1,.3,1), opacity .14s linear";
+      requestAnimationFrame(() => {
+        s.style.opacity = "0";
+        s.style.transform = "translateY(6px) scale(.992)";
+      });
+      s.addEventListener("transitionend", finishClose, { once: true });
+      fallbackTimer = setTimeout(finishClose, 210);
+    } else {
+      fallbackTimer = setTimeout(finishClose, 165);
+    }
   }
 
   function bindClose() {
@@ -37925,6 +38493,9 @@ const LuxAds = (() => {
     image.alt = "اشتراك خدمة توافقات عسل";
     image.loading = "eager";
     image.decoding = "async";
+    try {
+      image.fetchPriority = "high";
+    } catch (_) {}
     image.draggable = false;
 
     image.addEventListener(
@@ -37941,6 +38512,13 @@ const LuxAds = (() => {
     );
 
     image.src = "images/simi2.png";
+    try {
+      if (typeof image.decode === "function") {
+        image.decode().then(() => {
+          image.dataset.assalDecoded = "1";
+        }).catch(() => {});
+      }
+    } catch (_) {}
 
     // زر الاشتراك يستخدم مسار واتساب الحالي ورسالة الاشتراك المعتمدة.
     const actions = document.createElement("div");
@@ -37969,20 +38547,14 @@ const LuxAds = (() => {
     body.appendChild(actions);
   }
 
-  function showByKey(keyRaw) {
+  function prepareByKey(keyRaw) {
+    const key = normalize(keyRaw);
+    if (!key || key === "off") return false;
+    if (preparedAdKey === key) return true;
+
     bindClose();
     safeClearTimers();
 
-    const key = normalize(keyRaw);
-    if (!key || key === "off") return;
-
-    // once per session
-    if (AD_SHOW_ONCE_PER_SESSION) {
-      if (sessionStorage.getItem(shownKey(key)) === "true") return;
-      sessionStorage.setItem(shownKey(key), "true");
-    }
-
-    // render
     if (key === "barca_supercup") renderBarca();
     else if (key === "ramadan_greeting") renderRamadan();
     else if (key === "ramadan_dua") renderDua();
@@ -37993,8 +38565,24 @@ const LuxAds = (() => {
     else if (key === "instant_inquiry_feature") renderInstantInquiryFeature();
     else if (key === "simi_subscription") renderSimiSubscriptionAd();
     else if (key === "simi_subscription_cta") renderSimiSubscriptionCtaAd();
-    else return;
+    else return false;
 
+    preparedAdKey = key;
+    return true;
+  }
+
+  function showByKey(keyRaw) {
+    const key = normalize(keyRaw);
+    if (!key || key === "off") return;
+
+    // once per session
+    if (AD_SHOW_ONCE_PER_SESSION) {
+      if (sessionStorage.getItem(shownKey(key)) === "true") return;
+      sessionStorage.setItem(shownKey(key), "true");
+    }
+
+    // الإعلان يُجهز وهو مخفي من وقت الإقلاع؛ هنا نعرضه فقط.
+    if (!prepareByKey(key)) return;
     fadeIn();
   }
 
@@ -38046,7 +38634,7 @@ const LuxAds = (() => {
       }
 
       startupAdShown = true;
-      setTimeout(() => showByKey(key), Math.max(AD_DELAY_MS, 120));
+      setTimeout(() => showByKey(key), Math.max(AD_DELAY_MS, 30));
     };
 
     if (document.readyState === "loading") {
@@ -38058,8 +38646,24 @@ const LuxAds = (() => {
     }
   }
 
-  return { maybeShow, showByKey, close };
+  function prepareStartupChoice() {
+    try {
+      return prepareByKey(AD_CHOICE);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  return { maybeShow, showByKey, close, prepare: prepareStartupChoice };
 })();
+
+/*
+  جهّز جسم الإعلان وصورته من الآن وهو مخفي.
+  بهذا تحميل/decode الصورة المحلية يبدأ أثناء بقية Startup بدل لحظة إظهار النافذة.
+*/
+try {
+  LuxAds.prepare();
+} catch (_) {}
 
 // محاولة عرض إعلان بدء التشغيل
 function tryShowStartupAds(attempt = 0) {
@@ -38083,12 +38687,16 @@ function tryShowStartupAds(attempt = 0) {
 
 document.addEventListener("DOMContentLoaded", () => {
   if (window.__ASSAL_LOW_END_DEVICE__) return;
-  setTimeout(() => tryShowStartupAds(0), 120);
+  try {
+    LuxAds.prepare();
+  } catch (_) {}
+  setTimeout(() => tryShowStartupAds(0), 0);
 });
 
+/* load يبقى fallback فقط إذا DOMContentLoaded انشغل بشي ثقيل؛ maybeShow يمنع التكرار. */
 window.addEventListener("load", () => {
   if (window.__ASSAL_LOW_END_DEVICE__) return;
-  setTimeout(() => tryShowStartupAds(0), 80);
+  setTimeout(() => tryShowStartupAds(0), 0);
 });
 
 document.addEventListener("visibilitychange", () => {
@@ -42319,7 +42927,12 @@ html.low-end-device .update-success-shell{
       "https://raw.githubusercontent.com/AhMeD202444/assal-price-updates/main/version.json",
     fallbackCurrentVersionName: "1.3",
     fallbackCurrentVersionCode: 4,
-    checkDelayMs: 1400,
+    /*
+      فحص التحديث يبدأ فوراً. بوابة إعلان Startup تنتظر مدة قصيرة فقط؛
+      إذا الشبكة أبطأ يكمل الفحص بالخلفية ولا يعلّق الإعلان لعدة ثوانٍ.
+    */
+    checkDelayMs: 0,
+    startupAdGateMs: 700,
     githubApkDirectUrl:
       "https://github.com/AhMeD202444/assal-price-updates/releases/download/v1.3/app-release.apk",
     acceptedVersionKeys: ["appv", "appVersion", "version"],
@@ -42327,6 +42940,9 @@ html.low-end-device .update-success-shell{
 
   window.__ASSAL_FORCE_UPDATE_PENDING__ = true;
   window.__ASSAL_FORCE_UPDATE_ACTIVE__ = false;
+
+  let updateCheckStarted = false;
+  let startupAdGateTimer = null;
 
   let updateState = {
     remote: null,
@@ -43372,7 +43988,21 @@ html.low-end-device .update-success-shell{
   }
 
   async function runForceUpdateCheck() {
+    if (updateCheckStarted) return;
+    updateCheckStarted = true;
     window.__ASSAL_FORCE_UPDATE_PENDING__ = true;
+
+    /*
+      لا نقطع fetch بعد انتهاء البوابة؛ نحرر الإعلان فقط.
+      إذا وصل لاحقاً تحديث إجباري حقيقي، يرجع Pending=true ثم يغلق الإعلان ويعرض التحديث.
+    */
+    clearTimeout(startupAdGateTimer);
+    startupAdGateTimer = setTimeout(() => {
+      if (!window.__ASSAL_FORCE_UPDATE_ACTIVE__) {
+        window.__ASSAL_FORCE_UPDATE_PENDING__ = false;
+      }
+    }, Math.max(300, Number(APP_UPDATE_CONFIG.startupAdGateMs) || 700));
+
     try {
       if (!isAndroidLikeEnvironment()) return;
       const current = getCurrentAppVersion();
@@ -43384,12 +44014,17 @@ html.low-end-device .update-success-shell{
         remoteVersion: remote?.versionName,
       });
       if (needsUpdate(current, remote)) {
+        clearTimeout(startupAdGateTimer);
+        startupAdGateTimer = null;
+        window.__ASSAL_FORCE_UPDATE_PENDING__ = true;
         await showForceUpdateModal(remote, current);
         return;
       }
     } catch (err) {
       console.error("Force update check failed:", err);
     } finally {
+      clearTimeout(startupAdGateTimer);
+      startupAdGateTimer = null;
       if (!window.__ASSAL_FORCE_UPDATE_ACTIVE__) {
         window.__ASSAL_FORCE_UPDATE_PENDING__ = false;
       }
@@ -45356,6 +45991,9 @@ ${actionText} ${safeBranch}`;
     alert([modeTitle, sourceText(source), hintText].join("\n"));
   };
 
+  /* ابدأ فحص التحديث الآن بدل انتظار window.load + 1.4s. */
+  setTimeout(runForceUpdateCheck, Math.max(0, Number(APP_UPDATE_CONFIG.checkDelayMs) || 0));
+
   window.addEventListener("load", () => {
     try {
       window.updatePerfDebugButtonState();
@@ -45364,7 +46002,6 @@ ${actionText} ${safeBranch}`;
       if (typeof window.__ASSAL_APPLY_NEWS_BAR_STATE__ === "function")
         window.__ASSAL_APPLY_NEWS_BAR_STATE__();
     } catch (_) {}
-    setTimeout(runForceUpdateCheck, APP_UPDATE_CONFIG.checkDelayMs);
   });
 })();
 </script>
@@ -45962,7 +46599,18 @@ ${actionText} ${safeBranch}`;
 
   window.addEventListener("load", scheduleUpgrade);
 
-  const observer = new MutationObserver(() => scheduleUpgrade());
+  const SUPPORT_CARD_SELECTOR =
+    ".request-thread-card, .request-admin-card, .invoice-sent-card, .invoice-admin-card-shell";
+  const observer = new MutationObserver((mutations) => {
+    const relevant = mutations.some((mutation) =>
+      Array.from(mutation.addedNodes || []).some((node) =>
+        node && node.nodeType === 1 &&
+        ((node.matches && node.matches(SUPPORT_CARD_SELECTOR)) ||
+         (node.querySelector && node.querySelector(SUPPORT_CARD_SELECTOR))),
+      ),
+    );
+    if (relevant) scheduleUpgrade();
+  });
   observer.observe(document.documentElement, {
     childList: true,
     subtree: true,
@@ -45971,7 +46619,6 @@ ${actionText} ${safeBranch}`;
 </script>
 
 <style id="assal-cairo-and-branch-footer-upgrade">
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
 html, body, button, input, textarea, select,
 .support-card-toggle, .support-card-body, .request-message, .request-message *,
 .invoice-messages, .invoice-messages *, .availability-message-body,
@@ -46131,7 +46778,18 @@ html, body, button, input, textarea, select,
   }
 
   window.addEventListener("load", scheduleBranchFooters);
-  const branchObserver = new MutationObserver(scheduleBranchFooters);
+  const branchObserver = new MutationObserver(function (mutations) {
+    const relevant = mutations.some(function (mutation) {
+      return Array.from(mutation.addedNodes || []).some(function (node) {
+        return !!(
+          node && node.nodeType === 1 &&
+          ((node.matches && node.matches(".request-message.admin")) ||
+            (node.querySelector && node.querySelector(".request-message.admin")))
+        );
+      });
+    });
+    if (relevant) scheduleBranchFooters();
+  });
   branchObserver.observe(document.documentElement, {
     childList: true,
     subtree: true,
@@ -46368,14 +47026,51 @@ html, body, button, input, textarea, select,
   window.addEventListener("load", function () {
     scheduleApply(document);
   });
-  const observer = new MutationObserver(function () {
+  const observedToneCards = new WeakSet();
+  const cardAttributeObserver = new MutationObserver(function () {
     scheduleApply(document);
+  });
+
+  function observeToneCards(root) {
+    const cards = [];
+    if (root && root.matches && root.matches(CARD_SELECTOR)) cards.push(root);
+    if (root && root.querySelectorAll)
+      root.querySelectorAll(CARD_SELECTOR).forEach(function (card) { cards.push(card); });
+    cards.forEach(function (card) {
+      if (observedToneCards.has(card)) return;
+      observedToneCards.add(card);
+      cardAttributeObserver.observe(card, {
+        attributes: true,
+        attributeFilter: ["class", "style"],
+      });
+    });
+  }
+
+  observeToneCards(document);
+  const observer = new MutationObserver(function (mutations) {
+    let relevant = false;
+    mutations.forEach(function (mutation) {
+      mutation.addedNodes.forEach(function (node) {
+        if (!node || node.nodeType !== 1) return;
+        observeToneCards(node);
+        if (
+          (node.matches && node.matches(CARD_SELECTOR)) ||
+          (node.querySelector && node.querySelector(CARD_SELECTOR))
+        ) relevant = true;
+      });
+      mutation.removedNodes.forEach(function (node) {
+        if (
+          node && node.nodeType === 1 &&
+          ((node.matches && node.matches(CARD_SELECTOR)) ||
+            (node.querySelector && node.querySelector(CARD_SELECTOR)))
+        ) relevant = true;
+      });
+    });
+    if (relevant) scheduleApply(document);
   });
   observer.observe(document.documentElement, {
     childList: true,
     subtree: true,
-    attributes: true,
-    attributeFilter: ["class", "style"],
   });
 })();
 </script>
@@ -55996,6 +56691,7 @@ html.low-end-device .assal-private-clean-dialog *{
     let slot = null;
     let veil = null;
     let shell = null;
+    let touchBlocker = null;
     let compactRail = null;
     let compactTrack = null;
 
@@ -56007,6 +56703,7 @@ html.low-end-device .assal-private-clean-dialog *{
     let flightSerial = 0;
     let flightActive = false;
     let pendingViewportLayout = false;
+    let blurPrewarmStarted = false;
 
     let railPointerActive = false;
     let railPointerId = null;
@@ -56073,6 +56770,29 @@ html.low-end-device .assal-private-clean-dialog *{
     }
 
     function ensurePersistentLayers() {
+      if (!touchBlocker || !touchBlocker.isConnected) {
+        touchBlocker = document.createElement("div");
+        touchBlocker.className = "assal-search-dock-touch-blocker";
+        touchBlocker.setAttribute("aria-hidden", "true");
+
+        const swallowOutsideTouch = (event) => {
+          try {
+            event.preventDefault();
+            event.stopPropagation();
+            if (typeof event.stopImmediatePropagation === "function")
+              event.stopImmediatePropagation();
+          } catch (_) {}
+        };
+
+        touchBlocker.addEventListener("pointerdown", swallowOutsideTouch, { passive: false });
+        touchBlocker.addEventListener("pointerup", swallowOutsideTouch, { passive: false });
+        touchBlocker.addEventListener("touchstart", swallowOutsideTouch, { passive: false });
+        touchBlocker.addEventListener("touchmove", swallowOutsideTouch, { passive: false });
+        touchBlocker.addEventListener("click", swallowOutsideTouch, { passive: false });
+        touchBlocker.addEventListener("wheel", swallowOutsideTouch, { passive: false });
+        document.body.appendChild(touchBlocker);
+      }
+
       if (!veil || !veil.isConnected) {
         veil = document.createElement("div");
         veil.className = "assal-search-dock-veil";
@@ -56086,6 +56806,35 @@ html.low-end-device .assal-private-clean-dialog *{
         shell.setAttribute("aria-hidden", "true");
         document.body.appendChild(shell);
       }
+    }
+
+    function prewarmSearchBlurLayer() {
+      if (
+        blurPrewarmStarted ||
+        window.__ASSAL_LOW_END_DEVICE__ ||
+        !veil ||
+        !veil.isConnected
+      )
+        return;
+
+      blurPrewarmStarted = true;
+      try {
+        veil.style.top = Math.floor(getHeaderBottom()) + "px";
+        veil.classList.add("assal-search-blur-prewarm");
+
+        /*
+          فريمان فقط بعتامة شبه صفرية: يجبران WebView على تجهيز طبقة الـbackdrop
+          قبل أول لمس من المستخدم، من دون Blur دائم أو Animation مستمرة بالخلفية.
+        */
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            try {
+              veil.classList.remove("assal-search-blur-prewarm");
+              window.__ASSAL_SEARCH_BLUR_PREWARMED__ = true;
+            } catch (_) {}
+          });
+        });
+      } catch (_) {}
     }
 
     function createSlot(rect) {
@@ -56407,6 +57156,7 @@ html.low-end-device .assal-private-clean-dialog *{
         هكذا أول فريم للحركة يكون فوق خلفية زجاجية ثابتة أصلاً، بدون fade أو flash.
       */
       document.body.classList.add("assal-search-dock-body");
+      if (touchBlocker) touchBlocker.classList.add("is-active");
       if (veil) {
         veil.style.top = Math.floor(getHeaderBottom()) + "px";
         veil.classList.add("is-visible");
@@ -56500,6 +57250,7 @@ html.low-end-device .assal-private-clean-dialog *{
 
     function finalizeClose() {
       clearTimeout(returnTimer);
+      returnTimer = null;
       clearTimeout(landingTimer);
       landingTimer = null;
       ++flightSerial;
@@ -56507,8 +57258,9 @@ html.low-end-device .assal-private-clean-dialog *{
       pendingViewportLayout = false;
 
       /*
-        نخلي transitions الداخلية متوقفة أثناء إعادة الشكل الطبيعي أيضاً،
-        حتى ما يظهر فلاش عكسي بعد رجوع الشريط إلى مكانه.
+        RETURN FIRST -> BLUR LATER
+        نرجع العنصر من fixed إلى مكانه الطبيعي بينما الكيبورد والـVisualViewport
+        بعدهما ثابتين. بهذا ما يصير تنازع بين حركة الشريط وحركة نزول الكيبورد.
       */
       dock.classList.add("assal-search-flight");
       dock.classList.remove("assal-search-dock");
@@ -56538,7 +57290,7 @@ html.low-end-device .assal-private-clean-dialog *{
 
       /*
         نعيد تركيب الصفحة الأصلية والخلفية ما زالت محجوبة بالـveil الثابت.
-        بعدها نكشفها في الفريم التالي فقط.
+        لا نعمل blur للحقل هنا؛ ننتظر أول paint للشريط بمكانه الطبيعي.
       */
       setContainerSearchMode(false);
       void dock.offsetWidth;
@@ -56553,8 +57305,19 @@ html.low-end-device .assal-private-clean-dialog *{
       requestAnimationFrame(() => {
         dock.classList.remove("assal-search-flight");
         if (veil) veil.classList.remove("is-visible");
+        if (touchBlocker) touchBlocker.classList.remove("is-active");
         document.body.classList.remove("assal-search-dock-body");
         state = IDLE;
+
+        /*
+          نعطي WebView فريم إضافي يثبت الشريط الطبيعي أولاً، وبعدها فقط
+          ننزل الكيبورد. هذا يفصل تماماً حركة الرجوع عن تغيير الـVisualViewport.
+        */
+        requestAnimationFrame(() => {
+          try {
+            if (document.activeElement === input) input.blur();
+          } catch (_) {}
+        });
       });
     }
 
@@ -56565,17 +57328,20 @@ html.low-end-device .assal-private-clean-dialog *{
       clearTimeout(viewportTimer);
       clearTimeout(landingTimer);
       landingTimer = null;
-      ++flightSerial;
+      clearTimeout(returnTimer);
+      returnTimer = null;
+      const thisClose = ++flightSerial;
       flightActive = false;
       pendingViewportLayout = false;
 
-      try {
-        input.blur();
-      } catch (_) {}
+      /*
+        مهم: لا نعمل input.blur() هنا.
+        الكيبورد يبقى ثابت أثناء رجوع الشريط؛ blur يصير فقط بعد اكتمال الرجوع.
+      */
 
       /*
-        نخفي الطبقات الإضافية قبل الرجوع، لكن نبقي الخلفية المجمدة/الداكنة
-        إلى أن يعود الشريط وتستقر الصفحة الأصلية بالكامل.
+        نخفي الطبقات الإضافية قبل الرجوع، لكن نبقي الخلفية المجمدة والـBlur
+        ثابتين إلى أن يعود الشريط فعلياً إلى مكانه الطبيعي.
       */
       if (compactRail) compactRail.classList.remove("is-visible");
       if (shell) shell.classList.remove("is-visible");
@@ -56592,11 +57358,40 @@ html.low-end-device .assal-private-clean-dialog *{
 
       const dx = target.left - current.left;
       const dy = target.top - current.top;
+      let returnFinished = false;
 
-      dock.style.transition = "transform .245s cubic-bezier(.22,.82,.23,1)";
+      const finishReturn = () => {
+        if (returnFinished) return;
+        if (state !== CLOSING || thisClose !== flightSerial) return;
+        returnFinished = true;
+        clearTimeout(returnTimer);
+        returnTimer = null;
+        try {
+          dock.removeEventListener("transitionend", onReturnTransitionEnd);
+        } catch (_) {}
+        finalizeClose();
+      };
+
+      const onReturnTransitionEnd = (event) => {
+        if (
+          event &&
+          event.target === dock &&
+          event.propertyName === "transform"
+        ) {
+          finishReturn();
+        }
+      };
+
+      dock.addEventListener("transitionend", onReturnTransitionEnd);
+
+      /*
+        رجوع قصير وهادئ أقرب للـNative: بدون spring/bounce وبدون أي انتقالات داخلية.
+        transitionend هو الأساس، والـtimer مجرد حماية لحالات WebView النادرة.
+      */
+      dock.style.transition = "transform .195s cubic-bezier(.20,.75,.25,1)";
       dock.style.transform = `translate3d(${dx}px,${dy}px,0)`;
 
-      returnTimer = setTimeout(finalizeClose, 270);
+      returnTimer = setTimeout(finishReturn, 255);
     }
 
     function finishSearchSession() {
@@ -56706,6 +57501,22 @@ html.low-end-device .assal-private-clean-dialog *{
     input.addEventListener("blur", function () {}, true);
 
     if (searchButton) {
+      /*
+        منع زر البحث من أخذ الـfocus من الحقل قبل تنفيذ البحث.
+        منع default للـmousedown لا يمنع click، لكنه يمنع نقل التركيز للزر
+        في المتصفحات/WebView التي تفعل ذلك قبل click.
+      */
+      searchButton.addEventListener(
+        "mousedown",
+        function (e) {
+          if (state !== OPEN || document.activeElement !== input) return;
+          try {
+            e.preventDefault();
+          } catch (_) {}
+        },
+        true,
+      );
+
       searchButton.addEventListener(
         "click",
         function () {
@@ -56798,17 +57609,55 @@ html.low-end-device .assal-private-clean-dialog *{
     */
     ensurePersistentLayers();
     buildRail();
+    prewarmSearchBlurLayer();
   }
 
+  /*
+    جرّب Boot فوراً لأن عناصر البحث موجودة قبل هذا السكربت في الملف.
+    إذا كان المتصفح ما زال يبني DOM وما لقاها، DOMContentLoaded + fallback يعيدان المحاولة.
+  */
+  boot();
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot, {
       once: true,
     });
-  } else {
-    boot();
   }
 
   setTimeout(boot, 500);
+})();
+</script>
+
+<script id="assalStartupPerformanceMarkersFinal">
+// مؤشرات تشخيص خفيفة فقط؛ لا تغيّر الواجهة ولا تضيف Animation.
+(function(){
+  try {
+    window.__ASSAL_NATIVE_PERFORMANCE_FOUNDATION__ = {
+  version: "2026-10-07-native-interaction-engine-v2",
+  cacheFirstBoot: true,
+  singleExcelLoad: true,
+  lazyXlsx: true,
+  contentHashSkipParse: true,
+  scopedMutationObservers: true,
+  smartSearchMetadataCache: true,
+  lazyResultImages: true,
+  interactionGovernor: true,
+  nativeInteractionEngine: true,
+  queryMetaCache: true,
+  levenshteinSafePrune: true,
+  idleSearchMetaWarmup: true,
+  singleCommitResultRender: true,
+  offscreenResultPaintSkip: true,
+  rafScrollHandler: true,
+};
+
+window.__ASSAL_STARTUP_OPTIMIZATION__ = {
+      version: "2026-10-07-prewarm-fast-ad-lazy-pdf-v1",
+      lazyPdfLibraries: true,
+      searchBlurPrewarm: true,
+      forceUpdateStartsEarly: true,
+      startupAdGateMs: 700
+    };
+  } catch (_) {}
 })();
 </script>
 
