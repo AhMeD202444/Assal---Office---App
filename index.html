@@ -31299,6 +31299,12 @@ body.assal-card-preview-lock{
   visibility:visible;
   pointer-events:auto;
 }
+#assalResultPreviewModal.assal-preview-preparing{
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+  transition:none !important;
+}
 #assalResultPreviewModal .assal-preview-shell{
   width:min(94vw, 470px);
   max-height:min(86vh, 760px);
@@ -31529,7 +31535,7 @@ body.assal-card-preview-lock{
   });
 }
 
-function openAssalResultPreviewModal(payload) {
+async function openAssalResultPreviewModal(payload) {
   assalEnsureResultPreviewModal();
   const modal = document.getElementById("assalResultPreviewModal");
   if (!modal) return;
@@ -31539,6 +31545,13 @@ function openAssalResultPreviewModal(payload) {
   const deviceNameEl = modal.querySelector(".assal-preview-device-name");
   const categoryEl = modal.querySelector(".assal-preview-category-text");
   if (!imgEl) return;
+
+  // كل فتح جديد يلغي أي تجهيز سابق حتى لا تظهر صورة قديمة أو ومضة متأخرة.
+  const loadSeq = Number(modal.__assalPreviewLoadSeq || 0) + 1;
+  modal.__assalPreviewLoadSeq = loadSeq;
+  modal.classList.remove("show");
+  modal.classList.add("assal-preview-preparing");
+  modal.setAttribute("aria-hidden", "true");
 
   const imgSrc =
     assalSafeRemoteImageUrl(payload?.imgSrc || "") ||
@@ -31554,30 +31567,93 @@ function openAssalResultPreviewModal(payload) {
   if (categoryEl) categoryEl.textContent = categoryText;
 
   imgEl.classList.remove("assal-smart-cover");
-  imgEl.style.setProperty("--assal-phone-modal-zoom", isPhoneImage ? "1" : "1");
+  imgEl.style.visibility = "hidden";
+  imgEl.style.setProperty("--assal-phone-modal-zoom", "1");
   imgEl.style.setProperty("--assal-phone-modal-x", "0%");
   imgEl.style.setProperty("--assal-phone-modal-y", "0%");
-  imgEl.onload = function () {
-    try {
-      if (isPhoneImage) assalTunePhoneImageCrop(this, "modal");
-      if (window.assalCacheImageUrl) {
-        window.assalCacheImageUrl(this.currentSrc || this.src);
-      }
-    } catch (_) {}
-  };
-  imgEl.onerror = function () {
-    const next = this.getAttribute("data-assal-preview-fallback") || "images/default.png";
-    if (this.src === next || this.getAttribute("data-assal-fallback-used") === "1") {
-      this.onerror = null;
-      return;
-    }
-    this.setAttribute("data-assal-fallback-used", "1");
-    this.src = next;
-  };
   imgEl.removeAttribute("data-assal-fallback-used");
   imgEl.setAttribute("data-assal-preview-fallback", fallback);
   imgEl.alt = deviceName;
-  imgEl.src = imgSrc;
+
+  const waitUntilPrepared = () => new Promise((resolve) => {
+    let resolved = false;
+    let finishing = false;
+    let timer = null;
+
+    const finish = async () => {
+      if (resolved || finishing) return;
+      finishing = true;
+
+      try {
+        if (typeof imgEl.decode === "function") {
+          await imgEl.decode();
+        }
+      } catch (_) {}
+
+      if (resolved) return;
+
+      try {
+        if (isPhoneImage && imgEl.naturalWidth > 0 && imgEl.naturalHeight > 0) {
+          assalTunePhoneImageCrop(imgEl, "modal");
+        }
+        if (window.assalCacheImageUrl && imgEl.naturalWidth > 0) {
+          window.assalCacheImageUrl(imgEl.currentSrc || imgEl.src);
+        }
+      } catch (_) {}
+
+      resolved = true;
+      if (timer) clearTimeout(timer);
+      resolve();
+    };
+
+    imgEl.onload = finish;
+    imgEl.onerror = function () {
+      const next = this.getAttribute("data-assal-preview-fallback") || "images/default.png";
+      if (this.getAttribute("data-assal-fallback-used") === "1") {
+        this.onerror = null;
+        if (!resolved) {
+          resolved = true;
+          if (timer) clearTimeout(timer);
+          resolve();
+        }
+        return;
+      }
+      this.setAttribute("data-assal-fallback-used", "1");
+      finishing = false;
+      this.src = next;
+    };
+
+    imgEl.src = imgSrc;
+
+    // الصور الموجودة بالكاش قد تكون جاهزة قبل وصول حدث load.
+    if (imgEl.complete && imgEl.naturalWidth > 0) {
+      Promise.resolve().then(finish);
+    }
+
+    // حماية فقط: لا نترك النافذة معلقة إذا تعذر decode/load على جهاز معيّن.
+    timer = setTimeout(() => {
+      if (resolved) return;
+      try {
+        if (isPhoneImage && imgEl.naturalWidth > 0 && imgEl.naturalHeight > 0) {
+          assalTunePhoneImageCrop(imgEl, "modal");
+        }
+      } catch (_) {}
+      resolved = true;
+      resolve();
+    }, 1800);
+  });
+
+  await waitUntilPrepared();
+  if (modal.__assalPreviewLoadSeq !== loadSeq) return;
+
+  // أول Frame مرئي يكون بعد اكتمال الصورة والقص الذكي، لذلك لا تظهر الومضة.
+  imgEl.style.visibility = "visible";
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  if (modal.__assalPreviewLoadSeq !== loadSeq) return;
+
+  modal.classList.remove("assal-preview-preparing");
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  if (modal.__assalPreviewLoadSeq !== loadSeq) return;
 
   modal.classList.add("show");
   modal.setAttribute("aria-hidden", "false");
@@ -31588,7 +31664,9 @@ function openAssalResultPreviewModal(payload) {
 function closeAssalResultPreviewModal() {
   const modal = document.getElementById("assalResultPreviewModal");
   if (!modal) return;
+  modal.__assalPreviewLoadSeq = Number(modal.__assalPreviewLoadSeq || 0) + 1;
   modal.classList.remove("show");
+  modal.classList.remove("assal-preview-preparing");
   modal.setAttribute("aria-hidden", "true");
   document.documentElement.classList.remove("assal-card-preview-lock");
   document.body.classList.remove("assal-card-preview-lock");
