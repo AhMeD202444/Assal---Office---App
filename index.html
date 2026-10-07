@@ -14954,13 +14954,49 @@ html.assal-results-rendering body > .container {
   animation-play-state: paused !important;
 }
 
-/* Skip paint/layout work for result cards that are far outside the viewport.
-   content-visibility is ignored automatically on older WebViews, so this is progressive-only. */
-@supports (content-visibility: auto) {
-  #results .result-card {
-    content-visibility: auto;
-    contain-intrinsic-size: 320px;
-  }
+/* FAST-SCROLL STABILITY FINAL
+   Keep result cards paintable at all times. Some Android WebViews can checkerboard /
+   expose an unpainted surface during a fast fling when content-visibility:auto is used
+   on repeated result cards. We intentionally do NOT virtualize result-card painting. */
+#results .result-card {
+  content-visibility: visible !important;
+}
+
+/* Dark paint backstop only. It sits behind the existing animated gradient and does not
+   change the normal appearance; it prevents the WebView default light surface from
+   becoming visible for a transient compositor frame. */
+html {
+  background: #16222A !important;
+}
+body {
+  /* Keep the existing animated gradient image exactly as-is; this solid color is only
+     the paint underneath it if Android/WebView exposes a transient unpainted frame. */
+  background-color: #16222A !important;
+}
+
+/* KEYBOARD / VISUAL-VIEWPORT STABILITY FINAL
+   Android animates VisualViewport while the IME opens/closes. During that short window,
+   pause only continuous decorative animations so the compositor can spend its frame
+   budget on the viewport resize. No colors, blur values, layout or visible design change. */
+html.assal-viewport-transition body,
+html.assal-viewport-transition body > .container,
+html.assal-viewport-transition .news-ticker,
+html.assal-viewport-transition #newsTicker,
+html.assal-viewport-transition .notification,
+html.assal-viewport-transition .notification::before,
+html.assal-viewport-transition .logo-container,
+html.assal-viewport-transition .logo-container img,
+html.assal-viewport-transition .header-brand-logo::after {
+  animation-play-state: paused !important;
+}
+
+/* Keep a dark CSS paint underneath every keyboard-resize frame. This is deliberately
+   background-color only on body, so the current premium gradient remains untouched. */
+html.assal-viewport-transition {
+  background: #16222A !important;
+}
+html.assal-viewport-transition body {
+  background-color: #16222A !important;
 }
 </style>
 <script id="assal-native-performance-governor-v1-script">
@@ -14992,6 +15028,60 @@ html.assal-results-rendering body > .container {
   document.addEventListener('visibilitychange', function(){
     root.classList.toggle('assal-page-hidden', document.hidden);
   }, {passive:true});
+
+  /* Android keyboard / VisualViewport governor.
+     Important: this never writes viewport dimensions into layout. It only adds one root
+     class while the viewport is actively resizing, then releases it after the IME has
+     settled. This avoids resize-time paint competition without changing the UI. */
+  (function bindViewportStability(){
+    const vv = window.visualViewport;
+    if (!vv || typeof vv.addEventListener !== 'function') return;
+
+    let viewportReleaseTimer = 0;
+    let lastViewportSignalAt = 0;
+    let lastHeight = Number(vv.height || 0);
+
+    function isEditableFocused(){
+      const el = document.activeElement;
+      if (!el) return false;
+      const tag = String(el.tagName || '').toUpperCase();
+      return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable === true;
+    }
+
+    function releaseViewportTransition(){
+      const elapsed = performance.now() - lastViewportSignalAt;
+      if (elapsed < 190) {
+        viewportReleaseTimer = setTimeout(
+          releaseViewportTransition,
+          Math.max(24, 210 - elapsed)
+        );
+        return;
+      }
+      viewportReleaseTimer = 0;
+      root.classList.remove('assal-viewport-transition');
+    }
+
+    function markViewportTransition(){
+      const nextHeight = Number(vv.height || 0);
+      const delta = Math.abs(nextHeight - lastHeight);
+      lastHeight = nextHeight;
+
+      /* Ignore tiny compositor noise unless an editable control currently owns focus. */
+      if (delta < 1 && !isEditableFocused()) return;
+
+      lastViewportSignalAt = performance.now();
+      root.classList.add('assal-viewport-transition');
+      if (!viewportReleaseTimer) {
+        viewportReleaseTimer = setTimeout(releaseViewportTransition, 210);
+      }
+    }
+
+    vv.addEventListener('resize', markViewportTransition, {passive:true});
+
+    /* Window resize is a low-frequency fallback for WebViews that coalesce IME viewport
+       callbacks. Orientation changes are harmless here because the class is temporary. */
+    window.addEventListener('resize', markViewportTransition, {passive:true});
+  })();
 })();
 </script>
 
@@ -57632,7 +57722,7 @@ html.low-end-device .assal-private-clean-dialog *{
 (function(){
   try {
     window.__ASSAL_NATIVE_PERFORMANCE_FOUNDATION__ = {
-  version: "2026-10-07-native-interaction-engine-v2",
+  version: "2026-10-07-scroll-keyboard-no-white-v3",
   cacheFirstBoot: true,
   singleExcelLoad: true,
   lazyXlsx: true,
@@ -57646,7 +57736,9 @@ html.low-end-device .assal-private-clean-dialog *{
   levenshteinSafePrune: true,
   idleSearchMetaWarmup: true,
   singleCommitResultRender: true,
-  offscreenResultPaintSkip: true,
+  offscreenResultPaintSkip: false,
+  fastScrollBlankProtection: true,
+  darkCompositorBackstop: true,
   rafScrollHandler: true,
 };
 
