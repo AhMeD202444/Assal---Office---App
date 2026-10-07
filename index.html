@@ -26963,6 +26963,8 @@ function runAssalBootDataLoad() {
           precacheImages: false,
           dispatchRestoreEvent: false,
           loadNewItems: false,
+          refreshDerivedUi: false,
+          warmSearchMeta: false,
         });
         if (!assalIsBrowserOffline()) assalScheduleBackgroundPriceRefresh(snapshot);
         return {
@@ -27013,6 +27015,31 @@ function assalRunAfterFirstPaint(task) {
   else window.addEventListener("load", run, { once: true });
 }
 
+let assalPostStartupDerivedScheduled = false;
+function assalSchedulePostStartupDerivedUi() {
+  if (assalPostStartupDerivedScheduled) return;
+  assalPostStartupDerivedScheduled = true;
+
+  // Give the native splash -> WebView handoff, startup ad and first interactions a clean
+  // main thread. Then execute the same derived work during an idle period. No feature
+  // is removed; only its timing moves out of the cold-start critical path.
+  const start = () => {
+    assalScheduleIdleTask(() => {
+      try { refreshOffersUiCount(); } catch (_) {}
+      try { if (typeof loadNewItems === "function") loadNewItems(); } catch (_) {}
+      try {
+        if (typeof assalScheduleSmartMetaWarmup === "function")
+          assalScheduleSmartMetaWarmup();
+      } catch (_) {}
+      window.__ASSAL_POST_STARTUP_DERIVED_READY__ = true;
+    }, 2200);
+  };
+
+  // The timer is intentionally outside requestIdleCallback: it guarantees these scans
+  // cannot start during the first second even if Android reports an early idle slot.
+  setTimeout(start, window.__ASSAL_LOW_END_DEVICE__ ? 2600 : 1500);
+}
+
 function assalScheduleStartupDataAfterFirstPaint() {
   if (assalStartupDataScheduled) return;
   assalStartupDataScheduled = true;
@@ -27026,20 +27053,12 @@ function assalScheduleStartupDataAfterFirstPaint() {
       runAssalBootDataLoad().then((result) => {
         if (result && result.success) {
           if (window.__ASSAL_PRODUCTION_DEBUG__ === true)
-            console.log("تم تحميل البيانات بنجاح، جارٍ تحميل العناصر الجديدة.");
-          try {
-            if (typeof assalScheduleSmartMetaWarmup === "function")
-              assalScheduleSmartMetaWarmup();
-          } catch (_) {}
-          if (window.__ASSAL_LOW_END_DEVICE__) {
-            runLowEndDeferred(() => {
-              try { loadNewItems(); }
-              catch (e) { console.warn("low-end deferred loadNewItems failed", e); }
-            }, 3200);
-          } else {
-            // بعد أول Paint، نفس السلوك السابق بدون منافسة مرحلة الإقلاع.
-            loadNewItems();
-          }
+            console.log("تم تحميل بيانات الأسعار؛ الأعمال المشتقة مؤجلة لما بعد استقرار الواجهة.");
+
+          // Critical cold-start rule: never scan/sort/build thousands of derived rows
+          // immediately after restoring the snapshot. Preserve every feature, but let
+          // the startup shell/ad become fully visible first.
+          assalSchedulePostStartupDerivedUi();
           window.__ASSAL_PRICE_BACKGROUND_CHANGED__ = false;
         } else if (result) {
           console.warn("فشل تحميل البيانات:", result.message);
@@ -28082,9 +28101,17 @@ function assalApplyPriceSnapshot(snapshot, options = {}) {
 
   try {
     if (typeof window.__ASSAL_CLEAR_SEARCH_META_CACHE__ === "function")
-      window.__ASSAL_CLEAR_SEARCH_META_CACHE__();
+      window.__ASSAL_CLEAR_SEARCH_META_CACHE__({
+        warmup: options.warmSearchMeta !== false,
+      });
   } catch (_) {}
-  try { refreshOffersUiCount(); } catch (_) {}
+
+  // Derived UI scans (offers/new-items/search metadata) are useful, but they must not
+  // compete with the first visible frame on a cold WebView process. Startup passes
+  // refreshDerivedUi:false and schedules the exact same work once the shell is visible.
+  if (options.refreshDerivedUi !== false) {
+    try { refreshOffersUiCount(); } catch (_) {}
+  }
 
   if (options.loadNewItems !== false) {
     try { if (typeof loadNewItems === "function") loadNewItems(); } catch (_) {}
@@ -32960,8 +32987,12 @@ function assalGetSmartItemMeta(itemName) {
   return cached;
 }
 
-window.__ASSAL_CLEAR_SEARCH_META_CACHE__ = function () {
+window.__ASSAL_CLEAR_SEARCH_META_CACHE__ = function (options = {}) {
   assalSmartItemMetaCache.clear();
+  // Startup can clear stale metadata immediately without rebuilding thousands of
+  // normalized names on the same critical path. Normal runtime callers preserve
+  // the previous behaviour unless warmup:false is explicitly requested.
+  if (options && options.warmup === false) return;
   try { assalScheduleSmartMetaWarmup(); } catch (_) {}
 };
 
@@ -57750,11 +57781,15 @@ html.low-end-device .assal-private-clean-dialog *{
 (function(){
   try {
     window.__ASSAL_NATIVE_PERFORMANCE_FOUNDATION__ = {
-  version: "2026-10-07-fast-startup-keep-smoothness-v4",
+  version: "2026-10-07-cold-start-isolated-keep-runtime-smoothness-v5",
   cacheFirstBoot: true,
   startupWorkAfterLoad: true,
   startupDataAfterFirstPaint: true,
   earlyDOMContentDataLoad: false,
+  coldStartDerivedUiDeferred: true,
+  startupOffersScanDeferred: true,
+  startupNewItemsBuildDeferred: true,
+  startupSearchWarmupDeferred: true,
   delayedBackgroundRefresh: true,
   singleExcelLoad: true,
   lazyXlsx: true,
