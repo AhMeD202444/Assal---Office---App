@@ -18744,6 +18744,20 @@ window.assalSecureAuth = Object.freeze({
   },
 });
 
+/*
+ * OWNER AUTH COLD-START PREWARM
+ * -----------------------------
+ * Start ONLY Firebase Auth hydration as soon as the Firebase module is ready.
+ * Nothing awaits this promise, so first paint/startup is never blocked.
+ * This restores the old reliable behavior for secure owner tools while keeping
+ * all price/search/background performance work on its optimized schedule.
+ */
+try {
+  Promise.resolve()
+    .then(() => waitForAssalOfficeAuthReady())
+    .catch(() => null);
+} catch (_) {}
+
 function normalizeTokenKey(token) {
   return String(token || "").replace(/[.#$\[\]\/]/g, "_");
 }
@@ -57904,6 +57918,7 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
   const QR_LIB_SRC =
     "https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js";
   const ASSAL_OFFICE_AUTH_PROJECT_ID = "assal-office";
+  const ASSAL_OWNER_SUB_AUTH_RECOVERY_VERSION = "2026-10-08-owner-session-self-heal-v1";
 
   let ownerToolCycleInterval = null;
   let ownerToolShowTimeout = null;
@@ -57943,6 +57958,7 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
 
   const COMPAT_OWNER_AUTH_EMAIL = "owner@assal.app";
   let compatOwnerAuthReadyPromise = null;
+  let compatOwnerReauthPromise = null;
 
   function waitMs(ms) {
     return new Promise((resolve) => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
@@ -57964,6 +57980,122 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     throw new Error("خدمة مصادقة المالك لم تجهز بعد. أغلق اللوحة وافتحها بعد لحظة.");
   }
 
+  async function requestCompatOwnerFirebaseReauth() {
+    if (compatOwnerReauthPromise) return compatOwnerReauthPromise;
+
+    const runner = (async () => {
+      if (!ownerCanManageSubscriptions()) {
+        throw new Error("هذا الحساب لا يملك صلاحية إدارة اشتراكات التوافقات.");
+      }
+
+      let accessCode = "";
+
+      if (window.Swal && typeof window.Swal.fire === "function") {
+        const result = await window.Swal.fire({
+          title: "تأكيد جلسة المالك",
+          html:
+            '<div dir="rtl" style="font-family:Cairo,sans-serif;font-size:13px;line-height:1.8;color:#cbd5e1">' +
+            "جلسة Firebase الآمنة غير موجودة على هذا التشغيل. أدخل كلمة دخول المالك مرة واحدة لإعادة ربط الاشتراكات." +
+            "</div>",
+          input: "password",
+          inputPlaceholder: "كلمة دخول المالك",
+          inputAttributes: {
+            autocapitalize: "off",
+            autocomplete: "current-password",
+            spellcheck: "false",
+            dir: "ltr",
+          },
+          showCancelButton: true,
+          confirmButtonText: "إعادة الربط",
+          cancelButtonText: "إلغاء",
+          allowOutsideClick: false,
+          allowEscapeKey: true,
+          reverseButtons: true,
+          customClass: {
+            popup: "assal-debug-popup",
+          },
+          preConfirm: (value) => {
+            const clean = String(value || "").trim();
+            if (!clean) {
+              window.Swal.showValidationMessage("اكتب كلمة دخول المالك.");
+              return false;
+            }
+            return clean;
+          },
+        });
+        if (!result || !result.isConfirmed) {
+          throw new Error("تم إلغاء إعادة ربط جلسة المالك.");
+        }
+        accessCode = String(result.value || "").trim();
+      } else {
+        accessCode = String(
+          window.prompt("أدخل كلمة دخول المالك لإعادة ربط جلسة Firebase:") || "",
+        ).trim();
+        if (!accessCode) throw new Error("تم إلغاء إعادة ربط جلسة المالك.");
+      }
+
+      if (typeof authenticateAssalAccessCode !== "function") {
+        throw new Error("خدمة تسجيل دخول المالك غير جاهزة حالياً.");
+      }
+
+      const result = await authenticateAssalAccessCode(accessCode, {
+        staffOnly: true,
+      });
+      if (!result || result.ok !== true) {
+        throw new Error(
+          result?.message || "تعذر التحقق من كلمة دخول المالك.",
+        );
+      }
+
+      const role = String(result.profile?.role || "").trim().toLowerCase();
+      const email = String(result.user?.email || "").trim().toLowerCase();
+      const uid = String(result.user?.uid || "").trim();
+      const expectedUid = String(
+        typeof window.getAdminAuthUid === "function"
+          ? window.getAdminAuthUid() || ""
+          : "",
+      ).trim();
+
+      if (role !== "owner" || email !== COMPAT_OWNER_AUTH_EMAIL) {
+        try {
+          if (
+            window.assalSecureAuth &&
+            typeof window.assalSecureAuth.signOutCurrent === "function"
+          ) {
+            await window.assalSecureAuth.signOutCurrent();
+          }
+        } catch (_) {}
+        throw new Error("كلمة الدخول ليست لحساب المالك المعتمد.");
+      }
+      if (!uid || (expectedUid && uid !== expectedUid)) {
+        try {
+          if (
+            window.assalSecureAuth &&
+            typeof window.assalSecureAuth.signOutCurrent === "function"
+          ) {
+            await window.assalSecureAuth.signOutCurrent();
+          }
+        } catch (_) {}
+        throw new Error("جلسة Firebase لا تطابق حساب المالك المسجل في التطبيق.");
+      }
+
+      const auth = await waitForCompatSecureAuthFacade();
+      const user = await auth.waitUntilReady();
+      if (!user) throw new Error("تعذر تثبيت جلسة المالك في Firebase.");
+      if (typeof user.getIdToken === "function") await user.getIdToken(true);
+
+      showToast("تمت إعادة ربط جلسة المالك", "success");
+      return user;
+    })();
+
+    compatOwnerReauthPromise = runner;
+    try {
+      return await runner;
+    } finally {
+      if (compatOwnerReauthPromise === runner) compatOwnerReauthPromise = null;
+    }
+  }
+
   async function ensureCompatSubscriptionOwnerAuth(options = {}) {
     const forceTokenRefresh = options.forceTokenRefresh === true;
     const bypassCache = options.bypassCache === true || forceTokenRefresh;
@@ -57978,9 +58110,12 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
 
     const runner = (async () => {
       const auth = await waitForCompatSecureAuthFacade();
-      const user = await auth.waitUntilReady();
+      let user = await auth.waitUntilReady();
+
+      // If Firebase has authoritatively restored NO user, timing is no longer
+      // the issue. Recover the secure owner session once, then continue.
       if (!user) {
-        throw new Error("جلسة المالك في Firebase غير جاهزة. سجّل دخول المالك من جديد إذا استمرت الرسالة.");
+        user = await requestCompatOwnerFirebaseReauth();
       }
 
       const uid = String(user.uid || auth.getCurrentUid?.() || "").trim();
@@ -58012,7 +58147,23 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
 
       // Materialize a valid ID token before Firestore owner reads/writes.
       if (typeof user.getIdToken === "function") {
-        await user.getIdToken(forceTokenRefresh);
+        try {
+          await user.getIdToken(forceTokenRefresh);
+        } catch (tokenErr) {
+          const code = String(tokenErr?.code || "").toLowerCase();
+          if (
+            code.includes("user-token-expired") ||
+            code.includes("invalid-user-token") ||
+            code.includes("user-disabled")
+          ) {
+            user = await requestCompatOwnerFirebaseReauth();
+            if (typeof user?.getIdToken === "function") {
+              await user.getIdToken(true);
+            }
+          } else {
+            throw tokenErr;
+          }
+        }
       }
 
       return user;
@@ -58054,14 +58205,26 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     } catch (err) {
       if (!isCompatSubscriptionPermissionError(err)) throw err;
 
-      // A cold WebView can finish restoring Auth just as the first Firestore call starts.
-      // Force one fresh owner token and retry exactly once; never loop indefinitely.
-      await ensureCompatSubscriptionOwnerAuth({
-        forceTokenRefresh: true,
-        bypassCache: true,
-      });
+      // A valid-looking local session can still have a revoked/stale server token.
+      // First refresh it. If Firestore still refuses, securely re-auth the owner
+      // once and retry exactly once; never loop indefinitely.
+      try {
+        await ensureCompatSubscriptionOwnerAuth({
+          forceTokenRefresh: true,
+          bypassCache: true,
+        });
+      } catch (_) {
+        await requestCompatOwnerFirebaseReauth();
+      }
       await waitMs(90);
-      return await operation(tools);
+      try {
+        return await operation(tools);
+      } catch (retryErr) {
+        if (!isCompatSubscriptionPermissionError(retryErr)) throw retryErr;
+        await requestCompatOwnerFirebaseReauth();
+        await waitMs(90);
+        return await operation(tools);
+      }
     }
   }
 
