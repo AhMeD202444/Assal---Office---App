@@ -8515,7 +8515,7 @@ body.modal-lock{
   position: relative;
 }
 /* تجميد فعلي للخلفية أثناء أي نافذة/رسالة */
-body.modal-lock > *:not(.request-modal):not(.request-admin-modal):not(.request-track-modal):not(.stats-modal):not(.customer-profile-modal):not(.customers-admin-modal):not(.customer-blocked-overlay):not(.invoice-track-modal):not(.invoice-admin-modal):not(.activation-overlay):not(.swal2-container):not(#adModal):not(#adOverlay):not(#promoPopup):not(.assal-sub-manager):not(.assal-owner-auth-recovery){
+body.modal-lock > *:not(.request-modal):not(.request-admin-modal):not(.request-track-modal):not(.stats-modal):not(.customer-profile-modal):not(.customers-admin-modal):not(.customer-blocked-overlay):not(.invoice-track-modal):not(.invoice-admin-modal):not(.activation-overlay):not(.swal2-container):not(#adModal):not(#adOverlay):not(#promoPopup):not(.assal-sub-manager){
   pointer-events: none !important;
 }
 body.modal-lock .floating-new-btn,
@@ -8563,9 +8563,7 @@ body.modal-lock .swal2-container *,
 body.modal-lock #adModal *,
 body.modal-lock #promoPopup *,
 body.modal-lock .assal-sub-manager,
-body.modal-lock .assal-sub-manager *,
-body.modal-lock .assal-owner-auth-recovery,
-body.modal-lock .assal-owner-auth-recovery *{
+body.modal-lock .assal-sub-manager *{
   animation-play-state: running !important;
   pointer-events: auto !important;
   caret-color: auto;
@@ -8578,12 +8576,6 @@ body.modal-lock #promoPopup *{
   pointer-events: auto !important;
   touch-action: auto !important;
   visibility: visible !important;
-}
-body.modal-lock .assal-owner-auth-recovery,
-body.modal-lock .assal-owner-auth-recovery *{
-  pointer-events:auto !important;
-  touch-action:auto !important;
-  visibility:visible !important;
 }
 .request-modal,
 .request-admin-modal{
@@ -17535,310 +17527,163 @@ html.assal-viewport-transition body {
    
 </header>
 
-<style id="assal-owner-auth-recovery-premium-style">
-/* ===== Premium owner re-authentication — single lightweight blur layer ===== */
-.assal-owner-auth-recovery{
+<!-- ===== OWNER AUTH RECOVERY / ISOLATED SAFE UI ===== -->
+<style id="assal-owner-auth-recovery-isolated-style">
+#assalOwnerAuthRecovery{
   position:fixed;
   inset:0;
-  z-index:2147483012;
-  display:flex;
+  z-index:26050;
+  display:none;
   align-items:center;
   justify-content:center;
-  padding:16px;
-  direction:rtl;
-  font-family:'Cairo','Tajawal',sans-serif;
-  background:rgba(2,8,23,.68);
-  backdrop-filter:blur(6px) saturate(108%);
-  -webkit-backdrop-filter:blur(6px) saturate(108%);
+  padding:max(18px, env(safe-area-inset-top, 0px)) 16px max(18px, env(safe-area-inset-bottom, 0px));
+  background:rgba(2,8,23,.58);
+  -webkit-backdrop-filter:blur(5px);
+  backdrop-filter:blur(5px);
   opacity:0;
   visibility:hidden;
   pointer-events:none;
-  transition:opacity .17s ease,visibility 0s linear .17s;
-  overscroll-behavior:contain;
+  transition:opacity .17s ease, visibility 0s linear .17s;
   -webkit-tap-highlight-color:transparent;
 }
-.assal-owner-auth-recovery.is-open{
+#assalOwnerAuthRecovery.is-mounted{display:flex;}
+#assalOwnerAuthRecovery.is-open{
   opacity:1;
   visibility:visible;
   pointer-events:auto;
-  transition:opacity .17s ease,visibility 0s linear 0s;
+  transition:opacity .17s ease, visibility 0s linear 0s;
 }
-.assal-owner-auth-recovery.is-closing{
-  opacity:0;
-  pointer-events:none;
-}
-.assal-owner-auth-card{
-  position:relative;
-  width:min(440px,calc(100vw - 24px));
-  max-height:calc(100vh - 28px);
+#assalOwnerAuthRecovery .assal-owner-auth-shell{
+  width:min(408px, calc(100vw - 30px));
+  max-height:min(560px, calc(100vh - 36px));
   overflow:hidden;
-  border-radius:24px;
-  color:#f8fafc;
+  direction:rtl;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.10);
   background:
-    radial-gradient(circle at 88% 0%,rgba(34,211,238,.10),transparent 34%),
-    radial-gradient(circle at 0% 100%,rgba(99,102,241,.08),transparent 40%),
-    linear-gradient(160deg,#0f172a 0%,#081222 100%);
-  border:1px solid rgba(148,163,184,.18);
-  box-shadow:0 26px 78px rgba(0,0,0,.50),0 0 0 1px rgba(255,255,255,.025) inset;
-  contain:layout paint style;
-  opacity:0;
-  transform:translateY(9px) scale(.978);
-  transition:transform .18s cubic-bezier(.2,.8,.2,1),opacity .16s ease;
+    radial-gradient(circle at 92% 0%, rgba(34,197,94,.15), transparent 38%),
+    radial-gradient(circle at 8% 100%, rgba(14,165,233,.12), transparent 42%),
+    linear-gradient(145deg, rgba(15,23,42,.99), rgba(8,15,29,.99));
+  box-shadow:0 24px 70px rgba(0,0,0,.52);
+  color:#e5e7eb;
+  font-family:'Cairo','Tajawal',sans-serif;
+  transform:translateY(8px) scale(.975);
+  opacity:.98;
+  transition:transform .17s cubic-bezier(.2,.8,.2,1), opacity .17s ease;
+  outline:none;
 }
-.assal-owner-auth-recovery.is-open .assal-owner-auth-card{
-  opacity:1;
+#assalOwnerAuthRecovery.is-open .assal-owner-auth-shell{
   transform:translateY(0) scale(1);
-}
-.assal-owner-auth-recovery.is-closing .assal-owner-auth-card{
-  opacity:0;
-  transform:translateY(6px) scale(.985);
-}
-.assal-owner-auth-card.is-shake{
-  animation:assalOwnerAuthShake .30s ease;
-}
-.assal-owner-auth-card.is-success{
-  border-color:rgba(52,211,153,.30);
-  box-shadow:0 26px 78px rgba(0,0,0,.48),0 0 0 1px rgba(52,211,153,.08) inset;
-}
-@keyframes assalOwnerAuthShake{
-  0%,100%{transform:translateX(0)}
-  25%{transform:translateX(4px)}
-  50%{transform:translateX(-4px)}
-  75%{transform:translateX(2px)}
+  opacity:1;
 }
 .assal-owner-auth-top{
+  min-height:70px;
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  padding:16px 17px;
-  border-bottom:1px solid rgba(148,163,184,.12);
-  background:linear-gradient(135deg,rgba(11,31,58,.98),rgba(10,64,87,.82) 55%,rgba(35,55,112,.76));
+  padding:13px 14px 12px 16px;
+  border-bottom:1px solid rgba(255,255,255,.075);
+  background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0));
 }
-.assal-owner-auth-brand{
-  min-width:0;
-  display:flex;
-  align-items:center;
-  gap:11px;
+.assal-owner-auth-brand{display:flex;align-items:center;gap:11px;min-width:0;}
+.assal-owner-auth-icon{
+  width:42px;height:42px;min-width:42px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,#0f766e,#0ea5a4);
+  color:#ecfeff;font-size:17px;
+  box-shadow:0 8px 22px rgba(13,148,136,.24);
 }
-.assal-owner-auth-brand-icon{
-  width:44px;
-  height:44px;
-  min-width:44px;
-  border-radius:15px;
-  display:grid;
-  place-items:center;
-  color:#cffafe;
-  background:linear-gradient(145deg,rgba(34,211,238,.22),rgba(59,130,246,.18));
-  border:1px solid rgba(125,211,252,.22);
-  box-shadow:0 8px 20px rgba(2,132,199,.14),0 0 0 1px rgba(255,255,255,.04) inset;
-  font-size:18px;
-}
-.assal-owner-auth-copy{min-width:0}
-.assal-owner-auth-kicker{
-  display:flex;
-  align-items:center;
-  gap:5px;
-  margin-bottom:2px;
-  color:#67e8f9;
-  font-size:9.5px;
-  font-weight:900;
-  letter-spacing:.06em;
-}
-.assal-owner-auth-title{
-  font-size:18px;
-  line-height:1.25;
-  font-weight:950;
-  color:#fff;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.assal-owner-auth-subtitle{
-  margin-top:3px;
-  font-size:9.5px;
-  color:rgba(226,232,240,.66);
-  font-weight:700;
-}
+.assal-owner-auth-copy{min-width:0;text-align:right;}
+.assal-owner-auth-kicker{font-size:10px;color:#86efac;font-weight:800;margin-bottom:2px;letter-spacing:.02em;}
+.assal-owner-auth-title{font-size:16px;color:#f8fafc;font-weight:900;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .assal-owner-auth-close{
-  width:36px;
-  height:36px;
-  min-width:36px;
-  border:0;
-  border-radius:12px;
-  display:grid;
-  place-items:center;
-  cursor:pointer;
-  color:#fecaca;
-  background:linear-gradient(145deg,rgba(127,29,29,.70),rgba(69,10,10,.78));
-  border:1px solid rgba(248,113,113,.17);
-  transition:transform .16s ease,filter .16s ease;
+  width:34px;height:34px;min-width:34px;border:0;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:linear-gradient(145deg,#7f1d1d,#991b1b);color:#fee2e2;
+  box-shadow:0 7px 16px rgba(127,29,29,.24);
+  transition:transform .14s ease, filter .14s ease;
 }
-.assal-owner-auth-close:active{transform:scale(.94)}
-.assal-owner-auth-body{
-  padding:19px 18px 18px;
-  overflow:auto;
-  max-height:calc(100vh - 112px);
-  scrollbar-width:none;
+.assal-owner-auth-close:active{transform:scale(.93);}
+.assal-owner-auth-body{padding:18px 18px 16px;}
+.assal-owner-auth-note{
+  display:flex;align-items:flex-start;gap:9px;
+  padding:10px 11px;margin-bottom:14px;border-radius:13px;
+  background:rgba(15,118,110,.10);border:1px solid rgba(45,212,191,.14);
+  color:#cbd5e1;font-size:11px;line-height:1.75;text-align:right;
 }
-.assal-owner-auth-body::-webkit-scrollbar{display:none}
-.assal-owner-auth-hero{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px;
-  border-radius:17px;
-  background:linear-gradient(135deg,rgba(8,47,73,.36),rgba(30,41,59,.42));
-  border:1px solid rgba(125,211,252,.12);
-  margin-bottom:15px;
+.assal-owner-auth-note i{color:#5eead4;margin-top:4px;}
+.assal-owner-auth-label{display:block;margin:0 2px 6px;font-size:11px;color:#94a3b8;font-weight:700;text-align:right;}
+.assal-owner-auth-field{
+  height:48px;display:flex;align-items:center;gap:6px;
+  padding:0 8px 0 10px;border-radius:14px;
+  background:#07101f;border:1px solid rgba(148,163,184,.22);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02);
+  transition:border-color .15s ease, box-shadow .15s ease;
 }
-.assal-owner-auth-hero-icon{
-  width:44px;
-  height:44px;
-  min-width:44px;
-  border-radius:14px;
-  display:grid;
-  place-items:center;
-  color:#a5f3fc;
-  background:rgba(8,145,178,.14);
-  border:1px solid rgba(34,211,238,.16);
-  font-size:17px;
+.assal-owner-auth-field:focus-within{border-color:rgba(45,212,191,.62);box-shadow:0 0 0 3px rgba(20,184,166,.08);}
+#assalOwnerAuthPassword{
+  flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;
+  color:#f8fafc;font-family:'Cairo',sans-serif;font-size:14px;text-align:center;
+  direction:ltr;padding:0 5px;
 }
-.assal-owner-auth-hero strong{
-  display:block;
-  color:#f8fafc;
-  font-size:12px;
-  font-weight:900;
-}
-.assal-owner-auth-hero span{
-  display:block;
-  margin-top:3px;
-  color:rgba(203,213,225,.70);
-  font-size:10px;
-  line-height:1.7;
-  font-weight:700;
-}
-.assal-owner-auth-field-label{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  margin:0 1px 7px;
-  color:#cbd5e1;
-  font-size:10px;
-  font-weight:900;
-}
-.assal-owner-auth-field-label i{color:#67e8f9;font-size:10px}
-.assal-owner-auth-input-wrap{
-  position:relative;
-  display:flex;
-  align-items:center;
-  min-height:48px;
-  border-radius:15px;
-  border:1px solid rgba(148,163,184,.16);
-  background:rgba(2,8,23,.56);
-  box-shadow:0 0 0 0 rgba(34,211,238,0);
-  transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;
-}
-.assal-owner-auth-input-wrap:focus-within{
-  border-color:rgba(34,211,238,.42);
-  box-shadow:0 0 0 3px rgba(34,211,238,.065);
-  background:rgba(2,8,23,.66);
-}
-.assal-owner-auth-input{
-  width:100%;
-  height:46px;
-  padding:0 14px 0 48px;
-  border:0;
-  outline:0;
-  background:transparent;
-  color:#f8fafc;
-  font-family:inherit;
-  font-size:14px;
-  font-weight:800;
-  direction:ltr;
-  text-align:left;
-}
-.assal-owner-auth-input::placeholder{color:rgba(148,163,184,.48);font-weight:700}
+#assalOwnerAuthPassword::placeholder{color:#64748b;}
 .assal-owner-auth-eye{
-  position:absolute;
-  left:8px;
-  top:50%;
-  transform:translateY(-50%);
-  width:34px;
-  height:34px;
-  border:0;
-  border-radius:10px;
-  display:grid;
-  place-items:center;
-  cursor:pointer;
-  color:#bae6fd;
-  background:rgba(30,41,59,.66);
-  border:1px solid rgba(148,163,184,.10);
+  width:34px;height:34px;min-width:34px;border:0;border-radius:10px;
+  background:rgba(148,163,184,.08);color:#94a3b8;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
 }
 .assal-owner-auth-error{
-  min-height:22px;
-  padding:6px 2px 0;
-  color:#fda4af;
-  font-size:10px;
-  line-height:1.6;
-  font-weight:800;
-  opacity:0;
-  transform:translateY(-2px);
-  transition:opacity .14s ease,transform .14s ease;
+  min-height:20px;margin-top:7px;padding:0 2px;
+  color:#fca5a5;font-size:10px;font-weight:700;text-align:center;line-height:1.6;
 }
-.assal-owner-auth-error.has-error{opacity:1;transform:translateY(0)}
-.assal-owner-auth-submit{
-  width:100%;
-  min-height:46px;
-  margin-top:5px;
-  border:0;
-  border-radius:14px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  color:#f0fdff;
-  background:linear-gradient(135deg,#0f8b88,#1674a6 55%,#4055c7);
-  border:1px solid rgba(125,211,252,.17);
-  box-shadow:0 10px 22px rgba(8,145,178,.18);
-  font-family:inherit;
-  font-size:11.5px;
-  font-weight:950;
-  cursor:pointer;
-  transition:transform .16s ease,filter .16s ease,opacity .16s ease;
+.assal-owner-auth-actions{display:grid;grid-template-columns:1fr 1.45fr;gap:8px;margin-top:8px;}
+.assal-owner-auth-btn{
+  min-height:43px;border:0;border-radius:13px;cursor:pointer;
+  font-family:'Cairo',sans-serif;font-size:12px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  transition:transform .14s ease, filter .14s ease, opacity .14s ease;
 }
-.assal-owner-auth-submit:active{transform:scale(.985)}
-.assal-owner-auth-submit:disabled{cursor:wait;opacity:.72;transform:none;filter:none}
-.assal-owner-auth-submit .assal-owner-auth-spinner{display:none}
-.assal-owner-auth-submit.is-busy .assal-owner-auth-spinner{display:inline-flex}
-.assal-owner-auth-submit.is-busy .assal-owner-auth-submit-icon{display:none}
-.assal-owner-auth-submit.is-success{
-  background:linear-gradient(135deg,#047857,#0f766e);
-  border-color:rgba(110,231,183,.20);
-}
-.assal-owner-auth-note{
-  margin-top:11px;
-  display:flex;
-  align-items:flex-start;
-  justify-content:center;
-  gap:6px;
-  color:rgba(148,163,184,.68);
-  font-size:9px;
-  line-height:1.7;
-  font-weight:700;
-  text-align:center;
-}
-.assal-owner-auth-note i{color:#6ee7b7;margin-top:2px}
-@media (max-width:520px){
-  .assal-owner-auth-recovery{padding:10px;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
-  .assal-owner-auth-card{width:100%;border-radius:21px}
-  .assal-owner-auth-top{padding:14px 13px}
-  .assal-owner-auth-brand-icon{width:40px;height:40px;min-width:40px;border-radius:13px}
-  .assal-owner-auth-title{font-size:16px}
-  .assal-owner-auth-subtitle{font-size:9px}
-  .assal-owner-auth-body{padding:16px 14px 15px}
+.assal-owner-auth-btn:active{transform:scale(.97);}
+.assal-owner-auth-btn:disabled{opacity:.62;cursor:default;transform:none;}
+.assal-owner-auth-cancel{background:#172033;color:#cbd5e1;border:1px solid rgba(148,163,184,.13);}
+.assal-owner-auth-confirm{background:linear-gradient(135deg,#0f766e,#0ea5a4);color:#ecfeff;box-shadow:0 9px 22px rgba(13,148,136,.20);}
+@media (max-width:480px){
+  #assalOwnerAuthRecovery{-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);padding-inline:12px;}
+  #assalOwnerAuthRecovery .assal-owner-auth-shell{width:min(392px,calc(100vw - 24px));border-radius:20px;}
+  .assal-owner-auth-top{min-height:66px;padding:11px 12px;}
+  .assal-owner-auth-body{padding:15px 14px 14px;}
 }
 </style>
+
+<div id="assalOwnerAuthRecovery" class="assal-owner-auth-recovery" aria-hidden="true">
+  <section class="assal-owner-auth-shell" role="dialog" aria-modal="true" aria-labelledby="assalOwnerAuthTitle" tabindex="-1">
+    <div class="assal-owner-auth-top">
+      <div class="assal-owner-auth-brand">
+        <div class="assal-owner-auth-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="assal-owner-auth-copy">
+          <div class="assal-owner-auth-kicker">حماية حساب المالك</div>
+          <div class="assal-owner-auth-title" id="assalOwnerAuthTitle">تأكيد هوية المالك</div>
+        </div>
+      </div>
+      <button type="button" class="assal-owner-auth-close" id="assalOwnerAuthCloseBtn" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="assal-owner-auth-body">
+      <div class="assal-owner-auth-note"><i class="fa-solid fa-circle-info"></i><span>جلسة Firebase الآمنة غير متوفرة حالياً. أدخل كلمة دخول المالك لإعادة ربط إدارة الاشتراكات.</span></div>
+      <label class="assal-owner-auth-label" for="assalOwnerAuthPassword">كلمة دخول المالك</label>
+      <div class="assal-owner-auth-field">
+        <input id="assalOwnerAuthPassword" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="••••••••">
+        <button type="button" class="assal-owner-auth-eye" id="assalOwnerAuthEyeBtn" aria-label="إظهار أو إخفاء كلمة المرور"><i class="fa-regular fa-eye"></i></button>
+      </div>
+      <div id="assalOwnerAuthError" class="assal-owner-auth-error" aria-live="polite"></div>
+      <div class="assal-owner-auth-actions">
+        <button type="button" class="assal-owner-auth-btn assal-owner-auth-cancel" id="assalOwnerAuthCancelBtn">إلغاء</button>
+        <button type="button" class="assal-owner-auth-btn assal-owner-auth-confirm" id="assalOwnerAuthConfirmBtn"><i class="fa-solid fa-key"></i><span>تأكيد الدخول</span></button>
+      </div>
+    </div>
+  </section>
+</div>
+<!-- ===== /OWNER AUTH RECOVERY / ISOLATED SAFE UI ===== -->
 
 <!-- ===== OWNER SUBSCRIPTIONS MANAGER / UI PHASE 1 ===== -->
 <div id="assalOwnerSubscriptionManager" class="assal-sub-manager" aria-hidden="true">
@@ -18033,51 +17878,6 @@ html.assal-viewport-transition body {
   </section>
 </div>
 <!-- ===== /OWNER SUBSCRIPTIONS MANAGER ===== -->
-
-<!-- ===== OWNER FIREBASE SESSION RECOVERY / PREMIUM ===== -->
-<div id="assalCompatOwnerAuthModal" class="assal-owner-auth-recovery" aria-hidden="true">
-  <section class="assal-owner-auth-card" role="dialog" aria-modal="true" aria-labelledby="assalCompatOwnerAuthTitle" tabindex="-1">
-    <div class="assal-owner-auth-top">
-      <div class="assal-owner-auth-brand">
-        <div class="assal-owner-auth-brand-icon"><i class="fa-solid fa-shield-halved"></i></div>
-        <div class="assal-owner-auth-copy">
-          <div class="assal-owner-auth-kicker"><i class="fa-solid fa-lock"></i><span>حماية لوحة المالك</span></div>
-          <div class="assal-owner-auth-title" id="assalCompatOwnerAuthTitle">تأكيد هوية المالك</div>
-          <div class="assal-owner-auth-subtitle">استعادة جلسة الاشتراكات الآمنة</div>
-        </div>
-      </div>
-      <button type="button" class="assal-owner-auth-close" onclick="cancelCompatOwnerAuthRecovery()" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-
-    <div class="assal-owner-auth-body">
-      <div class="assal-owner-auth-hero">
-        <div class="assal-owner-auth-hero-icon"><i class="fa-solid fa-user-shield"></i></div>
-        <div>
-          <strong>الجلسة الآمنة تحتاج تأكيداً واحداً</strong>
-          <span>أدخل كلمة دخول المالك حتى يعاد ربط Firebase وتكمل إدارة الاشتراكات بصورة طبيعية.</span>
-        </div>
-      </div>
-
-      <form id="assalCompatOwnerAuthForm" onsubmit="return submitCompatOwnerAuthRecovery(event)" novalidate>
-        <label class="assal-owner-auth-field-label" for="assalCompatOwnerAuthPassword"><i class="fa-solid fa-key"></i><span>كلمة دخول المالك</span></label>
-        <div class="assal-owner-auth-input-wrap">
-          <input id="assalCompatOwnerAuthPassword" class="assal-owner-auth-input" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" placeholder="••••••••" aria-describedby="assalCompatOwnerAuthError">
-          <button id="assalCompatOwnerAuthEye" class="assal-owner-auth-eye" type="button" onclick="toggleCompatOwnerAuthRecoveryPassword()" aria-label="إظهار كلمة المرور"><i class="fa-solid fa-eye"></i></button>
-        </div>
-        <div id="assalCompatOwnerAuthError" class="assal-owner-auth-error" role="status" aria-live="polite"></div>
-        <button id="assalCompatOwnerAuthSubmit" class="assal-owner-auth-submit" type="submit">
-          <span class="assal-owner-auth-spinner"><i class="fa-solid fa-spinner fa-spin"></i></span>
-          <i class="fa-solid fa-shield-halved assal-owner-auth-submit-icon"></i>
-          <span id="assalCompatOwnerAuthSubmitLabel">تأكيد الدخول</span>
-        </button>
-      </form>
-
-      <div class="assal-owner-auth-note"><i class="fa-solid fa-lock"></i><span>كلمة المرور تستخدم للتحقق فقط ولا يتم حفظها داخل التطبيق.</span></div>
-    </div>
-  </section>
-</div>
-<!-- ===== /OWNER FIREBASE SESSION RECOVERY ===== -->
-
 
 
 <!-- يبقى الـ overlay مثل ما هو -->
@@ -22353,7 +22153,7 @@ function syncGlobalModalLock() {
   };
 
   const openCustomModal = !!document.querySelector(
-    ".request-modal.show, .request-admin-modal.show, .request-track-modal.show, .stats-modal.show, .customer-profile-modal.show, .customers-admin-modal.show, .customer-blocked-overlay.is-open, .invoice-track-modal.show, .invoice-admin-modal.show, .activation-overlay.show, .activation-overlay.force-show, .swal2-container, #adModal.active, #adOverlay.active, #promoPopup.show, .activation-overlay.is-open, .assal-sub-manager.is-open, .assal-owner-auth-recovery.is-open",
+    ".request-modal.show, .request-admin-modal.show, .request-track-modal.show, .stats-modal.show, .customer-profile-modal.show, .customers-admin-modal.show, .customer-blocked-overlay.is-open, .invoice-track-modal.show, .invoice-admin-modal.show, .activation-overlay.show, .activation-overlay.force-show, .swal2-container, #adModal.active, #adOverlay.active, #promoPopup.show, .activation-overlay.is-open, .assal-sub-manager.is-open",
   );
   const openSwal = !!document.querySelector(
     ".swal2-container.swal2-backdrop-show",
@@ -22378,7 +22178,7 @@ const ASSAL_MODAL_LOCK_TARGET_SELECTOR =
   ".request-modal, .request-admin-modal, .request-track-modal, .stats-modal, " +
   ".customer-profile-modal, .customers-admin-modal, .customer-blocked-overlay, " +
   ".invoice-track-modal, .invoice-admin-modal, .activation-overlay, .swal2-container, " +
-  "#adModal, #adOverlay, #promoPopup, .assal-sub-manager, .assal-owner-auth-recovery";
+  "#adModal, #adOverlay, #promoPopup, .assal-sub-manager";
 const assalObservedModalLockNodes = new WeakSet();
 const globalLockAttributeObserver = new MutationObserver(scheduleGlobalModalLockSync);
 
@@ -58276,7 +58076,7 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
   const QR_LIB_SRC =
     "https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js";
   const ASSAL_OFFICE_AUTH_PROJECT_ID = "assal-office";
-  const ASSAL_OWNER_SUB_AUTH_RECOVERY_VERSION = "2026-10-08-auth-stable-old-flow-no-freeze-v4";
+  const ASSAL_OWNER_SUB_AUTH_RECOVERY_VERSION = "2026-10-08-isolated-auth-safe-v2";
 
   let ownerToolCycleInterval = null;
   let ownerToolShowTimeout = null;
@@ -58317,7 +58117,6 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
   const COMPAT_OWNER_AUTH_EMAIL = "owner@assal.app";
   let compatOwnerAuthReadyPromise = null;
   let compatOwnerReauthPromise = null;
-  let compatManagerOpeningPromise = null;
 
   function waitMs(ms) {
     return new Promise((resolve) => setTimeout(resolve, Math.max(0, Number(ms) || 0)));
@@ -58339,325 +58138,246 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     throw new Error("خدمة مصادقة المالك لم تجهز بعد. أغلق اللوحة وافتحها بعد لحظة.");
   }
 
-  let compatOwnerAuthUiState = null;
+  let compatOwnerAuthUiPromise = null;
+  let compatOwnerAuthUiResolve = null;
+  let compatOwnerAuthUiSequence = 0;
+  let compatOwnerAuthUiBound = false;
+  let compatOwnerAuthUiHideTimer = null;
 
-  function getCompatSubscriptionManagerViewKey() {
-    const create = document.getElementById("assalSubManagerCreateView");
-    const card = document.getElementById("assalSubManagerCardView");
-    if (create && create.hidden === false) return "create";
-    if (card && card.hidden === false) return "card";
-    return "list";
-  }
-
-  function captureCompatOwnerAuthRecoveryContext() {
-    const manager = document.getElementById("assalOwnerSubscriptionManager");
+  function getCompatOwnerAuthUi() {
     return {
-      managerWasOpen: !!(manager && manager.classList.contains("is-open")),
-      managerView: getCompatSubscriptionManagerViewKey(),
+      overlay: document.getElementById("assalOwnerAuthRecovery"),
+      shell: document.querySelector("#assalOwnerAuthRecovery .assal-owner-auth-shell"),
+      input: document.getElementById("assalOwnerAuthPassword"),
+      error: document.getElementById("assalOwnerAuthError"),
+      confirm: document.getElementById("assalOwnerAuthConfirmBtn"),
+      cancel: document.getElementById("assalOwnerAuthCancelBtn"),
+      close: document.getElementById("assalOwnerAuthCloseBtn"),
+      eye: document.getElementById("assalOwnerAuthEyeBtn"),
     };
   }
 
-  function reopenCompatSubscriptionManagerAfterAuth(context) {
-    if (!context || context.managerWasOpen !== true) return;
-    const manager = document.getElementById("assalOwnerSubscriptionManager");
-    if (!manager) return;
-    try {
-      setManagerView(context.managerView || "list");
-    } catch (_) {
-      try {
-        setManagerView("list");
-      } catch (_) {}
-    }
-    manager.classList.add("is-open");
-    manager.setAttribute("aria-hidden", "false");
-    try {
-      if (typeof window.syncGlobalModalLock === "function")
-        window.syncGlobalModalLock();
-    } catch (_) {}
+  function setCompatOwnerAuthUiError(message = "") {
+    const { error } = getCompatOwnerAuthUi();
+    if (error) error.textContent = String(message || "");
   }
 
-  function getCompatOwnerAuthFriendlyError(err) {
-    const raw = String(err?.message || err || "").trim();
-    const low = raw.toLowerCase();
-    if (
-      low.includes("invalid-credential") ||
-      low.includes("wrong-password") ||
-      low.includes("invalid password") ||
-      low.includes("كلمة الدخول غير صحيحة") ||
-      low.includes("كلمة المرور غير صحيحة")
-    ) {
-      return "كلمة دخول المالك غير صحيحة. حاول من جديد.";
-    }
-    if (
-      low.includes("network-request-failed") ||
-      low.includes("failed to fetch") ||
-      low.includes("network")
-    ) {
-      return "تعذر الاتصال بـ Firebase. تحقق من الإنترنت ثم حاول من جديد.";
-    }
-    return raw || "تعذر تأكيد جلسة المالك. حاول من جديد.";
+  function setCompatOwnerAuthUiBusy(busy) {
+    const { confirm } = getCompatOwnerAuthUi();
+    if (!confirm) return;
+    confirm.disabled = !!busy;
+    confirm.innerHTML = busy
+      ? '<i class="fa-solid fa-spinner fa-spin"></i><span>جاري التحقق...</span>'
+      : '<i class="fa-solid fa-key"></i><span>تأكيد الدخول</span>';
   }
 
-  function setCompatOwnerAuthError(message = "") {
-    const errorEl = document.getElementById("assalCompatOwnerAuthError");
-    const card = document.querySelector(
-      "#assalCompatOwnerAuthModal .assal-owner-auth-card",
-    );
-    if (errorEl) {
-      const clean = String(message || "").trim();
-      errorEl.textContent = clean;
-      errorEl.classList.toggle("has-error", !!clean);
-    }
-    if (message && card) {
-      card.classList.remove("is-shake");
-      void card.offsetWidth;
-      card.classList.add("is-shake");
-      setTimeout(() => card.classList.remove("is-shake"), 340);
-    }
-  }
+  function finishCompatOwnerAuthUi(result = null) {
+    const ui = getCompatOwnerAuthUi();
+    const resolve = compatOwnerAuthUiResolve;
+    compatOwnerAuthUiResolve = null;
+    compatOwnerAuthUiPromise = null;
+    compatOwnerAuthUiSequence += 1;
+    clearTimeout(compatOwnerAuthUiHideTimer);
 
-  function setCompatOwnerAuthBusy(busy, success = false) {
-    const submit = document.getElementById("assalCompatOwnerAuthSubmit");
-    const label = document.getElementById("assalCompatOwnerAuthSubmitLabel");
-    const input = document.getElementById("assalCompatOwnerAuthPassword");
-    const eye = document.getElementById("assalCompatOwnerAuthEye");
-    const card = document.querySelector(
-      "#assalCompatOwnerAuthModal .assal-owner-auth-card",
-    );
-    if (submit) {
-      submit.disabled = !!busy;
-      submit.classList.toggle("is-busy", !!busy && !success);
-      submit.classList.toggle("is-success", !!success);
-    }
-    if (input) input.disabled = !!busy;
-    if (eye) eye.disabled = !!busy;
-    if (card) card.classList.toggle("is-success", !!success);
-    if (label) {
-      label.textContent = success
-        ? "تم تأكيد الهوية"
-        : busy
-          ? "جاري التحقق…"
-          : "تأكيد الدخول";
-    }
-  }
-
-  function finishCompatOwnerAuthRecovery(kind, payload) {
-    const state = compatOwnerAuthUiState;
-    if (!state || state.settled) return;
-    state.settled = true;
-
-    try {
-      if (state.keydownHandler)
-        document.removeEventListener("keydown", state.keydownHandler, true);
-    } catch (_) {}
-
-    const modal = document.getElementById("assalCompatOwnerAuthModal");
-    if (modal) modal.classList.add("is-closing");
-
-    setTimeout(() => {
-      if (modal) {
-        modal.classList.remove("is-open", "is-closing");
-        modal.setAttribute("aria-hidden", "true");
-      }
-
-      const input = document.getElementById("assalCompatOwnerAuthPassword");
-      if (input) {
-        input.value = "";
-        input.type = "password";
-        input.disabled = false;
-      }
-      const eyeIcon = document.querySelector("#assalCompatOwnerAuthEye i");
-      if (eyeIcon) eyeIcon.className = "fa-solid fa-eye";
-      const eye = document.getElementById("assalCompatOwnerAuthEye");
-      if (eye) {
-        eye.disabled = false;
-        eye.setAttribute("aria-label", "إظهار كلمة المرور");
-      }
-      setCompatOwnerAuthError("");
-      setCompatOwnerAuthBusy(false, false);
-
-      compatOwnerAuthUiState = null;
-
-      // لا نترك الفوكس داخل نافذة اختفت، ولا نترك modal-lock عالقاً بعد زر X.
-      try {
-        const active = document.activeElement;
-        if (active && modal && modal.contains(active) && typeof active.blur === "function")
-          active.blur();
-      } catch (_) {}
-
-      const resyncModalLock = () => {
+    if (ui.overlay) {
+      ui.overlay.classList.remove("is-open");
+      ui.overlay.setAttribute("aria-hidden", "true");
+      ui.overlay.style.pointerEvents = "none";
+      compatOwnerAuthUiHideTimer = setTimeout(() => {
         try {
-          if (typeof window.syncGlobalModalLock === "function")
-            window.syncGlobalModalLock();
+          ui.overlay.classList.remove("is-mounted");
+          ui.overlay.style.display = "none";
         } catch (_) {}
-      };
-      resyncModalLock();
-      try { requestAnimationFrame(resyncModalLock); } catch (_) {}
-      setTimeout(resyncModalLock, 60);
-
-      if (kind === "success") {
-        reopenCompatSubscriptionManagerAfterAuth(state.context);
-        resyncModalLock();
-        state.resolve(payload);
-      } else {
-        state.reject(
-          payload instanceof Error
-            ? payload
-            : new Error("تم إلغاء إعادة ربط جلسة المالك."),
-        );
-      }
-    }, 180);
+      }, 190);
+    }
+    setCompatOwnerAuthUiBusy(false);
+    setCompatOwnerAuthUiError("");
+    if (ui.input) {
+      ui.input.value = "";
+      ui.input.type = "password";
+    }
+    if (ui.eye) ui.eye.innerHTML = '<i class="fa-regular fa-eye"></i>';
+    if (typeof resolve === "function") resolve(result || null);
   }
 
-  function openCompatOwnerAuthRecoveryModal(authenticateHandler) {
-    const modal = document.getElementById("assalCompatOwnerAuthModal");
-    if (!modal || typeof authenticateHandler !== "function") {
-      return Promise.reject(
-        new Error("نافذة تأكيد هوية المالك غير جاهزة حالياً."),
-      );
+  async function submitCompatOwnerAuthUi() {
+    const ui = getCompatOwnerAuthUi();
+    if (!ui.overlay || !ui.overlay.classList.contains("is-open")) return;
+    const accessCode = String(ui.input?.value || "").trim();
+    if (!accessCode) {
+      setCompatOwnerAuthUiError("اكتب كلمة دخول المالك أولاً.");
+      return;
     }
+    if (ui.confirm?.disabled) return;
 
-    const context = captureCompatOwnerAuthRecoveryContext();
-    if (context.managerWasOpen) {
-      try {
-        window.closeCompatSubscriptionManagerModal();
-      } catch (_) {
-        const manager = document.getElementById("assalOwnerSubscriptionManager");
-        if (manager) {
-          manager.classList.remove("is-open");
-          manager.setAttribute("aria-hidden", "true");
-        }
-      }
-    }
+    const requestSequence = compatOwnerAuthUiSequence;
+    setCompatOwnerAuthUiBusy(true);
+    setCompatOwnerAuthUiError("");
 
-    // إذا كان فوكس سابق داخل نافذة الاشتراكات، نحرره حتى لا تفتح لوحة المفاتيح تلقائياً.
+    let result = null;
     try {
-      const active = document.activeElement;
-      if (active && typeof active.blur === "function") active.blur();
-    } catch (_) {}
-
-    return new Promise((resolve, reject) => {
-      const keydownHandler = (event) => {
-        if (event.key === "Escape" && !compatOwnerAuthUiState?.busy) {
-          event.preventDefault();
-          window.cancelCompatOwnerAuthRecovery();
-        }
-      };
-
-      compatOwnerAuthUiState = {
-        resolve,
-        reject,
-        authenticateHandler,
-        context,
-        busy: false,
-        settled: false,
-        keydownHandler,
-      };
-
-      const input = document.getElementById("assalCompatOwnerAuthPassword");
-      if (input) {
-        input.value = "";
-        input.type = "password";
-        input.disabled = false;
+      if (typeof authenticateAssalAccessCode !== "function") {
+        throw new Error("خدمة تسجيل دخول المالك غير جاهزة حالياً.");
       }
-      setCompatOwnerAuthError("");
-      setCompatOwnerAuthBusy(false, false);
+      result = await authenticateAssalAccessCode(accessCode, { staffOnly: true });
+    } catch (err) {
+      result = { ok: false, message: err?.message || "تعذر التحقق من حساب المالك." };
+    }
 
-      modal.classList.remove("is-closing");
-      modal.setAttribute("aria-hidden", "false");
-      document.addEventListener("keydown", keydownHandler, true);
+    // X / cancel is always authoritative. Never revive a closed overlay.
+    if (
+      requestSequence !== compatOwnerAuthUiSequence ||
+      !ui.overlay.classList.contains("is-open")
+    ) {
+      return;
+    }
 
-      requestAnimationFrame(() => {
-        modal.classList.add("is-open");
-        try {
-          if (typeof window.syncGlobalModalLock === "function")
-            window.syncGlobalModalLock();
-        } catch (_) {}
-        // متعمد: لا نعمل focus لحقل كلمة المرور عند الفتح.
-        // المستخدم يضغط الحقل بنفسه، لذلك لا تظهر الكيبورد ولا مؤشر الكتابة تلقائياً.
-      });
+    if (!result || result.ok !== true) {
+      setCompatOwnerAuthUiBusy(false);
+      setCompatOwnerAuthUiError(result?.message || "تعذر التحقق من كلمة دخول المالك.");
+      return;
+    }
+
+    const role = String(result.profile?.role || "").trim().toLowerCase();
+    const email = String(result.user?.email || "").trim().toLowerCase();
+    const uid = String(result.user?.uid || "").trim();
+    const expectedUid = String(
+      typeof window.getAdminAuthUid === "function"
+        ? window.getAdminAuthUid() || ""
+        : "",
+    ).trim();
+
+    if (role !== "owner" || email !== COMPAT_OWNER_AUTH_EMAIL) {
+      try {
+        if (window.assalSecureAuth?.signOutCurrent) {
+          await window.assalSecureAuth.signOutCurrent();
+        }
+      } catch (_) {}
+      setCompatOwnerAuthUiBusy(false);
+      setCompatOwnerAuthUiError("كلمة الدخول ليست لحساب المالك المعتمد.");
+      return;
+    }
+    if (!uid || (expectedUid && uid !== expectedUid)) {
+      try {
+        if (window.assalSecureAuth?.signOutCurrent) {
+          await window.assalSecureAuth.signOutCurrent();
+        }
+      } catch (_) {}
+      setCompatOwnerAuthUiBusy(false);
+      setCompatOwnerAuthUiError("جلسة Firebase لا تطابق حساب المالك المسجل في التطبيق.");
+      return;
+    }
+
+    try {
+      if (typeof result.user?.getIdToken === "function") {
+        await result.user.getIdToken(true);
+      }
+    } catch (err) {
+      setCompatOwnerAuthUiBusy(false);
+      setCompatOwnerAuthUiError(err?.message || "تعذر تثبيت جلسة المالك.");
+      return;
+    }
+
+    finishCompatOwnerAuthUi(result.user || null);
+  }
+
+  function bindCompatOwnerAuthUiOnce() {
+    if (compatOwnerAuthUiBound) return;
+    const ui = getCompatOwnerAuthUi();
+    if (!ui.overlay || !ui.input || !ui.confirm || !ui.cancel || !ui.close) return;
+    compatOwnerAuthUiBound = true;
+
+    ui.close.addEventListener("click", () => finishCompatOwnerAuthUi(null));
+    ui.cancel.addEventListener("click", () => finishCompatOwnerAuthUi(null));
+    ui.confirm.addEventListener("click", submitCompatOwnerAuthUi);
+    ui.eye?.addEventListener("click", () => {
+      const show = ui.input.type === "password";
+      ui.input.type = show ? "text" : "password";
+      if (ui.eye) {
+        ui.eye.innerHTML = show
+          ? '<i class="fa-regular fa-eye-slash"></i>'
+          : '<i class="fa-regular fa-eye"></i>';
+      }
+      // Deliberately do NOT focus the password field here.
+    });
+    ui.input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        submitCompatOwnerAuthUi();
+      }
+    });
+    ui.overlay.addEventListener("click", (event) => {
+      // Clicking the blurred background does nothing; only X / cancel closes it.
+      if (event.target === ui.overlay) event.preventDefault();
     });
   }
 
-  window.toggleCompatOwnerAuthRecoveryPassword = function () {
-    const input = document.getElementById("assalCompatOwnerAuthPassword");
-    const eye = document.getElementById("assalCompatOwnerAuthEye");
-    const icon = eye?.querySelector("i");
-    if (!input || input.disabled) return false;
-    const show = input.type === "password";
-    input.type = show ? "text" : "password";
-    if (icon) icon.className = show ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
-    if (eye)
-      eye.setAttribute(
-        "aria-label",
-        show ? "إخفاء كلمة المرور" : "إظهار كلمة المرور",
-      );
-    try {
-      input.focus({ preventScroll: true });
-    } catch (_) {}
-    return false;
-  };
-
-  window.cancelCompatOwnerAuthRecovery = function () {
-    const state = compatOwnerAuthUiState;
-    if (!state || state.busy || state.settled) return false;
-    finishCompatOwnerAuthRecovery(
-      "cancel",
-      new Error("تم إلغاء إعادة ربط جلسة المالك."),
-    );
-    return false;
-  };
-
-  window.submitCompatOwnerAuthRecovery = function (event) {
-    try {
-      event?.preventDefault?.();
-      event?.stopPropagation?.();
-    } catch (_) {}
-
-    const state = compatOwnerAuthUiState;
-    if (!state || state.busy || state.settled) return false;
-
-    const input = document.getElementById("assalCompatOwnerAuthPassword");
-    const accessCode = String(input?.value || "").trim();
-    if (!accessCode) {
-      setCompatOwnerAuthError("اكتب كلمة دخول المالك أولاً.");
-      try {
-        input?.focus({ preventScroll: true });
-      } catch (_) {}
-      return false;
+  function requestCompatOwnerAuthUi() {
+    if (compatOwnerAuthUiPromise) return compatOwnerAuthUiPromise;
+    bindCompatOwnerAuthUiOnce();
+    const ui = getCompatOwnerAuthUi();
+    if (!ui.overlay || !ui.input) {
+      return Promise.reject(new Error("واجهة تأكيد المالك غير جاهزة."));
     }
 
-    state.busy = true;
-    setCompatOwnerAuthError("");
-    setCompatOwnerAuthBusy(true, false);
+    clearTimeout(compatOwnerAuthUiHideTimer);
+    setCompatOwnerAuthUiError("");
+    setCompatOwnerAuthUiBusy(false);
+    ui.input.value = "";
+    ui.input.type = "password";
+    if (ui.eye) ui.eye.innerHTML = '<i class="fa-regular fa-eye"></i>';
 
-    Promise.resolve()
-      .then(() => state.authenticateHandler(accessCode))
-      .then((user) => {
-        if (compatOwnerAuthUiState !== state || state.settled) return;
-        state.busy = false;
-        setCompatOwnerAuthBusy(true, true);
-        setTimeout(() => {
-          if (compatOwnerAuthUiState === state && !state.settled)
-            finishCompatOwnerAuthRecovery("success", user);
-        }, 140);
-      })
-      .catch((err) => {
-        if (compatOwnerAuthUiState !== state || state.settled) return;
-        state.busy = false;
-        setCompatOwnerAuthBusy(false, false);
-        setCompatOwnerAuthError(getCompatOwnerAuthFriendlyError(err));
-        try {
-          if (input) {
-            input.disabled = false;
-            input.focus({ preventScroll: true });
-            input.select();
-          }
-        } catch (_) {}
+    compatOwnerAuthUiSequence += 1;
+    ui.overlay.style.display = "flex";
+    ui.overlay.style.pointerEvents = "none";
+    ui.overlay.classList.add("is-mounted");
+    ui.overlay.setAttribute("aria-hidden", "false");
+
+    compatOwnerAuthUiPromise = new Promise((resolve) => {
+      compatOwnerAuthUiResolve = resolve;
+    });
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!compatOwnerAuthUiPromise) return;
+        ui.overlay.classList.add("is-open");
+        ui.overlay.style.pointerEvents = "auto";
+        // IMPORTANT: no input.focus(), no autofocus, no keyboard popup.
       });
+    });
 
-    return false;
-  };
+    return compatOwnerAuthUiPromise;
+  }
+
+  function isSubscriptionManagerOpen() {
+    const modal = document.getElementById("assalOwnerSubscriptionManager");
+    return !!(modal && modal.classList.contains("is-open"));
+  }
+
+  function closeSubscriptionManagerShellForAuth() {
+    const modal = document.getElementById("assalOwnerSubscriptionManager");
+    if (!modal || !modal.classList.contains("is-open")) return false;
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    try {
+      if (typeof window.syncGlobalModalLock === "function") {
+        window.syncGlobalModalLock();
+      }
+    } catch (_) {}
+    return true;
+  }
+
+  function reopenSubscriptionManagerShellAfterAuth() {
+    const modal = document.getElementById("assalOwnerSubscriptionManager");
+    if (!modal) return;
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    try {
+      if (typeof window.syncGlobalModalLock === "function") {
+        window.syncGlobalModalLock();
+      }
+    } catch (_) {}
+  }
 
   async function requestCompatOwnerFirebaseReauth() {
     if (compatOwnerReauthPromise) return compatOwnerReauthPromise;
@@ -58667,62 +58387,18 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
         throw new Error("هذا الحساب لا يملك صلاحية إدارة اشتراكات التوافقات.");
       }
 
-      const user = await openCompatOwnerAuthRecoveryModal(async (accessCode) => {
-        if (typeof authenticateAssalAccessCode !== "function") {
-          throw new Error("خدمة تسجيل دخول المالك غير جاهزة حالياً.");
-        }
+      // If the subscription manager is already visible (e.g. a revoked token),
+      // close ONLY that manager first. The recovery overlay is completely
+      // independent from the app-wide modal-lock system.
+      const managerWasOpen = isSubscriptionManagerOpen();
+      if (managerWasOpen) closeSubscriptionManagerShellForAuth();
 
-        const result = await authenticateAssalAccessCode(accessCode, {
-          staffOnly: true,
-        });
-        if (!result || result.ok !== true) {
-          throw new Error(
-            result?.message || "تعذر التحقق من كلمة دخول المالك.",
-          );
-        }
+      const user = await requestCompatOwnerAuthUi();
+      if (!user) {
+        throw new Error("تم إلغاء تأكيد هوية المالك.");
+      }
 
-        const role = String(result.profile?.role || "").trim().toLowerCase();
-        const email = String(result.user?.email || "").trim().toLowerCase();
-        const uid = String(result.user?.uid || "").trim();
-        const expectedUid = String(
-          typeof window.getAdminAuthUid === "function"
-            ? window.getAdminAuthUid() || ""
-            : "",
-        ).trim();
-
-        if (role !== "owner" || email !== COMPAT_OWNER_AUTH_EMAIL) {
-          try {
-            if (
-              window.assalSecureAuth &&
-              typeof window.assalSecureAuth.signOutCurrent === "function"
-            ) {
-              await window.assalSecureAuth.signOutCurrent();
-            }
-          } catch (_) {}
-          throw new Error("كلمة الدخول ليست لحساب المالك المعتمد.");
-        }
-        if (!uid || (expectedUid && uid !== expectedUid)) {
-          try {
-            if (
-              window.assalSecureAuth &&
-              typeof window.assalSecureAuth.signOutCurrent === "function"
-            ) {
-              await window.assalSecureAuth.signOutCurrent();
-            }
-          } catch (_) {}
-          throw new Error("جلسة Firebase لا تطابق حساب المالك المسجل في التطبيق.");
-        }
-
-        const auth = await waitForCompatSecureAuthFacade();
-        const verifiedUser = await auth.waitUntilReady();
-        if (!verifiedUser)
-          throw new Error("تعذر تثبيت جلسة المالك في Firebase.");
-        if (typeof verifiedUser.getIdToken === "function")
-          await verifiedUser.getIdToken(true);
-
-        return verifiedUser;
-      });
-
+      if (managerWasOpen) reopenSubscriptionManagerShellAfterAuth();
       showToast("تم تأكيد جلسة المالك", "success");
       return user;
     })();
@@ -58836,46 +58512,34 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     if (typeof operation !== "function")
       throw new Error("COMPAT_SUB_OPERATION_MISSING");
 
+    // Validate the live owner session before EVERY owner Firestore action.
+    await ensureCompatSubscriptionOwnerAuth();
     const tools = await getCompatSubscriptionFirestoreTools();
-
-    // السلوك المثالي: الطلب الحقيقي أولاً مثل النسخة القديمة.
-    // لا نفتح نافذة تأكيد المالك لمجرد أن currentUser تأخر لحظة في Cold Start.
     try {
       return await operation(tools);
-    } catch (firstErr) {
-      if (!isCompatSubscriptionPermissionError(firstErr)) throw firstErr;
+    } catch (err) {
+      if (!isCompatSubscriptionPermissionError(err)) throw err;
 
-      // محاولة صامتة واحدة: إذا Firebase كان فقط يستعيد الجلسة/التوكن، نعطيه فرصة
-      // ونكرر الطلب بدون أي نافذة أو تدخل من المستخدم.
+      // A valid-looking local session can still have a revoked/stale server token.
+      // First refresh it. If Firestore still refuses, securely re-auth the owner
+      // once and retry exactly once; never loop indefinitely.
       try {
-        const auth = await waitForCompatSecureAuthFacade(5000);
-        let user = null;
-        try { user = auth.getCurrentUser?.() || null; } catch (_) {}
-        if (!user) {
-          try { user = await auth.waitUntilReady(); } catch (_) {}
-        }
-        if (user) {
-          try {
-            if (typeof user.getIdToken === "function") await user.getIdToken(true);
-          } catch (_) {}
-          await waitMs(90);
-          try {
-            return await operation(tools);
-          } catch (silentRetryErr) {
-            if (!isCompatSubscriptionPermissionError(silentRetryErr))
-              throw silentRetryErr;
-          }
-        }
-      } catch (silentErr) {
-        if (!isCompatSubscriptionPermissionError(silentErr)) {
-          // أخطاء التهيئة الصامتة لا تمنع مسار الاسترجاع الآمن أدناه.
-        }
+        await ensureCompatSubscriptionOwnerAuth({
+          forceTokenRefresh: true,
+          bypassCache: true,
+        });
+      } catch (_) {
+        await requestCompatOwnerFirebaseReauth();
       }
-
-      // فقط بعد رفض Firestore فعلياً واستنفاد الاسترجاع الصامت، نطلب تأكيد المالك.
-      await requestCompatOwnerFirebaseReauth();
       await waitMs(90);
-      return await operation(tools);
+      try {
+        return await operation(tools);
+      } catch (retryErr) {
+        if (!isCompatSubscriptionPermissionError(retryErr)) throw retryErr;
+        await requestCompatOwnerFirebaseReauth();
+        await waitMs(90);
+        return await operation(tools);
+      }
     }
   }
 
@@ -59047,8 +58711,9 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     if (compatSubFirestoreToolsPromise) return compatSubFirestoreToolsPromise;
 
     compatSubFirestoreToolsPromise = (async () => {
-      // مهم: إنشاء Firestore نفسه لا يحتاج إجبار نافذة تأكيد المالك.
-      // نجرب الطلب الحقيقي أولاً؛ نافذة التأكيد لا تظهر إلا إذا Firestore رفض فعلياً بالصلاحيات.
+      // Never touch owner Firestore until Firebase Auth has restored the real user.
+      await ensureCompatSubscriptionOwnerAuth();
+
       const [mod, appMod] = await Promise.all([
         import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
         import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
@@ -59942,14 +59607,8 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
       );
       renderSubscriptionsList();
     } catch (err) {
-      const errText = String(err?.message || err || "");
-      const ownerRecoveryCancelled =
-        errText.includes("تم إلغاء إعادة ربط جلسة المالك") ||
-        errText.includes("تم إلغاء");
-      if (!ownerRecoveryCancelled) {
-        console.error("COMPAT_SUBS_LOAD_ERROR", err);
-        renderErrorState(err?.message || "Firestore غير متاح للقراءة حالياً");
-      }
+      console.error("COMPAT_SUBS_LOAD_ERROR", err);
+      renderErrorState(err?.message || "Firestore غير متاح للقراءة حالياً");
     } finally {
       subscriptionsLoading = false;
     }
@@ -60688,7 +60347,7 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     setManagerView("create");
   };
 
-  window.openCompatSubscriptionManagerModal = function () {
+  window.openCompatSubscriptionManagerModal = async function () {
     if (!ownerCanManageSubscriptions()) {
       try {
         if (typeof window.showStaffOnlyPopup === "function")
@@ -60697,10 +60356,21 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
       return false;
     }
 
+    // Silent Firebase preflight FIRST. If the persisted owner session exists,
+    // the manager opens exactly like the old working behavior with no extra UI.
+    // Only a truly missing/revoked session invokes the isolated owner dialog.
+    try {
+      await ensureCompatSubscriptionOwnerAuth();
+    } catch (err) {
+      const msg = String(err?.message || "");
+      if (msg && !msg.includes("تم إلغاء")) {
+        showToast("تعذر فتح الاشتراكات", "error", msg);
+      }
+      return false;
+    }
+
     const modal = document.getElementById("assalOwnerSubscriptionManager");
     if (!modal) return false;
-    if (modal.classList.contains("is-open")) return true;
-
     const ownerLabel = document.getElementById("assalSubOwnerLabel");
     try {
       const label =
@@ -60709,7 +60379,6 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
           : "";
       if (ownerLabel) ownerLabel.textContent = label || "مالك النظام";
     } catch (_) {}
-
     resetSubscriptionFiltersForOpen();
     setManagerView("list");
     modal.classList.add("is-open");
@@ -60718,9 +60387,6 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
       if (typeof window.syncGlobalModalLock === "function")
         window.syncGlobalModalLock();
     } catch (_) {}
-
-    // القراءة تبدأ مثل السلوك القديم. إذا الجلسة سليمة فلن تظهر أي نافذة إضافية.
-    // فقط permission-denied الحقيقي يشغّل الاسترجاع الآمن داخل runCompatSubscriptionFirestoreOperation.
     loadSubscriptions(true);
     return true;
   };
