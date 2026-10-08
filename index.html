@@ -8515,7 +8515,7 @@ body.modal-lock{
   position: relative;
 }
 /* تجميد فعلي للخلفية أثناء أي نافذة/رسالة */
-body.modal-lock > *:not(.request-modal):not(.request-admin-modal):not(.request-track-modal):not(.stats-modal):not(.customer-profile-modal):not(.customers-admin-modal):not(.customer-blocked-overlay):not(.invoice-track-modal):not(.invoice-admin-modal):not(.activation-overlay):not(.swal2-container):not(#adModal):not(#adOverlay):not(#promoPopup):not(.assal-sub-manager){
+body.modal-lock > *:not(.request-modal):not(.request-admin-modal):not(.request-track-modal):not(.stats-modal):not(.customer-profile-modal):not(.customers-admin-modal):not(.customer-blocked-overlay):not(.invoice-track-modal):not(.invoice-admin-modal):not(.activation-overlay):not(.swal2-container):not(#adModal):not(#adOverlay):not(#promoPopup):not(.assal-sub-manager):not(.assal-owner-auth-recovery){
   pointer-events: none !important;
 }
 body.modal-lock .floating-new-btn,
@@ -8563,7 +8563,9 @@ body.modal-lock .swal2-container *,
 body.modal-lock #adModal *,
 body.modal-lock #promoPopup *,
 body.modal-lock .assal-sub-manager,
-body.modal-lock .assal-sub-manager *{
+body.modal-lock .assal-sub-manager *,
+body.modal-lock .assal-owner-auth-recovery,
+body.modal-lock .assal-owner-auth-recovery *{
   animation-play-state: running !important;
   pointer-events: auto !important;
   caret-color: auto;
@@ -8576,6 +8578,12 @@ body.modal-lock #promoPopup *{
   pointer-events: auto !important;
   touch-action: auto !important;
   visibility: visible !important;
+}
+body.modal-lock .assal-owner-auth-recovery,
+body.modal-lock .assal-owner-auth-recovery *{
+  pointer-events:auto !important;
+  touch-action:auto !important;
+  visibility:visible !important;
 }
 .request-modal,
 .request-admin-modal{
@@ -18028,7 +18036,7 @@ html.assal-viewport-transition body {
 
 <!-- ===== OWNER FIREBASE SESSION RECOVERY / PREMIUM ===== -->
 <div id="assalCompatOwnerAuthModal" class="assal-owner-auth-recovery" aria-hidden="true">
-  <section class="assal-owner-auth-card" role="dialog" aria-modal="true" aria-labelledby="assalCompatOwnerAuthTitle">
+  <section class="assal-owner-auth-card" role="dialog" aria-modal="true" aria-labelledby="assalCompatOwnerAuthTitle" tabindex="-1">
     <div class="assal-owner-auth-top">
       <div class="assal-owner-auth-brand">
         <div class="assal-owner-auth-brand-icon"><i class="fa-solid fa-shield-halved"></i></div>
@@ -58268,7 +58276,7 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
   const QR_LIB_SRC =
     "https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js";
   const ASSAL_OFFICE_AUTH_PROJECT_ID = "assal-office";
-  const ASSAL_OWNER_SUB_AUTH_RECOVERY_VERSION = "2026-10-08-owner-auth-preflight-fallback-v3";
+  const ASSAL_OWNER_SUB_AUTH_RECOVERY_VERSION = "2026-10-08-auth-stable-old-flow-no-freeze-v4";
 
   let ownerToolCycleInterval = null;
   let ownerToolShowTimeout = null;
@@ -58470,18 +58478,28 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
 
       compatOwnerAuthUiState = null;
 
+      // لا نترك الفوكس داخل نافذة اختفت، ولا نترك modal-lock عالقاً بعد زر X.
+      try {
+        const active = document.activeElement;
+        if (active && modal && modal.contains(active) && typeof active.blur === "function")
+          active.blur();
+      } catch (_) {}
+
+      const resyncModalLock = () => {
+        try {
+          if (typeof window.syncGlobalModalLock === "function")
+            window.syncGlobalModalLock();
+        } catch (_) {}
+      };
+      resyncModalLock();
+      try { requestAnimationFrame(resyncModalLock); } catch (_) {}
+      setTimeout(resyncModalLock, 60);
+
       if (kind === "success") {
         reopenCompatSubscriptionManagerAfterAuth(state.context);
-        try {
-          if (typeof window.syncGlobalModalLock === "function")
-            window.syncGlobalModalLock();
-        } catch (_) {}
+        resyncModalLock();
         state.resolve(payload);
       } else {
-        try {
-          if (typeof window.syncGlobalModalLock === "function")
-            window.syncGlobalModalLock();
-        } catch (_) {}
         state.reject(
           payload instanceof Error
             ? payload
@@ -58511,6 +58529,12 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
         }
       }
     }
+
+    // إذا كان فوكس سابق داخل نافذة الاشتراكات، نحرره حتى لا تفتح لوحة المفاتيح تلقائياً.
+    try {
+      const active = document.activeElement;
+      if (active && typeof active.blur === "function") active.blur();
+    } catch (_) {}
 
     return new Promise((resolve, reject) => {
       const keydownHandler = (event) => {
@@ -58549,15 +58573,8 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
           if (typeof window.syncGlobalModalLock === "function")
             window.syncGlobalModalLock();
         } catch (_) {}
-        setTimeout(() => {
-          try {
-            input?.focus({ preventScroll: true });
-          } catch (_) {
-            try {
-              input?.focus();
-            } catch (_) {}
-          }
-        }, 110);
+        // متعمد: لا نعمل focus لحقل كلمة المرور عند الفتح.
+        // المستخدم يضغط الحقل بنفسه، لذلك لا تظهر الكيبورد ولا مؤشر الكتابة تلقائياً.
       });
     });
   }
@@ -58819,34 +58836,46 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     if (typeof operation !== "function")
       throw new Error("COMPAT_SUB_OPERATION_MISSING");
 
-    // Validate the live owner session before EVERY owner Firestore action.
-    await ensureCompatSubscriptionOwnerAuth();
     const tools = await getCompatSubscriptionFirestoreTools();
+
+    // السلوك المثالي: الطلب الحقيقي أولاً مثل النسخة القديمة.
+    // لا نفتح نافذة تأكيد المالك لمجرد أن currentUser تأخر لحظة في Cold Start.
     try {
       return await operation(tools);
-    } catch (err) {
-      if (!isCompatSubscriptionPermissionError(err)) throw err;
+    } catch (firstErr) {
+      if (!isCompatSubscriptionPermissionError(firstErr)) throw firstErr;
 
-      // A valid-looking local session can still have a revoked/stale server token.
-      // First refresh it. If Firestore still refuses, securely re-auth the owner
-      // once and retry exactly once; never loop indefinitely.
+      // محاولة صامتة واحدة: إذا Firebase كان فقط يستعيد الجلسة/التوكن، نعطيه فرصة
+      // ونكرر الطلب بدون أي نافذة أو تدخل من المستخدم.
       try {
-        await ensureCompatSubscriptionOwnerAuth({
-          forceTokenRefresh: true,
-          bypassCache: true,
-        });
-      } catch (_) {
-        await requestCompatOwnerFirebaseReauth();
+        const auth = await waitForCompatSecureAuthFacade(5000);
+        let user = null;
+        try { user = auth.getCurrentUser?.() || null; } catch (_) {}
+        if (!user) {
+          try { user = await auth.waitUntilReady(); } catch (_) {}
+        }
+        if (user) {
+          try {
+            if (typeof user.getIdToken === "function") await user.getIdToken(true);
+          } catch (_) {}
+          await waitMs(90);
+          try {
+            return await operation(tools);
+          } catch (silentRetryErr) {
+            if (!isCompatSubscriptionPermissionError(silentRetryErr))
+              throw silentRetryErr;
+          }
+        }
+      } catch (silentErr) {
+        if (!isCompatSubscriptionPermissionError(silentErr)) {
+          // أخطاء التهيئة الصامتة لا تمنع مسار الاسترجاع الآمن أدناه.
+        }
       }
+
+      // فقط بعد رفض Firestore فعلياً واستنفاد الاسترجاع الصامت، نطلب تأكيد المالك.
+      await requestCompatOwnerFirebaseReauth();
       await waitMs(90);
-      try {
-        return await operation(tools);
-      } catch (retryErr) {
-        if (!isCompatSubscriptionPermissionError(retryErr)) throw retryErr;
-        await requestCompatOwnerFirebaseReauth();
-        await waitMs(90);
-        return await operation(tools);
-      }
+      return await operation(tools);
     }
   }
 
@@ -59018,9 +59047,8 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     if (compatSubFirestoreToolsPromise) return compatSubFirestoreToolsPromise;
 
     compatSubFirestoreToolsPromise = (async () => {
-      // Never touch owner Firestore until Firebase Auth has restored the real user.
-      await ensureCompatSubscriptionOwnerAuth();
-
+      // مهم: إنشاء Firestore نفسه لا يحتاج إجبار نافذة تأكيد المالك.
+      // نجرب الطلب الحقيقي أولاً؛ نافذة التأكيد لا تظهر إلا إذا Firestore رفض فعلياً بالصلاحيات.
       const [mod, appMod] = await Promise.all([
         import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
         import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
@@ -59914,8 +59942,14 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
       );
       renderSubscriptionsList();
     } catch (err) {
-      console.error("COMPAT_SUBS_LOAD_ERROR", err);
-      renderErrorState(err?.message || "Firestore غير متاح للقراءة حالياً");
+      const errText = String(err?.message || err || "");
+      const ownerRecoveryCancelled =
+        errText.includes("تم إلغاء إعادة ربط جلسة المالك") ||
+        errText.includes("تم إلغاء");
+      if (!ownerRecoveryCancelled) {
+        console.error("COMPAT_SUBS_LOAD_ERROR", err);
+        renderErrorState(err?.message || "Firestore غير متاح للقراءة حالياً");
+      }
     } finally {
       subscriptionsLoading = false;
     }
@@ -60654,7 +60688,7 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     setManagerView("create");
   };
 
-  window.openCompatSubscriptionManagerModal = async function () {
+  window.openCompatSubscriptionManagerModal = function () {
     if (!ownerCanManageSubscriptions()) {
       try {
         if (typeof window.showStaffOnlyPopup === "function")
@@ -60667,69 +60701,28 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     if (!modal) return false;
     if (modal.classList.contains("is-open")) return true;
 
-    /*
-     * IDEAL OWNER PREFLIGHT
-     * ---------------------
-     * لا نفتح لوحة الاشتراكات قبل أن تنتهي Firebase Auth من استعادة الجلسة.
-     * بالحالة الطبيعية تكون الجلسة جاهزة مسبقاً، لذلك الفتح يبقى مباشراً.
-     * إذا Firebase أكد فعلياً عدم وجود جلسة، تظهر نافذة تأكيد المالك فوق
-     * الواجهة الرئيسية فقط، وبعد نجاحها نكمل فتح اللوحة تلقائياً.
-     * بهذه الطريقة لا تظهر لوحة فارغة ولا رسالة permission-denied مؤقتة.
-     */
-    if (compatManagerOpeningPromise) return compatManagerOpeningPromise;
-
-    const runner = (async () => {
-      try {
-        await ensureCompatSubscriptionOwnerAuth();
-      } catch (err) {
-        const message = String(err?.message || err || "").trim();
-        const cancelled =
-          message.includes("تم إلغاء إعادة ربط جلسة المالك") ||
-          message.includes("تم إلغاء");
-        if (!cancelled) {
-          showToast(
-            "تعذر فتح الاشتراكات",
-            "error",
-            getCompatOwnerAuthFriendlyError(err),
-          );
-        }
-        return false;
-      }
-
-      // أعد التحقق بعد الانتظار: قد يتغير حساب الإدارة أثناء المصادقة.
-      if (!ownerCanManageSubscriptions()) return false;
-
-      const ownerLabel = document.getElementById("assalSubOwnerLabel");
-      try {
-        const label =
-          typeof window.getAdminAccountLabel === "function"
-            ? String(window.getAdminAccountLabel() || "").trim()
-            : "";
-        if (ownerLabel) ownerLabel.textContent = label || "مالك النظام";
-      } catch (_) {}
-
-      resetSubscriptionFiltersForOpen();
-      setManagerView("list");
-      modal.classList.add("is-open");
-      modal.setAttribute("aria-hidden", "false");
-      try {
-        if (typeof window.syncGlobalModalLock === "function")
-          window.syncGlobalModalLock();
-      } catch (_) {}
-
-      // الجلسة مؤكدة قبل الوصول هنا؛ القراءة لا تبدأ على Auth غير جاهز.
-      loadSubscriptions(true);
-      return true;
-    })();
-
-    compatManagerOpeningPromise = runner;
+    const ownerLabel = document.getElementById("assalSubOwnerLabel");
     try {
-      return await runner;
-    } finally {
-      if (compatManagerOpeningPromise === runner) {
-        compatManagerOpeningPromise = null;
-      }
-    }
+      const label =
+        typeof window.getAdminAccountLabel === "function"
+          ? String(window.getAdminAccountLabel() || "").trim()
+          : "";
+      if (ownerLabel) ownerLabel.textContent = label || "مالك النظام";
+    } catch (_) {}
+
+    resetSubscriptionFiltersForOpen();
+    setManagerView("list");
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden", "false");
+    try {
+      if (typeof window.syncGlobalModalLock === "function")
+        window.syncGlobalModalLock();
+    } catch (_) {}
+
+    // القراءة تبدأ مثل السلوك القديم. إذا الجلسة سليمة فلن تظهر أي نافذة إضافية.
+    // فقط permission-denied الحقيقي يشغّل الاسترجاع الآمن داخل runCompatSubscriptionFirestoreOperation.
+    loadSubscriptions(true);
+    return true;
   };
 
   window.closeCompatSubscriptionManagerModal = function () {
