@@ -2948,7 +2948,7 @@ h1 {
   width: 100%;
   transform: translateZ(0);
   /* تسريع عتادي */
-  will-change: display;
+  will-change: auto;
   /* تحسين تغيير الـ display */
 }
 .no-results {
@@ -26437,6 +26437,8 @@ if (requestFloatingBtn && floatingBtn) {
 
   let showRequest = false;
   setInterval(() => {
+    // Batch 4: no layout/style work while the WebView is backgrounded.
+    if (document.hidden) return;
     syncRequestButtonsToNewBtn();
 
     // نفس زر المحادثة صار مركز دخول: مراسلة الإدارة + مجتمع عسل.
@@ -26478,84 +26480,127 @@ const updateInitialPosition = () => {
 
 updateInitialPosition(); // تهيئة القيم عند التحميل
 
+let assalDragFrame = 0;
+let assalPendingDragX = 0;
+let assalPendingDragY = 0;
+let assalDragMaxX = 0;
+let assalDragMaxY = 0;
+
 floatingBtn.addEventListener("mousedown", startDragging);
-floatingBtn.addEventListener("touchstart", startDragging);
+floatingBtn.addEventListener("touchstart", startDragging, { passive: false });
+
+function attachActiveDragListeners(pointerType) {
+  if (pointerType === "touch") {
+    document.addEventListener("touchmove", drag, { passive: false });
+    document.addEventListener("touchend", stopDragging, { passive: true });
+    document.addEventListener("touchcancel", stopDragging, { passive: true });
+  } else {
+    document.addEventListener("mousemove", drag);
+    document.addEventListener("mouseup", stopDragging);
+  }
+}
+
+function detachActiveDragListeners() {
+  document.removeEventListener("mousemove", drag);
+  document.removeEventListener("mouseup", stopDragging);
+  document.removeEventListener("touchmove", drag, false);
+  document.removeEventListener("touchend", stopDragging, false);
+  document.removeEventListener("touchcancel", stopDragging, false);
+}
+
+function flushPendingDragPosition() {
+  assalDragFrame = 0;
+  if (!isDraggingInitiated) return;
+  floatingBtn.style.left = assalPendingDragX + "px";
+  floatingBtn.style.top = assalPendingDragY + "px";
+  floatingBtn.style.right = "auto";
+  floatingBtn.style.bottom = "auto";
+}
 
 // تحريك الزر العائم
 function startDragging(e) {
+  if (e.type === "touchstart" && (!e.touches || !e.touches[0])) return;
   e.preventDefault();
+  detachActiveDragListeners();
   isDragging = true;
   isDraggingInitiated = false;
-  updateInitialPosition(); // إعادة تحديث القيم الأولية عند بدء السحب
+
+  const rect = floatingBtn.getBoundingClientRect();
+  baseX = rect.left;
+  baseY = rect.top;
+  assalPendingDragX = baseX;
+  assalPendingDragY = baseY;
+  assalDragMaxX = Math.max(0, window.innerWidth - rect.width);
+  assalDragMaxY = Math.max(0, window.innerHeight - rect.height);
+
   if (e.type === "touchstart") {
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
     touchStartTime = Date.now(); // تسجيل وقت بدء اللمس
+    attachActiveDragListeners("touch");
   } else {
     startX = e.clientX;
     startY = e.clientY;
+    attachActiveDragListeners("mouse");
   }
   floatingBtn.style.cursor = "grabbing";
   floatingBtn.style.transition = "none"; // إزالة أي انتقال (transition) أثناء السحب
 }
 
-document.addEventListener("mousemove", drag);
-document.addEventListener("touchmove", drag);
-
 function drag(e) {
-  if (isDragging) {
-    e.preventDefault();
-    let newX, newY;
-    if (e.type === "touchmove") {
-      newX = e.touches[0].clientX;
-      newY = e.touches[0].clientY;
-    } else {
-      newX = e.clientX;
-      newY = e.clientY;
-    }
+  if (!isDragging) return;
+  if (e.cancelable) e.preventDefault();
 
-    const deltaX = Math.abs(newX - startX);
-    const deltaY = Math.abs(newY - startY);
-    if (deltaX > dragThreshold || deltaY > dragThreshold) {
-      isDraggingInitiated = true;
-
-      // حساب الموقع الجديد بناءً على الفرق النسبي من الموقع الأساسي
-      const offsetX = newX - startX;
-      const offsetY = newY - startY;
-      let currentX = baseX + offsetX;
-      let currentY = baseY + offsetY;
-
-      const maxX = window.innerWidth - floatingBtn.offsetWidth;
-      const maxY = window.innerHeight - floatingBtn.offsetHeight;
-      currentX = Math.max(0, Math.min(currentX, maxX));
-      currentY = Math.max(0, Math.min(currentY, maxY));
-
-      floatingBtn.style.left = currentX + "px";
-      floatingBtn.style.top = currentY + "px";
-      floatingBtn.style.right = "auto";
-      floatingBtn.style.bottom = "auto";
-    }
+  let newX, newY;
+  if (e.type === "touchmove") {
+    if (!e.touches || !e.touches[0]) return;
+    newX = e.touches[0].clientX;
+    newY = e.touches[0].clientY;
+  } else {
+    newX = e.clientX;
+    newY = e.clientY;
   }
+
+  const deltaX = Math.abs(newX - startX);
+  const deltaY = Math.abs(newY - startY);
+  if (deltaX <= dragThreshold && deltaY <= dragThreshold) return;
+
+  isDraggingInitiated = true;
+  const offsetX = newX - startX;
+  const offsetY = newY - startY;
+  assalPendingDragX = Math.max(0, Math.min(baseX + offsetX, assalDragMaxX));
+  assalPendingDragY = Math.max(0, Math.min(baseY + offsetY, assalDragMaxY));
+
+  // Batch 4: at most one position write per frame.
+  if (!assalDragFrame)
+    assalDragFrame = requestAnimationFrame(flushPendingDragPosition);
 }
 
-document.addEventListener("mouseup", stopDragging);
-document.addEventListener("touchend", stopDragging);
-
 function stopDragging(e) {
-  if (isDragging) {
-    isDragging = false;
-    floatingBtn.style.cursor = "pointer";
-    updateInitialPosition(); // تحديث الموقع الأساسي بعد انتهاء السحب
+  if (!isDragging) {
+    detachActiveDragListeners();
+    return;
+  }
 
-    // التحقق مما إذا كان النقر باللمس (tap) وليس سحب
-    if (e.type === "touchend" && !isDraggingInitiated) {
-      const touchEndTime = Date.now();
-      const touchDuration = touchEndTime - touchStartTime;
+  if (assalDragFrame) {
+    cancelAnimationFrame(assalDragFrame);
+    assalDragFrame = 0;
+    flushPendingDragPosition();
+  }
 
-      // إذا كانت مدة اللمس قصيرة (أقل من 300 مللي ثانية)، نعتبرها نقرة
-      if (touchDuration < 300) {
-        openModal();
-      }
+  isDragging = false;
+  detachActiveDragListeners();
+  floatingBtn.style.cursor = "pointer";
+  updateInitialPosition(); // تحديث الموقع الأساسي بعد انتهاء السحب
+
+  // التحقق مما إذا كان النقر باللمس (tap) وليس سحب
+  if (e.type === "touchend" && !isDraggingInitiated) {
+    const touchEndTime = Date.now();
+    const touchDuration = touchEndTime - touchStartTime;
+
+    // إذا كانت مدة اللمس قصيرة (أقل من 300 مللي ثانية)، نعتبرها نقرة
+    if (touchDuration < 300) {
+      openModal();
     }
   }
 }
@@ -34988,6 +35033,7 @@ function startNewsUpdates() {
   if (typeof canUseCompatibilities === "function" && canUseCompatibilities()) {
     if (!newsInterval && !window.__ASSAL_LOW_END_DEVICE__) {
       newsInterval = setInterval(() => {
+        if (document.hidden) return;
         refreshAssalAdminCompatFeed({
           force: navigator.onLine !== false,
         });
@@ -34997,7 +35043,9 @@ function startNewsUpdates() {
   }
   if (window.__ASSAL_LOW_END_DEVICE__) return;
   if (!newsInterval) {
-    newsInterval = setInterval(fetchTechNews, 60000);
+    newsInterval = setInterval(function () {
+      if (!document.hidden) fetchTechNews();
+    }, 60000);
   }
 }
 
@@ -50258,6 +50306,21 @@ html body footer {
       });
   };
 
+  if (typeof window.__ASSAL_SCHEDULE_COMMUNITY_INPUT_RESIZE__ !== "function") {
+    window.__ASSAL_SCHEDULE_COMMUNITY_INPUT_RESIZE__ = function (input, maxHeight) {
+      if (!input) return;
+      input.__assalPendingResizeMax = Number(maxHeight) || 110;
+      if (input.__assalResizeFrame) return;
+      input.__assalResizeFrame = requestAnimationFrame(function () {
+        input.__assalResizeFrame = 0;
+        if (!input.isConnected) return;
+        const limit = Number(input.__assalPendingResizeMax) || 110;
+        input.style.height = "auto";
+        input.style.height = Math.min(input.scrollHeight, limit) + "px";
+      });
+    };
+  }
+
   ready(function () {
     updateStaticCommunityTexts();
     var input = document.getElementById("assalCommunityInput");
@@ -50269,8 +50332,10 @@ html body footer {
           } catch (_) {}
           return;
         }
-        this.style.height = "auto";
-        this.style.height = Math.min(this.scrollHeight, 118) + "px";
+        window.__ASSAL_SCHEDULE_COMMUNITY_INPUT_RESIZE__(
+          this,
+          this.dataset.assalCommunityUltraBound === "1" ? 110 : 118,
+        );
       });
       input.addEventListener("keydown", function (e) {
         if (e.key === "Enter" && !e.shiftKey) {
@@ -52220,8 +52285,7 @@ html body footer {
     if (input && !input.dataset.assalCommunityUltraBound) {
       input.dataset.assalCommunityUltraBound = "1";
       input.addEventListener("input", function () {
-        this.style.height = "auto";
-        this.style.height = Math.min(this.scrollHeight, 110) + "px";
+        window.__ASSAL_SCHEDULE_COMMUNITY_INPUT_RESIZE__(this, 110);
         markTyping();
       });
       input.addEventListener("keydown", function (e) {
@@ -56020,6 +56084,7 @@ html.assal-offline-mode #assalOfflineBanner{
           startAdminLive();
           startTypingLive();
           injectTypingIndicators();
+          syncTypingIndicatorPulse();
           scrollCardsBottom("requestAdminModal");
         }, 120);
         return res;
@@ -56034,6 +56099,7 @@ html.assal-offline-mode #assalOfflineBanner{
           startCustomerLive();
           startTypingLive();
           injectTypingIndicators();
+          syncTypingIndicatorPulse();
           scrollCardsBottom("requestTrackModal");
         }, 120);
         return res;
@@ -56044,7 +56110,9 @@ html.assal-offline-mode #assalOfflineBanner{
     if (typeof oldCloseAdmin === "function") {
       window.closeRequestAdminModal = function () {
         stopAdminLive();
-        return oldCloseAdmin.apply(this, arguments);
+        const out = oldCloseAdmin.apply(this, arguments);
+        setTimeout(syncTypingIndicatorPulse, 0);
+        return out;
       };
     }
 
@@ -56052,7 +56120,9 @@ html.assal-offline-mode #assalOfflineBanner{
     if (typeof oldCloseCustomer === "function") {
       window.closeRequestTrackModal = function () {
         stopCustomerLive();
-        return oldCloseCustomer.apply(this, arguments);
+        const out = oldCloseCustomer.apply(this, arguments);
+        setTimeout(syncTypingIndicatorPulse, 0);
+        return out;
       };
     }
 
@@ -56131,6 +56201,30 @@ html.assal-offline-mode #assalOfflineBanner{
     }
   }
 
+  let typingIndicatorPulse = null;
+
+  function stopTypingIndicatorPulse() {
+    if (typingIndicatorPulse) {
+      clearInterval(typingIndicatorPulse);
+      typingIndicatorPulse = null;
+    }
+  }
+
+  function syncTypingIndicatorPulse() {
+    if (document.hidden || !anyChatOpen()) {
+      stopTypingIndicatorPulse();
+      return;
+    }
+    if (typingIndicatorPulse) return;
+    typingIndicatorPulse = setInterval(function () {
+      if (document.hidden || !anyChatOpen()) {
+        stopTypingIndicatorPulse();
+        return;
+      }
+      injectTypingIndicators();
+    }, 1200);
+  }
+
   function boot() {
     if (liveBooted) return;
     liveBooted = true;
@@ -56139,9 +56233,14 @@ html.assal-offline-mode #assalOfflineBanner{
     startTypingLive();
     if (modalOpen("requestAdminModal")) startAdminLive();
     if (modalOpen("requestTrackModal")) startCustomerLive();
-    setInterval(function () {
-      if (anyChatOpen()) injectTypingIndicators();
-    }, 1200);
+    syncTypingIndicatorPulse();
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) stopTypingIndicatorPulse();
+      else {
+        if (anyChatOpen()) injectTypingIndicators();
+        syncTypingIndicatorPulse();
+      }
+    });
   }
 
   if (document.readyState === "loading")
