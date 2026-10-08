@@ -15154,9 +15154,9 @@ html.assal-viewport-transition body {
       <div class="branch-name">مكتب عسل الفرع الرئيسي</div>
       <div class="branch-phone">07728640560</div>
     </div>
-    <a class="call-icon-btn" href="tel:07728640560" aria-label="اتصال الفرع الرئيسي">
-      <i class="fas fa-phone"></i>
-    </a>
+    <button class="call-icon-btn whatsapp-msg-btn" type="button" onclick="openAssalBranchWhatsapp('07728640560')" aria-label="مراسلة الفرع الرئيسي عبر واتساب" title="مراسلة عبر واتساب">
+      <i class="fab fa-whatsapp"></i>
+    </button>
   </div>
 
   <div class="contact-card branch-card">
@@ -15165,9 +15165,9 @@ html.assal-viewport-transition body {
       <div class="branch-name">مكتب عسل فرع حي المعلمين</div>
       <div class="branch-phone">07711107595</div>
     </div>
-    <a class="call-icon-btn" href="tel:07711107595" aria-label="اتصال فرع حي المعلمين">
-      <i class="fas fa-phone"></i>
-    </a>
+    <button class="call-icon-btn whatsapp-msg-btn" type="button" onclick="openAssalBranchWhatsapp('07711107595')" aria-label="مراسلة فرع حي المعلمين عبر واتساب" title="مراسلة عبر واتساب">
+      <i class="fab fa-whatsapp"></i>
+    </button>
   </div>
 
   <div class="contact-card branch-card">
@@ -15176,9 +15176,9 @@ html.assal-viewport-transition body {
       <div class="branch-name">مكتب عسل فرع التحرير</div>
       <div class="branch-phone">07730080731</div>
     </div>
-    <a class="call-icon-btn" href="tel:07730080731" aria-label="اتصال فرع التحرير">
-      <i class="fas fa-phone"></i>
-    </a>
+    <button class="call-icon-btn whatsapp-msg-btn" type="button" onclick="openAssalBranchWhatsapp('07730080731')" aria-label="مراسلة فرع التحرير عبر واتساب" title="مراسلة عبر واتساب">
+      <i class="fab fa-whatsapp"></i>
+    </button>
   </div>
 
   <div class="contact-card branch-card">
@@ -15187,12 +15187,12 @@ html.assal-viewport-transition body {
       <div class="branch-name">مكتب عسل فرع بلدروز</div>
       <div class="branch-phone">07755206020</div>
     </div>
-    <a class="call-icon-btn" href="tel:07755206020" aria-label="اتصال فرع بلدروز">
-      <i class="fas fa-phone"></i>
-    </a>
+    <button class="call-icon-btn whatsapp-msg-btn" type="button" onclick="openAssalBranchWhatsapp('07755206020')" aria-label="مراسلة فرع بلدروز عبر واتساب" title="مراسلة عبر واتساب">
+      <i class="fab fa-whatsapp"></i>
+    </button>
   </div>
 
-  <div class="contact-note">اضغط على أيقونة الاتصال حتى يتصل</div>
+  <div class="contact-note">اضغط على أيقونة واتساب لمراسلة الفرع مباشرة</div>
 </div>
 
 
@@ -25751,7 +25751,12 @@ function getTrackSearchConfig(kind) {
       activePanelId: "availabilityAdminActivePanel",
       archivePanelId: "availabilityAdminArchivePanel",
       loadFn: "loadAvailabilityRequests",
-      activeViewGetter: () => currentAvailabilityAdminView,
+      activeViewGetter: () =>
+        document
+          .getElementById("availabilityAdminArchiveTabBtn")
+          ?.classList.contains("is-active")
+          ? "archive"
+          : "active",
       searchEnabled: true,
       emptyClass: "request-admin-empty",
       emptyText: {
@@ -27434,6 +27439,11 @@ async function showActivationPopup() {
     return;
   }
 
+  // بوابة دورة التفعيل: تبقى فعالة لهذه الصفحة فقط حتى الـ reload بعد النجاح.
+  // الهدف منع إعلان بدء التشغيل من التداخل مع شاشة الدخول أو شاشة نجاح التفعيل،
+  // من دون إضافة أي تأخير إلى توقيت الإعلان الطبيعي بعد إعادة التحميل.
+  window.__ASSAL_ACTIVATION_FLOW_ACTIVE__ = true;
+
   const forcedReason = sessionStorage.getItem("forcedActivationReason");
 
   let overlay = document.getElementById("activation-overlay");
@@ -27479,18 +27489,18 @@ async function showActivationPopup() {
       `
                         ` +
       '<div class="activation-label">' +
-      "Secure Access" +
+      "دخول آمن" +
       "</div>" +
       `
                         ` +
       '<div class="activation-title">' +
-      "تأكيد الدخول للتطبيق" +
+      "مرحباً بك في عسل" +
       "</div>" +
       `
                         ` +
       '<div class="activation-subtitle">' +
       `
-                            الوصول مخصص لزبائن مكتب عسل فقط.
+                            دخول آمن إلى أسعار وخدمات مكتب عسل.
                         ` +
       "</div>" +
       `
@@ -27504,8 +27514,7 @@ async function showActivationPopup() {
                         ` +
       '<p class="activation-text">' +
       `
-                            حتى نحافظ على سرّية الأسعار وشغل المكتب، الدخول للتطبيق يحتاج كلمة مرور
-                            تستلمها مباشرة من مكتب عسل. اكتب الكلمة هنا وتوكل على الله.
+                            تطبيق عسل يجمع لك أسعار قطع الغيار، التوافقات، العروض والخدمات في مكان واحد، مع وصول سريع ومباشر للمعلومات التي تحتاجها أثناء العمل. ولحماية الأسعار وتنظيم استخدام خدمات مكتب عسل، أدخل رمز الدخول المخصص لك للمتابعة بأمان.
                         ` +
       "</p>" +
       `
@@ -27513,7 +27522,7 @@ async function showActivationPopup() {
                         ` +
       '<label class="activation-field-label" for="activation-password-input">' +
       `
-                            كلمة المرور
+                            رمز الدخول
                         ` +
       "</label>" +
       `
@@ -27526,14 +27535,14 @@ async function showActivationPopup() {
                                 id="activation-password-input"
                                 type="password"
                                 autocomplete="off"
-                                placeholder="اكتب كلمة المرور هنا"
+                                placeholder="أدخل رمز الدخول هنا"
                             />` +
       `
                             ` +
       `<button
                                 type="button"
                                 class="activation-toggle-password"
-                                aria-label="إظهار / إخفاء كلمة المرور"
+                                aria-label="إظهار / إخفاء رمز الدخول"
                             >` +
       `
                                 ` +
@@ -27565,7 +27574,7 @@ async function showActivationPopup() {
                             class="activation-btn primary"
                         >` +
       `
-                            تأكيد الدخول
+                            الدخول إلى التطبيق
                         ` +
       "</button>" +
       `
@@ -27686,7 +27695,7 @@ async function showActivationPopup() {
       const value = (passwordInput.value || "").trim();
 
       if (!value) {
-        setError("رجاءً اكتب كلمة المرور أولاً.");
+        setError("رجاءً أدخل رمز الدخول أولاً.");
         return;
       }
 
@@ -27704,7 +27713,7 @@ async function showActivationPopup() {
         console.error("Activation secure auth error:", err);
         authResult = {
           ok: false,
-          message: "تعذر التحقق من كلمة المرور حالياً. حاول مرة ثانية.",
+          message: "تعذر التحقق من رمز الدخول حالياً. حاول مرة ثانية.",
         };
       }
 
@@ -27713,7 +27722,7 @@ async function showActivationPopup() {
         confirmBtn.innerHTML = originalButtonHtml;
         setError(
           authResult?.message ||
-            "كلمة المرور غير صحيحة. تأكد منها وجرب مرة ثانية.",
+            "رمز الدخول غير صحيح. تأكد منه وجرب مرة ثانية.",
         );
         passwordInput.select();
         updateActivationLayout();
@@ -27803,7 +27812,7 @@ async function showActivationPopup() {
     // زر إغلاق التطبيق (نفس فكرة "لازم تفعّل")
     cancelBtn.addEventListener("click", () => {
       setError(
-        "لا يمكنك استخدام التطبيق بدون تفعيل. راجع مكتب عسل للحصول على كلمة المرور.",
+        "لا يمكنك استخدام التطبيق بدون تفعيل. راجع مكتب عسل للحصول على رمز الدخول.",
       );
     });
 
@@ -29376,6 +29385,27 @@ async function loadExcelFilesCore(options = {}) {
       savedAt,
     };
   } catch (error) {
+    const assalExcelErrorMessage = String(error && error.message ? error.message : "");
+    const assalExcelAbortLike =
+      (error && error.name === "AbortError") ||
+      /(?:operation\s+was\s+aborted|\baborted\b|\baborterror\b)/i.test(assalExcelErrorMessage);
+
+    /*
+      تسجيل الخروج يعيد تحميل الصفحة عمداً بينما قد يكون تحديث Excel بالخلفية قيد التنفيذ.
+      في هذه الحالة فقط، إلغاء fetch طبيعي وليس خطأ بيانات أو شبكة.
+      لا نخفي أي Abort أو خطأ حقيقي أثناء الاستخدام العادي.
+    */
+    if (window.__ASSAL_INTENTIONAL_LOGOUT_NAVIGATION__ === true && assalExcelAbortLike) {
+      return {
+        success: false,
+        hasData: !!(database && Object.keys(database).length),
+        aborted: true,
+        intentionalNavigation: true,
+        silent: true,
+        message: "",
+      };
+    }
+
     console.error("خطأ في تحميل ملف Excel:", error.message, error.stack);
     const restored = await assalRestorePriceSnapshot(
       "load-catch-" + (error && error.message ? error.message : "unknown"),
@@ -34904,6 +34934,16 @@ function shouldShowAssalOfflineNews() {
 
 // تحميل أخبار التقنيات
 async function fetchTechNews() {
+  // شاشة التفعيل الإلزامية لا تحتاج أي طلب أخبار بالخلفية.
+  // هذا يمنع طلبات شبكة غير ضرورية ورسائل خطأ مرئية أثناء تسجيل الخروج/الدخول.
+  try {
+    const activationBypass =
+      typeof getMaintenanceBypass === "function" && getMaintenanceBypass();
+    if (localStorage.getItem("isActivated") !== "true" && !activationBypass) {
+      return;
+    }
+  } catch (_) {}
+
   // حساب الأدمن لا يحمل أخبار التقنية نهائياً؛ مكانها شريط التوافقات.
   if (typeof canUseCompatibilities === "function" && canUseCompatibilities()) {
     await refreshAssalAdminCompatFeed({ force: false });
@@ -34987,7 +35027,11 @@ async function fetchTechNews() {
 
     ticker.innerHTML = html || "⚠️ ماكو أخبار حالياً";
   } catch (e) {
-    console.error("TechNews error:", e);
+    // فشل مصدر الأخبار خارجي وغير حرج؛ الواجهة عندها fallback طبيعي.
+    // لا نرسله كـ console.error حتى لا يحوله WebView إلى لوحة خطأ حمراء للمستخدم.
+    if (window.__ASSAL_PRODUCTION_DEBUG__ === true) {
+      console.warn("TechNews unavailable:", e);
+    }
     ticker.textContent = "⚠️ تعذر تحميل الأخبار حالياً";
   }
 }
@@ -39122,6 +39166,16 @@ const LuxAds = (() => {
   function maybeShow(attempt = 0) {
     const key = normalize(AD_CHOICE);
     if (!key || key === "off") return;
+
+    // لا نبدأ إعلان Startup على صفحة التفعيل نفسها. بعد نجاح التفعيل يحصل reload،
+    // وعندها يرجع نفس مسار الإعلان السريع الحالي (AD_DELAY_MS) بلا أي تأخير إضافي.
+    try {
+      if (window.__ASSAL_ACTIVATION_FLOW_ACTIVE__) return;
+      if (localStorage.getItem("isActivated") !== "true") return;
+    } catch (_) {
+      return;
+    }
+
     if (startupAdShown) return;
     if (startupAdScheduled && attempt === 0) return;
 
@@ -49008,6 +49062,9 @@ html body footer {
   }
 
   function confirmLogoutNow() {
+    /* وسم مغادرة مقصودة حتى لا يظهر Abort تحميل Excel كخطأ عند تسجيل الخروج السريع. */
+    window.__ASSAL_INTENTIONAL_LOGOUT_NAVIGATION__ = true;
+
     const overlay = document.getElementById(OVERLAY_ID);
     const approveBtn = overlay
       ? overlay.querySelector("#assalLogoutConfirmApprove")
@@ -64878,7 +64935,7 @@ body.assal-premium-shared-active #overlay{
     const icon = makeEl('div','assal-premium-icon','<i class="fa-solid fa-lock"></i>');
     const copy = makeEl('div','assal-premium-copy');
     const kicker = makeEl('div','assal-premium-kicker',oldLabel?.textContent?.trim() || 'دخول آمن');
-    const title = makeEl('div','assal-premium-title',oldTitle?.textContent?.trim() || 'تأكيد الدخول للتطبيق');
+    const title = makeEl('div','assal-premium-title',oldTitle?.textContent?.trim() || 'مرحباً بك في عسل');
     copy.append(kicker,title);
     brand.append(icon,copy);
     top.append(brand);
@@ -65155,3 +65212,323 @@ body.assal-premium-shared-active #overlay{
 })();
 </script>
 <!-- ===== /ASSAL PRE-BATCH 5 / PREMIUM MODAL UNIFICATION SAFE FINAL ===== -->
+
+
+<!-- ===== ASSAL PRE-BATCH 5 / HEADER ALIGN + ACTIVATION COPY REFINED SAFE FINAL ===== -->
+<style id="assal-prebatch5-header-activation-refined-safe-final">
+/* Surgical visual refinement only. No auth/navigation/data handlers are changed. */
+
+/* New Items: full-width header; brand far right, X far left. */
+#newItemsModal > .assal-premium-top{
+  width:100% !important;
+  max-width:none !important;
+  box-sizing:border-box !important;
+  align-self:stretch !important;
+  direction:rtl !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+}
+#newItemsModal > .assal-premium-top > .assal-premium-brand{
+  flex:0 1 auto !important;
+  min-width:0 !important;
+  margin:0 !important;
+}
+#newItemsModal > .assal-premium-top > .assal-premium-top-actions{
+  flex:0 0 auto !important;
+  margin:0 !important;
+}
+#newItemsModal > .assal-premium-top .assal-premium-copy{
+  text-align:right !important;
+  align-items:flex-start !important;
+}
+
+/* First-run activation: brand far right. Intentionally NO X/close control. */
+#activation-overlay .assal-premium-activation-top{
+  width:100% !important;
+  max-width:none !important;
+  box-sizing:border-box !important;
+  align-self:stretch !important;
+  direction:rtl !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  min-height:78px !important;
+  padding:15px 16px 14px !important;
+}
+#activation-overlay .assal-premium-activation-top > .assal-premium-brand{
+  margin:0 !important;
+  min-width:0 !important;
+  flex:0 1 auto !important;
+}
+#activation-overlay .assal-premium-activation-top .assal-premium-copy{
+  text-align:right !important;
+  align-items:flex-start !important;
+}
+
+/* Entry form only: taller shell with the actions genuinely anchored lower.
+   Success keeps its compact auto-height rule below. */
+#activation-overlay .activation-dialog:not(.is-success){
+  min-height:min(438px,calc(100dvh - 40px)) !important;
+}
+#activation-overlay .activation-body{
+  padding-top:22px !important;
+  padding-bottom:8px !important;
+}
+#activation-overlay .activation-text{
+  padding-top:12px !important;
+  padding-bottom:12px !important;
+  margin-bottom:17px !important;
+}
+#activation-overlay .activation-input-row{
+  min-height:50px !important;
+  height:50px !important;
+}
+#activation-overlay .activation-dialog:not(.is-success) .activation-footer{
+  margin-top:auto !important;
+  padding-top:14px !important;
+  padding-bottom:20px !important;
+}
+
+@media (max-width:480px){
+  #activation-overlay .assal-premium-activation-top{
+    min-height:74px !important;
+    padding:14px 14px 13px !important;
+  }
+  #activation-overlay .activation-dialog:not(.is-success){
+    min-height:min(425px,calc(100dvh - 36px)) !important;
+  }
+  #activation-overlay .activation-body{
+    padding-top:20px !important;
+    padding-bottom:7px !important;
+  }
+  #activation-overlay .activation-dialog:not(.is-success) .activation-footer{
+    margin-top:auto !important;
+    padding-top:12px !important;
+    padding-bottom:18px !important;
+  }
+}
+</style>
+<!-- ===== /ASSAL PRE-BATCH 5 / HEADER ALIGN + ACTIVATION COPY REFINED SAFE FINAL ===== -->
+
+
+<!-- ===== ASSAL PRE-BATCH 5 / ACTIVATION SINGLE-OPEN + LOGOUT FLASH + TECHNEWS SAFE FIX FINAL ===== -->
+<style id="assal-activation-single-open-safe-fix-final-style">
+/* شاشة الدخول الأولى لا تحتوي زر X إطلاقاً، حتى لو أضافت طبقة أخرى عن طريق الخطأ. */
+#activation-overlay > .close-modal-btn,
+#activation-overlay .activation-dialog > .close-modal-btn,
+#activation-overlay .activation-dialog > .assal-owner-auth-close,
+#activation-overlay .activation-dialog > .assal-space-close{
+  display:none !important;
+}
+</style>
+<script id="assal-activation-single-open-safe-fix-final-script">
+(function(){
+  'use strict';
+  if (window.__ASSAL_ACTIVATION_SINGLE_OPEN_SAFE_FIX_FINAL__) return;
+  window.__ASSAL_ACTIVATION_SINGLE_OPEN_SAFE_FIX_FINAL__ = true;
+
+  const previousShowActivationPopup = window.showActivationPopup;
+  if (typeof previousShowActivationPopup !== 'function') return;
+
+  let activationOpenPromise = null;
+
+  function hardHideOwnerAuthAboveActivation(){
+    /*
+      عندما يكون التطبيق غير مفعل لا يوجد أي سبب صحيح لظهور نافذة تأكيد
+      هوية المالك فوق بوابة الدخول الأساسية. نخفيها مباشرة بدون modal-lock.
+    */
+    try {
+      const owner = document.getElementById('assalOwnerAuthRecovery');
+      if (owner) {
+        owner.classList.remove('is-open','is-mounted');
+        owner.setAttribute('aria-hidden','true');
+        owner.style.pointerEvents = 'none';
+        owner.style.display = 'none';
+      }
+    } catch (_) {}
+
+    try {
+      const entry = document.getElementById('assalSpaceEntryModal');
+      if (entry) {
+        entry.classList.remove('show','assal-premium-preparing','assal-premium-closing');
+        entry.setAttribute('aria-hidden','true');
+      }
+    } catch (_) {}
+  }
+
+  function sanitizeActivationOverlay(overlay){
+    if (!overlay) return;
+    try {
+      overlay.querySelectorAll(
+        ':scope > .close-modal-btn, .activation-dialog > .close-modal-btn, .activation-dialog > .assal-owner-auth-close, .activation-dialog > .assal-space-close'
+      ).forEach(function(btn){ btn.remove(); });
+    } catch (_) {}
+  }
+
+  window.showActivationPopup = async function(){
+    /*
+      window.onload + حماية مجتمع عسل + pageshow قد تطلب نفس النافذة متقاربة.
+      إذا هي مفتوحة بالفعل، لا نعيد premium-preparing ولا نعيد الأنيميشن.
+    */
+    const existing = document.getElementById('activation-overlay');
+    if (existing && existing.classList.contains('is-open')) {
+      hardHideOwnerAuthAboveActivation();
+      sanitizeActivationOverlay(existing);
+      existing.classList.remove('assal-premium-activation-preparing');
+      return;
+    }
+
+    if (activationOpenPromise) return activationOpenPromise;
+
+    hardHideOwnerAuthAboveActivation();
+
+    activationOpenPromise = (async () => {
+      try {
+        const result = await previousShowActivationPopup.apply(this, arguments);
+        const overlay = document.getElementById('activation-overlay');
+        sanitizeActivationOverlay(overlay);
+        try { sessionStorage.removeItem('assal_after_logout_show_activation'); } catch (_) {}
+        return result;
+      } finally {
+        activationOpenPromise = null;
+      }
+    })();
+
+    return activationOpenPromise;
+  };
+})();
+</script>
+<!-- ===== /ASSAL PRE-BATCH 5 / ACTIVATION SINGLE-OPEN + LOGOUT FLASH + TECHNEWS SAFE FIX FINAL ===== -->
+
+<!-- ===== ASSAL PRE-BATCH 5 / AVAILABILITY ADMIN SEARCH SCOPE + ACTIVATION SUCCESS HEIGHT SAFE FIX FINAL ===== -->
+<style id="assal-prebatch5-activation-success-height-safe-fix-final">
+/*
+  Success state reuses the same activation dialog element.
+  Keep the entry form relaxed/taller, but let the success card shrink to its real content.
+*/
+#activation-overlay .activation-dialog.is-success{
+  min-height:0 !important;
+  height:auto !important;
+}
+#activation-overlay .activation-dialog.is-success .activation-success{
+  margin-inline:auto !important;
+}
+</style>
+<!-- ===== /ASSAL PRE-BATCH 5 / AVAILABILITY ADMIN SEARCH SCOPE + ACTIVATION SUCCESS HEIGHT SAFE FIX FINAL ===== -->
+
+<!-- ===== ASSAL PRE-BATCH 5 / WHATSAPP CONTACT + COMPACT ACTIVATION SAFE FINAL ===== -->
+<style id="assal-prebatch5-whatsapp-contact-compact-activation-safe-final">
+/* Contact: one clear WhatsApp action per branch. */
+#contactModal .whatsapp-msg-btn{
+  appearance:none !important;
+  -webkit-appearance:none !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:44px !important;
+  min-width:44px !important;
+  height:44px !important;
+  min-height:44px !important;
+  padding:0 !important;
+  border-radius:14px !important;
+  border:1px solid rgba(74,222,128,.34) !important;
+  background:linear-gradient(145deg,rgba(22,163,74,.96),rgba(13,148,136,.96)) !important;
+  color:#fff !important;
+  box-shadow:0 12px 28px rgba(22,163,74,.22),0 8px 20px rgba(0,0,0,.30) !important;
+  cursor:pointer !important;
+  flex:0 0 auto !important;
+  text-decoration:none !important;
+  transition:transform .16s ease,box-shadow .16s ease,filter .16s ease !important;
+}
+#contactModal .whatsapp-msg-btn i{
+  color:#fff !important;
+  font-size:21px !important;
+  line-height:1 !important;
+}
+#contactModal .whatsapp-msg-btn:active{
+  transform:scale(.95) !important;
+  box-shadow:0 7px 18px rgba(22,163,74,.18),0 5px 14px rgba(0,0,0,.28) !important;
+}
+#contactModal .contact-note{line-height:1.75 !important;}
+
+/* Entry form only: preserve premium spacing but remove the oversized dead area. */
+#activation-overlay .activation-dialog:not(.is-success){
+  min-height:min(392px,calc(100dvh - 40px)) !important;
+  height:auto !important;
+}
+#activation-overlay .activation-dialog:not(.is-success) .activation-body{
+  padding-top:18px !important;
+  padding-bottom:5px !important;
+}
+#activation-overlay .activation-dialog:not(.is-success) .activation-text{
+  padding-top:11px !important;
+  padding-bottom:11px !important;
+  margin-bottom:14px !important;
+}
+#activation-overlay .activation-dialog:not(.is-success) .activation-footer{
+  margin-top:18px !important;
+  padding-top:0 !important;
+  padding-bottom:16px !important;
+}
+@media (max-width:480px){
+  #activation-overlay .activation-dialog:not(.is-success){
+    min-height:min(382px,calc(100dvh - 34px)) !important;
+  }
+  #activation-overlay .activation-dialog:not(.is-success) .activation-body{
+    padding-top:16px !important;
+    padding-bottom:4px !important;
+  }
+  #activation-overlay .activation-dialog:not(.is-success) .activation-text{
+    margin-bottom:12px !important;
+  }
+  #activation-overlay .activation-dialog:not(.is-success) .activation-footer{
+    margin-top:16px !important;
+    padding-bottom:15px !important;
+  }
+}
+</style>
+<script id="assal-prebatch5-whatsapp-contact-safe-final-script">
+(function(){
+  'use strict';
+  if (window.__ASSAL_BRANCH_WHATSAPP_SAFE_FINAL__) return;
+  window.__ASSAL_BRANCH_WHATSAPP_SAFE_FINAL__ = true;
+
+  function normalizeIraqWhatsappNumber(raw){
+    let digits = String(raw || '').replace(/\D+/g,'');
+    if (!digits) return '';
+    if (digits.startsWith('00964')) digits = digits.slice(2);
+    if (digits.startsWith('964')) return digits;
+    if (digits.startsWith('0')) digits = digits.slice(1);
+    return '964' + digits;
+  }
+
+  window.openAssalBranchWhatsapp = function(rawPhone){
+    const phone = normalizeIraqWhatsappNumber(rawPhone);
+    if (!phone) return;
+    const appUrl = 'whatsapp://send?phone=' + encodeURIComponent(phone);
+    const webUrl = 'https://wa.me/' + encodeURIComponent(phone);
+
+    try {
+      if (window.Android) {
+        location.href = appUrl;
+        setTimeout(function(){
+          try {
+            if (document.visibilityState === 'visible') location.href = webUrl;
+          } catch (_) {}
+        },1200);
+        return;
+      }
+    } catch (_) {}
+
+    try {
+      const opened = window.open(webUrl,'_blank','noopener');
+      if (!opened) location.href = webUrl;
+    } catch (_) {
+      location.href = webUrl;
+    }
+  };
+})();
+</script>
+<!-- ===== /ASSAL PRE-BATCH 5 / WHATSAPP CONTACT + COMPACT ACTIVATION SAFE FINAL ===== -->
+
