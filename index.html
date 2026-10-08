@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- ===== ASSAL BATCH 3: NATIVE RUNTIME SAFE ===== -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -28459,31 +28460,59 @@ function assalToAbsoluteAssetUrl(url) {
   }
 }
 
+const assalImageCacheInflight = new Map();
+
 async function assalCacheImageUrl(url) {
+  let absoluteUrl = "";
   try {
     if (!("caches" in window) || !url) return false;
-    const absoluteUrl = assalToAbsoluteAssetUrl(url);
+    absoluteUrl = assalToAbsoluteAssetUrl(url);
     if (
       !absoluteUrl ||
       absoluteUrl.startsWith("data:") ||
       absoluteUrl.startsWith("blob:")
     )
       return false;
-    const cache = await caches.open(ASSAL_IMAGE_CACHE_NAME);
-    const existing = await cache.match(absoluteUrl);
-    if (existing) return true;
-    if (assalIsBrowserOffline()) return false;
-    const response = await fetch(absoluteUrl, {
-      cache: "force-cache",
-    });
-    if (response && response.ok) {
-      await cache.put(absoluteUrl, response.clone());
-      return true;
+
+    // أكثر من بطاقة قد تحمل نفس الصورة بنفس الفريم. نخليها تشترك بنفس العملية
+    // بدل فتح CacheStorage / match / fetch مكررة، بدون تغيير النتيجة أو السلوك.
+    const pending = assalImageCacheInflight.get(absoluteUrl);
+    if (pending) return pending;
+
+    const job = (async () => {
+      try {
+        const cache = await caches.open(ASSAL_IMAGE_CACHE_NAME);
+        const existing = await cache.match(absoluteUrl);
+        if (existing) return true;
+        if (assalIsBrowserOffline()) return false;
+        const response = await fetch(absoluteUrl, {
+          cache: "force-cache",
+        });
+        if (response && response.ok) {
+          await cache.put(absoluteUrl, response.clone());
+          return true;
+        }
+      } catch (err) {
+        try {
+          console.warn("ASSAL image cache failed:", url, err);
+        } catch (_) {}
+      }
+      return false;
+    })();
+
+    assalImageCacheInflight.set(absoluteUrl, job);
+    try {
+      return await job;
+    } finally {
+      if (assalImageCacheInflight.get(absoluteUrl) === job) {
+        assalImageCacheInflight.delete(absoluteUrl);
+      }
     }
   } catch (err) {
     try {
       console.warn("ASSAL image cache failed:", url, err);
     } catch (_) {}
+    if (absoluteUrl) assalImageCacheInflight.delete(absoluteUrl);
   }
   return false;
 }
@@ -31910,6 +31939,41 @@ function assalEscapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+const assalPhoneImageCropCache = new Map();
+const ASSAL_PHONE_CROP_CACHE_LIMIT = 220;
+
+function assalPhoneCropCacheKey(imgEl, w, h) {
+  try {
+    const raw = String(
+      (imgEl && imgEl.getAttribute && imgEl.getAttribute("data-assal-cache-src")) ||
+        (imgEl && imgEl.currentSrc) ||
+        (imgEl && imgEl.src) ||
+        "",
+    ).trim();
+    if (!raw) return "";
+    const src =
+      typeof assalToAbsoluteAssetUrl === "function"
+        ? assalToAbsoluteAssetUrl(raw)
+        : raw;
+    return src ? `${src}|${w}x${h}` : "";
+  } catch (_) {
+    return "";
+  }
+}
+
+function assalRememberPhoneCrop(key, value) {
+  if (!key || !value) return;
+  try {
+    if (assalPhoneImageCropCache.has(key)) assalPhoneImageCropCache.delete(key);
+    assalPhoneImageCropCache.set(key, value);
+    while (assalPhoneImageCropCache.size > ASSAL_PHONE_CROP_CACHE_LIMIT) {
+      const first = assalPhoneImageCropCache.keys().next();
+      if (first.done) break;
+      assalPhoneImageCropCache.delete(first.value);
+    }
+  } catch (_) {}
+}
+
 function assalTunePhoneImageCrop(imgEl, mode = "card") {
   if (!imgEl) return;
 
@@ -31931,19 +31995,38 @@ function assalTunePhoneImageCrop(imgEl, mode = "card") {
     }
   };
 
+  const applyCached = (entry) => {
+    if (!entry) return false;
+    const chosen = mode === "modal" ? entry.modal : entry.card;
+    if (!chosen) return false;
+    if (mode !== "modal" && entry.modal) {
+      imgEl.dataset.assalModalZoom = String(entry.modal.zoom);
+      imgEl.dataset.assalModalX = Number(entry.modal.x || 0).toFixed(2) + "%";
+      imgEl.dataset.assalModalY = Number(entry.modal.y || 0).toFixed(2) + "%";
+      imgEl.dataset.assalModalCropReady = "1";
+    }
+    applyCrop(chosen.zoom, chosen.x, chosen.y, false);
+    return true;
+  };
+
   try {
     const w = Number(imgEl.naturalWidth || 0);
     const h = Number(imgEl.naturalHeight || 0);
     if (!w || !h) return;
 
+    const cacheKey = assalPhoneCropCacheKey(imgEl, w, h);
+    if (cacheKey) {
+      const cached = assalPhoneImageCropCache.get(cacheKey);
+      if (cached && applyCached(cached)) return;
+    }
+
     const ratio = w / h;
     const nearSquare = ratio >= 0.82 && ratio <= 1.22;
     const mediumShape = ratio >= 0.68 && ratio <= 1.48;
-    const fallbackZoom = mode === "modal"
-      ? (nearSquare ? 1.05 : mediumShape ? 1.03 : 1.01)
-      : (nearSquare ? 1.18 : mediumShape ? 1.10 : 1.04);
+    const cardFallbackZoom = nearSquare ? 1.18 : mediumShape ? 1.10 : 1.04;
+    const modalFallbackZoom = nearSquare ? 1.05 : mediumShape ? 1.03 : 1.01;
 
-    let usedSmartBBox = false;
+    let cropEntry = null;
     try {
       const sampleMax = 220;
       const scale = Math.min(1, sampleMax / Math.max(w, h));
@@ -32016,47 +32099,37 @@ function assalTunePhoneImageCrop(imgEl, mode = "card") {
           const centerY = (minY + maxY) / 2 / sh;
 
           if (bboxWRatio < 0.96 && bboxHRatio < 0.96) {
-            const targetFill = mode === "modal" ? 0.90 : 0.82;
             const dominantFill = Math.max(bboxWRatio, bboxHRatio);
-            let zoom = dominantFill > 0 ? targetFill / dominantFill : fallbackZoom;
-
-            if (mode === "modal") {
-              zoom = Math.max(1, Math.min(1.18, zoom));
-            } else {
-              zoom = Math.max(1.02, Math.min(1.42, zoom));
-            }
-
             const shiftX = (0.5 - centerX) * 42;
             const shiftY = (0.5 - centerY) * 42;
-
-            // أثناء تجهيز صورة البطاقة نحسب أيضاً قص نافذة المعاينة مرة واحدة.
-            // هكذا فتح النافذة لاحقاً لا يحتاج Canvas/Decode جديد قبل الظهور.
-            if (mode !== "modal") {
-              const modalZoomRaw = dominantFill > 0 ? 0.90 / dominantFill : 1;
-              const modalZoom = Math.max(1, Math.min(1.18, modalZoomRaw));
-              imgEl.dataset.assalModalZoom = String(modalZoom);
-              imgEl.dataset.assalModalX = shiftX.toFixed(2) + "%";
-              imgEl.dataset.assalModalY = shiftY.toFixed(2) + "%";
-              imgEl.dataset.assalModalCropReady = "1";
-            }
-
-            applyCrop(zoom, shiftX, shiftY, false);
-            usedSmartBBox = true;
+            const cardZoomRaw = dominantFill > 0 ? 0.82 / dominantFill : cardFallbackZoom;
+            const modalZoomRaw = dominantFill > 0 ? 0.90 / dominantFill : modalFallbackZoom;
+            cropEntry = {
+              card: {
+                zoom: Math.max(1.02, Math.min(1.42, cardZoomRaw)),
+                x: shiftX,
+                y: shiftY,
+              },
+              modal: {
+                zoom: Math.max(1, Math.min(1.18, modalZoomRaw)),
+                x: shiftX,
+                y: shiftY,
+              },
+            };
           }
         }
       }
     } catch (_) {}
 
-    if (!usedSmartBBox) {
-      if (mode !== "modal") {
-        const modalFallbackZoom = nearSquare ? 1.05 : mediumShape ? 1.03 : 1.01;
-        imgEl.dataset.assalModalZoom = String(modalFallbackZoom);
-        imgEl.dataset.assalModalX = "0%";
-        imgEl.dataset.assalModalY = "0%";
-        imgEl.dataset.assalModalCropReady = "1";
-      }
-      applyCrop(fallbackZoom, 0, 0, false);
+    if (!cropEntry) {
+      cropEntry = {
+        card: { zoom: cardFallbackZoom, x: 0, y: 0 },
+        modal: { zoom: modalFallbackZoom, x: 0, y: 0 },
+      };
     }
+
+    if (cacheKey) assalRememberPhoneCrop(cacheKey, cropEntry);
+    applyCached(cropEntry);
   } catch (_) {}
 }
 window.assalTunePhoneImageCrop = assalTunePhoneImageCrop;
@@ -46957,23 +47030,35 @@ ${actionText} ${safeBranch}`;
     card.classList.add("support-collapsible-card", "support-card-ready");
   }
 
+  const SUPPORT_CARD_SELECTOR =
+    ".request-thread-card, .request-admin-card, .invoice-sent-card, .invoice-admin-card-shell";
+
   window.upgradeSupportCards = function (root) {
     const scope = root && root.querySelectorAll ? root : document;
-    scope
-      .querySelectorAll(
-        ".request-thread-card, .request-admin-card, .invoice-sent-card, .invoice-admin-card-shell",
-      )
-      .forEach(upgradeCard);
+    try {
+      if (root && root.matches && root.matches(SUPPORT_CARD_SELECTOR)) {
+        upgradeCard(root);
+      }
+    } catch (_) {}
+    scope.querySelectorAll(SUPPORT_CARD_SELECTOR).forEach(upgradeCard);
   };
 
   let frame = null;
+  const pendingUpgradeRoots = new Set();
 
-  function scheduleUpgrade() {
-    if (frame) cancelAnimationFrame(frame);
+  function scheduleUpgrade(root) {
+    pendingUpgradeRoots.add(root && root.querySelectorAll ? root : document);
+    if (frame) return;
     frame = requestAnimationFrame(() => {
       frame = null;
+      const roots = Array.from(pendingUpgradeRoots);
+      pendingUpgradeRoots.clear();
       try {
-        window.upgradeSupportCards(document);
+        if (roots.includes(document)) {
+          window.upgradeSupportCards(document);
+        } else {
+          roots.forEach((item) => window.upgradeSupportCards(item));
+        }
       } catch (_) {}
     });
   }
@@ -46988,17 +47073,18 @@ ${actionText} ${safeBranch}`;
 
   window.addEventListener("load", scheduleUpgrade);
 
-  const SUPPORT_CARD_SELECTOR =
-    ".request-thread-card, .request-admin-card, .invoice-sent-card, .invoice-admin-card-shell";
   const observer = new MutationObserver((mutations) => {
-    const relevant = mutations.some((mutation) =>
-      Array.from(mutation.addedNodes || []).some((node) =>
-        node && node.nodeType === 1 &&
-        ((node.matches && node.matches(SUPPORT_CARD_SELECTOR)) ||
-         (node.querySelector && node.querySelector(SUPPORT_CARD_SELECTOR))),
-      ),
-    );
-    if (relevant) scheduleUpgrade();
+    mutations.forEach((mutation) => {
+      Array.from(mutation.addedNodes || []).forEach((node) => {
+        if (
+          node && node.nodeType === 1 &&
+          ((node.matches && node.matches(SUPPORT_CARD_SELECTOR)) ||
+            (node.querySelector && node.querySelector(SUPPORT_CARD_SELECTOR)))
+        ) {
+          scheduleUpgrade(node);
+        }
+      });
+    });
   });
   observer.observe(document.documentElement, {
     childList: true,
@@ -47108,53 +47194,65 @@ html, body, button, input, textarea, select,
       .trim();
   }
 
+  function applyBranchFooterToBox(box) {
+    if (!box || !box.matches || !box.matches(".request-message.admin")) return;
+    if (
+      box.classList.contains("availability-request-message") ||
+      box.closest("#availabilityTrackModal") ||
+      box.closest("#availabilityAdminModal")
+    ) {
+      return;
+    }
+    if (
+      box.dataset.branchFooterReady === "1" ||
+      box.querySelector(".message-branch-footer")
+    ) {
+      box.dataset.branchFooterReady = "1";
+      return;
+    }
+    let branch = box.getAttribute("data-branch-label") || "";
+    if (!branch) {
+      const senderText = textOf(
+        box.querySelector(".request-message-head span:first-child"),
+      );
+      if (
+        senderText &&
+        senderText !== "فريق الدعم" &&
+        senderText !== "الإدارة"
+      ) {
+        branch = senderText;
+      }
+    }
+    if (!branch) return;
+    const footer = document.createElement("div");
+    footer.className = "message-branch-footer";
+    footer.innerHTML = `<i class="fas fa-store"></i><span>بواسطة: ${branch}</span>`;
+    box.appendChild(footer);
+    box.dataset.branchFooterReady = "1";
+  }
+
   function applyBranchFooters(root) {
-    (root && root.querySelectorAll ? root : document)
-      .querySelectorAll(".request-message.admin")
-      .forEach(function (box) {
-        if (
-          box.classList.contains("availability-request-message") ||
-          box.closest("#availabilityTrackModal") ||
-          box.closest("#availabilityAdminModal")
-        ) {
-          return;
-        }
-        if (
-          box.dataset.branchFooterReady === "1" ||
-          box.querySelector(".message-branch-footer")
-        ) {
-          box.dataset.branchFooterReady = "1";
-          return;
-        }
-        let branch = box.getAttribute("data-branch-label") || "";
-        if (!branch) {
-          const senderText = textOf(
-            box.querySelector(".request-message-head span:first-child"),
-          );
-          if (
-            senderText &&
-            senderText !== "فريق الدعم" &&
-            senderText !== "الإدارة"
-          ) {
-            branch = senderText;
-          }
-        }
-        if (!branch) return;
-        const footer = document.createElement("div");
-        footer.className = "message-branch-footer";
-        footer.innerHTML = `<i class="fas fa-store"></i><span>بواسطة: ${branch}</span>`;
-        box.appendChild(footer);
-        box.dataset.branchFooterReady = "1";
-      });
+    const scope = root && root.querySelectorAll ? root : document;
+    try {
+      if (root && root.matches && root.matches(".request-message.admin")) {
+        applyBranchFooterToBox(root);
+      }
+    } catch (_) {}
+    scope.querySelectorAll(".request-message.admin").forEach(applyBranchFooterToBox);
   }
 
   let branchFrame = null;
+  const pendingBranchRoots = new Set();
 
-  function scheduleBranchFooters() {
-    if (branchFrame) cancelAnimationFrame(branchFrame);
+  function scheduleBranchFooters(root) {
+    pendingBranchRoots.add(root && root.querySelectorAll ? root : document);
+    if (branchFrame) return;
     branchFrame = requestAnimationFrame(function () {
       branchFrame = null;
-      applyBranchFooters(document);
+      const roots = Array.from(pendingBranchRoots);
+      pendingBranchRoots.clear();
+      if (roots.includes(document)) applyBranchFooters(document);
+      else roots.forEach(applyBranchFooters);
     });
   }
 
@@ -47168,16 +47266,17 @@ html, body, button, input, textarea, select,
 
   window.addEventListener("load", scheduleBranchFooters);
   const branchObserver = new MutationObserver(function (mutations) {
-    const relevant = mutations.some(function (mutation) {
-      return Array.from(mutation.addedNodes || []).some(function (node) {
-        return !!(
+    mutations.forEach(function (mutation) {
+      Array.from(mutation.addedNodes || []).forEach(function (node) {
+        if (
           node && node.nodeType === 1 &&
           ((node.matches && node.matches(".request-message.admin")) ||
             (node.querySelector && node.querySelector(".request-message.admin")))
-        );
+        ) {
+          scheduleBranchFooters(node);
+        }
       });
     });
-    if (relevant) scheduleBranchFooters();
   });
   branchObserver.observe(document.documentElement, {
     childList: true,
@@ -47391,12 +47490,23 @@ html, body, button, input, textarea, select,
   }
 
   let frame = null;
+  const pendingToneRoots = new Set();
 
   function scheduleApply(root) {
-    if (frame) cancelAnimationFrame(frame);
+    const target = root && root.querySelectorAll ? root : document;
+    pendingToneRoots.add(target);
+    if (frame) return;
     frame = requestAnimationFrame(function () {
       frame = null;
-      applyAlternatingCardTones(root || document);
+      const roots = Array.from(pendingToneRoots);
+      pendingToneRoots.clear();
+      if (roots.includes(document)) {
+        applyAlternatingCardTones(document);
+        return;
+      }
+      roots.forEach(function (item) {
+        applyAlternatingCardTones(item);
+      });
     });
   }
 
@@ -47416,8 +47526,11 @@ html, body, button, input, textarea, select,
     scheduleApply(document);
   });
   const observedToneCards = new WeakSet();
-  const cardAttributeObserver = new MutationObserver(function () {
-    scheduleApply(document);
+  const cardAttributeObserver = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      const card = mutation.target;
+      scheduleApply((card && card.parentElement) || document);
+    });
   });
 
   function observeToneCards(root) {
@@ -47437,8 +47550,8 @@ html, body, button, input, textarea, select,
 
   observeToneCards(document);
   const observer = new MutationObserver(function (mutations) {
-    let relevant = false;
     mutations.forEach(function (mutation) {
+      let relevant = false;
       mutation.addedNodes.forEach(function (node) {
         if (!node || node.nodeType !== 1) return;
         observeToneCards(node);
@@ -47454,8 +47567,8 @@ html, body, button, input, textarea, select,
             (node.querySelector && node.querySelector(CARD_SELECTOR)))
         ) relevant = true;
       });
+      if (relevant) scheduleApply(mutation.target || document);
     });
-    if (relevant) scheduleApply(document);
   });
   observer.observe(document.documentElement, {
     childList: true,
@@ -57034,10 +57147,22 @@ html.low-end-device .assal-private-clean-dialog *{
     true,
   );
 
+  function prepareAddedTree(root) {
+    if (!root || root.nodeType !== 1) return;
+    try {
+      if (isPrivateEditInput(root)) prepareInput(root);
+      if (root.querySelectorAll) {
+        root.querySelectorAll(".assal-private-clean-input").forEach(prepareInput);
+      }
+    } catch (_) {}
+  }
+
   var mo = null;
   try {
-    mo = new MutationObserver(function () {
-      prepareAll();
+    mo = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        Array.from(mutation.addedNodes || []).forEach(prepareAddedTree);
+      });
     });
     mo.observe(document.documentElement || document.body, {
       childList: true,
