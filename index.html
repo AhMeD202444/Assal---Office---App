@@ -15006,6 +15006,7 @@ html.assal-viewport-transition body {
   window.__ASSAL_NATIVE_PERF_GOVERNOR_V1__ = true;
   let releaseTimer = 0;
   let lastInteractionAt = 0;
+  let interactionActive = false;
   const root = document.documentElement;
   function releaseInteraction(){
     const elapsed = performance.now() - lastInteractionAt;
@@ -15014,11 +15015,17 @@ html.assal-viewport-transition body {
       return;
     }
     releaseTimer = 0;
-    root.classList.remove('assal-ui-interacting');
+    if (interactionActive) {
+      interactionActive = false;
+      root.classList.remove('assal-ui-interacting');
+    }
   }
   function markInteracting(){
     lastInteractionAt = performance.now();
-    root.classList.add('assal-ui-interacting');
+    if (!interactionActive) {
+      interactionActive = true;
+      root.classList.add('assal-ui-interacting');
+    }
     if (!releaseTimer) releaseTimer = setTimeout(releaseInteraction, 170);
   }
   window.addEventListener('scroll', markInteracting, {passive:true, capture:true});
@@ -28515,6 +28522,19 @@ function assalToAbsoluteAssetUrl(url) {
 }
 
 const assalImageCacheInflight = new Map();
+let assalImageCacheHandlePromise = null;
+
+async function assalOpenImageCache() {
+  if (!("caches" in window)) throw new Error("CacheStorage unavailable");
+  if (!assalImageCacheHandlePromise) {
+    assalImageCacheHandlePromise = caches.open(ASSAL_IMAGE_CACHE_NAME).catch((err) => {
+      // Allow a later retry if the WebView transiently rejects CacheStorage.
+      assalImageCacheHandlePromise = null;
+      throw err;
+    });
+  }
+  return assalImageCacheHandlePromise;
+}
 
 async function assalCacheImageUrl(url) {
   let absoluteUrl = "";
@@ -28535,7 +28555,7 @@ async function assalCacheImageUrl(url) {
 
     const job = (async () => {
       try {
-        const cache = await caches.open(ASSAL_IMAGE_CACHE_NAME);
+        const cache = await assalOpenImageCache();
         const existing = await cache.match(absoluteUrl);
         if (existing) return true;
         if (assalIsBrowserOffline()) return false;
@@ -28599,7 +28619,7 @@ async function assalUseCachedImage(img) {
       img.getAttribute("data-assal-cache-src") || img.getAttribute("src") || "";
     const absoluteUrl = assalToAbsoluteAssetUrl(rawUrl);
     if ("caches" in window && absoluteUrl) {
-      const cache = await caches.open(ASSAL_IMAGE_CACHE_NAME);
+      const cache = await assalOpenImageCache();
       const response = await cache.match(absoluteUrl);
       if (response) {
         const blob = await response.blob();
@@ -28610,6 +28630,10 @@ async function assalUseCachedImage(img) {
           } catch (_) {}
         };
         img.onerror = function () {
+          try {
+            // Failed blob URLs are no longer useful; release them before fallback.
+            URL.revokeObjectURL(objectUrl);
+          } catch (_) {}
           try {
             img.onerror = null;
             img.__assalFallbackApplied = true;
@@ -34213,18 +34237,17 @@ function scrollToTop() {
 
 // التحكم بظهور الزر بناءً على التمرير وعدد النتائج
 
+let assalScrollTopButtonVisible = null;
 function toggleScrollToTopButton() {
   const scrollBtn = document.getElementById("scrollToTopBtn");
-  const scrollPosition = window.scrollY; // موقع التمرير الحالي
   const results = document.getElementById("results");
-  const resultCount = results.children.length; // عدد النتائج
+  if (!scrollBtn || !results) return;
+  const shouldShow = results.children.length > 0 && window.scrollY > 100;
 
-  // الشرط: يظهر الزر إذا كانت هناك نتائج (حتى لو واحدة) وتم التمرير لأسفل أكثر من 100 بكسل
-  if (resultCount > 0 && scrollPosition > 100) {
-    scrollBtn.classList.add("show-scroll-btn");
-  } else {
-    scrollBtn.classList.remove("show-scroll-btn");
-  }
+  // نفس السلوك المرئي؛ لا نكتب class من جديد إذا الحالة لم تتغيّر.
+  if (assalScrollTopButtonVisible === shouldShow) return;
+  assalScrollTopButtonVisible = shouldShow;
+  scrollBtn.classList.toggle("show-scroll-btn", shouldShow);
 }
 
 // ربط الزر بالنقر
@@ -47563,7 +47586,8 @@ html, body, button, input, textarea, select,
   ].join(", ");
 
   function isVisible(el) {
-    if (!el) return false;
+    if (!el || el.hidden) return false;
+    if (el.style && (el.style.display === "none" || el.style.visibility === "hidden")) return false;
     const style = window.getComputedStyle(el);
     return style.display !== "none" && style.visibility !== "hidden";
   }
@@ -47580,12 +47604,19 @@ html, body, button, input, textarea, select,
       parentMap.get(parent).push(card);
     });
 
-    parentMap.forEach(function (group) {
+    parentMap.forEach(function (group, parent) {
+      // التبويب المخفي كله لا يحتاج فحص كل بطاقة داخله.
+      try {
+        if (parent.hidden || parent.style.display === "none" || parent.style.visibility === "hidden") return;
+        const parentStyle = window.getComputedStyle(parent);
+        if (parentStyle.display === "none" || parentStyle.visibility === "hidden") return;
+      } catch (_) {}
+
       let visibleIndex = 0;
       group.forEach(function (card) {
         if (!isVisible(card)) return;
         const tone = visibleIndex % 2 === 0 ? "a" : "b";
-        card.setAttribute("data-card-tone", tone);
+        if (card.getAttribute("data-card-tone") !== tone) card.setAttribute("data-card-tone", tone);
         visibleIndex += 1;
       });
     });
@@ -47627,7 +47658,7 @@ html, body, button, input, textarea, select,
   window.addEventListener("load", function () {
     scheduleApply(document);
   });
-  const observedToneCards = new WeakSet();
+  let observedToneCards = new WeakSet();
   const cardAttributeObserver = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutation) {
       const card = mutation.target;
@@ -47650,6 +47681,19 @@ html, body, button, input, textarea, select,
     });
   }
 
+  let toneObserverRebuildFrame = 0;
+  function scheduleToneObserverRebuild() {
+    if (toneObserverRebuildFrame) return;
+    toneObserverRebuildFrame = requestAnimationFrame(function () {
+      toneObserverRebuildFrame = 0;
+      // MutationObserver has no per-target unobserve. Rebuilding drops references
+      // to cards removed by repeated renders while preserving identical behavior.
+      cardAttributeObserver.disconnect();
+      observedToneCards = new WeakSet();
+      observeToneCards(document);
+    });
+  }
+
   observeToneCards(document);
   const observer = new MutationObserver(function (mutations) {
     mutations.forEach(function (mutation) {
@@ -47667,7 +47711,10 @@ html, body, button, input, textarea, select,
           node && node.nodeType === 1 &&
           ((node.matches && node.matches(CARD_SELECTOR)) ||
             (node.querySelector && node.querySelector(CARD_SELECTOR)))
-        ) relevant = true;
+        ) {
+          relevant = true;
+          scheduleToneObserverRebuild();
+        }
       });
       if (relevant) scheduleApply(mutation.target || document);
     });
@@ -54904,10 +54951,12 @@ html.assal-offline-mode #assalOfflineBanner{
   }
 
   function scheduleForce() {
-    forceOfflineBannerPosition();
-    setTimeout(forceOfflineBannerPosition, 40);
-    setTimeout(forceOfflineBannerPosition, 160);
-    setTimeout(forceOfflineBannerPosition, 420);
+    /*
+      The FINAL CSS above permanently hides this legacy badge. Keep it attached to body
+      for compatibility, but do not force layout/read header geometry for an invisible node.
+      showAssalOfflineState/hideAssalOfflineState and all connectivity behavior stay intact.
+    */
+    forceOfflineBannerToBody();
   }
 
   var oldShow = window.showAssalOfflineState;
@@ -65531,4 +65580,153 @@ body.assal-premium-shared-active #overlay{
 })();
 </script>
 <!-- ===== /ASSAL PRE-BATCH 5 / WHATSAPP CONTACT + COMPACT ACTIVATION SAFE FINAL ===== -->
+
+<!-- ===== ASSAL BATCH 5: TRUE NATIVE FRAME ENGINE / UNDER-SKIN SAFE ===== -->
+<style id="assal-batch5-true-native-frame-engine-safe">
+/*
+  BATCH 5 — frame-budget only.
+  No layout, colors, blur strength, navigation, Firebase, startup, ad timing or business behavior changes.
+  Only known continuous decorative animations are paused when off-screen or while touch/scroll owns the frame budget.
+*/
+.assal-native-offscreen-anim .new-price-label,
+.assal-native-offscreen-anim .new-price-value,
+.assal-native-offscreen-anim::before,
+.assal-native-offscreen-anim::after{
+  animation-play-state:paused !important;
+}
+
+html.assal-ui-interacting .news-ticker,
+html.assal-ui-interacting #newsTicker,
+html.assal-ui-interacting .header-brand-logo::after,
+html.assal-ui-interacting .floating-request-btn::after,
+html.assal-ui-interacting .notification.show,
+html.assal-ui-interacting .header-btn.debug-btn.owner-subscription-mode,
+html.assal-ui-interacting #results .new-price-label,
+html.assal-ui-interacting #results .new-price-value,
+html.assal-ui-interacting #offersModal .new-price-label,
+html.assal-ui-interacting #offersModal .new-price-value,
+html.assal-ui-interacting .request-message.has-fresh-reply,
+html.assal-ui-interacting .request-message.has-fresh-reply::before,
+html.assal-ui-interacting .request-message.has-fresh-reply::after,
+html.assal-ui-interacting .invoice-message-highlight::after,
+html.assal-viewport-transition #results .new-price-label,
+html.assal-viewport-transition #results .new-price-value,
+html.assal-viewport-transition #offersModal .new-price-label,
+html.assal-viewport-transition #offersModal .new-price-value{
+  animation-play-state:paused !important;
+}
+</style>
+<script id="assal-batch5-true-native-frame-engine-safe-script">
+(function(){
+  'use strict';
+  if (window.__ASSAL_BATCH5_TRUE_NATIVE_FRAME_ENGINE__) return;
+  window.__ASSAL_BATCH5_TRUE_NATIVE_FRAME_ENGINE__ = true;
+
+  /*
+    Only repeated price cards are intersection-managed. This avoids class churn on
+    chats/modals while removing continuous offer-price animation work outside the viewport.
+  */
+  const CARD_SELECTOR = '.result-card,.offer-card';
+  const observedCards = new WeakSet();
+  const observedHosts = new WeakSet();
+  const hostObservers = [];
+
+  // Native browser compositor primitive. Unsupported WebViews keep the exact old behavior.
+  const io = typeof IntersectionObserver === 'function'
+    ? new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          const el = entry.target;
+          if (!el || !el.classList) return;
+          el.classList.toggle('assal-native-offscreen-anim', !entry.isIntersecting);
+        });
+      }, { root:null, rootMargin:'220px 0px', threshold:0 })
+    : null;
+
+  function observeCard(el){
+    if (!io || !el || el.nodeType !== 1 || observedCards.has(el)) return;
+    observedCards.add(el);
+    io.observe(el);
+  }
+
+  function unobserveCard(el){
+    if (!io || !el || el.nodeType !== 1 || !observedCards.has(el)) return;
+    try { io.unobserve(el); } catch (_) {}
+    try { observedCards.delete(el); } catch (_) {}
+  }
+
+  function scanCards(root){
+    if (!io || !root) return;
+    try {
+      if (root.matches && root.matches(CARD_SELECTOR)) observeCard(root);
+      if (root.querySelectorAll) root.querySelectorAll(CARD_SELECTOR).forEach(observeCard);
+    } catch (_) {}
+  }
+
+  function unscanCards(root){
+    if (!io || !root) return;
+    try {
+      if (root.matches && root.matches(CARD_SELECTOR)) unobserveCard(root);
+      if (root.querySelectorAll) root.querySelectorAll(CARD_SELECTOR).forEach(unobserveCard);
+    } catch (_) {}
+  }
+
+  function attachHost(host){
+    if (!io || !host || observedHosts.has(host)) return;
+    observedHosts.add(host);
+    scanCards(host);
+    const mo = new MutationObserver(function(mutations){
+      const removed = [];
+      const added = [];
+      mutations.forEach(function(mutation){
+        mutation.removedNodes.forEach(function(node){
+          if (node && node.nodeType === 1) removed.push(node);
+        });
+        mutation.addedNodes.forEach(function(node){
+          if (node && node.nodeType === 1) added.push(node);
+        });
+      });
+      // Process removals first so a node moved within the same render is observed again.
+      removed.forEach(unscanCards);
+      added.forEach(scanCards);
+    });
+    mo.observe(host,{childList:true,subtree:true});
+    hostObservers.push(mo);
+  }
+
+  function bindHosts(){
+    [
+      document.getElementById('results'),
+      document.querySelector('#offersModal .offers-content')
+    ].forEach(attachHost);
+  }
+
+  function boot(){
+    bindHosts();
+    // One delayed retry only for a late-created host; no permanent document-wide observer.
+    setTimeout(bindHosts,900);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
+
+  try {
+    window.__ASSAL_NATIVE_PERFORMANCE_FOUNDATION__ = Object.assign(
+      {},
+      window.__ASSAL_NATIVE_PERFORMANCE_FOUNDATION__ || {},
+      {
+        batch5TrueNativeFrameEngine:true,
+        offscreenOfferAnimationSuspension:true,
+        interactionAnimationBudget:true,
+        interactionRootWriteDedupe:true,
+        scrollButtonStateDedupe:true,
+        cardToneStyleReadReduction:true,
+        longSessionObserverCleanup:true,
+        sharedImageCacheHandle:true,
+        hiddenOfflineBannerLayoutElision:true
+      }
+    );
+  } catch (_) {}
+})();
+</script>
+<!-- ===== /ASSAL BATCH 5: TRUE NATIVE FRAME ENGINE / UNDER-SKIN SAFE ===== -->
 
