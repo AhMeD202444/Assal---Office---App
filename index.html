@@ -64384,3 +64384,774 @@ html.low-end-device .header-buttons > .assal-static-header-btn{
 })();
 </script>
 <!-- ===== /ASSAL PHASE 26 ===== -->
+<!-- ===== ASSAL PRE-BATCH 5 / PREMIUM MODAL UNIFICATION SAFE FINAL ===== -->
+<style id="assal-premium-modal-unification-safe-final">
+/*
+  ASSAL Premium Modal Unification
+  Visual/runtime shell only. Functional handlers/data paths stay unchanged.
+*/
+:root{
+  --assal-premium-modal-bg:
+    radial-gradient(circle at 92% 0%, rgba(34,197,94,.15), transparent 38%),
+    radial-gradient(circle at 8% 100%, rgba(14,165,233,.12), transparent 42%),
+    linear-gradient(145deg, rgba(15,23,42,.99), rgba(8,15,29,.99));
+  --assal-premium-modal-border:rgba(255,255,255,.10);
+  --assal-premium-modal-shadow:0 24px 70px rgba(0,0,0,.52);
+  --assal-premium-enter:cubic-bezier(.2,.8,.2,1);
+}
+
+/* Shared backdrop for the legacy #overlay modals: one blur layer only. */
+body.assal-premium-shared-active #overlay{
+  background:rgba(2,8,23,.58) !important;
+  -webkit-backdrop-filter:blur(5px) !important;
+  backdrop-filter:blur(5px) !important;
+  transition:opacity .17s ease !important;
+}
+@media (max-width:480px){
+  body.assal-premium-shared-active #overlay{
+    -webkit-backdrop-filter:blur(4px) !important;
+    backdrop-filter:blur(4px) !important;
+  }
+}
+
+/* ===== Shared owner-auth visual shell: new items / offers / contact ===== */
+#newItemsModal,
+#offersModal,
+#contactModal{
+  position:fixed !important;
+  top:50% !important;
+  bottom:auto !important;
+  left:50% !important;
+  right:auto !important;
+  margin:0 !important;
+  box-sizing:border-box !important;
+  direction:rtl !important;
+  color:#e5e7eb !important;
+  font-family:'Cairo','Tajawal',sans-serif !important;
+  background:var(--assal-premium-modal-bg) !important;
+  border:1px solid var(--assal-premium-modal-border) !important;
+  box-shadow:var(--assal-premium-modal-shadow) !important;
+  -webkit-backdrop-filter:none !important;
+  backdrop-filter:none !important;
+  overflow:hidden !important;
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+  transform:translate(-50%, calc(-50% + 8px)) scale(.975) !important;
+  transition:
+    transform .17s var(--assal-premium-enter),
+    opacity .17s ease,
+    visibility 0s linear .17s !important;
+  animation:none !important;
+  will-change:transform,opacity;
+}
+#newItemsModal.assal-premium-visible,
+#offersModal.assal-premium-visible,
+#contactModal.assal-premium-visible{
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+  transform:translate(-50%,-50%) scale(1) !important;
+  transition:
+    transform .17s var(--assal-premium-enter),
+    opacity .17s ease,
+    visibility 0s linear 0s !important;
+}
+#newItemsModal.assal-premium-closing,
+#offersModal.assal-premium-closing,
+#contactModal.assal-premium-closing{
+  display:flex !important;
+  pointer-events:none !important;
+}
+#newItemsModal{width:min(820px,calc(100vw - 24px)) !important;max-height:min(86dvh,760px) !important;padding:0 !important;flex-direction:column !important;gap:0 !important;border-radius:22px !important;}
+#offersModal{width:min(980px,calc(100vw - 24px)) !important;max-height:min(88dvh,790px) !important;padding:0 !important;flex-direction:column !important;gap:0 !important;border-radius:22px !important;}
+#contactModal{width:min(560px,calc(100vw - 24px)) !important;max-height:min(86dvh,720px) !important;padding:0 !important;flex-direction:column !important;gap:0 !important;border-radius:22px !important;}
+
+.assal-premium-top{
+  min-height:70px;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:12px !important;
+  padding:13px 14px 12px 16px !important;
+  margin:0 !important;
+  border-bottom:1px solid rgba(255,255,255,.075) !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0)) !important;
+  flex:0 0 auto;
+}
+.assal-premium-brand{display:flex;align-items:center;gap:11px;min-width:0;}
+.assal-premium-icon{
+  width:42px;height:42px;min-width:42px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,#0f766e,#0ea5a4);
+  color:#ecfeff;font-size:17px;
+  box-shadow:0 8px 22px rgba(13,148,136,.24);
+}
+#offersModal .assal-premium-icon{background:linear-gradient(145deg,#a16207,#d97706);box-shadow:0 8px 22px rgba(217,119,6,.20);}
+#contactModal .assal-premium-icon{background:linear-gradient(145deg,#15803d,#16a34a);box-shadow:0 8px 22px rgba(22,163,74,.20);}
+.assal-premium-copy{min-width:0;text-align:right;display:flex;flex-direction:column;align-items:flex-start;}
+.assal-premium-kicker{font-size:10px;color:#86efac;font-weight:800;margin-bottom:2px;letter-spacing:.02em;line-height:1.4;}
+#offersModal .assal-premium-kicker{color:#fde68a;}
+#contactModal .assal-premium-kicker{color:#bbf7d0;}
+.assal-premium-title,
+#newItemsModal .assal-premium-title,
+#offersModal .assal-premium-title,
+#contactModal .assal-premium-title{
+  margin:0 !important;
+  padding:0 !important;
+  font-size:16px !important;
+  line-height:1.35 !important;
+  color:#f8fafc !important;
+  font-weight:900 !important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  background:none !important;
+  -webkit-background-clip:initial !important;
+  -webkit-text-fill-color:#f8fafc !important;
+  text-shadow:none !important;
+}
+.assal-premium-top-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;}
+
+/* Mandatory close design: dark-red circle + pure white X. */
+#newItemsModal .close-modal-btn,
+#offersModal .close-modal-btn,
+#contactModal .close-modal-btn,
+#assalSpaceEntryModal .assal-space-close,
+#assalOwnerAuthRecovery .assal-owner-auth-close{
+  position:static !important;
+  inset:auto !important;
+  top:auto !important;right:auto !important;left:auto !important;
+  width:36px !important;height:36px !important;min-width:36px !important;min-height:36px !important;
+  padding:0 !important;margin:0 !important;
+  border-radius:999px !important;
+  border:1px solid rgba(248,113,113,.24) !important;
+  background:linear-gradient(145deg,#7f1d1d,#991b1b) !important;
+  color:#ffffff !important;
+  display:flex !important;align-items:center !important;justify-content:center !important;
+  box-shadow:0 7px 16px rgba(127,29,29,.26) !important;
+  cursor:pointer !important;
+  -webkit-tap-highlight-color:transparent !important;
+  transition:transform .14s ease,filter .14s ease,background .14s ease !important;
+  clip-path:none !important;
+}
+#newItemsModal .close-modal-btn i,
+#offersModal .close-modal-btn i,
+#contactModal .close-modal-btn i,
+#assalSpaceEntryModal .assal-space-close i,
+#assalOwnerAuthRecovery .assal-owner-auth-close i{color:#fff !important;font-size:15px !important;}
+#newItemsModal .close-modal-btn:hover,
+#offersModal .close-modal-btn:hover,
+#contactModal .close-modal-btn:hover,
+#assalSpaceEntryModal .assal-space-close:hover,
+#assalOwnerAuthRecovery .assal-owner-auth-close:hover{background:linear-gradient(145deg,#991b1b,#b91c1c) !important;filter:brightness(1.04);}
+#newItemsModal .close-modal-btn:active,
+#offersModal .close-modal-btn:active,
+#contactModal .close-modal-btn:active,
+#assalSpaceEntryModal .assal-space-close:active,
+#assalOwnerAuthRecovery .assal-owner-auth-close:active{transform:scale(.93) !important;}
+
+/* New items body: preserve data/cards, unify only the shell. */
+#newItemsModal .modal-content{
+  width:100% !important;
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  margin:0 !important;
+  padding:12px !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  border:0 !important;
+  overflow-y:auto !important;
+}
+#newItemsModal .modal-content .new-item-card{
+  border-radius:14px !important;
+  background:linear-gradient(145deg,rgba(15,23,42,.82),rgba(17,30,50,.72)) !important;
+  border:1px solid rgba(148,163,184,.12) !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.20) !important;
+}
+
+/* Offers: premium header but all search/cards/data stay intact. */
+#offersModal .offers-head{width:100% !important;}
+#offersModal .offers-head h2.assal-premium-title{margin:0 !important;padding:0 !important;}
+#offersModal .offers-chip{
+  font-size:10px !important;font-weight:800 !important;color:#fef3c7 !important;
+  background:rgba(161,98,7,.18) !important;border:1px solid rgba(245,158,11,.22) !important;
+  padding:5px 9px !important;border-radius:999px !important;box-shadow:none !important;
+}
+#offersModal .offers-toolbar{padding:12px 14px 8px !important;flex:0 0 auto;}
+#offersModal .offers-content{
+  flex:1 1 auto !important;min-height:0 !important;
+  margin:0 12px 12px !important;width:auto !important;
+  padding:8px !important;border-radius:14px !important;
+  background:rgba(2,8,23,.22) !important;border:1px solid rgba(148,163,184,.08) !important;
+}
+
+/* Contact: premium header + same branch/call behavior. */
+#contactModal .contact-head{width:100% !important;padding:13px 14px 12px 16px !important;}
+#contactModal .contact-head-text{min-width:0;text-align:right;display:flex;flex-direction:column;align-items:flex-start;}
+#contactModal .contact-sub{
+  order:-1 !important;margin:0 0 2px !important;padding:0 !important;
+  font-size:10px !important;color:#bbf7d0 !important;font-weight:800 !important;line-height:1.4 !important;
+}
+#contactModal .contact-body{
+  flex:1 1 auto;min-height:0;overflow-y:auto;
+  padding:12px !important;margin:0 !important;
+}
+#contactModal .contact-card{
+  background:linear-gradient(145deg,rgba(15,23,42,.82),rgba(17,30,50,.72)) !important;
+  border:1px solid rgba(148,163,184,.12) !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.20) !important;
+}
+
+/* ===== Conversation entry center: owner-auth identity + one lightweight blur ===== */
+#assalSpaceEntryModal{
+  background:rgba(2,8,23,.58) !important;
+  -webkit-backdrop-filter:blur(5px) !important;
+  backdrop-filter:blur(5px) !important;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .17s ease,visibility 0s linear .17s !important;
+}
+#assalSpaceEntryModal.show{
+  display:flex !important;
+}
+#assalSpaceEntryModal.show:not(.assal-premium-preparing){
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transition:opacity .17s ease,visibility 0s linear 0s !important;
+}
+#assalSpaceEntryModal.assal-premium-closing{
+  display:flex !important;
+  opacity:0 !important;
+  visibility:visible !important;
+  pointer-events:none !important;
+}
+#assalSpaceEntryModal .assal-space-entry-shell{
+  width:min(408px,calc(100vw - 30px)) !important;
+  border-radius:22px !important;
+  overflow:hidden !important;
+  color:#e5e7eb !important;
+  background:var(--assal-premium-modal-bg) !important;
+  border:1px solid var(--assal-premium-modal-border) !important;
+  box-shadow:var(--assal-premium-modal-shadow) !important;
+  transform:translateY(8px) scale(.975) !important;
+  opacity:0 !important;
+  transition:transform .17s var(--assal-premium-enter),opacity .17s ease !important;
+}
+#assalSpaceEntryModal.show:not(.assal-premium-preparing) .assal-space-entry-shell{
+  transform:translateY(0) scale(1) !important;
+  opacity:1 !important;
+}
+#assalSpaceEntryModal.assal-premium-closing .assal-space-entry-shell{
+  transform:translateY(6px) scale(.985) !important;
+  opacity:0 !important;
+  transition-duration:.11s !important;
+}
+#assalSpaceEntryModal .assal-space-entry-head{
+  min-height:70px !important;padding:13px 14px 12px 16px !important;
+  border-bottom:1px solid rgba(255,255,255,.075) !important;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0)) !important;
+}
+#assalSpaceEntryModal .assal-space-entry-icon{
+  width:42px !important;height:42px !important;min-width:42px !important;border-radius:14px !important;
+  background:linear-gradient(145deg,#0f766e,#0ea5a4) !important;
+  color:#ecfeff !important;border:0 !important;box-shadow:0 8px 22px rgba(13,148,136,.24) !important;
+}
+#assalSpaceEntryModal .assal-space-entry-title h3{font-size:16px !important;color:#f8fafc !important;font-weight:900 !important;}
+#assalSpaceEntryModal .assal-space-entry-title p{font-size:10px !important;color:#94a3b8 !important;margin-top:2px !important;}
+#assalSpaceEntryModal .assal-premium-kicker{color:#86efac !important;}
+#assalSpaceEntryModal .assal-space-entry-body{padding:14px !important;gap:9px !important;}
+#assalSpaceEntryModal .assal-space-choice{
+  border-radius:14px !important;padding:12px !important;
+  background:linear-gradient(145deg,rgba(15,23,42,.82),rgba(17,30,50,.72)) !important;
+  border:1px solid rgba(148,163,184,.12) !important;
+  box-shadow:0 9px 22px rgba(0,0,0,.18) !important;
+}
+#assalSpaceEntryModal .assal-space-choice .ico{width:44px !important;height:44px !important;border-radius:14px !important;}
+
+/* ===== First-run activation: same identity as owner auth; same secure logic. ===== */
+#activation-overlay{
+  background:rgba(2,8,23,.58) !important;
+  -webkit-backdrop-filter:blur(5px) !important;
+  backdrop-filter:blur(5px) !important;
+  transition:opacity .17s ease !important;
+}
+#activation-overlay.assal-premium-activation-preparing{
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+#activation-overlay .activation-dialog{
+  width:min(408px,calc(100vw - 30px)) !important;
+  max-height:min(620px,calc(100dvh - 28px)) !important;
+  margin:auto !important;
+  padding:0 !important;
+  border-radius:22px !important;
+  overflow:auto !important;
+  color:#e5e7eb !important;
+  font-family:'Cairo','Tajawal',sans-serif !important;
+  background:var(--assal-premium-modal-bg) !important;
+  border:1px solid var(--assal-premium-modal-border) !important;
+  box-shadow:var(--assal-premium-modal-shadow) !important;
+  transform:translateY(8px) scale(.975);
+  opacity:0;
+  transition:transform .17s var(--assal-premium-enter),opacity .17s ease !important;
+}
+#activation-overlay.is-open:not(.assal-premium-activation-preparing) .activation-dialog{
+  transform:translateY(0) scale(1);
+  opacity:1;
+}
+#activation-overlay .activation-dialog::before,
+#activation-overlay .activation-dialog::after{display:none !important;}
+#activation-overlay .activation-dialog.assal-premium-activation-decorated > .activation-logo,
+#activation-overlay .activation-dialog.assal-premium-activation-decorated > .activation-header{display:none !important;}
+#activation-overlay .assal-premium-activation-top{
+  min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:13px 14px 12px 16px;border-bottom:1px solid rgba(255,255,255,.075);
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0));
+}
+#activation-overlay .activation-body{width:100% !important;max-width:none !important;margin:0 !important;padding:18px 18px 8px !important;}
+#activation-overlay .activation-text{
+  padding:10px 11px !important;margin:0 0 14px !important;border-radius:13px !important;
+  background:rgba(15,118,110,.10) !important;border:1px solid rgba(45,212,191,.14) !important;
+  color:#cbd5e1 !important;font-size:11px !important;line-height:1.75 !important;text-align:right !important;
+}
+#activation-overlay .activation-field-label{display:block !important;margin:0 2px 6px !important;font-size:11px !important;color:#94a3b8 !important;font-weight:700 !important;text-align:right !important;}
+#activation-overlay .activation-input-row{
+  min-height:48px !important;height:48px !important;padding:0 8px 0 10px !important;border-radius:14px !important;
+  background:#07101f !important;border:1px solid rgba(148,163,184,.22) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02) !important;
+}
+#activation-overlay .activation-input-row:focus-within{border-color:rgba(45,212,191,.62) !important;box-shadow:0 0 0 3px rgba(20,184,166,.08) !important;}
+#activation-overlay .activation-input-row input{font-size:14px !important;text-align:center !important;color:#f8fafc !important;padding:0 5px !important;}
+#activation-overlay .activation-toggle-password{width:34px !important;height:34px !important;min-width:34px !important;border-radius:10px !important;background:rgba(148,163,184,.08) !important;color:#94a3b8 !important;}
+#activation-overlay .activation-error{min-height:20px !important;margin-top:7px !important;color:#fca5a5 !important;font-size:10px !important;font-weight:700 !important;text-align:center !important;}
+#activation-overlay .activation-footer{
+  width:100% !important;display:grid !important;grid-template-columns:1.45fr 1fr !important;
+  gap:8px !important;margin:0 !important;padding:0 18px 16px !important;
+}
+#activation-overlay .activation-btn{
+  min-height:43px !important;border-radius:13px !important;padding:8px 10px !important;
+  font-family:'Cairo',sans-serif !important;font-size:12px !important;font-weight:900 !important;
+  transition:transform .14s ease,filter .14s ease,opacity .14s ease !important;
+}
+#activation-overlay .activation-btn.primary{background:linear-gradient(135deg,#0f766e,#0ea5a4) !important;color:#ecfeff !important;box-shadow:0 9px 22px rgba(13,148,136,.20) !important;}
+#activation-overlay .activation-btn.ghost{background:linear-gradient(145deg,#7f1d1d,#991b1b) !important;color:#fff !important;border:1px solid rgba(248,113,113,.20) !important;}
+#activation-overlay .activation-success{padding:24px 18px !important;}
+
+@media (max-width:480px){
+  #newItemsModal,#offersModal,#contactModal{width:calc(100vw - 18px) !important;border-radius:20px !important;}
+  #newItemsModal{max-height:calc(100dvh - 76px) !important;}
+  #offersModal{max-height:calc(100dvh - 62px) !important;}
+  #contactModal{max-height:calc(100dvh - 74px) !important;}
+  .assal-premium-top{min-height:66px;padding:11px 12px !important;}
+  #assalSpaceEntryModal{-webkit-backdrop-filter:blur(4px) !important;backdrop-filter:blur(4px) !important;}
+  #assalSpaceEntryModal .assal-space-entry-shell{width:min(392px,calc(100vw - 24px)) !important;border-radius:20px !important;}
+  #activation-overlay{-webkit-backdrop-filter:blur(4px) !important;backdrop-filter:blur(4px) !important;}
+  #activation-overlay .activation-dialog{width:min(392px,calc(100vw - 24px)) !important;border-radius:20px !important;}
+  #activation-overlay .assal-premium-activation-top{min-height:66px;padding:11px 12px;}
+  #activation-overlay .activation-body{padding:15px 14px 7px !important;}
+  #activation-overlay .activation-footer{padding:0 14px 14px !important;}
+}
+</style>
+
+<script id="assal-premium-modal-unification-safe-final-script">
+(function(){
+  'use strict';
+  if (window.__ASSAL_PREMIUM_MODAL_UNIFICATION_SAFE_FINAL__) return;
+  window.__ASSAL_PREMIUM_MODAL_UNIFICATION_SAFE_FINAL__ = true;
+
+  const ENTER_MS = 170;
+  const CLOSE_MS = 170;
+  const SPACE_CLOSE_MS = 120;
+
+  function afterTwoFrames(fn){
+    requestAnimationFrame(() => requestAnimationFrame(fn));
+  }
+
+  function makeEl(tag, cls, html){
+    const el = document.createElement(tag);
+    if (cls) el.className = cls;
+    if (html != null) el.innerHTML = html;
+    return el;
+  }
+
+  function decorateNewItems(){
+    const modal = document.getElementById('newItemsModal');
+    if (!modal || modal.dataset.assalPremiumDecorated === '1') return modal;
+    const title = modal.querySelector(':scope > h2');
+    const close = modal.querySelector(':scope > .close-modal-btn');
+    const content = modal.querySelector(':scope > .modal-content');
+    if (!title || !close || !content) return modal;
+
+    const top = makeEl('div','assal-premium-top');
+    const brand = makeEl('div','assal-premium-brand');
+    const icon = makeEl('div','assal-premium-icon','<i class="fas fa-box-open"></i>');
+    const copy = makeEl('div','assal-premium-copy');
+    const kicker = makeEl('div','assal-premium-kicker','آخر الإضافات');
+    title.classList.add('assal-premium-title');
+    copy.append(kicker,title);
+    brand.append(icon,copy);
+    const actions = makeEl('div','assal-premium-top-actions');
+    actions.append(close);
+    top.append(brand,actions);
+    modal.insertBefore(top,content);
+    modal.dataset.assalPremiumDecorated = '1';
+    return modal;
+  }
+
+  function decorateOffers(){
+    const modal = document.getElementById('offersModal');
+    if (!modal || modal.dataset.assalPremiumDecorated === '1') return modal;
+    const head = modal.querySelector('.offers-head');
+    const title = head?.querySelector('h2');
+    const chip = document.getElementById('offersCountChip');
+    const close = modal.querySelector(':scope > .close-modal-btn');
+    if (!head || !title || !close) return modal;
+
+    head.classList.add('assal-premium-top');
+    head.textContent = '';
+    const brand = makeEl('div','assal-premium-brand');
+    const icon = makeEl('div','assal-premium-icon','<i class="fas fa-tags"></i>');
+    const copy = makeEl('div','assal-premium-copy');
+    const kicker = makeEl('div','assal-premium-kicker','عروض مكتب عسل');
+    title.classList.add('assal-premium-title');
+    copy.append(kicker,title);
+    brand.append(icon,copy);
+    const actions = makeEl('div','assal-premium-top-actions');
+    if (chip) actions.append(chip);
+    actions.append(close);
+    head.append(brand,actions);
+    modal.dataset.assalPremiumDecorated = '1';
+    return modal;
+  }
+
+  function decorateContact(){
+    const modal = document.getElementById('contactModal');
+    if (!modal || modal.dataset.assalPremiumDecorated === '1') return modal;
+    const head = modal.querySelector('.contact-head');
+    const icon = head?.querySelector('.contact-ico');
+    const copy = head?.querySelector('.contact-head-text');
+    const title = copy?.querySelector('h2');
+    const close = modal.querySelector(':scope > .close-modal-btn');
+    if (!head || !icon || !copy || !title || !close) return modal;
+
+    head.classList.add('assal-premium-top');
+    const brand = makeEl('div','assal-premium-brand');
+    icon.classList.add('assal-premium-icon');
+    copy.classList.add('assal-premium-copy');
+    title.classList.add('assal-premium-title');
+    brand.append(icon,copy);
+    head.textContent = '';
+    const actions = makeEl('div','assal-premium-top-actions');
+    actions.append(close);
+    head.append(brand,actions);
+    modal.dataset.assalPremiumDecorated = '1';
+    return modal;
+  }
+
+  function decorateSpaceEntry(){
+    const modal = document.getElementById('assalSpaceEntryModal');
+    if (!modal || modal.dataset.assalPremiumDecorated === '1') return modal;
+    const head = modal.querySelector('.assal-space-entry-head');
+    const titleWrap = head?.querySelector('.assal-space-entry-title > div:last-child');
+    const h3 = titleWrap?.querySelector('h3');
+    if (titleWrap && h3 && !titleWrap.querySelector('.assal-premium-kicker')) {
+      titleWrap.insertBefore(makeEl('div','assal-premium-kicker','مساحات عسل'),h3);
+    }
+    modal.dataset.assalPremiumDecorated = '1';
+    return modal;
+  }
+
+  function decorateActivation(overlay){
+    if (!overlay) return;
+    const dialog = overlay.querySelector('.activation-dialog');
+    if (!dialog || dialog.classList.contains('assal-premium-activation-decorated')) return;
+    const oldTitle = dialog.querySelector('.activation-title');
+    const oldLabel = dialog.querySelector('.activation-label');
+
+    const top = makeEl('div','assal-premium-activation-top');
+    const brand = makeEl('div','assal-premium-brand');
+    const icon = makeEl('div','assal-premium-icon','<i class="fa-solid fa-lock"></i>');
+    const copy = makeEl('div','assal-premium-copy');
+    const kicker = makeEl('div','assal-premium-kicker',oldLabel?.textContent?.trim() || 'دخول آمن');
+    const title = makeEl('div','assal-premium-title',oldTitle?.textContent?.trim() || 'تأكيد الدخول للتطبيق');
+    copy.append(kicker,title);
+    brand.append(icon,copy);
+    top.append(brand);
+    dialog.insertBefore(top,dialog.firstChild);
+    dialog.classList.add('assal-premium-activation-decorated');
+  }
+
+  function decorateAll(){
+    decorateNewItems();
+    decorateOffers();
+    decorateContact();
+    decorateSpaceEntry();
+  }
+
+  function isDisplayed(el){
+    if (!el) return false;
+    if (el.style.display === 'none') return false;
+    try { return getComputedStyle(el).display !== 'none'; } catch (_) { return false; }
+  }
+
+  function sharedOverlayNeeded(ignoreId){
+    const ids = ['newItemsModal','offersModal','contactModal','promoPopup','cartModal'];
+    return ids.some(id => id !== ignoreId && isDisplayed(document.getElementById(id)));
+  }
+
+  function anyPremiumSharedOpen(){
+    return ['newItemsModal','offersModal','contactModal'].some(id => isDisplayed(document.getElementById(id)));
+  }
+
+  function premiumOverlayBlocker(e){
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+    return false;
+  }
+
+  function bindPremiumOverlayBlocker(overlay){
+    if (!overlay || overlay.dataset.assalPremiumBlocker === '1') return;
+    overlay.addEventListener('click',premiumOverlayBlocker,true);
+    overlay.addEventListener('pointerdown',premiumOverlayBlocker,true);
+    overlay.addEventListener('touchstart',premiumOverlayBlocker,{capture:true,passive:false});
+    overlay.dataset.assalPremiumBlocker = '1';
+  }
+
+  function unbindPremiumOverlayBlocker(overlay){
+    if (!overlay || overlay.dataset.assalPremiumBlocker !== '1') return;
+    overlay.removeEventListener('click',premiumOverlayBlocker,true);
+    overlay.removeEventListener('pointerdown',premiumOverlayBlocker,true);
+    overlay.removeEventListener('touchstart',premiumOverlayBlocker,true);
+    delete overlay.dataset.assalPremiumBlocker;
+  }
+
+  function openSharedPremium(modal, beforeVisible){
+    if (!modal) return;
+    const overlay = document.getElementById('overlay');
+    const overlayWasVisible = isDisplayed(overlay);
+
+    modal.__assalPremiumCloseToken = Number(modal.__assalPremiumCloseToken || 0) + 1;
+    modal.classList.remove('assal-premium-visible','assal-premium-closing');
+    modal.style.animation = 'none';
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden','false');
+
+    document.body.classList.add('assal-premium-shared-active');
+    if (overlay){
+      bindPremiumOverlayBlocker(overlay);
+      overlay.style.transition = 'opacity .17s ease';
+      if (!overlayWasVisible){
+        overlay.style.opacity = '0';
+        overlay.style.display = 'block';
+      } else {
+        overlay.style.opacity = '1';
+      }
+    }
+
+    try { if (typeof beforeVisible === 'function') beforeVisible(); } catch (err) { console.error('ASSAL premium modal prepare:',err); }
+
+    afterTwoFrames(() => {
+      if (modal.style.display === 'none') return;
+      if (overlay) overlay.style.opacity = '1';
+      modal.classList.add('assal-premium-visible');
+    });
+  }
+
+  function closeSharedPremium(modal, options){
+    if (!modal || !isDisplayed(modal)) return;
+    const opts = options || {};
+    const overlay = document.getElementById('overlay');
+    const token = Number(modal.__assalPremiumCloseToken || 0) + 1;
+    modal.__assalPremiumCloseToken = token;
+
+    modal.classList.remove('assal-premium-visible');
+    modal.classList.add('assal-premium-closing');
+
+    const noOtherOverlayConsumer = !sharedOverlayNeeded(modal.id);
+    if (overlay && noOtherOverlayConsumer) overlay.style.opacity = '0';
+
+    let finished = false;
+    let fallback = 0;
+    let onEnd = null;
+    const finish = () => {
+      if (finished || modal.__assalPremiumCloseToken !== token) return;
+      finished = true;
+      if (fallback) clearTimeout(fallback);
+      if (onEnd) modal.removeEventListener('transitionend',onEnd);
+      modal.style.display = 'none';
+      modal.style.animation = 'none';
+      modal.classList.remove('assal-premium-visible','assal-premium-closing');
+      modal.setAttribute('aria-hidden','true');
+      try { if (typeof opts.onFinish === 'function') opts.onFinish(); } catch (_) {}
+
+      if (!anyPremiumSharedOpen()){
+        document.body.classList.remove('assal-premium-shared-active');
+        unbindPremiumOverlayBlocker(overlay);
+      }
+      if (overlay && !sharedOverlayNeeded('')){
+        overlay.style.display = 'none';
+        overlay.style.opacity = '';
+        overlay.style.transition = '';
+      }
+      try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch (_) {}
+    };
+
+    onEnd = function(e){
+      if (e.target !== modal || (e.propertyName !== 'transform' && e.propertyName !== 'opacity')) return;
+      finish();
+    };
+    modal.addEventListener('transitionend',onEnd);
+    fallback = setTimeout(finish,CLOSE_MS + 80);
+  }
+
+  /* Exact replacements of visual open/close choreography only. */
+  window.openModal = function(){
+    try{
+      const modal = decorateNewItems();
+      if (!modal || isDisplayed(modal)) return;
+      try { isModalOpen = true; } catch (_) {}
+      openSharedPremium(modal,() => {
+        try { if (typeof loadNewItems === 'function') loadNewItems(); } catch (e) { console.error('loadNewItems:',e); }
+      });
+    }catch(error){
+      console.error('Error in openModal:',error);
+      try { isModalOpen = false; } catch (_) {}
+    }
+  };
+
+  window.closeNewItemsModal = function(){
+    try{
+      const modal = document.getElementById('newItemsModal');
+      closeSharedPremium(modal,{onFinish(){ try { isModalOpen = false; } catch (_) {} }});
+    }catch(error){
+      console.error('Error in closeNewItemsModal:',error);
+      try { isModalOpen = false; } catch (_) {}
+    }
+  };
+
+  window.openOffersModal = function(){
+    try{
+      const modal = decorateOffers();
+      if (!modal || isDisplayed(modal)) return;
+      try { isOffersModalOpen = true; } catch (_) {}
+      openSharedPremium(modal,() => {
+        try { if (typeof loadOffers === 'function') loadOffers(); } catch (e) { console.error('loadOffers:',e); }
+      });
+    }catch(err){
+      console.error('Error in openOffersModal:',err);
+      try { isOffersModalOpen = false; } catch (_) {}
+    }
+  };
+
+  window.closeOffersModal = function(){
+    try{
+      const modal = document.getElementById('offersModal');
+      closeSharedPremium(modal,{onFinish(){ try { isOffersModalOpen = false; } catch (_) {} }});
+    }catch(err){
+      console.error('Error in closeOffersModal:',err);
+      try { isOffersModalOpen = false; } catch (_) {}
+    }
+  };
+
+  window.openContactModal = function(){
+    try{
+      const modal = decorateContact();
+      if (!modal || isDisplayed(modal)) return;
+      try { isContactModalOpen = true; } catch (_) {}
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+      openSharedPremium(modal);
+    }catch(err){
+      console.error('openContactModal:',err);
+      try { isContactModalOpen = false; } catch (_) {}
+    }
+  };
+
+  window.closeContactModal = function(){
+    try{
+      const modal = document.getElementById('contactModal');
+      closeSharedPremium(modal,{onFinish(){
+        try { isContactModalOpen = false; } catch (_) {}
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+      }});
+    }catch(err){
+      console.error('closeContactModal:',err);
+      try { isContactModalOpen = false; } catch (_) {}
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+  };
+
+  /* Conversation entry: keep destinations/handlers, upgrade only entrance/exit. */
+  const originalSpaceOpen = window.openCustomerChatEntryPoint;
+  if (typeof originalSpaceOpen === 'function'){
+    window.openCustomerChatEntryPoint = async function(){
+      const modal = decorateSpaceEntry();
+      if (modal){
+        modal.classList.remove('assal-premium-closing');
+        modal.classList.add('assal-premium-preparing');
+      }
+      let result;
+      try { result = await originalSpaceOpen.apply(this,arguments); }
+      finally {
+        if (modal){
+          if (modal.classList.contains('show')) afterTwoFrames(() => modal.classList.remove('assal-premium-preparing'));
+          else modal.classList.remove('assal-premium-preparing');
+        }
+      }
+      return result;
+    };
+  }
+
+  window.closeAssalSpaceEntryModal = function(){
+    const modal = document.getElementById('assalSpaceEntryModal');
+    if (!modal) return;
+    if (!modal.classList.contains('show')){
+      modal.classList.remove('assal-premium-preparing','assal-premium-closing');
+      modal.setAttribute('aria-hidden','true');
+      return;
+    }
+    modal.classList.remove('assal-premium-preparing');
+    modal.classList.add('assal-premium-closing');
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden','true');
+    setTimeout(() => {
+      modal.classList.remove('assal-premium-closing');
+      try { if (typeof syncGlobalModalLock === 'function') syncGlobalModalLock(); } catch (_) {}
+    },SPACE_CLOSE_MS);
+  };
+
+  /* First-run activation: preserve secure auth logic; only decorate + no-flash entrance. */
+  const originalActivationShow = window.showActivationPopup;
+  if (typeof originalActivationShow === 'function'){
+    window.showActivationPopup = async function(){
+      let pre = document.getElementById('activation-overlay');
+      if (pre) pre.classList.add('assal-premium-activation-preparing');
+      const result = originalActivationShow.apply(this,arguments);
+      const overlay = document.getElementById('activation-overlay');
+      if (overlay){
+        overlay.classList.add('assal-premium-activation-preparing');
+        decorateActivation(overlay);
+        afterTwoFrames(() => {
+          overlay.classList.remove('assal-premium-activation-preparing');
+        });
+      }
+      return await result;
+    };
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded',decorateAll,{once:true});
+  } else {
+    decorateAll();
+  }
+})();
+</script>
+<!-- ===== /ASSAL PRE-BATCH 5 / PREMIUM MODAL UNIFICATION SAFE FINAL ===== -->
