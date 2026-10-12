@@ -60913,11 +60913,6 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
       );
       renderSubscriptionsList();
       await fillCardView(clientRow);
-      showToast(
-        isTrial ? "تم إنشاء تيست ساعة بنجاح" : "تم إنشاء الاشتراك السنوي بنجاح",
-        "success",
-        code,
-      );
     } catch (err) {
       console.error("COMPAT_SUB_SAVE_ERROR", err);
       showToast(
@@ -61418,6 +61413,51 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
     });
   }
 
+  function openCompatSubscriptionCustomerWhatsapp(rawPhone) {
+    const localPhone = normalizeDigits(String(rawPhone || ""))
+      .replace(/\D+/g, "")
+      .trim();
+    if (!localPhone) return false;
+
+    try {
+      if (typeof window.openAssalBranchWhatsapp === "function") {
+        window.openAssalBranchWhatsapp(localPhone);
+        return true;
+      }
+    } catch (_) {}
+
+    let phone = localPhone;
+    if (phone.startsWith("00964")) phone = phone.slice(2);
+    else if (!phone.startsWith("964")) {
+      if (phone.startsWith("0")) phone = phone.slice(1);
+      phone = "964" + phone;
+    }
+    if (!/^964\d{10}$/.test(phone)) return false;
+
+    const appUrl = "whatsapp://send?phone=" + encodeURIComponent(phone);
+    const webUrl = "https://wa.me/" + encodeURIComponent(phone);
+
+    try {
+      if (window.Android) {
+        window.location.href = appUrl;
+        return true;
+      }
+    } catch (_) {}
+
+    try {
+      const opened = window.open(webUrl, "_blank", "noopener");
+      if (!opened) window.location.href = webUrl;
+      return true;
+    } catch (_) {
+      try {
+        window.location.href = webUrl;
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+  }
+
   window.downloadCurrentCompatSubscriptionCard = async function () {
     if (compatSubscriptionCardDownloadBusy) return false;
     compatSubscriptionCardDownloadBusy = true;
@@ -61455,11 +61495,16 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
         );
         const saved = window.Android.saveSubscriptionCardPng(dataUrl, fileName);
         if (saved === true || saved === "true") {
-          await showCompatSubscriptionCardToast(
-            "تم حفظ بطاقة الاشتراك في الصور",
-            "success",
-            "تم الحفظ داخل مجلد الصور / Assal",
+          const whatsappOpened = openCompatSubscriptionCustomerWhatsapp(
+            currentCardSubscription?.customerPhone || "",
           );
+          if (!whatsappOpened) {
+            await showCompatSubscriptionCardToast(
+              "تم حفظ البطاقة لكن تعذر فتح واتساب",
+              "error",
+              "تحقق من رقم المشترك أو افتح واتساب يدوياً",
+            );
+          }
           return true;
         }
         throw new Error("NATIVE_CARD_SAVE_FAILED");
@@ -61475,11 +61520,16 @@ window.__ASSAL_STARTUP_OPTIMIZATION__ = {
           a.remove();
         } catch (_) {}
       }, 0);
-      await showCompatSubscriptionCardToast(
-        "تم تجهيز بطاقة الاشتراك للتحميل",
-        "success",
-        a.download,
+      const whatsappOpened = openCompatSubscriptionCustomerWhatsapp(
+        currentCardSubscription?.customerPhone || "",
       );
+      if (!whatsappOpened) {
+        await showCompatSubscriptionCardToast(
+          "تم تجهيز البطاقة لكن تعذر فتح واتساب",
+          "error",
+          "تحقق من رقم المشترك أو افتح واتساب يدوياً",
+        );
+      }
       return true;
     } catch (err) {
       console.error("COMPAT_SUB_DOWNLOAD_ERROR", err);
@@ -65729,4 +65779,3 @@ html.assal-viewport-transition #offersModal .new-price-value{
 })();
 </script>
 <!-- ===== /ASSAL BATCH 5: TRUE NATIVE FRAME ENGINE / UNDER-SKIN SAFE ===== -->
-
