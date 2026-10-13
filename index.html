@@ -358,16 +358,14 @@
   }
 
   const LIGHT_CHOICE_CONFIRMED_KEY = "assal_light_mode_user_confirmed_v3";
-  let manualOverride = safeStorageGet("assal_force_low_end");
-  const lightChoiceConfirmed =
-    safeStorageGet(LIGHT_CHOICE_CONFIRMED_KEY) === "true";
 
-  // تنظيف آمن لإعدادات قديمة: أي وضع خفيف مخزون من النسخ السابقة لا يُعتبر اختياراً مؤكداً.
-  // هذا يمنع تفعيل الوضع الخفيف تلقائياً بسبب localStorage قديم.
-  if (manualOverride === "on" && !lightChoiceConfirmed) {
-    safeStorageRemove("assal_force_low_end");
-    manualOverride = null;
-  }
+  // ASSAL STANDARD-ONLY POLICY:
+  // من هذه النسخة جميع الأجهزة تعمل بالوضع القياسي حصراً.
+  // نمسح أي اختيار خفيف محفوظ من النسخ السابقة حتى لا يبقى أي جهاز عالقاً عليه.
+  safeStorageRemove("assal_force_low_end");
+  safeStorageRemove(LIGHT_CHOICE_CONFIRMED_KEY);
+  let manualOverride = null;
+  const lightChoiceConfirmed = false;
 
   const nativeValue = nativeLowEndValue();
   const nativeDecision = normalizeNativeLowEndValue(nativeValue);
@@ -449,7 +447,8 @@
   window.__ASSAL_NORMALIZE_NATIVE_LOW_END__ = normalizeNativeLowEndValue;
 
   window.__ASSAL_APPLY_LOW_END_PROFILE__ = function (mode) {
-    const normalizedMode = mode === "on" ? "on" : mode === "off" ? "off" : null;
+    // الوضع الخفيف مقفول نهائياً للمستخدمين؛ أي استدعاء قديم يرجع للقياسي.
+    const normalizedMode = "off";
     const recommended = !!(
       window.__ASSAL_LOW_END_RECOMMENDED__ || autoSuggestedLowEnd
     );
@@ -570,22 +569,14 @@
     } catch (_) {}
   };
 
-  window.__ASSAL_SET_LOW_END_OVERRIDE__ = function (mode) {
-    const normalizedMode = mode === "on" ? "on" : mode === "off" ? "off" : null;
-    if (normalizedMode) {
-      safeStorageSet("assal_force_low_end", normalizedMode);
-      if (normalizedMode === "on") {
-        safeStorageSet(LIGHT_CHOICE_CONFIRMED_KEY, "true");
-      } else {
-        safeStorageRemove(LIGHT_CHOICE_CONFIRMED_KEY);
-      }
-    } else {
-      safeStorageRemove("assal_force_low_end");
-      safeStorageRemove(LIGHT_CHOICE_CONFIRMED_KEY);
-    }
+  window.__ASSAL_SET_LOW_END_OVERRIDE__ = function () {
+    // توافق رجعي فقط: لا نخزن أي وضع خفيف ونبقي التطبيق قياسياً دائماً.
+    safeStorageRemove("assal_force_low_end");
+    safeStorageRemove(LIGHT_CHOICE_CONFIRMED_KEY);
     try {
-      window.__ASSAL_APPLY_LOW_END_PROFILE__(normalizedMode);
+      window.__ASSAL_APPLY_LOW_END_PROFILE__("off");
     } catch (_) {}
+    return false;
   };
 })();
 </script>
@@ -49218,6 +49209,10 @@ html body footer {
 // تقرير وضع الأداء وإرشادات الاستخدام
 
 (function () {
+  // رسالة وضع الأداء عند بداية التطبيق ملغاة نهائياً في سياسة STANDARD-ONLY.
+  window.__ASSAL_SHOW_USAGE_REPORT__ = function () { return false; };
+  return;
+
   const HIDE_STANDARD_KEY = "assal_usage_standard_notice_do_not_show_v1";
   const HIDE_LIGHT_KEY = "assal_usage_light_notice_do_not_show_v1";
   let sessionShown = false;
@@ -63106,22 +63101,7 @@ html.low-end-device .header-buttons > .assal-static-header-btn{
       "assal-tools-customers",
     );
 
-    /* 2) إعداد الأداء: زر جديد نظيف، بينما زر التناوب القديم يبقى مخفياً كمرساة داخلية. */
-    const perf = makeButton(
-      "assalToolsPerformanceBtn",
-      "header-btn header-icon-btn debug-btn assal-tools-item assal-tools-performance",
-      "إعداد الأداء",
-      "fas fa-stethoscope",
-    );
-    perf.addEventListener("click", function () {
-      try {
-        if (typeof window.openPerfDebugModal === "function")
-          window.openPerfDebugModal();
-      } catch (err) {
-        console.error("ASSAL performance tool:", err);
-      }
-    });
-    rail.appendChild(perf);
+    /* 2) إعداد الأداء مخفي نهائياً عن الواجهة؛ يبقى المحرك الداخلي فقط للتوافق الآمن. */
 
     /* 3) الإحصائيات */
     moveHeaderToolIntoRail("statsBtn", rail, "assal-tools-stats");
