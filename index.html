@@ -2377,12 +2377,13 @@ h1 {
   transform: translateY(-50%) scale(1) !important;
   box-shadow: none !important;
 }
-/* قائمة اقتراحات أسعار الجملة (تطلع لفوك) */
+/* قائمة اقتراحات أسعار الجملة (تطلع جوه شريط البحث) */
 .wholesale-suggestions{
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 8px);
+  bottom: auto;
   display: none;
   flex-direction: column;
   gap: 6px;
@@ -2395,6 +2396,11 @@ h1 {
   padding: 10px;
   backdrop-filter: blur(14px);
   z-index: 9999;
+}
+/* عند صعود شريط البحث كـ Dock: الاقتراحات تبدأ بعد شريط الأصناف المصغر، لا فوقه. */
+.search-container.assal-search-dock .wholesale-suggestions{
+  top: var(--assal-wholesale-suggestions-top, calc(100% + 56px)) !important;
+  bottom: auto !important;
 }
 /* اخفاء سكرول كروم */
 .wholesale-suggestions::-webkit-scrollbar{
@@ -21330,6 +21336,12 @@ function updateAdminWholesaleBtn() {
     btn.classList.remove("is-active");
     isWholesaleMode = false;
     hideWholesaleSuggestions();
+  } else {
+    // لا نربط هذا بمسار فتح التطبيق؛ فقط نحدد مزامنة هادئة بعد استقرار الواجهة.
+    try {
+      if (typeof assalScheduleWholesaleBackgroundSync === "function")
+        assalScheduleWholesaleBackgroundSync();
+    } catch (_) {}
   }
 }
 
@@ -28248,8 +28260,503 @@ const dropboxMainFile =
 
 let database = {};
 let currentCategory = null;
-let allDatabase = []; // Sheet ALL (Item Name, Price, CAG)
+let allDatabase = []; // مصدر البحث الفعلي لأسعار الجملة
+let legacyAllDatabase = []; // شيت ALL القديم يبقى fallback فقط ولا يطغى على المصدر الجديد
 let isWholesaleMode = false;
+
+/* ===== ASSAL WHOLESALE CLOUD FEED: GitHub JSON + IndexedDB =====
+   - لا يدخل ضمن مسار فتح التطبيق.
+   - يفحص META الصغير فقط بالخلفية لكادر عسل.
+   - يحمل JSON فقط إذا تغير الـ SHA256.
+   - البحث يتم محلياً من الذاكرة/IndexedDB بدون طلب شبكة مع كل حرف.
+*/
+function assalWholesaleBuildAssetCandidates(fileName) {
+  const file = String(fileName || "").replace(/^\/+/, "");
+  const urls = [];
+  const add = (value) => {
+    try {
+      const href = String(value || "").trim();
+      if (href && !urls.includes(href)) urls.push(href);
+    } catch (_) {}
+  };
+
+  // المصدر الأول: جذر التطبيق نفسه. نشتقه من manifest حتى لا يتأثر
+  // بعنوان index الحالي أو query الخاصة بنسخة التطبيق داخل Android/WebView.
+  try {
+    const manifestEl = document.querySelector('link[rel="manifest"]');
+    const manifestHref = manifestEl && manifestEl.getAttribute("href");
+    if (manifestHref) {
+      const manifestUrl = new URL(manifestHref, window.location.origin);
+      const appRoot = new URL("./", manifestUrl.href);
+      add(new URL("data/wholesale/" + file, appRoot.href).href);
+    }
+  } catch (_) {}
+
+  // fallback لنفس مكان الصفحة إذا تغيّر الاستضافة مستقبلاً.
+  try {
+    add(
+      new URL(
+        "data/wholesale/" + file,
+        document.baseURI || window.location.href,
+      ).href,
+    );
+  } catch (_) {}
+
+  // fallback صريح لمسار GitHub Pages الحالي للمشروع.
+  try {
+    add(
+      new URL(
+        "/Assal---Office---App/data/wholesale/" + file,
+        window.location.origin,
+      ).href,
+    );
+  } catch (_) {}
+
+  // fallback أخير مباشر من GitHub Raw إذا تأخر نشر GitHub Pages أو أعاد 404 مؤقتاً.
+  add(
+    "https://raw.githubusercontent.com/AhMeD202444/Assal---Office---App/main/data/wholesale/" +
+      encodeURIComponent(file),
+  );
+
+  return urls;
+}
+
+const ASSAL_WHOLESALE_DATA_URLS = assalWholesaleBuildAssetCandidates(
+  "ASSAL_WHOLESALE.json",
+);
+const ASSAL_WHOLESALE_META_URLS = assalWholesaleBuildAssetCandidates(
+  "ASSAL_WHOLESALE_META.json",
+);
+const ASSAL_WHOLESALE_CACHE_DB = "assal_wholesale_cache_db_v1";
+const ASSAL_WHOLESALE_CACHE_STORE = "snapshots";
+const ASSAL_WHOLESALE_CACHE_KEY = "latest-wholesale-snapshot";
+
+let assalWholesaleCacheDbPromise = null;
+let assalWholesaleCacheHydratePromise = null;
+let assalWholesaleNetworkPromise = null;
+let assalWholesaleDedicatedActive = false;
+let assalWholesaleBackgroundScheduled = false;
+let assalWholesaleLastNetworkCheckAt = 0;
+let assalWholesaleSearchIndex = [];
+let assalWholesaleSearchIndexRows = null;
+
+function assalWholesaleRowName(row) {
+  return String(
+    (row &&
+      (row.name ??
+        row["Item Name"] ??
+        row["ITEM NAME"] ??
+        row.ItemName ??
+        row.Item ??
+        row.Name)) ||
+      "",
+  ).trim();
+}
+
+function assalWholesaleRowPrice(row) {
+  if (!row) return "";
+  return row.price ?? row.Price ?? row.PRICE ?? "";
+}
+
+function assalHasValidWholesaleRows(rows) {
+  try {
+    if (!Array.isArray(rows) || !rows.length) return false;
+    const sampleSize = Math.min(rows.length, 120);
+    let valid = 0;
+    for (let i = 0; i < sampleSize; i++) {
+      const row = rows[i];
+      const name = assalWholesaleRowName(row);
+      const price = assalWholesaleRowPrice(row);
+      if (
+        name &&
+        price !== "" &&
+        price !== null &&
+        price !== undefined &&
+        Number.isFinite(Number(String(price).replace(/,/g, "")))
+      ) {
+        valid++;
+      }
+    }
+    return valid >= Math.max(1, Math.floor(sampleSize * 0.7));
+  } catch (_) {
+    return false;
+  }
+}
+
+function assalOpenWholesaleCacheDb() {
+  if (assalWholesaleCacheDbPromise) return assalWholesaleCacheDbPromise;
+  assalWholesaleCacheDbPromise = new Promise((resolve, reject) => {
+    try {
+      if (!("indexedDB" in window)) {
+        reject(new Error("IndexedDB غير مدعوم"));
+        return;
+      }
+      const req = indexedDB.open(ASSAL_WHOLESALE_CACHE_DB, 1);
+      req.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(ASSAL_WHOLESALE_CACHE_STORE)) {
+          db.createObjectStore(ASSAL_WHOLESALE_CACHE_STORE, { keyPath: "id" });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () =>
+        reject(req.error || new Error("فشل فتح كاش أسعار الجملة"));
+    } catch (err) {
+      reject(err);
+    }
+  }).catch((err) => {
+    assalWholesaleCacheDbPromise = null;
+    throw err;
+  });
+  return assalWholesaleCacheDbPromise;
+}
+
+async function assalLoadWholesaleSnapshot() {
+  try {
+    const db = await assalOpenWholesaleCacheDb();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(ASSAL_WHOLESALE_CACHE_STORE, "readonly");
+      const store = tx.objectStore(ASSAL_WHOLESALE_CACHE_STORE);
+      const req = store.get(ASSAL_WHOLESALE_CACHE_KEY);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () =>
+        reject(req.error || new Error("فشل قراءة كاش أسعار الجملة"));
+    });
+  } catch (err) {
+    try {
+      console.warn("ASSAL wholesale cache read failed:", err);
+    } catch (_) {}
+    return null;
+  }
+}
+
+async function assalSaveWholesaleSnapshot(snapshot) {
+  try {
+    if (!snapshot || !assalHasValidWholesaleRows(snapshot.rows)) return false;
+    const db = await assalOpenWholesaleCacheDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(ASSAL_WHOLESALE_CACHE_STORE, "readwrite");
+      const store = tx.objectStore(ASSAL_WHOLESALE_CACHE_STORE);
+      store.put({ id: ASSAL_WHOLESALE_CACHE_KEY, ...snapshot });
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () =>
+        reject(tx.error || new Error("فشل حفظ كاش أسعار الجملة"));
+      tx.onabort = () =>
+        reject(tx.error || new Error("توقف حفظ كاش أسعار الجملة"));
+    });
+    return true;
+  } catch (err) {
+    try {
+      console.warn("ASSAL wholesale cache save failed:", err);
+    } catch (_) {}
+    return false;
+  }
+}
+
+function assalBuildWholesaleSearchIndex(rows) {
+  const source = Array.isArray(rows) ? rows : [];
+  const index = [];
+  try {
+    for (let i = 0; i < source.length; i++) {
+      const row = source[i];
+      const name = assalWholesaleRowName(row);
+      if (!name) continue;
+      const nameNorm =
+        typeof normalizeString === "function"
+          ? normalizeString(name)
+          : name.replace(/\s+/g, "").toLowerCase();
+      index.push({ row, name, nameNorm });
+    }
+  } catch (_) {}
+  assalWholesaleSearchIndex = index;
+  assalWholesaleSearchIndexRows = rows;
+  return index;
+}
+
+function assalApplyWholesaleRows(rows, meta = {}, source = "cache") {
+  if (!assalHasValidWholesaleRows(rows)) return false;
+  allDatabase = rows;
+  assalWholesaleDedicatedActive = true;
+  window.__ASSAL_WHOLESALE_DEDICATED_ACTIVE__ = true;
+  window.__ASSAL_WHOLESALE_SOURCE__ = source;
+  window.__ASSAL_WHOLESALE_META__ = meta || {};
+
+  // بناء index البحث ليس جزءاً من اعتماد البيانات نفسه؛ نؤجله لوقت الخمول
+  // حتى وصول تحديث الجملة بالخلفية ما يسبب أي نتعة بالواجهة.
+  assalWholesaleSearchIndex = [];
+  assalWholesaleSearchIndexRows = null;
+  const appliedRows = rows;
+  const warmIndex = () => {
+    try {
+      if (
+        assalWholesaleDedicatedActive &&
+        allDatabase === appliedRows &&
+        assalWholesaleSearchIndexRows !== appliedRows
+      ) {
+        assalBuildWholesaleSearchIndex(appliedRows);
+      }
+    } catch (_) {}
+  };
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(warmIndex, { timeout: 3000 });
+  } else {
+    setTimeout(warmIndex, 900);
+  }
+  return true;
+}
+
+async function assalHydrateWholesaleCache() {
+  if (assalWholesaleDedicatedActive && assalHasValidWholesaleRows(allDatabase)) {
+    return { success: true, source: "memory" };
+  }
+  if (assalWholesaleCacheHydratePromise)
+    return assalWholesaleCacheHydratePromise;
+
+  assalWholesaleCacheHydratePromise = (async () => {
+    const snapshot = await assalLoadWholesaleSnapshot();
+    if (!snapshot || !assalHasValidWholesaleRows(snapshot.rows)) {
+      return { success: false, source: "none" };
+    }
+    assalApplyWholesaleRows(
+      snapshot.rows,
+      {
+        version: snapshot.version || "",
+        generatedAt: snapshot.generatedAt || "",
+        count: snapshot.count || snapshot.rows.length,
+        sha256: snapshot.sha256 || "",
+      },
+      "indexeddb",
+    );
+    return {
+      success: true,
+      source: "indexeddb",
+      snapshot,
+    };
+  })().catch((err) => {
+    try {
+      console.warn("ASSAL wholesale cache hydrate failed:", err);
+    } catch (_) {}
+    return { success: false, source: "none", error: err };
+  });
+
+  return assalWholesaleCacheHydratePromise;
+}
+
+async function assalWholesaleFetchJson(urls, timeoutMs = 10000) {
+  const candidates = Array.isArray(urls) ? urls.filter(Boolean) : [urls].filter(Boolean);
+  let lastError = null;
+
+  for (let i = 0; i < candidates.length; i++) {
+    let controller = null;
+    let timeoutId = 0;
+    try {
+      if (typeof AbortController !== "undefined") controller = new AbortController();
+      if (controller && timeoutMs > 0) {
+        timeoutId = setTimeout(() => {
+          try {
+            controller.abort();
+          } catch (_) {}
+        }, timeoutMs);
+      }
+
+      const target = new URL(candidates[i], document.baseURI || window.location.href);
+      target.searchParams.set("assalWholesale", String(Date.now()));
+      const response = await fetch(target.href, {
+        cache: "no-store",
+        signal: controller ? controller.signal : undefined,
+      });
+      if (!response.ok) {
+        lastError = new Error(`HTTP ${response.status} @ ${target.pathname}`);
+        continue;
+      }
+
+      const data = await response.json();
+      window.__ASSAL_WHOLESALE_LAST_GOOD_URL__ = target.href;
+      return data;
+    } catch (err) {
+      lastError = err;
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
+    }
+  }
+
+  throw lastError || new Error("تعذر الوصول إلى ملفات أسعار الجملة");
+}
+
+async function assalRefreshWholesaleFromNetwork() {
+  if (assalWholesaleNetworkPromise) return assalWholesaleNetworkPromise;
+  if (typeof assalIsBrowserOffline === "function" && assalIsBrowserOffline()) {
+    return { success: false, offline: true };
+  }
+
+  assalWholesaleLastNetworkCheckAt = Date.now();
+  assalWholesaleNetworkPromise = (async () => {
+    const meta = await assalWholesaleFetchJson(ASSAL_WHOLESALE_META_URLS, 7000);
+    const remoteCount = Number(meta && meta.count ? meta.count : 0);
+    const remoteHash = String((meta && meta.sha256) || "").trim().toLowerCase();
+    const remoteVersion = String((meta && meta.version) || "").trim();
+
+    if (remoteCount && remoteCount < 100) {
+      throw new Error("عدد مواد أسعار الجملة غير طبيعي");
+    }
+
+    const cached = await assalLoadWholesaleSnapshot();
+    const cachedHash = String((cached && cached.sha256) || "")
+      .trim()
+      .toLowerCase();
+    const cachedVersion = String((cached && cached.version) || "").trim();
+    const sameHash = !!remoteHash && !!cachedHash && remoteHash === cachedHash;
+    const sameVersion =
+      !remoteHash &&
+      !!remoteVersion &&
+      !!cachedVersion &&
+      remoteVersion === cachedVersion;
+
+    if (
+      cached &&
+      assalHasValidWholesaleRows(cached.rows) &&
+      (sameHash || sameVersion)
+    ) {
+      if (!assalWholesaleDedicatedActive) {
+        assalApplyWholesaleRows(
+          cached.rows,
+          {
+            version: remoteVersion || cachedVersion,
+            generatedAt: (meta && meta.generatedAt) || cached.generatedAt || "",
+            count: remoteCount || cached.count || cached.rows.length,
+            sha256: remoteHash || cachedHash,
+          },
+          "indexeddb-current",
+        );
+      }
+      return { success: true, unchanged: true, source: "indexeddb" };
+    }
+
+    const rows = await assalWholesaleFetchJson(ASSAL_WHOLESALE_DATA_URLS, 12000);
+    if (!assalHasValidWholesaleRows(rows) || rows.length < 100) {
+      throw new Error("ملف أسعار الجملة غير صالح أو ناقص");
+    }
+    if (remoteCount && rows.length !== remoteCount) {
+      throw new Error(
+        `عدد مواد أسعار الجملة لا يطابق META (${rows.length}/${remoteCount})`,
+      );
+    }
+
+    const snapshot = {
+      savedAt: Date.now(),
+      version: remoteVersion,
+      generatedAt: (meta && meta.generatedAt) || "",
+      count: rows.length,
+      sha256: remoteHash,
+      rows,
+    };
+
+    // نفعّل النسخة الجديدة بالذاكرة فور نجاح التحقق، وحفظ IndexedDB يتم بعدها.
+    assalApplyWholesaleRows(rows, meta || {}, "github");
+    await assalSaveWholesaleSnapshot(snapshot);
+
+    return {
+      success: true,
+      updated: true,
+      source: "github",
+      count: rows.length,
+    };
+  })()
+    .catch((err) => {
+      try {
+        console.warn("ASSAL wholesale network refresh failed:", err);
+      } catch (_) {}
+      return { success: false, error: err };
+    })
+    .finally(() => {
+      assalWholesaleNetworkPromise = null;
+    });
+
+  return assalWholesaleNetworkPromise;
+}
+
+async function assalEnsureWholesaleData(options = {}) {
+  const waitForNetwork = options.waitForNetwork !== false;
+
+  const cached = await assalHydrateWholesaleCache();
+  if (cached && cached.success && assalWholesaleDedicatedActive) {
+    if (!(typeof assalIsBrowserOffline === "function" && assalIsBrowserOffline())) {
+      // الكاش يفتح فوراً، والتأكد من نسخة GitHub يتم بالخلفية.
+      assalRefreshWholesaleFromNetwork().catch(() => {});
+    }
+    return { success: true, source: cached.source || "indexeddb" };
+  }
+
+  if (typeof assalIsBrowserOffline === "function" && assalIsBrowserOffline()) {
+    return { success: false, offline: true, noCache: true };
+  }
+
+  if (!waitForNetwork) {
+    assalRefreshWholesaleFromNetwork().catch(() => {});
+    return { success: false, pending: true };
+  }
+
+  return await assalRefreshWholesaleFromNetwork();
+}
+
+function assalScheduleWholesaleBackgroundSync() {
+  if (assalWholesaleBackgroundScheduled) return;
+  assalWholesaleBackgroundScheduled = true;
+
+  setTimeout(() => {
+    const run = () => {
+      try {
+        if (
+          typeof canUseWholesalePrices === "function" &&
+          !canUseWholesalePrices()
+        )
+          return;
+      } catch (_) {
+        return;
+      }
+      assalEnsureWholesaleData({ waitForNetwork: false }).catch(() => {});
+    };
+
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(run, { timeout: 2200 });
+    } else {
+      setTimeout(run, 0);
+    }
+  }, 4800);
+}
+
+window.addEventListener(
+  "online",
+  () => {
+    try {
+      if (
+        typeof canUseWholesalePrices === "function" &&
+        canUseWholesalePrices()
+      ) {
+        setTimeout(() => assalRefreshWholesaleFromNetwork().catch(() => {}), 900);
+      }
+    } catch (_) {}
+  },
+  { passive: true },
+);
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) return;
+  if (Date.now() - assalWholesaleLastNetworkCheckAt < 10 * 60 * 1000) return;
+  try {
+    if (
+      typeof canUseWholesalePrices === "function" &&
+      canUseWholesalePrices()
+    ) {
+      assalRefreshWholesaleFromNetwork().catch(() => {});
+    }
+  } catch (_) {}
+});
+
+try {
+  window.__ASSAL_REFRESH_WHOLESALE__ = assalRefreshWholesaleFromNetwork;
+  window.__ASSAL_ENSURE_WHOLESALE__ = assalEnsureWholesaleData;
+} catch (_) {}
 
 /* ===== ASSAL OFFLINE DATA CACHE: آخر نسخة ناجحة من Google Sheet ===== */
 const ASSAL_PRICE_CACHE_DB = "assal_price_cache_db_v1";
@@ -28387,7 +28894,11 @@ function assalApplyPriceSnapshot(snapshot, options = {}) {
   const reason = options.reason || "snapshot";
 
   database = snapshot.database || {};
-  allDatabase = Array.isArray(snapshot.allDatabase) ? snapshot.allDatabase : [];
+  legacyAllDatabase = Array.isArray(snapshot.allDatabase)
+    ? snapshot.allDatabase
+    : [];
+  // لا نخلي شيت ALL القديم يطغى على مصدر الجملة الجديد إذا صار جاهزاً.
+  if (!assalWholesaleDedicatedActive) allDatabase = legacyAllDatabase;
   assalUsingOfflineCachedData = offline;
   window.__ASSAL_USING_OFFLINE_PRICE_CACHE__ = offline;
   window.__ASSAL_PRICE_CACHE_SAVED_AT__ = snapshot.savedAt || 0;
@@ -29332,10 +29843,12 @@ async function loadExcelFilesCore(options = {}) {
       { defval: null },
     );
 
-    // ✅ تحميل شيت ALL (أسعار الجملة)
-    allDatabase = XLSX.utils.sheet_to_json(mainWorkbook.Sheets["ALL"] || {}, {
-      defval: null,
-    });
+    // ✅ شيت ALL القديم يبقى fallback فقط. مصدر أسعار الجملة الأساسي صار GitHub JSON.
+    legacyAllDatabase = XLSX.utils.sheet_to_json(
+      mainWorkbook.Sheets["ALL"] || {},
+      { defval: null },
+    );
+    if (!assalWholesaleDedicatedActive) allDatabase = legacyAllDatabase;
 
     // تصحيح البيانات — لا نطبع آلاف الكائنات في Console أثناء التشغيل الطبيعي.
     Object.keys(database).forEach((category) => {
@@ -29379,7 +29892,7 @@ async function loadExcelFilesCore(options = {}) {
     await assalSavePriceSnapshot({
       savedAt,
       database,
-      allDatabase,
+      allDatabase: legacyAllDatabase,
       source: "google-sheet-xlsx",
       url: dropboxMainFile.replace(/([?&]t=)\d+/, "$1TIMESTAMP"),
       contentHash: mainContentHash || "",
@@ -29631,6 +30144,11 @@ function filterCategory(category) {
   );
   if (selectedCategory) {
     selectedCategory.classList.add("active");
+  }
+  if (isWholesaleMode) {
+    const input = document.getElementById("searchInput");
+    if (input && input.value.trim()) showWholesaleSuggestions(input.value);
+    else hideWholesaleSuggestions();
   }
 }
 
@@ -33822,9 +34340,10 @@ function pickAllCat(row) {
 }
 
 // وضع أسعار الجملة
-function toggleWholesaleMode() {
+async function toggleWholesaleMode() {
   const btn = document.getElementById("adminWholesaleBtn");
   if (!btn) return;
+  if (btn.dataset.assalWholesaleBusy === "1") return;
 
   // إذا مو أدمن: نفس سلوك التوافقات
   if (!isAdminUser()) {
@@ -33847,23 +34366,77 @@ function toggleWholesaleMode() {
     return;
   }
 
-  // ✅ NEW: إذا الزر متعطل بالـ HTML نشيله للأدمن المصرح له حتى يشتغل اللون والضغط
+  const nextMode = !isWholesaleMode;
+
+  // عند التفعيل فقط: استخدم كاش IndexedDB فوراً، وإذا أول مرة انتظر تحميل JSON مرة واحدة.
+  if (nextMode && !assalWholesaleDedicatedActive) {
+    const icon = btn.querySelector("i");
+    btn.dataset.assalWholesaleBusy = "1";
+    btn.setAttribute("aria-busy", "true");
+    if (icon) icon.classList.add("fa-spin");
+    try {
+      const ready = await assalEnsureWholesaleData({ waitForNetwork: true });
+      if (!ready || !ready.success || !assalWholesaleDedicatedActive) {
+        showExitLikeAlert({
+          icon: "fas fa-cloud-arrow-down",
+          title: "أسعار الجملة",
+          message:
+            ready && ready.offline
+              ? "لا توجد نسخة محفوظة لأسعار الجملة على هذا الجهاز. افتحها مرة واحدة بوجود الإنترنت."
+              : "تعذر جلب أسعار الجملة حالياً. حاول مرة أخرى بعد قليل.",
+          confirmText: "موافق",
+        });
+        return;
+      }
+    } finally {
+      btn.dataset.assalWholesaleBusy = "0";
+      btn.removeAttribute("aria-busy");
+      if (icon) icon.classList.remove("fa-spin");
+    }
+  } else if (nextMode) {
+    // إذا الكاش حاضر نفتح فوراً، وفحص META يستمر بالخلفية بدون انتظار المستخدم.
+    assalRefreshWholesaleFromNetwork().catch(() => {});
+  }
+
+  // إذا الزر متعطل بالـ HTML نشيله للحساب المصرح له.
   btn.disabled = false;
+  isWholesaleMode = nextMode;
 
-  isWholesaleMode = !isWholesaleMode;
-
-  // ✅ حالة تفعيل واضحة وصارمة
   btn.classList.toggle("is-active", isWholesaleMode);
   btn.setAttribute("aria-pressed", String(isWholesaleMode));
-
-  // ✅ تثبيت اللون حتى لو تعارضت الستايلات
   btn.style.background = isWholesaleMode
     ? "linear-gradient(45deg, #8B0000, #B22222)"
     : "linear-gradient(45deg, #43cea2, #185a9d)";
   btn.style.color = "#fff";
 
-  // عند الإلغاء نخفي الاقتراحات
-  if (!isWholesaleMode) hideWholesaleSuggestions();
+  if (!isWholesaleMode) {
+    hideWholesaleSuggestions();
+  } else {
+    const input = document.getElementById("searchInput");
+    if (input && input.value.trim()) showWholesaleSuggestions(input.value);
+  }
+}
+
+// ASSAL wholesale V6: exact Bayan classification -> existing Assal category IDs.
+// No name guessing or extra network calls; unknown classes remain available in global search.
+const ASSAL_WHOLESALE_BAYAN_CATEGORY_MAP = Object.freeze({
+  "LCD": "LCD", "BATTERY": "BATTERY",
+  "HOUSING": "HOUSING", "HOUSING.": "HOUSING",
+  "BACK": "BACK", "CAMER": "CAMERA", "CAMERA": "CAMERA",
+  "FRONT CAMERA": "CAMERA", "BUZZER": "BUZZER",
+  "FLAT BOARD": "CHARGING", "FLAT CHARCHING": "CHARGING",
+  "FAT SIMCARD": "HOLLDER", "HOLLDER SIMCARD": "HOLLDER",
+  "CAHRCHING CONNECTER": "CC", "CHARCHING CONNECTOR": "CC",
+  "CHARCHING CONNECTER": "CC", "CHARGING CONNECTOR": "CC",
+  "FLAT POWER": "POWER", "SWITCH POWER": "POWER",
+  "FLAT VOLUME": "VOLUME", "FLAT SPEAKER": "FLAT SPEAKER",
+  "FLAT HOME": "FINGER", "FLAT LCD": "FLAT LCD",
+  "LENS": "LENS", "SPEAKER": "SPEAKER", "IC": "IC",
+  "TOUCH": "TOUCH", "VIBRATION": "VIBRATION"
+});
+function assalWholesaleAppCategory(row) {
+  const bayanCat = String(row && (row.cat ?? row.CAG ?? row.category ?? "") || "").trim().toUpperCase();
+  return ASSAL_WHOLESALE_BAYAN_CATEGORY_MAP[bayanCat] || "";
 }
 
 function getWholesaleMatches(queryRaw, limit = 30) {
@@ -33871,15 +34444,77 @@ function getWholesaleMatches(queryRaw, limit = 30) {
   if (!q) return [];
 
   const rows = Array.isArray(allDatabase) ? allDatabase : [];
-  const scored = [];
 
+  // المصدر الجديد يحتوي أكثر من 14 ألف مادة بدون CAG.
+  // نستخدم index محلي مُسبق التطبيع، ونؤجل التشابه الثقيل إلا عند الحاجة.
+  if (assalWholesaleDedicatedActive) {
+    const index =
+      assalWholesaleSearchIndexRows === rows &&
+      Array.isArray(assalWholesaleSearchIndex)
+        ? assalWholesaleSearchIndex
+        : assalBuildWholesaleSearchIndex(rows);
+    const direct = [];
+    const fuzzyCandidates = [];
+    const selectedCat = String(currentCategory || "").trim().toUpperCase();
+    const filterByCategory = !!selectedCat && selectedCat !== "ALL" && selectedCat !== "SIMILARITES";
+    const qHead = q.length >= 2 ? q.slice(0, 2) : q;
+
+    for (let i = 0; i < index.length; i++) {
+      const entry = index[i];
+      const appCat = assalWholesaleAppCategory(entry.row);
+      if (filterByCategory && appCat !== selectedCat) continue;
+      const idx = entry.nameNorm.indexOf(q);
+      if (idx !== -1) {
+        direct.push({
+          row: entry.row,
+          score: 1400 - Math.min(idx, 300),
+          cat: appCat,
+          name: entry.name,
+        });
+        continue;
+      }
+
+      // للـ typo فقط: نجمع مرشحين قريبين بدل حساب Levenshtein على 14 ألف صف بكل حرف.
+      if (q.length >= 4 && qHead && entry.nameNorm.includes(qHead)) {
+        if (fuzzyCandidates.length < 2200) fuzzyCandidates.push(entry);
+      }
+    }
+
+    direct.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+    if (direct.length >= limit || q.length < 4) return direct.slice(0, limit);
+
+    const fuzzy = [];
+    for (let i = 0; i < fuzzyCandidates.length; i++) {
+      const entry = fuzzyCandidates[i];
+      const score = Math.round(similarityScore(q, entry.nameNorm) * 1000);
+      if (score < 300) continue;
+      fuzzy.push({
+        row: entry.row,
+        score,
+        cat: assalWholesaleAppCategory(entry.row),
+        name: entry.name,
+      });
+    }
+    fuzzy.sort((a, b) => b.score - a.score);
+
+    const seen = new Set(direct.map((m) => m.name));
+    for (const m of fuzzy) {
+      if (seen.has(m.name)) continue;
+      direct.push(m);
+      seen.add(m.name);
+      if (direct.length >= limit) break;
+    }
+    return direct.slice(0, limit);
+  }
+
+  // fallback القديم فقط إذا المصدر الجديد غير متاح بعد.
+  const scored = [];
   for (const row of rows) {
     const cat = String(pickAllCat(row) || "")
       .trim()
       .toUpperCase();
     if (!WHOLESALE_ALLOWED_CATS.includes(cat)) continue;
 
-    // إذا المستخدم مختار صنف من الشريط (مثل LCD) نخلي الجملة تعرض/تبحث بهالصنف فقط
     const selectedCat = String(currentCategory || "")
       .trim()
       .toUpperCase();
@@ -33891,17 +34526,9 @@ function getWholesaleMatches(queryRaw, limit = 30) {
 
     const nameNorm = normalizeString(name);
     let score = 0;
-
     const idx = nameNorm.indexOf(q);
-    if (idx !== -1) {
-      // تطابق مباشر
-      score = 1000 - idx;
-    } else {
-      // تشابه ذكي
-      score = Math.round(similarityScore(q, nameNorm) * 1000);
-    }
-
-    // فلترة خفيفة حتى ما يطلع شي بعيد
+    if (idx !== -1) score = 1000 - idx;
+    else score = Math.round(similarityScore(q, nameNorm) * 1000);
     if (score < 220) continue;
 
     scored.push({ row, score, cat, name });
@@ -33938,25 +34565,112 @@ function setWholesaleSelectedIndex(i) {
   if (activeEl) activeEl.scrollIntoView({ block: "nearest" });
 }
 
-function renderWholesaleSingleMatch(m) {
-  const resultsContainer = document.getElementById("results");
-  if (!resultsContainer || !m) return;
-
-  const results = [
-    {
-      "Item Name": m.name,
-      "Price": pickAllPrice(m.row),
-      "CAG": m.cat,
-    },
+function assalWholesaleInferCategory(name) {
+  const raw = String(name || "").trim().toUpperCase();
+  if (!raw) return "";
+  const rules = [
+    ["FLAT SPEAKER", "FLAT SPEAKER"],
+    ["SIGNAL CABLE", "SIGNAL CABLE"],
+    ["FLAT LCD", "FLAT LCD"],
+    ["LCD", "LCD"],
+    ["BATTERY", "BATTERY"],
+    ["HOUSING", "HOUSING"],
+    ["BACK", "BACK"],
+    ["CAMERA", "CAMERA"],
+    ["CHARGING", "CHARGING"],
+    ["BUZZER", "BUZZER"],
+    ["HEADPHONE", "HEADPHONE"],
+    ["FINGER", "FINGER"],
+    ["POWER", "POWER"],
+    ["LENS", "LENS"],
+    ["VOLUME", "VOLUME"],
+    ["SPEAKER", "SPEAKER"],
+    ["HOLDER", "HOLLDER"],
+    ["HOLLDER", "HOLLDER"],
+    ["TOUCH", "TOUCH"],
+    ["VIBRATION", "VIBRATION"],
+    ["IC", "IC"],
+    ["CC", "CC"],
   ];
+  for (const pair of rules) {
+    if (raw === pair[0] || raw.startsWith(pair[0] + " ")) return pair[1];
+  }
+  return "";
+}
 
-  const prevCat = currentCategory;
-  currentCategory = "ALL";
+function renderWholesaleMatchesExact(matches) {
+  const resultsContainer = document.getElementById("results");
+  if (!resultsContainer) return;
 
-  resultsContainer.style.display = "block";
-  displayResults(results);
+  const list = Array.isArray(matches) ? matches : [];
+  const perfRoot = document.documentElement;
+  perfRoot.classList.add("assal-results-rendering");
 
-  currentCategory = prevCat;
+  let htmlContent = "";
+  if (!list.length) {
+    htmlContent = '<div class="no-results">هذا العنصر غير متوفر في الوقت الحالي</div>';
+  } else {
+    htmlContent = list
+      .map((m) => {
+        const name = String((m && m.name) || "").trim();
+        const exactPrice = pickAllPrice(m && m.row);
+        const category =
+          String((m && m.cat) || "").trim() || assalWholesaleInferCategory(name);
+
+        const itemForImage = { "Item Name": name, CAG: category };
+        const imageChoice = assalResolveResultImage(itemForImage, category);
+        const imgSrc = imageChoice.src;
+        const imgFallbackSrc = imageChoice.fallback;
+        const imgClass = imageChoice.isPhoneImage ? "assal-phone-model-image" : "";
+
+        const safeName = escapeHtml(name || "بدون اسم");
+        // Keep wholesale purchase-price precision; group only the integer part.
+        const priceText = String(exactPrice ?? "").trim().replace(/^(-?\d+)(\.\d+)?$/, (_, integer, fraction = "") =>
+          integer.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + fraction
+        );
+        const priceHtml =
+          exactPrice === undefined ||
+          exactPrice === null ||
+          String(exactPrice).trim() === ""
+            ? "<p>غير متوفر</p>"
+            : `<p>${escapeHtml(String(priceText))} د.ع</p>`;
+
+        return (
+          `<div class="result-card assal-wholesale-result-card"` +
+          ` data-preview-name="${encodeURIComponent(name)}"` +
+          ` data-preview-category="${encodeURIComponent(category)}"` +
+          ` data-preview-img="${encodeURIComponent(imgSrc)}"` +
+          ` data-preview-fallback="${encodeURIComponent(imgFallbackSrc)}"` +
+          ` data-preview-phone-image="${imageChoice.isPhoneImage ? "1" : "0"}"` +
+          ` data-preview-original-price="${encodeURIComponent(String(exactPrice ?? ""))}"` +
+          ` data-preview-discount-price="">` +
+          `<img class="${imgClass}" src="${imgSrc}" loading="lazy" decoding="async"` +
+          ` data-assal-cache-src="${imgSrc}" data-assal-fallback-src="${imgFallbackSrc}"` +
+          ` onload="try{if(this.classList.contains('assal-phone-model-image')&&window.assalTunePhoneImageCrop)window.assalTunePhoneImageCrop(this,'card');if(window.assalCacheImageUrl)window.assalCacheImageUrl(this.getAttribute('data-assal-cache-src')||this.src)}catch(_){}"` +
+          ` onerror="try{if(window.assalUseCachedImage)window.assalUseCachedImage(this);else this.src=(this.getAttribute('data-assal-fallback-src')||'images/default.png')}catch(_){this.src=(this.getAttribute('data-assal-fallback-src')||'images/default.png')}" alt="Item Image">` +
+          `<h4>${safeName}</h4>${priceHtml}</div>`
+        );
+      })
+      .join("");
+  }
+
+  // مسار مستقل لبطاقات الجملة: الاسم والسعر يخرجان من نفس m.row المستخدم بالاقتراحات.
+  // بهذا ما يمر سعر الجملة بأي منطق أسعار/عروض خاص بالبحث العادي.
+  resultsContainer.innerHTML = htmlContent;
+
+  requestAnimationFrame(() => {
+    resultsContainer.style.display = "flex";
+    resultsContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+    try { toggleScrollToTopButton(); } catch (_) {}
+    requestAnimationFrame(() => {
+      perfRoot.classList.remove("assal-results-rendering");
+    });
+  });
+}
+
+function renderWholesaleSingleMatch(m) {
+  if (!m) return;
+  renderWholesaleMatchesExact([m]);
 }
 
 function showWholesaleSuggestions(queryRaw) {
@@ -33984,6 +34698,9 @@ function showWholesaleSuggestions(queryRaw) {
       const safeName = escapeHtml(m.name);
       const safeCat = escapeHtml(m.cat);
       const safePrice = escapeHtml(String(price ?? ""));
+      const catHtml = safeCat
+        ? '<span class="wholesale-suggestion-cat">' + `${safeCat}` + "</span>"
+        : "";
       return (
         `
             ` +
@@ -33996,11 +34713,7 @@ function showWholesaleSuggestions(queryRaw) {
         `
                 ` +
         '<div class="wholesale-suggestion-meta">' +
-        `
-                    ` +
-        '<span class="wholesale-suggestion-cat">' +
-        `${safeCat}` +
-        "</span>" +
+        catHtml +
         `
                     ` +
         '<span class="wholesale-suggestion-price">' +
@@ -34035,8 +34748,11 @@ function showWholesaleSuggestions(queryRaw) {
 
       hideWholesaleSuggestions();
 
-      // ✅ عرض عنصر واحد فقط
+      // Selecting a wholesale suggestion must show this one item only.
       renderWholesaleSingleMatch(m);
+      if (typeof window.__ASSAL_FINISH_SEARCH_SESSION__ === "function") {
+        setTimeout(window.__ASSAL_FINISH_SEARCH_SESSION__, 30);
+      }
     });
   });
 }
@@ -34063,21 +34779,9 @@ function searchWholesaleItems(queryRaw) {
 
   const matches = getWholesaleMatches(q, 120);
 
-  // نحولها لشكل displayResults حتى ما نكسر الواجهة
-  const results = matches.map((m) => ({
-    "Item Name": m.name,
-    "Price": pickAllPrice(m.row),
-    "CAG": m.cat,
-  }));
-
-  // نخلي currentCategory مؤقتاً حتى displayResults ما ينكسر بالصور
-  const prevCat = currentCategory;
-  currentCategory = "ALL";
-
+  // بطاقات الجملة لها renderer مستقل حتى يبقى السعر هو نفس السعر الظاهر بالاقتراحات حرفياً.
   resultsContainer.style.display = "block";
-  displayResults(results);
-
-  currentCategory = prevCat;
+  renderWholesaleMatchesExact(matches);
 }
 
 /* تفعيل اقتراحات أسعار الجملة من نفس حقل البحث */
@@ -34111,6 +34815,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const wholesaleBtn = document.getElementById("adminWholesaleBtn");
   if (wholesaleBtn && canUseWholesalePrices()) {
     wholesaleBtn.disabled = false;
+    try {
+      assalScheduleWholesaleBackgroundSync();
+    } catch (_) {}
   }
 
   const input = document.getElementById("searchInput");
@@ -34199,7 +34906,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       input.value = m.name;
       hideWholesaleSuggestions();
+      // Keyboard selection also shows exactly the selected wholesale item.
       renderWholesaleSingleMatch(m);
+      if (typeof window.__ASSAL_FINISH_SEARCH_SESSION__ === "function") {
+        setTimeout(window.__ASSAL_FINISH_SEARCH_SESSION__, 30);
+      }
     } else if (e.key === "Escape") {
       hideWholesaleSuggestions();
     }
@@ -57805,6 +58516,20 @@ html.low-end-device .assal-private-clean-dialog *{
 
       const railRect = compactRail ? compactRail.getBoundingClientRect() : null;
       const shellBottom = railRect ? railRect.bottom : dockRect.bottom;
+
+      /*
+        اقتراحات أسعار الجملة موجودة داخل نفس search-container.
+        أثناء وضع الـDock يكون شريط الأصناف المصغر أسفل البحث كعنصر مستقل في body،
+        لذلك نمرر موضع نهايته كمتغير CSS حتى تبدأ الاقتراحات بعده مباشرة بلا تداخل.
+        لا يوجد Listener أو قياس إضافي: نستخدم المستطيلات المحسوبة أصلاً في applyLayout.
+      */
+      try {
+        const suggestionsTop = Math.ceil(shellBottom - dockRect.top + 7);
+        dock.style.setProperty(
+          "--assal-wholesale-suggestions-top",
+          suggestionsTop + "px",
+        );
+      } catch (_) {}
 
       if (shell) {
         shell.style.left = m.left - 5 + "px";
