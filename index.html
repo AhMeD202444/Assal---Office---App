@@ -34624,10 +34624,11 @@ function renderWholesaleMatchesExact(matches) {
         const imgClass = imageChoice.isPhoneImage ? "assal-phone-model-image" : "";
 
         const safeName = escapeHtml(name || "بدون اسم");
-        // Keep wholesale purchase-price precision; group only the integer part.
-        const priceText = String(exactPrice ?? "").trim().replace(/^(-?\d+)(\.\d+)?$/, (_, integer, fraction = "") =>
-          integer.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + fraction
-        );
+        // Wholesale display only: round to whole IQD; keep the underlying purchase price unchanged.
+        const priceNumber = Number(exactPrice);
+        const priceText = String(exactPrice ?? "").trim() !== "" && Number.isFinite(priceNumber)
+          ? Math.round(priceNumber).toLocaleString("en-US", { maximumFractionDigits: 0 })
+          : String(exactPrice ?? "").trim();
         const priceHtml =
           exactPrice === undefined ||
           exactPrice === null ||
@@ -34697,7 +34698,11 @@ function showWholesaleSuggestions(queryRaw) {
       const price = pickAllPrice(m.row);
       const safeName = escapeHtml(m.name);
       const safeCat = escapeHtml(m.cat);
-      const safePrice = escapeHtml(String(price ?? ""));
+      const priceNumber = Number(price);
+      const displayPrice = price !== null && price !== undefined && String(price).trim() !== "" && Number.isFinite(priceNumber)
+        ? Math.round(priceNumber).toLocaleString("en-US", { maximumFractionDigits: 0 })
+        : String(price ?? "");
+      const safePrice = escapeHtml(displayPrice);
       const catHtml = safeCat
         ? '<span class="wholesale-suggestion-cat">' + `${safeCat}` + "</span>"
         : "";
