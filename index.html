@@ -35384,16 +35384,14 @@ async function refreshAssalAdminCompatFeed(options = {}) {
     if (res && res.success && Array.isArray(compatDatabase)) {
       assalAdminCompatFeedItems = assalBuildAdminNewCompatItems(compatDatabase);
     }
-    // Recheck at render time: an in-flight request may have started before going offline.
-    assalRenderAdminCompatTicker(assalAdminCompatFeedItems, {
-      offline:
-        offline ||
-        (typeof shouldShowAssalOfflineNews === "function" && shouldShowAssalOfflineNews()) ||
-        document.documentElement.classList.contains("assal-offline-mode") ||
-        navigator.onLine === false ||
-        (res && res.source === "offline-cache") ||
-        !!window.__ASSAL_COMPAT_USING_OFFLINE_CACHE__,
-    });
+    // Never allow an in-flight compatibility request to replace the shared
+    // offline badge/ticker after the connection drops.
+    if (shouldShowAssalOfflineNews() ||
+        document.documentElement.classList.contains("assal-offline-mode")) {
+      setAssalOfflineNewsTicker();
+    } else if (typeof canUseCompatibilities === "function" && canUseCompatibilities()) {
+      assalRenderAdminCompatTicker(assalAdminCompatFeedItems, { offline: false });
+    }
     return assalAdminCompatFeedItems;
   })();
 
@@ -35618,11 +35616,8 @@ function assalBindAdminCompatFeedClicks() {
 }
 
 function setAssalOfflineNewsTicker() {
-  // الأدمن يبقى على شريط التوافقات حتى بالأوفلاين، مع توضيح أن البيانات محفوظة.
-  if (typeof canUseCompatibilities === "function" && canUseCompatibilities()) {
-    refreshAssalAdminCompatFeed({ force: false });
-    return;
-  }
+  // ASSAL COMPAT SUBSCRIBERS OFFLINE UNIFIED: same badge and ticker as ordinary users.
+  // Subscription and cached compatibility data stay untouched.
 
   const newsBar = document.querySelector(".news-bar");
   const badge = document.querySelector(".breaking-news");
@@ -35792,6 +35787,10 @@ function restartNewsTicker() {
 }
 
 function refreshNewsTicker() {
+  if (shouldShowAssalOfflineNews() || document.documentElement.classList.contains("assal-offline-mode")) {
+    setAssalOfflineNewsTicker();
+    return;
+  }
   if (typeof canUseCompatibilities === "function" && canUseCompatibilities()) {
     refreshAssalAdminCompatFeed({
       force: navigator.onLine !== false,
@@ -35851,6 +35850,16 @@ function applyManualLightNewsBarState() {
   root.classList.toggle("assal-admin-compat-news", compatAccess);
 
   if (!newsBar || !badge || !ticker) return;
+
+  // When offline, all accounts (including compatibility subscribers) use the
+  // exact same offline badge/ticker. Do not schedule compatibility refreshes.
+  if (shouldShowAssalOfflineNews() || root.classList.contains("assal-offline-mode")) {
+    root.classList.remove("manual-light-news");
+    assalSetAdminCompatInteractionState(false);
+    stopNewsUpdates();
+    setAssalOfflineNewsTicker();
+    return;
+  }
 
   if (compatAccess) {
     stopNewsUpdates();
@@ -35957,6 +35966,13 @@ window.addEventListener("assalOfflineDataRestored", function () {
   try {
     applyManualLightNewsBarState();
   } catch (_) {}
+});
+// Keep compatibility ticker in sync with native WebView connectivity events.
+window.addEventListener("assalOffline", function () {
+  try { applyManualLightNewsBarState(); } catch (_) {}
+});
+window.addEventListener("assalOnline", function () {
+  try { applyManualLightNewsBarState(); } catch (_) {}
 });
 
 ["pointerdown", "touchstart", "mousedown"].forEach((eventName) => {
