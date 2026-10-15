@@ -35384,9 +35384,13 @@ async function refreshAssalAdminCompatFeed(options = {}) {
     if (res && res.success && Array.isArray(compatDatabase)) {
       assalAdminCompatFeedItems = assalBuildAdminNewCompatItems(compatDatabase);
     }
+    // Recheck at render time: an in-flight request may have started before going offline.
     assalRenderAdminCompatTicker(assalAdminCompatFeedItems, {
       offline:
         offline ||
+        (typeof shouldShowAssalOfflineNews === "function" && shouldShowAssalOfflineNews()) ||
+        document.documentElement.classList.contains("assal-offline-mode") ||
+        navigator.onLine === false ||
         (res && res.source === "offline-cache") ||
         !!window.__ASSAL_COMPAT_USING_OFFLINE_CACHE__,
     });
@@ -35853,8 +35857,14 @@ function applyManualLightNewsBarState() {
     // بالأدمن، شريط التوافقات يبقى ظاهر حتى في الوضع الخفيف؛ الحركة فقط تنطفئ على الجهاز الخفيف.
     newsBar.style.display = "flex";
     assalBindAdminCompatFeedClicks();
+    // Native/offline events must update the badge immediately; cached feed refresh may be async.
+    const assalCompatImmediateOffline =
+      shouldShowAssalOfflineNews() || root.classList.contains("assal-offline-mode");
+    if (assalCompatImmediateOffline) {
+      assalRenderAdminCompatTicker(assalAdminCompatFeedItems, { offline: true });
+    }
     refreshAssalAdminCompatFeed({
-      force: !shouldShowAssalOfflineNews(),
+      force: !assalCompatImmediateOffline,
     });
     startNewsUpdates();
     return;
