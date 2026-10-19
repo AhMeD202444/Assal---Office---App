@@ -18298,8 +18298,8 @@ html.assal-viewport-transition body {
         <button type="button" onclick="clearAssalCommunityImage()"><i class="fas fa-times"></i></button>
       </div>
       <div class="assal-community-write-row">
-        <button class="assal-community-attach" type="button" onclick="pickAssalCommunityImage()" title="إرسال صورة"><i class="fas fa-camera"></i></button>
-        <textarea id="assalCommunityInput" class="assal-community-input" placeholder="اكتب رسالتك في مجتمع عسل..."></textarea>
+        <button class="assal-community-attach" type="button" onclick="pickAssalCommunityImage()" title="إرفاق صورة" aria-label="إرفاق صورة"><i class="fas fa-plus"></i></button>
+        <textarea id="assalCommunityInput" class="assal-community-input" placeholder="اكتب رسالة..."></textarea>
         <button id="assalCommunitySendBtn" class="assal-community-send" type="button" onclick="sendAssalCommunityMessage()" title="إرسال"><i class="fas fa-paper-plane"></i></button>
       </div>
       <input id="assalCommunityImageInput" type="file" accept="image/*" style="display:none">
@@ -26404,6 +26404,38 @@ function toggleClearButton() {
   }
 }
 
+// ===== ASSAL SEARCH: تحرير بطاقات النتائج المخفية فقط (بدون تعديل البحث أو الواجهة) =====
+// كل مسار رسم يرقّم الجولة حتى لا يعيد RAF قديم إظهار نتائج بعد المسح.
+function assalStartResultsPaintRound(container) {
+  if (!container) return 0;
+  container.__assalResultsPaintRound = (container.__assalResultsPaintRound || 0) + 1;
+  return container.__assalResultsPaintRound;
+}
+
+function assalReleaseHiddenResults() {
+  const container = document.getElementById("results");
+  if (!container) return;
+  const round = assalStartResultsPaintRound(container);
+  container.style.display = "none"; // نفس السلوك البصري السابق حرفياً
+  document.documentElement.classList.remove("assal-results-rendering");
+  const originalFirstChild = container.firstChild;
+  if (!originalFirstChild) return;
+
+  // نحرر عقد البطاقات والصور بعد إخفائها، أثناء خمول المتصفح لا أثناء حركة اللمس.
+  // لا نمس database ولا IndexedDB ولا CacheStorage ولا بيانات الأوفلاين.
+  const release = () => {
+    if (container.__assalResultsPaintRound !== round ||
+        container.style.display !== "none" ||
+        container.firstChild !== originalFirstChild) return;
+    container.replaceChildren();
+  };
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(release, { timeout: 900 });
+  } else {
+    setTimeout(release, 36);
+  }
+}
+
 // دالة لمسح حقل البحث
 
 function clearSearch() {
@@ -26412,7 +26444,7 @@ function clearSearch() {
 
   searchInput.value = ""; // تفريغ الحقل
   searchInput.setAttribute("dir", "rtl");
-  resultsContainer.style.display = "none"; // إخفاء النتائج
+  assalReleaseHiddenResults(); // إخفاء النتائج وتحرير بطاقاتها وصورها لاحقاً
   toggleClearButton(); // تحديث حالة زر المسح
   toggleScrollToTopButton(); // تحديث زر الرجوع لأعلى
 }
@@ -32289,8 +32321,7 @@ function clearAssalResultsBeforeVoiceSearch() {
   try {
     const resultsContainer = document.getElementById("results");
     if (resultsContainer) {
-      resultsContainer.innerHTML = "";
-      resultsContainer.style.display = "none";
+      assalReleaseHiddenResults();
     }
     if (typeof hideWholesaleSuggestions === "function") {
       try {
@@ -33459,8 +33490,10 @@ function displayResults(results) {
   // Single DOM commit: keep the previous frame intact while the HTML string is built,
   // then swap once. This avoids an extra clear/layout/paint cycle.
   resultsContainer.innerHTML = htmlContent;
+  const paintRound = assalStartResultsPaintRound(resultsContainer);
 
   requestAnimationFrame(() => {
+    if (resultsContainer.__assalResultsPaintRound !== paintRound) return;
     resultsContainer.style.display = "flex";
     resultsContainer.scrollIntoView({
       behavior: "smooth",
@@ -33470,7 +33503,9 @@ function displayResults(results) {
 
     // Release the background gradient only after the result DOM has reached the compositor.
     requestAnimationFrame(() => {
-      perfRoot.classList.remove("assal-results-rendering");
+      if (resultsContainer.__assalResultsPaintRound === paintRound) {
+        perfRoot.classList.remove("assal-results-rendering");
+      }
     });
   });
 }
@@ -33705,7 +33740,9 @@ function displayCompatResults(results) {
     resultsContainer.innerHTML = htmlContent;
   }
 
+  const paintRound = assalStartResultsPaintRound(resultsContainer);
   requestAnimationFrame(() => {
+    if (resultsContainer.__assalResultsPaintRound !== paintRound) return;
     resultsContainer.style.display = "flex";
     resultsContainer.scrollIntoView({
       behavior: "smooth",
@@ -33746,7 +33783,7 @@ async function searchCompatibilitiesAdmin() {
   const resultsContainer = document.getElementById("results");
 
   if (!searchInput) {
-    resultsContainer.style.display = "none";
+    assalReleaseHiddenResults();
     showExitLikeAlert({
       icon: "fas fa-exclamation-circle",
       title: "حقل فارغ",
@@ -34135,7 +34172,7 @@ function searchItems() {
   const resultsContainer = document.getElementById("results");
 
   if (!searchInput) {
-    resultsContainer.style.display = "none";
+    assalReleaseHiddenResults();
     showExitLikeAlert({
       icon: "fas fa-exclamation-circle",
       title: "حقل فارغ",
@@ -34708,13 +34745,17 @@ function renderWholesaleMatchesExact(matches) {
   // مسار مستقل لبطاقات الجملة: الاسم والسعر يخرجان من نفس m.row المستخدم بالاقتراحات.
   // بهذا ما يمر سعر الجملة بأي منطق أسعار/عروض خاص بالبحث العادي.
   resultsContainer.innerHTML = htmlContent;
+  const paintRound = assalStartResultsPaintRound(resultsContainer);
 
   requestAnimationFrame(() => {
+    if (resultsContainer.__assalResultsPaintRound !== paintRound) return;
     resultsContainer.style.display = "flex";
     resultsContainer.scrollIntoView({ behavior: "smooth", block: "start" });
     try { toggleScrollToTopButton(); } catch (_) {}
     requestAnimationFrame(() => {
-      perfRoot.classList.remove("assal-results-rendering");
+      if (resultsContainer.__assalResultsPaintRound === paintRound) {
+        perfRoot.classList.remove("assal-results-rendering");
+      }
     });
   });
 }
@@ -34828,7 +34869,7 @@ function searchWholesaleItems(queryRaw) {
   const resultsContainer = document.getElementById("results");
   const q = (queryRaw || "").trim();
   if (!q) {
-    resultsContainer.style.display = "none";
+    assalReleaseHiddenResults();
     return;
   }
 
@@ -51227,10 +51268,11 @@ html body footer {
     var input = document.getElementById("assalCommunityInput");
     if (input) {
       input.addEventListener("input", function () {
-        if (applyMutedState(false)) {
-          try {
-            this.blur();
-          } catch (_) {}
+        // The authoritative mute checker lives in the ultra-community closure.
+        // This earlier handler must never call that closure-private function.
+        // Read only the existing form lock state; the ultra layer owns muting.
+        if (this.disabled || this.readOnly || this.getAttribute("aria-disabled") === "true") {
+          try { this.blur(); } catch (_) {}
           return;
         }
         window.__ASSAL_SCHEDULE_COMMUNITY_INPUT_RESIZE__(
@@ -51764,6 +51806,9 @@ html body footer {
     { key: "heart", emoji: "❤️", label: "قلب" },
     { key: "laugh", emoji: "😂", label: "ضحك" },
     { key: "like", emoji: "👍", label: "إعجاب" },
+    { key: "fire", emoji: "🔥", label: "نار" },
+    { key: "clap", emoji: "👏", label: "تصفيق" },
+    { key: "wow", emoji: "😮", label: "دهشة" },
   ];
 
   function $(id) {
@@ -52461,12 +52506,43 @@ html body footer {
     );
   }
 
+  // Newly opened community must land at the true end, including asynchronous images.
+  let communityFirstOpenBottom=false;
+  let communityBottomGraceUntil=0;
+  let communityBottomEpoch=0;
+  let communityUserMoved=false;
+  function communityScrollToEnd(wrap){
+    if(!wrap||!wrap.isConnected)return;
+    // Direct assignment is intentionally unsmoothed; CSS smooth-scroll causes partial messages.
+    wrap.scrollTop=wrap.scrollHeight;
+  }
+  function communitySettleBottom(wrap,epoch){
+    communityBottomGraceUntil=performance.now()+1400;
+    const settle=()=>{
+      if(epoch!==communityBottomEpoch||communityUserMoved||!wrap.isConnected)return;
+      communityScrollToEnd(wrap);
+    };
+    settle();
+    requestAnimationFrame(()=>{settle();requestAnimationFrame(settle);});
+    // Image decoding changes the height after Firebase render; observe only images
+    // from this render for at most a short opening grace window.
+    wrap.querySelectorAll('.assal-community-image-open img').forEach(image=>{
+      if(image.complete)return;
+      image.addEventListener('load',()=>{
+        if(epoch===communityBottomEpoch && performance.now()<communityBottomGraceUntil)
+          requestAnimationFrame(settle);
+      },{once:true});
+    });
+    setTimeout(settle,130);
+    setTimeout(settle,460);
+  }
   function renderMessages() {
     const wrap = $("assalCommunityMessages");
     if (!wrap) return;
     ensureCommunityEnhancementUi();
     const me = deviceId();
-    const wasNearBottom =
+    const openAtBottom=communityFirstOpenBottom;
+    const wasNearBottom = openAtBottom ||
       wrap.scrollHeight - wrap.scrollTop - wrap.clientHeight < 110;
     const list = messages.filter((m) => m && !m.hardDeleted);
     updateCounters();
@@ -52609,11 +52685,14 @@ html body footer {
       .join("");
 
     renderTypingIndicator();
-    setTimeout(() => {
-      try {
-        if (wasNearBottom) wrap.scrollTop = wrap.scrollHeight;
-      } catch (_) {}
-    }, 30);
+    if(openAtBottom){
+      communityFirstOpenBottom=false;
+      communityUserMoved=false;
+      communitySettleBottom(wrap,communityBottomEpoch);
+    } else if(wasNearBottom){
+      communityScrollToEnd(wrap);
+      requestAnimationFrame(()=>communityScrollToEnd(wrap));
+    }
   }
 
   async function patchMessage(id, patch) {
@@ -53161,6 +53240,8 @@ html body footer {
     if (!modal) return;
     ensureHeaderUi();
     ensureCommunityEnhancementUi();
+    const newlyOpened=!modal.classList.contains("show");
+    if(newlyOpened){communityFirstOpenBottom=true;communityUserMoved=false;++communityBottomEpoch;}
     modal.classList.add("show");
     modal.setAttribute("aria-hidden", "false");
     startRealtime();
@@ -53176,6 +53257,7 @@ html body footer {
     if (!modal) return;
     modal.classList.remove("show");
     modal.setAttribute("aria-hidden", "true");
+    communityFirstOpenBottom=false;communityUserMoved=true;++communityBottomEpoch;
     clearOwnTyping(false);
     selectedReply = null;
     renderReplyPreview();
@@ -53268,6 +53350,13 @@ html body footer {
     }
 
     const wrap = $("assalCommunityMessages");
+    if(wrap&&!wrap.dataset.assalCommunityBottomGestureBound){
+      wrap.dataset.assalCommunityBottomGestureBound='1';
+      const stopOpeningScroll=()=>{communityUserMoved=true;};
+      wrap.addEventListener('touchstart',stopOpeningScroll,{passive:true});
+      wrap.addEventListener('wheel',stopOpeningScroll,{passive:true});
+      wrap.addEventListener('pointerdown',stopOpeningScroll,{passive:true});
+    }
     if (wrap && !wrap.dataset.assalCommunityActionsBound) {
       wrap.dataset.assalCommunityActionsBound = "1";
       wrap.addEventListener("click", function (e) {
@@ -53391,7 +53480,7 @@ html body footer {
       const overlay = document.createElement("div");
       overlay.id = "assalCommunityHardActionDialog";
       overlay.style.cssText =
-        "position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(2,8,23,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);direction:rtl;font-family:Cairo,Tajawal,sans-serif;";
+        "position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(2,8,23,.82);direction:rtl;font-family:Cairo,Tajawal,sans-serif;";
       const inputHtml = opts.input
         ? '<textarea id="assalCommunityHardInput" maxlength="700" style="width:100%;min-height:112px;resize:vertical;border-radius:16px;padding:12px;background:rgba(2,6,23,.58);border:1px solid rgba(148,163,184,.22);color:#fff;outline:none;font-family:Cairo,Tajawal,sans-serif;font-size:14px;line-height:1.7">' +
           esc(opts.value || "") +
@@ -54903,8 +54992,8 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
   touch-action: pan-y;
   -webkit-user-select: none;
   user-select: none;
-  transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
-  will-change: transform;
+  transition: background-color .12s ease;
+  will-change: auto;
 }
 #assalCommunityModal .assal-community-msg.is-swipe-replying{
   box-shadow:0 14px 34px rgba(14,165,233,.18), 0 10px 24px rgba(0,0,0,.28) !important;
@@ -55018,10 +55107,16 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
   var longPressTarget = null;
   var activeTouch = null;
   var pickerHideTimer = null;
+  var longPressActivatedAt = 0;
+  var longPressActivatedId = "";
+  var mouseStartPoint = null;
   var REACTIONS = [
     { key: "heart", emoji: "❤️", label: "قلب" },
     { key: "laugh", emoji: "😂", label: "ضحك" },
     { key: "like", emoji: "👍", label: "إعجاب" },
+    { key: "fire", emoji: "🔥", label: "نار" },
+    { key: "clap", emoji: "👏", label: "تصفيق" },
+    { key: "wow", emoji: "😮", label: "دهشة" },
   ];
 
   function $(id) {
@@ -55056,9 +55151,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
     return !!(
       target &&
       target.closest &&
-      target.closest(
-        "button,a,input,textarea,select,.assal-community-msg-actions,.assal-community-reactions,.assal-community-quoted-reply,.assal-community-reply-preview",
-      )
+      target.closest('input,textarea,select,[contenteditable="true"]')
     );
   }
 
@@ -55131,7 +55224,9 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
       reply.type = "button";
       reply.className = "assal-community-picker-option";
       reply.setAttribute("data-picker-action", "reply");
-      reply.innerHTML = '<i class="fas fa-reply"></i><span>رد</span>';
+      reply.innerHTML = '<i class="fas fa-reply" aria-hidden="true"></i>';
+      reply.setAttribute("title", "رد");
+      reply.setAttribute("aria-label", "رد");
       actions.appendChild(reply);
       // Source buttons are generated by the original renderer with the current user's permissions.
       el.querySelectorAll(".assal-community-msg-actions button[data-community-action]").forEach(function (source) {
@@ -55141,23 +55236,31 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
         opt.type = "button";
         opt.className = "assal-community-picker-option" + (action === "delete" ? " is-danger" : "");
         opt.setAttribute("data-picker-action", action);
-        opt.innerHTML = source.innerHTML;
+        var description = (source.textContent || "").trim() || ({edit:"تعديل",pin:"تثبيت",mute:"كتم",delete:"حذف"}[action] || action);
+        opt.setAttribute("title", description);
+        opt.setAttribute("aria-label", description);
+        var icon = source.querySelector("i");
+        if (icon) opt.appendChild(icon.cloneNode(true));
+        else opt.textContent = "·";
         actions.appendChild(opt);
       });
     }
     var rect = el.getBoundingClientRect();
-    var vw = document.documentElement.clientWidth || window.innerWidth || 360;
-    var vh = window.visualViewport ? window.visualViewport.height : (window.innerHeight || 640);
+    var visual = window.visualViewport;
+    var visibleLeft = visual ? visual.offsetLeft : 0;
+    var visibleTop = visual ? visual.offsetTop : 0;
+    var vw = visual ? visual.width : (document.documentElement.clientWidth || window.innerWidth || 360);
+    var vh = visual ? visual.height : (window.innerHeight || 640);
     // Hidden until all sizes/coordinates are calculated (prevents visible layout jumps).
     picker.style.visibility = "hidden";
     picker.classList.add("show");
     picker.setAttribute("data-message-id", id);
     var pw = picker.offsetWidth || 276;
     var ph = picker.offsetHeight || 122;
-    var x = Math.max(10, Math.min(rect.left + rect.width / 2 - pw / 2, vw - pw - 10));
+    var x = Math.max(visibleLeft + 10, Math.min(rect.left + rect.width / 2 - pw / 2, visibleLeft + vw - pw - 10));
     var above = rect.top - ph - 8;
     var below = rect.bottom + 8;
-    var y = above >= 8 ? above : (below + ph <= vh - 8 ? below : Math.max(8, Math.min(above, vh - ph - 8)));
+    var y = above >= visibleTop + 8 ? above : (below + ph <= visibleTop + vh - 8 ? below : Math.max(visibleTop + 8, Math.min(above, visibleTop + vh - ph - 8)));
     picker.style.left = Math.round(x) + "px";
     picker.style.top = Math.round(y) + "px";
     picker.style.visibility = "visible";
@@ -55183,34 +55286,35 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
     cancelLongPress();
     if (!el || !getMsgId(el)) return;
     longPressTarget = el;
-    el.classList.add("is-long-pressing");
     longPressTimer = setTimeout(function () {
       var target = longPressTarget;
       cancelLongPress();
-      if (target && isCommunityOpen()) {
-        try {
-          if (navigator.vibrate) navigator.vibrate(18);
-        } catch (_) {}
+      if (target && isCommunityOpen() && target.isConnected) {
+        longPressActivatedAt = Date.now();
+        longPressActivatedId = getMsgId(target);
+        try { if (navigator.vibrate) navigator.vibrate(12); } catch (_) {}
         positionPickerFor(target);
       }
     }, 430);
   }
 
-  function syncReactionVisibility() {
-    var wrap = messagesBox();
-    if (!wrap) return;
-    wrap.querySelectorAll(".assal-community-msg").forEach(ensureSwipeHint);
-    wrap.querySelectorAll(".assal-community-reactions").forEach(function (row) {
+  function enhanceMessage(el) {
+    if (!el || !el.classList || !el.classList.contains("assal-community-msg")) return;
+    ensureSwipeHint(el);
+    el.querySelectorAll(".assal-community-reactions").forEach(function (row) {
       var visible = false;
       row.querySelectorAll(".assal-community-reaction").forEach(function (btn) {
-        var hasCount = !!btn.querySelector("b");
-        var active = btn.classList.contains("is-active");
-        var show = hasCount || active;
+        var show = !!btn.querySelector("b") || btn.classList.contains("is-active");
         btn.classList.toggle("is-gesture-hidden", !show);
         if (show) visible = true;
       });
       row.classList.toggle("is-empty-reactions", !visible);
     });
+  }
+
+  function syncReactionVisibility() {
+    var wrap = messagesBox();
+    if (wrap) wrap.querySelectorAll(".assal-community-msg").forEach(enhanceMessage);
   }
 
   function beginSwipe(el, x, y) {
@@ -55233,7 +55337,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
     activeTouch.dx = dx;
     activeTouch.dy = dy;
 
-    if (Math.abs(dy) > 18 && Math.abs(dy) > Math.abs(dx)) {
+    if (Math.abs(dy) > 9 && Math.abs(dy) > Math.abs(dx)) {
       endSwipe(false);
       cancelLongPress();
       return;
@@ -55241,7 +55345,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
     if (dx > 10 && Math.abs(dx) > Math.abs(dy) * 1.25) {
       activeTouch.swiping = true;
       cancelLongPress();
-      if (ev && ev.cancelable) ev.preventDefault();
+      // CSS touch-action:pan-y lets vertical scroll stay on the compositor.
       var move = Math.min(Math.max(dx, 0), 84);
       activeTouch.el.classList.add("is-swipe-replying");
       activeTouch.el.style.transform = "translateX(" + move + "px)";
@@ -55304,7 +55408,7 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
         var t = e.touches[0];
         moveSwipe(t.clientX, t.clientY, e);
       },
-      { passive: false },
+      { passive: true },
     );
 
     wrap.addEventListener(
@@ -55324,30 +55428,50 @@ html.low-end-device .assal-community-msg.is-jump-highlight{
       { passive: true },
     );
 
-    /* دعم الكمبيوتر: ضغط مطوّل بالماوس للتجربة */
+    /* Mouse press is allowed on the full bubble, including name, quote and image. */
     wrap.addEventListener("mousedown", function (e) {
       if (e.button !== 0 || ignoreInteractive(e.target)) return;
       var el = getMsgEl(e.target);
       if (!el || el.classList.contains("deleted")) return;
+      mouseStartPoint = {x:e.clientX,y:e.clientY};
       startLongPress(el);
     });
-    wrap.addEventListener("mousemove", cancelLongPress);
-    wrap.addEventListener("mouseup", cancelLongPress);
-    wrap.addEventListener("mouseleave", cancelLongPress);
-
-    wrap.addEventListener(
-      "scroll",
-      function () {
-        hidePicker();
-        cancelLongPress();
-      },
-      { passive: true },
-    );
-
-    var mo = new MutationObserver(function () {
-      window.requestAnimationFrame(syncReactionVisibility);
+    wrap.addEventListener("mousemove", function(e){
+      if(mouseStartPoint && Math.hypot(e.clientX-mouseStartPoint.x,e.clientY-mouseStartPoint.y)>8)cancelLongPress();
+    },{passive:true});
+    wrap.addEventListener("mouseup", function(){ mouseStartPoint=null;cancelLongPress(); });
+    wrap.addEventListener("mouseleave", function(){ mouseStartPoint=null;cancelLongPress(); });
+    wrap.addEventListener("contextmenu",function(e){
+      var el=getMsgEl(e.target);
+      if(!el || el.classList.contains('deleted'))return;
+      e.preventDefault();cancelLongPress();positionPickerFor(el);
     });
-    mo.observe(wrap, { childList: true, subtree: true });
+    // Prevent the synthetic click after a long touch press from opening a photo/reply.
+    wrap.addEventListener("click",function(e){
+      var el=getMsgEl(e.target);
+      if(el && longPressActivatedId===getMsgId(el) && Date.now()-longPressActivatedAt<650){
+        e.preventDefault();e.stopImmediatePropagation();
+        longPressActivatedAt=0;longPressActivatedId="";
+      }
+    },true);
+    wrap.addEventListener("scroll", function () {
+      hidePicker();cancelLongPress();
+    }, {passive:true});
+    // Observe only message-list replacements, not subtree image loads or reaction/hint nodes.
+    var raf=0, pending=new Set();
+    var mo=new MutationObserver(function(records){
+      records.forEach(function(record){
+        record.addedNodes.forEach(function(node){
+          if(node.nodeType!==1)return;
+          if(node.classList.contains('assal-community-msg')) pending.add(node);
+          else if(node.querySelectorAll)node.querySelectorAll('.assal-community-msg').forEach(function(el){pending.add(el);});
+        });
+      });
+      if(pending.size && !raf){
+        raf=requestAnimationFrame(function(){raf=0;var batch=Array.from(pending);pending.clear();batch.forEach(enhanceMessage);});
+      }
+    });
+    mo.observe(wrap,{childList:true});
     syncReactionVisibility();
   }
 
@@ -67370,9 +67494,9 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
 /* Community images: same design language as private chat. CSS transforms preserve source image quality. */
 #assalCommunityFullImage.assal-community-full-image{
   padding:14px;
-  background:rgba(1,7,17,.68);
-  backdrop-filter:blur(3px);
-  -webkit-backdrop-filter:blur(3px);
+  background:rgba(1,7,17,.90);
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
   isolation:isolate;
   font-family:'Cairo',sans-serif;
 }
@@ -67412,6 +67536,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;background:rgba(1,7,17,.3);
   touch-action:none;user-select:none;-webkit-user-select:none;direction:ltr;
+  contain:layout paint style;overscroll-behavior:contain;
 }
 #assalCommunityFullImage .assal-community-image-stage.is-zoomed{cursor:grab}
 #assalCommunityFullImage .assal-community-image-stage.is-zoomed:active{cursor:grabbing}
@@ -67419,6 +67544,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   flex:none;max-width:none;max-height:none;width:auto;height:auto;
   border-radius:0;box-shadow:none;object-fit:contain;
   transform-origin:center;pointer-events:none;image-rendering:auto;
+  will-change:transform;backface-visibility:hidden;
 }
 #assalCommunityFullImage .assal-community-image-toolbar{
   display:flex;align-items:center;justify-content:center;gap:10px;flex:none;
@@ -67447,108 +67573,176 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
 </style>
 
 <script id="assal-community-matched-zoom-viewer-final">
+/* Community image gestures use the SAME direct-transform pointer/wheel/pinch engine
+   as the private Messenger (installImageGestures, fitImage, zoomImage).
+   Previous community RAF/coalesced-event engine is REPLACED, not stacked. */
 (function(){
   'use strict';
-  function initialize(){
-    const modal=document.getElementById('assalCommunityFullImage');
+  function install(){
+    const cover=document.getElementById('assalCommunityFullImage');
     const stage=document.getElementById('assalCommunityImageStage');
     const img=document.getElementById('assalCommunityFullImageImg');
-    const zoomText=document.getElementById('assalCommunityZoomPercent');
-    if(!modal||!stage||!img||modal.dataset.matchedViewerReady==='1')return;
-    modal.dataset.matchedViewerReady='1';
-    let scale=1,x=0,y=0,baseW=0,baseH=0,focusTarget=null;
-    let lastTap=0,lastTapX=0,lastTapY=0;
-    const pointers=new Map();let initialDistance=0,initialScale=1,dragStart=null;
-    function clamp(v,low,high){return Math.max(low,Math.min(high,v));}
-    function refresh(){
-      const limX=Math.max(0,(baseW*scale-stage.clientWidth)/2+12),limY=Math.max(0,(baseH*scale-stage.clientHeight)/2+12);
-      x=clamp(x,-limX,limX);y=clamp(y,-limY,limY);
-      img.style.transform='translate3d('+x+'px,'+y+'px,0) scale('+scale+')';
-      stage.classList.toggle('is-zoomed',scale>1.01);
-      if(zoomText)zoomText.textContent=Math.round(scale*100)+'%';
-      const zin=modal.querySelector('[data-community-zoom="in"]'),zout=modal.querySelector('[data-community-zoom="out"]');
-      if(zin)zin.disabled=scale>=5;if(zout)zout.disabled=scale<=1;
+    const percent=document.getElementById('assalCommunityZoomPercent');
+    if(!cover||!stage||!img||cover.dataset.privateImageEngine==='1')return;
+    cover.dataset.privateImageEngine='1';
+    const zoomOut=cover.querySelector('[data-community-zoom="out"]');
+    const zoomIn=cover.querySelector('[data-community-zoom="in"]');
+    const zoomReset=cover.querySelector('[data-community-zoom="reset"]');
+    const S={imageScale:1,imageX:0,imageY:0,imageWidth:0,imageHeight:0,
+      imagePointers:new Map(),imageTap:null,imageLastTap:null};
+    let lastFocus=null,openSeq=0;
+    const opened=()=>cover.classList.contains('show');
+    // Copied from the private Messenger's fit / transform / zoom calculations.
+    function fitImage(reset=false){
+      if(!opened())return;
+      const w=img.naturalWidth,h=img.naturalHeight;
+      if(!w||!h||!stage.clientWidth||!stage.clientHeight)return;
+      const fit=Math.min(1,(stage.clientWidth-24)/w,(stage.clientHeight-24)/h);
+      S.imageWidth=w*fit;S.imageHeight=h*fit;
+      img.style.width=S.imageWidth+'px';img.style.height=S.imageHeight+'px';
+      if(reset){S.imageScale=1;S.imageX=S.imageY=0;}
+      updateImageTransform();
     }
-    function fit(){
-      if(!modal.classList.contains('show')||!img.naturalWidth||!img.naturalHeight||!stage.clientWidth||!stage.clientHeight)return;
-      // Fit to BOTH dimensions (no enlargement above the original resolution).
-      const actual=Math.min(1,(stage.clientWidth-24)/img.naturalWidth,(stage.clientHeight-24)/img.naturalHeight);
-      baseW=Math.max(1,Math.round(img.naturalWidth*actual));baseH=Math.max(1,Math.round(img.naturalHeight*actual));
-      img.style.width=baseW+'px';img.style.height=baseH+'px';scale=1;x=0;y=0;refresh();
+    function updateImageTransform(){
+      if(!opened())return;
+      const limitX=Math.max(0,(S.imageWidth*S.imageScale-stage.clientWidth)/2+12);
+      const limitY=Math.max(0,(S.imageHeight*S.imageScale-stage.clientHeight)/2+12);
+      S.imageX=Math.max(-limitX,Math.min(limitX,S.imageX));
+      S.imageY=Math.max(-limitY,Math.min(limitY,S.imageY));
+      img.style.transform='translate3d('+S.imageX+'px,'+S.imageY+'px,0) scale('+S.imageScale+')';
+      stage.classList.toggle('is-zoomed',S.imageScale>1.01);
+      if(percent)percent.textContent=Math.round(S.imageScale*100)+'%';
+      if(zoomOut)zoomOut.disabled=S.imageScale<=1;
+      if(zoomIn)zoomIn.disabled=S.imageScale>=5;
+      const focus=document.activeElement;
+      if(((focus===zoomOut&&zoomOut.disabled)||(focus===zoomIn&&zoomIn.disabled))&&zoomReset)
+        zoomReset.focus({preventScroll:true});
     }
-    function zoom(next){scale=clamp(next,1,5);if(scale===1){x=0;y=0;}refresh();}
+    function zoomImage(value,point){
+      const before=S.imageScale,next=Math.max(1,Math.min(5,value));
+      if(point){
+        const rect=stage.getBoundingClientRect();
+        const x=point.x-rect.left-rect.width/2,y=point.y-rect.top-rect.height/2;
+        S.imageX=x-(x-S.imageX)*next/before;
+        S.imageY=y-(y-S.imageY)*next/before;
+      }
+      S.imageScale=next;
+      if(next===1)S.imageX=S.imageY=0;
+      updateImageTransform();
+    }
+    const points=()=>[...S.imagePointers.values()];
+    const distance=p=>Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
+    const middle=p=>({x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2});
+    stage.addEventListener('pointerdown',e=>{
+      if(!opened()||e.button>0)return;
+      e.preventDefault();
+      try{stage.setPointerCapture?.(e.pointerId);}catch(_){}
+      S.imagePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      S.imageTap={time:Date.now(),x:e.clientX,y:e.clientY,moved:S.imagePointers.size>1};
+    });
+    stage.addEventListener('pointermove',e=>{
+      if(!S.imagePointers.has(e.pointerId))return;
+      e.preventDefault();
+      const before=points(),old=S.imagePointers.get(e.pointerId);
+      S.imagePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(S.imageTap&&Math.hypot(e.clientX-S.imageTap.x,e.clientY-S.imageTap.y)>8)
+        S.imageTap.moved=true;
+      const after=points();
+      if(after.length===2){
+        if(S.imageTap)S.imageTap.moved=true;
+        const d=distance(before);
+        if(d>5)zoomImage(S.imageScale*distance(after)/d,middle(before));
+        const a=middle(after),b=middle(before);
+        S.imageX+=a.x-b.x;S.imageY+=a.y-b.y;
+      }else if(after.length===1&&S.imageScale>1){
+        S.imageX+=e.clientX-old.x;S.imageY+=e.clientY-old.y;
+      }
+      updateImageTransform();
+    });
+    const end=e=>{
+      const tap=S.imageTap;
+      S.imagePointers.delete(e.pointerId);
+      if(e.type==='pointerup'&&!S.imagePointers.size&&tap&&!tap.moved&&Date.now()-tap.time<300){
+        const last=S.imageLastTap;
+        if(last&&Date.now()-last.time<320&&Math.hypot(e.clientX-last.x,e.clientY-last.y)<24){
+          zoomImage(S.imageScale>1?1:2.5,{x:e.clientX,y:e.clientY});
+          S.imageLastTap=null;
+        }else S.imageLastTap={time:Date.now(),x:e.clientX,y:e.clientY};
+      }
+    };
+    ['pointerup','pointercancel','lostpointercapture'].forEach(type=>stage.addEventListener(type,end));
+    stage.addEventListener('wheel',e=>{
+      if(!opened())return;
+      e.preventDefault();
+      zoomImage(S.imageScale*Math.exp(-e.deltaY*.002),{x:e.clientX,y:e.clientY});
+    },{passive:false});
     const oldOpen=window.openAssalCommunityImageViewer;
     window.openAssalCommunityImageViewer=function(id){
       if(typeof oldOpen!=='function')return;
-      focusTarget=document.activeElement;
+      lastFocus=document.activeElement;
+      S.imageScale=1;S.imageX=S.imageY=0;S.imagePointers.clear();S.imageLastTap=null;
+      const current=++openSeq;
+      // Existing Firebase validation and source image selection are untouched.
       oldOpen.apply(this,arguments);
-      if(!modal.classList.contains('show')||!img.src)return;
-      const source=document.getElementById('assal-community-msg-'+id);
-      const name=source?.querySelector('.assal-community-sender > span')?.textContent||'مجتمع عسل';
-      const time=source?.querySelector('.assal-community-time')?.textContent||'';
-      const cap=document.getElementById('assalCommunityImageCaption');if(cap)cap.textContent=name+(time?' · '+time:'');
-      pointers.clear();dragStart=null;initialDistance=0;img.style.transform='';
-      if(img.complete&&img.naturalWidth)fit();else img.addEventListener('load',fit,{once:true});
-      modal.querySelector('.assal-community-view-close')?.focus({preventScroll:true});
+      if(!opened()||!img.src)return;
+      const message=document.getElementById('assal-community-msg-'+id);
+      const name=message?.querySelector('.assal-community-sender > span')?.textContent||'مجتمع عسل';
+      const time=message?.querySelector('.assal-community-time')?.textContent||'';
+      const caption=document.getElementById('assalCommunityImageCaption');
+      if(caption)caption.textContent=name+(time?' · '+time:'');
+      if(img.complete&&img.naturalWidth)fitImage(true);
+      else requestAnimationFrame(()=>{if(current===openSeq)fitImage(true)});
+      cover.querySelector('.assal-community-view-close')?.focus({preventScroll:true});
     };
     const oldClose=window.closeAssalCommunityImageViewer;
     window.closeAssalCommunityImageViewer=function(){
+      ++openSeq;
       if(typeof oldClose==='function')oldClose.apply(this,arguments);
-      else modal.classList.remove('show');
-      pointers.clear();dragStart=null;initialDistance=0;img.removeAttribute('src');
-      if(focusTarget?.isConnected)try{focusTarget.focus({preventScroll:true});}catch(_){}
-      focusTarget=null;
+      else cover.classList.remove('show');
+      S.imagePointers.clear();S.imageLastTap=null;S.imageTap=null;
+      img.removeAttribute('src');img.style.transform='';img.style.width='';img.style.height='';
+      stage.classList.remove('is-zoomed');
+      if(lastFocus?.isConnected)try{lastFocus.focus({preventScroll:true});}catch(_){}
+      lastFocus=null;
     };
-    img.addEventListener('load',fit);
-    const controls=modal.querySelector('.assal-community-image-toolbar');
-    controls?.addEventListener('click',e=>{
-      const btn=e.target.closest('[data-community-zoom]');if(!btn)return;
-      if(btn.dataset.communityZoom==='in')zoom(scale*1.25);
-      else if(btn.dataset.communityZoom==='out')zoom(scale/1.25);
-      else zoom(1);
+    img.addEventListener('load',()=>{if(opened())fitImage(true)});
+    cover.querySelector('.assal-community-image-toolbar')?.addEventListener('click',e=>{
+      const button=e.target.closest('[data-community-zoom]');if(!button)return;
+      const action=button.getAttribute('data-community-zoom');
+      zoomImage(action==='in'?S.imageScale*1.25:action==='out'?S.imageScale/1.25:1);
     });
-    stage.addEventListener('wheel',e=>{if(!modal.classList.contains('show'))return;e.preventDefault();zoom(scale*(e.deltaY<0?1.18:1/1.18));},{passive:false});
-    function distance(){const arr=Array.from(pointers.values());return arr.length<2?0:Math.hypot(arr[0].x-arr[1].x,arr[0].y-arr[1].y);}
-    stage.addEventListener('pointerdown',e=>{
-      if(!modal.classList.contains('show'))return;
-      if(e.pointerType==='mouse'&&e.button!==0)return;
-      try{stage.setPointerCapture(e.pointerId);}catch(_){}
-      pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-      if(pointers.size===1){dragStart={x:e.clientX,y:e.clientY,panX:x,panY:y,moved:false};}
-      else if(pointers.size>=2){initialDistance=distance();initialScale=scale;dragStart=null;}
-    });
-    stage.addEventListener('pointermove',e=>{
-      if(!pointers.has(e.pointerId))return;
-      const prev=pointers.get(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-      if(pointers.size>=2){if(initialDistance>0)zoom(initialScale*(distance()/initialDistance));}
-      else if(scale>1&&dragStart){x=dragStart.panX+e.clientX-dragStart.x;y=dragStart.panY+e.clientY-dragStart.y;refresh();}
-      if(dragStart&&(Math.abs(e.clientX-dragStart.x)>7||Math.abs(e.clientY-dragStart.y)>7))dragStart.moved=true;
-    });
-    function release(e){
-      if(!pointers.has(e.pointerId))return;
-      const wasOne=pointers.size===1,st=dragStart;pointers.delete(e.pointerId);
-      if(wasOne&&st&&!st.moved&&e.pointerType!=='mouse'){
-        const now=Date.now();if(now-lastTap<340&&Math.abs(e.clientX-lastTapX)<38&&Math.abs(e.clientY-lastTapY)<38){zoom(scale>1?1:2);lastTap=0;}
-        else{lastTap=now;lastTapX=e.clientX;lastTapY=e.clientY;}
-      }
-      if(pointers.size===1){const p=Array.from(pointers.values())[0];dragStart={x:p.x,y:p.y,panX:x,panY:y,moved:true};}
-      else if(!pointers.size){dragStart=null;initialDistance=0;}
-    }
-    stage.addEventListener('pointerup',release);stage.addEventListener('pointercancel',release);
-    stage.addEventListener('dblclick',e=>{if(e.pointerType!=='touch')zoom(scale>1?1:2);});
-    window.addEventListener('resize',()=>{if(modal.classList.contains('show'))fit();});
+    if(window.ResizeObserver)new ResizeObserver(()=>{if(opened())fitImage(false)}).observe(stage);
     document.addEventListener('keydown',e=>{
-      if(!modal.classList.contains('show'))return;
+      if(!opened())return;
       if(e.key==='Escape'){e.preventDefault();window.closeAssalCommunityImageViewer();}
-      else if(e.key==='+'||e.key==='='){e.preventDefault();zoom(scale*1.25);}
-      else if(e.key==='-'){e.preventDefault();zoom(scale/1.25);}
-      else if(e.key==='0'){e.preventDefault();zoom(1);}
+      else if(e.key==='+'||e.key==='='){e.preventDefault();zoomImage(S.imageScale*1.25);}
+      else if(e.key==='-'){e.preventDefault();zoomImage(S.imageScale/1.25);}
+      else if(e.key==='0'){e.preventDefault();zoomImage(1);}
     });
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
-  else initialize();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});
+  else install();
 })();
 </script>
+
+
+<!-- ASSAL community photo: identical gesture input path as private Messenger, no experimental compositing. -->
+<style id="assal-community-exact-private-photo-engine-css">
+#assalCommunityFullImage .assal-community-image-stage{
+  contain:none !important;
+  touch-action:none !important;
+  overscroll-behavior:contain !important;
+}
+#assalCommunityFullImage .assal-community-image-stage img{
+  backface-visibility:visible !important;
+  will-change:transform;
+  pointer-events:none !important;
+}
+#assalCommunityModal #assalCommunityMessages{
+  overflow-anchor:none !important;
+  scroll-behavior:auto !important;
+}
+</style>
 
 <!-- ASSAL COMMUNITY MATCH PRIVATE MESSENGER | LIGHT HEAD MENU & CONTEXT ACTIONS -->
 <style id="assal-community-private-parity-final">
@@ -67756,6 +67950,94 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
 @media(prefers-reduced-motion:reduce){
   #assalCommunityReactionPicker.assal-community-reaction-picker.show,
   #assalCommunityModal .assal-community-header-menu{animation:none !important}
+}
+
+/* ASSAL careful UX/performance pass: avoid accumulated translucent composite layers. */
+#assalCommunityModal .assal-community-actions{
+  padding:0 !important;background:none !important;border:none !important;
+  box-shadow:none !important;outline:0 !important;border-radius:0 !important;
+}
+#assalCommunityModal .assal-community-write-row{
+  display:flex !important;align-items:center !important;gap:8px !important;
+  padding:0 !important;min-height:42px !important;
+  border:0 !important;border-radius:0 !important;background:none !important;
+  box-shadow:none !important;overflow:visible !important;direction:rtl !important;
+}
+#assalCommunityModal .assal-community-write-row::before,
+#assalCommunityModal .assal-community-write-row::after{display:none !important;content:none !important}
+#assalCommunityModal .assal-community-input{
+  flex:1 1 auto !important;width:0 !important;min-width:0 !important;
+  height:42px !important;min-height:42px !important;max-height:90px !important;
+  padding:9px 15px !important;margin:0 !important;
+  border:1px solid rgba(148,163,184,.28) !important;border-radius:24px !important;
+  background:rgba(7,16,31,.78) !important;box-shadow:none !important;
+  resize:none !important;scrollbar-width:none !important;
+}
+#assalCommunityModal .assal-community-attach,
+#assalCommunityModal .assal-community-send{
+  position:static !important;flex:0 0 42px !important;
+  display:grid !important;place-items:center !important;
+  width:42px !important;height:42px !important;min-width:42px !important;min-height:42px !important;
+  border-radius:50% !important;padding:0 !important;margin:0 !important;box-shadow:none !important;
+  transform:none !important;transition:background-color .12s ease !important;
+}
+#assalCommunityModal .assal-community-attach{background:linear-gradient(135deg,#075985,#0284c7) !important}
+#assalCommunityModal .assal-community-send{background:linear-gradient(135deg,#0f766e,#0ea5a4) !important}
+#assalCommunityModal .assal-community-attach i{font-size:19px !important}
+#assalCommunityModal .assal-community-send i{transform:none !important;font-size:17px !important}
+#assalCommunityModal .assal-community-msg{
+  will-change:auto !important;filter:none !important;
+  transition:none !important;contain:layout style !important;
+}
+#assalCommunityModal .assal-community-msg.is-swipe-replying{transition:none !important}
+#assalCommunityModal .assal-community-messages{
+  touch-action:pan-y !important;-webkit-overflow-scrolling:touch !important;
+  overscroll-behavior:contain !important;
+}
+#assalCommunityReactionPicker.assal-community-reaction-picker{
+  width:min(294px,calc(100vw - 20px)) !important;max-width:calc(100vw - 20px) !important;
+  padding:9px 10px 8px !important;gap:5px !important;
+  justify-content:space-evenly !important;
+  box-shadow:0 9px 26px rgba(0,0,0,.35) !important;
+  border-radius:19px !important;
+}
+#assalCommunityReactionPicker button[data-reaction]{
+  flex:0 0 38px !important;width:38px !important;height:38px !important;
+  display:grid !important;place-items:center !important;
+  padding:0 !important;margin:0 !important;font-size:21px !important;
+  background:rgba(255,255,255,.055) !important;
+}
+#assalCommunityReactionPicker .assal-community-picker-actions{
+  display:flex !important;flex:0 0 100% !important;
+  flex-wrap:nowrap !important;align-items:center !important;justify-content:center !important;
+  gap:8px !important;min-width:0 !important;
+  padding:8px 0 0 !important;margin-top:1px !important;
+  border-top:1px solid rgba(148,163,184,.18) !important;
+}
+#assalCommunityReactionPicker .assal-community-picker-option{
+  flex:0 0 38px !important;width:38px !important;height:37px !important;
+  min-width:0 !important;padding:0 !important;margin:0 !important;
+  border-radius:12px !important;gap:0 !important;
+  display:grid !important;place-items:center !important;
+  background:rgba(148,163,184,.085) !important;
+  border:1px solid rgba(148,163,184,.15) !important;
+  color:#e5f4ff !important;box-shadow:none !important;
+}
+#assalCommunityReactionPicker .assal-community-picker-option i{font-size:16px !important;line-height:1 !important}
+#assalCommunityReactionPicker .assal-community-picker-option span{display:none !important}
+#assalCommunityReactionPicker .assal-community-picker-option.is-danger{
+  background:rgba(127,29,29,.20) !important;color:#ffb6b6 !important;
+}
+#assalCommunityReactionPicker.assal-community-reaction-picker.show{
+  animation:assalCommunitySoftPop .13s ease-out both !important;
+}
+@media(max-width:350px){
+ #assalCommunityReactionPicker.assal-community-reaction-picker{gap:3px !important;padding:8px 6px !important}
+ #assalCommunityReactionPicker button[data-reaction]{flex-basis:34px !important;width:34px !important;height:34px !important;font-size:19px !important}
+ #assalCommunityReactionPicker .assal-community-picker-option{flex-basis:34px !important;width:34px !important;height:34px !important}
+ #assalCommunityReactionPicker .assal-community-picker-actions{gap:5px !important}
+ #assalCommunityModal .assal-community-attach,
+ #assalCommunityModal .assal-community-send{flex-basis:39px !important;width:39px !important;height:39px !important;min-width:39px !important;min-height:39px !important}
 }
 </style>
 <script id="assal-community-private-parity-final-script">
