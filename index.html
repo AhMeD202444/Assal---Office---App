@@ -18301,9 +18301,26 @@ html.assal-viewport-transition body {
   </div>
 </div>
 
-<div id="assalCommunityFullImage" class="assal-community-full-image" onclick="if(event.target===this) closeAssalCommunityImageViewer()">
-  <button type="button" onclick="closeAssalCommunityImageViewer()"><i class="fas fa-times"></i></button>
-  <img id="assalCommunityFullImageImg" alt="صورة">
+<div id="assalCommunityFullImage" class="assal-community-full-image" role="presentation" onclick="if(event.target===this) closeAssalCommunityImageViewer()">
+  <section class="assal-community-image-dialog" role="dialog" aria-modal="true" aria-label="عرض الصورة" dir="rtl">
+    <header class="assal-community-image-head">
+      <span class="assal-community-image-symbol"><i class="fas fa-image" aria-hidden="true"></i></span>
+      <div><b>عرض الصورة</b><small id="assalCommunityImageCaption">صورة من مجتمع عسل</small></div>
+      <button class="assal-community-view-close" type="button" onclick="closeAssalCommunityImageViewer()" aria-label="إغلاق الصورة"><i class="fas fa-times"></i></button>
+    </header>
+    <div class="assal-community-image-stage" id="assalCommunityImageStage" aria-label="منطقة عرض الصورة وتكبيرها">
+      <img id="assalCommunityFullImageImg" alt="صورة" draggable="false">
+    </div>
+    <div class="assal-community-image-toolbar" role="group" aria-label="أدوات تكبير الصورة">
+      <div class="assal-community-zoom-group">
+        <button type="button" data-community-zoom="out" aria-label="تصغير الصورة"><i class="fas fa-minus"></i></button>
+        <output id="assalCommunityZoomPercent" aria-live="polite">100%</output>
+        <button type="button" data-community-zoom="in" aria-label="تكبير الصورة"><i class="fas fa-plus"></i></button>
+      </div>
+      <button class="assal-community-zoom-reset" type="button" data-community-zoom="reset" aria-label="إرجاع حجم الصورة" title="إرجاع حجم الصورة"><i class="fas fa-expand-arrows-alt"></i></button>
+    </div>
+    <small class="assal-community-image-hint">قرّب بإصبعين · انقر مرتين · اسحب للتحريك</small>
+  </section>
 </div>
 
 <div id="requestModal" class="request-modal support-chat-start-modal" aria-hidden="true">
@@ -66726,6 +66743,8 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   function mount(role){
     const id=role==='admin'?'requestAdminModal':'requestTrackModal';
     const root=document.getElementById(id);if(!root)throw Error('chat-root-missing');
+    // Android WebView already places content below the status bar; don't reserve it twice.
+    root.classList.toggle('assal-android-safe-inset-fix',/Android/i.test(navigator.userAgent||''));
     if(root.dataset.assalMessengerMounted!=='1'){
       root.innerHTML=template();root.classList.add('assal-msg');root.dataset.assalMessengerMounted='1';root.setAttribute('dir','rtl');root.addEventListener('click',onClick);root.addEventListener('keydown',onKey);
       root.addEventListener('pointerdown',touchInk,{passive:true});
@@ -66814,7 +66833,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     let lastDay='';let added=0;
     const sameRun=(a,b)=>a&&b&&a.senderRole!=='system'&&a.senderRole===b.senderRole&&messageName(a)===messageName(b)&&dayKey(a.createdAt)===dayKey(b.createdAt)&&Math.abs(Number(a.createdAt)-Number(b.createdAt))<300000;
     visible.forEach((msg,index)=>{const day=dayKey(msg.createdAt);if(day!==lastDay){const dayId=day+':'+msg.key;let node=S.days.get(dayId);if(!node){node=document.createElement('div');node.className='am-day';const span=document.createElement('span');span.textContent=dayText(msg.createdAt);node.append(span);S.days.set(dayId,node);}dayKeep.add(dayId);desired.push(node);lastDay=day;}keep.add(msg.key);if(S.shownKeys.size&&!S.shownKeys.has(msg.key)&&msg.senderRole!==S.role)added++;const row=patchMessage(msg);if(animateArrivals&&index>=visible.length-arrivingCount&&!S.shownKeys.has(msg.key)){arrivingRows.push(row);}row.classList.toggle('is-grouped',!!sameRun(visible[index-1],msg));row.classList.toggle('is-group-last',!sameRun(msg,visible[index+1]));desired.push(row);});
-    if(!messages.length){let empty=box.querySelector('.am-chat-empty');if(!empty){empty=document.createElement('div');empty.className='am-chat-empty';empty.innerHTML=svg('chat')+'<span>بداية حديث جديد<br>اكتب رسالتك، وفريق عسل حاضر إلك</span>';}desired.push(empty);}
+    if(!messages.length&&S.role!=='admin'){let empty=box.querySelector('.am-chat-empty');if(!empty){empty=document.createElement('div');empty.className='am-chat-empty';empty.innerHTML=svg('chat')+'<span>بداية حديث جديد<br>اكتب رسالتك، وفريق عسل حاضر إلك</span>';}desired.push(empty);}
     let cursor = box.firstChild;
     desired.forEach(node => {
       if (node === cursor) {
@@ -66960,8 +66979,11 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     if(role==='admin'&&!clean(options.requestId)&&!clean(options.deviceId)){resetInboxOnEntry();}
     if(role==='customer'){S.inbox=false;}
     ['requestModal','assalSpaceEntryModal',role==='admin'?'requestTrackModal':'requestAdminModal'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.remove('show');el.setAttribute('aria-hidden','true');}});
-    S.open=true;S.root.classList.add('show');S.root.setAttribute('aria-hidden','false');viewport();lock();$('newChat').hidden=role!=='admin';renderConnection();if(options.requestId){S.targetRequest=clean(options.requestId);S.targetMessage=clean(options.messageId);}if(options.profile)S.extra[options.profile.deviceId]=options.profile;
-    S.profileReady=role==='admin';buildGroups();renderList();if(S.active&&S.groupMap.has(S.active))selectGroup(S.active);updateSend();
+    // Build the inbox while the shell is still hidden: no first-frame empty list flash.
+    S.open=true;viewport();$('newChat').hidden=role!=='admin';renderConnection();if(options.requestId){S.targetRequest=clean(options.requestId);S.targetMessage=clean(options.messageId);}if(options.profile)S.extra[options.profile.deviceId]=options.profile;
+    S.profileReady=role==='admin';buildGroups();renderList();
+    S.root.classList.add('show');S.root.setAttribute('aria-hidden','false');lock();
+    if(S.active&&S.groupMap.has(S.active))selectGroup(S.active);updateSend();
     const stream=startStream(false).catch(err=>{S.error='تعذّر الاتصال بالمحادثات. أعد المحاولة.';renderList();console.warn('ASSAL Messenger:',err);});
     if(role==='customer'){
       try{await waitFirebase();const f=fb(),snap=await f.get(f.ref(f.db,'customerProfiles/'+me));if(seq!==S.openSeq)return false;const profile=snap.exists()?snap.val():null;if(profile?.blocked){close();window.applyCustomerBlockedState?.(profile);return false;}if(!profile||!clean(profile.name)||!clean(profile.phone)||!clean(profile.address)||(typeof window.isValidIraqMobile==='function'&&!window.isValidIraqMobile(profile.phone))){close();window.openCustomerProfileModal?.(profile||{});return false;}S.profile=profile;S.profileReady=true;buildGroups();startActivityPresence();if(!S.inbox&&!S.active&&S.loaded&&S.groups.length)selectGroup(S.groups[0].key);updateSend();}catch(err){if(seq===S.openSeq){S.profileReady=false;toast('تعذّر التحقق من حسابك. أغلق المحادثة وأعد فتحها.');}console.warn('ASSAL Messenger profile:',err);}
@@ -67062,10 +67084,14 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   function openDirectory(){
     if(S.role!=='admin')return;
     saveDraft();clearTyping();hideMenu();if($('directory').hidden)S.directoryFocus=document.activeElement;S.directoryQuery='';
-    $('directorySearch').value='';$('directory').hidden=false;setOverlayInert(true);renderDirectory();
+    $('directorySearch').value='';
+    // Render customer rows off-screen before revealing the directory, avoiding an empty-then-filled frame.
+    if(!S.directoryStop){S.directoryLoaded=false;S.directoryError=false;}
+    renderDirectory(true);
+    $('directory').hidden=false;setOverlayInert(true);
     (matchMedia('(pointer:coarse)').matches?S.root.querySelector('[data-action="directory-close"]'):$('directorySearch')).focus({preventScroll:true});
     if(S.directoryStop)return;
-    S.directoryLoaded=false;S.directoryError=false;renderDirectory();const f=fb();
+    const f=fb();
     try{S.directoryStop=f.onValue(f.ref(f.db,'customerProfiles'),snap=>{
       if(S.role!=='admin')return;
       S.directoryData=Object.entries(snap.val()||{}).filter(([,p])=>p&&typeof p==='object').map(([id,p])=>({...p,deviceId:id}));
@@ -67080,8 +67106,8 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     const text=clean(name).replace(/^(?:مكتب|شركة|محل|مركز)\s+/,'').replace(/^ال/,'').normalize('NFKC').replace(/[أإآ]/g,'ا').replace(/[\u064B-\u065F\u0670ـ]/g,'');
     const letter=Array.from(text)[0]?.toUpperCase()||'#';return /[\p{L}]/u.test(letter)?letter:'#';
   };
-  function renderDirectory(){
-    if(!$('directory')||$('directory').hidden)return;
+  function renderDirectory(allowHidden=false){
+    if(!$('directory')||($('directory').hidden&&!allowHidden))return;
     const list=$('directoryList'),index=$('directoryIndex');
     $('directoryCount').textContent=S.directoryLoaded&&!S.directoryError?S.directoryData.length+' زبون':'اختر جهة المراسلة';
     if(!S.directoryLoaded||S.directoryError){list.innerHTML='<div class="am-directory-empty">'+svg(S.directoryError?'info':'people')+'<b>'+(S.directoryError?'تعذّر تحميل الزبائن':'جارٍ تحميل الزبائن…')+'</b>'+(S.directoryError?'<button class="am-directory-retry" data-action="directory-retry">إعادة المحاولة</button>':'')+'</div>';index.replaceChildren();return;}
@@ -67214,3 +67240,272 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   opacity:.45 !important;
 }
 </style>
+
+<!-- ASSAL Messages opening: non-flickering lightweight single-layer motion + matched community viewer -->
+<style id="assal-messenger-soft-entry-no-flash-final">
+/* Existing request modal also has statsFadeIn (alpha+scale) from the legacy stylesheet.
+   Only Messenger roots opt out, while the shell moves a few CSS pixels. */
+#requestAdminModal.assal-msg.show,
+#requestTrackModal.assal-msg.show{
+  animation:none !important;
+  opacity:1 !important;
+  transform:none !important;
+}
+@keyframes assalMsgQuietEntrance{
+  from{transform:translate3d(0,6px,0)}
+  to{transform:translate3d(0,0,0)}
+}
+@keyframes assalMsgQuietPanel{
+  from{transform:translate3d(0,5px,0)}
+  to{transform:translate3d(0,0,0)}
+}
+#requestAdminModal.assal-msg.show .am-app,
+#requestTrackModal.assal-msg.show .am-app{
+  animation:assalMsgQuietEntrance .19s cubic-bezier(.20,.83,.25,1) both !important;
+  opacity:1 !important;
+}
+/* The mobile inbox was fading a second time AFTER its containing app animated.
+   This also prevented the list from reanimating on has-chat changes. */
+#requestAdminModal.assal-msg .am-sidebar,
+#requestTrackModal.assal-msg .am-sidebar{
+  animation:none !important;
+  opacity:1 !important;
+}
+/* Secondary panes used independent transparent-to-opaque entries, showing as brief blinks. */
+#requestAdminModal.assal-msg .am-conversation:not([hidden]),
+#requestTrackModal.assal-msg .am-conversation:not([hidden]){
+  animation:assalMsgQuietPanel .16s ease-out both !important;
+  opacity:1 !important;
+}
+#requestAdminModal.assal-msg .am-directory,
+#requestTrackModal.assal-msg .am-directory,
+#requestAdminModal.assal-msg .am-dialog,
+#requestTrackModal.assal-msg .am-dialog,
+#requestAdminModal.assal-msg .am-image-dialog,
+#requestTrackModal.assal-msg .am-image-dialog,
+#requestAdminModal.assal-msg .am-popover,
+#requestTrackModal.assal-msg .am-popover,
+#requestAdminModal.assal-msg .am-chat-search:not([hidden]),
+#requestTrackModal.assal-msg .am-chat-search:not([hidden]){
+  animation:assalMsgQuietPanel .16s ease-out both !important;
+  opacity:1 !important;
+}
+/* Do not animate thread rows themselves: Firebase may update them in real time. */
+#requestAdminModal.assal-msg .am-threads .am-thread,
+#requestTrackModal.assal-msg .am-threads .am-thread{
+  animation:none !important;
+}
+@media(prefers-reduced-motion:reduce){
+  #requestAdminModal.assal-msg.show .am-app,
+  #requestTrackModal.assal-msg.show .am-app,
+  #requestAdminModal.assal-msg .am-conversation:not([hidden]),
+  #requestTrackModal.assal-msg .am-conversation:not([hidden]),
+  #requestAdminModal.assal-msg .am-directory,
+  #requestTrackModal.assal-msg .am-directory,
+  #requestAdminModal.assal-msg .am-dialog,
+  #requestTrackModal.assal-msg .am-dialog,
+  #requestAdminModal.assal-msg .am-image-dialog,
+  #requestTrackModal.assal-msg .am-image-dialog,
+  #requestAdminModal.assal-msg .am-popover,
+  #requestTrackModal.assal-msg .am-popover,
+  #requestAdminModal.assal-msg .am-chat-search:not([hidden]),
+  #requestTrackModal.assal-msg .am-chat-search:not([hidden]){animation:none!important}
+}
+/* Android messenger ONLY: WebView already offsets the page below the system status bar.
+   Remove the duplicated notch/top inset from the inbox and the conversation header.
+   Preserve the existing light entrance animation, geometry and keyboard viewport logic.
+   On iOS the original safe-area rules remain intact. */
+@media (max-width:720px){
+  #requestAdminModal.assal-msg.assal-android-safe-inset-fix .am-sidebar,
+  #requestTrackModal.assal-msg.assal-android-safe-inset-fix .am-sidebar{
+    padding-top:0 !important;
+  }
+  #requestAdminModal.assal-msg.assal-android-safe-inset-fix .am-chat-head,
+  #requestTrackModal.assal-msg.assal-android-safe-inset-fix .am-chat-head{
+    height:58px !important;
+    min-height:58px !important;
+    padding-top:8px !important;
+  }
+}
+/* Community images: same design language as private chat. CSS transforms preserve source image quality. */
+#assalCommunityFullImage.assal-community-full-image{
+  padding:14px;
+  background:rgba(1,7,17,.68);
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+  isolation:isolate;
+  font-family:'Cairo',sans-serif;
+}
+#assalCommunityFullImage .assal-community-image-dialog{
+  width:min(760px,100%);
+  height:min(700px,92dvh);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  border:1px solid rgba(148,163,184,.22);
+  border-radius:22px;
+  background:radial-gradient(circle at 92% 0%,rgba(34,197,94,.10),transparent 38%),linear-gradient(145deg,rgba(15,23,42,.99),rgba(8,15,29,.99));
+  box-shadow:0 22px 70px rgba(0,0,0,.55);
+  animation:assalMsgQuietPanel .18s ease-out both;
+  color:#f8fafc;
+}
+#assalCommunityFullImage .assal-community-image-head{
+  flex:none;display:flex;align-items:center;gap:10px;min-height:58px;padding:10px 12px;
+  background:rgba(255,255,255,.025);border-bottom:1px solid rgba(148,163,184,.15)
+}
+#assalCommunityFullImage .assal-community-image-symbol{
+  display:grid;place-items:center;flex:none;width:34px;height:34px;
+  border-radius:12px;border:1px solid rgba(94,234,212,.15);
+  background:rgba(20,184,166,.12);color:#5eead4;font-size:18px;
+}
+#assalCommunityFullImage .assal-community-image-head>div{flex:1;min-width:0;text-align:right}
+#assalCommunityFullImage .assal-community-image-head b{display:block;font-size:14px;line-height:20px}
+#assalCommunityFullImage .assal-community-image-head small{display:block;color:#b8c7d9;font-size:10px;line-height:18px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#assalCommunityFullImage .assal-community-view-close{
+  position:static;flex:none;width:34px;height:34px;display:grid;place-items:center;
+  border:1px solid rgba(248,113,113,.24);border-radius:50%;
+  color:#fff;background:linear-gradient(145deg,#7f1d1d,#991b1b);font-size:18px;
+  box-shadow:0 5px 14px rgba(127,29,29,.2);cursor:pointer;
+}
+#assalCommunityFullImage .assal-community-image-stage{
+  position:relative;flex:1;min-height:0;min-width:0;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;background:rgba(1,7,17,.3);
+  touch-action:none;user-select:none;-webkit-user-select:none;direction:ltr;
+}
+#assalCommunityFullImage .assal-community-image-stage.is-zoomed{cursor:grab}
+#assalCommunityFullImage .assal-community-image-stage.is-zoomed:active{cursor:grabbing}
+#assalCommunityFullImage .assal-community-image-stage img{
+  flex:none;max-width:none;max-height:none;width:auto;height:auto;
+  border-radius:0;box-shadow:none;object-fit:contain;
+  transform-origin:center;pointer-events:none;image-rendering:auto;
+}
+#assalCommunityFullImage .assal-community-image-toolbar{
+  display:flex;align-items:center;justify-content:center;gap:10px;flex:none;
+  padding:10px 14px 5px;direction:ltr;
+  background:linear-gradient(180deg,rgba(14,30,48,.38),rgba(8,20,34,.64));
+  border-top:1px solid rgba(125,211,252,.12);
+}
+#assalCommunityFullImage .assal-community-zoom-group{display:flex;align-items:center;gap:7px;padding:4px;border:1px solid rgba(148,191,215,.19);border-radius:26px;background:linear-gradient(145deg,rgba(32,55,75,.72),rgba(10,26,43,.92));direction:ltr}
+#assalCommunityFullImage .assal-community-image-toolbar button{
+  position:static;display:grid;place-items:center;flex:none;width:34px;height:34px;
+  border:1px solid rgba(125,211,252,.24);border-radius:50%;padding:0;
+  background:linear-gradient(145deg,#2b5268,#1d3b53);color:#e0f2fe;
+  font-size:15px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12);cursor:pointer;
+}
+#assalCommunityFullImage .assal-community-image-toolbar [data-community-zoom="in"]{background:linear-gradient(135deg,#0f766e,#0ea5a4);border-color:rgba(94,234,212,.4)}
+#assalCommunityFullImage .assal-community-image-toolbar .assal-community-zoom-reset{width:40px;height:40px;background:linear-gradient(145deg,#075985,#0284c7)}
+#assalCommunityFullImage .assal-community-image-toolbar button:disabled{opacity:.42;cursor:default}
+#assalCommunityFullImage .assal-community-image-toolbar button:not(:disabled):active{transform:scale(.93)}
+#assalCommunityFullImage .assal-community-image-toolbar output{display:grid;place-items:center;width:58px;min-width:58px;height:28px;border:1px solid rgba(94,234,212,.12);border-radius:12px;background:rgba(5,29,39,.64);color:#d8fff7;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+#assalCommunityFullImage .assal-community-image-hint{padding:4px 10px 10px;flex:none;text-align:center;font-size:10px;line-height:16px;color:#a7c3d7;background:rgba(8,20,34,.64)}
+@media(max-width:720px){
+  #assalCommunityFullImage.assal-community-full-image{padding:12px}
+  #assalCommunityFullImage .assal-community-image-dialog{height:83dvh;min-height:220px}
+}
+@media(prefers-reduced-motion:reduce){#assalCommunityFullImage .assal-community-image-dialog{animation:none!important}}
+</style>
+
+<script id="assal-community-matched-zoom-viewer-final">
+(function(){
+  'use strict';
+  function initialize(){
+    const modal=document.getElementById('assalCommunityFullImage');
+    const stage=document.getElementById('assalCommunityImageStage');
+    const img=document.getElementById('assalCommunityFullImageImg');
+    const zoomText=document.getElementById('assalCommunityZoomPercent');
+    if(!modal||!stage||!img||modal.dataset.matchedViewerReady==='1')return;
+    modal.dataset.matchedViewerReady='1';
+    let scale=1,x=0,y=0,baseW=0,baseH=0,focusTarget=null;
+    let lastTap=0,lastTapX=0,lastTapY=0;
+    const pointers=new Map();let initialDistance=0,initialScale=1,dragStart=null;
+    function clamp(v,low,high){return Math.max(low,Math.min(high,v));}
+    function refresh(){
+      const limX=Math.max(0,(baseW*scale-stage.clientWidth)/2+12),limY=Math.max(0,(baseH*scale-stage.clientHeight)/2+12);
+      x=clamp(x,-limX,limX);y=clamp(y,-limY,limY);
+      img.style.transform='translate3d('+x+'px,'+y+'px,0) scale('+scale+')';
+      stage.classList.toggle('is-zoomed',scale>1.01);
+      if(zoomText)zoomText.textContent=Math.round(scale*100)+'%';
+      const zin=modal.querySelector('[data-community-zoom="in"]'),zout=modal.querySelector('[data-community-zoom="out"]');
+      if(zin)zin.disabled=scale>=5;if(zout)zout.disabled=scale<=1;
+    }
+    function fit(){
+      if(!modal.classList.contains('show')||!img.naturalWidth||!img.naturalHeight||!stage.clientWidth||!stage.clientHeight)return;
+      // Fit to BOTH dimensions (no enlargement above the original resolution).
+      const actual=Math.min(1,(stage.clientWidth-24)/img.naturalWidth,(stage.clientHeight-24)/img.naturalHeight);
+      baseW=Math.max(1,Math.round(img.naturalWidth*actual));baseH=Math.max(1,Math.round(img.naturalHeight*actual));
+      img.style.width=baseW+'px';img.style.height=baseH+'px';scale=1;x=0;y=0;refresh();
+    }
+    function zoom(next){scale=clamp(next,1,5);if(scale===1){x=0;y=0;}refresh();}
+    const oldOpen=window.openAssalCommunityImageViewer;
+    window.openAssalCommunityImageViewer=function(id){
+      if(typeof oldOpen!=='function')return;
+      focusTarget=document.activeElement;
+      oldOpen.apply(this,arguments);
+      if(!modal.classList.contains('show')||!img.src)return;
+      const source=document.getElementById('assal-community-msg-'+id);
+      const name=source?.querySelector('.assal-community-sender > span')?.textContent||'مجتمع عسل';
+      const time=source?.querySelector('.assal-community-time')?.textContent||'';
+      const cap=document.getElementById('assalCommunityImageCaption');if(cap)cap.textContent=name+(time?' · '+time:'');
+      pointers.clear();dragStart=null;initialDistance=0;img.style.transform='';
+      if(img.complete&&img.naturalWidth)fit();else img.addEventListener('load',fit,{once:true});
+      modal.querySelector('.assal-community-view-close')?.focus({preventScroll:true});
+    };
+    const oldClose=window.closeAssalCommunityImageViewer;
+    window.closeAssalCommunityImageViewer=function(){
+      if(typeof oldClose==='function')oldClose.apply(this,arguments);
+      else modal.classList.remove('show');
+      pointers.clear();dragStart=null;initialDistance=0;img.removeAttribute('src');
+      if(focusTarget?.isConnected)try{focusTarget.focus({preventScroll:true});}catch(_){}
+      focusTarget=null;
+    };
+    img.addEventListener('load',fit);
+    const controls=modal.querySelector('.assal-community-image-toolbar');
+    controls?.addEventListener('click',e=>{
+      const btn=e.target.closest('[data-community-zoom]');if(!btn)return;
+      if(btn.dataset.communityZoom==='in')zoom(scale*1.25);
+      else if(btn.dataset.communityZoom==='out')zoom(scale/1.25);
+      else zoom(1);
+    });
+    stage.addEventListener('wheel',e=>{if(!modal.classList.contains('show'))return;e.preventDefault();zoom(scale*(e.deltaY<0?1.18:1/1.18));},{passive:false});
+    function distance(){const arr=Array.from(pointers.values());return arr.length<2?0:Math.hypot(arr[0].x-arr[1].x,arr[0].y-arr[1].y);}
+    stage.addEventListener('pointerdown',e=>{
+      if(!modal.classList.contains('show'))return;
+      if(e.pointerType==='mouse'&&e.button!==0)return;
+      try{stage.setPointerCapture(e.pointerId);}catch(_){}
+      pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(pointers.size===1){dragStart={x:e.clientX,y:e.clientY,panX:x,panY:y,moved:false};}
+      else if(pointers.size>=2){initialDistance=distance();initialScale=scale;dragStart=null;}
+    });
+    stage.addEventListener('pointermove',e=>{
+      if(!pointers.has(e.pointerId))return;
+      const prev=pointers.get(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(pointers.size>=2){if(initialDistance>0)zoom(initialScale*(distance()/initialDistance));}
+      else if(scale>1&&dragStart){x=dragStart.panX+e.clientX-dragStart.x;y=dragStart.panY+e.clientY-dragStart.y;refresh();}
+      if(dragStart&&(Math.abs(e.clientX-dragStart.x)>7||Math.abs(e.clientY-dragStart.y)>7))dragStart.moved=true;
+    });
+    function release(e){
+      if(!pointers.has(e.pointerId))return;
+      const wasOne=pointers.size===1,st=dragStart;pointers.delete(e.pointerId);
+      if(wasOne&&st&&!st.moved&&e.pointerType!=='mouse'){
+        const now=Date.now();if(now-lastTap<340&&Math.abs(e.clientX-lastTapX)<38&&Math.abs(e.clientY-lastTapY)<38){zoom(scale>1?1:2);lastTap=0;}
+        else{lastTap=now;lastTapX=e.clientX;lastTapY=e.clientY;}
+      }
+      if(pointers.size===1){const p=Array.from(pointers.values())[0];dragStart={x:p.x,y:p.y,panX:x,panY:y,moved:true};}
+      else if(!pointers.size){dragStart=null;initialDistance=0;}
+    }
+    stage.addEventListener('pointerup',release);stage.addEventListener('pointercancel',release);
+    stage.addEventListener('dblclick',e=>{if(e.pointerType!=='touch')zoom(scale>1?1:2);});
+    window.addEventListener('resize',()=>{if(modal.classList.contains('show'))fit();});
+    document.addEventListener('keydown',e=>{
+      if(!modal.classList.contains('show'))return;
+      if(e.key==='Escape'){e.preventDefault();window.closeAssalCommunityImageViewer();}
+      else if(e.key==='+'||e.key==='='){e.preventDefault();zoom(scale*1.25);}
+      else if(e.key==='-'){e.preventDefault();zoom(scale/1.25);}
+      else if(e.key==='0'){e.preventDefault();zoom(1);}
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
+  else initialize();
+})();
+</script>
