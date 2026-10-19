@@ -2402,6 +2402,14 @@ h1 {
   top: var(--assal-wholesale-suggestions-top, calc(100% + 56px)) !important;
   bottom: auto !important;
 }
+/* ASSAL DESKTOP ONLY: اقتراحات الجملة فوق حقل البحث الطبيعي، بدون تغيير Dock الموبايل. */
+@media (min-width: 769px) and (pointer: fine){
+  .search-container:not(.assal-search-dock) > #wholesaleSuggestions{
+    top: auto !important;
+    bottom: calc(100% + 8px) !important;
+    max-height: min(240px, calc(100dvh - 130px));
+  }
+}
 /* اخفاء سكرول كروم */
 .wholesale-suggestions::-webkit-scrollbar{
   width: 6px;
@@ -7196,6 +7204,16 @@ input, textarea, [contenteditable="true"] {
   object-position: center;
   margin: 0 auto;
   background: #06152b;
+}
+/* ASSAL DESKTOP STARTUP AD: الصورة الأفقية فقط؛ الموبايل دون أي تغيير. */
+#adModal .ad-shell.ad-theme-simi.ad-theme-simi-desktop{
+  width: min(1080px, 100%);
+}
+#adModal .ad-shell.ad-theme-simi.ad-theme-simi-desktop .simi-startup-ad{
+  width: 100%;
+  height: auto;
+  max-height: calc(100svh - 100px);
+  object-fit: contain;
 }
 @supports not (height: 100svh){
   #adModal .ad-shell.ad-theme-simi .simi-startup-ad{
@@ -39759,7 +39777,9 @@ const LuxAds = (() => {
   }
 
   function renderSimiSubscriptionAd() {
-    setTheme("ad-theme-simi");
+    const isDesktop = !/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+    const imageSrc = isDesktop ? "images/reduce price - 2.png" : "images/reduce price.png";
+    setTheme(isDesktop ? "ad-theme-simi ad-theme-simi-desktop" : "ad-theme-simi");
     const body = bodyEl();
     if (!body) return;
 
@@ -39768,8 +39788,8 @@ const LuxAds = (() => {
       ` +
       `<img
         class="simi-startup-ad"
-        src="images/reduce price.png"
-        alt="إعلان اشتراك التوافقات"
+        src="${imageSrc}"
+        alt="إعلان تخفيضات مكتب عسل"
         loading="eager"
         decoding="async"
         draggable="false"
@@ -39779,7 +39799,7 @@ const LuxAds = (() => {
       "<br>" +
       "تأكد من وجود الملف " +
       "<b>" +
-      "images/reduce price.png" +
+      imageSrc +
       "</b>" +
       " بنفس الاسم تماماً." +
       "</div>" +
