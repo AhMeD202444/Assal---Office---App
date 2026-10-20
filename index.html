@@ -68221,6 +68221,21 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
 .assal-voice-bubble svg{display:block;width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
 @media(max-width:380px){.assal-wa-voice-bar{padding:6px 8px;gap:6px}.assal-wa-voice-controls{gap:6px}.assal-wa-voice-hint{max-width:79px;font-size:9px}.assal-wa-voice-controls .assal-wa-voice-send,.assal-wa-voice-controls .assal-wa-voice-delete{width:39px!important;min-width:39px!important;height:39px!important;min-height:39px!important;flex-basis:39px}.assal-wa-voice-controls .assal-wa-voice-pause{padding:0 7px!important;font-size:11px!important}}
 </style>
+
+<!-- ASSAL Voice / error window: self-contained UI, no browser alert -->
+<style id="assal-voice-diagnostic-dialog-css">
+.assal-vn-dialog{position:fixed;inset:0;z-index:2147483640;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(1,8,17,.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-family:'Cairo','Tajawal',sans-serif;direction:rtl;pointer-events:none!important}
+.assal-vn-dialog[hidden]{display:none!important}
+.assal-vn-dialog__panel{pointer-events:auto!important;width:min(100%,385px);position:relative;border-radius:19px;overflow:hidden;border:1px solid rgba(103,232,249,.21);background:linear-gradient(145deg,#152a3a,#0b1727);box-shadow:0 25px 70px rgba(0,0,0,.57);padding:25px 21px 19px;color:#f6fcff;text-align:center}
+.assal-vn-dialog__close{position:absolute;top:11px;left:11px;display:grid;place-items:center;width:32px;height:32px;border:1px solid rgba(248,113,113,.25);border-radius:50%;background:#821e24;color:#fff;cursor:pointer}
+.assal-vn-dialog__close svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2.7;stroke-linecap:round}
+.assal-vn-dialog__symbol{margin:6px auto 13px;width:58px;height:58px;display:grid;place-items:center;border-radius:19px;border:1px solid rgba(94,234,212,.25);background:linear-gradient(135deg,#17435a,#125f5b);color:#b7fff3}
+.assal-vn-dialog__symbol svg{width:27px;height:27px;stroke:currentColor;fill:none;stroke-width:1.85;stroke-linecap:round;stroke-linejoin:round}
+.assal-vn-dialog__title{font:800 17px/1.65 'Cairo','Tajawal',sans-serif;margin:0 0 5px;color:#efffff}
+.assal-vn-dialog__msg{margin:0;color:#bfd0dd;font:600 12px/1.95 'Cairo','Tajawal',sans-serif;white-space:pre-line;overflow-wrap:anywhere}
+.assal-vn-dialog__code{margin:11px auto 0;color:#839bab;font:500 10px/1.6 Arial,sans-serif;direction:ltr;letter-spacing:.1px;overflow-wrap:anywhere}
+.assal-vn-dialog__ok{margin:17px 0 0;width:100%;min-height:40px;border:0;border-radius:13px;background:linear-gradient(100deg,#0e887c,#14648a);color:#fff;font:800 13px 'Cairo','Tajawal',sans-serif;cursor:pointer}
+</style>
 <script id="assal-voice-note-core">
 (function(){
   'use strict';
@@ -68238,13 +68253,51 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     delete:voiceSvg('<path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/>')
   };
   const qs=s=>document.querySelector(s);
+  // Recorder notices use a small branded overlay instead of native browser alert().
+  function voiceNotice(title,message,code){
+    let layer=qs('#assalVoiceNoteErrorDialog');
+    if(!layer){
+      layer=document.createElement('div');layer.id='assalVoiceNoteErrorDialog';layer.className='assal-vn-dialog';layer.hidden=true;
+      layer.innerHTML='<section class="assal-vn-dialog__panel" role="alertdialog" aria-modal="false" aria-labelledby="assalVnErrTitle" aria-describedby="assalVnErrMsg"><button class="assal-vn-dialog__close" type="button" data-vn-dismiss aria-label="إغلاق"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div class="assal-vn-dialog__symbol"><svg viewBox="0 0 24 24"><path d="M12 16v2M9 3h6M8 9a4 4 0 1 1 8 0v4a4 4 0 0 1-8 0V9ZM5 12v1a7 7 0 0 0 14 0v-1M12 20v2"/></svg></div><h3 class="assal-vn-dialog__title" id="assalVnErrTitle"></h3><p class="assal-vn-dialog__msg" id="assalVnErrMsg"></p><p class="assal-vn-dialog__code" id="assalVnErrCode"></p><button class="assal-vn-dialog__ok" type="button" data-vn-dismiss>حسناً</button></section>';
+      // Do not trap touch outside the warning: photo viewer controls under it stay usable.
+      // The dimmed backdrop is visual-only; the panel and its own buttons remain clickable.
+      const dismiss=()=>{layer.hidden=true;if(layer.contains(document.activeElement)){try{document.activeElement.blur();}catch(_){}}};
+      layer.addEventListener('click',e=>{if(e.target.closest('[data-vn-dismiss]')){dismiss();}});
+      document.addEventListener('pointerdown',e=>{
+        if(!layer.hidden&&!layer.contains(e.target))dismiss();
+      },true);
+      // Never dismiss from a document click: the mic starts on pointerdown, and an
+      // immediate microphone rejection can show this dialog before the SAME tap's
+      // synthesized click. Treating that click as an outside tap instantly hid it.
+      // Actual subsequent outside taps are handled by pointerdown above, without
+      // intercepting the underlying photo viewer's click.
+      layer.addEventListener('keydown',e=>{
+        if(e.key==='Escape'){e.stopPropagation();dismiss();}
+      });
+      document.body.appendChild(layer);
+    }
+    qs('#assalVnErrTitle').textContent=String(title||'التسجيل الصوتي');
+    qs('#assalVnErrMsg').textContent=String(message||'تعذر تسجيل الصوت حالياً.');
+    const codeEl=qs('#assalVnErrCode');codeEl.textContent=code?'رمز الفحص: '+String(code).slice(0,80):'';codeEl.hidden=!code;
+    layer.hidden=false;
+    const button=layer.querySelector('.assal-vn-dialog__ok');if(button)button.focus({preventScroll:true});
+  }
+  function micFailure(err){
+    const code=String(err?.name||'RecorderError');
+    if(['NotAllowedError','PermissionDeniedError','SecurityError'].includes(code))return ['ما حصلنا سماح باستخدام المايك. تأكد من إذن الميكروفون لتطبيق عسل في إعدادات الأندرويد. وبعدها جرّب من جديد.',code];
+    if(['NotReadableError','AbortError'].includes(code))return ['الميكروفون مشغول أو غير متاح حالياً. أغلق أي تطبيق يستخدم المايك وجرّب مرة ثانية.',code];
+    if(code==='NotFoundError')return ['ما تم العثور على ميكروفون متاح على هذا الجهاز.',code];
+    if(code==='NotSupportedError')return ['طريقة التسجيل هذه غير مدعومة في WebView على هذا الجهاز. تحتاج نسخة عسل الأندرويد الداعمة للتسجيل الأصلي.',code];
+    return ['فشل تشغيل المايك على هذا الجهاز. إذا حدّثت التطبيق وبقيت المشكلة، أرسل رمز الفحص الظاهر هنا حتى نحدد سببها.',code];
+  }
+
   const valid=id=>/^[A-Za-z0-9_-]{8,70}$/.test(String(id||''));
   const safeString=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fdb=()=>{const f=window.firebaseDB;if(!f?.db||!f.ref||!f.get||!f.set||!f.runTransaction)throw Error('قاعدة البيانات غير جاهزة');return f;};
   const clock=s=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
   const infoHtml=meta=>'<div class="assal-voice-bubble" data-voice-id="'+safeString(meta.id)+'"><button type="button" class="assal-voice-play" data-assal-voice-play="'+safeString(meta.id)+'" title="تشغيل التسجيل" aria-label="تشغيل التسجيل">'+VOICE_ICON.play+'</button><div class="assal-voice-times"><span>'+clock(Number(meta.seconds)||0)+'</span><span class="assal-voice-progress"><span></span></span>'+VOICE_ICON.mic+'</div></div>';
   window.assalVoiceMarkup=meta=>meta&&valid(meta.id)?infoHtml(meta):'';
-  let state={session:0,phase:'idle',mode:'',target:'',stream:null,rec:null,blob:null,url:'',chunks:[],bytes:0,start:0,pauseStart:0,pausedMs:0,seconds:0,tick:0,bar:null,host:null,analyser:null,ctx:null,samples:null,wave:[],listen:null,busy:false,sendOnStop:false,overSize:false,watch:null};
+  let state={session:0,phase:'idle',mode:'',target:'',stream:null,rec:null,blob:null,url:'',chunks:[],bytes:0,start:0,pauseStart:0,pausedMs:0,seconds:0,tick:0,bar:null,host:null,analyser:null,ctx:null,samples:null,wave:[],listen:null,busy:false,sendOnStop:false,overSize:false,watch:null,native:false};
   let gesture=null,suppressClickUntil=0,player=null,playUrl='',playButton=null;
   function currentContext(mode){if(mode==='private'){const c=window.__ASSAL_PRIVATE_VOICE_CONTEXT__?.();return c?.open&&c?.ready?c.group:'';}return qs('#assalCommunityModal.show')?'community':'';}
   function ms(){return state.start?Math.max(0,Date.now()-state.start-state.pausedMs-(state.pauseStart?Date.now()-state.pauseStart:0)):0;}
@@ -68282,7 +68335,11 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     if(state.listen){try{state.listen.pause();state.listen.removeAttribute('src');state.listen.load();}catch(_){}state.listen=null;}
     if(state.url){URL.revokeObjectURL(state.url);state.url='';}state.blob=null;state.chunks=[];state.bytes=0;state.start=0;state.pauseStart=0;state.pausedMs=0;state.seconds=0;state.busy=false;state.sendOnStop=false;state.overSize=false;
   }
-  function close(){state.session++;cleanup();detachBar();state.phase='idle';state.mode='';state.target='';gesture=null;}
+  function close(){
+    if(state.native){try{window.Android?.cancelAssalVoiceNote?.();}catch(_){}}
+    state.session++;cleanup();detachBar();state.phase='idle';state.mode='';state.target='';state.native=false;gesture=null;
+  }
+
   function tick(){if(!state.bar)return;
     if(state.mode==='private'&&(!state.host?.isConnected||!qs('.assal-msg.show'))){close();return;}
     if(state.mode==='community'&&!qs('#assalCommunityModal.show')){close();return;}
@@ -68298,12 +68355,18 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   function analyserFor(stream){try{const Type=window.AudioContext||window.webkitAudioContext;if(!Type)return;const ctx=new Type();const input=ctx.createMediaStreamSource(stream);const analyser=ctx.createAnalyser();analyser.fftSize=64;analyser.smoothingTimeConstant=.55;input.connect(analyser);state.ctx=ctx;state.analyser=analyser;state.samples=new Uint8Array(analyser.frequencyBinCount);}catch(_){} }
   async function start(mode){
     if(!['private','community'].includes(mode))return;
-    if(!window.MediaRecorder||!navigator.mediaDevices?.getUserMedia){alert('هذا الجهاز لا يدعم تسجيل الرسائل الصوتية داخل التطبيق.');return;}
-    const target=currentContext(mode);if(!target){alert('افتح المحادثة وانتظر اتصالها أولاً.');return;}
-    if(mode==='community'&&qs('#assalCommunityModal .assal-community-composer.is-muted')){alert('إرسال الرسائل مغلق لهذا الحساب حالياً.');return;}
+    const nativeAvailable=typeof window.Android?.startAssalVoiceNote==='function';
+    if(!nativeAvailable&&(!window.MediaRecorder||!navigator.mediaDevices?.getUserMedia)){voiceNotice('التسجيل الصوتي غير متاح','نسخة WebView الحالية لا توفر تسجيل الصوت، وتطبيق الأندرويد يحتاج تحديث دعم المايك الأصلي.','WEB_RECORDER_UNAVAILABLE');return;}
+    const target=currentContext(mode);if(!target){voiceNotice('المحادثة غير جاهزة','افتح المحادثة وانتظر تحميلها قبل التسجيل.');return;}
+    if(mode==='community'&&qs('#assalCommunityModal .assal-community-composer.is-muted')){voiceNotice('الإرسال غير متاح','إرسال الرسائل مغلق لهذا الحساب حالياً.');return;}
     const heldGesture=gesture;close();gesture=heldGesture;state.mode=mode;state.target=target;state.phase='requesting';const session=state.session;
     if(!attachBar(mode)){close();return;}
     try{
+      if(nativeAvailable){
+        state.native=true;
+        window.Android.startAssalVoiceNote();
+        return;
+      }
       const stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true},video:false});
       if(state.session!==session){stream.getTracks().forEach(t=>t.stop());return;}
       state.stream=stream;const types=['audio/webm;codecs=opus','audio/webm','audio/mp4'];
@@ -68320,9 +68383,50 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
         if(state.sendOnStop)sendRecorded();
       };
       rec.start(250);state.start=Date.now();state.phase='recording';analyserFor(stream);hint('جارٍ التسجيل');ui();tick();state.tick=setInterval(tick,140);
-    }catch(err){console.warn('ASSAL recorder:',err);if(state.session===session){close();alert('تعذّر فتح المايك. فعّل الإذن للتطبيق أو حدّث APK.');}}
+    }catch(err){console.warn('ASSAL recorder:',err);if(state.session===session){const failure=micFailure(err);close();voiceNotice('تعذّر تشغيل المايك',failure[0],failure[1]);}}
   }
+
+  function nativeAudioResult(data,mime){
+    if(typeof data!=='string'||!/^data:audio\/(mp4|mpeg|aac|webm|ogg);base64,/i.test(data)||data.length>200000)throw Error('NATIVE_AUDIO_FORMAT');
+    const b64=data.slice(data.indexOf(',')+1),binary=atob(b64),bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+    return new Blob([bytes],{type:mime||'audio/mp4'});
+  }
+  window.__ASSAL_VOICE_NATIVE_EVENT__=function(event){
+    if(!state.native||state.phase==='idle')return;
+    if(event?.event==='started'&&state.phase==='requesting'){
+      state.start=Date.now();state.pausedMs=0;state.phase='recording';hint('جارٍ التسجيل');ui();tick();state.tick=setInterval(tick,140);return;
+    }
+    if(event?.event==='paused'&&state.phase==='recording'){
+      state.pauseStart=Date.now();state.phase='paused';stopTick();hint('التسجيل متوقف مؤقتاً');ui();tick();return;
+    }
+    if(event?.event==='resumed'&&state.phase==='paused'){
+      state.pausedMs+=Date.now()-state.pauseStart;state.pauseStart=0;state.phase='recording';hint('جارٍ التسجيل');ui();state.tick=setInterval(tick,140);return;
+    }
+    if(event?.event==='stopped'&&['finalizing','recording','paused'].includes(state.phase)){
+      // Android also enforces the 30-second limit, even if a WebView timer is delayed.
+      if(state.phase!=='finalizing'){state.seconds=Math.min(MAX_SECONDS,Math.max(1,Math.floor(ms()/1000)));state.sendOnStop=false;state.phase='finalizing';}
+      try{
+        stopTick();const blob=nativeAudioResult(event.data,event.mime);
+        if(blob.size>MAX_BYTES||blob.size<900||state.seconds<1)throw Error(blob.size>MAX_BYTES?'NATIVE_SIZE_LIMIT':'NATIVE_AUDIO_TOO_SHORT');
+        state.blob=blob;state.url=URL.createObjectURL(blob);state.phase='ready';hint('التسجيل جاهز');ui();tick();
+        if(state.sendOnStop)sendRecorded();
+      }catch(err){const code=String(err?.message||'NATIVE_DECODE');close();voiceNotice('تعذّر تجهيز الصوت','التسجيل لم يُحفَظ. حاول من جديد.',code);}
+      return;
+    }
+    if(event?.event==='error'){
+      const code=String(event.code||'NATIVE_ERROR').slice(0,70);
+      const messages={NATIVE_MIC_DENIED:'صلاحية المايك مرفوضة. افتح إعدادات الهاتف، واختر تطبيق عسل ثم السماح للميكروفون.',NATIVE_RECORDER_BUSY:'المايك مستخدم بتطبيق آخر. أغلقه وجرّب.',NATIVE_UNTRUSTED_PAGE:'تعذّر التحقق من عنوان صفحة عسل المسموح لها بالتسجيل.',NATIVE_STOP_ERROR:'التسجيل كان قصيراً جداً أو تعذر إغلاق الملف. جرّب تسجيل ثانيتين أو أكثر.',NATIVE_APP_BACKGROUND:'تم إيقاف التسجيل لأن التطبيق انتقل إلى الخلفية.',NATIVE_SIZE_LIMIT:'تجاوز التسجيل الحجم الأقصى المخصص للخطة المجانية.',NATIVE_RECORD_FAILED:'تعذّر تشغيل مسجّل الأندرويد. تأكد من الصلاحية وأن الميكروفون غير مستخدم.'};
+      close();voiceNotice('تعذّر التسجيل الصوتي',messages[code]||'تعذّر استخدام المايك حالياً. أرسل رمز الفحص حتى نحدّد السبب.',code);
+    }
+  };
   function togglePause(){
+    if(state.native&&state.phase==='recording'){
+      try{window.Android.pauseAssalVoiceNote();}catch(err){const fail=micFailure(err);close();voiceNotice('تعذّر إيقاف التسجيل',fail[0],fail[1]);}return;
+    }
+    if(state.native&&state.phase==='paused'){
+      try{window.Android.resumeAssalVoiceNote();}catch(err){const fail=micFailure(err);close();voiceNotice('تعذّر استئناف التسجيل',fail[0],fail[1]);}return;
+    }
     if(state.phase==='recording'&&state.rec){try{state.rec.pause();state.pauseStart=Date.now();state.phase='paused';stopTick();try{state.ctx?.suspend();}catch(_){}hint('التسجيل متوقف مؤقتاً');ui();tick();}catch(_){}return;}
     if(state.phase==='paused'&&state.rec){try{state.rec.resume();state.pausedMs+=Date.now()-state.pauseStart;state.pauseStart=0;state.phase='recording';try{state.ctx?.resume();}catch(_){}hint('جارٍ التسجيل');ui();state.tick=setInterval(tick,140);}catch(_){}return;}
     if(state.phase==='ready'&&state.url){
@@ -68334,9 +68438,10 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   function finish(send){
     if(state.phase==='ready'){if(send)sendRecorded();return;}
     if(state.phase==='finalizing'||state.phase==='sending'||state.phase==='error'||state.phase==='requesting')return;
-    if(!['recording','paused'].includes(state.phase)||!state.rec)return;
+    if(!['recording','paused'].includes(state.phase)||(!state.rec&&!state.native))return;
     state.seconds=Math.max(0,Math.min(MAX_SECONDS,Math.floor(ms()/1000)));
     state.sendOnStop=!!send;state.phase='finalizing';hint(send?'جارٍ تجهيز الإرسال':'وصل التسجيل للحد الزمني');ui();stopTick();
+    if(state.native){try{window.Android.stopAssalVoiceNote();}catch(err){const fail=micFailure(err);close();voiceNotice('تعذّر إنهاء التسجيل',fail[0],fail[1]);}return;}
     try{state.rec.stop();}catch(_){close();}
   }
   async function asDataUrl(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(Error('فشل تجهيز التسجيل'));r.readAsDataURL(blob);});}
@@ -68371,7 +68476,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
       playUrl=URL.createObjectURL(blob);player=new Audio(playUrl);player.preload='metadata';const control=btn.closest('.assal-voice-bubble');const progress=control?.querySelector('.assal-voice-progress>span');
       player.ontimeupdate=()=>{if(progress&&player?.duration)progress.style.width=(100*player.currentTime/player.duration)+'%';};
       player.onended=stopPlayer;player.onerror=stopPlayer;await player.play();btn.innerHTML=VOICE_ICON.pause;
-    }catch(err){console.warn('ASSAL voice playback:',err);stopPlayer();alert(err?.message||'تعذر تشغيل التسجيل');}finally{btn.disabled=false;}
+    }catch(err){console.warn('ASSAL voice playback:',err);stopPlayer();voiceNotice('تعذّر تشغيل التسجيل',err?.message||'تعذر تشغيل التسجيل');}finally{btn.disabled=false;}
   }
   // WhatsApp-inspired gestures: tap = locked recorder; hold then release = send;
   // drag LEFT = discard; drag UP = lock without auto-send.
@@ -68393,7 +68498,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     if(duration>1000&&state.phase==='recording'&&ms()>900){finish(true);return;}
     if(state.phase==='recording')hint('التسجيل مقفول؛ اضغط إرسال');
   },true);
-  document.addEventListener('pointercancel',e=>{if(gesture?.id===e.pointerId){gesture=null;if(state.phase!=='idle')close();}},true);
+  document.addEventListener('pointercancel',e=>{if(gesture?.id===e.pointerId){gesture=null;/* The Android runtime mic dialog may cancel the pointer; keep pending permission alive. */if(state.phase!=='idle'&&state.phase!=='requesting')close();}},true);
   document.addEventListener('click',e=>{
     const rec=e.target.closest?.('[data-assal-voice-record]');if(rec){e.preventDefault();e.stopPropagation();if(performance.now()<suppressClickUntil)return;if(state.phase==='idle')start(rec.dataset.assalVoiceRecord);return;}
     const playback=e.target.closest?.('[data-assal-voice-play]');if(playback){e.preventDefault();e.stopPropagation();play(playback);}
