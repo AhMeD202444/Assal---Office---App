@@ -18300,6 +18300,7 @@ html.assal-viewport-transition body {
       <div class="assal-community-write-row">
         <button class="assal-community-attach" type="button" onclick="pickAssalCommunityImage()" title="إرفاق صورة" aria-label="إرفاق صورة"><i class="fas fa-plus"></i></button>
         <textarea id="assalCommunityInput" class="assal-community-input" placeholder="اكتب رسالة..."></textarea>
+        
         <button id="assalCommunitySendBtn" class="assal-community-send" type="button" onclick="sendAssalCommunityMessage()" title="إرسال"><i class="fas fa-paper-plane"></i></button>
       </div>
       <input id="assalCommunityImageInput" type="file" accept="image/*" style="display:none">
@@ -50906,6 +50907,7 @@ html body footer {
           '<div class="assal-community-text">' +
           textHtml +
           "</div>" +
+          (!deleted && msg.voice && window.assalVoiceMarkup ? window.assalVoiceMarkup(msg.voice) : "") +
           editLabel +
           actions +
           "</div>"
@@ -53087,6 +53089,33 @@ html body footer {
     if (isCommunityInputLocked() || applyMutedState(false)) return;
     const picker = $("assalCommunityImageInput");
     if (picker && !assalCommunityImageBusy) picker.click();
+  };
+
+  window.__ASSAL_COMMUNITY_VOICE_SEND__ = async function (meta) {
+    if (!hasFirebase() || !meta || !meta.id) return false;
+    if (!document.getElementById("assalCommunityModal")?.classList.contains("show")) return false;
+    if (await checkMuted() || isCommunityInputLocked()) return false;
+    if (now() - lastSendAt < SEND_COOLDOWN_MS) return false;
+    const user = await getProfile();
+    if (await checkMuted() || isCommunityInputLocked()) return false;
+    const id = "CS-" + now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2,7).toUpperCase();
+    const payload = {id,text:"",imageData:"",voice:{id:meta.id,seconds:meta.seconds,bytes:meta.bytes,mime:meta.mime},
+      senderRole:user.role,senderName:user.name,customerPhone:user.phone||"",deviceId:user.deviceId,
+      createdAt:now(),updatedAt:now(),replyTo:selectedReply?{id:selectedReply.id,senderName:selectedReply.senderName||"",text:selectedReply.text||"",createdAt:selectedReply.createdAt||0}:null};
+    const f=dbApi();
+    await f.set(f.ref(f.db,PATH_MESSAGES+"/"+id),payload);
+    lastSendAt=now();
+    selectedReply=null;
+    renderReplyPreview();
+    try {
+      if(typeof queuePushNotificationEvent==="function") {
+        const body=(user.name||"زبون")+": أرسل رسالة صوتية";
+        const event={title:"مجتمع عسل",body,customerName:user.name,item:"تسجيل صوتي",data:{communityMessageId:id,screen:"assal_community"}};
+        await queuePushNotificationEvent("customer_space_message",{...event,targetRole:"admin"});
+        await queuePushNotificationEvent("customer_space_message",{...event,targetRole:"customer"});
+      }
+    }catch(e){console.warn("ASSAL voice notification:",e)}
+    return true;
   };
 
   window.sendAssalCommunityMessage = async function () {
@@ -66714,6 +66743,11 @@ html.low-end-device .assal-msg .am-app{box-shadow:none}
 .assal-msg .am-directory-index button:hover{background:rgba(20,184,166,.18)}
 .assal-msg .am-directory-empty{padding:45px 16px;text-align:center;font-size:13px;color:#b8c7d9;display:flex;align-items:center;flex-direction:column;gap:14px}
 .assal-msg .am-directory-empty>svg{width:30px;height:30px;color:#5eead4}
+/* Center only empty/loading customer-directory states; no modal or animation changes. */
+.assal-msg .am-directory-content.am-directory-centered-empty{padding-bottom:0}
+.assal-msg .am-directory-content.am-directory-centered-empty .am-directory-list{display:flex;align-items:center;justify-content:center}
+.assal-msg .am-directory-content.am-directory-centered-empty .am-directory-empty{width:100%;padding:16px 12px;flex:0 0 auto}
+.assal-msg .am-directory-index:empty{display:none}
 .assal-msg .am-directory-retry{padding:7px 16px;border-radius:20px;border:1px solid rgba(94,234,212,.2);background:var(--am-primary-fill);font-size:12px}
 @keyframes am-chat-glow{0%,75%,100%{opacity:1}84%,92%{opacity:.65}88%,96%{opacity:1}}
 @media(max-width:720px){
@@ -66941,7 +66975,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   function scrollBottom(){if(!$('messages'))return;$('messages').scrollTop=$('messages').scrollHeight;clearNew();scheduleReadVisible();}
   function clearNew(){S.unseen=0;if($('newMessages'))$('newMessages').hidden=true;}
   function resizeInput(){const input=$('input');if(!input)return;input.style.height='auto';input.style.height=Math.min(112,Math.max(36,input.scrollHeight))+'px';}
-  function updateSend(){if(!$('send'))return;const can=!!currentGroup()&&S.profileReady&&S.loaded&&!S.photoBusy; $('input').disabled=!can;$('attach').disabled=!can||!!S.editing;$('send').disabled=!can||(!clean($('input').value)&&!S.photo);$('input').placeholder=!S.loaded?'جارٍ الاتصال بالمحادثة…':!S.profileReady?'جارٍ التحقق من الحساب…':'اكتب رسالة…';}
+  function updateSend(){if(!$('send'))return;const can=!!currentGroup()&&S.profileReady&&S.loaded&&!S.photoBusy;const text=clean($('input').value);const voice=can&&allowed()&&!text&&!S.photo&&!S.editing&&!S.reply;if(typeof window.__ASSAL_SYNC_VOICE_SEND__==='function')window.__ASSAL_SYNC_VOICE_SEND__('private',$('send'),voice);$('input').disabled=!can;$('attach').disabled=!can||!!S.editing;$('send').disabled=!can||(!voice&&!text&&!S.photo);$('input').placeholder=!S.loaded?'جارٍ الاتصال بالمحادثة…':!S.profileReady?'جارٍ التحقق من الحساب…':'اكتب رسالة…';}
   function renderPreview(){if(!$('replyPreview'))return;const val=S.editing||S.reply;$('replyPreview').hidden=!val;if(val){$('replyTitle').textContent=S.editing?'تعديل الرسالة':'رد على '+(val.senderName||'رسالة');$('replyText').textContent=val.text||'صورة';}$('imagePreview').hidden=!S.photo;if(S.photo&&$('imageThumb').getAttribute('src')!==S.photo)$('imageThumb').src=S.photo;updateSend();}
   function groupIdentity(req){return req.deviceId?'customer:'+req.deviceId:'thread:'+req.id;}
   function messageName(msg){if(msg.senderRole==='system')return 'النظام';if(msg.senderRole==='admin')return msg.branchLabel||msg.senderName||'فريق عسل';return msg.senderName||(S.role==='admin'?currentGroup()?.name:S.profile?.name)||'الزبون';}
@@ -66980,11 +67014,12 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     let html='';if(msg.senderRole!=='system')html+='<span class="am-sender">'+esc(msg.senderRole===S.role?'أنت':messageName(msg))+'</span>';
     if(msg.replyTo&&!msg.deletedAt){const q=msg.replyTo;const source=currentMessages().find(m=>m.id===q.id&&m.requestId===(q.requestId||msg.requestId)),photo=source&&!source.deletedAt&&/^data:image\/(jpeg|png|webp);base64,/i.test(source.image||'')?source.image:'';html+='<button type="button" class="am-quote" data-action="jump" data-quote-id="'+esc(q.id)+'" data-quote-request="'+esc(q.requestId||msg.requestId)+'" aria-label="الانتقال إلى الرسالة الأصلية">'+svg('reply')+'<span class="am-quote-copy"><b>رد على '+esc(q.senderName||'رسالة')+'</b><span>'+esc(source?.deletedAt?'تم حذف الرسالة':q.text||'صورة')+'</span></span>'+(photo?'<img class="am-quote-thumb" src="'+esc(photo)+'" alt="">':'')+'</button>';}
     const image=clean(msg.image);if(image&&!msg.deletedAt&&/^data:image\/(jpeg|png|webp);base64,/i.test(image))html+='<img class="am-photo" src="'+esc(image)+'" alt="صورة مرفقة" tabindex="0" role="button" aria-label="عرض الصورة وتكبيرها" data-action="view-image" width="280" loading="lazy">';
+    if(!msg.deletedAt&&msg.voice&&window.assalVoiceMarkup)html+=window.assalVoiceMarkup(msg.voice);
     html+='<div class="am-body" dir="auto">'+esc(msg.deletedAt?'تم حذف الرسالة':msg.text||'')+'</div>';
     return html;
   }
   function metaHTML(msg){let status='';if(msg.senderRole===S.role){if(msg.localStatus==='sending')status='<span class="am-state" title="جارٍ الإرسال">'+svg('clock')+' جارٍ الإرسال</span>';else if(msg.localStatus==='failed')status='<span class="am-state is-failed"><button type="button" data-action="retry">إعادة الإرسال</button></span>';else{const seen=S.role==='admin'?msg.seenByCustomer:msg.seenByAdmin;status='<span class="am-state '+(seen?'is-read':'')+'" title="'+(seen?'تمت القراءة':'تم الإرسال')+'" aria-label="'+(seen?'تمت القراءة':'تم الإرسال')+'">'+svg(seen?'checks':'check')+'</span>';}}return (msg.editedAt&&!msg.deletedAt?'<span>معدّلة</span>':'')+'<time>'+esc(clock(msg.createdAt))+'</time>'+status;}
-  function patchMessage(msg){let row=S.rows.get(msg.key);if(!row){row=document.createElement('article');row.className='am-row';row.dataset.messageKey=msg.key;row.innerHTML='<span class="am-message-avatar" aria-hidden="true"></span><div class="am-bubble"><div class="am-content"></div><div class="am-meta"></div><div class="am-message-tools"><button type="button" class="am-quick-reply" data-action="quick-reply" aria-label="الرد على الرسالة" title="رد">'+svg('reply')+'</button><button type="button" class="am-message-action" data-action="message-menu" aria-label="خيارات الرسالة" title="خيارات الرسالة">'+svg('more')+'</button></div></div>';S.rows.set(msg.key,row);S.io?.observe(row);}row.classList.toggle('is-mine',msg.senderRole===S.role);row.classList.toggle('is-system',msg.senderRole==='system');row.classList.toggle('am-system',msg.senderRole==='system');row.classList.toggle('is-deleted',!!msg.deletedAt);row.classList.toggle('has-sender',msg.senderRole==='admin');setAvatar(row.querySelector('.am-message-avatar'),currentGroup()?.deviceId||msg.senderName,msg.senderRole==='admin');row.classList.toggle('has-quote',!!msg.replyTo&&!msg.deletedAt);const quoteSource=msg.replyTo?currentMessages().find(m=>m.id===msg.replyTo.id&&m.requestId===(msg.replyTo.requestId||msg.requestId)):null;const body=JSON.stringify([msg.text,msg.image,msg.deletedAt,msg.replyTo,msg.senderRole,msg.branchLabel,msg.senderName,quoteSource?.deletedAt||0]);if(row.__body!==body){row.querySelector('.am-content').innerHTML=bodyHTML(msg);row.__body=body;row.querySelectorAll('img').forEach(img=>img.addEventListener('load',()=>{if(S.open&&nearBottom())scrollBottom();},{once:true}));}const meta=metaHTML(msg);if(row.__meta!==meta){row.querySelector('.am-meta').innerHTML=meta;row.__meta=meta;}row.querySelector('.am-message-tools').hidden=msg.senderRole==='system';row.querySelector('.am-quick-reply').hidden=!!msg.deletedAt||msg.localStatus!=='sent';return row;}
+  function patchMessage(msg){let row=S.rows.get(msg.key);if(!row){row=document.createElement('article');row.className='am-row';row.dataset.messageKey=msg.key;row.innerHTML='<span class="am-message-avatar" aria-hidden="true"></span><div class="am-bubble"><div class="am-content"></div><div class="am-meta"></div><div class="am-message-tools"><button type="button" class="am-quick-reply" data-action="quick-reply" aria-label="الرد على الرسالة" title="رد">'+svg('reply')+'</button><button type="button" class="am-message-action" data-action="message-menu" aria-label="خيارات الرسالة" title="خيارات الرسالة">'+svg('more')+'</button></div></div>';S.rows.set(msg.key,row);S.io?.observe(row);}row.classList.toggle('is-mine',msg.senderRole===S.role);row.classList.toggle('is-system',msg.senderRole==='system');row.classList.toggle('am-system',msg.senderRole==='system');row.classList.toggle('is-deleted',!!msg.deletedAt);row.classList.toggle('has-sender',msg.senderRole==='admin');setAvatar(row.querySelector('.am-message-avatar'),currentGroup()?.deviceId||msg.senderName,msg.senderRole==='admin');row.classList.toggle('has-quote',!!msg.replyTo&&!msg.deletedAt);const quoteSource=msg.replyTo?currentMessages().find(m=>m.id===msg.replyTo.id&&m.requestId===(msg.replyTo.requestId||msg.requestId)):null;const body=JSON.stringify([msg.text,msg.image,msg.voice,msg.deletedAt,msg.replyTo,msg.senderRole,msg.branchLabel,msg.senderName,quoteSource?.deletedAt||0]);if(row.__body!==body){row.querySelector('.am-content').innerHTML=bodyHTML(msg);row.__body=body;row.querySelectorAll('img').forEach(img=>img.addEventListener('load',()=>{if(S.open&&nearBottom())scrollBottom();},{once:true}));}const meta=metaHTML(msg);if(row.__meta!==meta){row.querySelector('.am-meta').innerHTML=meta;row.__meta=meta;}row.querySelector('.am-message-tools').hidden=msg.senderRole==='system';row.querySelector('.am-quick-reply').hidden=!!msg.deletedAt||msg.localStatus!=='sent';return row;}
   function renderConversation(){
     const g=currentGroup();if(!g){$('conversation').hidden=true;$('welcome').hidden=false;return;}
     $('name').textContent=g.label;setAvatar($('avatar'),g.deviceId||g.key,S.role==='customer');$('subtitle').textContent=g.archived?'محادثة مؤرشفة · إرسال رسالة يعيدها للقائمة':'محادثة خاصة '+(S.role==='admin'?'مع الزبون':'مع فريق عسل');
@@ -67156,7 +67191,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   }
   function close(){if(!S.open)return;closeImage();closeDirectory();saveDraft();saveLocal();clearTyping();stopTypingListeners();hideMenu();S.open=false;S.openSeq++;if(S.root){S.root.classList.remove('show');S.root.setAttribute('aria-hidden','true');}if(S.dialogResolve){S.dialogResolve(false);S.dialogResolve=null;}$('dialog').hidden=true;S.contactFocus=null;$('imageView').hidden=true;lock();try{if(S.lastFocus?.isConnected&&!S.lastFocus.matches('input,textarea'))S.lastFocus.focus({preventScroll:true});}catch(_){}}
 
-  function createPending(text){const g=currentGroup();let req=requestForGroup(g)||Object.values(S.pending).find(p=>p.groupKey===g.key)?.meta;const now=Date.now(),isFirst=!req;if(!req)req={id:uid('REQ'),deviceId:g.deviceId,name:S.role==='customer'?S.profile.name:g.name,phone:S.role==='customer'?S.profile.phone:g.phone,address:S.role==='customer'?S.profile.address:g.address,item:text||'صورة',createdAt:now,updatedAt:now,status:'processing',customerDeleted:false,customerArchived:false,archivedForAdmin:false,requestKind:'private_chat'};const id=uid('MSG');const msg={id,senderRole:S.role,senderName:S.role==='admin'?branch():S.profile.name,branchLabel:S.role==='admin'?branch():'',text,createdAt:now,seenByAdmin:S.role==='admin',seenByCustomer:S.role==='customer'};if(S.photo)msg.image=S.photo;if(S.reply)msg.replyTo={id:S.reply.id,requestId:S.reply.requestId,senderName:S.reply.senderName,text:S.reply.text.slice(0,220)};return {key:fullKey(req.id,id),requestId:req.id,groupKey:g.key,meta:{...req,messages:undefined},msg,status:'sending',isFirst};}
+  function createPending(text,voiceMeta){const g=currentGroup();let req=requestForGroup(g)||Object.values(S.pending).find(p=>p.groupKey===g.key)?.meta;const now=Date.now(),isFirst=!req;if(!req)req={id:uid('REQ'),deviceId:g.deviceId,name:S.role==='customer'?S.profile.name:g.name,phone:S.role==='customer'?S.profile.phone:g.phone,address:S.role==='customer'?S.profile.address:g.address,item:text||'صورة',createdAt:now,updatedAt:now,status:'processing',customerDeleted:false,customerArchived:false,archivedForAdmin:false,requestKind:'private_chat'};const id=uid('MSG');const msg={id,senderRole:S.role,senderName:S.role==='admin'?branch():S.profile.name,branchLabel:S.role==='admin'?branch():'',text,createdAt:now,seenByAdmin:S.role==='admin',seenByCustomer:S.role==='customer'};if(voiceMeta&&voiceMeta.id)msg.voice={id:voiceMeta.id,seconds:voiceMeta.seconds,bytes:voiceMeta.bytes,mime:voiceMeta.mime};if(S.photo)msg.image=S.photo;if(S.reply)msg.replyTo={id:S.reply.id,requestId:S.reply.requestId,senderName:S.reply.senderName,text:S.reply.text.slice(0,220)};return {key:fullKey(req.id,id),requestId:req.id,groupKey:g.key,meta:{...req,messages:undefined},msg,status:'sending',isFirst};}
   async function notifySent(p){if(typeof window.queuePushNotificationEvent!=='function')return;const adminSender=p.msg.senderRole==='admin';let payload={requestId:p.requestId,messageId:p.msg.id,requestKind:'private_chat',targetRole:adminSender?'customer':'admin',targetDeviceId:adminSender?p.meta.deviceId:'',customerName:p.meta.name,title:'رسالة جديدة',body:p.msg.text||(p.msg.image?'صورة':'رسالة'),senderName:p.msg.senderName,branchLabel:p.msg.branchLabel,data:{requestKind:'private_chat',requestId:p.requestId,messageId:p.msg.id,senderDisplayName:p.msg.senderName,senderName:p.msg.senderName,realCustomerName:p.meta.name}};if(!adminSender&&typeof window.buildAdminCustomerNotificationPayload==='function'){const info=window.buildAdminCustomerNotificationPayload({customerName:p.meta.name,customerPhone:p.meta.phone,deviceId:p.meta.deviceId,body:payload.body,extraData:payload.data});payload={...payload,...info,data:{...payload.data,...info?.data}};}try{const eventType=!adminSender&&p.isFirst?'customer_private_message':'customer_private_reply';if(p.isFirst)payload.item=p.meta.item||payload.body;const queued=await window.queuePushNotificationEvent(eventType,payload);if(queued===null)throw Error('notification-not-queued');}catch(err){console.warn('ASSAL Messenger notification queue:',err);if(S.open)toast('الرسالة انرسلت، لكن تعذّر إرسال التنبيه الخارجي.');}}
   function commitPending(p){
     if(p.inFlight)return;p.inFlight=true;p.status='sending';const f=fb(),existing=S.data[p.requestId];const patch={};const path='materialRequests/'+p.requestId;
@@ -67165,6 +67200,11 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     saveLocal();scheduleRender();
     let promise;try{promise=f.update(f.ref(f.db),patch);}catch(err){promise=Promise.reject(err);}
     Promise.resolve(promise).then(()=>{p.inFlight=false;p.status='sent';const stored=S.data[p.requestId]?.messages?.[p.msg.id];if(stored)delete S.pending[p.key];saveLocal();scheduleRender();notifySent(p);},err=>{p.inFlight=false;p.status='failed';saveLocal();scheduleRender();console.warn('ASSAL Messenger send:',err);if(S.open)toast('تعذّر إرسال الرسالة. اضغط «إعادة الإرسال» عليها.');});
+  }
+  function sendVoiceNote(meta,expectedGroup){
+    if(!S.open||!S.profileReady||!S.loaded||!currentGroup()||!allowed()||S.photoBusy||S.editing||S.active!==expectedGroup)return false;
+    const p=createPending('',meta);S.pending[p.key]=p;S.reply=null;renderPreview();S.forceBottom=true;
+    buildGroups();renderList();renderConversation();saveLocal();commitPending(p);return true;
   }
   function send(){if(!S.open||!S.profileReady||!S.loaded||!currentGroup()||!allowed()||S.photoBusy)return;const text=clean($('input').value);if(!text&&!S.photo)return;if(S.editing){saveEdit(text);return;}const p=createPending(text);S.pending[p.key]=p;$('input').value='';S.reply=null;S.photo='';S.drafts[S.active]={text:'',reply:null,photo:''};clearTyping();resizeInput();renderPreview();S.forceBottom=true;buildGroups();renderList();renderConversation();saveLocal();commitPending(p);}
   function retry(key){const p=S.pending[key];if(!p||p.inFlight||!S.profileReady||!S.loaded||!allowed())return;const stored=S.data[p.requestId]?.messages?.[p.msg.id];if(stored){delete S.pending[key];saveLocal();scheduleRender();return;}commitPending(p);}
@@ -67274,10 +67314,11 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     if(!$('directory')||($('directory').hidden&&!allowHidden))return;
     const list=$('directoryList'),index=$('directoryIndex');
     $('directoryCount').textContent=S.directoryLoaded&&!S.directoryError?S.directoryData.length+' زبون':'اختر جهة المراسلة';
-    if(!S.directoryLoaded||S.directoryError){list.innerHTML='<div class="am-directory-empty">'+svg(S.directoryError?'info':'people')+'<b>'+(S.directoryError?'تعذّر تحميل الزبائن':'جارٍ تحميل الزبائن…')+'</b>'+(S.directoryError?'<button class="am-directory-retry" data-action="directory-retry">إعادة المحاولة</button>':'')+'</div>';index.replaceChildren();return;}
+    if(!S.directoryLoaded||S.directoryError){list.parentElement.classList.add('am-directory-centered-empty');list.innerHTML='<div class="am-directory-empty">'+svg(S.directoryError?'info':'people')+'<b>'+(S.directoryError?'تعذّر تحميل الزبائن':'جارٍ تحميل الزبائن…')+'</b>'+(S.directoryError?'<button class="am-directory-retry" data-action="directory-retry">إعادة المحاولة</button>':'')+'</div>';index.replaceChildren();return;}
     const words=normalize(S.directoryQuery).split(/\s+/).filter(Boolean);
     const entries=S.directoryData.filter(p=>words.every(w=>normalize(p.name+' '+p.phone+' '+p.address).includes(w))).sort((a,b)=>customerLetter(a.name).localeCompare(customerLetter(b.name),'ar')||clean(a.name).localeCompare(clean(b.name),'ar')||a.deviceId.localeCompare(b.deviceId));
-    if(!entries.length){list.innerHTML='<div class="am-directory-empty">'+svg('search')+'<b>'+(S.directoryQuery?'ماكو زبون يطابق البحث':'ماكو زبائن مسجلين بعد')+'</b></div>';index.replaceChildren();return;}
+    if(!entries.length){list.parentElement.classList.add('am-directory-centered-empty');list.innerHTML='<div class="am-directory-empty">'+svg('search')+'<b>'+(S.directoryQuery?'ماكو زبون يطابق البحث':'ماكو زبائن مسجلين بعد')+'</b></div>';index.replaceChildren();return;}
+    list.parentElement.classList.remove('am-directory-centered-empty');
     const scroll=list.scrollTop,letters=[];let previous='',html='';
     entries.forEach(p=>{
       const letter=customerLetter(p.name);if(letter!==previous){if(previous)html+='</section>';letters.push(letter);html+='<section class="am-letter-section" data-directory-letter="'+esc(letter)+'"><h4>'+esc(letter)+'</h4>';previous=letter;}
@@ -67356,6 +67397,8 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     window.refreshMaterialRequestCount=async function(){if(S.loaded){buildGroups();updateBadge();return;}return typeof originalRefresh==='function'?originalRefresh.apply(this,arguments):undefined;};
     window.assalOpenMessengerFromNotification=payload=>open({requestId:payload?.requestId||payload?.data?.requestId,messageId:payload?.messageId||payload?.data?.messageId});
     window.assalMessengerBack=back;
+    window.__ASSAL_PRIVATE_VOICE_CONTEXT__=()=>({open:!!S.open,ready:!!S.loaded&&!!S.profileReady&&!!currentGroup()&&allowed()&&!S.editing,group:S.active});
+    window.__ASSAL_PRIVATE_VOICE_SEND__=(meta,group)=>sendVoiceNote(meta,group);
     window.addEventListener('resize',()=>{const bottom=nearBottom();viewport();if(bottom&&S.open)requestAnimationFrame(scrollBottom);});
     window.visualViewport?.addEventListener('resize',()=>{const bottom=nearBottom();viewport();if(bottom&&S.open)requestAnimationFrame(scrollBottom);});
     window.visualViewport?.addEventListener('scroll',viewport,{passive:true});
@@ -68140,5 +68183,296 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   }
   window.addEventListener('resize',syncViewport,{passive:true});
   syncViewport();syncHeader();
+})();
+</script>
+
+<!-- ASSAL VOICE NOTES / In-composer WhatsApp-style recorder / Spark guarded -->
+<style id="assal-voice-note-minimal-css">
+/* ASSAL WhatsApp-inspired in-composer voice recording: scoped to voice controls only. */
+.assal-voice-bubble{display:flex;align-items:center;gap:10px;padding:8px 11px;margin-top:4px;width:min(100%,285px);min-width:175px;border:1px solid rgba(125,211,252,.22);border-radius:13px;background:rgba(9,35,52,.42);direction:rtl}
+.assal-voice-bubble button{display:grid;place-items:center;flex:none;width:34px;height:34px;border:0;border-radius:50%;background:#0f766e;color:#fff;cursor:pointer;box-shadow:none}
+.assal-voice-bubble .assal-voice-times{flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-size:11px;color:#cbe7f4;white-space:nowrap}
+.assal-voice-bubble .assal-voice-progress{flex:1;min-width:42px;height:3px;border-radius:3px;background:rgba(255,255,255,.23);overflow:hidden}
+.assal-voice-bubble .assal-voice-progress>span{display:block;background:#5eead4;height:100%;width:0%;transition:none}
+/* The ordinary composer is not changed; it expands only WHILE recording. */
+.assal-msg .am-write.assal-wa-voice-active{position:relative!important;min-height:82px!important;height:82px!important}
+#assalCommunityModal .assal-community-write-row.assal-wa-voice-active{position:relative!important;min-height:82px!important;height:82px!important}
+/* Icons embedded as SVG: no FontAwesome, Unicode private-use glyphs or network fonts required. */
+.assal-wa-voice-bar{position:absolute;inset:0;z-index:16;display:flex;flex-direction:column;justify-content:center;gap:7px;direction:rtl;background:#101b2a;border:1px solid rgba(94,234,212,.19);border-radius:17px;padding:7px 11px;font-family:'Cairo','Tajawal',Arial,sans-serif;color:#f4fafa;box-sizing:border-box;box-shadow:0 4px 16px rgba(0,0,0,.22);touch-action:manipulation;isolation:isolate}
+.assal-wa-voice-bar[hidden]{display:none!important}
+.assal-wa-voice-top{display:flex;align-items:center;gap:8px;direction:ltr;min-height:22px;width:100%;overflow:hidden}
+.assal-wa-voice-dot{width:8px;height:8px;border-radius:50%;background:#f26c72;flex:none;box-shadow:0 0 0 3px rgba(242,108,114,.12)}
+.assal-wa-voice-bar.is-paused .assal-wa-voice-dot,.assal-wa-voice-bar.is-ready .assal-wa-voice-dot{background:#94a3b8;box-shadow:none}
+.assal-wa-voice-clock{font:700 13px/1.25 Arial,sans-serif;color:#f8fafc;min-width:37px;direction:ltr;font-variant-numeric:tabular-nums;white-space:nowrap}
+.assal-wa-voice-wave{display:flex;align-items:center;justify-content:center;gap:2px;flex:1;overflow:hidden;min-width:0;height:20px;direction:ltr}
+.assal-wa-voice-wave span{flex:1;min-width:1px;max-width:3px;height:3px;border-radius:5px;background:#56d8be;opacity:.9;transition:height .09s linear}
+.assal-wa-voice-bar.is-paused .assal-wa-voice-wave span,.assal-wa-voice-bar.is-ready .assal-wa-voice-wave span{opacity:.38}
+.assal-wa-voice-hint{min-width:0;max-width:115px;text-align:right;font-size:10px;font-weight:700;color:#b4c8d1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl}
+.assal-wa-voice-controls{display:flex;align-items:center;justify-content:space-between;gap:9px;direction:rtl;min-height:41px;width:100%}
+.assal-wa-voice-controls button{border:0!important;cursor:pointer;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px;min-height:40px!important;height:40px!important;padding:0;border-radius:999px!important;color:#edf8fc!important;font-family:inherit;font-size:12px!important;font-weight:800;box-shadow:none!important;transform:none!important;flex:none;line-height:1!important;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.assal-wa-voice-controls button:disabled{opacity:.55;cursor:default}
+.assal-wa-voice-controls button svg{display:block!important;width:19px!important;height:19px!important;flex:none;stroke:currentColor!important;fill:none!important;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none!important;transform:none!important}
+.assal-wa-voice-controls .assal-wa-voice-send{width:41px!important;min-width:41px!important;height:41px!important;min-height:41px!important;background:#20c97e!important;color:#052d24!important;flex:0 0 41px}
+.assal-wa-voice-controls .assal-wa-voice-send svg{width:22px!important;height:22px!important;stroke-width:2.7}
+.assal-wa-voice-controls .assal-wa-voice-pause{background:#293644!important;flex:1 1 auto;min-width:0!important;max-width:none!important;padding:0 10px!important;color:#edf8fc!important}
+.assal-wa-voice-controls .assal-wa-voice-pause svg{width:17px!important;height:17px!important}
+.assal-wa-voice-controls .assal-wa-voice-delete{width:41px!important;min-width:41px!important;height:41px!important;min-height:41px!important;background:rgba(218,46,68,.18)!important;color:#ff7e90!important;flex:0 0 41px}
+.assal-wa-voice-bar.is-loading .assal-wa-voice-send,.assal-wa-voice-bar.is-loading .assal-wa-voice-pause{opacity:.5}
+.assal-voice-bubble svg{display:block;width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+@media(max-width:380px){.assal-wa-voice-bar{padding:6px 8px;gap:6px}.assal-wa-voice-controls{gap:6px}.assal-wa-voice-hint{max-width:79px;font-size:9px}.assal-wa-voice-controls .assal-wa-voice-send,.assal-wa-voice-controls .assal-wa-voice-delete{width:39px!important;min-width:39px!important;height:39px!important;min-height:39px!important;flex-basis:39px}.assal-wa-voice-controls .assal-wa-voice-pause{padding:0 7px!important;font-size:11px!important}}
+</style>
+<script id="assal-voice-note-core">
+(function(){
+  'use strict';
+  if(window.__ASSAL_VOICE_NOTES_V1__)return;
+  window.__ASSAL_VOICE_NOTES_V1__=true;
+  const MAX_SECONDS=30,MAX_BYTES=140*1024,MAX_GLOBAL_BYTES=16*1024*1024;
+  const VOICE_ROOT='assalVoiceClips/v1',QUOTA_PATH='assalVoiceQuota/v1/usedBytes';
+  // Inline SVG assets: reliable offline and independent from the icon font CDN.
+  const voiceSvg=path=>'<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">'+path+'</svg>';
+  const VOICE_ICON={
+    send:voiceSvg('<path d="M4.5 12h15M13.5 5.5 20 12l-6.5 6.5"/>'),
+    pause:voiceSvg('<path d="M9 5v14M15 5v14"/>'),
+    play:voiceSvg('<path d="m8.5 5.5 10 6.5-10 6.5z"/>'),
+    mic:voiceSvg('<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5.5 10.5a6.5 6.5 0 0 0 13 0M12 17v4M9 21h6"/>'),
+    delete:voiceSvg('<path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/>')
+  };
+  const qs=s=>document.querySelector(s);
+  const valid=id=>/^[A-Za-z0-9_-]{8,70}$/.test(String(id||''));
+  const safeString=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fdb=()=>{const f=window.firebaseDB;if(!f?.db||!f.ref||!f.get||!f.set||!f.runTransaction)throw Error('قاعدة البيانات غير جاهزة');return f;};
+  const clock=s=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  const infoHtml=meta=>'<div class="assal-voice-bubble" data-voice-id="'+safeString(meta.id)+'"><button type="button" class="assal-voice-play" data-assal-voice-play="'+safeString(meta.id)+'" title="تشغيل التسجيل" aria-label="تشغيل التسجيل">'+VOICE_ICON.play+'</button><div class="assal-voice-times"><span>'+clock(Number(meta.seconds)||0)+'</span><span class="assal-voice-progress"><span></span></span>'+VOICE_ICON.mic+'</div></div>';
+  window.assalVoiceMarkup=meta=>meta&&valid(meta.id)?infoHtml(meta):'';
+  let state={session:0,phase:'idle',mode:'',target:'',stream:null,rec:null,blob:null,url:'',chunks:[],bytes:0,start:0,pauseStart:0,pausedMs:0,seconds:0,tick:0,bar:null,host:null,analyser:null,ctx:null,samples:null,wave:[],listen:null,busy:false,sendOnStop:false,overSize:false,watch:null};
+  let gesture=null,suppressClickUntil=0,player=null,playUrl='',playButton=null;
+  function currentContext(mode){if(mode==='private'){const c=window.__ASSAL_PRIVATE_VOICE_CONTEXT__?.();return c?.open&&c?.ready?c.group:'';}return qs('#assalCommunityModal.show')?'community':'';}
+  function ms(){return state.start?Math.max(0,Date.now()-state.start-state.pausedMs-(state.pauseStart?Date.now()-state.pauseStart:0)):0;}
+  const activeSeconds=()=>Math.min(MAX_SECONDS,Math.floor(ms()/1000));
+  function hostFor(mode){return mode==='private'?qs('.assal-msg .am-write'):qs('#assalCommunityModal .assal-community-write-row');}
+  function hint(text){if(!state.bar)return;const el=state.bar.querySelector('[data-wa="hint"]');if(el)el.textContent=text;}
+  function detachBar(){if(state.watch){state.watch.disconnect();state.watch=null;}if(state.host){state.host.classList.remove('assal-wa-voice-active');}if(state.bar){state.bar.remove();}state.host=null;state.bar=null;state.wave=[];}
+  function attachBar(mode){
+    const host=hostFor(mode);if(!host)return false;state.host=host;host.classList.add('assal-wa-voice-active');
+    const bar=document.createElement('div');bar.className='assal-wa-voice-bar is-loading';bar.setAttribute('role','group');bar.setAttribute('aria-label','تسجيل صوتي');
+    bar.innerHTML='<div class="assal-wa-voice-top"><span class="assal-wa-voice-dot"></span><span class="assal-wa-voice-clock" data-wa="clock">00:00</span><div class="assal-wa-voice-wave" data-wa="wave" aria-hidden="true">'+Array.from({length:28},()=>'<span></span>').join('')+'</div><span class="assal-wa-voice-hint" data-wa="hint">جاري فتح المايك…</span></div><div class="assal-wa-voice-controls"><button type="button" class="assal-wa-voice-send" data-wa-action="send" title="إرسال التسجيل" aria-label="إرسال التسجيل">'+VOICE_ICON.send+'</button><button type="button" class="assal-wa-voice-pause" data-wa-action="pause" title="إيقاف مؤقت / استئناف"><span data-wa="pause-icon">'+VOICE_ICON.pause+'</span><span data-wa="pause-label">إيقاف مؤقت</span></button><button type="button" class="assal-wa-voice-delete" data-wa-action="discard" title="حذف التسجيل" aria-label="حذف التسجيل">'+VOICE_ICON.delete+'</button></div>';
+    bar.addEventListener('click',e=>{const b=e.target.closest('[data-wa-action]');if(!b)return;e.preventDefault();e.stopPropagation();const a=b.dataset.waAction;if(a==='discard')close();else if(a==='pause')togglePause();else if(a==='send')finish(true);});
+    host.appendChild(bar);state.bar=bar;state.wave=Array.from(bar.querySelectorAll('[data-wa="wave"] span'));
+    const shell=mode==='private'?host.closest('.assal-msg'):document.getElementById('assalCommunityModal');
+    if(shell&&window.MutationObserver){state.watch=new MutationObserver(()=>{if(state.phase!=='idle'&&!shell.classList.contains('show'))close();});state.watch.observe(shell,{attributes:true,attributeFilter:['class','aria-hidden']});}
+    ui();return true;
+  }
+  function ui(){const b=state.bar;if(!b)return;
+    b.classList.toggle('is-loading',state.phase==='requesting'||state.phase==='finalizing'||state.phase==='sending');
+    b.classList.toggle('is-paused',state.phase==='paused');b.classList.toggle('is-ready',state.phase==='ready');
+    const send=b.querySelector('[data-wa-action="send"]'),pause=b.querySelector('[data-wa-action="pause"]'),del=b.querySelector('[data-wa-action="discard"]');
+    send.disabled=!(state.phase==='recording'||state.phase==='paused'||state.phase==='ready');
+    pause.disabled=!(state.phase==='recording'||state.phase==='paused'||state.phase==='ready');
+    del.disabled=state.phase==='sending';
+    const icon=pause.querySelector('[data-wa="pause-icon"]'),label=pause.querySelector('[data-wa="pause-label"]');
+    if(state.phase==='paused'){icon.innerHTML=VOICE_ICON.mic;label.textContent='استئناف';}
+    else if(state.phase==='ready'){icon.innerHTML=VOICE_ICON.play;label.textContent='استماع';}
+    else{icon.innerHTML=VOICE_ICON.pause;label.textContent='إيقاف مؤقت';}
+  }
+  function stopTick(){if(state.tick){clearInterval(state.tick);state.tick=0;}}
+  function stopLive(){stopTick();try{state.stream?.getTracks().forEach(t=>t.stop());}catch(_){}state.stream=null;
+    try{state.ctx?.close();}catch(_){}state.ctx=null;state.analyser=null;state.samples=null;
+  }
+  function cleanup(){stopLive();try{if(state.rec&&state.rec.state!=='inactive')state.rec.stop();}catch(_){}state.rec=null;
+    if(state.listen){try{state.listen.pause();state.listen.removeAttribute('src');state.listen.load();}catch(_){}state.listen=null;}
+    if(state.url){URL.revokeObjectURL(state.url);state.url='';}state.blob=null;state.chunks=[];state.bytes=0;state.start=0;state.pauseStart=0;state.pausedMs=0;state.seconds=0;state.busy=false;state.sendOnStop=false;state.overSize=false;
+  }
+  function close(){state.session++;cleanup();detachBar();state.phase='idle';state.mode='';state.target='';gesture=null;}
+  function tick(){if(!state.bar)return;
+    if(state.mode==='private'&&(!state.host?.isConnected||!qs('.assal-msg.show'))){close();return;}
+    if(state.mode==='community'&&!qs('#assalCommunityModal.show')){close();return;}
+    const label=state.bar.querySelector('[data-wa="clock"]');if(label)label.textContent=clock(state.phase==='ready'?state.seconds:activeSeconds());
+    if(state.phase==='recording'&&state.analyser&&state.samples){
+      try{state.analyser.getByteFrequencyData(state.samples);const v=state.samples;for(let i=0;i<state.wave.length;i++){
+        const amp=v[Math.min(v.length-1,Math.floor(i*v.length/state.wave.length))]/255;
+        const h=3+Math.round(15*Math.min(1,amp*2.4));state.wave[i].style.height=h+'px';
+      }}catch(_){}
+    }
+    if(state.phase==='recording'&&ms()>=MAX_SECONDS*1000)finish(false);
+  }
+  function analyserFor(stream){try{const Type=window.AudioContext||window.webkitAudioContext;if(!Type)return;const ctx=new Type();const input=ctx.createMediaStreamSource(stream);const analyser=ctx.createAnalyser();analyser.fftSize=64;analyser.smoothingTimeConstant=.55;input.connect(analyser);state.ctx=ctx;state.analyser=analyser;state.samples=new Uint8Array(analyser.frequencyBinCount);}catch(_){} }
+  async function start(mode){
+    if(!['private','community'].includes(mode))return;
+    if(!window.MediaRecorder||!navigator.mediaDevices?.getUserMedia){alert('هذا الجهاز لا يدعم تسجيل الرسائل الصوتية داخل التطبيق.');return;}
+    const target=currentContext(mode);if(!target){alert('افتح المحادثة وانتظر اتصالها أولاً.');return;}
+    if(mode==='community'&&qs('#assalCommunityModal .assal-community-composer.is-muted')){alert('إرسال الرسائل مغلق لهذا الحساب حالياً.');return;}
+    const heldGesture=gesture;close();gesture=heldGesture;state.mode=mode;state.target=target;state.phase='requesting';const session=state.session;
+    if(!attachBar(mode)){close();return;}
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true},video:false});
+      if(state.session!==session){stream.getTracks().forEach(t=>t.stop());return;}
+      state.stream=stream;const types=['audio/webm;codecs=opus','audio/webm','audio/mp4'];
+      const selected=types.find(type=>{try{return MediaRecorder.isTypeSupported(type);}catch(_){return false;}});
+      const rec=new MediaRecorder(stream,selected?{mimeType:selected,audioBitsPerSecond:24000}:{audioBitsPerSecond:24000});state.rec=rec;state.chunks=[];state.bytes=0;
+      rec.ondataavailable=e=>{if(state.session!==session||!e.data?.size)return;state.chunks.push(e.data);state.bytes+=e.data.size;
+        if(state.bytes>MAX_BYTES&&rec.state!=='inactive'){state.overSize=true;try{rec.stop();}catch(_){}}};
+      rec.onerror=()=>{if(state.session!==session)return;state.overSize=true;hint('تعذّر التسجيل');try{if(rec.state!=='inactive')rec.stop();}catch(_){}};
+      rec.onstop=()=>{stopLive();if(state.session!==session)return;
+        state.rec=null;const blob=new Blob(state.chunks,{type:rec.mimeType||selected||'audio/webm'});state.chunks=[];
+        if(state.overSize||blob.size>MAX_BYTES){hint('الحجم تجاوز الحد؛ احذف وأعد التسجيل');state.phase='error';ui();return;}
+        if(blob.size<900||state.seconds<1){hint('التسجيل قصير؛ احذف وأعد التسجيل');state.phase='error';ui();return;}
+        state.blob=blob;state.url=URL.createObjectURL(blob);state.phase='ready';hint('التسجيل جاهز');ui();tick();
+        if(state.sendOnStop)sendRecorded();
+      };
+      rec.start(250);state.start=Date.now();state.phase='recording';analyserFor(stream);hint('جارٍ التسجيل');ui();tick();state.tick=setInterval(tick,140);
+    }catch(err){console.warn('ASSAL recorder:',err);if(state.session===session){close();alert('تعذّر فتح المايك. فعّل الإذن للتطبيق أو حدّث APK.');}}
+  }
+  function togglePause(){
+    if(state.phase==='recording'&&state.rec){try{state.rec.pause();state.pauseStart=Date.now();state.phase='paused';stopTick();try{state.ctx?.suspend();}catch(_){}hint('التسجيل متوقف مؤقتاً');ui();tick();}catch(_){}return;}
+    if(state.phase==='paused'&&state.rec){try{state.rec.resume();state.pausedMs+=Date.now()-state.pauseStart;state.pauseStart=0;state.phase='recording';try{state.ctx?.resume();}catch(_){}hint('جارٍ التسجيل');ui();state.tick=setInterval(tick,140);}catch(_){}return;}
+    if(state.phase==='ready'&&state.url){
+      if(state.listen&&!state.listen.paused){state.listen.pause();hint('المعاينة متوقفة');return;}
+      if(!state.listen){state.listen=new Audio(state.url);state.listen.preload='metadata';state.listen.onended=()=>hint('التسجيل جاهز للإرسال');}
+      state.listen.play().then(()=>hint('تستمع للتسجيل')).catch(()=>hint('تعذّر تشغيل المعاينة'));
+    }
+  }
+  function finish(send){
+    if(state.phase==='ready'){if(send)sendRecorded();return;}
+    if(state.phase==='finalizing'||state.phase==='sending'||state.phase==='error'||state.phase==='requesting')return;
+    if(!['recording','paused'].includes(state.phase)||!state.rec)return;
+    state.seconds=Math.max(0,Math.min(MAX_SECONDS,Math.floor(ms()/1000)));
+    state.sendOnStop=!!send;state.phase='finalizing';hint(send?'جارٍ تجهيز الإرسال':'وصل التسجيل للحد الزمني');ui();stopTick();
+    try{state.rec.stop();}catch(_){close();}
+  }
+  async function asDataUrl(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(Error('فشل تجهيز التسجيل'));r.readAsDataURL(blob);});}
+  async function store(meta,blob){
+    const f=fdb(),clip=f.ref(f.db,VOICE_ROOT+'/'+meta.id),q=f.ref(f.db,QUOTA_PATH);let reserved=false;
+    try{const result=await f.runTransaction(q,current=>{const used=Number(current)||0;if(!Number.isFinite(used)||used<0||used+blob.size>MAX_GLOBAL_BYTES)return;return used+blob.size;},{applyLocally:false});
+      if(!result?.committed)throw Error('وصلت التسجيلات للحد الآمن المخصص للصوت.');reserved=true;
+      const data=await asDataUrl(blob);if(data.length>200000)throw Error('حجم التسجيل بعد التحويل أكبر من الحد الآمن.');
+      await f.set(clip,{data,mime:meta.mime,bytes:meta.bytes,seconds:meta.seconds,createdAt:Date.now()});return true;
+    }catch(err){if(reserved){try{await f.runTransaction(q,n=>Math.max(0,(Number(n)||0)-blob.size),{applyLocally:false});}catch(_){}}throw err;}
+  }
+  async function sendRecorded(){
+    if(state.phase!=='ready'||!state.blob||state.busy)return;
+    if(currentContext(state.mode)!==state.target){hint('المحادثة تغيّرت؛ احذف التسجيل');return;}
+    state.busy=true;state.phase='sending';hint('جارٍ الإرسال…');ui();const session=state.session;
+    const blob=state.blob,meta={id:'VN_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,12),seconds:state.seconds,bytes:blob.size,mime:blob.type||'audio/webm'};
+    try{const allowed=state.mode==='private'&&!!window.__ASSAL_PRIVATE_VOICE_SEND__||state.mode==='community'&&!!window.__ASSAL_COMMUNITY_VOICE_SEND__;
+      if(!allowed)throw Error('مسار المحادثة غير جاهز');await store(meta,blob);
+      if(state.session!==session)return;let sent=false;
+      if(state.mode==='private')sent=!!window.__ASSAL_PRIVATE_VOICE_SEND__(meta,state.target);
+      else sent=!!(await window.__ASSAL_COMMUNITY_VOICE_SEND__(meta));
+      if(!sent)throw Error('تعذّر إرسال الرسالة للمحادثة');close();
+    }catch(err){console.warn('ASSAL voice send:',err);if(state.session!==session)return;state.phase='ready';state.busy=false;hint(err?.message||'فشل الإرسال؛ أعد المحاولة');ui();}
+  }
+  function stopPlayer(){if(player){player.pause();player.removeAttribute('src');player.load();player=null;}if(playUrl){URL.revokeObjectURL(playUrl);playUrl='';}if(playButton){playButton.innerHTML=VOICE_ICON.play;playButton=null;}}
+  async function play(btn){const id=btn.dataset.assalVoicePlay;if(!valid(id))return;
+    if(player&&playButton===btn){if(player.paused){player.play().catch(()=>{});btn.innerHTML=VOICE_ICON.pause;}else{player.pause();btn.innerHTML=VOICE_ICON.play;}return;}
+    stopPlayer();playButton=btn;btn.disabled=true;
+    try{const f=fdb(),snap=await f.get(f.ref(f.db,VOICE_ROOT+'/'+id));if(!snap.exists())throw Error('التسجيل غير موجود');
+      const val=snap.val();if(!val||typeof val.data!=='string'||val.data.length>200000||!/^data:audio\/(webm|mp4|ogg|mpeg|aac)[^,]*;base64,/i.test(val.data))throw Error('صيغة التسجيل غير مدعومة');
+      const response=await fetch(val.data);const blob=await response.blob();if(blob.size>MAX_BYTES)throw Error('ملف الصوت أكبر من المسموح');
+      playUrl=URL.createObjectURL(blob);player=new Audio(playUrl);player.preload='metadata';const control=btn.closest('.assal-voice-bubble');const progress=control?.querySelector('.assal-voice-progress>span');
+      player.ontimeupdate=()=>{if(progress&&player?.duration)progress.style.width=(100*player.currentTime/player.duration)+'%';};
+      player.onended=stopPlayer;player.onerror=stopPlayer;await player.play();btn.innerHTML=VOICE_ICON.pause;
+    }catch(err){console.warn('ASSAL voice playback:',err);stopPlayer();alert(err?.message||'تعذر تشغيل التسجيل');}finally{btn.disabled=false;}
+  }
+  // WhatsApp-inspired gestures: tap = locked recorder; hold then release = send;
+  // drag LEFT = discard; drag UP = lock without auto-send.
+  document.addEventListener('pointerdown',e=>{const b=e.target.closest?.('[data-assal-voice-record]');if(!b||e.button!==0)return;
+    e.preventDefault();e.stopPropagation();if(state.phase!=='idle')close();
+    gesture={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now(),decision:'',ready:false};
+    suppressClickUntil=performance.now()+900;start(b.dataset.assalVoiceRecord);
+  },true);
+  document.addEventListener('pointermove',e=>{if(!gesture||gesture.id!==e.pointerId)return;
+    const dx=e.clientX-gesture.x,dy=e.clientY-gesture.y;
+    if(dx< -72){gesture.decision='discard';hint('ارفع إصبعك لإلغاء التسجيل');}
+    else if(dy< -62){gesture.decision='lock';hint('ارفع إصبعك لقفل التسجيل');}
+    else{gesture.decision='';if(state.phase==='recording')hint('جارٍ التسجيل');}
+  },{passive:true});
+  document.addEventListener('pointerup',e=>{if(!gesture||gesture.id!==e.pointerId)return;
+    const g=gesture;gesture=null;const duration=performance.now()-g.t;
+    if(g.decision==='discard'){close();return;}
+    if(g.decision==='lock'){hint('التسجيل مقفول؛ اضغط إرسال');return;}
+    if(duration>1000&&state.phase==='recording'&&ms()>900){finish(true);return;}
+    if(state.phase==='recording')hint('التسجيل مقفول؛ اضغط إرسال');
+  },true);
+  document.addEventListener('pointercancel',e=>{if(gesture?.id===e.pointerId){gesture=null;if(state.phase!=='idle')close();}},true);
+  document.addEventListener('click',e=>{
+    const rec=e.target.closest?.('[data-assal-voice-record]');if(rec){e.preventDefault();e.stopPropagation();if(performance.now()<suppressClickUntil)return;if(state.phase==='idle')start(rec.dataset.assalVoiceRecord);return;}
+    const playback=e.target.closest?.('[data-assal-voice-play]');if(playback){e.preventDefault();e.stopPropagation();play(playback);}
+  },true);
+  document.addEventListener('keydown',e=>{const b=e.target.closest?.('[data-assal-voice-record]');if(b&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.stopPropagation();if(state.phase==='idle')start(b.dataset.assalVoiceRecord);}},true);
+  window.addEventListener('pagehide',()=>{stopPlayer();close();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.phase==='recording')togglePause();});
+  // Avoid orphan microphone if the user leaves the chat while recording.
+  const oldCommunityClose=window.closeAssalCommunitySpace;
+  if(typeof oldCommunityClose==='function')window.closeAssalCommunitySpace=function(){if(state.mode==='community')close();return oldCommunityClose.apply(this,arguments);};
+  const oldPrivateClose=window.closeRequestModal;
+  if(typeof oldPrivateClose==='function')window.closeRequestModal=function(){if(state.mode==='private')close();return oldPrivateClose.apply(this,arguments);};
+})();
+</script>
+
+<!-- ASSAL / WhatsApp-smart primary mic: an empty composer offers the mic, text/photo restores Send. -->
+<style id="assal-wa-single-mic-css">
+/* Purely scoped to the existing round primary actions, no design/layout/animation edits elsewhere. */
+.assal-msg .am-send.assal-wa-primary-mic,
+#assalCommunityModal .assal-community-send.assal-wa-primary-mic{
+  background:linear-gradient(135deg,#0d9079,#087968)!important;
+  border-color:rgba(94,234,212,.34)!important;
+  color:#fff!important;
+  touch-action:none;-webkit-user-select:none;user-select:none;
+}
+.assal-msg .am-send.assal-wa-primary-mic svg,
+#assalCommunityModal .assal-community-send.assal-wa-primary-mic svg{
+  width:21px!important;height:21px!important;display:block;stroke:#fff;fill:none;
+  transform:none!important;pointer-events:none;
+}
+@media(max-width:360px){.assal-msg .am-send.assal-wa-primary-mic svg,
+#assalCommunityModal .assal-community-send.assal-wa-primary-mic svg{width:20px!important;height:20px!important}}
+</style>
+<script id="assal-wa-single-mic-script">
+(function(){
+  'use strict';
+  if(window.__ASSAL_WA_SINGLE_MIC__)return;
+  window.__ASSAL_WA_SINGLE_MIC__=true;
+  const originals=new WeakMap();
+  const mic='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21" aria-hidden="true" focusable="false"><rect x="9" y="2.2" width="6" height="12.2" rx="3" stroke-width="2"/><path d="M5.3 10.7a6.7 6.7 0 0 0 13.4 0M12 17.4v4.3M8.2 21.7h7.6" stroke-width="2" stroke-linecap="round"/></svg>';
+  window.__ASSAL_SYNC_VOICE_SEND__=function(mode,button,voice){
+    if(!button)return;
+    if(!originals.has(button))originals.set(button,{html:button.innerHTML,title:button.title,aria:button.getAttribute('aria-label'),action:button.getAttribute('data-action')});
+    const old=originals.get(button),active=button.classList.contains('assal-wa-primary-mic');
+    if(!!voice===active)return;
+    button.classList.toggle('assal-wa-primary-mic',!!voice);
+    if(voice){
+      button.innerHTML=mic;button.dataset.assalVoiceRecord=mode;button.removeAttribute('data-action');
+      // Community has an inline send onclick; capture-phase voice handler prevents it while recording.
+      button.title='تسجيل صوتي';button.setAttribute('aria-label','تسجيل صوتي');
+    }else{
+      button.innerHTML=old.html;button.removeAttribute('data-assal-voice-record');
+      if(old.action!==null)button.setAttribute('data-action',old.action);
+      else button.removeAttribute('data-action');
+      button.title=old.title;
+      if(old.aria!==null)button.setAttribute('aria-label',old.aria);else button.removeAttribute('aria-label');
+    }
+  };
+  const $=sel=>document.querySelector(sel);
+  function syncCommunity(){
+    const btn=$('#assalCommunitySendBtn'),input=$('#assalCommunityInput');if(!btn||!input)return;
+    const hasText=!!input.value.trim(),hasImage=!!$('#assalCommunityPreview.show');
+    const muted=!!$('#assalCommunityModal .assal-community-composer.is-muted');
+    window.__ASSAL_SYNC_VOICE_SEND__('community',btn,!hasText&&!hasImage&&!muted);
+  }
+  document.addEventListener('input',function(e){if(e.target?.id==='assalCommunityInput')syncCommunity();},true);
+  // When the existing community sender clears its textarea programmatically, restore microphone.
+  if(typeof window.sendAssalCommunityMessage==='function'){
+    const sendOriginal=window.sendAssalCommunityMessage;
+    window.sendAssalCommunityMessage=function(){
+      const returned=sendOriginal.apply(this,arguments);
+      Promise.resolve(returned).then(syncCommunity,syncCommunity);
+      return returned;
+    };
+  }
+  const preview=$('#assalCommunityPreview');
+  if(preview&&window.MutationObserver)new MutationObserver(syncCommunity).observe(preview,{attributes:true,attributeFilter:['class']});
+  const composer=$('#assalCommunityModal .assal-community-composer');
+  if(composer&&window.MutationObserver)new MutationObserver(syncCommunity).observe(composer,{attributes:true,attributeFilter:['class']});
+  syncCommunity();
 })();
 </script>
