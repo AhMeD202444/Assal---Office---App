@@ -11,6 +11,10 @@
       ? String(window.Android.getAssalAndroidIdentity()||'') : '';
     if(!/^AND-[A-F0-9]{32}$/.test(nativeId))return;
     window.__ASSAL_ANDROID_DEVICE_ID_V1__=nativeId;
+    // Boot gate is only for Android without a locally activated session.
+    window.__ASSAL_ANDROID_RESTORE_PENDING__=(localStorage.getItem('isActivated')!=='true'
+      &&localStorage.getItem('assal_android_intentional_logout_v1')!=='1'
+      &&sessionStorage.getItem('forcedActivationReason')!=='admin_password_upgrade');
     if(!localStorage.getItem('device_id')){
       localStorage.setItem('device_id',nativeId);
       window.__ASSAL_ANDROID_FIRST_ID_V1__=true;
@@ -18699,15 +18703,15 @@ html.assal-viewport-transition body {
       <div class="customer-profile-grid">
         <div class="customer-profile-field">
           <label class="customer-profile-label" for="customerProfileName">اسم الزبون</label>
-          <input id="customerProfileName" class="customer-profile-input" type="text" maxlength="60" placeholder="اكتب الاسم الكامل">
+          <input id="customerProfileName" class="customer-profile-input" type="text" maxlength="60" enterkeyhint="next" autocomplete="name" autocapitalize="words" placeholder="اكتب الاسم الكامل">
         </div>
         <div class="customer-profile-field">
           <label class="customer-profile-label" for="customerProfilePhone">رقم الهاتف</label>
-          <input id="customerProfilePhone" class="customer-profile-input" type="tel" maxlength="11" inputmode="numeric" dir="ltr" autocomplete="tel" placeholder="مثال: 07712345678" oninput="sanitizeRequestPhone(this); onCustomerProfilePhoneInput(this)">
+          <input id="customerProfilePhone" class="customer-profile-input" type="tel" maxlength="11" inputmode="numeric" enterkeyhint="next" pattern="[0-9]*" dir="ltr" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="مثال: 07712345678" oninput="sanitizeRequestPhone(this); onCustomerProfilePhoneInput(this)">
         </div>
         <div class="customer-profile-field full">
           <label class="customer-profile-label" for="customerProfileAddress">عنوان مكتب الصيانة</label>
-          <input id="customerProfileAddress" class="customer-profile-input" type="text" maxlength="120" placeholder="اكتب عنوان مكتب الصيانة بالتفصيل">
+          <input id="customerProfileAddress" class="customer-profile-input" type="text" maxlength="120" enterkeyhint="done" autocomplete="street-address" placeholder="اكتب عنوان مكتب الصيانة بالتفصيل">
         </div>
         <div class="customer-profile-actions full">
           <button id="customerProfileSubmitBtn" class="customer-profile-submit" type="button" onclick="submitCustomerProfile()">
@@ -22432,6 +22436,8 @@ function openCustomerProfileModal(prefill = {}) {
   setCustomerProfileSubmitState("idle", "تسجيل", "fa-user-plus");
   modal.classList.add("show");
   modal.setAttribute("aria-hidden", "false");
+  document.documentElement.classList.add('assal-customer-profile-editable');
+  document.body.classList.add('assal-customer-profile-editable');
   syncGlobalModalLock();
 }
 
@@ -22440,48 +22446,146 @@ function closeCustomerProfileModal() {
   if (!modal) return;
   modal.classList.remove("show");
   modal.setAttribute("aria-hidden", "true");
+  document.documentElement.classList.remove('assal-customer-profile-editable');
+  document.body.classList.remove('assal-customer-profile-editable');
   syncGlobalModalLock();
 }
 
-async function maybePromptCustomerProfileRegistration() {
-  if (isAdminUser()) return;
-  if (localStorage.getItem("isActivated") !== "true") return;
-  if (!window.firebaseDB || !window.firebaseDB.db)
-    throw new Error("firebase-not-ready");
-  const { db, ref, get } = window.firebaseDB;
-  const deviceId = getDeviceId();
-  const snap = await get(ref(db, `customerProfiles/${deviceId}`));
-  const profile = snap.exists() ? snap.val() || {} : null;
-  if (profile && profile.blocked) {
-    applyCustomerBlockedState(profile);
+// ASSAL Batch 1: customer profile decision is prefetched while the ad is on screen.
+// Only the real ad-close event may release an unfinished registration into view.
+const ASSAL_PROFILE_CHECK_KEY = 'assal_profile_verified_v1';
+let assalProfileCheckPromise = null;
+let assalProfileDecision = null;
+let assalProfileGate = null;
+let assalProfileBootStarted = false;
+function assalProfileEligible() {
+  return localStorage.getItem('isActivated') === 'true'
+    && !isAdminUser() && !window.__ASSAL_ANDROID_RESTORE_PENDING__;
+}
+function assalProfileAdFinished() {
+  const phase = window.__ASSAL_LUX_STARTUP_PHASE__ || 'pending';
+  return phase === 'closed' || phase === 'skipped';
+}
+function assalProfileWaitingLayer(show, error = false) {
+  if (!show) {
+    if (assalProfileGate) { assalProfileGate.remove(); assalProfileGate = null; }
     return;
   }
-  const isComplete = !!(
-    profile &&
-    String(profile.name || "").trim() &&
-    String(profile.phone || "").trim() &&
-    String(profile.address || "").trim()
-  );
-  if (!isComplete) openCustomerProfileModal(profile || {});
+  if (!assalProfileEligible() || !assalProfileAdFinished()) return;
+  if (!assalProfileGate) {
+    const wrap = document.createElement('div');
+    wrap.id = 'assalProfileStartupCheck';
+    wrap.innerHTML = '<div class="assal-startup-check-card" role="status" aria-live="polite">'
+      + '<i class="fa-solid fa-user-shield" aria-hidden="true"></i>'
+      + '<strong>جارٍ التحقق من بيانات حسابك</strong>'
+      + '<p id="assalProfileCheckMessage">يرجى الانتظار لحظات...</p>'
+      + '<button id="assalProfileCheckRetry" type="button" hidden>إعادة المحاولة</button></div>';
+    document.body.appendChild(wrap);
+    wrap.querySelector('#assalProfileCheckRetry').addEventListener('click', () => location.reload());
+    assalProfileGate = wrap;
+  }
+  const message = assalProfileGate.querySelector('#assalProfileCheckMessage');
+  const retry = assalProfileGate.querySelector('#assalProfileCheckRetry');
+  if (message) message.textContent = error
+    ? 'تعذّر فحص بيانات الحساب. تحقق من الإنترنت ثم أعد المحاولة.'
+    : 'يرجى الانتظار لحظات...';
+  if (retry) retry.hidden = !error;
 }
-
-window.queueCustomerProfilePrompt = function (retries = 16) {
-  if (customerProfilePromptQueued) return;
+function assalProfileReleaseIfReady() {
+  if (!assalProfileEligible() || !assalProfileAdFinished()) return;
+  if (!assalProfileDecision) {
+    assalProfileWaitingLayer(true);
+    return;
+  }
+  if (assalProfileDecision.kind === 'error') {
+    assalProfileWaitingLayer(true, true);
+    return;
+  }
+  assalProfileWaitingLayer(false);
+  if (assalProfileDecision.kind === 'blocked') {
+    applyCustomerBlockedState(assalProfileDecision.profile);
+  } else if (assalProfileDecision.kind === 'missing') {
+    openCustomerProfileModal(assalProfileDecision.profile || {});
+  }
+}
+async function maybePromptCustomerProfileRegistration() {
+  if (!assalProfileEligible()) return;
+  const customerId = getDeviceId();
+  if (localStorage.getItem(ASSAL_PROFILE_CHECK_KEY) === customerId) {
+    assalProfileDecision = { kind: 'complete' };
+    return;
+  }
+  // Firebase modules initialize asynchronously. Wait for readiness, but never
+  // decide "new customer" while the database is unavailable.
+  let remaining = 24;
+  while ((!window.firebaseDB || !window.firebaseDB.db) && remaining-- > 0) {
+    await new Promise(resolve => setTimeout(resolve, 150));
+  }
+  if (!window.firebaseDB || !window.firebaseDB.db) throw new Error('firebase-not-ready');
+  const { db, ref, get } = window.firebaseDB;
+  const snap = await get(ref(db, `customerProfiles/${customerId}`));
+  if (getDeviceId() !== customerId || !assalProfileEligible()) return;
+  const profile = snap.exists() ? snap.val() || {} : null;
+  if (profile && profile.blocked) {
+    localStorage.removeItem(ASSAL_PROFILE_CHECK_KEY);
+    assalProfileDecision = { kind: 'blocked', profile };
+    return;
+  }
+  const complete = !!(profile && String(profile.name || '').trim()
+    && String(profile.phone || '').trim() && String(profile.address || '').trim());
+  if (complete) {
+    localStorage.setItem(ASSAL_PROFILE_CHECK_KEY, customerId);
+    assalProfileDecision = { kind: 'complete' };
+  } else {
+    localStorage.removeItem(ASSAL_PROFILE_CHECK_KEY);
+    assalProfileDecision = { kind: 'missing', profile: profile || {} };
+  }
+}
+window.queueCustomerProfilePrompt = function () {
+  if (!assalProfileEligible()) return;
+  if (assalProfileBootStarted) {
+    assalProfileReleaseIfReady();
+    return;
+  }
+  assalProfileBootStarted = true;
   customerProfilePromptQueued = true;
-  const run = async (left) => {
-    try {
-      await maybePromptCustomerProfileRegistration();
+  assalProfileCheckPromise = maybePromptCustomerProfileRegistration()
+    .catch(err => {
+      console.warn('ASSAL customer profile startup:', err);
+      assalProfileDecision = { kind: 'error' };
+    })
+    .finally(() => {
       customerProfilePromptQueued = false;
-    } catch (e) {
-      if (left <= 0) {
-        customerProfilePromptQueued = false;
-        return;
-      }
-      setTimeout(() => run(left - 1), 500);
-    }
-  };
-  run(retries);
+      assalProfileReleaseIfReady();
+    });
+  assalProfileReleaseIfReady();
 };
+window.addEventListener('assal:startup-ad-finished', () => {
+  assalProfileReleaseIfReady();
+});
+
+// Keyboard behavior confined to these 3 inputs: Next, Next, Done.
+document.addEventListener('DOMContentLoaded', () => {
+  const name = document.getElementById('customerProfileName');
+  const phone = document.getElementById('customerProfilePhone');
+  const address = document.getElementById('customerProfileAddress');
+  if (!name || !phone || !address) return;
+  function nextOnEnter(input, next) {
+    input.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== 'NumpadEnter') return;
+      if (event.isComposing) return;
+      event.preventDefault();
+      if (next) next.focus();
+      else if (!customerProfileSubmitting) window.submitCustomerProfile();
+    });
+  }
+  nextOnEnter(name, phone);
+  nextOnEnter(phone, address);
+  nextOnEnter(address, null);
+  phone.addEventListener('focus', () => {
+    try { phone.setSelectionRange(phone.value.length, phone.value.length); } catch (_) {}
+  });
+});
 
 window.submitCustomerProfile = async function () {
   if (customerProfileSubmitting) return;
@@ -22541,6 +22645,8 @@ window.submitCustomerProfile = async function () {
       updatedAt: now,
     });
     try { window.__ASSAL_DEVICE_IDENTITY_REGISTER__?.(); } catch (_) {}
+    try { localStorage.setItem(ASSAL_PROFILE_CHECK_KEY, deviceId); } catch (_) {}
+    assalProfileDecision = {kind:'complete'};
     setCustomerProfileSubmitState(
       "success",
       "تم التسجيل بنجاح",
@@ -22576,15 +22682,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, 260);
 
-  setTimeout(() => {
-    if (
-      !window.__ASSAL_LOW_END_DEVICE__ &&
-      localStorage.getItem("isActivated") === "true" &&
-      !isAdminUser()
-    ) {
-      queueCustomerProfilePrompt();
-    }
-  }, 800);
+  // Batch 1: no independent 800ms popup; initialization is coordinated
+  // with the startup advertisement and original window.onload below.
 });
 
 document.addEventListener("visibilitychange", () => {
@@ -27524,11 +27623,8 @@ window.onload = function () {
       }
     } catch (_) {}
 
-    runLowEndDeferred(() => {
-      try {
-        queueCustomerProfilePrompt();
-      } catch (_) {}
-    }, 2400);
+    // No extra 2400ms delay before customer registration on low-end devices.
+    try { queueCustomerProfilePrompt(); } catch (_) {}
   } else {
     triggerAnimation();
     queueCustomerProfilePrompt();
@@ -27544,6 +27640,8 @@ window.onload = function () {
 
 // نافذة تفعيل التطبيق
 async function showActivationPopup() {
+  // Android ID lookup must resolve before a fresh activation popup can appear.
+  if (window.__ASSAL_ANDROID_RESTORE_PENDING__) return;
   // إذا التطبيق مفعّل مسبقاً، لا تفتح النافذة
   if (localStorage.getItem("isActivated") === "true") {
     return;
@@ -38564,6 +38662,14 @@ const AD_CHOICE = "simi_subscription"; // الإعلان الجديد مع زر 
 // خيارات اضافية (اختياري)
 const AD_DELAY_MS = 45; // بعد جاهزية بوابة التحديث: ظهور شبه فوري بدون قفزة بصرية
 const AD_SHOW_ONCE_PER_SESSION = false; // هذا الإعلان يطلع بكل مرة يفتح التطبيق
+window.__ASSAL_LUX_STARTUP_PHASE__ = String(AD_CHOICE || '').toLowerCase() === 'off' ? 'skipped' : 'pending';
+function assalFinishStartupAd(phase) {
+  if (window.__ASSAL_LUX_STARTUP_PHASE__ === 'closed' && phase !== 'closed') return;
+  window.__ASSAL_LUX_STARTUP_PHASE__ = phase;
+  if (phase === 'closed' || phase === 'skipped') {
+    window.dispatchEvent(new Event('assal:startup-ad-finished'));
+  }
+}
 
 const LuxAds = (() => {
   const overlay = () => document.getElementById("adOverlay");
@@ -38644,6 +38750,7 @@ const LuxAds = (() => {
     if (!o || !m) return;
 
     adCloseInProgress = false;
+    window.__ASSAL_LUX_STARTUP_PHASE__ = 'open';
     o.style.pointerEvents = "";
     m.style.pointerEvents = "";
     o.style.transition = "";
@@ -38748,6 +38855,7 @@ const LuxAds = (() => {
         if (typeof syncGlobalModalLock === "function") syncGlobalModalLock();
       } catch (e) {}
       adCloseInProgress = false;
+      assalFinishStartupAd('closed');
     };
 
     // إخفاء الخلفية يبدأ فور الضغط، بدون انتظار مؤقت أعمى.
@@ -39997,7 +40105,7 @@ const LuxAds = (() => {
 
   function showByKey(keyRaw) {
     const key = normalize(keyRaw);
-    if (!key || key === "off") return;
+    if (!key || key === "off") { assalFinishStartupAd('skipped'); return; }
 
     // once per session
     if (AD_SHOW_ONCE_PER_SESSION) {
@@ -40006,7 +40114,7 @@ const LuxAds = (() => {
     }
 
     // الإعلان يُجهز وهو مخفي من وقت الإقلاع؛ هنا نعرضه فقط.
-    if (!prepareByKey(key)) return;
+    if (!prepareByKey(key)) { assalFinishStartupAd('skipped'); return; }
     fadeIn();
   }
 
@@ -40035,7 +40143,7 @@ const LuxAds = (() => {
 
   function maybeShow(attempt = 0) {
     const key = normalize(AD_CHOICE);
-    if (!key || key === "off") return;
+    if (!key || key === "off") { assalFinishStartupAd('skipped'); return; }
 
     // لا نبدأ إعلان Startup على صفحة التفعيل نفسها. بعد نجاح التفعيل يحصل reload،
     // وعندها يرجع نفس مسار الإعلان السريع الحالي (AD_DELAY_MS) بلا أي تأخير إضافي.
@@ -40063,6 +40171,8 @@ const LuxAds = (() => {
       if (overlayBusy) {
         if (attempt < 18) {
           setTimeout(() => maybeShow(attempt + 1), 220);
+        } else {
+          assalFinishStartupAd('skipped');
         }
         return;
       }
@@ -68606,6 +68716,29 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
 })();
 </script>
 
+<style id="assal-startup-profile-batch1-css">
+/* Activation-styled silent Android account verification. */
+#assalAndroidVerification{z-index:2147483500 !important;background:rgba(2,8,23,.70)}
+#assalAndroidVerification .activation-dialog{width:min(408px,calc(100vw - 28px));padding:24px 18px 22px;max-height:calc(100dvh - 24px);overflow:auto;transform:translateY(0) scale(1)}
+#assalAndroidVerification .activation-title{-webkit-text-fill-color:initial;background:none;color:#eafefa;font-size:19px}
+#assalAndroidVerification .activation-text{line-height:1.9}
+#assalAndroidVerification .activation-btn{margin-top:8px;width:100%;max-width:220px}
+.assal-identity-loader{width:24px;height:24px;border:3px solid rgba(100,230,208,.21);border-top-color:#64e6d0;border-radius:50%;animation:assalIdentitySpin .8s linear infinite;margin:10px auto}
+@keyframes assalIdentitySpin{to{transform:rotate(360deg)}}
+#assalAndroidVerification [hidden],#assalProfileStartupCheck [hidden]{display:none !important}
+#assalProfileStartupCheck{position:fixed;inset:0;z-index:2147483450;background:rgba(2,8,23,.7);display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl;font-family:Cairo,Tajawal,sans-serif;color:#fff}
+.assal-startup-check-card{width:min(400px,100%);text-align:center;background:linear-gradient(140deg,#192c42,#0b1828);border:1px solid rgba(136,202,216,.19);border-radius:22px;box-shadow:0 22px 48px rgba(0,0,0,.43);padding:28px 22px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.assal-startup-check-card>i{font-size:25px;color:#64e6d0}
+.assal-startup-check-card strong{font-size:16px}
+.assal-startup-check-card p{font-size:12px;color:#b7cdda;line-height:1.8}
+.assal-startup-check-card button{background:#52d7c4;border:0;border-radius:12px;padding:10px 22px;font:inherit;color:#071a25;font-weight:800}
+/* Customer form: native Android keypad and reliable tap focus, without changing other inputs. */
+html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-profile-editable{touch-action:pan-y !important}
+#customerProfileModal .customer-profile-shell,#customerProfileModal .customer-profile-body{touch-action:pan-y !important}
+#customerProfileModal .customer-profile-input{user-select:text !important;-webkit-user-select:text !important;touch-action:manipulation !important;caret-color:#67e8f9}
+#customerProfileModal .customer-profile-body{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#customerProfilePhone{font-variant-numeric:tabular-nums;unicode-bidi:plaintext}
+</style>
 <script id="assal-android-account-link-v1">
 /* ANDROID ONLY. Stable customerId DEV-/AND- remains source of truth for messages and bans.
    No manual recovery or iPhone support. Android ID is a locator, not a credential. */
@@ -68688,38 +68821,74 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
      localStorage.setItem('device_id',target);
      localStorage.setItem('isActivated','true');
      localStorage.setItem(LINKED_KEY,marker(device,target));
-     // Existing listeners are reset so all chats use canonical customerId from startup.
-     location.reload();
+     // Show the confirmed-account message before the canonical identity reload.
+     try{updateVerificationOverlay('مرحباً بعودتك إلى عسل','لديك حساب سابق على هذا الجهاز',
+       'جارٍ استرجاع حسابك وتفعيله وبياناتك، انتظر لحظات...',false)}catch(_){}
+     setTimeout(()=>location.reload(),300);
      return {restored:true,blocked:!!response.blocked};
    }catch(e){console.warn('ASSAL Android device lookup deferred:',e?.message||e);return {unavailable:true}}
    finally{restoring=false}
  }
  window.__ASSAL_DEVICE_IDENTITY_REGISTER__=()=>reconcile();
+ // Reuse the activation theme for the silent customer lookup, without any password field.
+ function verificationOverlay(){
+   let overlay=document.getElementById('assalAndroidVerification');
+   if(overlay)return overlay;
+   overlay=document.createElement('div');
+   overlay.id='assalAndroidVerification';
+   overlay.className='activation-overlay is-open';
+   overlay.setAttribute('role','status');
+   overlay.setAttribute('aria-live','polite');
+   overlay.innerHTML='<div class="activation-dialog" dir="rtl">'
+      +'<div class="activation-logo"><div class="activation-logo-ring"><div class="activation-logo-core">'
+      +'<i class="fa-solid fa-shield-halved" aria-hidden="true"></i></div></div></div>'
+      +'<div class="activation-header"><div class="activation-label">عسل · حسابك</div>'
+      +'<div class="activation-title" id="assalRecoveryTitle">جارٍ التحقق من حسابك</div>'
+      +'<div class="activation-subtitle" id="assalRecoverySubtitle">يرجى الانتظار لحظات...</div></div>'
+      +'<div class="activation-body"><p class="activation-text" id="assalRecoveryMessage">'
+      +'نتأكد من هوية جهازك تلقائياً، بدون الحاجة لإدخال رمز الدخول.</p></div>'
+      +'<div class="assal-identity-loader" id="assalRecoverySpinner" aria-hidden="true"></div>'
+      +'<button type="button" class="activation-btn primary assal-identity-retry" id="assalRecoveryRetry" hidden>إعادة المحاولة</button>'
+      +'</div>';
+   document.body.appendChild(overlay);
+   try{syncGlobalModalLock()}catch(_){}
+   overlay.querySelector('#assalRecoveryRetry').addEventListener('click',()=>location.reload());
+   return overlay;
+ }
+ function updateVerificationOverlay(title,subtitle,message,error){
+   const overlay=verificationOverlay();
+   overlay.querySelector('#assalRecoveryTitle').textContent=title;
+   overlay.querySelector('#assalRecoverySubtitle').textContent=subtitle;
+   overlay.querySelector('#assalRecoveryMessage').textContent=message;
+   overlay.querySelector('#assalRecoverySpinner').hidden=!!error;
+   overlay.querySelector('#assalRecoveryRetry').hidden=!error;
+ }
+ function endVerificationOverlay(){
+   const overlay=document.getElementById('assalAndroidVerification');
+   if(overlay)overlay.remove();
+   window.__ASSAL_ANDROID_RESTORE_PENDING__=false;
+   try{syncGlobalModalLock()}catch(_){}
+ }
  const oldLoad=window.onload;
  window.onload=async function(event){
    const device=androidId();
-   if(device&&!activated()&&!admin()&&localStorage.getItem(LOGOUT_KEY)!=='1'){
+   const maintenanceActive=(typeof maintenanceLock!=='undefined'&&maintenanceLock
+     &&typeof getMaintenanceBypass==='function'&&!getMaintenanceBypass());
+   const forcedAdminLogin=sessionStorage.getItem('forcedActivationReason')==='admin_password_upgrade';
+   if(device&&!activated()&&!admin()&&!maintenanceActive&&!forcedAdminLogin
+       &&localStorage.getItem(LOGOUT_KEY)!=='1'){
+     window.__ASSAL_ANDROID_RESTORE_PENDING__=true;
+     verificationOverlay();
      const status=await lookupAndRestore();
      if(status.restored)return;
      if(status.unavailable){
-       // Never accidentally create a new identity while a previous device binding may exist.
-       if(!document.getElementById('assalAndroidVerificationOffline')){
-         const overlay=document.createElement('div');
-         overlay.id='assalAndroidVerificationOffline';
-         overlay.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#081523ed;display:flex;align-items:center;justify-content:center;padding:22px;font-family:Cairo,Tajawal,sans-serif;direction:rtl;color:white';
-         const card=document.createElement('div');
-         card.style.cssText='max-width:400px;width:100%;background:#142c3e;border:1px solid #385269;padding:24px 22px;border-radius:19px;text-align:center;box-shadow:0 20px 50px #0007';
-         const title=document.createElement('h3');title.textContent='تعذّر التحقق من جهازك';
-         const txt=document.createElement('p');txt.textContent='تحقق من الإنترنت ثم أعد المحاولة. لم نغيّر حسابك أو بياناتك.';
-         txt.style.cssText='font-size:13px;margin:14px auto 20px;line-height:1.8;color:#c0d9e0';
-         const button=document.createElement('button');button.type='button';button.textContent='إعادة المحاولة';
-         button.style.cssText='border:0;border-radius:11px;padding:11px 28px;background:#55d3c2;color:#10242d;font-weight:bold;font:inherit';
-         button.onclick=()=>location.reload();
-         card.append(title,txt,button);overlay.appendChild(card);document.body.appendChild(overlay);
-       }
+       // Keep the identity unresolved and prevent incorrect new accounts while offline.
+       updateVerificationOverlay('تعذّر التحقق من جهازك','يرجى التحقق من الإنترنت',
+         'لم نغيّر بيانات حسابك. اضغط إعادة المحاولة بعد عودة الاتصال.',true);
        return;
      }
    }
+   endVerificationOverlay();
    try{if(typeof oldLoad==='function')oldLoad.call(this,event)}
    finally{if(device&&activated()&&!admin())setTimeout(()=>{reconcile()},650)}
  };
