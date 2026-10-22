@@ -2,6 +2,22 @@
 <!-- ===== ASSAL BATCH 3: NATIVE RUNTIME SAFE ===== -->
 <html lang="en">
 <head>
+<script id="assal-android-identity-early-v1">
+/* ANDROID ONLY: never overwrite an existing DEV account or admin identity. */
+(function(){
+  'use strict';
+  try {
+    const nativeId=window.Android&&typeof window.Android.getAssalAndroidIdentity==='function'
+      ? String(window.Android.getAssalAndroidIdentity()||'') : '';
+    if(!/^AND-[A-F0-9]{32}$/.test(nativeId))return;
+    window.__ASSAL_ANDROID_DEVICE_ID_V1__=nativeId;
+    if(!localStorage.getItem('device_id')){
+      localStorage.setItem('device_id',nativeId);
+      window.__ASSAL_ANDROID_FIRST_ID_V1__=true;
+    }
+  }catch(_){}
+})();
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Phone Parts Pro</title>
@@ -22524,6 +22540,7 @@ window.submitCustomerProfile = async function () {
       registeredAt: oldVal.registeredAt || now,
       updatedAt: now,
     });
+    try { window.__ASSAL_DEVICE_IDENTITY_REGISTER__?.(); } catch (_) {}
     setCustomerProfileSubmitState(
       "success",
       "تم التسجيل بنجاح",
@@ -27823,6 +27840,9 @@ async function showActivationPopup() {
       }
 
       localStorage.setItem("isActivated", "true");
+      if (authResult.profile?.role === "customer") {
+        try { window.__ASSAL_ANDROID_LOGIN_MARK__?.(); } catch (_) {}
+      }
 
       if (authResult.profile?.role === "customer") {
         setAdminUser(false);
@@ -49980,6 +50000,10 @@ html body footer {
         }
       } catch (_) {}
 
+      if (localStorage.getItem("isActivated") === "true" &&
+          localStorage.getItem("isAdmin") !== "true") {
+        try { window.__ASSAL_ANDROID_LOGOUT_MARK__?.(); } catch (_) {}
+      }
       clearAdminStateSafely();
       localStorage.removeItem("isActivated");
       localStorage.removeItem("isActivatedBackup");
@@ -68581,3 +68605,127 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   syncCommunity();
 })();
 </script>
+
+<script id="assal-android-account-link-v1">
+/* ANDROID ONLY. Stable customerId DEV-/AND- remains source of truth for messages and bans.
+   No manual recovery or iPhone support. Android ID is a locator, not a credential. */
+(function(){
+ 'use strict';
+ if(window.__ASSAL_ANDROID_LINK_V1__)return;
+ window.__ASSAL_ANDROID_LINK_V1__=true; // Single startup identity gate; no recurring polling.
+ const API='https://purple-frog-c3b8.ahmed-al-bayatii-90.workers.dev/device-identity/';
+ const LINKED_KEY='assal_android_device_linked_v1';
+ const LOGOUT_KEY='assal_android_intentional_logout_v1';
+ const VALID=/^(?:DEV-[A-Z0-9-]{7,24}|AND-[A-F0-9]{32})$/;
+ const AND=/^AND-[A-F0-9]{32}$/;
+ const androidId=()=>{const id=String(window.__ASSAL_ANDROID_DEVICE_ID_V1__||'');return AND.test(id)?id:''};
+ function localCustomer(){try{return String(localStorage.getItem('device_id')||'')}catch(_){return ''}}
+ function activated(){try{return localStorage.getItem('isActivated')==='true'}catch(_){return false}}
+ function admin(){try{return typeof isAdminUser==='function'&&isAdminUser()}catch(_){return false}}
+ function profileReady(){return !!(window.firebaseDB&&window.firebaseDB.db)}
+ function marker(device,id){return device+'|'+id}
+ async function post(route,data){
+   const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),5500);
+   try{
+     const response=await fetch(API+route,{method:'POST',mode:'cors',cache:'no-store',
+       headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:ctl.signal});
+     const result=await response.json();
+     if(!response.ok||!result.ok)throw Error(String(result.error||'identity_http_'+response.status));
+     return result;
+   }finally{clearTimeout(timer)}
+ }
+ async function link(device,customerId){
+   if(!profileReady())return false;
+   const f=window.firebaseDB;
+   const snap=await f.get(f.ref(f.db,'customerProfiles/'+customerId));
+   const profile=snap.exists()?snap.val():null;
+   if(!profile||!String(profile.name||'').trim()||!String(profile.phone||'').trim()||!String(profile.address||'').trim())return false;
+   // Validate current identity again after the asynchronous profile read.
+   if(!activated()||admin()||localCustomer()!==customerId)return false;
+   await post('link',{androidId:device,customerId});
+   if(activated()&&localCustomer()===customerId)localStorage.setItem(LINKED_KEY,marker(device,customerId));
+   if(profile.blocked&&typeof window.applyCustomerBlockedState==='function')window.applyCustomerBlockedState(profile);
+   return true;
+ }
+ let syncing=false;
+ async function reconcile(){
+   const device=androidId(),id=localCustomer();
+   if(!device||admin()||!activated()||!VALID.test(id)||syncing)return false;
+   if(localStorage.getItem(LINKED_KEY)===marker(device,id))return true;
+   syncing=true;
+   try{
+     // Server binding, when present, always wins. Never reassign a device to a second account.
+     const response=await post('lookup',{androidId:device});
+     if(!activated()||admin()||androidId()!==device)return false;
+     if(response.found){
+       const canonical=String(response.customerId||'');
+       if(!VALID.test(canonical))return false;
+       if(canonical!==localCustomer()){
+         localStorage.setItem('device_id',canonical);
+         localStorage.setItem('isActivated','true');
+         localStorage.setItem(LINKED_KEY,marker(device,canonical));
+         location.reload();
+         return true;
+       }
+       localStorage.setItem(LINKED_KEY,marker(device,canonical));
+       if(response.blocked&&typeof window.showCustomerBlockedOverlay==='function')window.showCustomerBlockedOverlay({blocked:true});
+       return true;
+     }
+     return await link(device,id);
+   }catch(e){console.warn('ASSAL Android identity sync deferred:',e?.message||e);return false}
+   finally{syncing=false}
+ }
+ let restoring=false;
+ async function lookupAndRestore(){
+   const device=androidId();
+   if(!device||admin()||activated()||localStorage.getItem(LOGOUT_KEY)==='1'||restoring)return {skipped:true};
+   restoring=true;
+   try{
+     const response=await post('lookup',{androidId:device});
+     if(!response.found)return {found:false};
+     const target=String(response.customerId||'');
+     if(!VALID.test(target)||activated())return {skipped:true};
+     localStorage.setItem('device_id',target);
+     localStorage.setItem('isActivated','true');
+     localStorage.setItem(LINKED_KEY,marker(device,target));
+     // Existing listeners are reset so all chats use canonical customerId from startup.
+     location.reload();
+     return {restored:true,blocked:!!response.blocked};
+   }catch(e){console.warn('ASSAL Android device lookup deferred:',e?.message||e);return {unavailable:true}}
+   finally{restoring=false}
+ }
+ window.__ASSAL_DEVICE_IDENTITY_REGISTER__=()=>reconcile();
+ const oldLoad=window.onload;
+ window.onload=async function(event){
+   const device=androidId();
+   if(device&&!activated()&&!admin()&&localStorage.getItem(LOGOUT_KEY)!=='1'){
+     const status=await lookupAndRestore();
+     if(status.restored)return;
+     if(status.unavailable){
+       // Never accidentally create a new identity while a previous device binding may exist.
+       if(!document.getElementById('assalAndroidVerificationOffline')){
+         const overlay=document.createElement('div');
+         overlay.id='assalAndroidVerificationOffline';
+         overlay.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#081523ed;display:flex;align-items:center;justify-content:center;padding:22px;font-family:Cairo,Tajawal,sans-serif;direction:rtl;color:white';
+         const card=document.createElement('div');
+         card.style.cssText='max-width:400px;width:100%;background:#142c3e;border:1px solid #385269;padding:24px 22px;border-radius:19px;text-align:center;box-shadow:0 20px 50px #0007';
+         const title=document.createElement('h3');title.textContent='تعذّر التحقق من جهازك';
+         const txt=document.createElement('p');txt.textContent='تحقق من الإنترنت ثم أعد المحاولة. لم نغيّر حسابك أو بياناتك.';
+         txt.style.cssText='font-size:13px;margin:14px auto 20px;line-height:1.8;color:#c0d9e0';
+         const button=document.createElement('button');button.type='button';button.textContent='إعادة المحاولة';
+         button.style.cssText='border:0;border-radius:11px;padding:11px 28px;background:#55d3c2;color:#10242d;font-weight:bold;font:inherit';
+         button.onclick=()=>location.reload();
+         card.append(title,txt,button);overlay.appendChild(card);document.body.appendChild(overlay);
+       }
+       return;
+     }
+   }
+   try{if(typeof oldLoad==='function')oldLoad.call(this,event)}
+   finally{if(device&&activated()&&!admin())setTimeout(()=>{reconcile()},650)}
+ };
+ window.addEventListener('online',()=>{if(activated()&&!admin())reconcile()});
+ window.__ASSAL_ANDROID_LOGOUT_MARK__=()=>{try{localStorage.setItem(LOGOUT_KEY,'1')}catch(_){}};
+ window.__ASSAL_ANDROID_LOGIN_MARK__=()=>{try{localStorage.removeItem(LOGOUT_KEY)}catch(_){}};
+})();
+</script>
+
