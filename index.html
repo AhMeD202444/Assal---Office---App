@@ -64682,7 +64682,10 @@ html.low-end-device .header-buttons > .assal-static-header-btn{
   }
 
   function device() {
-    return String(localStorage.getItem("deviceId") || "").trim();
+    // Customer records and conversations are keyed by the canonical device_id.
+    // deviceId belongs to the separate compatibility/subscription flow.
+    if (!admin()) return String(getDeviceId() || "").trim();
+    return String(localStorage.getItem("deviceId") || getDeviceId() || "").trim();
   }
 
   function code() {
@@ -67639,7 +67642,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     if(S.active&&S.groupMap.has(S.active))selectGroup(S.active);updateSend();
     const stream=startStream(false).catch(err=>{S.error='تعذّر الاتصال بالمحادثات. أعد المحاولة.';renderList();console.warn('ASSAL Messenger:',err);});
     if(role==='customer'){
-      try{await waitFirebase();const f=fb(),snap=await f.get(f.ref(f.db,'customerProfiles/'+me));if(seq!==S.openSeq)return false;const profile=snap.exists()?snap.val():null;if(profile?.blocked){close();window.applyCustomerBlockedState?.(profile);return false;}if(!profile||!clean(profile.name)||!clean(profile.phone)||!clean(profile.address)||(typeof window.isValidIraqMobile==='function'&&!window.isValidIraqMobile(profile.phone))){close();window.openCustomerProfileModal?.(profile||{});return false;}S.profile=profile;S.profileReady=true;buildGroups();startActivityPresence();if(!S.inbox&&!S.active&&S.loaded&&S.groups.length)selectGroup(S.groups[0].key);updateSend();}catch(err){if(seq===S.openSeq){S.profileReady=false;toast('تعذّر التحقق من حسابك. أغلق المحادثة وأعد فتحها.');}console.warn('ASSAL Messenger profile:',err);}
+      try{await waitFirebase();const f=fb(),snap=await f.get(f.ref(f.db,'customerProfiles/'+me));if(seq!==S.openSeq)return false;const profile=snap.exists()?snap.val():null;if(profile?.blocked){close();window.applyCustomerBlockedState?.(profile);return false;}if(!profile||!clean(profile.name)||!clean(profile.phone)||!clean(profile.address)){close();window.openCustomerProfileModal?.(profile||{});return false;}S.profile=profile;S.profileReady=true;buildGroups();startActivityPresence();if(!S.inbox&&!S.active&&S.loaded&&S.groups.length)selectGroup(S.groups[0].key);updateSend();}catch(err){if(seq===S.openSeq){S.profileReady=false;toast('تعذّر التحقق من حسابك. أغلق المحادثة وأعد فتحها.');}console.warn('ASSAL Messenger profile:',err);}
     }
     await stream;if(seq!==S.openSeq)return false;if(options.deviceId){buildGroups();const g=S.groups.find(g=>g.deviceId===options.deviceId);if(g)selectGroup(g.key);}scheduleRender();return true;
   }
