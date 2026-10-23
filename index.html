@@ -22594,6 +22594,8 @@ function openCustomerProfileModal(prefill = {}) {
 }
 
 function closeCustomerProfileModal() {
+  if (window.__ASSAL_CUSTOMER_STARTUP_LOCK__ && assalProfileDecision?.kind === 'missing'
+      && !assalProfileDecision?.saved) return;
   const modal = document.getElementById("customerProfileModal");
   if (!modal) return;
   modal.classList.remove("show");
@@ -22610,6 +22612,17 @@ let assalProfileCheckPromise = null;
 let assalProfileDecision = null;
 let assalProfileGate = null;
 let assalProfileBootStarted = false;
+// A single, server-backed startup decision; no persistent client verification bypass.
+window.__ASSAL_CUSTOMER_STARTUP_LOCK__ = false;
+let assalStartupAdReleased = false;
+function assalReleaseStartupAd() {
+  if (assalStartupAdReleased) return;
+  assalStartupAdReleased = true;
+  window.__ASSAL_CUSTOMER_STARTUP_LOCK__ = false;
+  // Keep the original advertisement logic; run it only for a verified account.
+  if (typeof LuxAds !== 'undefined' && LuxAds && typeof LuxAds.maybeShow === 'function')
+    LuxAds.maybeShow();
+}
 function assalProfileEligible() {
   return localStorage.getItem('isActivated') === 'true'
     && !isAdminUser() && !window.__ASSAL_ANDROID_RESTORE_PENDING__;
@@ -22623,7 +22636,7 @@ function assalProfileWaitingLayer(show, error = false) {
     if (assalProfileGate) { assalProfileGate.remove(); assalProfileGate = null; }
     return;
   }
-  if (!assalProfileEligible() || !assalProfileAdFinished()) return;
+  if (!assalProfileEligible()) return;
   if (!assalProfileGate) {
     const wrap = document.createElement('div');
     wrap.id = 'assalProfileStartupCheck';
@@ -22632,7 +22645,11 @@ function assalProfileWaitingLayer(show, error = false) {
       + '<strong>جارٍ التحقق من بيانات حسابك</strong>'
       + '<p id="assalProfileCheckMessage">يرجى الانتظار لحظات...</p>'
       + '<button id="assalProfileCheckRetry" type="button" hidden>إعادة المحاولة</button></div>';
+    wrap.style.opacity = '0';
+    wrap.style.transition = 'opacity .12s ease';
     document.body.appendChild(wrap);
+    // Transparent interaction guard immediately; reveal only for a slow check.
+    setTimeout(() => { if (assalProfileGate === wrap && !assalProfileDecision) wrap.style.opacity = '1'; }, 320);
     wrap.querySelector('#assalProfileCheckRetry').addEventListener('click', () => location.reload());
     assalProfileGate = wrap;
   }
@@ -22642,40 +22659,42 @@ function assalProfileWaitingLayer(show, error = false) {
     ? 'تعذّر فحص بيانات الحساب. تحقق من الإنترنت ثم أعد المحاولة.'
     : 'يرجى الانتظار لحظات...';
   if (retry) retry.hidden = !error;
+  if (error && assalProfileGate) assalProfileGate.style.opacity = '1';
 }
 function assalProfileReleaseIfReady() {
-  if (!assalProfileEligible() || !assalProfileAdFinished()) return;
-  if (!assalProfileDecision) {
-    assalProfileWaitingLayer(true);
-    return;
-  }
-  if (assalProfileDecision.kind === 'error') {
+  if (!assalProfileEligible()) return;
+  const decision = assalProfileDecision;
+  if (!decision) return;
+  if (decision.kind === 'error') {
     assalProfileWaitingLayer(true, true);
     return;
   }
   assalProfileWaitingLayer(false);
-  if (assalProfileDecision.kind === 'blocked') {
-    applyCustomerBlockedState(assalProfileDecision.profile);
-  } else if (assalProfileDecision.kind === 'missing') {
-    openCustomerProfileModal(assalProfileDecision.profile || {});
+  if (decision.kind === 'blocked') {
+    // Banned users must never see the advertisement.
+    applyCustomerBlockedState(decision.profile);
+  } else if (decision.kind === 'missing') {
+    // Registration happens BEFORE the advertisement, never after the user starts searching.
+    openCustomerProfileModal(decision.profile || {});
+  } else if (decision.kind === 'complete') {
+    assalReleaseStartupAd();
   }
 }
 async function maybePromptCustomerProfileRegistration() {
   if (!assalProfileEligible()) return;
   const customerId = getDeviceId();
-  if (localStorage.getItem(ASSAL_PROFILE_CHECK_KEY) === customerId) {
-    assalProfileDecision = { kind: 'complete' };
-    return;
-  }
-  // Firebase modules initialize asynchronously. Wait for readiness, but never
-  // decide "new customer" while the database is unavailable.
+  // Cache is only a UI hint. Always consult the server once on each real startup:
+  // deleted profiles and newly banned accounts cannot pass using stale localStorage.
   let remaining = 24;
   while ((!window.firebaseDB || !window.firebaseDB.db) && remaining-- > 0) {
     await new Promise(resolve => setTimeout(resolve, 150));
   }
   if (!window.firebaseDB || !window.firebaseDB.db) throw new Error('firebase-not-ready');
   const { db, ref, get } = window.firebaseDB;
-  const snap = await get(ref(db, `customerProfiles/${customerId}`));
+  const snap = await Promise.race([
+    get(ref(db, `customerProfiles/${customerId}`)),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('profile-check-timeout')), 10000))
+  ]);
   if (getDeviceId() !== customerId || !assalProfileEligible()) return;
   const profile = snap.exists() ? snap.val() || {} : null;
   if (profile && profile.blocked) {
@@ -22687,7 +22706,7 @@ async function maybePromptCustomerProfileRegistration() {
     && String(profile.phone || '').trim() && String(profile.address || '').trim());
   if (complete) {
     localStorage.setItem(ASSAL_PROFILE_CHECK_KEY, customerId);
-    assalProfileDecision = { kind: 'complete' };
+    assalProfileDecision = { kind: 'complete', profile };
   } else {
     localStorage.removeItem(ASSAL_PROFILE_CHECK_KEY);
     assalProfileDecision = { kind: 'missing', profile: profile || {} };
@@ -22695,12 +22714,12 @@ async function maybePromptCustomerProfileRegistration() {
 }
 window.queueCustomerProfilePrompt = function () {
   if (!assalProfileEligible()) return;
-  if (assalProfileBootStarted) {
-    assalProfileReleaseIfReady();
-    return;
-  }
+  if (assalProfileBootStarted) return;
   assalProfileBootStarted = true;
+  window.__ASSAL_CUSTOMER_STARTUP_LOCK__ = true;
   customerProfilePromptQueued = true;
+  // The same non-dismissible layer blocks access during verification. No recurring popup.
+  assalProfileWaitingLayer(true);
   assalProfileCheckPromise = maybePromptCustomerProfileRegistration()
     .catch(err => {
       console.warn('ASSAL customer profile startup:', err);
@@ -22710,12 +22729,7 @@ window.queueCustomerProfilePrompt = function () {
       customerProfilePromptQueued = false;
       assalProfileReleaseIfReady();
     });
-  assalProfileReleaseIfReady();
 };
-window.addEventListener('assal:startup-ad-finished', () => {
-  assalProfileReleaseIfReady();
-});
-
 // Keyboard behavior confined to these 3 inputs: Next, Next, Done.
 document.addEventListener('DOMContentLoaded', () => {
   const name = document.getElementById('customerProfileName');
@@ -22798,7 +22812,7 @@ window.submitCustomerProfile = async function () {
     });
     try { window.__ASSAL_DEVICE_IDENTITY_REGISTER__?.(); } catch (_) {}
     try { localStorage.setItem(ASSAL_PROFILE_CHECK_KEY, deviceId); } catch (_) {}
-    assalProfileDecision = {kind:'complete'};
+    assalProfileDecision = {kind:'complete', saved:true};
     setCustomerProfileSubmitState(
       "success",
       "تم التسجيل بنجاح",
@@ -22807,6 +22821,7 @@ window.submitCustomerProfile = async function () {
     setTimeout(() => {
       customerProfileSubmitting = false;
       closeCustomerProfileModal();
+      assalReleaseStartupAd();
       setCustomerProfileSubmitState("idle", "تسجيل", "fa-user-plus");
     }, 1400);
   } catch (err) {
@@ -40462,6 +40477,7 @@ const LuxAds = (() => {
   }
 
   function maybeShow(attempt = 0) {
+    if (window.__ASSAL_CUSTOMER_STARTUP_LOCK__) return;
     const key = normalize(AD_CHOICE);
     if (!key || key === "off") { assalFinishStartupAd('skipped'); return; }
 
