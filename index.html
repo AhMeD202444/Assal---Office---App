@@ -17545,6 +17545,11 @@ html.assal-viewport-transition body {
 </button>
 
 
+<button class="header-btn header-icon-btn" id="assalManagedStaffLoginHeaderBtn" type="button"
+        onclick="openAssalManagedStaffLogin()" title="دخول كادر عسل" aria-label="دخول كادر عسل" style="display:none">
+  <i class="fas fa-shield-halved"></i>
+</button>
+
 <button class="header-btn header-icon-btn debug-btn"
         id="ownerSmartHeaderBtn"
         type="button"
@@ -18642,53 +18647,63 @@ html.assal-viewport-transition body {
 
 
 <div id="customersAdminModal" class="customers-admin-modal" aria-hidden="true">
-  <div class="customers-admin-shell" role="dialog" aria-modal="true" aria-label="إدارة الزبائن">
+  <div class="customers-admin-shell" role="dialog" aria-modal="true" aria-label="إدارة الحسابات">
     <div class="customers-admin-top">
       <div class="customers-admin-title">
-        <div class="customers-admin-icon"><i class="fas fa-users"></i></div>
-        <div>
-          <h3>إدارة الزبائن</h3>
-        </div>
+        <span class="customers-admin-icon"><i class="fas fa-users" aria-hidden="true"></i></span>
+        <div><h3>إدارة الحسابات</h3><small>دليل حسابات عسل</small></div>
       </div>
       <div class="customers-admin-top-actions">
-        <div id="customersAdminSwitcherWrap" class="customers-admin-switcher-wrap">
-          <div id="customersAdminTabsHost" class="customers-admin-tabs-host">
-            <div class="request-view-tabs" role="tablist" aria-label="تبويبات الزبائن">
-              <button id="customersActiveTabBtn" class="request-view-tab is-active" type="button" onclick="switchCustomersView('active')" aria-label="الزبائن" title="الزبائن">
+        <button id="customersAdminRotateActionBtn" class="customers-admin-refresh request-circle-icon" type="button" onclick="handleCustomersRotatingAction()" aria-label="تحديث الحسابات" title="تحديث الحسابات" data-mode="refresh"><i class="fas fa-rotate-right"></i></button>
+        <button class="customers-admin-close" type="button" onclick="closeCustomersAdminModal()" aria-label="إغلاق"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div id="customersAdminSwitcherWrap" class="customers-admin-switcher-wrap">
+      <div id="customersAdminTabsHost" class="customers-admin-tabs-host">
+<div class="request-view-tabs" role="tablist" aria-label="تبويبات الزبائن">
+              <button id="customersStaffTabBtn" class="request-view-tab is-active" type="button" onclick="switchCustomersView('staff')" aria-label="الأدمنية" title="الأدمنية">
+                <i class="fas fa-user-shield"></i><span>الأدمنية</span>
+              </button>
+              <button id="customersActiveTabBtn" class="request-view-tab" type="button" onclick="switchCustomersView('active')" aria-label="الزبائن" title="الزبائن">
                 <i class="fas fa-address-book"></i><span>الزبائن</span>
               </button>
               <button id="customersBlockedTabBtn" class="request-view-tab" type="button" onclick="switchCustomersView('blocked')" aria-label="قائمة الحظر" title="قائمة الحظر">
                 <i class="fas fa-user-lock"></i><span>قائمة الحظر</span>
               </button>
             </div>
-          </div>
-          <div id="customersAdminSearchHost" class="customers-admin-search-host" aria-hidden="true">
-            <div class="customers-admin-searchbar">
-              <button class="customers-admin-searchback" type="button" onclick="hideCustomersSearchBar()" aria-label="إخفاء البحث" title="إخفاء البحث">
-                <i class="fas fa-arrow-right"></i>
-              </button>
-              <i class="fas fa-search customers-admin-searchicon" aria-hidden="true"></i>
-              <input id="customersAdminSearchInput" class="customers-admin-searchinput" type="search" placeholder="ابحث بالاسم أو الرقم أو العنوان أو المعرّف" oninput="applyCustomersAdminSearch()" autocomplete="off" dir="rtl">
-            </div>
-          </div>
-        </div>
-        <button id="customersAdminRotateActionBtn" class="customers-admin-refresh request-circle-icon" type="button" onclick="handleCustomersRotatingAction()" aria-label="تحديث الزبائن" title="تحديث الزبائن" data-mode="refresh">
-          <i class="fas fa-rotate-right"></i>
-        </button>
-        <button class="customers-admin-close" type="button" onclick="closeCustomersAdminModal()" aria-label="إغلاق">
-          <i class="fas fa-times"></i>
-        </button>
+      </div>
+      <div id="customersAdminSearchHost" class="customers-admin-search-host" aria-hidden="true">
+        <div class="customers-admin-searchbar"><button class="customers-admin-searchback" type="button" onclick="hideCustomersSearchBar()" aria-label="إخفاء البحث" title="إخفاء البحث"><i class="fas fa-arrow-right"></i></button><i class="fas fa-search customers-admin-searchicon"></i><input id="customersAdminSearchInput" class="customers-admin-searchinput" type="search" oninput="applyCustomersAdminSearch()" autocomplete="off" placeholder="ابحث في الحسابات" dir="rtl"></div>
       </div>
     </div>
     <div class="customers-admin-body">
-      <div id="customersActivePanel" class="customers-admin-list request-panel is-active">
-        <div class="customers-admin-empty">جاري تحميل الزبائن...</div>
-      </div>
-      <div id="customersBlockedPanel" class="customers-admin-list request-panel">
-        <div class="customers-admin-empty">قائمة الحظر فارغة حالياً.</div>
-      </div>
+      <label class="assal-accounts-searchbar" for="assalAccountsQuickSearch"><i class="fas fa-magnifying-glass" aria-hidden="true"></i><input id="assalAccountsQuickSearch" type="search" placeholder="اسم الزبون أو رقم الهاتف" autocomplete="off" dir="rtl" oninput="applyCustomersAdminSearch()" aria-label="بحث عن حساب"></label>
+      <div id="customersStaffPanel" class="customers-admin-list request-panel is-active"><div class="customers-admin-empty">جاري تحميل الأدمنية...</div></div>
+      <div id="customersActivePanel" class="customers-admin-list request-panel"><div class="customers-admin-empty">جاري تحميل الزبائن...</div></div>
+      <div id="customersBlockedPanel" class="customers-admin-list request-panel"><div class="customers-admin-empty">قائمة الحظر فارغة حالياً.</div></div>
     </div>
   </div>
+</div>
+
+<!-- Read-only account details: opened by tapping an account row, does not mutate Firebase. -->
+<div id="assalAccountDetailsOverlay" class="assal-account-details-overlay" aria-hidden="true">
+  <section class="assal-account-details-dialog" role="dialog" aria-modal="true" aria-labelledby="assalAccountDetailsTitle" dir="rtl">
+    <header class="assal-account-details-header">
+      <div class="assal-account-details-headline"><span class="assal-account-details-icon"><i class="fas fa-id-card"></i></span><div><h3 id="assalAccountDetailsTitle">معلومات الحساب</h3><p id="assalAccountDetailsStatus">تفاصيل الحساب المسجّل</p></div></div>
+      <button class="assal-account-details-close" type="button" aria-label="إغلاق التفاصيل" title="إغلاق" onclick="closeAssalAccountDetails(event)"><i class="fas fa-xmark"></i></button>
+    </header>
+    <div class="assal-account-details-content">
+      <div class="assal-account-details-person"><span id="assalAccountDetailsAvatar" class="assal-account-avatar">ع</span><strong id="assalAccountDetailsName">—</strong></div>
+      <dl class="assal-account-details-fields">
+        <div><dt><i class="fas fa-phone"></i> رقم الهاتف</dt><span class="assal-account-details-value"><dd id="assalAccountDetailsPhone" dir="ltr">—</dd><button class="assal-account-details-copy" type="button" data-assal-copy="assalAccountDetailsPhone" title="نسخ رقم الهاتف" aria-label="نسخ رقم الهاتف"><i class="fas fa-copy"></i></button></span></div>
+        <div><dt><i class="fas fa-hashtag"></i> المعرّف</dt><span class="assal-account-details-value"><dd id="assalAccountDetailsId" dir="ltr">—</dd><button class="assal-account-details-copy" type="button" data-assal-copy="assalAccountDetailsId" title="نسخ المعرّف" aria-label="نسخ المعرّف"><i class="fas fa-copy"></i></button></span></div>
+        <div><dt><i class="fas fa-location-dot"></i> العنوان</dt><dd id="assalAccountDetailsAddress">—</dd></div>
+        <div id="assalAccountDetailsBranchRow" hidden><dt><i class="fas fa-building"></i> الفرع</dt><dd id="assalAccountDetailsBranch">—</dd></div>
+        <div id="assalAccountDetailsEmailRow" hidden><dt><i class="fas fa-envelope"></i> البريد الإداري</dt><dd id="assalAccountDetailsEmail" dir="ltr">—</dd></div>
+      </dl>
+      <div class="assal-account-details-copy-feedback" role="status" aria-live="polite"></div>
+    </div>
+  </section>
 </div>
 
 <div id="customerProfileModal" class="customer-profile-modal" aria-hidden="true">
@@ -18778,6 +18793,9 @@ import {
   signOut as firebaseAuthSignOut,
   setPersistence,
   browserLocalPersistence,
+  inMemoryPersistence,
+  createUserWithEmailAndPassword,
+  deleteUser,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -18841,6 +18859,11 @@ function getAssalOfficeFirestoreTools() {
           db: mod.getFirestore(assalOfficeAuthApp),
           doc: mod.doc,
           getDoc: mod.getDoc,
+          collection: mod.collection,
+          getDocs: mod.getDocs,
+          setDoc: mod.setDoc,
+          updateDoc: mod.updateDoc,
+          onSnapshot: mod.onSnapshot,
         }))
         .catch((err) => {
           assalOfficeFirestoreToolsPromise = null;
@@ -18982,6 +19005,128 @@ try {
     .then(() => waitForAssalOfficeAuthReady())
     .catch(() => null);
 } catch (_) {}
+
+/* ===== ASSAL STAFF MANAGEMENT: authority remains assal-office Firestore =====
+ * IMPORTANT: device id is only a customer link; never an admin credential.
+ * Provisioning uses a SECONDARY in-memory Auth instance, preserving owner session.
+ */
+let assalProvisionAuthPromise = null;
+function assalProvisionAuth() {
+  if (!assalProvisionAuthPromise) assalProvisionAuthPromise = (async () => {
+    const name = "assalStaffProvisionV1";
+    const provisionApp = getApps().some(x => x?.name === name)
+      ? getApp(name) : initializeApp(assalOfficeAuthConfig, name);
+    const auth = getAuth(provisionApp);
+    await setPersistence(auth, inMemoryPersistence);
+    return auth;
+  })();
+  return assalProvisionAuthPromise;
+}
+function assalIsRealCustomerId(id) {
+  return /^(?:DEV-[A-Z0-9-]{7,24}|AND-[A-F0-9]{32})$/.test(String(id || ""));
+}
+async function assalAssertOwnerForStaff() {
+  await waitForAssalOfficeAuthReady();
+  const uid = String(assalOfficeAuth.currentUser?.uid || "");
+  if (!uid || uid !== String(localStorage.getItem("assalAdminAuthUid") || ""))
+    throw new Error("يجب تسجيل دخول المالك مجدداً قبل إدارة الأدمنية.");
+  const tools = await getAssalOfficeFirestoreTools();
+  const snap = await tools.getDoc(tools.doc(tools.db, "staffProfiles", uid));
+  if (!snap.exists() || snap.data()?.role !== "owner" || snap.data()?.active !== true)
+    throw new Error("إدارة الأدمنية متاحة للمالك الرئيسي فقط.");
+  return tools;
+}
+window.assalStaffManagement = Object.freeze({
+  async list() {
+    const tools = await assalAssertOwnerForStaff();
+    const snap = await tools.getDocs(tools.collection(tools.db, "staffProfiles"));
+    return snap.docs.map(d => ({ uid:d.id, ...d.data() }));
+  },
+  async create({customerId, password, branchCode}) {
+    customerId = String(customerId || "").trim();
+    password = String(password || "");
+    branchCode = String(branchCode || "");
+    if (!assalIsRealCustomerId(customerId)) throw new Error("معرّف الزبون غير صالح.");
+    if (!/^[\x21-\x7e]{10,72}$/.test(password)) throw new Error("كلمة الأدمن يجب أن تكون 10 رموز إنكليزية على الأقل، بدون مسافات.");
+    if (!["baqubah", "tahrir", "hay", "baladruz"].includes(branchCode)) throw new Error("اختر فرعاً صحيحاً.");
+    const tools = await assalAssertOwnerForStaff();
+    const registered = await window.firebaseDB.get(window.firebaseDB.ref(window.firebaseDB.db,`customerProfiles/${customerId}`));
+    const profile = registered.exists() ? registered.val() : null;
+    if (!profile || !String(profile.name || "").trim() || !String(profile.phone || "").trim() || !String(profile.address || "").trim())
+      throw new Error("يجب أن يكون الزبون مسجلاً بالفعل قبل ترقيته.");
+    const existing = await tools.getDocs(tools.collection(tools.db,"staffProfiles"));
+    if (existing.docs.some(d => d.data()?.managedByOwner === true && d.data()?.staffCustomerId === customerId && d.data()?.active === true))
+      throw new Error("هذا الزبون لديه حساب أدمن فعّال بالفعل.");
+    const random = new Uint8Array(12); crypto.getRandomValues(random);
+    const nonce = [...random].map(x=>x.toString(16).padStart(2,"0")).join("");
+    const email = `staff.${nonce}@assal.app`;
+    const provision = await assalProvisionAuth();
+    // Owner auth remains untouched; credentials are ONLY sent to Firebase Auth.
+    const result = await createUserWithEmailAndPassword(provision, email, password);
+    const uid = String(result?.user?.uid || "");
+    if (!uid) throw new Error("تعذر إنشاء هوية الأدمن.");
+    try {
+      // Recheck owner *after* async signup: do not create roles under stale owner state.
+      await assalAssertOwnerForStaff();
+      await tools.setDoc(tools.doc(tools.db,"staffProfiles",uid), {
+        role:"branch", branchCode, active:true,
+        label:String(profile.name).trim().slice(0,100),
+        canUseWholesale:false, canManageCompatSubscriptions:false,
+        managedByOwner:true, staffCustomerId:customerId, staffEmail:email,
+        createdAt:Date.now(), createdByUid: String(assalOfficeAuth.currentUser?.uid || "")
+      });
+    } catch(err) {
+      try { await deleteUser(result.user); } catch(cleanupErr) { console.error("ASSAL orphan staff account requires manual Firebase Auth cleanup:", uid, cleanupErr); }
+      throw err;
+    } finally {
+      try { await firebaseAuthSignOut(provision); } catch(_) {}
+    }
+    return {uid,email,customerId};
+  },
+  async revoke(uid) {
+    const tools = await assalAssertOwnerForStaff();
+    const record = tools.doc(tools.db, "staffProfiles", String(uid || ""));
+    const snap = await tools.getDoc(record);
+    const d = snap.exists() ? snap.data() : null;
+    if (!d || d.managedByOwner !== true || d.role !== "branch" || d.active !== true)
+      throw new Error("لا يمكن سحب هذا الحساب من هنا، أو أنه موقوف مسبقاً.");
+    await tools.updateDoc(record,{active:false, revokedAt:Date.now(), revokedByUid:assalOfficeAuth.currentUser.uid});
+    return true;
+  },
+  async login(email,password) {
+    email = String(email || "").trim().toLowerCase();
+    if (!/^staff\.[a-f0-9]{24}@assal\.app$/.test(email)) throw new Error("بريد حساب الأدمن غير صحيح.");
+    if (!window.assalSecureAuth) throw new Error("خدمة تسجيل الدخول غير جاهزة.");
+    const cred = await window.assalSecureAuth.signIn(email,String(password || ""));
+    try {
+      const raw = await window.assalSecureAuth.getStaffProfile(cred.user.uid);
+      const customerId = String(typeof getDeviceId === "function" ? getDeviceId() : "");
+      if (!raw || raw.role !== "branch" || raw.managedByOwner !== true || raw.active !== true ||
+        raw.staffCustomerId !== customerId || raw.staffEmail !== email)
+        throw new Error("هذا الحساب غير مخوّل على هذا الجهاز، أو تم إيقاف صلاحياته.");
+      const profile = normalizeAssalFirestoreAccessProfile(raw,{uid:cred.user.uid, email, route:"managed"});
+      if (!profile) throw new Error("ملف صلاحيات الأدمن غير صالح.");
+      localStorage.setItem("isActivated","true");
+      setAdminUser(true,profile);
+      return true;
+    } catch(err) {
+      try { await window.assalSecureAuth.signOutCurrent(); } catch(_) {}
+      throw err;
+    }
+  },
+  async watchManaged(onRevoked) {
+    if (localStorage.getItem("assalAdminManagedByOwner") !== "true" || !isAdminUser()) return ()=>{};
+    await waitForAssalOfficeAuthReady();
+    const uid = getAdminAuthUid();
+    if (!uid || assalOfficeAuth.currentUser?.uid !== uid) {onRevoked();return ()=>{};}
+    const tools = await getAssalOfficeFirestoreTools();
+    return tools.onSnapshot(tools.doc(tools.db,"staffProfiles",uid), snap=>{
+      const p = snap.exists() ? snap.data() : null;
+      if (!p || !p.active || p.role !== "branch" || p.managedByOwner !== true ||
+          p.staffCustomerId !== String(getDeviceId())) onRevoked();
+    }, err=>{ console.warn("Staff live auth check:",err); /* offline errors are not evidence of revocation */ });
+  }
+});
 
 function normalizeTokenKey(token) {
   return String(token || "").replace(/[.#$\[\]\/]/g, "_");
@@ -20422,6 +20567,8 @@ const ADMIN_COMPAT_MANAGER_ACCESS_KEY = "adminCompatSubscriptionManager";
 const ADMIN_AUTH_ROUTE_KEY = "assalAdminAuthRoute";
 const ADMIN_AUTH_UID_KEY = "assalAdminAuthUid";
 const ADMIN_ROLE_KEY = "assalAdminRole";
+const ADMIN_MANAGED_KEY = "assalAdminManagedByOwner";
+const ADMIN_MANAGED_CUSTOMER_KEY = "assalAdminManagedCustomerId";
 
 /*
   هذه القائمة تحتوي عناوين Firebase Auth الداخلية فقط، ولا تحتوي أدواراً أو صلاحيات أو كلمات مرور.
@@ -20546,6 +20693,8 @@ function normalizeAssalFirestoreAccessProfile(rawProfile, meta = {}) {
       .trim()
       .toLowerCase(),
     authUid: String(meta.uid || raw.uid || "").trim(),
+    managedByOwner: raw.managedByOwner === true,
+    staffCustomerId: String(raw.staffCustomerId || "").trim(),
   };
 }
 
@@ -21265,6 +21414,9 @@ function setAdminAccessProfile(profile) {
     ADMIN_COMPAT_MANAGER_ACCESS_KEY,
     canManageCompatSubscriptions ? "true" : "false",
   );
+  localStorage.setItem(ADMIN_MANAGED_KEY, profile.managedByOwner === true ? "true" : "false");
+  if (profile.staffCustomerId) localStorage.setItem(ADMIN_MANAGED_CUSTOMER_KEY, String(profile.staffCustomerId));
+  else localStorage.removeItem(ADMIN_MANAGED_CUSTOMER_KEY);
   localStorage.setItem(ADMIN_LOGIN_VERSION_KEY, ADMIN_LOGIN_VERSION);
 }
 
@@ -25259,7 +25411,9 @@ async function initFirebaseStats() {
   }
 }
 
-let currentCustomersView = "active";
+let currentCustomersView = "staff";
+let assalStaffAdminCache = [];
+let assalAllCustomersDirectory = [];
 let customersAdminEntriesCache = { active: [], blocked: [] };
 let customersAdminSearchVisible = false;
 let customersAdminRotateMode = "refresh";
@@ -25282,7 +25436,7 @@ function normalizeCustomersAdminSearchText(value) {
 }
 
 function getCustomersAdminSearchQuery() {
-  const input = document.getElementById("customersAdminSearchInput");
+  const input = document.getElementById("assalAccountsQuickSearch") || document.getElementById("customersAdminSearchInput");
   return normalizeCustomersAdminSearchText(input?.value || "");
 }
 
@@ -25321,16 +25475,7 @@ function stopCustomersRotateAction() {
 
 function startCustomersRotateAction() {
   stopCustomersRotateAction();
-  if (customersAdminSearchVisible) {
-    setCustomersRotateActionMode("refresh");
-    return;
-  }
   setCustomersRotateActionMode("refresh");
-  customersAdminRotateTimer = setInterval(() => {
-    setCustomersRotateActionMode(
-      customersAdminRotateMode === "refresh" ? "search" : "refresh",
-    );
-  }, 2000);
 }
 
 function setCustomersSearchVisibility(visible) {
@@ -25366,27 +25511,94 @@ function filterCustomersAdminEntries(entries, query) {
 }
 
 // عرض قائمة الزبائن للأدمن
+function assalAccountEsc(value) {
+  return String(value == null ? "" : value).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function assalAccountLetter(name) {
+  const text = String(name || "").trim()
+    .replace(/^(?:مكتب|شركة|محل|مركز)\s+/, "")
+    .replace(/^ال/, "")
+    .normalize("NFKC")
+    .replace(/[أإآ]/g, "ا")
+    .replace(/[\u064B-\u065F\u0670ـ]/g, "");
+  const letter = Array.from(text)[0]?.toUpperCase() || "#";
+  return /[\p{L}]/u.test(letter) ? letter : "#";
+}
+function assalAccountDirectorySort(entries) {
+  return [...entries].sort((a, b) =>
+    assalAccountLetter(a.name).localeCompare(assalAccountLetter(b.name), "ar") ||
+    String(a.name || "").localeCompare(String(b.name || ""), "ar") ||
+    String(a.deviceId || a.id || "").localeCompare(String(b.deviceId || b.id || "")));
+}
+function assalAccountAvatarText(name) {
+  return assalAccountEsc(assalAccountLetter(name));
+}
+function assalAccountAvatarTone(id) {
+  const hash=Array.from(String(id||"")).reduce((h,ch)=>(h*31+ch.charCodeAt(0))|0,0);
+  return Math.abs(hash%6);
+}
+function assalAccountIconAction(type, icon, label, customerId, disabled=false) {
+  return '<button class="assal-account-icon-action is-'+type+'" type="button" data-assal-account-action="'+type+'"'
+    +' data-customer-id="'+assalAccountEsc(customerId)+'" aria-label="'+assalAccountEsc(label)+'" title="'+assalAccountEsc(label)+'"'
+    +(disabled?' disabled':'')+'><i class="'+icon+'" aria-hidden="true"></i></button>';
+}
+function assalAccountStableRender(target, nextHtml) {
+  if (!target) return;
+  // Avoid flicker and reset of search, alphabet index and list scroll on identical refreshes.
+  if (target.__assalRenderedMarkup === nextHtml && target.__assalLastRoot === target.firstElementChild) return;
+  const list = target.querySelector('.assal-account-directory-list, .assal-account-staff-rows');
+  const oldTop = list ? list.scrollTop : 0;
+  const oldLeft = list ? list.scrollLeft : 0;
+  const oldIndex = target.querySelector('.assal-account-directory-index');
+  const indexTop = oldIndex?.scrollTop || 0;
+  target.innerHTML = nextHtml;
+  target.__assalRenderedMarkup = nextHtml;
+  target.__assalLastRoot = target.firstElementChild;
+  const newList = target.querySelector('.assal-account-directory-list, .assal-account-staff-rows');
+  if (newList) { newList.scrollTop = oldTop; newList.scrollLeft = oldLeft; }
+  const newIndex = target.querySelector('.assal-account-directory-index');
+  if (newIndex) newIndex.scrollTop = indexTop;
+}
 function renderCustomersAdminList(target, entries, emptyText) {
   if (!target) return;
-  target.innerHTML = entries.length
-    ? entries.map((item) => renderCustomerCard(item)).join("")
-    : `<div class="customers-admin-empty">${emptyText}</div>`;
+  if (!entries.length) {
+    assalAccountStableRender(target, '<div class="assal-account-directory-empty">'+assalAccountEsc(emptyText)+'</div>');
+    return;
+  }
+  const sorted=assalAccountDirectorySort(entries);
+  let html='',previous='',letters=[];
+  for(const customer of sorted){
+    const letter=assalAccountLetter(customer.name);
+    if(letter!==previous){
+      if(previous)html+='</section>';
+      html+='<section class="assal-account-letter-section" data-account-letter="'+assalAccountEsc(letter)+'"><h4>'+assalAccountEsc(letter)+'</h4>';
+      letters.push(letter);previous=letter;
+    }
+    html+=renderCustomerCard(customer);
+  }
+  if(previous)html+='</section>';
+  assalAccountStableRender(target, '<div class="assal-account-directory-content"><div class="assal-account-directory-list">'+html+'</div>'
+    +'<nav class="assal-account-directory-index" aria-label="الحروف الأبجدية">'
+    +letters.map(letter=>'<button type="button" data-assal-account-letter="'+assalAccountEsc(letter)+'" aria-label="اذهب إلى حرف '+assalAccountEsc(letter)+'">'+assalAccountEsc(letter)+'</button>').join('')
+    +'</nav></div>');
 }
 
 function renderCustomersAdminPanels() {
   const activePanel = document.getElementById("customersActivePanel");
   const blockedPanel = document.getElementById("customersBlockedPanel");
+  const staffPanel = document.getElementById("customersStaffPanel");
   if (!activePanel || !blockedPanel) return;
 
   const query = getCustomersAdminSearchQuery();
-  const searchingActive =
-    customersAdminSearchVisible && currentCustomersView === "active";
-  const searchingBlocked =
-    customersAdminSearchVisible && currentCustomersView === "blocked";
+  const searchingActive = currentCustomersView === "active" && !!query;
+  const searchingBlocked = currentCustomersView === "blocked" && !!query;
 
+  const ordinaryCustomers = customersAdminEntriesCache.active.filter(item =>
+    !assalStaffAdminCache.some(staff => staff.active && staff.staffCustomerId === (item.deviceId || item.id)));
   const activeEntries = searchingActive
-    ? filterCustomersAdminEntries(customersAdminEntriesCache.active, query)
-    : [...customersAdminEntriesCache.active];
+    ? filterCustomersAdminEntries(ordinaryCustomers, query)
+    : ordinaryCustomers;
   const blockedEntries = searchingBlocked
     ? filterCustomersAdminEntries(customersAdminEntriesCache.blocked, query)
     : [...customersAdminEntriesCache.blocked];
@@ -25402,14 +25614,26 @@ function renderCustomersAdminPanels() {
 
   renderCustomersAdminList(activePanel, activeEntries, activeEmpty);
   renderCustomersAdminList(blockedPanel, blockedEntries, blockedEmpty);
+  if (staffPanel && Array.isArray(assalStaffAdminCache)) {
+    assalAccountStableRender(staffPanel, assalStaffIsOwner()
+      ? renderAssalStaffDirectory(assalStaffAdminCache, currentCustomersView === "staff" ? query : "")
+      : '<div class="customers-admin-empty">إدارة الأدمنية وإنشاء الحسابات مخصصة للمالك الرئيسي.</div>');
+  }
   setCustomersViewButtons();
 }
 
 function setCustomersViewButtons() {
+  const staffBtn = document.getElementById("customersStaffTabBtn");
+  const staffPanel = document.getElementById("customersStaffPanel");
   const activeBtn = document.getElementById("customersActiveTabBtn");
   const blockedBtn = document.getElementById("customersBlockedTabBtn");
   const activePanel = document.getElementById("customersActivePanel");
   const blockedPanel = document.getElementById("customersBlockedPanel");
+  if (staffBtn) {
+    staffBtn.style.display = assalStaffIsOwner() ? "" : "none";
+    staffBtn.classList.toggle("is-active", currentCustomersView === "staff");
+  }
+  if (staffPanel) staffPanel.classList.toggle("is-active", currentCustomersView === "staff");
   if (activeBtn)
     activeBtn.classList.toggle("is-active", currentCustomersView === "active");
   if (blockedBtn)
@@ -25430,7 +25654,8 @@ function setCustomersViewButtons() {
 }
 
 window.switchCustomersView = function (view) {
-  currentCustomersView = view === "blocked" ? "blocked" : "active";
+  currentCustomersView = ["staff","blocked","active"].includes(view) ? view : "active";
+  if(currentCustomersView === "staff" && !assalStaffIsOwner()) currentCustomersView = "active";
   setCustomersViewButtons();
   renderCustomersAdminPanels();
 };
@@ -25460,23 +25685,17 @@ window.applyCustomersAdminSearch = function () {
 };
 
 window.handleCustomersRotatingAction = async function () {
-  if (customersAdminSearchVisible) {
-    await loadCustomersAdmin();
-    return;
-  }
-  if (customersAdminRotateMode === "search") {
-    showCustomersSearchBar();
-    return;
-  }
-  await loadCustomersAdmin();
+  await Promise.all([loadCustomersAdmin(), loadAssalStaffDirectory()]);
 };
 
 window.openCustomersAdminModal = async function () {
   if (!isAdminUser()) return;
-  currentCustomersView = "active";
+  currentCustomersView = assalStaffIsOwner() ? "staff" : "active";
   setCustomersSearchVisibility(false);
   const input = document.getElementById("customersAdminSearchInput");
   if (input) input.value = "";
+  const quickInput = document.getElementById("assalAccountsQuickSearch");
+  if (quickInput) quickInput.value = "";
   setCustomersViewButtons();
   const modal = document.getElementById("customersAdminModal");
   if (!modal) return;
@@ -25484,12 +25703,14 @@ window.openCustomersAdminModal = async function () {
   modal.setAttribute("aria-hidden", "false");
   syncGlobalModalLock();
   startCustomersRotateAction();
-  await loadCustomersAdmin();
+  await Promise.all([loadCustomersAdmin(), loadAssalStaffDirectory()]);
+  renderCustomersAdminPanels();
 };
 
 window.closeCustomersAdminModal = function () {
   const modal = document.getElementById("customersAdminModal");
   if (!modal) return;
+  closeAssalAccountDetails(null, true);
   modal.classList.remove("show");
   modal.setAttribute("aria-hidden", "true");
   stopCustomersRotateAction();
@@ -25505,101 +25726,36 @@ function sortCustomerEntries(list) {
   );
 }
 
+
+// Same avatar renderer and hash as the private-message new-chat directory.
+function assalAccountMessengerAvatarTone(key){return String(Math.abs(Array.from(String(key||'')).reduce((n,c)=>n+c.charCodeAt(0),0)+2)%6);}
+function assalAccountMessengerPortrait(key){
+  const avatarTone=assalAccountMessengerAvatarTone;
+    const tone=Number(avatarTone(key)),skin=['#f4ceae','#d9a580','#edbb95','#c58c69','#edc7a5','#d6a17e'][tone],shirt=['#a5f3fc','#c4b5fd','#99f6e4','#fde68a','#bfdbfe','#fbcfe8'][tone];
+    const hair=tone%2?'<path d="M19 29V22c0-10 24-14 26 2v8l-5-9c-6 4-13 5-21 6Z" fill="#263344"/>':'<path d="M19 30V22c0-9 8-14 17-11 8-3 14 10 8 16l-5-7c-5 6-11 5-20 10Z" fill="#263344"/>';
+    const glasses=tone%3===0?'<path d="M22 31h8v6h-8zM34 31h8v6h-8zM30 33h4" fill="none" stroke="#334155" stroke-width="1.8" stroke-linejoin="round"/>':'';
+    return '<svg class="am-portrait" viewBox="0 0 64 64" fill="none" aria-hidden="true"><circle cx="32" cy="32" r="32" fill="#ffffff" fill-opacity=".06"/><path d="M10 64v-5c0-12 11-17 22-17s22 5 22 17v5" fill="'+shirt+'"/><path d="M27 41v7c3 4 7 4 10 0v-7" fill="'+skin+'"/><ellipse cx="32" cy="31" rx="13" ry="16" fill="'+skin+'"/>'+hair+'<circle cx="26" cy="32" r="1.2" fill="#263344"/><circle cx="38" cy="32" r="1.2" fill="#263344"/><path d="M29 39q3 2 6 0" stroke="#925d48" stroke-width="1.7" stroke-linecap="round"/>'+glasses+'<path d="m24 49 8 8 8-8" stroke="#ffffff" stroke-opacity=".6" stroke-width="2"/></svg>';
+}
 function renderCustomerCard(customer) {
-  const name = escapeHtml(customer.name || "بدون اسم");
-  const phone = escapeHtml(customer.phone || "—");
-  const address = escapeHtml(customer.address || "—");
-  const deviceId = escapeHtml(customer.deviceId || customer.id || "");
-  const blocked = !!customer.blocked;
-  const actionBtn = blocked
-    ? `<button class="customers-admin-action unban" type="button" onclick="confirmToggleCustomerBan('${deviceId}', false)">` +
-      '<i class="fas fa-unlock">' +
-      "</i>" +
-      " إلغاء الحظر" +
-      "</button>"
-    : `<button class="customers-admin-action ban" type="button" onclick="confirmToggleCustomerBan('${deviceId}', true)">` +
-      '<i class="fas fa-user-lock">' +
-      "</i>" +
-      " حظر" +
-      "</button>";
-  return (
-    `
-      ` +
-    '<div class="customers-admin-card">' +
-    `
-        ` +
-    '<div class="customers-admin-head">' +
-    `
-          ` +
-    '<div class="customers-admin-name">' +
-    `${name}` +
-    "</div>" +
-    `
-          ` +
-    `<div class="customers-admin-status ${blocked ? "blocked" : "active"}">` +
-    `${blocked ? "محظور" : "نشط"}` +
-    "</div>" +
-    `
-        ` +
-    "</div>" +
-    `
-        ` +
-    '<div class="customers-admin-meta">' +
-    `
-          ` +
-    '<div class="customers-admin-chip">' +
-    '<i class="fas fa-phone">' +
-    "</i>" +
-    "<span>" +
-    `${phone}` +
-    "</span>" +
-    "</div>" +
-    `
-          ` +
-    '<div class="customers-admin-chip">' +
-    '<i class="fas fa-location-dot">' +
-    "</i>" +
-    "<span>" +
-    `${address}` +
-    "</span>" +
-    "</div>" +
-    `
-          ` +
-    '<div class="customers-admin-chip">' +
-    '<i class="fas fa-mobile-screen">' +
-    "</i>" +
-    "<span>" +
-    `${deviceId}` +
-    "</span>" +
-    "</div>" +
-    `
-        ` +
-    "</div>" +
-    `
-        ` +
-    '<div class="customers-admin-actions">' +
-    `
-          ${actionBtn}
-          ` +
-    `<button class="customers-admin-action chat" type="button" onclick="openAdminChatWithCustomer('${deviceId}')">` +
-    '<i class="fas fa-comments">' +
-    "</i>" +
-    " مراسلة" +
-    "</button>" +
-    `
-          ` +
-    `<button class="customers-admin-action delete" type="button" onclick="confirmDeleteCustomerProfile('${deviceId}')">` +
-    '<i class="fas fa-trash">' +
-    "</i>" +
-    " حذف" +
-    "</button>" +
-    `
-        ` +
-    "</div>" +
-    `
-      ` +
-    "</div>"
-  );
+  const id=String(customer.deviceId || customer.id || "");
+  const name=assalAccountEsc(customer.name || "بدون اسم");
+  const phone=assalAccountEsc(customer.phone || "بدون رقم");
+  const blocked=!!customer.blocked;
+  const whatsapp=assalStaffNormalizeWhatsApp(customer.phone);
+  const isPromotable=!blocked && assalStaffIsOwner() && !assalStaffAdminCache.some(staff=>
+    staff.active && staff.staffCustomerId === id);
+  const actions=assalAccountIconAction('chat','fas fa-comment-dots','مسج التطبيق',id,blocked)
+    +(whatsapp?'<a class="assal-account-icon-action is-whatsapp" href="https://wa.me/'+whatsapp+'" target="_blank" rel="noopener noreferrer" aria-label="واتساب" title="واتساب"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>'
+      :assalAccountIconAction('whatsapp','fab fa-whatsapp','واتساب غير متاح',id,true))
+    +assalAccountIconAction(blocked?'unban':'ban',blocked?'fas fa-unlock':'fas fa-ban',blocked?'رفع الحظر':'حظر الزبون',id)
+    +(isPromotable?assalAccountIconAction('promote','fas fa-user-shield','ترقية إلى أدمن',id):'')
+    +assalAccountIconAction('delete','fas fa-trash-can','حذف حساب الزبون',id);
+  return '<article class="assal-account-customer-row" data-assal-row-kind="customer" data-customer-id="'+assalAccountEsc(id)+'">'
+    +'<button type="button" class="assal-account-row-main" data-assal-account-action="details" data-customer-id="'+assalAccountEsc(id)+'" aria-label="تفاصيل '+name+'">'
+    +'<span class="assal-account-avatar am-avatar" data-tone="'+assalAccountMessengerAvatarTone(id)+'">'+assalAccountMessengerPortrait(id)+'</span>'
+    +'<span class="assal-account-row-info"><b>'+name+'</b><small dir="ltr">'+phone+'</small>'
+    +(blocked?'<em>محظور من التطبيق</em>':'')+'</span></button>'
+    +'<div class="assal-account-row-actions">'+actions+'</div></article>';
 }
 
 window.loadCustomersAdmin = async function () {
@@ -25614,10 +25770,12 @@ window.loadCustomersAdmin = async function () {
       '<div class="customers-admin-empty">Firebase غير جاهز حالياً.</div>';
     return;
   }
-  activePanel.innerHTML =
-    '<div class="customers-admin-empty">جاري تحميل الزبائن...</div>';
-  blockedPanel.innerHTML =
-    '<div class="customers-admin-empty">جاري تحميل قائمة الحظر...</div>';
+  if (!activePanel.firstElementChild?.classList.contains('assal-account-directory-content')) {
+    activePanel.innerHTML = '<div class="customers-admin-empty">جاري تحميل الزبائن...</div>';
+  }
+  if (!blockedPanel.firstElementChild?.classList.contains('assal-account-directory-content')) {
+    blockedPanel.innerHTML = '<div class="customers-admin-empty">جاري تحميل قائمة الحظر...</div>';
+  }
   try {
     const { db, ref, get } = window.firebaseDB;
     const snap = await get(ref(db, "customerProfiles"));
@@ -25629,6 +25787,7 @@ window.loadCustomersAdmin = async function () {
         ...(value || {}),
       })),
     );
+    assalAllCustomersDirectory = entries;
     customersAdminEntriesCache = {
       active: entries.filter((item) => !item.blocked),
       blocked: entries.filter((item) => !!item.blocked),
@@ -25636,12 +25795,173 @@ window.loadCustomersAdmin = async function () {
     renderCustomersAdminPanels();
   } catch (err) {
     console.error("loadCustomersAdmin:", err);
-    customersAdminEntriesCache = { active: [], blocked: [] };
-    activePanel.innerHTML =
-      '<div class="customers-admin-empty">تعذّر جلب الزبائن حالياً.</div>';
-    blockedPanel.innerHTML =
-      '<div class="customers-admin-empty">تعذّر جلب قائمة الحظر حالياً.</div>';
+    // A temporary Firebase error must not erase an already loaded directory.
+    if (!assalAllCustomersDirectory.length) {
+      customersAdminEntriesCache = { active: [], blocked: [] };
+      activePanel.innerHTML = '<div class="customers-admin-empty">تعذّر جلب الزبائن حالياً.</div>';
+      blockedPanel.innerHTML = '<div class="customers-admin-empty">تعذّر جلب قائمة الحظر حالياً.</div>';
+    }
   }
+};
+
+/* ===== ASSAL ACCOUNT DIRECTORY v1: owner-only staff provisioning, customer card parity ===== */
+function assalStaffIsOwner(){
+  return typeof isAdminUser==='function' && isAdminUser() &&
+    typeof getAdminRole==='function' && getAdminRole()==='owner';
+}
+function assalStaffNormalizeWhatsApp(phone){
+  let x=String(phone||'').replace(/[^0-9]/g,'');
+  if(/^07\d{9}$/.test(x))x='964'+x.slice(1);
+  else if(/^7\d{9}$/.test(x))x='964'+x;
+  else if(/^009647\d{9}$/.test(x))x=x.slice(2);
+  return /^9647\d{9}$/.test(x)?x:'';
+}
+function renderAssalStaffDirectory(staff,query=''){
+  const p=String(query||'').toLowerCase().trim();
+  let sorted=staff.filter(a=>a&&['owner','branch'].includes(String(a.role||'')))
+    .sort((a,b)=>Number(b.role==='owner')-Number(a.role==='owner') ||
+      Number(b.active===true)-Number(a.active===true) || String(a.label||'').localeCompare(String(b.label||''),'ar'));
+  if(p) sorted=sorted.filter(a=>[a.label,a.staffEmail,a.branchCode,a.staffCustomerId,a.uid].join(' ').toLowerCase().includes(p));
+  const labels={baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز'};
+  const cards=sorted.map(a=>{
+    const owner=a.role==='owner',managed=a.managedByOwner===true,active=a.active===true;
+    const customer=(assalAllCustomersDirectory||[]).find(x=>(x.deviceId||x.id)===a.staffCustomerId);
+    const name=assalAccountEsc(String(a.label||(owner?'المالك الرئيسي':'أدمن')).slice(0,100));
+    const uid=String(a.uid||''), cid=String(a.staffCustomerId||'');
+    const validUid=/^[a-zA-Z0-9_-]{12,128}$/.test(uid);
+    const validCid=/^(?:DEV-[A-Z0-9-]{7,24}|AND-[A-F0-9]{32})$/.test(cid);
+    const wa=assalStaffNormalizeWhatsApp(customer?.phone);
+    const actions=(managed&&validCid
+      ?assalAccountIconAction('chat','fas fa-comment-dots','مسج التطبيق',cid,!active)
+        +(wa?'<a class="assal-account-icon-action is-whatsapp" href="https://wa.me/'+wa+'" target="_blank" rel="noopener noreferrer" aria-label="واتساب" title="واتساب"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>':'')
+      :'')
+      +(managed&&active&&validUid?'<button type="button" class="assal-account-icon-action is-revoke" data-assal-account-action="revoke" data-staff-uid="'+assalAccountEsc(uid)+'" aria-label="سحب الإدارة مع إبقاء التفعيل" title="سحب الإدارة مع إبقاء التفعيل"><i class="fas fa-shield-halved"></i></button>':'');
+    return '<article class="assal-account-customer-row assal-account-staff-row" data-assal-row-kind="staff" data-staff-uid="'+assalAccountEsc(uid)+'">'
+      +'<button type="button" class="assal-account-row-main" data-assal-account-action="staff-details" data-staff-uid="'+assalAccountEsc(uid)+'" aria-label="تفاصيل '+name+'">'
+      +'<span class="assal-account-avatar" data-tone="'+(owner?'owner':assalAccountAvatarTone(uid))+'"><i class="fas '+(owner?'fa-crown':'fa-user-shield')+'"></i></span>'
+      +'<span class="assal-account-row-info"><b>'+name+'</b><small>'+assalAccountEsc(owner?'المالك الرئيسي':(labels[a.branchCode]||'أدمن عسل'))+'</small>'
+      +(!active?'<em>صلاحية موقوفة</em>':'')+'</span></button>'
+      +'<div class="assal-account-row-actions">'+actions+'</div></article>';
+  }).join('');
+  return '<div class="assal-account-staff-head"><small>الأدمنية ('+sorted.length+')</small>'
+    +'<button type="button" class="assal-account-icon-action is-create" data-assal-account-action="create" title="إنشاء أدمن" aria-label="إنشاء أدمن"><i class="fas fa-user-plus"></i></button></div>'
+    +'<div class="assal-account-staff-rows">'+(cards||'<div class="assal-account-directory-empty">لا توجد حسابات مطابقة.</div>')+'</div>';
+}
+
+window.loadAssalStaffDirectory=async function(){
+  const panel=document.getElementById('customersStaffPanel');
+  if(!panel)return;
+  if(!assalStaffIsOwner()){
+    assalStaffAdminCache=[];
+    renderCustomersAdminPanels();return;
+  }
+  if (!panel.querySelector('.assal-account-staff-head')) {
+    panel.innerHTML='<div class="customers-admin-empty">جارٍ جلب الأدمنية...</div>';
+  }
+  try{
+    assalStaffAdminCache=await window.assalStaffManagement.list();
+    renderCustomersAdminPanels();
+  }catch(err){
+    console.warn('ASSAL staff list:',err);
+    // Keep cached staff rows if Firebase is momentarily offline; retry is manual.
+    if (!assalStaffAdminCache.length) {
+      panel.innerHTML='<div class="customers-admin-empty">تعذّر تحميل الأدمنية. تأكد من تسجيل دخول المالك وقواعد Firestore الجديدة.</div>';
+    }
+  }
+};
+function assalStaffCustomer(customerId){
+  return assalAllCustomersDirectory.find(x=>(x.deviceId||x.id)===customerId);
+}
+window.assalOpenCreateStaff=async function(){
+  if(!assalStaffIsOwner())return;
+  const {value:form}=await Swal.fire({
+    title:'إنشاء أدمن من زبون مسجّل',
+    html:'<p class="assal-staff-hint">كل حساب أدمن مرتبط بزبون موجود مسبقاً. التفعيل والمحادثات يبقيان باسم الزبون.</p>'
+      +'<input id="asCustomerId" class="swal2-input" dir="ltr" placeholder="معرّف الزبون DEV- أو AND-">'
+      +'<select id="asBranch" class="swal2-select"><option value="baqubah">بعقوبة</option><option value="tahrir">التحرير</option><option value="hay">الحي</option><option value="baladruz">بلدروز</option></select>'
+      +'<input id="asPassword" class="swal2-input" type="password" autocapitalize="off" autocomplete="new-password" dir="ltr" placeholder="كلمة مرور إدارية جديدة (10+)" />',
+    background:'#0b1220',color:'#fff',confirmButtonText:'إنشاء حساب الأدمن',cancelButtonText:'إلغاء',
+    showCancelButton:true,confirmButtonColor:'#0f766e',
+    preConfirm:()=>{
+      const customerId=document.getElementById('asCustomerId').value.trim();
+      const branchCode=document.getElementById('asBranch').value;
+      const password=document.getElementById('asPassword').value;
+      if(!/^(?:DEV-[A-Z0-9-]{7,24}|AND-[A-F0-9]{32})$/.test(customerId)||password.length<10){
+        Swal.showValidationMessage('اكتب معرف زبون صحيح وكلمة مرور إدارية من 10 رموز على الأقل.');return false;
+      }
+      return {customerId,branchCode,password};
+    }
+  });
+  if(form)await assalSubmitStaffProvision(form);
+};
+window.assalPromoteCustomer=async function(id){
+  if(!assalStaffIsOwner())return;
+  const item=assalStaffCustomer(id), name=escapeHtml(item?.name||id);
+  const {value:form}=await Swal.fire({
+    title:'ترقية الزبون إلى أدمن',
+    html:'<p class="assal-staff-hint">'+name+' — يحتفظ بنفس التفعيل والمحادثات. كلمة المرور الجديدة يُدخلها الأدمن في جهازه مرة واحدة.</p>'
+      +'<select id="asBranch" class="swal2-select"><option value="baqubah">بعقوبة</option><option value="tahrir">التحرير</option><option value="hay">الحي</option><option value="baladruz">بلدروز</option></select>'
+      +'<input id="asPassword" class="swal2-input" type="password" dir="ltr" autocomplete="new-password" placeholder="كلمة مرور إدارية جديدة (10+)" />',
+    background:'#0b1220',color:'#fff',confirmButtonText:'تأكيد الترقية',cancelButtonText:'إلغاء',
+    showCancelButton:true,confirmButtonColor:'#0f766e',
+    preConfirm:()=>{
+      const password=document.getElementById('asPassword').value;
+      if(password.length<10){Swal.showValidationMessage('كلمة المرور يجب ألا تقل عن 10 رموز.');return false;}
+      return {customerId:id,password,branchCode:document.getElementById('asBranch').value};
+    }
+  });
+  if(form)await assalSubmitStaffProvision(form);
+};
+async function assalSubmitStaffProvision(form){
+  try{
+    Swal.fire({title:'جارٍ إنشاء صلاحية أدمن...',allowOutsideClick:false,showConfirmButton:false,
+      didOpen:()=>Swal.showLoading(),background:'#0b1220',color:'#fff'});
+    const {email}=await window.assalStaffManagement.create(form);
+    Swal.close();
+    await Swal.fire({title:'تم إنشاء حساب الأدمن',icon:'success',background:'#0b1220',color:'#fff',
+      html:'<div class="assal-staff-credentials">البريد الإداري:<br><strong dir="ltr">'+escapeHtml(email)+'</strong>'
+        +'<p>كلمة المرور هي التي أدخلتها أنت. سلّم الاثنين لصاحب الجهاز بصورة خاصة. لا تُحفظ كلمة المرور بقاعدة البيانات.</p>'
+        +'<p>يفتح الزبون عسل ويضغط أيقونة <b>دخول كادر عسل</b> ثم يدخل بياناته.</p></div>',
+      confirmButtonText:'تم',confirmButtonColor:'#185a9d'});
+    await loadAssalStaffDirectory();await loadCustomersAdmin();
+  }catch(err){
+    Swal.close();
+    await Swal.fire({title:'تعذّر إنشاء الأدمن',text:err?.message||'خطأ غير متوقع',icon:'error',background:'#0b1220',color:'#fff'});
+  }
+}
+window.assalRevokeStaff=async function(uid){
+  if(!assalStaffIsOwner())return;
+  const item=assalStaffAdminCache.find(x=>x.uid===uid);
+  if(!item||item.role==='owner'||item.managedByOwner!==true)return;
+  const ok=await Swal.fire({title:'سحب صلاحية الأدمن؟',
+    text:'يرجع '+String(item.label||'الحساب')+' زبوناً عادياً، مع بقاء التفعيل والبيانات والمحادثات دون حذف.',
+    icon:'warning',showCancelButton:true,confirmButtonText:'سحب الصلاحية',cancelButtonText:'تراجع',
+    confirmButtonColor:'#b91c1c',background:'#0b1220',color:'#fff'});
+  if(!ok.isConfirmed)return;
+  try{
+    await window.assalStaffManagement.revoke(uid);
+    await loadAssalStaffDirectory();await loadCustomersAdmin();
+    Swal.fire({title:'تم سحب صلاحية الإدارة',icon:'success',timer:1800,showConfirmButton:false,background:'#0b1220',color:'#fff'});
+  }catch(err){
+    Swal.fire({title:'تعذّر سحب الصلاحية',text:err?.message||'',icon:'error',background:'#0b1220',color:'#fff'});
+  }
+};
+window.openAssalManagedStaffLogin=async function(){
+  if(isAdminUser()||localStorage.getItem('isActivated')!=='true')return;
+  const result=await Swal.fire({title:'دخول كادر عسل',
+    html:'<p class="assal-staff-hint">للأدمنية الذين أنشأ المالك حساباتهم فقط. لا يتغير تفعيل الزبون.</p>'
+      +'<input id="asStaffEmail" class="swal2-input" type="email" dir="ltr" autocomplete="username" placeholder="البريد الإداري">'
+      +'<input id="asStaffPassword" class="swal2-input" type="password" autocomplete="current-password" dir="ltr" placeholder="كلمة مرور الأدمن">',
+    showCancelButton:true,confirmButtonText:'دخول',cancelButtonText:'إلغاء',background:'#0b1220',color:'#fff',confirmButtonColor:'#0f766e',
+    preConfirm:async()=>{
+      const email=document.getElementById('asStaffEmail').value.trim();
+      const password=document.getElementById('asStaffPassword').value;
+      if(!email||!password){Swal.showValidationMessage('أدخل البريد وكلمة المرور.');return false;}
+      try{await window.assalStaffManagement.login(email,password);return true;}
+      catch(err){Swal.showValidationMessage(err?.message||'تعذر التحقق من الحساب.');return false;}
+    },allowOutsideClick:()=>!Swal.isLoading()
+  });
+  if(result.isConfirmed&&result.value===true)location.reload();
 };
 
 function closeCustomerFacingModalsForBlock() {
@@ -68898,3 +69218,431 @@ html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-p
 })();
 </script>
 
+
+<style id="assal-staff-management-css-v1">
+/* Account management - isolated styles, preserves existing chat and request UI */
+#customersAdminModal .customers-admin-icon{width:38px;height:38px;border-radius:12px;font-size:15px}
+#customersAdminModal .customers-admin-title h3{font-size:15px}
+#customersAdminModal .customers-admin-body{padding:10px 12px}
+#customersAdminModal .customers-admin-card{padding:11px 12px;border-radius:14px;gap:9px}
+#customersAdminModal .customers-admin-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px}
+#customersAdminModal .customers-admin-action{min-height:35px!important;border-radius:10px;font-size:11px;padding:7px 6px}
+#customersAdminModal .customers-admin-action.delete{grid-column:auto!important;width:auto!important}
+#customersAdminModal .customers-admin-action.whatsapp{background:linear-gradient(135deg,#128c7e,#075e54);text-decoration:none}
+#customersAdminModal .customers-admin-action.promote{background:linear-gradient(135deg,#6d28d9,#4338ca)}
+#customersAdminModal .customers-admin-action.revoke{background:linear-gradient(135deg,#a11f36,#781122);grid-column:1/-1!important}
+#customersAdminModal .customers-admin-action.disabled{background:rgba(255,255,255,.08);color:#94a3b8}
+#customersAdminModal .customers-admin-actions .customers-admin-action.chat{background:linear-gradient(135deg,#2563eb,#0891b2)}
+#customersAdminModal .customers-admin-meta{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:5px}
+#customersAdminModal .customers-admin-chip{padding:6px 8px;border-radius:10px}
+#customersAdminModal .customers-admin-name{font-size:13px}
+#customersAdminModal .customers-admin-status{font-size:10px;padding:4px 7px}
+#customersAdminModal .customers-admin-list{max-height:min(70dvh,650px);min-height:150px;gap:7px}
+#customersAdminModal .customers-admin-shell{max-height:min(92dvh,820px)}
+#customersAdminModal .assal-staff-toolbar{display:flex;align-items:center;justify-content:space-between;gap:6px;color:#e2e8f0;font-size:12px;font-weight:800;margin:0 4px 5px}
+#customersAdminModal .assal-staff-new{border:1px solid rgba(45,212,191,.35);background:rgba(13,148,136,.17);color:#ccfbf1;border-radius:10px;padding:8px 10px;font:700 11px Cairo,sans-serif;cursor:pointer}
+#customersAdminModal .assal-staff-protected{font-size:10px;color:#cbd5e1}
+.assal-staff-hint{font-size:12px;color:#cbd5e1;line-height:1.8;margin:0 0 12px}
+.assal-staff-credentials{font-size:12px;color:#e2e8f0;overflow-wrap:anywhere;line-height:2}
+.assal-staff-credentials strong{font-size:13px;color:#99f6e4}
+@media(max-width:600px){
+  #customersAdminModal .customers-admin-top{display:grid;grid-template-columns:minmax(0,1fr) 30px 30px;gap:7px;padding:10px 10px 8px}
+  #customersAdminModal .customers-admin-title{grid-column:1;grid-row:1}
+  #customersAdminModal .customers-admin-top-actions{display:contents}
+  #customersAdminModal .customers-admin-switcher-wrap{grid-column:1/-1;grid-row:2}
+  #customersAdminModal .customers-admin-refresh{grid-column:2;grid-row:1}
+  #customersAdminModal .customers-admin-close{grid-column:3;grid-row:1}
+  #customersAdminModal .customers-admin-title{gap:5px}
+  #customersAdminModal .customers-admin-title h3{font-size:11px}
+  #customersAdminModal .customers-admin-icon{width:29px;height:29px;font-size:12px}
+  #customersAdminModal .customers-admin-top-actions{gap:4px}
+  #customersAdminModal .customers-admin-refresh,#customersAdminModal .customers-admin-close{min-width:28px;width:28px;height:28px;min-height:28px}
+  #customersAdminModal .customers-admin-switcher-wrap .request-view-tab{padding:4px;font-size:10px}
+  #customersAdminModal .customers-admin-chip{font-size:10px}
+  #customersAdminModal .customers-admin-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+
+</style>
+<script id="assal-staff-revoke-live-v1">
+(function(){
+  const start = async () => {
+    if(localStorage.getItem('assalAdminManagedByOwner')!=='true') return;
+    try{
+      await window.assalStaffManagement?.watchManaged(async()=>{
+        if(localStorage.getItem('assalAdminManagedByOwner')!=='true') return;
+        try{setAdminUser(false);localStorage.setItem('isActivated','true');}catch(_){}
+        try{await window.assalSecureAuth?.signOutCurrent();}catch(_){}
+        location.reload();
+      });
+    }catch(err){ console.warn('ASSAL staff role sync:',err); /* do not clear role on transient offline */ }
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+  const refreshEntry=()=>{
+    const btn=document.getElementById('assalManagedStaffLoginHeaderBtn');
+    if(btn)btn.style.display=localStorage.getItem('isActivated')==='true' && localStorage.getItem('isAdmin')!=='true'?'inline-flex':'none';
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refreshEntry,{once:true});else refreshEntry();
+  window.addEventListener('pageshow',refreshEntry);
+})();
+</script>
+
+<style id="assal-account-directory-parity-css-v2">
+/* Visual parity with private-messenger New Chat directory; scoped to account-management only. */
+#customersAdminModal .customers-admin-shell{width:min(100%,600px);max-height:min(94dvh,770px);border-radius:21px}
+#customersAdminModal .customers-admin-body{flex:1;min-height:0;padding:10px 11px 11px;gap:7px;overflow:hidden}
+#customersAdminModal .assal-accounts-searchbar{display:flex;align-items:center;gap:9px;min-height:38px;padding:0 12px;border-radius:20px;background:rgba(1,7,17,.43);border:1px solid rgba(148,163,184,.25);color:#5eead4;flex:none}
+#customersAdminModal .assal-accounts-searchbar>i{font-size:14px}
+#customersAdminModal .assal-accounts-searchbar input{border:0!important;background:transparent!important;box-shadow:none!important;outline:none!important;min-width:0;flex:1;color:#e9eefc;font:400 12px Cairo,sans-serif;height:36px}
+#customersAdminModal .assal-accounts-searchbar input::placeholder{color:#9eb6cd}
+#customersAdminModal .customers-admin-list{flex:1;min-height:0;max-height:none!important;overflow:hidden;display:flex;flex-direction:column;gap:0;padding:0}
+#customersAdminModal .assal-account-directory-content{display:flex;flex:1;min-height:0;overflow:hidden;padding:0 2px 2px;gap:3px}
+#customersAdminModal .assal-account-directory-list{flex:1;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:0 4px 4px 2px;scrollbar-width:thin;scrollbar-color:#28435f transparent}
+#customersAdminModal .assal-account-letter-section h4{position:sticky;top:0;z-index:1;font-size:12px;line-height:20px;font-weight:800;color:#5eead4;background:#101e30;border-radius:7px;padding:4px 8px;margin:0}
+#customersAdminModal .assal-account-directory-index{display:flex;flex-direction:column;align-items:center;gap:2px;overflow-y:auto;scrollbar-width:none;width:25px;flex:none;padding:3px 0}
+#customersAdminModal .assal-account-directory-index button{width:23px;height:24px;flex:none;border:0;border-radius:7px;background:transparent;color:#5eead4;font-size:10px;font-weight:700;padding:0;cursor:pointer}
+#customersAdminModal .assal-account-directory-index button:active{background:rgba(20,184,166,.22)}
+#customersAdminModal .assal-account-customer-row{display:flex;align-items:center;gap:7px;min-height:60px;padding:8px 3px;border-bottom:1px solid rgba(148,163,184,.1);background:transparent}
+#customersAdminModal .assal-account-row-main{display:flex;align-items:center;gap:8px;flex:1;min-width:0;min-height:45px;text-align:right;background:transparent!important;border:0!important;padding:0!important;box-shadow:none!important;color:inherit;cursor:pointer;font-family:Cairo,sans-serif}
+#customersAdminModal .assal-account-avatar{width:36px;height:36px;min-width:36px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(145deg,#0369a1,#0ea5e9);color:white;font-size:17px;font-weight:800;box-shadow:inset 0 1px 0 rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.14)}
+#customersAdminModal .assal-account-avatar[data-tone="1"]{background:linear-gradient(145deg,#6d28d9,#a855f7)}
+#customersAdminModal .assal-account-avatar[data-tone="2"]{background:linear-gradient(145deg,#047857,#10b981)}
+#customersAdminModal .assal-account-avatar[data-tone="3"]{background:linear-gradient(145deg,#b45309,#f59e0b)}
+#customersAdminModal .assal-account-avatar[data-tone="4"]{background:linear-gradient(145deg,#3730a3,#6366f1)}
+#customersAdminModal .assal-account-avatar[data-tone="5"]{background:linear-gradient(145deg,#9d174d,#ec4899)}
+#customersAdminModal .assal-account-avatar[data-tone="owner"]{background:linear-gradient(145deg,#ca8a04,#854d0e)}
+#customersAdminModal .assal-account-row-info{min-width:0;flex:1;display:flex;flex-direction:column;gap:1px;overflow:hidden}
+#customersAdminModal .assal-account-row-info b{font-size:12px;font-weight:750;color:#f1f5f9;line-height:1.45;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#customersAdminModal .assal-account-row-info small{font-size:10px;color:#9eb6cd;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+#customersAdminModal .assal-account-row-info em{font-style:normal;font-size:9px;color:#fda4af}
+#customersAdminModal .assal-account-row-actions{display:flex;align-items:center;gap:4px;flex:none}
+#customersAdminModal .assal-account-icon-action{width:29px;height:29px;min-width:29px;min-height:29px;display:grid!important;place-items:center!important;padding:0!important;line-height:1!important;border-radius:50%!important;background:linear-gradient(145deg,#075985,#0369a1)!important;border:1px solid rgba(125,211,252,.19)!important;color:#e0f2fe!important;text-decoration:none!important;box-shadow:none!important;cursor:pointer;font-size:12px}
+#customersAdminModal .assal-account-icon-action.is-whatsapp{background:linear-gradient(145deg,#166534,#15803d)!important;border-color:rgba(134,239,172,.23)!important;color:#dcfce7!important}
+#customersAdminModal .assal-account-icon-action.is-ban,#customersAdminModal .assal-account-icon-action.is-revoke{background:linear-gradient(145deg,#a16207,#92400e)!important}
+#customersAdminModal .assal-account-icon-action.is-unban{background:linear-gradient(145deg,#047857,#059669)!important}
+#customersAdminModal .assal-account-icon-action.is-promote,#customersAdminModal .assal-account-icon-action.is-create{background:linear-gradient(145deg,#5b21b6,#7c3aed)!important}
+#customersAdminModal .assal-account-icon-action.is-delete{background:linear-gradient(145deg,#991b1b,#dc2626)!important}
+#customersAdminModal .assal-account-icon-action:disabled{opacity:.3;cursor:default}
+#customersAdminModal .assal-account-directory-empty{margin:auto;text-align:center;color:#b8c7d9;font-size:12px;padding:22px 12px}
+#customersAdminModal .assal-account-staff-head{display:flex;align-items:center;justify-content:space-between;color:#d7e5ef;font-size:12px;padding:3px 8px;border-bottom:1px solid rgba(148,163,184,.1)}
+#customersAdminModal .assal-account-staff-rows{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 4px}
+#customersAdminModal .assal-account-staff-row{min-height:58px}
+#customersAdminModal .assal-account-icon-action:focus-visible,#customersAdminModal .assal-account-row-main:focus-visible{outline:2px solid #5eead4!important;outline-offset:2px}
+.assal-account-details-overlay{position:fixed;inset:0;z-index:17080;display:none;align-items:center;justify-content:center;background:rgba(1,7,17,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:16px}
+.assal-account-details-overlay.is-open{display:flex}
+.assal-account-details-dialog{width:min(100%,430px);max-height:calc(100dvh - 32px);overflow:hidden;display:flex;flex-direction:column;background:linear-gradient(160deg,#112239,#071323);border:1px solid rgba(148,163,184,.2);border-radius:22px;box-shadow:0 26px 65px rgba(0,0,0,.56);font-family:Cairo,sans-serif;color:#f0f9ff}
+.assal-account-details-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 16px 13px;border-bottom:1px solid rgba(148,163,184,.13)}
+.assal-account-details-headline{display:flex;align-items:center;gap:10px;min-width:0}
+.assal-account-details-headline h3{font-size:15px;line-height:1.5;margin:0;font-weight:800}
+.assal-account-details-headline p{font-size:10px;color:#9eb6cd;margin:2px 0 0}
+.assal-account-details-icon{width:37px;height:37px;flex:none;border-radius:11px;background:linear-gradient(135deg,#43cea2,#185a9d);display:grid;place-items:center}
+.assal-account-details-close{background:linear-gradient(135deg,#d02d45,#a11230);border:0;border-radius:50%;color:white;width:31px;height:31px;flex:none;display:grid;place-items:center;cursor:pointer}
+.assal-account-details-content{overflow:auto;padding:15px 16px 18px;overscroll-behavior:contain}
+.assal-account-details-person{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+.assal-account-details-person .assal-account-avatar{display:grid;place-items:center;width:43px;height:43px;min-width:43px;font-size:19px;border-radius:50%;background:linear-gradient(145deg,#047857,#0ea5e9);color:#fff;font-weight:800;border:1px solid rgba(255,255,255,.18)}
+.assal-account-details-person strong{font-size:15px;overflow-wrap:anywhere}
+.assal-account-details-fields{display:grid;gap:8px;margin:0}
+.assal-account-details-fields>div{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;border-radius:12px;padding:10px 11px;background:rgba(255,255,255,.045);border:1px solid rgba(148,163,184,.09);min-width:0}
+.assal-account-details-fields>div[hidden]{display:none!important}
+.assal-account-details-fields dt{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#9eb6cd;flex:none}
+.assal-account-details-fields dt i{width:15px;text-align:center;color:#5eead4}
+.assal-account-details-fields dd{margin:0;font-size:11px;font-weight:750;color:#e6f7ff;min-width:0;overflow-wrap:anywhere;text-align:left;direction:auto}
+@media(max-width:480px){#customersAdminModal .customers-admin-shell{max-height:calc(100dvh - 28px);width:100%}#customersAdminModal .customers-admin-list{min-height:0}#customersAdminModal .assal-account-customer-row{gap:5px}#customersAdminModal .assal-account-avatar{width:32px;height:32px;min-width:32px;font-size:15px}#customersAdminModal .assal-account-row-main{gap:5px}#customersAdminModal .assal-account-row-actions{gap:3px}#customersAdminModal .assal-account-icon-action{width:27px;height:27px;min-width:27px;min-height:27px;font-size:11px}#customersAdminModal .assal-account-row-info b{font-size:11px}}
+</style>
+<style id="assal-account-directory-private-chat-parity-v3">
+
+/* ===== ASSAL ACCOUNTS: Private-message directory exact layout v3 ===== */
+#customersAdminModal.customers-admin-modal{padding:18px;align-items:center;justify-content:center;background:rgba(1,7,17,.66);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+#customersAdminModal .customers-admin-shell{width:min(570px,100%);height:min(680px,94dvh);max-height:94dvh;display:flex;flex-direction:column;overflow:hidden;border-radius:22px;border:1px solid rgba(148,163,184,.22);background:var(--assal-premium-modal-bg,radial-gradient(circle at 92% 0%,rgba(34,197,94,.15),transparent 38%),radial-gradient(circle at 8% 100%,rgba(14,165,233,.12),transparent 42%),linear-gradient(145deg,rgba(15,23,42,.99),rgba(8,15,29,.99)));box-shadow:0 22px 70px rgba(0,0,0,.55);padding:0}
+#customersAdminModal .customers-admin-top{display:flex!important;align-items:center;justify-content:space-between;gap:10px;flex:none;min-height:58px;padding:10px 12px!important;border-bottom:1px solid rgba(148,163,184,.15);background:rgba(255,255,255,.025)}
+#customersAdminModal .customers-admin-title{display:flex!important;align-items:center;gap:10px;grid-column:auto;grid-row:auto;flex:1;min-width:0}
+#customersAdminModal .customers-admin-title>div{min-width:0}
+#customersAdminModal .customers-admin-title h3{display:block;font-size:14px!important;line-height:20px;margin:0;color:#f8fafc;font-weight:800}
+#customersAdminModal .customers-admin-title small{display:block;font-size:10px;color:#b8c7d9;line-height:18px}
+#customersAdminModal .customers-admin-icon{display:grid;width:34px!important;height:34px!important;min-width:34px;border-radius:12px;font-size:15px!important;place-items:center;flex:none;background:rgba(20,184,166,.12);color:#5eead4;border:1px solid rgba(94,234,212,.15);box-shadow:none}
+#customersAdminModal .customers-admin-top-actions{display:flex!important;align-items:center;justify-content:flex-end;gap:7px;flex:none}
+#customersAdminModal .customers-admin-refresh,#customersAdminModal .customers-admin-close{display:grid;place-items:center;width:32px!important;height:32px!important;min-width:32px!important;min-height:32px!important;flex:none;border-radius:50%;padding:0;font-size:13px;box-shadow:none}
+#customersAdminModal .customers-admin-refresh{background:linear-gradient(135deg,#0f766e,#0ea5a4)}
+#customersAdminModal .customers-admin-close{background:linear-gradient(145deg,#7f1d1d,#991b1b);border:1px solid rgba(248,113,113,.24)}
+#customersAdminModal .customers-admin-switcher-wrap{display:flex;align-items:center;max-width:100%;width:100%;padding:7px 12px 0!important;flex:none}
+#customersAdminModal .customers-admin-tabs-host,#customersAdminModal .customers-admin-tabs-host .request-view-tabs{width:100%;display:flex;gap:5px;min-width:0}
+#customersAdminModal .customers-admin-tabs-host .request-view-tab{padding:5px 6px!important;min-width:0;flex:1;min-height:30px;font-size:10px!important;border-radius:10px}
+#customersAdminModal .customers-admin-tabs-host .request-view-tab span{font-size:10px!important}
+#customersAdminModal .customers-admin-tabs-host.is-hidden{display:none!important}
+#customersAdminModal .customers-admin-body{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:0!important;padding:0!important}
+#customersAdminModal .assal-accounts-searchbar{height:38px;min-height:38px;margin:12px!important;padding:0 12px;border-radius:20px;background:rgba(1,7,17,.4);border:1px solid rgba(148,163,184,.25);gap:9px}
+#customersAdminModal .assal-accounts-searchbar input{font-size:13px!important;height:100%}
+#customersAdminModal .customers-admin-list{flex:1;min-height:0!important;max-height:none!important;display:flex;flex-direction:column;overflow:hidden!important;gap:0!important;padding:0!important;margin:0!important}
+#customersAdminModal .assal-account-directory-content{display:flex;flex:1;min-height:0;overflow:hidden;padding:0 6px 10px!important;gap:0!important}
+#customersAdminModal .assal-account-directory-list{flex:1;min-width:0;overflow-y:auto;overscroll-behavior:contain;padding:0 6px!important;scrollbar-width:thin;scrollbar-color:#28435f transparent}
+#customersAdminModal .assal-account-customer-row{display:flex;flex-direction:column;align-items:stretch;gap:3px;min-height:81px;padding:9px 5px!important;border-bottom:1px solid rgba(148,163,184,.1);cursor:pointer;background:transparent;box-sizing:border-box}
+#customersAdminModal .assal-account-customer-row:last-child{border-bottom:0}
+#customersAdminModal .assal-account-row-main{width:100%;min-height:38px;height:auto;display:flex;align-items:center;gap:9px;flex:none;text-align:right;cursor:pointer;box-shadow:none}
+#customersAdminModal .assal-account-row-main .assal-account-avatar{width:38px!important;height:38px!important;min-width:38px!important;border-radius:50%;font-size:16px!important}
+#customersAdminModal .assal-account-row-info b{font-size:13px!important;line-height:1.6;font-weight:750}
+#customersAdminModal .assal-account-row-info small{font-size:10px!important}
+#customersAdminModal .assal-account-row-actions{display:flex;flex-direction:row;align-items:center;justify-content:flex-end;width:100%;gap:7px!important;direction:rtl;padding:1px 0 0 0!important;box-sizing:border-box}
+#customersAdminModal .assal-account-icon-action{width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;border-radius:50%!important;flex:none;font-size:13px!important;box-shadow:none!important}
+#customersAdminModal .assal-account-customer-row:active{background:rgba(94,234,212,.035)}
+#customersAdminModal .assal-account-staff-head{min-height:40px;padding:3px 12px}
+#customersAdminModal .assal-account-staff-rows{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:0 6px 10px!important}
+#customersAdminModal .assal-account-directory-index{width:25px!important;gap:2px;flex:none}
+#customersAdminModal .assal-account-directory-index button{display:grid;place-items:center;min-width:23px!important;min-height:24px!important}
+#customersAdminModal .customers-admin-empty{align-self:center;margin:auto;text-align:center}
+/* Details are a dedicated dialog over the list, not behind its parent's stacking context. */
+#assalAccountDetailsOverlay.assal-account-details-overlay{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;background:rgba(1,7,17,.74);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:16px}
+#assalAccountDetailsOverlay.assal-account-details-overlay.is-open{display:flex!important}
+#assalAccountDetailsOverlay .assal-account-details-dialog{width:min(100%,410px);max-height:calc(100dvh - 32px);background:var(--assal-premium-modal-bg,linear-gradient(145deg,#112239,#071323));border:1px solid rgba(148,163,184,.22);border-radius:22px;box-shadow:0 26px 65px rgba(0,0,0,.56)}
+#assalAccountDetailsOverlay .assal-account-details-header{background:rgba(255,255,255,.025)}
+#assalAccountDetailsOverlay .assal-account-details-value{display:flex;align-items:center;gap:7px;min-width:0;margin-inline-start:auto}
+#assalAccountDetailsOverlay .assal-account-details-copy{display:grid;place-items:center;width:28px;height:28px;min-width:28px;border:1px solid rgba(94,234,212,.16);border-radius:8px;background:rgba(20,184,166,.09);color:#70e4d1;font-size:12px;cursor:pointer}
+#assalAccountDetailsOverlay .assal-account-details-copy-feedback{font-size:10px;color:#70e4d1;min-height:16px;text-align:center;margin-top:8px}
+@media(max-width:720px){#customersAdminModal.customers-admin-modal{padding:12px!important}#customersAdminModal .customers-admin-shell{width:100%;height:88dvh;max-height:88dvh;border-radius:20px}#customersAdminModal .assal-account-customer-row{min-height:81px}#customersAdminModal .assal-account-row-actions{gap:6px!important}}
+@media(max-width:380px){#customersAdminModal .customers-admin-top{padding:9px 10px!important}#customersAdminModal .customers-admin-switcher-wrap{padding-inline:10px!important}#customersAdminModal .assal-accounts-searchbar{margin:10px!important}#customersAdminModal .assal-account-row-actions{gap:5px!important}}
+</style>
+<style id="assal-account-directory-polish-v4">
+/* Compact header: one single line and icon-only controls; scoped to accounts modal. */
+#customersAdminModal .customers-admin-top{
+  display:flex!important; flex-direction:row!important; flex-wrap:nowrap!important;
+  align-items:center!important; justify-content:space-between!important;
+  min-height:54px!important; height:54px!important; padding:9px 12px!important;
+  gap:8px!important; box-sizing:border-box!important;
+}
+#customersAdminModal .customers-admin-title{min-width:0!important;flex:1 1 auto!important;gap:8px!important;overflow:hidden!important}
+#customersAdminModal .customers-admin-title>div{display:block!important;min-width:0!important;overflow:hidden!important;flex:1!important}
+#customersAdminModal .customers-admin-title h3{
+  margin:0!important; font-size:14px!important;line-height:1.5!important;
+  white-space:nowrap!important;word-break:normal!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+#customersAdminModal .customers-admin-title small{display:none!important}
+#customersAdminModal .customers-admin-icon{
+  width:30px!important;min-width:30px!important;height:30px!important;
+  border-radius:9px!important;font-size:13px!important;box-shadow:none!important;
+}
+#customersAdminModal .customers-admin-top-actions{flex:0 0 auto!important;display:flex!important;gap:7px!important}
+#customersAdminModal .customers-admin-refresh,#customersAdminModal .customers-admin-close{
+  width:30px!important;height:30px!important;min-width:30px!important;min-height:30px!important;
+  font-size:12px!important;border-radius:10px!important;box-shadow:none!important;
+}
+#customersAdminModal .customers-admin-refresh{
+  background:rgba(20,184,166,.1)!important;color:#6ee7db!important;border:1px solid rgba(94,234,212,.18)!important;
+}
+#customersAdminModal .customers-admin-close{
+  background:#8f2739!important;color:#fff!important;border:1px solid rgba(251,113,133,.28)!important;
+}
+/* Slim low-chroma toolbar under the customer's name, aligned to physical left in RTL. */
+#customersAdminModal .assal-account-row-actions{
+  display:flex!important;flex-direction:row!important;justify-content:flex-end!important;
+  align-items:center!important;direction:rtl!important;gap:5px!important;
+  width:100%!important;padding:1px 0 0!important;
+}
+#customersAdminModal .assal-account-icon-action{
+  box-sizing:border-box!important;width:30px!important;height:30px!important;
+  min-width:30px!important;min-height:30px!important;flex:none!important;
+  border-radius:9px!important;font-size:12px!important;line-height:1!important;
+  background:rgba(148,163,184,.075)!important;color:#c4d5e6!important;
+  border:1px solid rgba(148,163,184,.14)!important;box-shadow:none!important;
+  transition:background-color .12s ease,border-color .12s ease!important;
+}
+#customersAdminModal .assal-account-icon-action.is-whatsapp{color:#7ad6a4!important;background:rgba(22,163,74,.075)!important;border-color:rgba(74,222,128,.16)!important}
+#customersAdminModal .assal-account-icon-action.is-ban,#customersAdminModal .assal-account-icon-action.is-revoke{color:#e9bd85!important;background:rgba(217,119,6,.065)!important;border-color:rgba(245,158,11,.16)!important}
+#customersAdminModal .assal-account-icon-action.is-unban{color:#86efac!important;background:rgba(22,163,74,.065)!important;border-color:rgba(74,222,128,.14)!important}
+#customersAdminModal .assal-account-icon-action.is-promote,#customersAdminModal .assal-account-icon-action.is-create{color:#bdb1f2!important;background:rgba(124,58,237,.07)!important;border-color:rgba(167,139,250,.14)!important}
+#customersAdminModal .assal-account-icon-action.is-delete{color:#f1a0aa!important;background:rgba(190,45,60,.07)!important;border-color:rgba(251,113,133,.16)!important}
+#customersAdminModal .assal-account-icon-action:active{background:rgba(148,163,184,.2)!important}
+@media(max-width:380px){
+ #customersAdminModal .customers-admin-top{padding:8px 10px!important;gap:6px!important}
+ #customersAdminModal .customers-admin-title h3{font-size:13px!important}
+ #customersAdminModal .assal-account-icon-action{width:29px!important;height:29px!important;min-width:29px!important;min-height:29px!important}
+}
+/* Keep a transparent interception layer until Android/WebView completes the closing touch/click. */
+#assalAccountDetailsOverlay.assal-account-details-overlay.is-closing{
+  display:flex!important;opacity:0!important;pointer-events:auto!important;
+  visibility:visible!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+</style>
+<style id="assal-accounts-chat-parity-v5">
+/* Private chat directory parity: actions at physical left, portrait and name side-by-side at right. */
+#customersAdminModal .customers-admin-top{direction:rtl!important;display:flex!important;align-items:center!important;justify-content:space-between!important;min-height:53px!important;height:53px!important;padding:8px 12px!important;gap:9px!important}
+#customersAdminModal .customers-admin-top-actions{order:0!important;display:flex!important;gap:7px!important;flex:none!important}
+#customersAdminModal .customers-admin-title{order:1!important;flex:1!important;justify-content:flex-start!important;min-width:0!important;direction:rtl!important}
+#customersAdminModal .customers-admin-title .customers-admin-icon{display:none!important}
+#customersAdminModal .customers-admin-title h3{font-size:15px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#customersAdminModal .customers-admin-refresh,#customersAdminModal .customers-admin-close{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;border-radius:50%!important;display:grid!important;place-items:center!important}
+#customersAdminModal .customers-admin-refresh{background:rgba(20,184,166,.13)!important;border:1px solid rgba(94,234,212,.24)!important}
+#customersAdminModal .customers-admin-close{background:#a32537!important;border:1px solid rgba(255,255,255,.13)!important}
+#customersAdminModal .assal-account-row-main{direction:rtl!important;justify-content:flex-start!important;text-align:right!important}
+#customersAdminModal .assal-account-row-main .assal-account-avatar{order:0!important;flex:none!important;width:40px!important;height:40px!important;min-width:40px!important;overflow:hidden!important;border:1px solid rgba(255,255,255,.2)!important}
+#customersAdminModal .assal-account-row-main .assal-account-row-info{order:1!important;flex:1!important;text-align:right!important}
+#customersAdminModal .assal-account-avatar .am-portrait{display:block;width:100%;height:100%;border-radius:50%;overflow:hidden}
+#customersAdminModal .assal-account-row-actions{direction:ltr!important;justify-content:flex-start!important;align-self:flex-start!important;gap:6px!important}
+#assalAccountDetailsOverlay .assal-account-details-person .assal-account-avatar{overflow:hidden!important;padding:0!important}
+#assalAccountDetailsOverlay .assal-account-details-person .assal-account-avatar .am-portrait{width:100%;height:100%;display:block;border-radius:50%}
+#assalAccountDetailsOverlay .assal-account-details-close{pointer-events:auto!important;touch-action:manipulation!important;position:relative!important;z-index:4!important}
+@media(max-width:380px){#customersAdminModal .customers-admin-top{padding:8px 10px!important}#customersAdminModal .assal-account-row-main .assal-account-avatar{width:37px!important;height:37px!important;min-width:37px!important}}
+</style>
+<script id="assal-account-directory-interactions-v2">
+(function(){
+  'use strict';
+  const root=()=>document.getElementById('customersAdminModal');
+  const overlay=()=>document.getElementById('assalAccountDetailsOverlay');
+  const txt=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=String(value==null||value===''?'—':value);};
+  const showRow=(id,enabled)=>{const el=document.getElementById(id);if(el)el.hidden=!enabled;};
+  let opener=null;
+  let closeShieldTimer=0;
+  function details(customer,staff){
+    const parent=root();if(!parent||!parent.classList.contains('show'))return;
+    const box=overlay();if(!box)return;
+    const id=String(customer?.deviceId||customer?.id||staff?.staffCustomerId||'');
+    const name=String(customer?.name||staff?.label||'بدون اسم');
+    txt('assalAccountDetailsTitle',staff?'معلومات الأدمن':'معلومات الزبون');
+    txt('assalAccountDetailsStatus',staff?(staff.role==='owner'?'حساب المالك الرئيسي':staff.active?'أدمن فعّال':'أدمن موقوف'):(customer?.blocked?'حساب محظور':'حساب نشط'));
+    txt('assalAccountDetailsName',name);
+    const detailsAvatar=document.getElementById('assalAccountDetailsAvatar');
+    if(detailsAvatar){detailsAvatar.innerHTML=staff&& !id?'<i class="fas fa-user-shield"></i>':assalAccountMessengerPortrait(id);detailsAvatar.dataset.tone=assalAccountMessengerAvatarTone(id);}
+    txt('assalAccountDetailsPhone',customer?.phone);
+    txt('assalAccountDetailsId',id||(staff?.uid||''));
+    txt('assalAccountDetailsAddress',customer?.address);
+    const branchNames={baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز'};
+    if(staff){
+      txt('assalAccountDetailsBranch',staff.role==='owner'?'المالك الرئيسي':(branchNames[staff.branchCode]||'أدمن عسل'));
+      txt('assalAccountDetailsEmail',staff.staffEmail);
+      showRow('assalAccountDetailsBranchRow',true);
+      showRow('assalAccountDetailsEmailRow',!!staff.staffEmail);
+    }else{showRow('assalAccountDetailsBranchRow',false);showRow('assalAccountDetailsEmailRow',false);}
+    opener=document.activeElement;
+    const feedback=box.querySelector('.assal-account-details-copy-feedback');if(feedback)feedback.textContent='';
+    // Own top-level dialog ensures it is visible in Android WebView even with layered modals.
+    if(box.parentElement!==document.body)document.body.appendChild(box);
+    if(closeShieldTimer){clearTimeout(closeShieldTimer);closeShieldTimer=0;}
+    box.classList.remove('is-closing');
+    box.classList.add('is-open');box.setAttribute('aria-hidden','false');
+    box.querySelector('.assal-account-details-close')?.focus({preventScroll:true});
+  }
+  window.openAssalAccountDetails=function(id){
+    const customer=(typeof assalAllCustomersDirectory!=='undefined'?assalAllCustomersDirectory:[])
+      .find(item=>String(item.deviceId||item.id)===String(id));
+    if(customer)details(customer,null);
+  };
+  window.openAssalStaffDetails=function(uid){
+    if(typeof assalStaffIsOwner==='function'&&!assalStaffIsOwner())return;
+    const staff=(typeof assalStaffAdminCache!=='undefined'?assalStaffAdminCache:[])
+      .find(item=>String(item.uid)===String(uid));
+    if(!staff)return;
+    const customer=(typeof assalAllCustomersDirectory!=='undefined'?assalAllCustomersDirectory:[])
+      .find(item=>String(item.deviceId||item.id)===String(staff.staffCustomerId));
+    details(customer||null,staff);
+  };
+  window.closeAssalAccountDetails=function(event,immediate=false){
+    // Do not let the closing X pass through to a customer row during Android touch synthesis.
+    if(event?.preventDefault)event.preventDefault();
+    if(event?.stopPropagation)event.stopPropagation();
+    const box=overlay();if(!box)return;
+    if(closeShieldTimer){clearTimeout(closeShieldTimer);closeShieldTimer=0;}
+    const wasOpen=box.classList.contains('is-open');
+    box.classList.remove('is-open');box.setAttribute('aria-hidden','true');
+    const focusTarget=opener;opener=null;
+    const finish=()=>{
+      box.classList.remove('is-closing');closeShieldTimer=0;
+      if(focusTarget?.isConnected&&typeof focusTarget.focus==='function'){
+        try{focusTarget.focus({preventScroll:true});}catch(_){}
+      }
+    };
+    if(!wasOpen||immediate){finish();return;}
+    // A transparent modal shield remains briefly, absorbing the secondary click WebView
+    // may emit after touchend. No underlying action or data request is run on dismissal.
+    box.classList.add('is-closing');
+    closeShieldTimer=setTimeout(finish,400);
+  };
+  async function copyValue(id){
+    const box=overlay();const value=document.getElementById(id)?.textContent?.trim()||'';
+    if(!value||value==='—')return;
+    let ok=false;
+    if(navigator.clipboard && typeof navigator.clipboard.writeText==='function'){
+      try{await navigator.clipboard.writeText(value);ok=true;}catch(_){}
+    }
+    if(!ok){
+      const temp=document.createElement('textarea');temp.value=value;temp.setAttribute('readonly','');
+      temp.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0';
+      document.body.appendChild(temp);temp.select();try{ok=document.execCommand('copy');}catch(_){}temp.remove();
+    }
+    const feedback=box?.querySelector('.assal-account-details-copy-feedback');
+    if(feedback)feedback.textContent=ok?'تم النسخ':'تعذّر النسخ';
+  }
+  // Capture on the dialog itself: other document-wide click listeners cannot swallow row taps.
+  function clickInsideRoot(event){
+    if(overlay()?.classList.contains('is-closing')||overlay()?.classList.contains('is-open')){
+      event.preventDefault();event.stopImmediatePropagation();return;
+    }
+    const target=event.target instanceof Element?event.target:null;
+    if(!target)return;
+    const letter=target.closest('[data-assal-account-letter]');
+    if(letter){
+      event.stopPropagation();
+      const list=letter.closest('.assal-account-directory-content')?.querySelector('.assal-account-directory-list');
+      const section=Array.from(list?.children||[]).find(el=>el.dataset.accountLetter===letter.dataset.assalAccountLetter);
+      if(list&&section)list.scrollTop+=section.getBoundingClientRect().top-list.getBoundingClientRect().top;
+      return;
+    }
+    const action=target.closest('[data-assal-account-action]');
+    if(action){
+      event.stopPropagation();
+      const id=action.dataset.customerId||'',uid=action.dataset.staffUid||'';
+      switch(action.dataset.assalAccountAction){
+        case 'details':window.openAssalAccountDetails(id);break;
+        case 'staff-details':window.openAssalStaffDetails(uid);break;
+        case 'chat':window.openAdminChatWithCustomer?.(id);break;
+        case 'ban':window.confirmToggleCustomerBan?.(id,true);break;
+        case 'unban':window.confirmToggleCustomerBan?.(id,false);break;
+        case 'promote':window.assalPromoteCustomer?.(id);break;
+        case 'delete':window.confirmDeleteCustomerProfile?.(id);break;
+        case 'revoke':window.assalRevokeStaff?.(uid);break;
+        case 'create':window.assalOpenCreateStaff?.();break;
+      }
+      return;
+    }
+    // WhatsApp links (and disabled controls) never open details or trigger other actions.
+    if(target.closest('.assal-account-row-actions')){event.stopPropagation();return;}
+    // Full row, including its blank space, opens the same details dialog.
+    const row=target.closest('.assal-account-customer-row[data-assal-row-kind]');
+    if(!row)return;
+    event.stopPropagation();
+    if(row.dataset.assalRowKind==='staff')window.openAssalStaffDetails(row.dataset.staffUid);
+    else window.openAssalAccountDetails(row.dataset.customerId);
+  }
+  function attach(){root()?.addEventListener('click',clickInsideRoot,true);}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach,{once:true});else attach();
+  document.addEventListener('click',event=>{
+    const box=overlay();if(!box?.classList.contains('is-open'))return;
+    if(event.target===box){window.closeAssalAccountDetails(event);return;}
+    const btn=event.target instanceof Element?event.target.closest('[data-assal-copy]'):null;
+    if(btn&&box.contains(btn)){event.preventDefault();copyValue(btn.dataset.assalCopy);}
+  },true);
+
+  // Direct dialog close handling: close button must always work on Android WebView.
+  function wireCloseButton(){
+    const box=overlay(), button=box?.querySelector('.assal-account-details-close');
+    if(!box||!button||button.dataset.assalFixedClose==='1')return;
+    button.dataset.assalFixedClose='1';
+    button.removeAttribute('onclick');
+    button.addEventListener('click',function(e){
+      e.preventDefault();e.stopImmediatePropagation();
+      window.closeAssalAccountDetails(e);
+    },true);
+    button.addEventListener('touchend',function(e){
+      // Let the click event close it, without allowing a touch to leak to the list.
+      e.stopPropagation();
+    },{passive:true,capture:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireCloseButton,{once:true});else wireCloseButton();
+  // The detail overlay owns its pointer sequence; never bubble dismissals to page listeners.
+  function consumeOverlayInteraction(event){event.stopPropagation();}
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>overlay()?.addEventListener('click',consumeOverlayInteraction),{once:true});
+  }else overlay()?.addEventListener('click',consumeOverlayInteraction);
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&overlay()?.classList.contains('is-open')){
+      event.stopImmediatePropagation();window.closeAssalAccountDetails();
+    }
+  },true);
+})();
+</script>
