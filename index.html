@@ -18929,8 +18929,12 @@ function getAssalOfficeFirestoreTools() {
           getDoc: mod.getDoc,
           collection: mod.collection,
           getDocs: mod.getDocs,
+          getDocFromServer: mod.getDocFromServer,
+          getDocsFromServer: mod.getDocsFromServer,
+          runStaffTransaction: mod.runTransaction,
           setDoc: mod.setDoc,
           updateDoc: mod.updateDoc,
+          writeBatch: mod.writeBatch,
           onSnapshot: mod.onSnapshot,
         }))
         .catch((err) => {
@@ -19101,123 +19105,405 @@ function assalStaffPasswordValid(password){return /^assal-[0-9]{3}$/.test(String
 function assalIsRealCustomerId(id) {
   return /^(?:DEV-[A-Z0-9-]{7,24}|AND-[A-F0-9]{32})$/.test(String(id || ""));
 }
+/* STAFF INVITATIONS V3 — Firestore owner authority; no customer/Android identity writes. */
+const ASSAL_STAFF_EMAIL_RE = /^assal-[a-z0-9]{1,30}@assal\.app$/;
+const ASSAL_STAFF_UID_RE = /^[a-zA-Z0-9_-]{12,128}$/;
+const ASSAL_STAFF_BRANCHES = ["baqubah","tahrir","hay","baladruz"];
+let assalStaffMutationBusy = false;
+
+function assalStaffFailure(code, message, report = null, partial = null) {
+  const error = new Error(message);
+  error.code = code;
+  if (report) error.staffReport = report;
+  if (partial) error.staffPartial = partial;
+  return error;
+}
 async function assalAssertOwnerForStaff() {
   await waitForAssalOfficeAuthReady();
   const uid = String(assalOfficeAuth.currentUser?.uid || "");
   if (!uid || uid !== String(localStorage.getItem("assalAdminAuthUid") || ""))
     throw new Error("يجب تسجيل دخول المالك مجدداً قبل إدارة الأدمنية.");
   const tools = await getAssalOfficeFirestoreTools();
-  const snap = await tools.getDoc(tools.doc(tools.db, "staffProfiles", uid));
+  const snap = await tools.getDocFromServer(tools.doc(tools.db,"staffProfiles",uid));
   if (!snap.exists() || snap.data()?.role !== "owner" || snap.data()?.active !== true)
     throw new Error("إدارة الأدمنية متاحة للمالك الرئيسي فقط.");
   return tools;
 }
+function assalStaffOwnerUid() {
+  const uid = String(assalOfficeAuth.currentUser?.uid || "");
+  if (!uid || uid !== String(localStorage.getItem("assalAdminAuthUid") || ""))
+    throw new Error("تغيّرت جلسة المالك. سجّل الدخول من جديد.");
+  return uid;
+}
+function assalStaffSafeStopped(record) {
+  return record && record.role === "branch" && record.managedByOwner === true &&
+    record.active === false && ASSAL_STAFF_EMAIL_RE.test(String(record.staffEmail || "")) &&
+    ASSAL_STAFF_BRANCHES.includes(record.branchCode) && record.canUseWholesale === false &&
+    record.canManageCompatSubscriptions === false;
+}
+function assalStaffStateToken(state) {
+  const fields = ["role","managedByOwner","staffCustomerId","staffEmail","active","branchCode",
+    "canUseWholesale","canManageCompatSubscriptions","createdAt","createdByUid","revokedAt",
+    "revokedByUid","reactivatedAt","reactivatedByUid","label","inviteStatus","inviteRevision","invitedAt","invitedByUid","acceptedAt","acceptedByUid"];
+  const invite = state.invite;
+  const relevant = state.docs.filter(d => d.data.staffCustomerId === state.customerId || d.uid === invite?.uid);
+  const emails = new Set(relevant.map(d => d.data.staffEmail).filter(Boolean));
+  const tracked = state.docs.filter(d => relevant.includes(d) || emails.has(d.data.staffEmail));
+  const invitationFields = ["customerId","uid","email","active","createdAt","createdByUid","revision",
+    "updatedAt","updatedByUid","selectionBasis","previousUid","previousEmail","status","branchCode","label","issuedAt","issuedByUid","acceptedAt","acceptedByUid"];
+  return JSON.stringify([state.customerId,
+    tracked.map(d => [d.uid,...fields.map(k => d.data[k])]).sort((a,b) => a[0].localeCompare(b[0])),
+    invite ? invitationFields.map(k => invite[k]) : null]);
+}
+function assalStaffRecoveryReport(state) {
+  const {customerId, docs, invite} = state;
+  const linked = docs.filter(d => d.data.staffCustomerId === customerId);
+  const records = linked.map(d => ({uid:d.uid,email:String(d.data.staffEmail || ""),
+    label:String(d.data.label || ""),branchCode:String(d.data.branchCode || ""),active:d.data.active,
+    inviteStatus:String(d.data.inviteStatus || ""),role:String(d.data.role || ""),managedByOwner:d.data.managedByOwner === true,
+    createdAt:d.data.createdAt,revokedAt:d.data.revokedAt,reactivatedAt:d.data.reactivatedAt,
+    eligible:ASSAL_STAFF_UID_RE.test(d.uid) && assalStaffSafeStopped(d.data),
+    inviteMatch:!!invite && invite.uid === d.uid && invite.email === d.data.staffEmail && invite.customerId === customerId}));
+  const report = {customerId,records,invite:invite ? {...invite} : null,token:assalStaffStateToken(state),
+    mode:"blocked",basis:"",selectedUid:"",message:"",candidates:[]};
+  if (linked.some(d => d.data.active === true)) {
+    report.message = "يوجد حساب إداري فعّال مرتبط بهذا الزبون. اسحب الصلاحية المطلوبة أولاً، ولا تفعّل حساباً ثانياً.";
+    return report;
+  }
+  if (linked.some(d => d.data.role !== "branch" || d.data.managedByOwner !== true || d.data.active !== false)) {
+    report.message = "توجد سجلات مرتبطة بالزبون بدور أو حالة تفعيل غير متوقعة. يلزم تدقيقها قبل أي إنشاء أو استرجاع.";
+    return report;
+  }
+  if (invite && (invite.customerId !== customerId || !ASSAL_STAFF_UID_RE.test(String(invite.uid || "")) ||
+      !ASSAL_STAFF_EMAIL_RE.test(String(invite.email || "")) || typeof invite.active !== "boolean" ||
+      !Number.isSafeInteger(invite.createdAt) || !String(invite.createdByUid || "") ||
+      (invite.revision !== undefined && (!Number.isSafeInteger(invite.revision) || invite.revision < 0)))) {
+    report.message = "الدعوة القديمة تحتوي بيانات هوية أو حالة غير صالحة. لم نغيّرها؛ راجع تفاصيلها مع سجلات الحساب.";
+    return report;
+  }
+  const previous = invite ? docs.find(d => d.uid === invite.uid) : null;
+  if (previous && (previous.data.staffCustomerId !== customerId || previous.data.role !== "branch" ||
+      previous.data.managedByOwner !== true || previous.data.active !== false)) {
+    report.message = "الدعوة تشير إلى حساب آخر أو سجل غير قابل للاسترجاع لهذا الزبون. لا يمكن إعادة ربطه تلقائياً.";
+    return report;
+  }
+  const pending=linked.filter(d=>d.data.inviteStatus==="pending");
+  if(pending.length || invite?.status==="pending") {
+    const target=pending.length===1?pending[0]:null;
+    if(target && invite?.status==="pending" && invite.active===false && invite.uid===target.uid &&
+        invite.email===target.data.staffEmail && invite.revision===target.data.inviteRevision &&
+        invite.branchCode===target.data.branchCode && invite.label===target.data.label &&
+        invite.issuedByUid===target.data.invitedByUid && invite.issuedAt===target.data.invitedAt && assalStaffSafeStopped(target.data)) {
+      report.mode="pending";report.selectedUid=target.uid;
+      report.message="توجد دعوة إدارية لهذا الزبون بانتظار موافقته ودخوله. لا توجد صلاحية إدارة فعّالة بعد؛ يمكنك إلغاء الدعوة من قائمة الأدمنية.";
+    } else report.message="حالة الدعوة المعلّقة لا تتطابق مع سجل الحساب. لم نُصدر دعوة أخرى؛ راجع الربط أو ألغِ الدعوة من الإدارة.";
+    return report;
+  }
+  if(invite?.status && !["accepted","revoked"].includes(invite.status)) {
+    report.message="حالة الدعوة غير معروفة. يلزم تدقيقها قبل إعادة الترقية.";return report;
+  }
+  if (!linked.length) {
+    report.mode = invite ? "blocked" : "new";
+    report.message = invite ? "توجد دعوة قديمة دون سجل إداري مرتبط قابل للاسترجاع. لن ننشئ حساباً بديلاً تلقائياً." : "الزبون لا يملك سجلات إدارة سابقة.";
+    return report;
+  }
+  report.candidates = records.filter(d => d.eligible).map(d => d.uid);
+  if (!report.candidates.length) {
+    report.message = "لا يوجد سجل موقوف مكتمل وآمن لإعادة تفعيله. راجع البريد والدور وصلاحيات السجلات المعروضة.";
+    return report;
+  }
+  const matched = records.find(d => d.eligible && d.inviteMatch);
+  const sole = !invite && records.length === 1 && records[0].eligible ? records[0] : null;
+  const automatic = matched || sole;
+  if (automatic && docs.filter(d => d.data.staffEmail === automatic.email).length === 1) {
+    report.mode = "reactivate";
+    report.basis = matched ? "invite" : "single";
+    report.selectedUid = automatic.uid;
+    report.message = matched ? "الدعوة تطابق هذا الحساب في UID والبريد ومعرّف الزبون." : "يوجد حساب إداري موقوف واحد فقط، ولا توجد دعوة متعارضة.";
+  } else {
+    report.mode = "choose";
+    report.basis = "owner-verified";
+    report.message = "يلزم اختيار حساب قديم والتحقق من كلمة مروره وUID الحقيقي قبل إعادة الصلاحية. لا نعتمد ترتيب السجلات أو تاريخها وحده.";
+  }
+  return report;
+}
+async function assalReadStaffRecovery(customerId) {
+  customerId = String(customerId || "").trim();
+  if (!assalIsRealCustomerId(customerId)) throw new Error("معرّف الزبون غير صالح.");
+  const tools = await assalAssertOwnerForStaff();
+  const ownerUid = assalStaffOwnerUid();
+  const [registered, directory, invitation] = await Promise.all([
+    window.firebaseDB.get(window.firebaseDB.ref(window.firebaseDB.db,`customerProfiles/${customerId}`)),
+    tools.getDocsFromServer(tools.collection(tools.db,"staffProfiles")),
+    tools.getDocFromServer(tools.doc(tools.db,"staffInvites",customerId))
+  ]);
+  if (ownerUid !== assalStaffOwnerUid()) throw new Error("تغيّرت جلسة المالك أثناء الفحص. أعد المحاولة.");
+  const customer = registered.exists() ? registered.val() : null;
+  if (!customer || !String(customer.name || "").trim() || !String(customer.phone || "").trim() || !String(customer.address || "").trim())
+    throw new Error("يجب أن يكون الزبون مسجلاً بالفعل قبل ترقيته.");
+  if (customer.blocked === true) throw new Error("الزبون محظور حالياً. ارفع الحظر قبل منحه صلاحية إدارية.");
+  const state = {tools,ownerUid,customerId,customer,docs:directory.docs.map(d => ({uid:d.id,data:d.data(),ref:d.ref})),
+    invite:invitation.exists() ? invitation.data() : null};
+  state.report = assalStaffRecoveryReport(state);
+  return state;
+}
+function assalStaffInviteWrite(old, customerId, uid, email, status, basis, actorUid, now, target = null) {
+  const update={uid,email,status,active:status==="accepted",revision:(old?.revision || 0)+1,
+    updatedAt:now,updatedByUid:actorUid,selectionBasis:basis};
+  if(status==="pending")Object.assign(update,{branchCode:target.branchCode,label:target.label,
+    issuedAt:now,issuedByUid:actorUid,acceptedAt:0,acceptedByUid:""});
+  if(!old)return {customerId,...update,createdAt:now,createdByUid:actorUid};
+  if(old.uid!==uid || old.email!==email){update.previousUid=old.uid;update.previousEmail=old.email;}
+  return update;
+}
+async function assalStaffVerifyOldAuth(uid, email, password) {
+  if (!String(password || "")) throw new Error("أدخل كلمة المرور القديمة للتحقق من الحساب المختار. لن نغيّرها أو نخزّنها.");
+  const auth = await assalProvisionAuth();
+  try {
+    const credential = await signInWithEmailAndPassword(auth,email,String(password));
+    if (credential?.user?.uid !== uid || String(credential?.user?.email || "").toLowerCase() !== email)
+      throw assalStaffFailure("staff-auth-mismatch","بيانات الدخول تخص UID مختلفاً عن السجل المختار. أوقفت العملية دون تغيير الصلاحيات.");
+  } finally { try {await firebaseAuthSignOut(auth);} catch (_) {} }
+}
+async function assalStaffTransactionState(tools, transaction, original, extraUid) {
+  const ids = new Set(original.docs.filter(d => d.data.staffCustomerId === original.customerId ||
+    d.uid === original.invite?.uid).map(d => d.uid));
+  const emails = new Set(original.docs.filter(d => ids.has(d.uid)).map(d => d.data.staffEmail).filter(Boolean));
+  original.docs.forEach(d => {if (emails.has(d.data.staffEmail)) ids.add(d.uid);});
+  if (original.invite?.uid) ids.add(original.invite.uid);
+  if (extraUid) ids.add(extraUid);
+  ids.add(original.ownerUid);
+  if (ids.size > 200) throw new Error("عدد السجلات المرتبطة غير اعتيادي. يلزم تدقيق الإدارة قبل المتابعة.");
+  const refs = [...ids].map(uid => tools.doc(tools.db,"staffProfiles",uid));
+  const snaps = await Promise.all(refs.map(ref => transaction.get(ref)));
+  const invitation = await transaction.get(tools.doc(tools.db,"staffInvites",original.customerId));
+  const owner = snaps.find(d => d.id === original.ownerUid);
+  if (assalStaffOwnerUid() !== original.ownerUid || !owner?.exists() || owner.data()?.role !== "owner" || owner.data()?.active !== true)
+    throw new Error("جلسة المالك أو صلاحيته تغيّرت. لم نعتمد العملية.");
+  const refreshed = new Map(original.docs.map(d => [d.uid,d]));
+  snaps.forEach(snap => {if (snap.exists()) refreshed.set(snap.id,{uid:snap.id,data:snap.data(),ref:snap.ref});else refreshed.delete(snap.id);});
+  const state = {...original,docs:[...refreshed.values()],invite:invitation.exists() ? invitation.data() : null};
+  if (assalStaffStateToken(state) !== original.report.token)
+    throw assalStaffFailure("staff-state-changed","تغيّرت سجلات الحساب أثناء العملية. أعد الفحص قبل المتابعة.",assalStaffRecoveryReport(state));
+  return state;
+}
+async function assalStaffCreateOrRecover(form) {
+  const customerId = String(form.customerId || "").trim(), branchCode = String(form.branchCode || "");
+  if (!ASSAL_STAFF_BRANCHES.includes(branchCode)) throw new Error("اختر فرعاً صحيحاً.");
+  const original = await assalReadStaffRecovery(customerId), report = original.report;
+  if (form.reviewToken && form.reviewToken !== report.token)
+    throw assalStaffFailure("staff-state-changed","تغيّرت بيانات الحساب بعد عرضها. راجع الفحص الجديد ثم أعد المحاولة.",report);
+  if (report.mode === "blocked" || report.mode === "pending") throw assalStaffFailure("staff-review-blocked",report.message,report);
+  const {tools,ownerUid} = original, inviteRef=tools.doc(tools.db,"staffInvites",customerId);
+  if (report.mode !== "new") {
+    let selectedUid = report.selectedUid;
+    if (report.mode === "choose") {
+      selectedUid = String(form.selectedUid || "");
+      if (!report.candidates.includes(selectedUid))
+        throw assalStaffFailure("staff-selection-required",report.message,report);
+      const chosen = original.docs.find(d => d.uid === selectedUid);
+      await assalStaffVerifyOldAuth(selectedUid,chosen.data.staffEmail,form.recoveryPassword);
+    } else if (form.selectedUid && form.selectedUid !== selectedUid) {
+      throw assalStaffFailure("staff-state-changed","الحساب المختار لا يطابق دليل الربط الحالي. أعد الفحص.",report);
+    }
+    const chosen = original.docs.find(d => d.uid === selectedUid), email=chosen.data.staffEmail;
+    try { await tools.runStaffTransaction(tools.db,async transaction => {
+      const current = await assalStaffTransactionState(tools,transaction,original);
+      const nextReport=assalStaffRecoveryReport(current);
+      if (["blocked","pending"].includes(nextReport.mode) || !nextReport.candidates.includes(selectedUid))
+        throw assalStaffFailure("staff-state-changed","السجل المختار لم يعد قابلاً للاسترجاع. أعد الفحص.",nextReport);
+      const now=Date.now();
+      const pending={active:false,branchCode,label:String(chosen.data.label || original.customer.name).trim().slice(0,100),
+        inviteStatus:"pending",inviteRevision:(current.invite?.revision || 0)+1,invitedAt:now,invitedByUid:ownerUid};
+      transaction.update(chosen.ref,pending);
+      const data=assalStaffInviteWrite(current.invite,customerId,selectedUid,email,"pending",report.basis,ownerUid,now,pending);
+      if(current.invite)transaction.update(inviteRef,data);else transaction.set(inviteRef,data);
+    }); } catch(error) {
+      if(["permission-denied","aborted","failed-precondition"].includes(String(error?.code || "")) && !error.staffReport) {
+        let refreshed=null;
+        try {refreshed=await assalReadStaffRecovery(customerId);}catch(_){}
+        if(refreshed && refreshed.report.token!==report.token)
+          throw assalStaffFailure("staff-state-changed","تغيّرت سجلات الحساب أثناء الحفظ. راجع الحالة المحدّثة قبل إعادة المحاولة.",refreshed.report);
+      }
+      throw error;
+    }
+    return {uid:selectedUid,email,customerId,reactivated:true,pending:true,selectionBasis:report.basis};
+  }
+  if (form.selectedUid) throw new Error("لا يوجد سجل قديم يطابق الاختيار. لم ننشئ بديلاً عنه.");
+  const password=String(form.password || "");
+  if (!assalStaffPasswordValid(password)) throw new Error("كلمة المرور يجب أن تكون assal- متبوعة بثلاثة أرقام.");
+  const baseName=assalStaffShortName(original.customer.name);
+  const occupied=new Set(original.docs.map(d => String(d.data.staffEmail || "").toLowerCase()));
+  let email=`assal-${baseName}@assal.app`;
+  for(let suffix=2;occupied.has(email)&&suffix<10000;suffix++)email=`assal-${baseName}${suffix}@assal.app`;
+  if(occupied.has(email))throw new Error("تعذّر اختيار بريد إداري فريد.");
+  const provision=await assalProvisionAuth();
+  let result=null,uid="";
+  try {
+    try {result=await createUserWithEmailAndPassword(provision,email,password);}
+    catch(error) {
+      if(String(error?.code || "").includes("email-already-in-use"))
+        throw assalStaffFailure("staff-auth-already-exists","البريد "+email+" موجود في Authentication دون سجل مطابق متاح. يلزم تدقيقه؛ لن ننشئ بريداً بديلاً تلقائياً.");
+      throw error;
+    }
+    uid=String(result?.user?.uid || "");
+    if(!uid)throw new Error("تعذّر تأكيد هوية الحساب الجديد. راجع Authentication قبل إعادة المحاولة.");
+    try {
+      await tools.runStaffTransaction(tools.db,async transaction => {
+        const current=await assalStaffTransactionState(tools,transaction,original,uid);
+        const target=tools.doc(tools.db,"staffProfiles",uid);
+        if(current.docs.some(d => d.uid===uid))throw new Error("هوية الحساب الجديد مرتبطة بسجل موجود؛ لم نكتب فوقه.");
+        if(current.invite)throw new Error("ظهرت دعوة إدارية أثناء الإنشاء. لم نستبدلها.");
+        const now=Date.now();
+        const pending={branchCode,label:String(original.customer.name).trim().slice(0,100)};
+        transaction.set(target,{role:"branch",branchCode,active:false,inviteStatus:"pending",inviteRevision:1,invitedAt:now,invitedByUid:ownerUid,
+          label:String(original.customer.name).trim().slice(0,100),canUseWholesale:false,
+          canManageCompatSubscriptions:false,managedByOwner:true,staffCustomerId:customerId,
+          staffEmail:email,createdAt:now,createdByUid:ownerUid});
+        transaction.set(inviteRef,assalStaffInviteWrite(null,customerId,uid,email,"pending","new",ownerUid,now,pending));
+      });
+    } catch(error) {
+      // Never delete an Auth identity after an uncertain commit. Reconcile from the SERVER first.
+      let profileSnap,inviteSnap;
+      try {
+        [profileSnap,inviteSnap]=await Promise.all([
+          tools.getDocFromServer(tools.doc(tools.db,"staffProfiles",uid)),tools.getDocFromServer(inviteRef)]);
+      } catch (_) {
+        throw assalStaffFailure("staff-result-unknown","تعذّر تأكيد نتيجة الإنشاء. احتفظنا بحساب Authentication للمراجعة؛ لا تعاود الإنشاء قبل تدقيق البيانات.",null,{uid,email,status:"unknown"});
+      }
+      const saved=profileSnap.exists()?profileSnap.data():null, invitation=inviteSnap.exists()?inviteSnap.data():null;
+      if(saved?.active===false && saved.inviteStatus==="pending" && saved.role==="branch" && saved.managedByOwner===true &&
+          saved.staffCustomerId===customerId && saved.staffEmail===email &&
+          invitation?.active===false && invitation.status==="pending" && invitation.uid===uid && invitation.email===email &&
+          invitation.customerId===customerId && invitation.revision===saved.inviteRevision)
+        return {uid,email,customerId,reactivated:false,pending:true,reconciled:true};
+      if(!profileSnap.exists() && (!inviteSnap.exists() || invitation.uid!==uid)) {
+        try {await deleteUser(result.user);}
+        catch (_) {
+          throw assalStaffFailure("staff-auth-cleanup-required","لم تُثبت الصلاحية، وتعذّر حذف حساب Authentication الجديد لهذه المحاولة. يحتاج المالك تدقيق الحساب التالي قبل إعادة الإنشاء.",null,{uid,email,status:"auth-only"});
+        }
+        if(error?.staffReport)throw error;
+        throw assalStaffFailure(String(error?.code || "staff-create-failed"),String(error?.message || "تعذّر حفظ الصلاحية.")+" أُلغي حساب Authentication الجديد لهذه المحاولة.");
+      }
+      throw assalStaffFailure("staff-partial-records","نتيجة الإنشاء غير متطابقة بين السجلات. لم نحذف أي حساب. راجع UID والبريد التاليين قبل إعادة المحاولة.",null,{uid,email,status:"needs-review"});
+    }
+    return {uid,email,customerId,reactivated:false,pending:true};
+  } finally {try{await firebaseAuthSignOut(provision);}catch(_){} }
+}
+async function assalStaffRevokeLinked(uid) {
+  uid=String(uid || "");
+  if(!ASSAL_STAFF_UID_RE.test(uid))throw new Error("معرّف حساب الأدمن غير صالح.");
+  const tools=await assalAssertOwnerForStaff(),ownerUid=assalStaffOwnerUid();
+  const directory=await tools.getDocsFromServer(tools.collection(tools.db,"staffProfiles"));
+  return await tools.runStaffTransaction(tools.db,async transaction => {
+    const record=tools.doc(tools.db,"staffProfiles",uid);
+    const [snapshot,owner]=await Promise.all([transaction.get(record),transaction.get(tools.doc(tools.db,"staffProfiles",ownerUid))]);
+    const d=snapshot.exists()?snapshot.data():null;
+    if(ownerUid!==assalStaffOwnerUid() || !owner.exists() || owner.data()?.role!=="owner" || owner.data()?.active!==true)
+      throw new Error("تغيّرت صلاحية المالك أثناء السحب. أعد تسجيل الدخول.");
+    if(uid===ownerUid || !d || d.managedByOwner!==true || d.role!=="branch" || typeof d.active!=="boolean")
+      throw new Error("لا يمكن سحب هذا السجل من هنا. الحساب يجب أن يكون فرعاً مداراً من المالك.");
+    if(!assalIsRealCustomerId(d.staffCustomerId))throw new Error("ربط الزبون في سجل الأدمن غير صالح. يلزم تدقيقه قبل السحب.");
+    const otherRefs=directory.docs.filter(s=>s.id!==uid && s.data()?.staffCustomerId===d.staffCustomerId).map(s=>s.ref);
+    if(otherRefs.length>200)throw new Error("عدد السجلات المرتبطة غير اعتيادي. يلزم تدقيق الإدارة قبل السحب.");
+    const others=await Promise.all(otherRefs.map(ref=>transaction.get(ref)));
+    const remainingActive=others.some(s=>s.exists() && s.data()?.staffCustomerId===d.staffCustomerId && s.data()?.active===true);
+    const inviteRef=tools.doc(tools.db,"staffInvites",d.staffCustomerId),inviteSnap=await transaction.get(inviteRef);
+    const invite=inviteSnap.exists()?inviteSnap.data():null;
+    const matches=!!invite && invite.uid===uid && invite.customerId===d.staffCustomerId && invite.email===d.staffEmail;
+    if(matches && (typeof invite.active!=="boolean" || (invite.revision!==undefined && (!Number.isSafeInteger(invite.revision)||invite.revision<0))))
+      throw new Error("حالة الدعوة المرتبطة غير صالحة. لم نعرض نجاحاً جزئياً؛ راجع الدعوة ثم أعد السحب.");
+    if(invite && invite.uid===uid && !matches)
+      throw new Error("الدعوة تشير إلى UID نفسه لكن البريد أو معرّف الزبون متعارض. يلزم تدقيقها قبل سحب مترابط.");
+    const now=Date.now();
+    const revision=matches?(invite.revision || 0)+1:(Number.isSafeInteger(d.inviteRevision)?d.inviteRevision:0)+1;
+    transaction.update(record,{active:false,inviteStatus:"revoked",inviteRevision:revision,revokedAt:now,revokedByUid:ownerUid});
+    if(matches)transaction.update(inviteRef,assalStaffInviteWrite(invite,d.staffCustomerId,uid,d.staffEmail,"revoked","revoke",ownerUid,now));
+    return {revoked:true,cancelled:d.inviteStatus==="pending",alreadyStopped:d.active===false,inviteStatus:matches?"stopped":invite?"different":"missing",
+      warning:remainingActive?"أُوقفت صلاحية الحساب المحدد، لكن يوجد UID آخر فعّال مرتبط بالزبون. راجع سجلاته؛ لم نغيّر صلاحية الحساب الآخر أو دعوته.":
+        invite&&!matches?"أُوقفت صلاحية هذا الحساب فقط. الدعوة تخص UID آخر، لذلك لم نغيّرها؛ راجع ربط السجلات قبل إعادة الترقية.":""};
+  });
+}
+async function assalStaffExclusive(action) {
+  if(assalStaffMutationBusy)throw new Error("توجد عملية إدارة قيد التنفيذ. انتظر اكتمالها ثم أعد المحاولة.");
+  assalStaffMutationBusy=true;
+  try{return await action();}finally{assalStaffMutationBusy=false;}
+}
+/* Acceptance is a separate authenticated transaction. Saving a card never calls it. */
+async function assalStaffAcceptOrLogin(email, password, expectedInvite = null) {
+  email=String(email || "").trim().toLowerCase();
+  if(!ASSAL_STAFF_EMAIL_RE.test(email))throw new Error("بريد حساب الأدمن غير صحيح.");
+  if(!String(password || ""))throw new Error("أدخل كلمة مرور حسابك الإداري.");
+  if(!window.assalSecureAuth)throw new Error("خدمة تسجيل الدخول غير جاهزة.");
+  const customerId=String(typeof getDeviceId==="function"?getDeviceId():"");
+  if(!assalIsRealCustomerId(customerId))throw new Error("معرّف حساب الزبون غير صالح.");
+  const credential=await window.assalSecureAuth.signIn(email,String(password));
+  const uid=String(credential?.user?.uid || "");
+  try {
+    const tools=await getAssalOfficeFirestoreTools();
+    const profileRef=tools.doc(tools.db,"staffProfiles",uid),inviteRef=tools.doc(tools.db,"staffInvites",customerId);
+    const raw=await tools.runStaffTransaction(tools.db,async transaction=>{
+      const [profileSnap,inviteSnap]=await Promise.all([transaction.get(profileRef),transaction.get(inviteRef)]);
+      const p=profileSnap.exists()?profileSnap.data():null,invite=inviteSnap.exists()?inviteSnap.data():null;
+      if(assalOfficeAuth.currentUser?.uid!==uid || !p || p.role!=="branch" || p.managedByOwner!==true ||
+          p.staffCustomerId!==customerId || p.staffEmail!==email ||
+          !ASSAL_STAFF_BRANCHES.includes(p.branchCode) || p.canUseWholesale!==false || p.canManageCompatSubscriptions!==false)
+        throw new Error("هذا الحساب غير مخوّل لحساب الزبون الحالي، أو بيانات صلاحياته غير متطابقة.");
+      // Previously accepted/legacy active profiles keep their existing login behavior.
+      if(p.active===true && (!p.inviteStatus || p.inviteStatus==="accepted"))return p;
+      if(p.active!==false || p.inviteStatus!=="pending" || !invite || invite.status!=="pending" || invite.active!==false ||
+          invite.customerId!==customerId || invite.uid!==uid || invite.email!==email ||
+          !Number.isSafeInteger(invite.revision) || invite.revision<1 || p.inviteRevision!==invite.revision ||
+          invite.branchCode!==p.branchCode || invite.label!==p.label ||
+          invite.issuedByUid!==p.invitedByUid || invite.issuedAt!==p.invitedAt)
+        throw new Error("لا توجد دعوة إدارية معلّقة صالحة لهذا الحساب. ربما ألغاها المالك أو سحب الصلاحية.");
+      if(expectedInvite && (expectedInvite.uid!==uid || expectedInvite.revision!==invite.revision))
+        throw new Error("تغيّرت الدعوة منذ فتح النافذة. أغلقها وافتح الدعوة المحدّثة قبل الموافقة.");
+      const now=Date.now(),revision=invite.revision+1;
+      const accepted={active:true,inviteStatus:"accepted",inviteRevision:revision,acceptedAt:now,acceptedByUid:uid};
+      transaction.update(profileRef,accepted);
+      transaction.update(inviteRef,{active:true,status:"accepted",revision,updatedAt:now,updatedByUid:uid,acceptedAt:now,acceptedByUid:uid});
+      return {...p,...accepted};
+    });
+    const profile=normalizeAssalFirestoreAccessProfile(raw,{uid,email,route:"managed"});
+    if(!profile || raw.active!==true)throw new Error("ملف صلاحيات الأدمن غير صالح.");
+    localStorage.setItem("isActivated","true");
+    setAdminUser(true,profile);
+    return true;
+  } catch(error) {
+    try{await window.assalSecureAuth.signOutCurrent();}catch(_){}
+    throw error;
+  }
+}
+
 window.assalStaffManagement = Object.freeze({
   async list() {
-    const tools = await assalAssertOwnerForStaff();
-    const snap = await tools.getDocs(tools.collection(tools.db, "staffProfiles"));
-    return snap.docs.map(d => ({ uid:d.id, ...d.data() }));
+    const tools=await assalAssertOwnerForStaff();
+    const snapshot=await tools.getDocsFromServer(tools.collection(tools.db,"staffProfiles"));
+    return snapshot.docs.map(d => ({...d.data(),uid:d.id}));
   },
-  async create({customerId, password, branchCode}) {
-    customerId = String(customerId || "").trim();
-    password = String(password || "");
-    branchCode = String(branchCode || "");
-    if (!assalIsRealCustomerId(customerId)) throw new Error("معرّف الزبون غير صالح.");
-    if (!assalStaffPasswordValid(password)) throw new Error("كلمة المرور يجب أن تكون assal- متبوعة بثلاثة أرقام.");
-    if (!["baqubah", "tahrir", "hay", "baladruz"].includes(branchCode)) throw new Error("اختر فرعاً صحيحاً.");
-    const tools = await assalAssertOwnerForStaff();
-    const registered = await window.firebaseDB.get(window.firebaseDB.ref(window.firebaseDB.db,`customerProfiles/${customerId}`));
-    const profile = registered.exists() ? registered.val() : null;
-    if (!profile || !String(profile.name || "").trim() || !String(profile.phone || "").trim() || !String(profile.address || "").trim())
-      throw new Error("يجب أن يكون الزبون مسجلاً بالفعل قبل ترقيته.");
-    const existing = await tools.getDocs(tools.collection(tools.db,"staffProfiles"));
-    if (existing.docs.some(d => d.data()?.managedByOwner === true && d.data()?.staffCustomerId === customerId && d.data()?.active === true))
-      throw new Error("هذا الزبون لديه حساب أدمن فعّال بالفعل.");
-    const baseName=assalStaffShortName(profile.name);
-    const occupied=new Set(existing.docs.map(d=>String(d.data()?.staffEmail||'').toLowerCase()));
-    let email=`assal-${baseName}@assal.app`;
-    for(let suffix=2;occupied.has(email)&&suffix<10000;suffix++)email=`assal-${baseName}${suffix}@assal.app`;
-    if(occupied.has(email))throw new Error('تعذر اختيار بريد إداري فريد.');
-    const provision = await assalProvisionAuth();
-    // Owner auth remains untouched; credentials are ONLY sent to Firebase Auth.
-    const result = await createUserWithEmailAndPassword(provision, email, password);
-    const uid = String(result?.user?.uid || "");
-    if (!uid) throw new Error("تعذر إنشاء هوية الأدمن.");
-    try {
-      // Recheck owner *after* async signup: do not create roles under stale owner state.
-      await assalAssertOwnerForStaff();
-      await tools.setDoc(tools.doc(tools.db,"staffProfiles",uid), {
-        role:"branch", branchCode, active:true,
-        label:String(profile.name).trim().slice(0,100),
-        canUseWholesale:false, canManageCompatSubscriptions:false,
-        managedByOwner:true, staffCustomerId:customerId, staffEmail:email,
-        createdAt:Date.now(), createdByUid: String(assalOfficeAuth.currentUser?.uid || "")
-      });
-      // Notice contains no password. Firestore rules allow only owner to create.
-      await tools.setDoc(tools.doc(tools.db,"staffInvites",customerId), {
-        customerId, uid, email, active:true, createdAt:Date.now(),
-        createdByUid:String(assalOfficeAuth.currentUser?.uid || "")
-      });
-    } catch(err) {
-      // Roll back a role if writing the owner-issued invitation failed.
-      try {
-        const saved=await tools.getDoc(tools.doc(tools.db,"staffProfiles",uid));
-        if(saved.exists()&&saved.data()?.active===true&&saved.data()?.managedByOwner===true){
-          await tools.updateDoc(tools.doc(tools.db,"staffProfiles",uid),{
-            active:false,revokedAt:Date.now(),revokedByUid:assalOfficeAuth.currentUser?.uid||""
-          });
-        }
-      }catch(cleanupRoleError){console.error("CRITICAL: staff role rollback failed",uid,cleanupRoleError);}
-      try { await deleteUser(result.user); } catch(cleanupErr) { console.error("ASSAL orphan staff account requires manual Firebase Auth cleanup:", uid, cleanupErr); }
-      throw err;
-    } finally {
-      try { await firebaseAuthSignOut(provision); } catch(_) {}
-    }
-    return {uid,email,customerId};
-  },
-  async revoke(uid) {
-    const tools = await assalAssertOwnerForStaff();
-    const record = tools.doc(tools.db, "staffProfiles", String(uid || ""));
-    const snap = await tools.getDoc(record);
-    const d = snap.exists() ? snap.data() : null;
-    if (!d || d.managedByOwner !== true || d.role !== "branch" || d.active !== true)
-      throw new Error("لا يمكن سحب هذا الحساب من هنا، أو أنه موقوف مسبقاً.");
-    await tools.updateDoc(record,{active:false, revokedAt:Date.now(), revokedByUid:assalOfficeAuth.currentUser.uid});
-    if (assalIsRealCustomerId(d.staffCustomerId)) {
-      try { await tools.updateDoc(tools.doc(tools.db,'staffInvites',d.staffCustomerId),{active:false}); }
-      catch (err) { console.warn('Invite deactivation retry required:',err); }
-    }
-    return true;
-  },
+  async inspect(customerId) {return (await assalReadStaffRecovery(customerId)).report;},
+  async create(form) {return await assalStaffExclusive(() => assalStaffCreateOrRecover(form || {}));},
+  async revoke(uid) {return await assalStaffExclusive(() => assalStaffRevokeLinked(uid));},
   async lookupInvite(customerId){
     if(!assalIsRealCustomerId(customerId))return null;
     const tools=await getAssalOfficeFirestoreTools();
-    const snap=await tools.getDoc(tools.doc(tools.db,'staffInvites',customerId));
+    const snap=await tools.getDocFromServer(tools.doc(tools.db,"staffInvites",customerId));
     const item=snap.exists()?snap.data():null;
-    if(!item||item.customerId!==customerId||item.active!==true||!/^assal-[a-z0-9]{1,30}@assal\.app$/.test(String(item.email||'')))return null;
-    return {email:item.email,uid:item.uid,createdAt:item.createdAt};
+    const pending=item?.status==="pending" && item.active===false;
+    const accepted=item?.active===true && (!item.status || item.status==="accepted");
+    if(!item || item.customerId!==customerId || (!pending && !accepted) ||
+        !ASSAL_STAFF_UID_RE.test(String(item.uid || "")) || !ASSAL_STAFF_EMAIL_RE.test(String(item.email || "")))return null;
+    return {email:item.email,uid:item.uid,createdAt:item.createdAt,revision:item.revision || 0,
+      status:pending?"pending":"accepted",label:String(item.label || ""),branchCode:String(item.branchCode || "")};
   },
-  async login(email,password) {
-    email = String(email || "").trim().toLowerCase();
-    if (!/^assal-[a-z0-9]{1,30}@assal\.app$/.test(email)) throw new Error("بريد حساب الأدمن غير صحيح.");
-    if (!window.assalSecureAuth) throw new Error("خدمة تسجيل الدخول غير جاهزة.");
-    const cred = await window.assalSecureAuth.signIn(email,String(password || ""));
-    try {
-      const raw = await window.assalSecureAuth.getStaffProfile(cred.user.uid);
-      const customerId = String(typeof getDeviceId === "function" ? getDeviceId() : "");
-      if (!raw || raw.role !== "branch" || raw.managedByOwner !== true || raw.active !== true ||
-        raw.staffCustomerId !== customerId || raw.staffEmail !== email)
-        throw new Error("هذا الحساب غير مخوّل على هذا الجهاز، أو تم إيقاف صلاحياته.");
-      const profile = normalizeAssalFirestoreAccessProfile(raw,{uid:cred.user.uid, email, route:"managed"});
-      if (!profile) throw new Error("ملف صلاحيات الأدمن غير صالح.");
-      localStorage.setItem("isActivated","true");
-      setAdminUser(true,profile);
-      return true;
-    } catch(err) {
-      try { await window.assalSecureAuth.signOutCurrent(); } catch(_) {}
-      throw err;
-    }
+  async watchInvite(customerId,onChange){
+    if(!assalIsRealCustomerId(customerId))return ()=>{};
+    const tools=await getAssalOfficeFirestoreTools();
+    return tools.onSnapshot(tools.doc(tools.db,"staffInvites",customerId),()=>onChange(),
+      error=>console.warn("Staff invitation listener:",error?.code || "unavailable"));
   },
+  async login(email,password,expectedInvite=null) {return await assalStaffExclusive(()=>assalStaffAcceptOrLogin(email,password,expectedInvite));},
   async watchManaged(onRevoked) {
     if (localStorage.getItem("assalAdminManagedByOwner") !== "true" || !isAdminUser()) return ()=>{};
     await waitForAssalOfficeAuthReady();
@@ -19226,7 +19512,7 @@ window.assalStaffManagement = Object.freeze({
     const tools = await getAssalOfficeFirestoreTools();
     return tools.onSnapshot(tools.doc(tools.db,"staffProfiles",uid), snap=>{
       const p = snap.exists() ? snap.data() : null;
-      if (!p || !p.active || p.role !== "branch" || p.managedByOwner !== true ||
+      if (!p || p.active !== true || (p.inviteStatus && p.inviteStatus!=="accepted") || p.role !== "branch" || p.managedByOwner !== true ||
           p.staffCustomerId !== String(getDeviceId())) onRevoked();
     }, err=>{ console.warn("Staff live auth check:",err); /* offline errors are not evidence of revocation */ });
   }
@@ -25798,8 +26084,9 @@ function renderCustomerCard(customer) {
   const phone=assalAccountEsc(customer.phone || "بدون رقم");
   const blocked=!!customer.blocked;
   const whatsapp=assalStaffNormalizeWhatsApp(customer.phone);
+  const pendingStaff=assalStaffAdminCache.find(staff=>staff.staffCustomerId===id && staff.active===false && staff.inviteStatus==='pending');
   const isPromotable=!blocked && assalStaffIsOwner() && !assalStaffAdminCache.some(staff=>
-    staff.active && staff.staffCustomerId === id);
+    (staff.active===true || staff.inviteStatus==='pending') && staff.staffCustomerId === id);
   const actions=assalAccountIconAction('chat','fas fa-comment-dots','مسج التطبيق',id,blocked)
     +(whatsapp?'<a class="assal-account-icon-action is-whatsapp" data-contact-whatsapp="'+whatsapp+'" href="https://wa.me/'+whatsapp+'" target="_blank" rel="noopener noreferrer" aria-label="واتساب" title="واتساب"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>'
       :assalAccountIconAction('whatsapp','fab fa-whatsapp','واتساب غير متاح',id,true))
@@ -25810,7 +26097,7 @@ function renderCustomerCard(customer) {
     +'<button type="button" class="assal-account-row-main" data-assal-account-action="details" data-customer-id="'+assalAccountEsc(id)+'" aria-label="تفاصيل '+name+'">'
     +'<span class="assal-account-avatar am-avatar" data-tone="'+assalAccountMessengerAvatarTone(id)+'">'+assalAccountMessengerPortrait(id)+'</span>'
     +'<span class="assal-account-row-info"><b>'+name+'</b><small dir="ltr">'+phone+'</small>'
-    +(blocked?'<em>محظور من التطبيق</em>':'')+'</span></button>'
+    +(blocked?'<em>محظور من التطبيق</em>':pendingStaff?'<em>دعوة إدارة بانتظار الموافقة</em>':'')+'</span></button>'
     +'<div class="assal-account-row-actions">'+actions+'</div></article>';
 }
 
@@ -25874,13 +26161,13 @@ function assalStaffNormalizeWhatsApp(phone){
 }
 function renderAssalStaffDirectory(staff,query=''){
   const p=String(query||'').toLowerCase().trim();
-  let sorted=staff.filter(a=>a&&a.active===true&&['owner','branch'].includes(String(a.role||'')))
+  let sorted=staff.filter(a=>a&&(a.active===true || (a.active===false&&a.inviteStatus==='pending'&&a.managedByOwner===true))&&['owner','branch'].includes(String(a.role||'')))
     .sort((a,b)=>Number(b.role==='owner')-Number(a.role==='owner') ||
       Number(b.active===true)-Number(a.active===true) || String(a.label||'').localeCompare(String(b.label||''),'ar'));
   if(p) sorted=sorted.filter(a=>[a.label,a.staffEmail,a.branchCode,a.staffCustomerId,a.uid].join(' ').toLowerCase().includes(p));
   const labels={baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز'};
   const cards=sorted.map(a=>{
-    const owner=a.role==='owner',managed=a.managedByOwner===true,active=a.active===true;
+    const owner=a.role==='owner',managed=a.managedByOwner===true,active=a.active===true,pending=a.active===false&&a.inviteStatus==='pending';
     const customer=(assalAllCustomersDirectory||[]).find(x=>(x.deviceId||x.id)===a.staffCustomerId);
     const name=assalAccountEsc(String(a.label||(owner?'المالك الرئيسي':'أدمن')).slice(0,100));
     const uid=String(a.uid||''), cid=String(a.staffCustomerId||'');
@@ -25891,15 +26178,15 @@ function renderAssalStaffDirectory(staff,query=''){
       ?assalAccountIconAction('chat','fas fa-comment-dots','مسج التطبيق',cid,!active)
         +(wa?'<a class="assal-account-icon-action is-whatsapp" data-contact-whatsapp="'+wa+'" href="https://wa.me/'+wa+'" target="_blank" rel="noopener noreferrer" aria-label="واتساب" title="واتساب"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>':'')
       :'')
-      +(managed&&active&&validUid?'<button type="button" class="assal-account-icon-action is-revoke" data-assal-account-action="revoke" data-staff-uid="'+assalAccountEsc(uid)+'" aria-label="سحب الإدارة مع إبقاء التفعيل" title="سحب الإدارة مع إبقاء التفعيل"><i class="fas fa-shield-halved"></i></button>':'');
+      +(managed&&(active||pending)&&validUid?'<button type="button" class="assal-account-icon-action is-revoke" data-assal-account-action="revoke" data-staff-uid="'+assalAccountEsc(uid)+'" aria-label="'+(pending?'إلغاء الدعوة المعلّقة':'سحب الإدارة مع إبقاء التفعيل')+'" title="'+(pending?'إلغاء الدعوة المعلّقة':'سحب الإدارة مع إبقاء التفعيل')+'"><i class="fas fa-shield-halved"></i></button>':'');
     return '<article class="assal-account-customer-row assal-account-staff-row" data-assal-row-kind="staff" data-staff-uid="'+assalAccountEsc(uid)+'">'
       +'<button type="button" class="assal-account-row-main" data-assal-account-action="staff-details" data-staff-uid="'+assalAccountEsc(uid)+'" aria-label="تفاصيل '+name+'">'
       +'<span class="assal-account-avatar" data-tone="'+(owner?'owner':assalAccountAvatarTone(uid))+'"><i class="fas '+(owner?'fa-crown':'fa-user-shield')+'"></i></span>'
       +'<span class="assal-account-row-info"><b>'+name+'</b><small>'+assalAccountEsc(owner?'المالك الرئيسي':(labels[a.branchCode]||'أدمن عسل'))+'</small>'
-      +(!active?'<em>صلاحية موقوفة</em>':'')+'</span></button>'
+      +(pending?'<em>دعوة معلّقة · لم يقبل بعد</em>':!active?'<em>صلاحية موقوفة</em>':'')+'</span></button>'
       +'<div class="assal-account-row-actions">'+actions+'</div></article>';
   }).join('');
-  return '<div class="assal-account-staff-head"><small>الأدمنية ('+sorted.length+')</small>'
+  return '<div class="assal-account-staff-head"><small>الأدمنية ('+sorted.filter(a=>a.active===true).length+')'+(sorted.some(a=>a.inviteStatus==='pending'&&a.active===false)?' · دعوات معلّقة ('+sorted.filter(a=>a.inviteStatus==='pending'&&a.active===false).length+')':'')+'</small>'
     +'<button type="button" class="assal-account-icon-action is-create" data-assal-account-action="create" title="إنشاء أدمن" aria-label="إنشاء أدمن"><i class="fas fa-user-plus"></i></button></div>'
     +'<div class="assal-account-staff-rows">'+(cards||'<div class="assal-account-directory-empty">لا توجد حسابات مطابقة.</div>')+'</div>';
 }
@@ -25940,22 +26227,135 @@ function assalStaffHumanErrorMessage(error, context='generic'){
   if(lower.includes('too-many-requests')) return 'المحاولات كثيرة حالياً. انتظر قليلاً ثم أعد المحاولة.';
   return raw.length>180 ? raw.slice(0,180)+'…' : raw;
 }
+/* ASSAL STAFF FLOW 2026 — visual-only redesign of owner provisioning + revocation;
+ * all writes remain inside the existing assalStaffManagement service. */
+function assalStaffBranchPickerHtml(){
+  const options=[['baqubah','بعقوبة','fa-location-dot'],['tahrir','التحرير','fa-building'],['hay','الحي','fa-shop'],['baladruz','بلدروز','fa-map-location-dot']];
+  return '<div class="assal-branch-picker assal-flow-field" data-branch-picker>'
+    +'<label class="assal-flow-label" id="asBranchLabel" for="asBranchTrigger"><i class="fas fa-location-dot"></i> الفرع الإداري</label>'
+    +'<button id="asBranchTrigger" class="assal-branch-trigger" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="asBranchMenu" aria-labelledby="asBranchLabel asBranchDisplay"><span class="assal-branch-trigger-main"><span class="assal-branch-trigger-icon"><i class="fas fa-building"></i></span><span id="asBranchDisplay" data-branch-display>بعقوبة</span></span><span class="assal-branch-chevron"><i class="fas fa-chevron-down"></i></span></button>'
+    +'<div id="asBranchMenu" class="assal-branch-options" role="listbox" aria-label="اختيار الفرع" hidden>'
+    +options.map(([code,name,icon],i)=>'<button type="button" role="option" aria-selected="'+(i===0?'true':'false')+'" tabindex="'+(i===0?'0':'-1')+'" data-branch-value="'+code+'"><span class="assal-branch-option-ico"><i class="fas '+icon+'"></i></span><span>'+name+'</span><i class="fas fa-check assal-branch-tick"></i></button>').join('')+'</div>'
+    +'<input type="hidden" id="asBranch" value="baqubah"></div>';
+}
+function assalWireBranchPicker(){
+  const host=document.querySelector('.swal2-popup.assal-flow [data-branch-picker]');
+  if(!host)return;
+  const trigger=host.querySelector('.assal-branch-trigger'),menu=host.querySelector('.assal-branch-options');
+  const options=()=>Array.from(menu.querySelectorAll('[data-branch-value]'));
+  const close=()=>{menu.hidden=true;trigger.setAttribute('aria-expanded','false');host.classList.remove('is-expanded');};
+  const open=()=>{menu.hidden=false;trigger.setAttribute('aria-expanded','true');host.classList.add('is-expanded');};
+  function choose(btn){
+    if(!btn)return;
+    host.querySelector('#asBranch').value=btn.dataset.branchValue;
+    host.querySelector('[data-branch-display]').textContent=btn.querySelector('span:nth-child(2)')?.textContent||btn.textContent.trim();
+    options().forEach(x=>{const current=x===btn;x.setAttribute('aria-selected',String(current));x.tabIndex=current?0:-1;});
+    close();trigger.focus({preventScroll:true});
+  }
+  trigger.addEventListener('click',e=>{e.stopPropagation();menu.hidden?open():close();});
+  menu.addEventListener('click',e=>{const btn=e.target.closest('[data-branch-value]');if(btn)choose(btn);});
+  host.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&!menu.hidden){e.preventDefault();e.stopPropagation();close();trigger.focus({preventScroll:true});return;}
+    if((e.key==='ArrowDown'||e.key==='ArrowUp')&&menu.hidden){e.preventDefault();open();(options().find(x=>x.getAttribute('aria-selected')==='true')||options()[0])?.focus({preventScroll:true});return;}
+    if(!menu.hidden&&(e.key==='ArrowDown'||e.key==='ArrowUp')){
+      const all=options(),idx=all.indexOf(document.activeElement),next=(idx+(e.key==='ArrowDown'?1:-1)+all.length)%all.length;
+      e.preventDefault();all[next]?.focus({preventScroll:true});return;
+    }
+    if(!menu.hidden&&(e.key==='Enter'||e.key===' ')){
+      const btn=document.activeElement?.closest?.('[data-branch-value]');if(btn){e.preventDefault();choose(btn);}
+    }
+  });
+  // Close on clicks elsewhere inside dialog without obscuring the form or confirm button.
+  const popup=host.closest('.swal2-popup');
+  popup?.addEventListener('click',e=>{if(!host.contains(e.target)&&!menu.hidden)close();});
+}
+function assalFlowLabel(icon,label){return '<label class="assal-flow-label"><i class="fas '+icon+'"></i> '+label+'</label>';}
+function assalFlowNotice(icon,text,type='info'){
+  return '<div class="assal-flow-notice is-'+type+'"><i class="fas '+icon+'"></i><span>'+text+'</span></div>';
+}
+function assalFlowIdentity(name,subtitle='حساب الزبون الحالي'){
+  return '<div class="assal-flow-person"><span class="assal-flow-person-avatar"><i class="fas fa-user"></i></span><span class="assal-flow-person-name"><strong>'+name+'</strong><small>'+subtitle+'</small></span><i class="fas fa-circle-check assal-flow-person-check"></i></div>';
+}
+function assalFlowHero(icon,eyebrow,title,subtitle,kind='teal'){
+  return '<div class="assal-flow-hero is-'+kind+'"><span class="assal-flow-hero-symbol"><i class="fas '+icon+'"></i></span><div class="assal-flow-hero-text"><small>'+eyebrow+'</small><strong>'+title+'</strong><p>'+subtitle+'</p></div></div>';
+}
+function assalFlowErrorHtml(msg,subtitle='قد تكون بعض مراحل العملية اكتملت. راجع حالة الحساب قبل إعادة المحاولة.'){
+  return '<div class="assal-flow-result is-error"><div class="assal-flow-result-icon"><i class="fas fa-triangle-exclamation"></i></div><strong>ما اكتملت العملية</strong><p>'+assalAccountEsc(msg)+'</p><div class="assal-flow-result-foot"><i class="fas fa-circle-info"></i><span>'+subtitle+'</span></div></div>';
+}
+/* Recovery review uses the approved assal-flow components; existing styles are unchanged. */
+function assalStaffRecoveryDetailsHtml(report, choose = false) {
+  const esc=value=>assalAccountEsc(String(value ?? ""));
+  const time=value=>Number.isSafeInteger(value)&&value>0 ? esc(new Date(value).toLocaleString('ar-IQ')) : 'غير مسجّل';
+  const active=value=>value===true?'فعّال':value===false?'موقوف':'حالة غير صالحة: '+esc(value);
+  const branches={baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز'};
+  let html=assalFlowNotice('fa-fingerprint','معرّف الزبون: <b dir="ltr">'+esc(report.customerId)+'</b>','info');
+  if(report.invite){
+    html+='<div class="assal-flow-credential"><span><i class="fas fa-link"></i> الدعوة المسجّلة — '+active(report.invite.active)+'</span>'
+      +'<strong dir="ltr">'+esc(report.invite.email)+'</strong><small dir="ltr">'+esc(report.invite.uid)+'</small></div>';
+  }else html+=assalFlowNotice('fa-link-slash','لا توجد دعوة قديمة لهذا الزبون.','violet');
+  html+='<div class="assal-flow-fields">';
+  for(const record of report.records || []){
+    const selectable=choose && report.candidates.includes(record.uid);
+    html+='<'+(selectable?'label':'div')+' class="assal-flow-person">'
+      +(selectable?'<input type="radio" name="asRecoveryUid" value="'+esc(record.uid)+'" style="accent-color:#73e6d4" aria-label="اختيار '+esc(record.email)+'">':'<span class="assal-flow-person-avatar"><i class="fas fa-user-shield"></i></span>')
+      +'<span class="assal-flow-person-name"><strong dir="ltr">'+esc(record.email || 'بريد غير مسجّل')+'</strong>'
+      +'<small dir="ltr">UID: '+esc(record.uid)+'</small>'
+      +'<small>'+esc(branches[record.branchCode] || record.branchCode || 'فرع غير مسجّل')+' · '+active(record.active)
+      +(record.inviteMatch?' · مطابق للدعوة':'')+'</small>'
+      +'<small>الإنشاء: '+time(record.createdAt)+'</small><small>السحب: '+time(record.revokedAt)+'</small>'
+      +'<small>آخر استرجاع: '+time(record.reactivatedAt)+'</small>'
+      +(!record.eligible?'<small>غير متاح للاختيار: راجع الدور والتفعيل والبريد وصلاحيات السجل.</small>':'')
+      +'</span></'+(selectable?'label':'div')+'>';
+  }
+  return html+'</div>';
+}
+async function assalStaffChooseRecovery(report) {
+  const result=await Swal.fire({
+    title:'تدقيق حسابات الأدمن السابقة',customClass:{popup:'assal-staff-premium assal-flow assal-flow-form'},showCloseButton:true,
+    html:assalFlowHero('fa-magnifying-glass','مراجعة المالك','اختيار حساب سابق موثّق',assalAccountEsc(report.message),'violet')
+      +assalStaffRecoveryDetailsHtml(report,true)
+      +'<div class="assal-flow-field">'+assalFlowLabel('fa-key','كلمة المرور القديمة للحساب المختار')
+      +'<input id="asRecoveryPassword" class="assal-premium-input" type="password" dir="ltr" autocomplete="off" placeholder="كلمة المرور القديمة"></div>'
+      +assalFlowNotice('fa-lock','نختبر الدخول على جلسة منفصلة ونطابق UID. كلمة المرور لا تتغيّر ولا تُخزّن، وبقية السجلات تبقى موقوفة.','violet'),
+    confirmButtonText:'تحقق وأرسل الدعوة',showCancelButton:true,cancelButtonText:'تراجع',focusConfirm:false,
+    preConfirm:()=>{
+      const selectedUid=document.querySelector('.swal2-popup.assal-flow input[name="asRecoveryUid"]:checked')?.value || '';
+      const recoveryPassword=document.getElementById('asRecoveryPassword')?.value || '';
+      if(!report.candidates.includes(selectedUid)){Swal.showValidationMessage('اختر السجل الذي تريد استرجاعه بعد مراجعة بياناته.');return false;}
+      if(!recoveryPassword){Swal.showValidationMessage('أدخل كلمة المرور القديمة للتحقق من UID الحساب المختار.');return false;}
+      return {selectedUid,recoveryPassword};
+    },
+    willClose:()=>{const input=document.getElementById('asRecoveryPassword');if(input)input.value='';}
+  });
+  return result.isConfirmed ? result.value : null;
+}
+function assalStaffPartialDetailsHtml(partial) {
+  if(!partial)return '';
+  return '<div class="assal-flow-credential"><span><i class="fas fa-clipboard-check"></i> بيانات الحساب المطلوب تدقيقه</span>'
+    +'<strong dir="ltr">'+assalAccountEsc(String(partial.email || ''))+'</strong>'
+    +'<small dir="ltr">UID: '+assalAccountEsc(String(partial.uid || ''))+'</small></div>';
+}
+
 window.assalOpenCreateStaff=async function(){
   if(!assalStaffIsOwner())return;
   const {value:form}=await Swal.fire({
-    title:'إنشاء أدمن من زبون مسجّل',customClass:{popup:'assal-staff-premium'},showCloseButton:true,
-    html:'<p class="assal-staff-hint">كل حساب أدمن مرتبط بزبون موجود مسبقاً. التفعيل والمحادثات يبقيان باسم الزبون.</p>'
-      +'<input id="asCustomerId" class="assal-premium-input" dir="ltr" placeholder="معرّف الزبون DEV- أو AND-">'
-      +'<select id="asBranch" class="assal-premium-select"><option value="baqubah">بعقوبة</option><option value="tahrir">التحرير</option><option value="hay">الحي</option><option value="baladruz">بلدروز</option></select>'
-      +'<label class="assal-staff-field-label">كلمة المرور الأولية</label><input id="asPassword" class="assal-premium-input" type="text" inputmode="text" dir="ltr" autocapitalize="off" autocomplete="off" value="assal-'+String(crypto.getRandomValues(new Uint16Array(1))[0]%1000).padStart(3,'0')+'" />',
-    background:'#0b1220',color:'#fff',confirmButtonText:'إنشاء حساب الأدمن',cancelButtonText:'إلغاء',
-    showCancelButton:true,confirmButtonColor:'#0f766e',
+    title:'إنشاء حساب إداري',customClass:{popup:'assal-staff-premium assal-flow assal-flow-form'},showCloseButton:true,
+    html:assalFlowHero('fa-user-shield','إدارة الكادر','إضافة أدمن جديد','اربط الصلاحية بزبون مسجّل مسبقاً، بدون تغيير حسابه الأصلي.')
+      +'<div class="assal-flow-fields">'
+      +'<div class="assal-flow-field">'+assalFlowLabel('fa-fingerprint','معرّف حساب الزبون')
+      +'<input id="asCustomerId" class="assal-premium-input" dir="ltr" placeholder="DEV-... أو AND-..." autocomplete="off"></div>'
+      +assalStaffBranchPickerHtml()
+      +'<div class="assal-flow-field">'+assalFlowLabel('fa-key','كلمة المرور الأولية')
+      +'<input id="asPassword" class="assal-premium-input" type="text" inputmode="text" dir="ltr" autocapitalize="off" autocomplete="off" value="assal-'+String(crypto.getRandomValues(new Uint16Array(1))[0]%1000).padStart(3,'0')+'" /></div>'
+      +'</div>'
+      +assalFlowNotice('fa-shield-heart','التفعيل والمحادثات ومعرّف الزبون تبقى محفوظة.'),
+    showCancelButton:true,confirmButtonText:'إرسال دعوة الإدارة',cancelButtonText:'إلغاء',didOpen:assalWireBranchPicker,
     preConfirm:()=>{
       const customerId=document.getElementById('asCustomerId').value.trim();
       const branchCode=document.getElementById('asBranch').value;
       const password=document.getElementById('asPassword').value;
       if(!/^(?:DEV-[A-Z0-9-]{7,24}|AND-[A-F0-9]{32})$/.test(customerId)||!/^assal-[0-9]{3}$/.test(password)){
-        Swal.showValidationMessage('اكتب معرّف زبون صحيح وكلمة مرور بصيغة assal-123.');return false;
+        Swal.showValidationMessage('تحقق من معرّف الزبون وكلمة المرور المطلوبة (assal- وثلاثة أرقام).');return false;
       }
       return {customerId,branchCode,password};
     }
@@ -25964,17 +26364,22 @@ window.assalOpenCreateStaff=async function(){
 };
 window.assalPromoteCustomer=async function(id){
   if(!assalStaffIsOwner())return;
-  const item=assalStaffCustomer(id), name=escapeHtml(item?.name||id);
+  const item=assalStaffCustomer(id),name=escapeHtml(item?.name||id);
+  const oldAdmin=assalStaffAdminCache.some(x=>x.managedByOwner===true&&x.staffCustomerId===id&&x.active===false);
   const {value:form}=await Swal.fire({
-    title:'ترقية الزبون إلى أدمن',customClass:{popup:'assal-staff-premium'},showCloseButton:true,
-    html:'<p class="assal-staff-hint">'+name+' — يحتفظ بنفس التفعيل والمحادثات. كلمة المرور الجديدة يُدخلها الأدمن في جهازه مرة واحدة.</p>'
-      +'<select id="asBranch" class="assal-premium-select"><option value="baqubah">بعقوبة</option><option value="tahrir">التحرير</option><option value="hay">الحي</option><option value="baladruz">بلدروز</option></select>'
-      +'<label class="assal-staff-field-label">كلمة المرور الأولية</label><input id="asPassword" class="assal-premium-input" type="text" inputmode="text" dir="ltr" autocomplete="off" value="assal-'+String(crypto.getRandomValues(new Uint16Array(1))[0]%1000).padStart(3,'0')+'" />',
-    background:'#0b1220',color:'#fff',confirmButtonText:'تأكيد الترقية',cancelButtonText:'إلغاء',
-    showCancelButton:true,confirmButtonColor:'#0f766e',
+    title:oldAdmin?'إعادة تفعيل الأدمن':'ترقية إلى أدمن',
+    customClass:{popup:'assal-staff-premium assal-flow assal-flow-form'},showCloseButton:true,
+    html:assalFlowHero(oldAdmin?'fa-rotate':'fa-crown',oldAdmin?'استرجاع صلاحية قديمة':'ترقية حساب زبون',oldAdmin?'عودة الصلاحية الإدارية':'خطوة جديدة في عسل',oldAdmin?'إعادة تفعيل الحساب الإداري السابق من دون إنشاء حساب ثانٍ.':'تبدأ صلاحية الإدارة فقط بعد موافقته ودخوله بالحساب الإداري.',oldAdmin?'violet':'teal')
+      +assalFlowIdentity(name,oldAdmin?'كان أدمن سابقاً':'زبون عسل مسجّل')
+      +'<div class="assal-flow-fields">'+assalStaffBranchPickerHtml()
+      +(oldAdmin?'':('<div class="assal-flow-field">'+assalFlowLabel('fa-key','كلمة المرور الأولية')
+        +'<input id="asPassword" class="assal-premium-input" type="text" inputmode="text" dir="ltr" autocomplete="off" value="assal-'+String(crypto.getRandomValues(new Uint16Array(1))[0]%1000).padStart(3,'0')+'" /></div>'))
+      +'</div>'
+      +assalFlowNotice(oldAdmin?'fa-lock':'fa-shield-heart',oldAdmin?'سيبقى البريد وكلمة المرور القديمة كما هما عند إعادة التفعيل.':'بيانات الزبون وتفعيله ومحادثاته تبقى محفوظة.',oldAdmin?'violet':'info'),
+    showCancelButton:true,confirmButtonText:oldAdmin?'دعوة الحساب القديم':'إرسال دعوة الترقية',cancelButtonText:'تراجع',didOpen:assalWireBranchPicker,
     preConfirm:()=>{
-      const password=document.getElementById('asPassword').value;
-      if(!/^assal-[0-9]{3}$/.test(password)){Swal.showValidationMessage('كلمة المرور يجب أن تكون assal- وثلاثة أرقام.');return false;}
+      const password=oldAdmin?'':document.getElementById('asPassword').value;
+      if(!oldAdmin&&!/^assal-[0-9]{3}$/.test(password)){Swal.showValidationMessage('كلمة المرور يجب أن تكون assal- وثلاثة أرقام.');return false;}
       return {customerId:id,password,branchCode:document.getElementById('asBranch').value};
     }
   });
@@ -25982,47 +26387,94 @@ window.assalPromoteCustomer=async function(id){
 };
 async function assalSubmitStaffProvision(form){
   try{
-    Swal.fire({title:'جارٍ إنشاء صلاحية أدمن...',customClass:{popup:'assal-staff-premium'},showCloseButton:true,allowOutsideClick:false,showConfirmButton:false,
-      didOpen:()=>Swal.showLoading(),background:'#0b1220',color:'#fff'});
-    const {email}=await window.assalStaffManagement.create(form);
+    const progress={
+      title:'تجهيز الصلاحية الإدارية',customClass:{popup:'assal-staff-premium assal-flow assal-flow-progress'},
+      showCloseButton:false,allowOutsideClick:false,allowEscapeKey:false,showConfirmButton:false,
+      html:'<div class="assal-flow-working"><div class="assal-flow-orbit"><div class="assal-flow-orbit-core"><i class="fas fa-shield-halved"></i></div></div><strong>جارٍ تجهيز الحساب</strong><p>نراجع هوية الحساب ونجهّز الدعوة بانتظار موافقة صاحبها.</p><div class="assal-flow-working-track"><span></span></div><div class="assal-flow-working-status"><i class="fas fa-lock"></i> اتصال آمن بنظام الإدارة</div></div>'
+    };
+    Swal.fire(progress);
+    const report=await window.assalStaffManagement.inspect(form.customerId);
+    if(report.mode==='blocked'||report.mode==='pending'){
+      const error=new Error(report.message);error.staffReport=report;throw error;
+    }
+    let recovery={};
+    if(report.mode==='choose'){
+      recovery=await assalStaffChooseRecovery(report);
+      if(!recovery)return;
+      Swal.fire(progress);
+    }
+    const {email,reactivated}=await window.assalStaffManagement.create({...form,...recovery,reviewToken:report.token});
+    recovery=null;form.password='';form.recoveryPassword='';
     Swal.close();
-    await Swal.fire({title:'تم إنشاء حساب الأدمن',customClass:{popup:'assal-staff-premium'},showCloseButton:true,icon:'success',background:'#0b1220',color:'#fff',
-      html:'<div class="assal-staff-credentials">البريد الإداري:<br><strong dir="ltr">'+escapeHtml(email)+'</strong>'
-        +'<p>كلمة المرور التي ظهرت لك في نافذة الإنشاء سلّمها لصاحب الحساب بصورة خاصة؛ لا تُحفظ في ملف الزبون.</p>'
-        +'<p>يفتح الزبون عسل ويضغط أيقونة <b>دخول كادر عسل</b> ثم يدخل بياناته.</p></div>',
-      confirmButtonText:'تم',confirmButtonColor:'#185a9d'});
-    await loadAssalStaffDirectory();await loadCustomersAdmin();
+    await Swal.fire({
+      title:'أُرسلت دعوة الإدارة',
+      customClass:{popup:'assal-staff-premium assal-flow assal-flow-success'},showCloseButton:true,
+      html:'<div class="assal-flow-result is-success"><div class="assal-flow-result-icon"><i class="fas fa-check"></i></div><strong>'+'بانتظار موافقة صاحب الحساب'+'</strong><p>'+(reactivated?'جُهّزت دعوة لنفس الحساب القديم دون إنشاء حساب ثانٍ.':'جُهّز الحساب الإداري وربط الدعوة بالزبون.')+' تبقى صلاحية الإدارة موقوفة حتى يوافق ويسجل الدخول.'+'</p></div>'
+        +'<div class="assal-flow-credential"><span><i class="fas fa-envelope"></i> البريد الإداري</span><strong dir="ltr">'+escapeHtml(email)+'</strong></div>'
+        +assalFlowNotice(reactivated?'fa-key':'fa-paper-plane',reactivated?'كلمة المرور القديمة لم تتغير عند إعادة التفعيل.':'سلّم كلمة المرور الأولية لصاحب الحساب بصورة خاصة. لا تُخزّن ضمن ملف الزبون.',reactivated?'violet':'info'),
+      confirmButtonText:'تم'
+    });
+    try{await loadAssalStaffDirectory();await loadCustomersAdmin();}catch(refreshError){console.warn('Staff directory refresh:',refreshError);}
   }catch(err){
+    form.password='';form.recoveryPassword='';
     Swal.close();
-    await Swal.fire({title:'تعذّر إنشاء الأدمن',customClass:{popup:'assal-staff-premium'},showCloseButton:true,text:assalStaffHumanErrorMessage(err,'create')||'خطأ غير متوقع',icon:'error',background:'#0b1220',color:'#fff'});
+    await Swal.fire({
+      title:'تعذّر تجهيز الصلاحية',customClass:{popup:'assal-staff-premium assal-flow assal-flow-error'},showCloseButton:true,
+      html:assalFlowErrorHtml(assalStaffHumanErrorMessage(err,'create'))
+        +(err.staffReport?assalStaffRecoveryDetailsHtml(err.staffReport):'')
+        +assalStaffPartialDetailsHtml(err.staffPartial),
+      confirmButtonText:'فهمت'
+    });
   }
 }
 window.assalRevokeStaff=async function(uid){
   if(!assalStaffIsOwner())return;
   const item=assalStaffAdminCache.find(x=>x.uid===uid);
   if(!item||item.role==='owner'||item.managedByOwner!==true)return;
-  const ok=await Swal.fire({title:'سحب صلاحية الأدمن؟',customClass:{popup:'assal-staff-premium'},showCloseButton:true,
-    text:'يرجع '+String(item.label||'الحساب')+' زبوناً عادياً، مع بقاء التفعيل والبيانات والمحادثات دون حذف.',
-    icon:'warning',showCancelButton:true,confirmButtonText:'سحب الصلاحية',cancelButtonText:'تراجع',
-    confirmButtonColor:'#b91c1c',background:'#0b1220',color:'#fff'});
+  const pending=item.active===false&&item.inviteStatus==='pending';
+  const safeName=assalAccountEsc(String(item.label||'الأدمن'));
+  const ok=await Swal.fire({
+    title:pending?'إلغاء دعوة الإدارة':'سحب صلاحية الإدارة',customClass:{popup:'assal-staff-premium assal-flow assal-flow-revoke'},showCloseButton:true,
+    html:assalFlowHero('fa-user-shield','إدارة الصلاحيات',pending?'إلغاء الدعوة المعلّقة':'إرجاع الحساب إلى زبون',pending?'لم تبدأ صلاحية الإدارة لهذا الحساب. إلغاء الدعوة يمنع قبولها لاحقاً.':'بعد التأكيد، لن يعود هذا الحساب قادراً على استخدام صلاحيات الأدمن.','danger')
+      +assalFlowIdentity(safeName,pending?'يبقى حساب زبون':'سيعود إلى قائمة الزبائن')
+      +'<div class="assal-flow-impact"><div><i class="fas fa-shield-xmark"></i><span>إيقاف صلاحية الإدارة</span><i class="fas fa-check"></i></div><div><i class="fas fa-comments"></i><span>المحادثات والتفعيل محفوظة</span><i class="fas fa-check"></i></div></div>'
+      +assalFlowNotice('fa-circle-exclamation','لا يمكن حذف حساب المالك أو تغيير صلاحياته من هذه النافذة.','danger'),
+    showCancelButton:true,confirmButtonText:pending?'إلغاء الدعوة':'سحب الصلاحية',cancelButtonText:'تراجع'
+  });
   if(!ok.isConfirmed)return;
   try{
-    await window.assalStaffManagement.revoke(uid);
-    assalStaffAdminCache=assalStaffAdminCache.map(staff=>staff.uid===uid?{...staff,active:false}:staff);
+    Swal.fire({
+      title:'تحديث صلاحية الحساب',customClass:{popup:'assal-staff-premium assal-flow assal-flow-progress'},
+      showCloseButton:false,allowOutsideClick:false,allowEscapeKey:false,showConfirmButton:false,
+      html:'<div class="assal-flow-working"><div class="assal-flow-orbit is-amber"><div class="assal-flow-orbit-core"><i class="fas fa-user-shield"></i></div></div><strong>جارٍ سحب الصلاحية</strong><p>سيبقى الحساب الأصلي وتفعيله ومحادثاته محفوظة.</p><div class="assal-flow-working-track"><span></span></div><div class="assal-flow-working-status"><i class="fas fa-lock"></i> تحديث سجل الصلاحيات</div></div>'
+    });
+    const revokeResult=await window.assalStaffManagement.revoke(uid);
+    Swal.close();
+    assalStaffAdminCache=assalStaffAdminCache.map(staff=>staff.uid===uid?{...staff,active:false,inviteStatus:'revoked'}:staff);
     renderCustomersAdminPanels();
-    await loadAssalStaffDirectory();await loadCustomersAdmin();
-    Swal.fire({title:'تم سحب صلاحية الإدارة',customClass:{popup:'assal-staff-premium'},showCloseButton:true,icon:'success',timer:1800,showConfirmButton:false,background:'#0b1220',color:'#fff'});
+    try{await loadAssalStaffDirectory();await loadCustomersAdmin();}catch(refreshError){console.warn('Staff directory refresh:',refreshError);}
+    await Swal.fire({
+      title:revokeResult?.cancelled?'أُلغيت الدعوة':'تم سحب الصلاحية',customClass:{popup:'assal-staff-premium assal-flow assal-flow-success'},showCloseButton:true,
+      html:'<div class="assal-flow-result is-success"><div class="assal-flow-result-icon"><i class="fas fa-check"></i></div><strong>'+(revokeResult?.cancelled?'يبقى حساب زبون':revokeResult?.warning?'أُوقفت صلاحية الحساب المحدد':'رجع إلى حساب زبون')+'</strong><p>أُوقفت الدعوة والصلاحية لهذا الحساب؛ التفعيل والبيانات والمحادثات محفوظة.</p></div>'
+        +(revokeResult?.warning?assalFlowNotice('fa-circle-info',assalAccountEsc(revokeResult.warning),'violet'):''),
+      confirmButtonText:'تم'
+    });
   }catch(err){
-    Swal.fire({title:'تعذّر سحب الصلاحية',customClass:{popup:'assal-staff-premium'},showCloseButton:true,text:assalStaffHumanErrorMessage(err,'revoke'),icon:'error',background:'#0b1220',color:'#fff'});
+    Swal.close();
+    await Swal.fire({
+      title:'تعذّر سحب الصلاحية',customClass:{popup:'assal-staff-premium assal-flow assal-flow-error'},showCloseButton:true,
+      html:assalFlowErrorHtml(assalStaffHumanErrorMessage(err,'revoke'),'راجع حالة صلاحيات الحساب قبل إعادة محاولة السحب.'),
+      confirmButtonText:'إغلاق'
+    });
   }
 };
 window.openAssalManagedStaffLogin=async function(){
   if(isAdminUser()||localStorage.getItem('isActivated')!=='true')return;
   const result=await Swal.fire({title:'دخول كادر عسل',customClass:{popup:'assal-staff-premium'},showCloseButton:true,
-    html:'<p class="assal-staff-hint">للأدمنية الذين أنشأ المالك حساباتهم فقط. لا يتغير تفعيل الزبون.</p>'
+    html:'<p class="assal-staff-hint">بدخولك تقبل دعوة الإدارة التي أرسلها المالك لحسابك. لا يتغير تفعيل الزبون أو محادثاته.</p>'
       +'<input id="asStaffEmail" class="assal-premium-input" type="email" dir="ltr" autocomplete="username" placeholder="البريد الإداري">'
       +'<input id="asStaffPassword" class="assal-premium-input" type="password" autocomplete="current-password" dir="ltr" placeholder="كلمة مرور الأدمن">',
-    showCancelButton:true,confirmButtonText:'دخول',cancelButtonText:'إلغاء',background:'#0b1220',color:'#fff',confirmButtonColor:'#0f766e',
+    showCancelButton:true,confirmButtonText:'موافقة ودخول',cancelButtonText:'إلغاء',showLoaderOnConfirm:true,background:'#0b1220',color:'#fff',confirmButtonColor:'#0f766e',
     preConfirm:async()=>{
       const email=document.getElementById('asStaffEmail').value.trim();
       const password=document.getElementById('asStaffPassword').value;
@@ -26035,35 +26487,150 @@ window.openAssalManagedStaffLogin=async function(){
 };
 
 
-/* ASSAL PROMOTION WELCOME — read owner-issued invite from assal-office only.
- * Invitation never carries/stores a password; login remains Firebase Auth validated.
- * A customer with legacy app activation receives the popup without navigating to staff login. */
+/* ASSAL PROMOTION WELCOME V3 — no password is read from or written to Firestore.
+ * The card uses the existing Android PNG gallery bridge. Export does not accept an invitation. */
+function assalStaffCardBranch(code){return {baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز'}[code] || 'كادر عسل';}
+function assalStaffWelcomeCardHtml(invite){
+  const esc=value=>assalAccountEsc(String(value || ''));
+  return '<section class="assal-staff-access-card" aria-label="بطاقة بيانات الدخول">'
+    +'<div class="assal-staff-card-brand"><span class="assal-staff-card-mark">A<span>ASSAL OFFICE</span></span><span class="assal-staff-card-brand-ar"><b>مكتب عسل</b><small>لقطع الغيار</small></span><span class="assal-staff-card-seal" aria-hidden="true"><i class="fas fa-shield-halved"></i></span></div>'
+    +'<div class="assal-staff-card-person"><strong>'+esc(invite.label || 'أهلاً بك في كادر عسل')+'</strong><span><i class="fas fa-location-dot" aria-hidden="true"></i> '+esc(assalStaffCardBranch(invite.branchCode))+'</span></div>'
+    +'<div class="assal-staff-card-field"><label for="asWelcomeEmail">البريد الإداري <span>EMAIL</span></label>'
+    +'<input id="asWelcomeEmail" class="assal-staff-card-input" dir="ltr" type="email" autocomplete="username" readonly value="'+esc(invite.email)+'"></div>'
+    +'<div class="assal-staff-card-field"><label for="asWelcomePassword">كلمة المرور <span>PASSWORD</span></label>'
+    +'<div class="assal-staff-card-password"><input id="asWelcomePassword" class="assal-staff-card-input" type="password" dir="ltr" autocomplete="current-password" placeholder="أدخل كلمة المرور" aria-label="كلمة مرور حساب الإدارة">'
+    +'<button id="asWelcomeTogglePassword" type="button" aria-label="إظهار كلمة المرور" aria-pressed="false"><i class="fas fa-eye" aria-hidden="true"></i></button></div></div>'
+    +'<div class="assal-staff-card-foot"><span>STAFF ACCESS</span><small>بيانات دخولك الخاصة</small></div></section>';
+}
+async function assalStaffCardPng(invite,email,password){
+  if(document.fonts?.load)await Promise.race([document.fonts.load('700 36px "Assal Cairo"').catch(()=>{}),new Promise(resolve=>setTimeout(resolve,1500))]);
+  const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=760;
+  const ctx=canvas.getContext('2d');
+  if(!ctx)throw new Error('تعذّر تجهيز صورة البطاقة على هذا الجهاز.');
+  function round(x,y,w,h,r,fill,stroke=''){
+    ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();ctx.fillStyle=fill;ctx.fill();
+    if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}
+  }
+  function text(value,x,y,size,color,rtl=false,maxWidth=1060){
+    value=String(value || '');ctx.direction=rtl?'rtl':'ltr';ctx.textAlign=rtl?'right':'left';
+    let fitted=size;ctx.font='700 '+fitted+'px "Assal Cairo","Cairo",Tahoma,sans-serif';
+    while(ctx.measureText(value).width>maxWidth && fitted>10){fitted--;ctx.font='700 '+fitted+'px "Assal Cairo","Cairo",Tahoma,sans-serif';}
+    if(ctx.measureText(value).width>maxWidth)throw new Error('البيانات أطول من مساحة البطاقة. لم نحفظ صورة ناقصة.');
+    ctx.fillStyle=color;ctx.fillText(value,x,y);
+  }
+  const background=ctx.createLinearGradient(0,0,1200,760);
+  background.addColorStop(0,'#0c2637');background.addColorStop(.48,'#17243f');background.addColorStop(1,'#251d3c');
+  ctx.fillStyle=background;ctx.fillRect(0,0,1200,760);
+  const glow=ctx.createRadialGradient(1080,70,5,1080,70,540);glow.addColorStop(0,'rgba(45,203,178,.23)');glow.addColorStop(1,'rgba(45,203,178,0)');
+  ctx.fillStyle=glow;ctx.fillRect(0,0,1200,760);
+  ctx.strokeStyle='rgba(175,212,217,.12)';ctx.lineWidth=2;
+  for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(1160,20,140+i*65,0,Math.PI*2);ctx.stroke();}
+  round(24,24,1152,712,28,'rgba(0,0,0,0)','rgba(181,222,227,.26)');
+  const gold=ctx.createLinearGradient(60,0,1140,0);gold.addColorStop(0,'#82e1d2');gold.addColorStop(.5,'#e6c888');gold.addColorStop(1,'#a897e8');
+  round(62,205,1076,3,1,gold);
+  text('ASSAL',64,112,57,'#eefcfb',false,500);text('OFFICE  /  STAFF ACCESS',66,153,21,'#9ec1cc',false,500);
+  text('مكتب عسل',1135,100,43,'#fff1d4',true,510);text('لقطع الغيار',1135,148,26,'#aedbd7',true,510);
+  text(invite.label || 'كادر عسل',1135,270,32,'#f3f8ff',true,740);
+  text('فرع '+assalStaffCardBranch(invite.branchCode),65,270,25,'#c7b8ed',false,330);
+  round(62,308,1076,143,19,'rgba(5,16,29,.52)','rgba(153,205,210,.18)');
+  text('البريد الإداري',1108,347,22,'#b1cfdb',true,500);text('EMAIL',90,347,18,'#78cdbc',false,250);
+  text(email,92,411,40,'#f1ffff',false,1010);
+  round(62,474,1076,143,19,'rgba(5,16,29,.52)','rgba(153,205,210,.18)');
+  text('كلمة المرور',1108,513,22,'#b1cfdb',true,500);text('PASSWORD',90,513,18,'#d6b77e',false,250);
+  text(password,92,578,42,'#ffe4ad',false,1010);
+  text('بيانات دخولك الخاصة • احتفظ بالبطاقة بمكان خاص',1135,684,23,'#a8c0d0',true,1050);
+  return canvas.toDataURL('image/png');
+}
+async function assalSaveStaffAccessCard(invite,email,password){
+  if(!String(password || ''))throw new Error('أدخل كلمة المرور التي سلّمها لك المالك حتى تظهر في البطاقة.');
+  const dataUrl=await assalStaffCardPng(invite,email,password);
+  const safeUid=String(invite.uid || 'STAFF').replace(/[^a-zA-Z0-9_-]/g,'').slice(-28);
+  const fileName='ASSAL_STAFF_CARD_'+safeUid+'_R'+Number(invite.revision || 0)+'.png';
+  if(window.Android && typeof window.Android.saveSubscriptionCardPng==='function'){
+    const saved=await Promise.resolve(window.Android.saveSubscriptionCardPng(dataUrl,fileName));
+    if(saved!==true && saved!=='true')throw new Error('تعذّر حفظ البطاقة في الاستوديو. جرّب مرة ثانية.');
+    return 'انحفظت البطاقة في الاستوديو';
+  }
+  const link=document.createElement('a');link.href=dataUrl;link.download=fileName;link.style.display='none';
+  document.body.appendChild(link);link.click();link.remove();
+  return 'تم طلب تنزيل صورة البطاقة';
+}
+async function assalShowStaffInvitation(invite){
+  const pending=invite.status==='pending';
+  return await Swal.fire({
+    title:pending?'دعوة خاصة إلى كادر عسل':'أهلاً بك في كادر عسل',
+    customClass:{popup:'assal-staff-premium assal-flow assal-flow-welcome'},showCloseButton:true,
+    html:'<div class="assal-staff-invite-intro"><span class="assal-staff-invite-spark"><i class="fas fa-star" aria-hidden="true"></i> اختيار من المالك</span>'
+      +'<strong>'+(pending?'مكانك بين كادر عسل':'بطاقة دخولك الإداري')+'</strong><p>'+(pending?'وصلتك دعوة للإدارة. تبدأ صلاحيتك بعد موافقتك وتسجيل الدخول.':'سجّل الدخول ببيانات حسابك الإداري للمتابعة.')+'</p></div>'
+      +assalStaffWelcomeCardHtml(invite)
+      +'<button id="asWelcomeSaveCard" class="assal-staff-save-card" type="button"><span><i class="fas fa-download" aria-hidden="true"></i> حفظ البطاقة صورة</span><small>في الاستوديو</small></button>'
+      +'<div id="asWelcomeSaveStatus" class="assal-staff-save-status" role="status" aria-live="polite"></div>'
+      +'<p class="assal-staff-invite-help">أدخل كلمة المرور التي سلّمها لك المالك. تفعيلك وبياناتك ومحادثاتك تبقى محفوظة.</p>',
+    confirmButtonText:pending?'موافقة ودخول':'دخول الإدارة',showCancelButton:true,cancelButtonText:'لاحقاً',focusConfirm:false,
+    showLoaderOnConfirm:true,allowOutsideClick:()=>!Swal.isLoading(),allowEscapeKey:()=>!Swal.isLoading(),
+    didOpen:()=>{
+      const input=document.getElementById('asWelcomePassword'),toggle=document.getElementById('asWelcomeTogglePassword');
+      toggle.addEventListener('click',()=>{
+        const visible=input.type==='password';input.type=visible?'text':'password';toggle.setAttribute('aria-pressed',String(visible));
+        toggle.setAttribute('aria-label',visible?'إخفاء كلمة المرور':'إظهار كلمة المرور');
+        toggle.innerHTML='<i class="fas '+(visible?'fa-eye-slash':'fa-eye')+'" aria-hidden="true"></i>';
+      });
+      const save=document.getElementById('asWelcomeSaveCard'),status=document.getElementById('asWelcomeSaveStatus');
+      save.addEventListener('click',async()=>{
+        if(save.disabled || Swal.isLoading())return;
+        const password=input.value,email=document.getElementById('asWelcomeEmail').value;
+        if(!password){Swal.showValidationMessage('أدخل كلمة المرور أولاً حتى تُحفظ داخل البطاقة.');input.focus();return;}
+        Swal.resetValidationMessage();save.disabled=true;status.classList.remove('is-error');status.textContent='جارٍ حفظ صورة البطاقة…';
+        try{status.textContent=await assalSaveStaffAccessCard(invite,email,password);}
+        catch(error){status.classList.add('is-error');status.textContent=String(error?.message || 'تعذّر حفظ صورة البطاقة.');}
+        finally{save.disabled=false;}
+      });
+    },
+    preConfirm:async()=>{
+      const email=document.getElementById('asWelcomeEmail').value.trim(),input=document.getElementById('asWelcomePassword');
+      const password=input.value,save=document.getElementById('asWelcomeSaveCard'),close=Swal.getCloseButton();
+      if(!password){Swal.showValidationMessage('أدخل كلمة مرور حسابك الإداري.');return false;}
+      if(save.disabled){Swal.showValidationMessage('انتظر إكمال حفظ البطاقة ثم تابع الدخول.');return false;}
+      save.disabled=true;input.readOnly=true;if(close)close.disabled=true;
+      try{await window.assalStaffManagement.login(email,password,pending?{uid:invite.uid,revision:invite.revision}:null);return true;}
+      catch(error){Swal.showValidationMessage(assalStaffHumanErrorMessage(error,'login'));return false;}
+      finally{save.disabled=false;input.readOnly=false;if(close)close.disabled=false;}
+    },
+    willClose:()=>{const input=document.getElementById('asWelcomePassword');if(input)input.value='';}
+  });
+}
 (function(){
-  let busy=false,seen='';
+  let busy=false,seen='',watched='',unsubscribe=null,retry=0;
   async function check(){
-    if(busy||typeof isAdminUser!=='function'||isAdminUser()||localStorage.getItem('isActivated')!=='true'||!window.assalStaffManagement)return;
-    const id=typeof getDeviceId==='function'?String(getDeviceId()||''):'';
+    if(busy || document.hidden || typeof isAdminUser!=='function' || isAdminUser() || localStorage.getItem('isActivated')!=='true' || !window.assalStaffManagement)return;
+    const id=typeof getDeviceId==='function'?String(getDeviceId() || ''):'';
     if(!/^(?:DEV-[A-Z0-9-]{7,24}|AND-[A-F0-9]{32})$/.test(id))return;
     busy=true;
     try{
       const invite=await window.assalStaffManagement.lookupInvite(id);
       if(!invite)return;
-      const token=id+'|'+String(invite.uid||'');
+      const token=[id,invite.uid,invite.revision,invite.status].join('|');
       if(seen===token)return;
+      if(Swal.isVisible()){setTimeout(check,1600);return;}
       seen=token;
-      const result=await Swal.fire({
-        title:'مبروك! تمت ترقية حسابك إلى أدمن',
-        customClass:{popup:'assal-staff-premium'},showCloseButton:true,
-        html:'<p class="assal-staff-hint">تمت ترقيتك إلى أدمن عسل. أدخل بيانات الدخول المرسلة من المالك لتفعيل صلاحياتك الإدارية. حسابك الأصلي ومحادثاتك محفوظة.</p>'
-          +'<label class="assal-staff-field-label">البريد الإداري</label><input id="asWelcomeEmail" class="assal-premium-input" dir="ltr" type="email" autocomplete="username" value="'+String(invite.email).replace(/[&<>"']/g,'')+'">'
-          +'<label class="assal-staff-field-label">كلمة المرور</label><input id="asWelcomePassword" class="assal-premium-input" type="password" dir="ltr" autocomplete="current-password" placeholder="assal-000">',
-        confirmButtonText:'دخول حساب الأدمن',showCancelButton:true,cancelButtonText:'لاحقاً',allowOutsideClick:true,
-        preConfirm:async()=>{try{const email=document.getElementById('asWelcomeEmail').value.trim();const pw=document.getElementById('asWelcomePassword').value;await window.assalStaffManagement.login(email,pw);return true;}catch(e){Swal.showValidationMessage(assalStaffHumanErrorMessage(e,'login'));return false;}}
-      });
-      if(result.isConfirmed&&result.value===true)location.reload();
-    }catch(e){console.warn('Staff invitation check:',e?.message||e);}finally{busy=false;}
+      const result=await assalShowStaffInvitation(invite);
+      if(result.isConfirmed && result.value===true)location.reload();
+    }catch(error){console.warn('Staff invitation check:',error?.code || error?.message || error);}
+    finally{busy=false;}
   }
-  function boot(){setTimeout(check,1100);document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});}
+  async function bind(){
+    if(typeof isAdminUser!=='function' || isAdminUser() || localStorage.getItem('isActivated')!=='true')return;
+    if(!window.assalStaffManagement){if(retry++<15)setTimeout(bind,1000);return;}
+    const id=typeof getDeviceId==='function'?String(getDeviceId() || ''):'';
+    if(!/^(?:DEV-[A-Z0-9-]{7,24}|AND-[A-F0-9]{32})$/.test(id))return;
+    if(watched!==id){
+      if(unsubscribe)unsubscribe();watched=id;
+      try{unsubscribe=await window.assalStaffManagement.watchInvite(id,check);}catch(error){watched='';console.warn('Staff invite watch:',error?.code || 'unavailable');}
+    }
+    await check();
+  }
+  function boot(){setTimeout(bind,1100);document.addEventListener('visibilitychange',()=>{if(!document.hidden)bind();});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 
@@ -69672,8 +70239,8 @@ html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-p
     const box=overlay();if(!box)return;
     const id=String(customer?.deviceId||customer?.id||staff?.staffCustomerId||'');
     const name=String(customer?.name||staff?.label||'بدون اسم');
-    txt('assalAccountDetailsTitle',staff?'معلومات الأدمن':'معلومات الزبون');
-    txt('assalAccountDetailsStatus',staff?(staff.role==='owner'?'حساب المالك الرئيسي':staff.active?'أدمن فعّال':'أدمن موقوف'):(customer?.blocked?'حساب محظور':'حساب نشط'));
+    txt('assalAccountDetailsTitle',staff?(staff.inviteStatus==='pending'&&staff.active===false?'دعوة إدارة معلّقة':'معلومات الأدمن'):'معلومات الزبون');
+    txt('assalAccountDetailsStatus',staff?(staff.role==='owner'?'حساب المالك الرئيسي':staff.active?'أدمن فعّال':staff.inviteStatus==='pending'?'بانتظار الموافقة والدخول':'أدمن موقوف'):(customer?.blocked?'حساب محظور':'حساب نشط'));
     txt('assalAccountDetailsName',name);
     const detailsAvatar=document.getElementById('assalAccountDetailsAvatar');
     if(detailsAvatar){detailsAvatar.innerHTML=staff&& !id?'<i class="fas fa-user-shield"></i>':assalAccountMessengerPortrait(id);detailsAvatar.dataset.tone=assalAccountMessengerAvatarTone(id);}
@@ -70094,3 +70661,194 @@ html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-p
 }
 #customersAdminModal .assal-account-icon-action:active{transform:scale(.93)!important;filter:brightness(1.08)!important}
 </style>
+
+<style id="assal-staff-flow-redesign-v6">
+/* ASSAL / Staff flow only — no global dialogs, customers list, or payment modal changes. */
+.swal2-container:has(.assal-flow){background:rgba(2,9,20,.76)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important}
+.swal2-popup.assal-flow{
+  --af-ink:#eaf9fc;--af-muted:#a3bbc9;--af-teal:#73e6d4;--af-line:rgba(151,203,224,.14);
+  box-sizing:border-box!important;width:min(94vw,438px)!important;max-height:92dvh!important;
+  padding:0 0 17px!important;margin:0!important;overflow:hidden!important;direction:rtl!important;text-align:right!important;
+  border-radius:26px!important;border:1px solid rgba(129,204,215,.28)!important;
+  background:radial-gradient(ellipse at 95% 0%,rgba(38,151,177,.22),transparent 56%),radial-gradient(ellipse at 5% 100%,rgba(20,108,135,.12),transparent 48%),linear-gradient(167deg,#122840,#091b30 50%,#071423 100%)!important;
+  box-shadow:0 28px 70px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.085)!important;
+  color:var(--af-ink)!important;font-family:'Cairo',Tahoma,sans-serif!important;
+}
+.assal-flow .swal2-title{
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  margin:0!important;min-height:63px!important;padding:13px 20px 13px 68px!important;
+  box-sizing:border-box!important;border-bottom:1px solid rgba(148,190,208,.15)!important;
+  color:#f5fdff!important;font:850 16px/1.65 'Cairo',Tahoma,sans-serif!important;text-align:right!important;
+  background:linear-gradient(96deg,rgba(16,60,86,.24),rgba(33,114,134,.18)),rgba(255,255,255,.016)!important;
+}
+.assal-flow .swal2-title::before{content:'';width:4px;height:22px;display:inline-block;flex:none;margin-inline-end:11px;border-radius:9px;background:linear-gradient(#b3fff1,#32b9b8);box-shadow:0 0 12px rgba(115,230,212,.24)}
+.assal-flow.assal-flow-revoke .swal2-title::before,.assal-flow.assal-flow-error .swal2-title::before{background:linear-gradient(#ffc197,#fb7185)}
+.assal-flow .swal2-close{
+  display:grid!important;place-items:center!important;position:absolute!important;left:17px!important;right:auto!important;top:13px!important;
+  width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;
+  border-radius:50%!important;border:1px solid rgba(255,180,180,.23)!important;
+  background:linear-gradient(155deg,#a72e45,#72192d)!important;color:#fff!important;
+  padding:0!important;margin:0!important;font:400 25px/1 Arial,sans-serif!important;
+  box-shadow:0 6px 15px rgba(75,8,25,.32),inset 0 1px 0 rgba(255,255,255,.16)!important;
+  z-index:5!important;opacity:1!important;transform:none!important;
+}
+.assal-flow .swal2-close:hover{background:linear-gradient(155deg,#bb3950,#88223a)!important}
+.assal-flow .swal2-close:focus-visible{outline:2px solid var(--af-teal)!important;outline-offset:3px!important}
+.assal-flow .swal2-html-container{
+  margin:0!important;padding:17px 18px 8px!important;max-height:calc(92dvh - 153px)!important;
+  overflow-y:auto!important;overflow-x:hidden!important;text-align:right!important;
+  color:var(--af-ink)!important;font:600 12px/1.8 'Cairo',Tahoma,sans-serif!important;
+  scrollbar-width:thin;scrollbar-color:rgba(111,178,193,.25) transparent;
+}
+.assal-flow .swal2-input,.assal-flow .swal2-select,.assal-flow .swal2-textarea,.assal-flow .swal2-file,.assal-flow .swal2-range,.assal-flow .swal2-radio,.assal-flow .swal2-checkbox{display:none!important}
+.assal-flow .assal-flow-hero{display:flex;align-items:center;gap:12px;padding:14px 13px;margin-bottom:14px;border:1px solid rgba(115,230,212,.23);border-radius:18px;background:linear-gradient(118deg,rgba(30,118,139,.24),rgba(27,59,87,.46));box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.assal-flow .assal-flow-hero.is-violet{border-color:rgba(190,159,250,.25);background:linear-gradient(118deg,rgba(99,66,155,.3),rgba(35,49,89,.5))}
+.assal-flow .assal-flow-hero.is-danger{border-color:rgba(255,168,120,.25);background:linear-gradient(118deg,rgba(129,53,60,.24),rgba(48,41,72,.48))}
+.assal-flow .assal-flow-hero-symbol{display:grid;place-items:center;flex:none;width:54px;height:54px;border-radius:18px;color:#c0fff2;font-size:22px;background:linear-gradient(145deg,rgba(38,193,169,.38),rgba(23,110,156,.43));border:1px solid rgba(153,244,229,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.assal-flow .is-violet .assal-flow-hero-symbol{color:#eee0ff;background:linear-gradient(135deg,rgba(148,111,237,.36),rgba(73,90,183,.3))}
+.assal-flow .is-danger .assal-flow-hero-symbol{color:#ffd4c3;background:linear-gradient(135deg,rgba(209,83,90,.35),rgba(122,65,95,.3))}
+.assal-flow .assal-flow-hero-text{flex:1;min-width:0;display:grid;gap:1px}
+.assal-flow .assal-flow-hero-text small{color:#8ee7db;font:800 10px/1.5 'Cairo',Tahoma,sans-serif}
+.assal-flow .is-violet .assal-flow-hero-text small{color:#d6bfff}
+.assal-flow .is-danger .assal-flow-hero-text small{color:#ffc9ad}
+.assal-flow .assal-flow-hero-text strong{color:#f1fdff;font:850 15px/1.6 'Cairo',Tahoma,sans-serif}
+.assal-flow .assal-flow-hero-text p{margin:1px 0 0;color:#bbd4df;font:600 10.7px/1.75 'Cairo',Tahoma,sans-serif}
+.assal-flow .assal-flow-person{display:flex;align-items:center;gap:10px;padding:12px 12px;margin-bottom:13px;border-radius:16px;border:1px solid var(--af-line);background:rgba(255,255,255,.038)}
+.assal-flow .assal-flow-person-avatar{width:39px;height:39px;flex:none;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,#247f99,#18556f);color:#c4faff;font-size:16px}
+.assal-flow .assal-flow-person-name{display:grid;gap:1px;min-width:0;flex:1}
+.assal-flow .assal-flow-person-name strong{font:800 12.7px/1.6 'Cairo',Tahoma,sans-serif;color:#f7ffff;overflow-wrap:anywhere}
+.assal-flow .assal-flow-person-name small{font:600 10.5px/1.5 'Cairo',Tahoma,sans-serif;color:var(--af-muted)}
+.assal-flow .assal-flow-person-check{color:#66dcc6;font-size:16px}
+.assal-flow .assal-flow-fields{display:grid;gap:12px;margin:4px 0 12px}
+.assal-flow .assal-flow-field{display:grid;gap:6px;position:relative;min-width:0}
+.assal-flow .assal-flow-label{display:flex;align-items:center;gap:8px;color:#dbf0f8!important;font:800 11px/1.5 'Cairo',Tahoma,sans-serif!important;margin:0!important}
+.assal-flow .assal-flow-label i{color:#63dacf;font-size:12px;min-width:14px;text-align:center}
+.assal-flow .assal-premium-input{width:100%!important;max-width:100%!important;box-sizing:border-box!important;height:46px!important;min-height:46px!important;border-radius:13px!important;padding:0 13px!important;margin:0!important;border:1px solid rgba(135,178,204,.27)!important;background:rgba(6,19,36,.73)!important;color:#f9feff!important;font:700 13px 'Cairo',Tahoma,sans-serif!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.022)!important;outline:none!important;-webkit-appearance:none!important;appearance:none!important}
+.assal-flow .assal-premium-input:focus{border-color:#65dcca!important;box-shadow:0 0 0 3px rgba(54,200,185,.14)!important}
+.assal-flow .assal-premium-input::placeholder{color:#829cad!important}
+.assal-flow .assal-branch-picker{position:relative;z-index:3}
+.assal-flow .assal-branch-picker.is-expanded{z-index:8}
+.assal-flow .assal-branch-trigger{width:100%;height:48px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-sizing:border-box;padding:0 11px;border-radius:13px;border:1px solid rgba(135,178,204,.3);background:rgba(6,19,36,.76);color:#f2fdff;font:750 12px 'Cairo',Tahoma,sans-serif;text-align:right;cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
+.assal-flow .assal-branch-trigger-main{display:flex;align-items:center;gap:10px}
+.assal-flow .assal-branch-trigger-icon{width:29px;height:29px;border-radius:9px;display:grid;place-items:center;color:#aaf5ea;background:rgba(34,193,170,.12)}
+.assal-flow .assal-branch-chevron{color:#8bded8;transition:transform .16s ease}
+.assal-flow .assal-branch-picker.is-expanded .assal-branch-chevron{transform:rotate(180deg)}
+.assal-flow .assal-branch-trigger:focus-visible{outline:2px solid #71e5d4;outline-offset:2px}
+.assal-flow .assal-branch-options[hidden]{display:none!important}
+.assal-flow .assal-branch-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:10px;margin-top:8px;border-radius:15px;background:linear-gradient(160deg,#142e49,#0c2038);border:1px solid rgba(128,206,215,.28);box-shadow:0 12px 28px rgba(0,0,0,.25);animation:assal-flow-menu .15s ease-out}
+.assal-flow .assal-branch-options button{width:100%;display:flex;align-items:center;gap:7px;padding:10px 8px;border-radius:11px;border:1px solid rgba(167,198,215,.12);background:rgba(255,255,255,.033);color:#dcecf6;font:750 11px 'Cairo',Tahoma,sans-serif;cursor:pointer;text-align:right}
+.assal-flow .assal-branch-options .assal-branch-option-ico{display:grid;place-items:center;width:26px;height:26px;flex:none;background:rgba(255,255,255,.045);border-radius:8px;color:#a3d4e3}
+.assal-flow .assal-branch-options .assal-branch-tick{margin-right:auto;opacity:0;color:#91f9e6}
+.assal-flow .assal-branch-options button[aria-selected="true"]{background:rgba(35,185,160,.16);border-color:rgba(115,230,212,.37);color:white}
+.assal-flow .assal-branch-options button[aria-selected="true"] .assal-branch-tick{opacity:1}
+.assal-flow .assal-branch-options button:focus-visible{outline:2px solid #8be8da;outline-offset:1px}
+.assal-flow .assal-flow-notice{display:flex;align-items:flex-start;gap:9px;margin:2px 0 0;padding:10px 11px;border-radius:13px;border:1px solid rgba(89,185,196,.2);background:rgba(18,111,128,.12);color:#c8eaf0;font:650 10.5px/1.85 'Cairo',Tahoma,sans-serif}
+.assal-flow .assal-flow-notice i{padding-top:3px;color:#7ce3d5;font-size:13px}
+.assal-flow .assal-flow-notice.is-violet{background:rgba(108,83,178,.16);border-color:rgba(170,146,238,.21)}
+.assal-flow .assal-flow-notice.is-violet i{color:#c4b3ff}
+.assal-flow .assal-flow-notice.is-danger{background:rgba(174,64,77,.13);border-color:rgba(241,139,144,.2)}
+.assal-flow .assal-flow-notice.is-danger i{color:#ffb7a8}
+.assal-flow .swal2-actions{display:flex!important;align-items:center!important;justify-content:stretch!important;flex-wrap:nowrap!important;width:auto!important;margin:15px 18px 0!important;gap:9px!important}
+.assal-flow .swal2-styled{flex:1 1 0!important;width:0!important;max-width:none!important;height:44px!important;min-height:44px!important;margin:0!important;padding:0 12px!important;border-radius:13px!important;border:1px solid rgba(255,255,255,.1)!important;font:800 12.1px 'Cairo',Tahoma,sans-serif!important;box-shadow:none!important;transition:filter .16s ease,transform .14s ease!important}
+.assal-flow .swal2-confirm{background:linear-gradient(112deg,#24b29d,#128ca7)!important;color:#fff!important;box-shadow:0 6px 18px rgba(15,146,147,.21)!important}
+.assal-flow .swal2-cancel{background:rgba(104,130,151,.12)!important;border-color:rgba(156,185,202,.21)!important;color:#dcecf5!important}
+.assal-flow.assal-flow-revoke .swal2-confirm{background:linear-gradient(120deg,#c9545a,#8c3448)!important;color:white!important;box-shadow:0 7px 18px rgba(170,57,78,.18)!important}
+.assal-flow .swal2-styled:active{transform:scale(.974)!important}
+.assal-flow .swal2-styled:focus-visible{outline:2px solid #b4faed!important;outline-offset:2px!important}
+.assal-flow .swal2-validation-message{box-sizing:border-box!important;margin:12px 17px 0!important;padding:10px 12px!important;border:1px solid rgba(245,139,160,.18)!important;border-radius:11px!important;background:rgba(135,32,51,.34)!important;color:#ffe3e7!important;font:650 11px/1.75 'Cairo',Tahoma,sans-serif!important}
+.assal-flow .assal-flow-impact{display:grid;gap:6px;margin:0 0 11px}
+.assal-flow .assal-flow-impact>div{display:flex;align-items:center;gap:9px;padding:11px;border-radius:12px;background:rgba(255,255,255,.034);color:#d4e6ef;border:1px solid rgba(255,255,255,.06);font:700 11px 'Cairo',Tahoma,sans-serif}
+.assal-flow .assal-flow-impact>div i:first-child{color:#f6b3a2}
+.assal-flow .assal-flow-impact>div i:last-child{color:#78e5c5;margin-right:auto}
+.assal-flow.assal-flow-progress{width:min(91vw,367px)!important;padding-bottom:19px!important}
+.assal-flow-progress .swal2-title{font-size:14px!important;min-height:57px!important}
+.assal-flow-progress .swal2-close{display:none!important}
+.assal-flow-progress .swal2-html-container{padding:22px 20px 8px!important}
+.assal-flow .assal-flow-working{display:grid;justify-items:center;text-align:center;gap:8px;padding:4px 3px 7px}
+.assal-flow .assal-flow-orbit{position:relative;width:91px;height:91px;display:grid;place-items:center;margin:0 auto 9px}
+.assal-flow .assal-flow-orbit::before{content:'';position:absolute;inset:4px;border:3px solid rgba(111,223,210,.15);border-top-color:#71edda;border-right-color:#45c1d2;border-radius:50%;animation:assal-flow-spin 1.35s linear infinite}
+.assal-flow .assal-flow-orbit::after{content:'';position:absolute;inset:12px;border:1px dashed rgba(132,226,220,.24);border-radius:50%}
+.assal-flow .assal-flow-orbit-core{display:grid;place-items:center;width:63px;height:63px;border-radius:22px;background:linear-gradient(145deg,rgba(20,160,149,.28),rgba(25,85,128,.44));border:1px solid rgba(130,236,223,.21);color:#acfff0;font-size:26px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.assal-flow .assal-flow-orbit.is-amber::before{border-top-color:#ffb995;border-right-color:#f5a3aa}
+.assal-flow .assal-flow-orbit.is-amber .assal-flow-orbit-core{background:linear-gradient(145deg,rgba(179,99,72,.28),rgba(93,69,114,.36));color:#ffe0bb}
+.assal-flow .assal-flow-working strong{color:#f6fdff;font:850 17px 'Cairo',Tahoma,sans-serif}
+.assal-flow .assal-flow-working p{margin:0;color:#bdd2df;font:600 11px/1.9 'Cairo',Tahoma,sans-serif;max-width:270px}
+.assal-flow .assal-flow-working-track{width:85%;height:6px;border-radius:50px;overflow:hidden;margin-top:10px;background:rgba(160,197,208,.14)}
+.assal-flow .assal-flow-working-track>span{display:block;width:36%;height:100%;border-radius:50px;background:linear-gradient(90deg,#39bba9,#a1fff0);animation:assal-flow-bar 1.7s ease-in-out infinite alternate}
+.assal-flow .assal-flow-working-status{display:flex;align-items:center;gap:7px;color:#7899ac;font:650 10.2px 'Cairo',Tahoma,sans-serif;margin-top:4px}
+.assal-flow .assal-flow-working-status i{color:#75bdbf}
+.assal-flow .assal-flow-result{text-align:center;display:grid;justify-items:center;gap:7px;padding:3px 2px 13px}
+.assal-flow .assal-flow-result-icon{display:grid;place-items:center;width:71px;height:71px;border-radius:23px;color:#b2ffee;font-size:30px;background:linear-gradient(145deg,rgba(30,177,148,.21),rgba(16,109,127,.28));border:1px solid rgba(134,240,222,.27);box-shadow:0 8px 25px rgba(25,158,132,.13)}
+.assal-flow .assal-flow-result.is-error .assal-flow-result-icon{color:#ffd2cd;background:linear-gradient(145deg,rgba(178,53,76,.22),rgba(116,51,72,.24));border-color:rgba(251,142,159,.26)}
+.assal-flow .assal-flow-result strong{font:850 17px 'Cairo',Tahoma,sans-serif;color:#f3fcff}
+.assal-flow .assal-flow-result p{margin:0;color:#bdcfdf;font:650 11.5px/1.9 'Cairo',Tahoma,sans-serif;overflow-wrap:anywhere}
+.assal-flow .assal-flow-result.is-error p{padding:12px 13px;width:100%;box-sizing:border-box;border-radius:13px;border:1px solid rgba(255,163,165,.17);background:rgba(171,56,73,.095);color:#ffe1e2;text-align:right;line-height:1.9}
+.assal-flow .assal-flow-result-foot{display:flex;align-items:flex-start;gap:8px;width:100%;padding-top:5px;color:#b6cdda;text-align:right;font:600 10px/1.8 'Cairo',Tahoma,sans-serif}
+.assal-flow .assal-flow-result-foot i{margin-top:3px;color:#e8b19c}
+.assal-flow .assal-flow-credential{display:grid;gap:6px;padding:13px 14px;border:1px solid rgba(139,214,207,.17);border-radius:13px;background:rgba(4,19,31,.38)}
+.assal-flow .assal-flow-credential>span{display:flex;align-items:center;gap:8px;color:#9fc4d3;font:700 10.5px 'Cairo',Tahoma,sans-serif}
+.assal-flow .assal-flow-credential>span i{color:#64c9c2}
+.assal-flow .assal-flow-credential strong{direction:ltr;text-align:left;overflow-wrap:anywhere;font:800 13px/1.7 'Cairo',Tahoma,sans-serif;color:#8df2dc}
+.assal-flow-success .swal2-html-container,.assal-flow-error .swal2-html-container{padding-top:20px!important}
+@keyframes assal-flow-spin{to{transform:rotate(360deg)}}
+@keyframes assal-flow-bar{from{transform:translateX(-88%)}to{transform:translateX(195%)}}
+@keyframes assal-flow-menu{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:390px){
+  .swal2-popup.assal-flow{width:95vw!important;border-radius:22px!important}
+  .assal-flow .swal2-title{font-size:14.5px!important;min-height:58px!important;padding:11px 15px 11px 62px!important}
+  .assal-flow .swal2-html-container{padding:13px 13px 7px!important}
+  .assal-flow .assal-flow-hero{padding:11px 10px;gap:10px}
+  .assal-flow .assal-flow-hero-symbol{width:47px;height:47px;border-radius:16px;font-size:20px}
+  .assal-flow .assal-flow-hero-text strong{font-size:13.5px}
+  .assal-flow .swal2-actions{margin:12px 13px 0!important}
+  .assal-flow .swal2-styled{font-size:11.5px!important}
+}
+@media(prefers-reduced-motion:reduce){.assal-flow *, .assal-flow *::before,.assal-flow *::after{animation:none!important;transition:none!important}}
+</style>
+
+<style id="assal-staff-invite-card-v3">
+/* Additive, scoped styling. Approved owner/recovery/revocation dialogs are unchanged. */
+.swal2-popup.assal-flow.assal-flow-welcome{width:min(94vw,440px)!important;background:radial-gradient(ellipse at 100% 0,rgba(27,141,137,.2),transparent 48%),radial-gradient(ellipse at 0 100%,rgba(118,73,171,.17),transparent 52%),linear-gradient(150deg,#10283a,#111b31 60%,#201b33)!important}
+.assal-flow-welcome .swal2-title{background:linear-gradient(105deg,rgba(25,126,127,.2),rgba(110,74,148,.19))!important}
+.assal-flow-welcome .swal2-html-container{padding-top:12px!important}
+.assal-flow-welcome .assal-staff-invite-intro{display:grid;gap:4px;text-align:center;justify-items:center;margin-bottom:15px}
+.assal-flow-welcome .assal-staff-invite-spark{padding:3px 11px;border:1px solid rgba(226,195,131,.25);border-radius:50px;background:rgba(227,183,97,.07);color:#edc997;font:700 10px 'Assal Cairo','Cairo',Tahoma,sans-serif}
+.assal-flow-welcome .assal-staff-invite-intro>strong{font:800 20px/1.7 'Assal Cairo','Cairo',Tahoma,sans-serif;color:#fff3df}
+.assal-flow-welcome .assal-staff-invite-intro>p{font:600 11px/1.9 'Assal Cairo','Cairo',Tahoma,sans-serif;color:#bbd0df;margin:0;max-width:330px}
+.assal-flow-welcome .assal-staff-access-card{position:relative;isolation:isolate;overflow:hidden;padding:17px 16px 11px;border:1px solid rgba(166,211,216,.31);border-radius:21px;background:radial-gradient(ellipse at 96% -5%,rgba(51,189,167,.22),transparent 55%),linear-gradient(135deg,#0c2637,#17243f 52%,#251d3c);box-shadow:0 10px 25px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.1);text-align:right}
+.assal-flow-welcome .assal-staff-access-card:before{content:'';position:absolute;z-index:-1;left:-90px;top:-125px;width:250px;height:250px;border:1px solid rgba(183,207,237,.11);border-radius:50%;box-shadow:0 0 0 25px rgba(183,207,237,.025),0 0 0 50px rgba(183,207,237,.02);pointer-events:none}
+.assal-flow-welcome .assal-staff-card-brand{display:flex;align-items:center;gap:10px;padding-bottom:15px;border-bottom:1px solid rgba(225,196,136,.32)}
+.assal-flow-welcome .assal-staff-card-mark{order:3;margin-right:auto;display:grid;gap:0;text-align:left;direction:ltr;font:800 31px/1.15 Georgia,serif;color:#e3c792}
+.assal-flow-welcome .assal-staff-card-mark>span{font:700 7px/1.6 'Assal Cairo','Cairo',Tahoma,sans-serif;letter-spacing:1.5px;color:#a6c7d2}
+.assal-flow-welcome .assal-staff-card-brand-ar{order:2;display:grid;gap:0}
+.assal-flow-welcome .assal-staff-card-brand-ar b{font:800 17px/1.5 'Assal Cairo','Cairo',Tahoma,sans-serif;color:#fff1d4}
+.assal-flow-welcome .assal-staff-card-brand-ar small{font:600 10px/1.5 'Assal Cairo','Cairo',Tahoma,sans-serif;color:#a9d1d0}
+.assal-flow-welcome .assal-staff-card-seal{order:1;display:grid;place-items:center;width:39px;height:44px;flex:none;border-radius:13px;background:linear-gradient(145deg,rgba(45,170,158,.19),rgba(57,79,132,.23));border:1px solid rgba(153,224,207,.26);color:#92e6d3;font-size:17px}
+.assal-flow-welcome .assal-staff-card-person{display:flex;align-items:center;gap:9px;justify-content:space-between;margin:12px 0}
+.assal-flow-welcome .assal-staff-card-person strong{font:750 12px/1.8 'Assal Cairo','Cairo',Tahoma,sans-serif;color:#f1f7ff;overflow-wrap:anywhere;min-width:0}
+.assal-flow-welcome .assal-staff-card-person>span{display:inline-flex;align-items:center;gap:5px;flex:none;padding:3px 8px;border-radius:8px;background:rgba(162,128,212,.1);color:#d1c0ec;font:650 9px 'Assal Cairo','Cairo',Tahoma,sans-serif}
+.assal-flow-welcome .assal-staff-card-field{display:grid;gap:4px;border:1px solid rgba(153,205,210,.17);border-radius:12px;background:rgba(5,16,29,.5);padding:8px 10px;margin-top:8px;min-width:0}
+.assal-flow-welcome .assal-staff-card-field>label{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#b7d3dd;font:650 9px/1.7 'Assal Cairo','Cairo',Tahoma,sans-serif;margin:0}
+.assal-flow-welcome .assal-staff-card-field>label>span{direction:ltr;font:700 8px 'Assal Cairo','Cairo',Tahoma,sans-serif;letter-spacing:1.1px;color:#78cdbc}
+.assal-flow-welcome .assal-staff-card-field:nth-last-child(2)>label>span{color:#d6b77e}
+.assal-flow-welcome input.assal-staff-card-input{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;border:0!important;border-radius:4px!important;background:transparent!important;box-shadow:none!important;outline:none!important;padding:3px 0!important;margin:0!important;color:#f1ffff!important;text-align:left!important;font:700 13px/1.7 'Assal Cairo','Cairo',Tahoma,sans-serif!important;min-height:29px!important;height:auto!important;-webkit-appearance:none!important;appearance:none!important}
+.assal-flow-welcome input.assal-staff-card-input::placeholder{font:600 11px 'Assal Cairo','Cairo',Tahoma,sans-serif;color:#8ea4b9;text-align:right;direction:rtl}
+.assal-flow-welcome input.assal-staff-card-input:focus-visible{outline:1px solid #7bd9cd!important;outline-offset:3px!important}
+.assal-flow-welcome .assal-staff-card-password{display:flex;direction:ltr;align-items:center;gap:6px;min-width:0}
+.assal-flow-welcome .assal-staff-card-password input{color:#ffe4ad!important;flex:1}
+.assal-flow-welcome .assal-staff-card-password button{display:grid;place-items:center;flex:none;width:30px;height:30px;padding:0;border:0;border-radius:8px;background:rgba(205,189,157,.07);color:#d5c19b;cursor:pointer;font-size:12px}
+.assal-flow-welcome .assal-staff-card-foot{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-top:13px}
+.assal-flow-welcome .assal-staff-card-foot>span{color:#91afc0;font:700 7px 'Assal Cairo','Cairo',Tahoma,sans-serif;letter-spacing:1.4px;direction:ltr}
+.assal-flow-welcome .assal-staff-card-foot>small{font:600 8px 'Assal Cairo','Cairo',Tahoma,sans-serif;color:#a8bdcd}
+.assal-flow-welcome .assal-staff-save-card{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;box-sizing:border-box;margin:12px 0 0;padding:11px 13px;border-radius:13px;border:1px solid rgba(229,191,123,.3);background:linear-gradient(115deg,rgba(183,129,53,.18),rgba(158,113,72,.07));color:#f8dcab;cursor:pointer}
+.assal-flow-welcome .assal-staff-save-card>span{display:flex;align-items:center;gap:9px;font:750 11px 'Assal Cairo','Cairo',Tahoma,sans-serif}
+.assal-flow-welcome .assal-staff-save-card>small{font:600 9px 'Assal Cairo','Cairo',Tahoma,sans-serif;color:#bea887}
+.assal-flow-welcome .assal-staff-save-card:disabled{opacity:.65;cursor:wait}
+.assal-flow-welcome .assal-staff-save-card:focus-visible,.assal-flow-welcome .assal-staff-card-password button:focus-visible{outline:2px solid #e4c48d;outline-offset:3px}
+.assal-flow-welcome .assal-staff-save-status{color:#9de5ce;font:600 10px/1.7 'Assal Cairo','Cairo',Tahoma,sans-serif;text-align:center;margin-top:5px;min-height:0}
+.assal-flow-welcome .assal-staff-save-status:empty{display:none}
+.assal-flow-welcome .assal-staff-save-status.is-error{color:#ffc1c6}
+.assal-flow-welcome .assal-staff-invite-help{font:600 10px/1.9 'Assal Cairo','Cairo',Tahoma,sans-serif;color:#a5bbcd;text-align:center;margin:10px 3px 0}
+@media(max-width:360px){.assal-flow-welcome .assal-staff-access-card{padding:14px 11px 10px}.assal-flow-welcome .assal-staff-card-person{align-items:flex-start}.assal-flow-welcome input.assal-staff-card-input{font-size:11px!important}.assal-flow-welcome .assal-staff-invite-intro>strong{font-size:18px}}
+</style>
+
