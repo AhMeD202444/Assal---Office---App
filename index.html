@@ -22680,55 +22680,24 @@ function assalProfileReleaseIfReady() {
     assalReleaseStartupAd();
   }
 }
-async function maybePromptCustomerProfileRegistration() {
-  if (!assalProfileEligible()) return;
-  const customerId = getDeviceId();
-  // Cache is only a UI hint. Always consult the server once on each real startup:
-  // deleted profiles and newly banned accounts cannot pass using stale localStorage.
-  let remaining = 24;
-  while ((!window.firebaseDB || !window.firebaseDB.db) && remaining-- > 0) {
-    await new Promise(resolve => setTimeout(resolve, 150));
-  }
-  if (!window.firebaseDB || !window.firebaseDB.db) throw new Error('firebase-not-ready');
-  const { db, ref, get } = window.firebaseDB;
-  const snap = await Promise.race([
-    get(ref(db, `customerProfiles/${customerId}`)),
-    new Promise((_, reject) => setTimeout(() => reject(new Error('profile-check-timeout')), 10000))
-  ]);
-  if (getDeviceId() !== customerId || !assalProfileEligible()) return;
-  const profile = snap.exists() ? snap.val() || {} : null;
-  if (profile && profile.blocked) {
-    localStorage.removeItem(ASSAL_PROFILE_CHECK_KEY);
-    assalProfileDecision = { kind: 'blocked', profile };
-    return;
-  }
-  const complete = !!(profile && String(profile.name || '').trim()
-    && String(profile.phone || '').trim() && String(profile.address || '').trim());
-  if (complete) {
-    localStorage.setItem(ASSAL_PROFILE_CHECK_KEY, customerId);
-    assalProfileDecision = { kind: 'complete', profile };
-  } else {
-    localStorage.removeItem(ASSAL_PROFILE_CHECK_KEY);
-    assalProfileDecision = { kind: 'missing', profile: profile || {} };
-  }
-}
+// One live Firebase subscription decides ban / deleted / complete profile.
+// A previously verified customer does not wait for a network round-trip to see Assal.
+// New or unknown customers remain gated until the first account result arrives.
 window.queueCustomerProfilePrompt = function () {
-  if (!assalProfileEligible()) return;
-  if (assalProfileBootStarted) return;
+  if (!assalProfileEligible() || assalProfileBootStarted) return;
   assalProfileBootStarted = true;
-  window.__ASSAL_CUSTOMER_STARTUP_LOCK__ = true;
-  customerProfilePromptQueued = true;
-  // The same non-dismissible layer blocks access during verification. No recurring popup.
-  assalProfileWaitingLayer(true);
-  assalProfileCheckPromise = maybePromptCustomerProfileRegistration()
-    .catch(err => {
-      console.warn('ASSAL customer profile startup:', err);
-      assalProfileDecision = { kind: 'error' };
-    })
-    .finally(() => {
-      customerProfilePromptQueued = false;
-      assalProfileReleaseIfReady();
-    });
+  const id = getDeviceId();
+  const previouslyVerified = localStorage.getItem(ASSAL_PROFILE_CHECK_KEY) === id;
+  if (previouslyVerified) {
+    assalProfileDecision = { kind: 'complete', cached: true };
+    // Remote changes are handled below by the existing live watcher.
+    assalReleaseStartupAd();
+  } else {
+    window.__ASSAL_CUSTOMER_STARTUP_LOCK__ = true;
+    customerProfilePromptQueued = true;
+    assalProfileWaitingLayer(true);
+  }
+  startCustomerBlockedWatcher();
 };
 // Keyboard behavior confined to these 3 inputs: Next, Next, Done.
 document.addEventListener('DOMContentLoaded', () => {
@@ -22839,40 +22808,8 @@ window.submitCustomerProfile = async function () {
   }
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => {
-    if (localStorage.getItem("isActivated") === "true" && !isAdminUser()) {
-      startCustomerBlockedWatcher();
-      if (typeof window.enforceCustomerBlockedState === "function") {
-        window.enforceCustomerBlockedState().catch(() => {});
-      }
-    }
-  }, 260);
-
-  // Batch 1: no independent 800ms popup; initialization is coordinated
-  // with the startup advertisement and original window.onload below.
-});
-
-document.addEventListener("visibilitychange", () => {
-  if (
-    !document.hidden &&
-    localStorage.getItem("isActivated") === "true" &&
-    !isAdminUser() &&
-    typeof window.enforceCustomerBlockedState === "function"
-  ) {
-    window.enforceCustomerBlockedState().catch(() => {});
-  }
-});
-
-window.addEventListener("focus", () => {
-  if (
-    localStorage.getItem("isActivated") === "true" &&
-    !isAdminUser() &&
-    typeof window.enforceCustomerBlockedState === "function"
-  ) {
-    window.enforceCustomerBlockedState().catch(() => {});
-  }
-});
+// The one live account listener starts through queueCustomerProfilePrompt().
+// Do not issue separate GET reads on startup / focus / visibility.
 
 async function getCustomerProfileForChat() {
   if (!window.firebaseDB || !window.firebaseDB.db) return null;
@@ -26055,31 +25992,62 @@ function startCustomerBlockedWatcher(retries = 20) {
     hideCustomerBlockedOverlay();
     return;
   }
-  if (
-    !window.firebaseDB ||
-    !window.firebaseDB.db ||
-    typeof window.firebaseDB.onValue !== "function"
-  ) {
-    if (retries <= 0) return;
-    setTimeout(() => startCustomerBlockedWatcher(retries - 1), 500);
+  if (!window.firebaseDB || !window.firebaseDB.db ||
+      typeof window.firebaseDB.onValue !== "function") {
+    if (retries > 0) setTimeout(() => startCustomerBlockedWatcher(retries - 1), 500);
+    else if (window.__ASSAL_CUSTOMER_STARTUP_LOCK__) {
+      assalProfileDecision = {kind:'error'};
+      assalProfileReleaseIfReady();
+    }
     return;
   }
-  if (customerBlockedWatcherStop) {
-    try {
-      customerBlockedWatcherStop();
-    } catch (_) {}
-    customerBlockedWatcherStop = null;
-  }
+  if (customerBlockedWatcherStop) return; // exactly one active listener
   const { db, ref, onValue } = window.firebaseDB;
+  const listeningId = getDeviceId();
   customerBlockedWatcherStop = onValue(
-    ref(db, `customerProfiles/${getDeviceId()}`),
+    ref(db, `customerProfiles/${listeningId}`),
     (snap) => {
-      const profile = snap.exists() ? snap.val() || {} : {};
-      applyCustomerBlockedState(profile);
+      if (!assalProfileEligible() || getDeviceId() !== listeningId) return;
+      const profile = snap.exists() ? snap.val() || {} : null;
+      const blocked = !!(profile && profile.blocked === true);
+      const complete = !!(profile && String(profile.name || '').trim()
+        && String(profile.phone || '').trim() && String(profile.address || '').trim());
+      if (blocked) {
+        localStorage.removeItem(ASSAL_PROFILE_CHECK_KEY);
+        assalProfileDecision = {kind:'blocked', profile};
+        if (document.getElementById('customerProfileModal')?.classList.contains('show')) {
+          document.getElementById('customerProfileModal').classList.remove('show');
+        }
+        applyCustomerBlockedState(profile);
+        assalProfileWaitingLayer(false);
+        return;
+      }
+      applyCustomerBlockedState(profile || {});
+      if (complete) {
+        localStorage.setItem(ASSAL_PROFILE_CHECK_KEY, listeningId);
+        const wasMissing = assalProfileDecision?.kind === 'missing';
+        assalProfileDecision = {kind:'complete', profile};
+        if (wasMissing) closeCustomerProfileModal();
+        assalProfileWaitingLayer(false);
+        if (!assalStartupAdReleased) assalReleaseStartupAd();
+      } else {
+        localStorage.removeItem(ASSAL_PROFILE_CHECK_KEY);
+        const previouslyMissing = assalProfileDecision?.kind === 'missing';
+        assalProfileDecision = {kind:'missing',profile:profile||{}};
+        window.__ASSAL_CUSTOMER_STARTUP_LOCK__ = true;
+        assalProfileWaitingLayer(false);
+        if (!previouslyMissing && !customerProfileSubmitting) openCustomerProfileModal(profile||{});
+      }
+      customerProfilePromptQueued = false;
     },
     (err) => {
-      console.error("customerBlockedWatcher:", err);
-    },
+      console.warn('ASSAL account live listener:', err?.message || err);
+      if (window.__ASSAL_CUSTOMER_STARTUP_LOCK__ &&
+          assalProfileDecision?.kind !== 'missing') {
+        assalProfileDecision = {kind:'error'};
+        assalProfileWaitingLayer(true,true);
+      }
+    }
   );
 }
 
