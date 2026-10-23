@@ -40476,8 +40476,19 @@ const LuxAds = (() => {
     );
   }
 
+  // Customer security gate must be resolved BEFORE any advertisement can start.
+  // DOMContentLoaded may fire before the customer check in window.onload.
+  function assalCustomerAdReady() {
+    try {
+      if (window.__ASSAL_ANDROID_RESTORE_PENDING__) return false;
+      if (localStorage.getItem('isActivated') !== 'true' || isAdminUser()) return true;
+      return assalProfileBootStarted && assalProfileDecision?.kind === 'complete'
+        && !window.__ASSAL_CUSTOMER_STARTUP_LOCK__;
+    } catch (_) { return false; }
+  }
+
   function maybeShow(attempt = 0) {
-    if (window.__ASSAL_CUSTOMER_STARTUP_LOCK__) return;
+    if (!assalCustomerAdReady()) return;
     const key = normalize(AD_CHOICE);
     if (!key || key === "off") { assalFinishStartupAd('skipped'); return; }
 
@@ -40496,7 +40507,10 @@ const LuxAds = (() => {
     startupAdScheduled = true;
 
     const run = () => {
-      if (startupAdShown) return;
+      if (startupAdShown || !assalCustomerAdReady()) {
+        startupAdScheduled = false;
+        return;
+      }
 
       if (document.hidden) {
         setTimeout(() => maybeShow(attempt + 1), 220);
@@ -40514,7 +40528,16 @@ const LuxAds = (() => {
       }
 
       startupAdShown = true;
-      setTimeout(() => showByKey(key), Math.max(AD_DELAY_MS, 30));
+      setTimeout(() => {
+        // Revalidate after the animation delay so a pending ban/profile decision
+        // cannot get an advertisement behind a security modal.
+        if (!assalCustomerAdReady()) {
+          startupAdShown = false;
+          startupAdScheduled = false;
+          return;
+        }
+        showByKey(key);
+      }, Math.max(AD_DELAY_MS, 30));
     };
 
     if (document.readyState === "loading") {
