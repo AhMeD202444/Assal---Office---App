@@ -18745,7 +18745,7 @@ html.assal-viewport-transition body {
     <div class="customers-admin-body">
       <label class="assal-accounts-searchbar" for="assalAccountsQuickSearch"><i class="fas fa-magnifying-glass" aria-hidden="true"></i><input id="assalAccountsQuickSearch" type="search" placeholder="اسم الزبون أو رقم الهاتف" autocomplete="off" dir="rtl" oninput="applyCustomersAdminSearch(this)" aria-label="بحث عن حساب"></label>
       <div id="customersStaffPanel" class="customers-admin-list request-panel is-active"><div class="customers-admin-empty">جاري تحميل الأدمنية...</div></div>
-      <div id="customersActivePanel" class="customers-admin-list request-panel"><div class="customers-admin-empty">جاري تحميل الزبائن...</div></div>
+      <div id="customersActivePanel" class="customers-admin-list request-panel"><div class="assal-account-directory-empty assal-staff-loading" role="status" aria-live="polite"><i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i><span>جارٍ جلب الزبائن</span></div></div>
       <div id="customersBlockedPanel" class="customers-admin-list request-panel"><div class="customers-admin-empty">قائمة الحظر فارغة حالياً.</div></div>
     </div>
   </div>
@@ -26326,10 +26326,10 @@ window.loadCustomersAdmin = async function () {
     return;
   }
   if (!activePanel.firstElementChild?.classList.contains('assal-account-directory-content')) {
-    activePanel.innerHTML = '<div class="customers-admin-empty">جاري تحميل الزبائن...</div>';
+    activePanel.innerHTML = '<div class="assal-account-directory-empty assal-staff-loading" role="status" aria-live="polite"><i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i><span>جارٍ جلب الزبائن</span></div>';
   }
   if (!blockedPanel.firstElementChild?.classList.contains('assal-account-directory-content')) {
-    blockedPanel.innerHTML = '<div class="customers-admin-empty">جاري تحميل قائمة الحظر...</div>';
+    blockedPanel.innerHTML = '<div class="assal-account-directory-empty assal-staff-loading" role="status" aria-live="polite"><i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i><span>جارٍ جلب قائمة الحظر</span></div>';
   }
   try {
     const { db, ref, get } = window.firebaseDB;
@@ -26555,7 +26555,7 @@ function assalStaffButtonLoading(button, label) {
   button.classList.add('assal-staff-button-loading');
   button.setAttribute('aria-busy', 'true');
   button.disabled = true;
-  button.innerHTML = '<span class="assal-staff-button-label">' + assalAccountEsc(label) + '</span>';
+  button.innerHTML = '<span class="assal-staff-button-spinner" aria-hidden="true"></span><span class="assal-staff-button-label">' + assalAccountEsc(label) + '</span>';
   return () => {
     if (restored) return;
     restored = true;
@@ -40130,7 +40130,7 @@ function closeContactModal() {
      "simi_subscription_cta"   => صورة images/simi2.png مع زر الاشتراك
 
    ========================================================== */
-const AD_CHOICE = "simi_subscription"; // الإعلان الجديد مع زر الاشتراك؛ الصورة فقط: "simi_subscription"؛ الإيقاف: "off"
+const AD_CHOICE = "off"; // الإعلان الجديد مع زر الاشتراك؛ الصورة فقط: "simi_subscription"؛ الإيقاف: "off"
 
 // خيارات اضافية (اختياري)
 const AD_DELAY_MS = 45; // بعد جاهزية بوابة التحديث: ظهور شبه فوري بدون قفزة بصرية
@@ -59149,14 +59149,10 @@ html.low-end-device .assal-private-clean-dialog *{
         requestKind: "private_chat",
       });
     }
-    if (
-      isPrivateChat &&
-      (type === "material_request_created" ||
-        type === "material_request_customer_reply")
-    ) {
-      payload.title = "مسج جديد";
-    } else if (isPrivateChat && type === "material_request_admin_reply") {
-      payload.title = "رد على المسج";
+    if (isPrivateChat) {
+      var recipient = String(payload.targetRole || (payload.data && payload.data.targetRole) || '').trim().toLowerCase();
+      payload.title = recipient === 'customer' ? 'رسالة جديدة من الإدارة'
+        : recipient === 'admin' ? 'رسالة جديدة من الزبون' : 'رسالة جديدة';
     }
     return payload;
   }
@@ -71496,3 +71492,20 @@ body.modal-lock.assal-accounts-search-editable{touch-action:pan-y!important}
   document.querySelectorAll('input,textarea,[contenteditable=true]').forEach(prepare);
 })();
 </script>
+
+<style id="assal-staff-polish-final">
+/* Compact account handoff presentation; no editor or native changes. */
+.assal-staff-loading{margin:18px auto!important;width:max-content!important;max-width:calc(100% - 24px)!important;padding:9px 15px!important;border:1px solid rgba(96,199,193,.2);border-radius:14px;background:linear-gradient(120deg,rgba(38,123,122,.15),rgba(37,71,104,.16));box-shadow:inset 0 1px rgba(255,255,255,.035);font-size:11px!important}
+.swal2-popup.assal-flow-welcome .assal-staff-send-setup{box-sizing:border-box;grid-template-columns:minmax(0,1fr) auto;gap:9px 10px;margin:12px 0;padding:12px!important;border:1px solid rgba(105,213,190,.24)!important;border-radius:16px!important;background:linear-gradient(130deg,rgba(42,120,119,.16),rgba(22,46,74,.36))!important;box-shadow:inset 0 1px rgba(255,255,255,.045)!important}
+.swal2-popup.assal-flow-welcome .assal-staff-send-setup[hidden]{display:none!important}
+.swal2-popup.assal-flow-welcome .assal-staff-send-setup small{font-size:10px!important;color:#b3d5d7!important}
+.swal2-popup.assal-flow-welcome #asStaffDeliveryCode{box-sizing:border-box;min-width:0;padding:7px 9px!important;border:1px solid rgba(118,219,199,.18);border-radius:10px;background:rgba(4,23,37,.44);text-align:center!important;font-size:19px!important;letter-spacing:1.3px;color:#d0fff0!important;font-variant-numeric:tabular-nums}
+.swal2-popup.assal-flow-welcome #asStaffDeliverySend{min-height:40px;border-radius:11px!important;padding:9px 12px!important;background:linear-gradient(120deg,#1b6b64,#235775)!important;border-color:rgba(143,244,216,.3)!important;color:#ecfff9!important;box-shadow:inset 0 1px rgba(255,255,255,.1)!important}
+.swal2-popup .assal-staff-button-loading{position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;opacity:1!important;filter:none!important;cursor:wait!important;overflow:hidden!important;isolation:isolate;box-shadow:inset 0 1px rgba(255,255,255,.12),0 3px 12px rgba(0,0,0,.1)!important}
+.assal-staff-button-loading .assal-staff-button-spinner{box-sizing:border-box;flex:0 0 15px;width:15px;height:15px;position:relative;z-index:1;border:2px solid rgba(226,255,246,.24);border-top-color:#e2fff6;border-right-color:#8fe7d4;border-radius:50%;animation:assal-polish-spin .8s linear infinite}
+.assal-staff-button-loading>.assal-staff-button-label{font-size:inherit;line-height:1.6}
+.assal-staff-button-loading::after{height:2px!important;opacity:.55}
+@keyframes assal-polish-spin{to{transform:rotate(360deg)}}
+@media(max-width:360px){.swal2-popup.assal-flow-welcome .assal-staff-send-setup{gap:8px;padding:10px!important}.swal2-popup.assal-flow-welcome #asStaffDeliveryCode{font-size:16px!important;letter-spacing:.7px}.swal2-popup.assal-flow-welcome #asStaffDeliverySend{padding:9px!important;font-size:9px!important}}
+@media(prefers-reduced-motion:reduce){.assal-staff-button-loading .assal-staff-button-spinner{animation:none;border-right-color:#e2fff6}}
+</style>
