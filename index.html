@@ -71467,3 +71467,32 @@ body.modal-lock.assal-accounts-search-editable{touch-action:pan-y!important}
 @keyframes assal-staff-button-sheen{from{background-position:180% 0}to{background-position:-40% 0}}
 @media(prefers-reduced-motion:reduce){.assal-staff-button-loading::before,.assal-staff-button-loading::after{animation:none;background-position:50% 0}}
 </style>
+
+<script id="assal-ime-session-v3">
+// ASSAL IME session v3: one bounded native handshake per editor entry.
+(function(){
+  let serial=0, current=null;
+  function editor(el){return el && el.matches && el.matches('textarea,input:not([type=button]):not([type=submit]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]),[contenteditable=true]') && !el.disabled && !el.readOnly;}
+  function prepare(el){
+    if(!editor(el)||document.activeElement===el)return;
+    const type=(el.type||'text').toLowerCase();
+    if(['text','search','textarea','password'].includes(type))el.setAttribute('lang',el.id==='searchInput'?'en':'ar');
+  }
+  function invalidate(){serial++;current=null;}
+  function begin(el){
+    if(!editor(el)||document.activeElement!==el)return;
+    if(current===el)return;
+    current=el; const token=String(++serial);
+    window.__assalImeSession={token:token,ready:function(){return current===el&&document.activeElement===el&&el.isConnected&&!document.hidden;}};
+    try{if(window.Android&&typeof Android.assalBeginTextInput==='function')Android.assalBeginTextInput(token);}catch(_){}
+  }
+  document.addEventListener('pointerdown',e=>prepare(e.target),true);
+  document.addEventListener('focusin',e=>begin(e.target),true);
+  document.addEventListener('focusout',invalidate,true);
+  document.addEventListener('input',invalidate,true);
+  document.addEventListener('compositionstart',invalidate,true);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)invalidate();},true);
+  // Installed before an editor is focused; never changes attributes mid-composition.
+  document.querySelectorAll('input,textarea,[contenteditable=true]').forEach(prepare);
+})();
+</script>
