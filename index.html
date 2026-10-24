@@ -19519,7 +19519,7 @@ window.assalStaffManagement = Object.freeze({
   }
 });
 
-/* V4 delivery only. Existing create/recovery/revoke/accept and Auth role checks remain intact. */
+/* Encrypted staff delivery with an expiring, explicitly sent registration request. */
 const ASSAL_STAFF_DELIVERY_API='https://purple-frog-c3b8.ahmed-al-bayatii-90.workers.dev/staff-delivery-v4/';
 async function assalStaffDeliveryRequest(action,data,owner=false){
   const headers={'Content-Type':'application/json'};
@@ -19532,19 +19532,30 @@ async function assalStaffDeliveryRequest(action,data,owner=false){
     return result;
   }finally{clearTimeout(timer);}
 }
+function assalStaffDeliveryDeviceProof(customerId){
+  if(!assalIsRealCustomerId(customerId))throw new Error('معرّف الزبون غير صالح.');
+  const capability=String(window.__ASSAL_STAFF_BRIDGE_CAPABILITY__ || '');
+  if(!capability || typeof window.Android?.getStaffDeliveryDeviceInfo!=='function')
+    throw new Error('حدّث تطبيق أندرويد لاستلام بيانات الدخول تلقائياً.');
+  const raw=window.Android.getStaffDeliveryDeviceInfo(capability,customerId);
+  if(!raw)throw new Error('تعذّر تجهيز رمز الجهاز. أعد فتح التطبيق وحاول مجدداً.');
+  return JSON.parse(raw);
+}
 window.assalStaffDelivery=Object.freeze({
   async prepare(uid,password=''){return await assalStaffDeliveryRequest('prepare',{uid,password},true);},
-  async approve(uid,code){return await assalStaffDeliveryRequest('approve',{uid,code},true);},
+  async approve(uid,code,requestId){return await assalStaffDeliveryRequest('approve',{uid,code,requestId},true);},
+  async pairStatus(uid){return await assalStaffDeliveryRequest('pair-status',{uid},true);},
   async password(uid){return await assalStaffDeliveryRequest('password',{uid},true);},
   async register(customerId){
-    if(!assalIsRealCustomerId(customerId))throw new Error('معرّف الزبون غير صالح.');
-    const capability=String(window.__ASSAL_STAFF_BRIDGE_CAPABILITY__ || '');
-    if(!capability || typeof window.Android?.getStaffDeliveryDeviceInfo!=='function')
-      throw new Error('حدّث تطبيق أندرويد لاستلام بيانات الدخول تلقائياً.');
-    const raw=window.Android.getStaffDeliveryDeviceInfo(capability,customerId);
-    if(!raw)throw new Error('تعذّر تجهيز رمز الجهاز. أعد فتح التطبيق وحاول مجدداً.');
-    const device=JSON.parse(raw),result=await assalStaffDeliveryRequest('register',device);
-    return {kid:device.kid,code:result.code,customerId};
+    const device=assalStaffDeliveryDeviceProof(customerId),result=await assalStaffDeliveryRequest('register',device);
+    if(result.kid!==device.kid||!/^reg-\d{4}$/.test(result.code||'')||!/^[a-f0-9]{32}$/.test(result.requestId||'')||!Number.isFinite(result.expiresAt))
+      throw new Error('حدّث Worker والإندكس معاً لتجهيز رمز التسجيل القصير.');
+    return {...result,kid:device.kid,customerId};
+  },
+  async send(invite,device){
+    const proof=assalStaffDeliveryDeviceProof(device.customerId);
+    if(proof.kid!==device.kid)throw new Error('تغيّر مفتاح جهاز الاستلام. أعد فتح الدعوة.');
+    return await assalStaffDeliveryRequest('send-code',{...proof,uid:invite.uid,revision:invite.revision,requestId:device.requestId});
   },
   async receive(invite,device){
     const result=await assalStaffDeliveryRequest('receive',{customerId:device.customerId,kid:device.kid});
@@ -22663,9 +22674,20 @@ let requestSubmitting = false;
 // تنقية رقم الهاتف والتحقق منه
 function sanitizeRequestPhone(input) {
   if (!input) return;
-  input.value = String(input.value || "")
-    .replace(/\D+/g, "")
-    .slice(0, 11);
+  const raw = String(input.value || "");
+  const clean = (value) => String(value).replace(/[٠-٩۰-۹]/g, (digit) => {
+    const code = digit.charCodeAt(0);
+    return String(code - (code >= 0x06F0 ? 0x06F0 : 0x0660));
+  }).replace(/\D+/g, "").slice(0, 11);
+  const value = clean(raw);
+  if (value === raw) return;
+  const start = input.selectionStart;
+  const end = input.selectionEnd;
+  input.value = value;
+  if (typeof start === "number" && typeof end === "number") {
+    try { input.setSelectionRange(clean(raw.slice(0, start)).length,
+      clean(raw.slice(0, end)).length); } catch (_) {}
+  }
 }
 
 function isValidIraqMobile(phone) {
@@ -26378,6 +26400,83 @@ function assalStaffPartialDetailsHtml(partial) {
 }
 
 /* Owner-only delivery setup. A pending Auth/profile is never reported as active. */
+async function assalWaitStaffPairing(uid){
+  let closed=false,timer=0,inFlight=false,confirming=false,popup=null,selected=null,explicit=false,requests=[],blockedUntil=0,signature='';
+  const live=()=>!closed&&popup?.isConnected&&Swal.getPopup()===popup;
+  function stop(){closed=true;clearTimeout(timer);}
+  function text(id,value){const el=document.getElementById(id);if(el&&el.textContent!==value)el.textContent=value;}
+  function render(){
+    if(!live())return;
+    const input=document.getElementById('asDeliveryDeviceCode'),choices=document.getElementById('asDeliveryRequests');
+    const now=Date.now();requests=requests.filter(request=>request.expiresAt>now);
+    selected=selected?requests.find(request=>request.requestId===selected.requestId)||null:null;
+    if(requests.length===1&&!selected)selected=requests[0];
+    if(requests.length>1&&!explicit)selected=null;
+    const next=JSON.stringify(requests.map(request=>[request.requestId,request.code,request.deviceHint]));
+    if(signature!==next){
+      signature=next;choices.innerHTML=requests.map(request=>'<button type="button" class="assal-pair-choice" data-pair-request="'+assalAccountEsc(request.requestId)+'" aria-pressed="false"><b dir="ltr">'+assalAccountEsc(request.code)+'</b><small>جهاز · '+assalAccountEsc(request.deviceHint||'')+'</small></button>').join('');
+    }
+    choices.hidden=requests.length<2;
+    choices.querySelectorAll('[data-pair-request]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.pairRequest===selected?.requestId)));
+    input.value=selected?.code||'';
+    const blocked=blockedUntil>now,confirm=Swal.getConfirmButton();
+    if(confirm&&!confirming)confirm.disabled=!selected||blocked;
+    text('asDeliveryPairState',blocked?'محاولات كثيرة؛ انتظر دقيقة.':selected?'وصل الرمز، قارنْه بجهاز الزبون ثم اعتمد.':requests.length>1?'وصل أكثر من جهاز؛ اختر الرمز المطابق للزبون.':'بانتظار ضغط الزبون «إرسال للمالك»');
+  }
+  async function poll(){
+    if(!live())return;
+    if(inFlight||confirming||document.hidden){timer=setTimeout(poll,3000);return;}
+    inFlight=true;
+    try{
+      const result=await window.assalStaffDelivery.pairStatus(uid);
+      if(!live())return;
+      if(result.uid!==uid)throw new Error('طلب الاعتماد لا يطابق حساب الأدمن.');
+      requests=(result.requests||[]).filter(request=>/^reg-\d{4}$/.test(request.code||'')&&/^[a-f0-9]{32}$/.test(request.requestId||''));
+      blockedUntil=Number(result.blockedUntil)||0;
+      text('asDeliveryPairCustomer',String(result.label||'الدعوة الحالية'));
+      render();
+    }catch(error){if(live()){
+      selected=null;explicit=false;requests=[];render();
+      text('asDeliveryPairState',assalStaffHumanErrorMessage(error));
+    }}finally{inFlight=false;if(live())timer=setTimeout(poll,3000);}
+  }
+  const result=await Swal.fire({title:'اعتماد جهاز الاستلام',showCloseButton:true,focusConfirm:false,
+    customClass:{popup:'assal-staff-premium assal-flow assal-flow-form assal-flow-pairing'},
+    html:'<div class="assal-pair-panel"><p class="assal-pair-intro">يصل الرمز هنا بعد أن يرسله الزبون</p>'
+      +'<span id="asDeliveryPairCustomer" class="assal-pair-customer">الدعوة الحالية</span>'
+      +'<div class="assal-flow-field assal-pair-field"><label for="asDeliveryDeviceCode" class="assal-flow-label"><i class="fas fa-key" aria-hidden="true"></i> رمز التسجيل</label>'
+      +'<input id="asDeliveryDeviceCode" class="assal-premium-input" dir="ltr" readonly autocomplete="off" spellcheck="false" placeholder="بانتظار الإرسال"></div>'
+      +'<div id="asDeliveryPairState" class="assal-pair-state" role="status" aria-live="polite">بانتظار إرسال الزبون…</div>'
+      +'<div id="asDeliveryRequests" class="assal-pair-choices" hidden></div>'
+      +'<p class="assal-pair-note">أول اعتماد: تأكد أن الرمز يطابق جهاز الزبون المقصود.</p></div>',
+    showCancelButton:true,cancelButtonText:'لاحقاً',confirmButtonText:'اعتماد وتسليم',showLoaderOnConfirm:true,
+    allowOutsideClick:()=>!Swal.isLoading(),allowEscapeKey:()=>!Swal.isLoading(),
+    didOpen:()=>{
+      popup=Swal.getPopup();Swal.getConfirmButton().disabled=true;
+      document.getElementById('asDeliveryRequests').addEventListener('click',event=>{
+        const button=event.target.closest('[data-pair-request]');if(!button||confirming)return;
+        selected=requests.find(request=>request.requestId===button.dataset.pairRequest)||null;
+        explicit=!!selected;render();
+      });poll();
+    },
+    preConfirm:async()=>{
+      if(!selected||selected.expiresAt<=Date.now()||blockedUntil>Date.now()){
+        render();Swal.showValidationMessage('انتظر إرسال رمز صالح من الزبون أولاً.');return false;
+      }
+      const current=selected,close=Swal.getCloseButton(),cancel=Swal.getCancelButton();confirming=true;
+      if(close)close.disabled=true;if(cancel)cancel.disabled=true;
+      try{
+        const response=await window.assalStaffDelivery.approve(uid,current.code,current.requestId);
+        if(response.auditPending&&typeof window.showElegantTopToast==='function')window.showElegantTopToast('تم الاعتماد؛ تعذّر تحديث سجل إكمال الطلب','warning',3000);
+        return true;
+      }catch(error){Swal.showValidationMessage(assalStaffHumanErrorMessage(error));return false;}
+      finally{confirming=false;if(close)close.disabled=false;if(cancel)cancel.disabled=false;}
+    },
+    willClose:stop,didDestroy:stop
+  });
+  return result.isConfirmed&&result.value===true;
+}
+
 async function assalCompleteStaffDelivery(uid,password=''){
   if(!assalStaffIsOwner())throw new Error('إدارة الدعوة متاحة للمالك فقط.');
   let prepared;
@@ -26397,16 +26496,7 @@ async function assalCompleteStaffDelivery(uid,password=''){
     if(!result.isConfirmed)return false;prepared=result.value;
   }
   if(!prepared.needsPairing)return true;
-  const paired=await Swal.fire({title:'اعتماد جهاز الاستلام',showCloseButton:true,
-    customClass:{popup:'assal-staff-premium assal-flow assal-flow-form'},
-    html:assalFlowNotice('fa-mobile-screen-button','خذ رمز جهاز الاستلام من نافذة الدعوة عند الزبون والصقه هنا. الاعتماد مرة واحدة لهذا الجهاز؛ بعدها تصله البيانات تلقائياً.')
-      +'<div class="assal-flow-field"><input id="asDeliveryDeviceCode" class="assal-premium-input" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"></div>',
-    showCancelButton:true,cancelButtonText:'لاحقاً',confirmButtonText:'اعتماد وتسليم',showLoaderOnConfirm:true,
-    allowOutsideClick:()=>!Swal.isLoading(),allowEscapeKey:()=>!Swal.isLoading(),
-    preConfirm:async()=>{const code=document.getElementById('asDeliveryDeviceCode').value;if(!/^[A-F0-9]{24}$/i.test(code.replace(/[\s-]/g,''))){Swal.showValidationMessage('الصق رمز الجهاز الظاهر عند الزبون كاملاً.');return false;}
-      try{await window.assalStaffDelivery.approve(uid,code);return true;}catch(error){Swal.showValidationMessage(assalStaffHumanErrorMessage(error));return false;}}
-  });
-  return paired.isConfirmed && paired.value===true;
+  return await assalWaitStaffPairing(uid);
 }
 window.openAssalStaffDeliverySetup=async function(uid){
   if(!assalStaffIsOwner())return;
@@ -26612,9 +26702,9 @@ function assalStaffWelcomeCardHtml(invite){
     +'<div class="assal-staff-card-brand"><span class="assal-staff-card-mark">A<span>ASSAL OFFICE</span></span><span class="assal-staff-card-brand-ar"><b>مكتب عسل لقطع الغيار</b><small>لقطع الغيار</small></span><span class="assal-staff-card-seal" aria-hidden="true"><i class="fas fa-shield-halved"></i></span></div>'
     +'<div class="assal-staff-card-person"><strong>'+esc(invite.label || 'أهلاً بك في كادر عسل')+'</strong><span><i class="fas fa-location-dot" aria-hidden="true"></i> '+esc(assalStaffCardBranch(invite.branchCode))+'</span></div>'
     +'<div class="assal-staff-card-field"><label for="asWelcomeEmail">البريد الإداري <span>EMAIL</span></label>'
-    +'<input id="asWelcomeEmail" class="assal-staff-card-input" dir="ltr" type="email" autocomplete="username" readonly value="'+esc(invite.email)+'"></div>'
+    +'<input id="asWelcomeEmail" class="assal-staff-card-input" dir="ltr" type="email" autocomplete="off" autocapitalize="off" spellcheck="false" readonly value="'+esc(invite.email)+'"></div>'
     +'<div class="assal-staff-card-field"><label for="asWelcomePassword">كلمة المرور <span>PASSWORD</span></label>'
-    +'<div class="assal-staff-card-password"><input id="asWelcomePassword" class="assal-staff-card-input" type="password" dir="ltr" autocomplete="current-password" placeholder="أدخل كلمة المرور" aria-label="كلمة مرور حساب الإدارة">'
+    +'<div class="assal-staff-card-password"><input id="asWelcomePassword" class="assal-staff-card-input" type="password" dir="ltr" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="أدخل كلمة المرور" aria-label="كلمة مرور حساب الإدارة">'
     +'<button id="asWelcomeTogglePassword" type="button" aria-label="إظهار كلمة المرور" aria-pressed="false"><i class="fas fa-eye" aria-hidden="true"></i></button></div></div>'
     +'<div class="assal-staff-card-foot"><span>STAFF ACCESS</span><small>بيانات دخولك الخاصة</small></div></section>';
 }
@@ -26667,6 +26757,7 @@ async function assalSaveStaffAccessCard(invite,email,password){
   if(window.Android && typeof window.Android.saveSubscriptionCardPng==='function'){
     const saved=await Promise.resolve(window.Android.saveSubscriptionCardPng(dataUrl,fileName));
     if(saved!==true && saved!=='true')throw new Error('تعذّر حفظ البطاقة في الاستوديو. جرّب مرة ثانية.');
+    if(typeof window.showElegantTopToast==='function')window.showElegantTopToast('تم الحفظ','success',2400);
     return 'انحفظت البطاقة في الاستوديو';
   }
   const link=document.createElement('a');link.href=dataUrl;link.download=fileName;link.style.display='none';
@@ -26675,62 +26766,79 @@ async function assalSaveStaffAccessCard(invite,email,password){
 }
 async function assalShowStaffInvitation(invite){
   const pending=invite.status==='pending';
-  let closed=false,timer=0,inFlight=false,device=null,delivered=false;
+  let closed=false,timer=0,inFlight=false,sending=false,device=null,delivered=false,popup=null;
+  const live=()=>!closed&&popup?.isConnected&&Swal.getPopup()===popup;
   function stop(){closed=true;clearTimeout(timer);window.removeEventListener('assalStaffNativeReady',onNativeReady);}
   function onNativeReady(){clearTimeout(timer);poll();}
+  function renderCode(){
+    if(!live()||!device)return;
+    const code=document.getElementById('asStaffDeliveryCode'),setup=document.getElementById('asStaffDeliverySetup'),send=document.getElementById('asStaffDeliverySend');
+    code.textContent=device.code;setup.hidden=delivered;
+    send.disabled=sending||!!device.sentAt;
+    send.innerHTML=sending?'<i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i> جارٍ الإرسال…':device.sentAt?'<i class="fas fa-check" aria-hidden="true"></i> تم الإرسال':'<i class="fas fa-paper-plane" aria-hidden="true"></i> إرسال للمالك';
+  }
   async function poll(){
-    if(closed || inFlight || delivered || !pending)return;
-    const input=document.getElementById('asWelcomePassword'),state=document.getElementById('asStaffDeliveryState');
-    if(!input||!state)return;
+    if(!live()||inFlight||delivered||!pending)return;
     inFlight=true;
     try{
-      if(!device){
-        device=await window.assalStaffDelivery.register(String(getDeviceId()));
-        if(closed)return;
-        const code=document.getElementById('asStaffDeliveryCode'),setup=document.getElementById('asStaffDeliverySetup');
-        code.textContent=String(device.code).match(/.{1,4}/g).join('-');code.dataset.code=code.textContent;setup.hidden=false;
+      if(!device||device.expiresAt<=Date.now()){
+        const registered=await window.assalStaffDelivery.register(String(getDeviceId()));
+        if(!live())return;
+        if(registered.uid!==invite.uid||registered.revision!==invite.revision)throw new Error('تغيّرت الدعوة. أعد فتحها لتجهيز الرمز الصحيح.');
+        device=registered;renderCode();
       }
       const credential=await window.assalStaffDelivery.receive(invite,device);
-      if(closed)return;
+      if(!live())return;
+      const input=document.getElementById('asWelcomePassword'),state=document.getElementById('asStaffDeliveryState');
       if(credential){
         if(credential.email!==document.getElementById('asWelcomeEmail').value)throw new Error('تغيّر بريد الدعوة. أعد فتحها.');
-        input.value=credential.password;input.placeholder='';delivered=true;
+        input.value=credential.password;input.placeholder='';delivered=true;Swal.resetValidationMessage();
         document.getElementById('asStaffDeliverySetup').hidden=true;
         state.textContent='بياناتك جاهزة، اضغط موافقة ودخول';
-      }else state.textContent='بانتظار اعتماد المالك لجهاز الاستلام';
-    }catch(error){if(!closed)state.textContent=String(error?.message || 'تعذّر تجهيز بيانات الدخول.');}
-    finally{inFlight=false;if(!closed&&!delivered)timer=setTimeout(poll,5000);}
+      }else state.textContent=device.sentAt?'تم إرسال الرمز؛ بانتظار اعتماد المالك':'اضغط إرسال للمالك لإكمال اعتماد الجهاز';
+    }catch(error){if(live())document.getElementById('asStaffDeliveryState').textContent=String(error?.message||'تعذّر تجهيز بيانات الدخول.');}
+    finally{inFlight=false;if(live()&&!delivered)timer=setTimeout(poll,5000);}
   }
   return await Swal.fire({
     title:pending?'دعوة إدارة عسل':'دخول كادر عسل',customClass:{popup:'assal-staff-premium assal-flow assal-flow-welcome'},showCloseButton:true,
     html:assalStaffWelcomeCardHtml(invite)
-      +'<div id="asStaffDeliverySetup" class="assal-staff-delivery-setup" hidden><small>رمز جهاز الاستلام · للاعتماد أول مرة</small><button id="asStaffDeliveryCode" type="button" aria-label="نسخ رمز جهاز الاستلام"></button><small>اضغط للنسخ وأرسله للمالك</small></div>'
+      +'<div id="asStaffDeliverySetup" class="assal-staff-delivery-setup assal-staff-send-setup" hidden><small>رمز التسجيل · للاعتماد أول مرة</small><strong id="asStaffDeliveryCode" dir="ltr" aria-label="رمز التسجيل"></strong><button id="asStaffDeliverySend" type="button"><i class="fas fa-paper-plane" aria-hidden="true"></i> إرسال للمالك</button></div>'
       +'<div id="asStaffDeliveryState" class="assal-staff-delivery-state" role="status" aria-live="polite">'+(pending?'جارٍ تجهيز بيانات الدخول…':'')+'</div>'
       +'<button id="asWelcomeSaveCard" class="assal-staff-save-card" type="button"><span><i class="fas fa-download" aria-hidden="true"></i> حفظ البطاقة صورة</span><small>في الاستوديو</small></button>'
       +'<div id="asWelcomeSaveStatus" class="assal-staff-save-status" role="status" aria-live="polite"></div>',
     confirmButtonText:pending?'موافقة ودخول':'دخول الإدارة',showCancelButton:true,cancelButtonText:'لاحقاً',focusConfirm:false,
     showLoaderOnConfirm:true,allowOutsideClick:()=>!Swal.isLoading(),allowEscapeKey:()=>!Swal.isLoading(),
     didOpen:()=>{
+      popup=Swal.getPopup();
       const input=document.getElementById('asWelcomePassword'),toggle=document.getElementById('asWelcomeTogglePassword');
       toggle.addEventListener('click',()=>{
         const visible=input.type==='password';input.type=visible?'text':'password';toggle.setAttribute('aria-pressed',String(visible));
         toggle.setAttribute('aria-label',visible?'إخفاء كلمة المرور':'إظهار كلمة المرور');
         toggle.innerHTML='<i class="fas '+(visible?'fa-eye-slash':'fa-eye')+'" aria-hidden="true"></i>';
       });
-      document.getElementById('asStaffDeliveryCode').addEventListener('click',async event=>{
-        const code=event.currentTarget.dataset.code || '';if(!code)return;let copied=false;
-        try{await navigator.clipboard.writeText(code);copied=true;}catch(_){}
-        if(!copied){const area=document.createElement('textarea');area.value=code;area.style.cssText='position:fixed;left:-9999px;top:-9999px';document.body.appendChild(area);area.select();try{copied=document.execCommand('copy');}catch(_){}area.remove();}
-        document.getElementById('asStaffDeliveryState').textContent=copied?'تم نسخ رمز الجهاز':'تعذّر النسخ؛ أرسل الرمز الظاهر للمالك';
+      document.getElementById('asStaffDeliverySend').addEventListener('click',async()=>{
+        if(!device||sending||device.sentAt||delivered||Swal.isLoading())return;
+        sending=true;renderCode();
+        const state=document.getElementById('asStaffDeliveryState');state.textContent='جارٍ إرسال رمز التسجيل…';
+        try{
+          const response=await window.assalStaffDelivery.send(invite,device);
+          if(!live())return;
+          if(response.requestId!==device.requestId||response.code!==device.code)throw new Error('تغيّر طلب التسجيل. أعد إرسال الرمز الجديد.');
+          device={...device,...response};state.textContent='تم إرسال الرمز؛ بانتظار اعتماد المالك';
+          if(typeof window.showElegantTopToast==='function')window.showElegantTopToast('تم إرسال الرمز','success',2400);
+        }catch(error){if(live()){
+          state.textContent=String(error?.message||'تعذّر إرسال الرمز. حاول مجدداً.');
+          if(['CODE_EXPIRED','INVITE_CHANGED','PAIR_MISSING'].includes(error?.code)){device=null;clearTimeout(timer);timer=setTimeout(poll,0);}
+        }}finally{sending=false;if(live())renderCode();}
       });
       const save=document.getElementById('asWelcomeSaveCard'),status=document.getElementById('asWelcomeSaveStatus');
       save.addEventListener('click',async()=>{
-        if(save.disabled || Swal.isLoading())return;
+        if(save.disabled||Swal.isLoading())return;
         const password=input.value,email=document.getElementById('asWelcomeEmail').value;
         if(!password){Swal.showValidationMessage('انتظر تجهيز كلمة المرور حتى تُحفظ داخل البطاقة.');return;}
         Swal.resetValidationMessage();save.disabled=true;status.classList.remove('is-error');status.textContent='جارٍ حفظ صورة البطاقة…';
         try{status.textContent=await assalSaveStaffAccessCard(invite,email,password);}
-        catch(error){status.classList.add('is-error');status.textContent=String(error?.message || 'تعذّر حفظ صورة البطاقة.');}
+        catch(error){status.classList.add('is-error');status.textContent=String(error?.message||'تعذّر حفظ صورة البطاقة.');}
         finally{save.disabled=false;}
       });
       window.addEventListener('assalStaffNativeReady',onNativeReady);if(pending)poll();
@@ -26745,8 +26853,7 @@ async function assalShowStaffInvitation(invite){
       catch(error){Swal.showValidationMessage(assalStaffHumanErrorMessage(error,'login'));return false;}
       finally{save.disabled=false;input.readOnly=false;if(close)close.disabled=false;}
     },
-    willClose:()=>{stop();const input=document.getElementById('asWelcomePassword');if(input)input.value='';},
-    didDestroy:stop
+    willClose:()=>{stop();const input=document.getElementById('asWelcomePassword');if(input)input.value='';},didDestroy:stop
   });
 }
 
@@ -37359,8 +37466,14 @@ window.addEventListener("assalOnline", function () {
 ["pointerdown", "touchstart", "mousedown"].forEach((eventName) => {
   document.addEventListener(
     eventName,
-    () => {
+    (event) => {
       try {
+        const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+        // Android may send pointerdown, touchstart and a compatibility mousedown
+        // for one tap. None of them should blur a field the user is editing.
+        if (target?.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
+        if (target?.closest('label')?.control) return;
+        if (target?.closest('#asWelcomeTogglePassword')) return;
         const el = document.activeElement;
         if (el && typeof el.blur === "function") el.blur();
       } catch (_) {}
@@ -64668,8 +64781,31 @@ html.low-end-device .header-buttons > .assal-static-header-btn{
       30 +
       edgeBreathing +
       (count ? 18 + count * 30 + Math.max(0, count - 1) * 6 : 0);
-    const viewportCap = Math.max(30, Math.min(248, window.innerWidth - 44));
-    return Math.min(wanted, viewportCap);
+    const customerAccount = typeof isAdminUser === "function" && !isAdminUser();
+    hub.classList.toggle("assal-tools-customer-account", customerAccount);
+    if (!customerAccount) {
+      const viewportCap = Math.max(30, Math.min(248, window.innerWidth - 44));
+      return Math.min(wanted, viewportCap);
+    }
+    let available = window.innerWidth - 56;
+    const header = hub.closest(".header");
+    const buttons = hub.closest(".header-buttons");
+    if (header && buttons) {
+      const cs = getComputedStyle(header);
+      const px = (value) => parseFloat(value) || 0;
+      const siblings = Array.from(header.children).filter((el) => el !== buttons && isActuallyVisible(el));
+      const occupied = siblings.reduce((total, el) => {
+        const style = getComputedStyle(el);
+        return total + el.getBoundingClientRect().width + px(style.marginLeft) + px(style.marginRight);
+      }, 0);
+      available = header.clientWidth - px(cs.paddingLeft) - px(cs.paddingRight)
+        - occupied - Math.max(8, px(cs.columnGap));
+      // Preserve any independently visible control alongside the customer rail.
+      Array.from(buttons.children).filter((el) => el !== hub && el.classList.contains("assal-tools-preserve") && isActuallyVisible(el))
+        .forEach((el) => { available -= el.getBoundingClientRect().width + 4; });
+    }
+    const viewportCap = Math.max(30, Math.min(window.innerWidth - 44, Math.floor(available)));
+    return Math.min(wanted + (count ? 6 : 0), viewportCap);
   }
 
   function refreshHubMetrics() {
@@ -71036,3 +71172,67 @@ html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-p
 #assalAccountDetailsOverlay #assalAccountDetailsDeliveryRepair[hidden],#assalAccountDetailsOverlay #assalAccountDetailsPasswordRow[hidden]{display:none!important}
 </style>
 
+
+<style id="assal-input-toast-header-fix-v5">
+/* Header badge appearance only. Visibility, counts, click handlers and permissions stay intact. */
+.header .header-buttons .header-btn .header-cart-badge,
+.header .header-buttons .assal-tools-launcher .header-cart-badge,
+.header .header-buttons #cartCount{
+  top:1px!important;right:-4px!important;
+  background:linear-gradient(135deg,#1f2937,#111827)!important;
+  color:#fff!important;border:1px solid rgba(255,255,255,.24)!important;
+  border-radius:999px!important;box-sizing:border-box!important;
+  box-shadow:0 0 0 2px rgba(8,12,22,.92),0 4px 10px rgba(0,0,0,.3)!important;
+  min-width:17px!important;height:17px!important;padding:0 4px!important;
+  font-size:10px!important;line-height:1!important;transform:none!important;
+}
+.assal-header-tools-hub.is-open .assal-tools-rail{
+  height:32px;padding-top:1px;padding-bottom:1px;
+}
+.assal-header-tools-hub:not(.is-open){overflow:visible}
+.assal-header-tools-hub.assal-tools-customer-account.is-open{
+  height:38px;min-height:38px;
+}
+@media(max-width:768px){
+  .header .header-buttons .header-btn .header-cart-badge,
+  .header .header-buttons .assal-tools-launcher .header-cart-badge,
+  .header .header-buttons #cartCount{
+    min-width:16px!important;height:16px!important;font-size:9px!important;
+  }
+}
+/* Keep the adopted card colors when Android/Chromium supplies a saved value. */
+.assal-flow-welcome #asWelcomeEmail:-webkit-autofill,
+.assal-flow-welcome #asWelcomePassword:-webkit-autofill{
+  -webkit-text-fill-color:#f1ffff!important;caret-color:#f1ffff!important;
+  -webkit-box-shadow:0 0 0 1000px #0a1a2d inset!important;
+  box-shadow:0 0 0 1000px #0a1a2d inset!important;
+}
+.assal-flow-welcome #asWelcomePassword:-webkit-autofill{
+  -webkit-text-fill-color:#ffe4ad!important;caret-color:#ffe4ad!important;
+}
+</style>
+
+<style id="assal-reg-send-pairing-v5">
+/* Only the registration handoff: keep the adopted header, card and other dialogs. */
+.assal-flow-pairing .assal-pair-panel{display:grid;gap:13px;padding:2px 0 0}
+.assal-flow-pairing .assal-pair-intro{margin:0;color:#c5e1e8;font:650 11px/1.9 'Cairo',Tahoma,sans-serif;text-align:center}
+.assal-flow-pairing .assal-pair-customer{display:block;justify-self:center;max-width:100%;padding:4px 12px;border:1px solid rgba(115,230,212,.16);border-radius:20px;background:rgba(69,181,164,.07);color:#a6e9da;font:700 10px/1.8 'Cairo',Tahoma,sans-serif;overflow-wrap:anywhere}
+.assal-flow-pairing .assal-pair-field{gap:8px;margin-top:2px}
+.assal-flow-pairing #asDeliveryDeviceCode{height:52px!important;min-height:52px!important;text-align:center!important;color:#b0f2dd!important;font:800 22px/1.4 'Assal Cairo','Cairo',Tahoma,sans-serif!important;letter-spacing:1.1px;cursor:default}
+.assal-flow-pairing #asDeliveryDeviceCode::placeholder{font:600 12px 'Cairo',Tahoma,sans-serif!important;letter-spacing:0;color:#92adbf!important}
+.assal-flow-pairing .assal-pair-state{color:#acc7d4;font:600 10px/1.9 'Cairo',Tahoma,sans-serif;text-align:center;min-height:19px}
+.assal-flow-pairing .assal-pair-note{margin:0;padding-top:8px;border-top:1px solid rgba(138,194,207,.12);color:#8da9bb;font:600 9px/1.9 'Cairo',Tahoma,sans-serif;text-align:center}
+.assal-flow-pairing .assal-pair-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.assal-flow-pairing .assal-pair-choices[hidden]{display:none!important}
+.assal-flow-pairing .assal-pair-choice{display:grid;gap:4px;padding:10px 7px;border:1px solid rgba(140,185,207,.22);border-radius:12px;background:rgba(255,255,255,.035);color:#cde6eb;cursor:pointer;min-width:0;text-align:center}
+.assal-flow-pairing .assal-pair-choice b{font:750 15px 'Assal Cairo','Cairo',Tahoma,sans-serif}
+.assal-flow-pairing .assal-pair-choice small{font:600 9px 'Cairo',Tahoma,sans-serif;color:#94adbf}
+.assal-flow-pairing .assal-pair-choice[aria-pressed="true"]{border-color:#63cfb9;background:rgba(42,161,139,.16);color:#bcffe8}
+.assal-flow-pairing .swal2-confirm:disabled{opacity:.42!important;cursor:wait!important;filter:saturate(.45)!important}
+.assal-flow-welcome .assal-staff-send-setup{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:7px 12px;padding:10px 12px}
+.assal-flow-welcome .assal-staff-send-setup small{grid-column:1/-1;color:#a9c4d1;text-align:right;font-size:9px}
+.assal-flow-welcome #asStaffDeliveryCode{display:block;direction:ltr;color:#c6ebdf;text-align:left;font:800 21px/1.5 'Assal Cairo','Cairo',Tahoma,sans-serif;letter-spacing:1px;white-space:nowrap}
+.assal-flow-welcome #asStaffDeliverySend{display:inline-flex;align-items:center;justify-content:center;gap:7px;width:auto;max-width:100%;margin:0;padding:9px 11px;border:1px solid rgba(112,224,204,.28);border-radius:10px;background:linear-gradient(115deg,rgba(31,149,132,.25),rgba(31,104,144,.18));color:#bff8e9;font:750 10px/1.7 'Cairo',Tahoma,sans-serif;direction:rtl;letter-spacing:0;cursor:pointer}
+.assal-flow-welcome #asStaffDeliverySend:disabled{opacity:.68;cursor:default}
+@media(max-width:360px){.assal-flow-welcome #asStaffDeliveryCode{font-size:18px}.assal-flow-welcome #asStaffDeliverySend{padding:8px 9px;font-size:9px}.assal-flow-pairing .assal-pair-panel{gap:11px}}
+</style>
