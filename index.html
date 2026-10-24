@@ -13581,8 +13581,6 @@ html.low-end-device .results-container {
 <style id="assal-final-search-placeholder-visibility-fix">
 /* ===== ASSAL FINAL: عبارة البحث واضحة بالكامل بين أزرار اليسار واليمين ===== */
 .search-container #searchInput{
-  direction: rtl !important;
-  unicode-bidi: plaintext !important;
   text-align: center !important;
   padding-right: 92px !important;
   padding-left: 108px !important;
@@ -18179,7 +18177,7 @@ html.assal-viewport-transition body {
 </button>
 
     
-    <input type="text" id="searchInput" placeholder=" " aria-label="اكتب اسم الآيتم أو اضغط المايك" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" lang="en" inputmode="text" dir="ltr" data-assal-english-keyboard="true">
+    <input type="text" id="searchInput" placeholder=" " aria-label="اكتب اسم الآيتم أو اضغط المايك" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" lang="" inputmode="text" dir="auto">
     <span id="searchPlaceholderLabel" class="search-placeholder-label" aria-hidden="true">اكتب اسم الآيتم أو اضغط المايك</span>
     <div id="wholesaleSuggestions" class="wholesale-suggestions" aria-label="Wholesale suggestions"></div>
     <button id="clearBtn" class="clear-btn" onclick="clearSearch()" style="display: none;"><i class="fas fa-times"></i></button>
@@ -28025,7 +28023,6 @@ function clearSearch() {
   const resultsContainer = document.getElementById("results");
 
   searchInput.value = ""; // تفريغ الحقل
-  searchInput.setAttribute("dir", "rtl");
   assalReleaseHiddenResults(); // إخفاء النتائج وتحرير بطاقاتها وصورها لاحقاً
   toggleClearButton(); // تحديث حالة زر المسح
   toggleScrollToTopButton(); // تحديث زر الرجوع لأعلى
@@ -28035,13 +28032,8 @@ function clearSearch() {
 const assalMainSearchInputEl = document.getElementById("searchInput");
 if (assalMainSearchInputEl) {
   function syncAssalMainSearchInput() {
+    // dir="auto" belongs to the browser; do not reconfigure an active IME editor.
     toggleClearButton();
-    const value = (assalMainSearchInputEl.value || "").trim();
-    const direction = value && /[A-Za-z0-9]/.test(value) &&
-      !(typeof hasArabicText === "function" && hasArabicText(value)) ? "ltr" : "rtl";
-    if (assalMainSearchInputEl.getAttribute("dir") !== direction) {
-      assalMainSearchInputEl.setAttribute("dir", direction);
-    }
   }
   assalMainSearchInputEl.addEventListener("compositionstart", function () {
     this.__assalComposing = true;
@@ -33540,7 +33532,6 @@ function searchAssalVoiceCurrentCategory(rawVoiceText, options = {}) {
   const input = document.getElementById("searchInput");
   if (input && options.updateInput !== false) {
     input.value = englishQuery;
-    input.setAttribute("dir", "ltr");
   }
   try {
     toggleClearButton();
@@ -36578,6 +36569,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ✅ NEW: دعم الأسهم + إنتر + اسكيب للاقتراحات
   input.addEventListener("keydown", (e) => {
+    if (e.isComposing || e.keyCode === 229 || input.__assalComposing) return;
     const box = document.getElementById("wholesaleSuggestions");
     const isOpen = box && box.style.display === "flex";
 
@@ -57657,24 +57649,21 @@ html.assal-offline-mode #assalOfflineBanner{
 </script>
 
 <script>
-// A one-time preference for model search. The DOM editor owns native IME focus.
+// ASSAL input policy 2026-10-24-neutral-v2: the keyboard retains its chosen language.
 (function () {
   function prepareAssalSearchKeyboard() {
     const input = document.getElementById('searchInput');
-    if (!input || input.__assalStableTextInputHints) return;
+    if (!input) return;
+    // The verified app-release-35.apk checks this flag before injecting hints.
+    // These are JS flags only: never change lang/dir/inputmode or request focus here.
     input.__assalStableTextInputHints = true;
-    // Older APKs consult this flag before attaching their native focus callback.
     input.__assalEnglishKeyboardBound = true;
-    // Never change keyboard attributes after the user has started editing.
-    if (document.activeElement === input) return;
-    const hints = {lang:'en',inputmode:'text',autocomplete:'off',autocorrect:'off',autocapitalize:'characters',spellcheck:'false'};
-    Object.entries(hints).forEach(([name,value]) => {
-      if (input.getAttribute(name) !== value) input.setAttribute(name,value);
-    });
+    window.__ASSAL_INPUT_POLICY_VERSION__ = '2026-10-24-neutral-v2';
   }
+  prepareAssalSearchKeyboard();
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded',prepareAssalSearchKeyboard,{once:true});
-  } else prepareAssalSearchKeyboard();
+  }
 })();
 </script>
 <!-- ASSAL SAFE ADDON: Community header menu + admin-only views counter (non-invasive) -->
@@ -60254,6 +60243,7 @@ html.low-end-device .assal-private-clean-dialog *{
     input.addEventListener(
       "keydown",
       function (e) {
+        if (e.isComposing || e.keyCode === 229 || input.__assalComposing) return;
         if (e.key === "Enter") {
           setTimeout(finishSearchSession, 30);
         } else if (e.key === "Escape") {
