@@ -18768,6 +18768,7 @@ html.assal-viewport-transition body {
         <div><dt><i class="fas fa-location-dot"></i> العنوان</dt><dd id="assalAccountDetailsAddress">—</dd></div>
         <div id="assalAccountDetailsBranchRow" hidden><dt><i class="fas fa-building"></i> الفرع</dt><dd id="assalAccountDetailsBranch">—</dd></div>
         <div id="assalAccountDetailsEmailRow" hidden><dt><i class="fas fa-envelope"></i> البريد الإداري</dt><dd id="assalAccountDetailsEmail" dir="ltr">—</dd></div>
+        <div id="assalAccountDetailsPasswordRow" hidden><dt><i class="fas fa-key"></i> كلمة المرور</dt><dd><span class="assal-staff-password-controls"><input id="assalAccountDetailsPassword" readonly type="password" dir="ltr" autocomplete="off" aria-label="كلمة الدخول المحفوظة"><button type="button" data-assal-password-toggle aria-label="إظهار أو إخفاء كلمة المرور"><i class="fas fa-eye"></i></button><button id="assalAccountDetailsPasswordCopy" type="button" data-assal-copy="assalAccountDetailsPassword" aria-label="نسخ كلمة المرور" disabled><i class="fas fa-copy"></i></button></span><small id="assalAccountDetailsPasswordMessage"></small><button type="button" id="assalAccountDetailsDeliveryRepair" data-assal-delivery-repair hidden>إكمال تسليم دعوة الإدارة</button></dd></div>
       </dl>
       <div class="assal-account-details-copy-feedback" role="status" aria-live="polite"></div>
     </div>
@@ -19515,6 +19516,46 @@ window.assalStaffManagement = Object.freeze({
       if (!p || p.active !== true || (p.inviteStatus && p.inviteStatus!=="accepted") || p.role !== "branch" || p.managedByOwner !== true ||
           p.staffCustomerId !== String(getDeviceId())) onRevoked();
     }, err=>{ console.warn("Staff live auth check:",err); /* offline errors are not evidence of revocation */ });
+  }
+});
+
+/* V4 delivery only. Existing create/recovery/revoke/accept and Auth role checks remain intact. */
+const ASSAL_STAFF_DELIVERY_API='https://purple-frog-c3b8.ahmed-al-bayatii-90.workers.dev/staff-delivery-v4/';
+async function assalStaffDeliveryRequest(action,data,owner=false){
+  const headers={'Content-Type':'application/json'};
+  if(owner){await assalAssertOwnerForStaff();headers.Authorization='Bearer '+await assalOfficeAuth.currentUser.getIdToken();}
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),18000);
+  try{
+    const response=await fetch(ASSAL_STAFF_DELIVERY_API+action,{method:'POST',headers,cache:'no-store',body:JSON.stringify(data),signal:controller.signal});
+    let result;try{result=await response.json();}catch(_){throw new Error('تعذّر الاتصال بخدمة تسليم بيانات الدخول. تأكد من تثبيت ملف Worker الجديد.');}
+    if(!response.ok||result.ok!==true){const error=new Error(result.error || 'تعذّر تجهيز تسليم بيانات الدخول.');error.code=result.code || 'staff-delivery-failed';throw error;}
+    return result;
+  }finally{clearTimeout(timer);}
+}
+window.assalStaffDelivery=Object.freeze({
+  async prepare(uid,password=''){return await assalStaffDeliveryRequest('prepare',{uid,password},true);},
+  async approve(uid,code){return await assalStaffDeliveryRequest('approve',{uid,code},true);},
+  async password(uid){return await assalStaffDeliveryRequest('password',{uid},true);},
+  async register(customerId){
+    if(!assalIsRealCustomerId(customerId))throw new Error('معرّف الزبون غير صالح.');
+    const capability=String(window.__ASSAL_STAFF_BRIDGE_CAPABILITY__ || '');
+    if(!capability || typeof window.Android?.getStaffDeliveryDeviceInfo!=='function')
+      throw new Error('حدّث تطبيق أندرويد لاستلام بيانات الدخول تلقائياً.');
+    const raw=window.Android.getStaffDeliveryDeviceInfo(capability,customerId);
+    if(!raw)throw new Error('تعذّر تجهيز رمز الجهاز. أعد فتح التطبيق وحاول مجدداً.');
+    const device=JSON.parse(raw),result=await assalStaffDeliveryRequest('register',device);
+    return {kid:device.kid,code:result.code,customerId};
+  },
+  async receive(invite,device){
+    const result=await assalStaffDeliveryRequest('receive',{customerId:device.customerId,kid:device.kid});
+    if(!result.packet)return null;
+    const capability=String(window.__ASSAL_STAFF_BRIDGE_CAPABILITY__ || '');
+    if(!capability || typeof window.Android?.decryptStaffDeliveryPacket!=='function')throw new Error('حدّث تطبيق أندرويد لإكمال استلام الدعوة.');
+    const raw=window.Android.decryptStaffDeliveryPacket(capability,JSON.stringify(result.packet),device.customerId,invite.uid,invite.revision);
+    if(!raw)throw new Error('تعذّر فتح بيانات الدعوة على هذا الجهاز. تحقق من الوقت أو رمز الجهاز المعتمد.');
+    const credential=JSON.parse(raw);
+    if(credential.email!==invite.email || !credential.password)throw new Error('بيانات التسليم لا تطابق هذه الدعوة.');
+    return credential;
   }
 });
 
@@ -26336,6 +26377,76 @@ function assalStaffPartialDetailsHtml(partial) {
     +'<small dir="ltr">UID: '+assalAccountEsc(String(partial.uid || ''))+'</small></div>';
 }
 
+/* Owner-only delivery setup. A pending Auth/profile is never reported as active. */
+async function assalCompleteStaffDelivery(uid,password=''){
+  if(!assalStaffIsOwner())throw new Error('إدارة الدعوة متاحة للمالك فقط.');
+  let prepared;
+  try{prepared=await window.assalStaffDelivery.prepare(uid,password);}
+  catch(error){
+    if(!['PASSWORD_REQUIRED','PASSWORD_INVALID'].includes(error?.code))throw error;
+    const result=await Swal.fire({title:'كلمة دخول الحساب القديم',showCloseButton:true,
+      customClass:{popup:'assal-staff-premium assal-flow assal-flow-form'},
+      html:assalFlowNotice('fa-key','أدخل كلمة المرور الحالية. نتحقق منها فعلياً ونحفظ نسخة خاصة بالمالك؛ لا تتغيّر كلمة الحساب.')
+        +'<div class="assal-flow-field"><input id="asDeliveryOldPassword" class="assal-premium-input" type="password" dir="ltr" autocomplete="off" placeholder="كلمة المرور الحالية"></div>',
+      showCancelButton:true,cancelButtonText:'لاحقاً',confirmButtonText:'تحقق وجهّز الدعوة',showLoaderOnConfirm:true,
+      allowOutsideClick:()=>!Swal.isLoading(),allowEscapeKey:()=>!Swal.isLoading(),
+      preConfirm:async()=>{const value=document.getElementById('asDeliveryOldPassword').value;if(!value){Swal.showValidationMessage('أدخل كلمة المرور الحالية.');return false;}
+        try{return await window.assalStaffDelivery.prepare(uid,value);}catch(e){Swal.showValidationMessage(assalStaffHumanErrorMessage(e));return false;}},
+      willClose:()=>{const input=document.getElementById('asDeliveryOldPassword');if(input)input.value='';}
+    });
+    if(!result.isConfirmed)return false;prepared=result.value;
+  }
+  if(!prepared.needsPairing)return true;
+  const paired=await Swal.fire({title:'اعتماد جهاز الاستلام',showCloseButton:true,
+    customClass:{popup:'assal-staff-premium assal-flow assal-flow-form'},
+    html:assalFlowNotice('fa-mobile-screen-button','خذ رمز جهاز الاستلام من نافذة الدعوة عند الزبون والصقه هنا. الاعتماد مرة واحدة لهذا الجهاز؛ بعدها تصله البيانات تلقائياً.')
+      +'<div class="assal-flow-field"><input id="asDeliveryDeviceCode" class="assal-premium-input" dir="ltr" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX"></div>',
+    showCancelButton:true,cancelButtonText:'لاحقاً',confirmButtonText:'اعتماد وتسليم',showLoaderOnConfirm:true,
+    allowOutsideClick:()=>!Swal.isLoading(),allowEscapeKey:()=>!Swal.isLoading(),
+    preConfirm:async()=>{const code=document.getElementById('asDeliveryDeviceCode').value;if(!/^[A-F0-9]{24}$/i.test(code.replace(/[\s-]/g,''))){Swal.showValidationMessage('الصق رمز الجهاز الظاهر عند الزبون كاملاً.');return false;}
+      try{await window.assalStaffDelivery.approve(uid,code);return true;}catch(error){Swal.showValidationMessage(assalStaffHumanErrorMessage(error));return false;}}
+  });
+  return paired.isConfirmed && paired.value===true;
+}
+window.openAssalStaffDeliverySetup=async function(uid){
+  if(!assalStaffIsOwner())return;
+  window.closeAssalAccountDetails?.(null,true);
+  try{
+    const done=await assalCompleteStaffDelivery(uid);
+    if(done)await Swal.fire({title:'بيانات الدعوة جاهزة',customClass:{popup:'assal-staff-premium assal-flow assal-flow-success'},showCloseButton:true,
+      html:assalFlowNotice('fa-circle-check','تصله بيانات الدخول على الجهاز المعتمد. تبقى الإدارة معلّقة حتى يوافق ويسجل الدخول.'),confirmButtonText:'تم'});
+  }catch(error){await Swal.fire({title:'تسليم بيانات الدخول لم يكتمل',customClass:{popup:'assal-staff-premium assal-flow assal-flow-error'},showCloseButton:true,
+    html:assalFlowErrorHtml(assalStaffHumanErrorMessage(error),'أعد تجهيز التسليم من تفاصيل الحساب نفسه؛ لا تنشئ حساباً إضافياً.'),confirmButtonText:'فهمت'});}
+};
+(function(){
+  let generation=0;
+  window.assalClearStaffPasswordDetails=function(){
+    generation++;
+    const input=document.getElementById('assalAccountDetailsPassword');if(input){input.value='';input.type='password';}
+    const row=document.getElementById('assalAccountDetailsPasswordRow');if(row)row.hidden=true;
+    const button=document.getElementById('assalAccountDetailsPasswordCopy');if(button)button.disabled=true;
+    const repair=document.getElementById('assalAccountDetailsDeliveryRepair');if(repair){repair.hidden=true;repair.dataset.uid='';}
+  };
+  window.assalLoadStaffPasswordDetails=async function(staff){
+    window.assalClearStaffPasswordDetails();
+    if(!assalStaffIsOwner() || !staff || staff.role!=='branch' || staff.managedByOwner!==true)return;
+    const token=generation,uid=staff.uid,box=document.getElementById('assalAccountDetailsOverlay');
+    const input=document.getElementById('assalAccountDetailsPassword'),row=document.getElementById('assalAccountDetailsPasswordRow');
+    const copy=document.getElementById('assalAccountDetailsPasswordCopy'),message=document.getElementById('assalAccountDetailsPasswordMessage');
+    const repair=document.getElementById('assalAccountDetailsDeliveryRepair');
+    if(!input||!row||!message||!box)return;
+    row.hidden=false;input.placeholder='جارٍ التحقق…';message.textContent='';
+    if(repair && staff.inviteStatus==='pending' && staff.active===false){repair.hidden=false;repair.dataset.uid=uid;}
+    try{
+      const result=await window.assalStaffDelivery.password(uid);
+      if(token!==generation || !box.classList.contains('is-open') || !assalStaffIsOwner())return;
+      input.value=result.saved?String(result.password || ''):'';input.placeholder=result.saved?'':'غير محفوظة لهذا الحساب';
+      if(copy)copy.disabled=!input.value;
+      message.textContent=result.saved?'نسخة كلمة الدخول عند آخر تجهيز للدعوة':'الحسابات القديمة تحتاج التحقق من كلمتها أولاً؛ لا يمكن استخراجها من Authentication.';
+    }catch(error){if(token===generation && box.classList.contains('is-open')){input.placeholder='تعذّر الجلب';message.textContent=assalStaffHumanErrorMessage(error);}}
+  };
+})();
+
 window.assalOpenCreateStaff=async function(){
   if(!assalStaffIsOwner())return;
   const {value:form}=await Swal.fire({
@@ -26386,6 +26497,7 @@ window.assalPromoteCustomer=async function(id){
   if(form)await assalSubmitStaffProvision(form);
 };
 async function assalSubmitStaffProvision(form){
+  let provisioned=null;
   try{
     const progress={
       title:'تجهيز الصلاحية الإدارية',customClass:{popup:'assal-staff-premium assal-flow assal-flow-progress'},
@@ -26403,7 +26515,10 @@ async function assalSubmitStaffProvision(form){
       if(!recovery)return;
       Swal.fire(progress);
     }
-    const {email,reactivated}=await window.assalStaffManagement.create({...form,...recovery,reviewToken:report.token});
+    provisioned=await window.assalStaffManagement.create({...form,...recovery,reviewToken:report.token});
+    const {uid,email,reactivated}=provisioned;
+    const deliveryPassword=reactivated?String(recovery?.recoveryPassword || ''):String(form.password || '');
+    const deliveryReady=await assalCompleteStaffDelivery(uid,deliveryPassword);
     recovery=null;form.password='';form.recoveryPassword='';
     Swal.close();
     await Swal.fire({
@@ -26411,16 +26526,17 @@ async function assalSubmitStaffProvision(form){
       customClass:{popup:'assal-staff-premium assal-flow assal-flow-success'},showCloseButton:true,
       html:'<div class="assal-flow-result is-success"><div class="assal-flow-result-icon"><i class="fas fa-check"></i></div><strong>'+'بانتظار موافقة صاحب الحساب'+'</strong><p>'+(reactivated?'جُهّزت دعوة لنفس الحساب القديم دون إنشاء حساب ثانٍ.':'جُهّز الحساب الإداري وربط الدعوة بالزبون.')+' تبقى صلاحية الإدارة موقوفة حتى يوافق ويسجل الدخول.'+'</p></div>'
         +'<div class="assal-flow-credential"><span><i class="fas fa-envelope"></i> البريد الإداري</span><strong dir="ltr">'+escapeHtml(email)+'</strong></div>'
-        +assalFlowNotice(reactivated?'fa-key':'fa-paper-plane',reactivated?'كلمة المرور القديمة لم تتغير عند إعادة التفعيل.':'سلّم كلمة المرور الأولية لصاحب الحساب بصورة خاصة. لا تُخزّن ضمن ملف الزبون.',reactivated?'violet':'info'),
+        +assalFlowNotice('fa-lock',deliveryReady?'بيانات الدخول جاهزة على جهاز الاستلام المعتمد. يبدأ دوره بعد الموافقة والدخول.':'الدعوة محفوظة ومعلّقة. أكمل تجهيز كلمة الدخول أو اعتماد الجهاز من تفاصيل الحساب نفسه.','info'),
       confirmButtonText:'تم'
     });
     try{await loadAssalStaffDirectory();await loadCustomersAdmin();}catch(refreshError){console.warn('Staff directory refresh:',refreshError);}
   }catch(err){
     form.password='';form.recoveryPassword='';
+    if(provisioned){err.staffPartial={uid:provisioned.uid,email:provisioned.email,status:'delivery-incomplete'};}
     Swal.close();
     await Swal.fire({
-      title:'تعذّر تجهيز الصلاحية',customClass:{popup:'assal-staff-premium assal-flow assal-flow-error'},showCloseButton:true,
-      html:assalFlowErrorHtml(assalStaffHumanErrorMessage(err,'create'))
+      title:provisioned?'تسليم بيانات الدخول لم يكتمل':'تعذّر تجهيز الصلاحية',customClass:{popup:'assal-staff-premium assal-flow assal-flow-error'},showCloseButton:true,
+      html:assalFlowErrorHtml(assalStaffHumanErrorMessage(err,'create'),provisioned?'الحساب موجود. راجع حالته وأكمل التسليم من تفاصيله؛ لا تنشئ حساباً إضافياً.':'راجع حالة الحساب قبل إعادة المحاولة.')
         +(err.staffReport?assalStaffRecoveryDetailsHtml(err.staffReport):'')
         +assalStaffPartialDetailsHtml(err.staffPartial),
       confirmButtonText:'فهمت'
@@ -26493,7 +26609,7 @@ function assalStaffCardBranch(code){return {baqubah:'بعقوبة',tahrir:'ال�
 function assalStaffWelcomeCardHtml(invite){
   const esc=value=>assalAccountEsc(String(value || ''));
   return '<section class="assal-staff-access-card" aria-label="بطاقة بيانات الدخول">'
-    +'<div class="assal-staff-card-brand"><span class="assal-staff-card-mark">A<span>ASSAL OFFICE</span></span><span class="assal-staff-card-brand-ar"><b>مكتب عسل</b><small>لقطع الغيار</small></span><span class="assal-staff-card-seal" aria-hidden="true"><i class="fas fa-shield-halved"></i></span></div>'
+    +'<div class="assal-staff-card-brand"><span class="assal-staff-card-mark">A<span>ASSAL OFFICE</span></span><span class="assal-staff-card-brand-ar"><b>مكتب عسل لقطع الغيار</b><small>لقطع الغيار</small></span><span class="assal-staff-card-seal" aria-hidden="true"><i class="fas fa-shield-halved"></i></span></div>'
     +'<div class="assal-staff-card-person"><strong>'+esc(invite.label || 'أهلاً بك في كادر عسل')+'</strong><span><i class="fas fa-location-dot" aria-hidden="true"></i> '+esc(assalStaffCardBranch(invite.branchCode))+'</span></div>'
     +'<div class="assal-staff-card-field"><label for="asWelcomeEmail">البريد الإداري <span>EMAIL</span></label>'
     +'<input id="asWelcomeEmail" class="assal-staff-card-input" dir="ltr" type="email" autocomplete="username" readonly value="'+esc(invite.email)+'"></div>'
@@ -26512,8 +26628,8 @@ async function assalStaffCardPng(invite,email,password){
     ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();ctx.fillStyle=fill;ctx.fill();
     if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}
   }
-  function text(value,x,y,size,color,rtl=false,maxWidth=1060){
-    value=String(value || '');ctx.direction=rtl?'rtl':'ltr';ctx.textAlign=rtl?'right':'left';
+  function text(value,x,y,size,color,rtl=false,maxWidth=1060,align=''){
+    value=String(value || '');ctx.direction=rtl?'rtl':'ltr';ctx.textAlign=align || (rtl?'right':'left');
     let fitted=size;ctx.font='700 '+fitted+'px "Assal Cairo","Cairo",Tahoma,sans-serif';
     while(ctx.measureText(value).width>maxWidth && fitted>10){fitted--;ctx.font='700 '+fitted+'px "Assal Cairo","Cairo",Tahoma,sans-serif';}
     if(ctx.measureText(value).width>maxWidth)throw new Error('البيانات أطول من مساحة البطاقة. لم نحفظ صورة ناقصة.');
@@ -26529,8 +26645,9 @@ async function assalStaffCardPng(invite,email,password){
   round(24,24,1152,712,28,'rgba(0,0,0,0)','rgba(181,222,227,.26)');
   const gold=ctx.createLinearGradient(60,0,1140,0);gold.addColorStop(0,'#82e1d2');gold.addColorStop(.5,'#e6c888');gold.addColorStop(1,'#a897e8');
   round(62,205,1076,3,1,gold);
-  text('ASSAL',64,112,57,'#eefcfb',false,500);text('OFFICE  /  STAFF ACCESS',66,153,21,'#9ec1cc',false,500);
-  text('مكتب عسل',1135,100,43,'#fff1d4',true,510);text('لقطع الغيار',1135,148,26,'#aedbd7',true,510);
+  text('A',600,102,62,'#e3c792',false,500,'center');
+  text('ASSAL OFFICE',600,145,22,'#a6c7d2',false,500,'center');
+  text('مكتب عسل لقطع الغيار',600,181,22,'#d0e2e4',true,700,'center');
   text(invite.label || 'كادر عسل',1135,270,32,'#f3f8ff',true,740);
   text('فرع '+assalStaffCardBranch(invite.branchCode),65,270,25,'#c7b8ed',false,330);
   round(62,308,1076,143,19,'rgba(5,16,29,.52)','rgba(153,205,210,.18)');
@@ -26558,15 +26675,39 @@ async function assalSaveStaffAccessCard(invite,email,password){
 }
 async function assalShowStaffInvitation(invite){
   const pending=invite.status==='pending';
+  let closed=false,timer=0,inFlight=false,device=null,delivered=false;
+  function stop(){closed=true;clearTimeout(timer);window.removeEventListener('assalStaffNativeReady',onNativeReady);}
+  function onNativeReady(){clearTimeout(timer);poll();}
+  async function poll(){
+    if(closed || inFlight || delivered || !pending)return;
+    const input=document.getElementById('asWelcomePassword'),state=document.getElementById('asStaffDeliveryState');
+    if(!input||!state)return;
+    inFlight=true;
+    try{
+      if(!device){
+        device=await window.assalStaffDelivery.register(String(getDeviceId()));
+        if(closed)return;
+        const code=document.getElementById('asStaffDeliveryCode'),setup=document.getElementById('asStaffDeliverySetup');
+        code.textContent=String(device.code).match(/.{1,4}/g).join('-');code.dataset.code=code.textContent;setup.hidden=false;
+      }
+      const credential=await window.assalStaffDelivery.receive(invite,device);
+      if(closed)return;
+      if(credential){
+        if(credential.email!==document.getElementById('asWelcomeEmail').value)throw new Error('تغيّر بريد الدعوة. أعد فتحها.');
+        input.value=credential.password;input.placeholder='';delivered=true;
+        document.getElementById('asStaffDeliverySetup').hidden=true;
+        state.textContent='بياناتك جاهزة، اضغط موافقة ودخول';
+      }else state.textContent='بانتظار اعتماد المالك لجهاز الاستلام';
+    }catch(error){if(!closed)state.textContent=String(error?.message || 'تعذّر تجهيز بيانات الدخول.');}
+    finally{inFlight=false;if(!closed&&!delivered)timer=setTimeout(poll,5000);}
+  }
   return await Swal.fire({
-    title:pending?'دعوة خاصة إلى كادر عسل':'أهلاً بك في كادر عسل',
-    customClass:{popup:'assal-staff-premium assal-flow assal-flow-welcome'},showCloseButton:true,
-    html:'<div class="assal-staff-invite-intro"><span class="assal-staff-invite-spark"><i class="fas fa-star" aria-hidden="true"></i> اختيار من المالك</span>'
-      +'<strong>'+(pending?'مكانك بين كادر عسل':'بطاقة دخولك الإداري')+'</strong><p>'+(pending?'وصلتك دعوة للإدارة. تبدأ صلاحيتك بعد موافقتك وتسجيل الدخول.':'سجّل الدخول ببيانات حسابك الإداري للمتابعة.')+'</p></div>'
-      +assalStaffWelcomeCardHtml(invite)
+    title:pending?'دعوة إدارة عسل':'دخول كادر عسل',customClass:{popup:'assal-staff-premium assal-flow assal-flow-welcome'},showCloseButton:true,
+    html:assalStaffWelcomeCardHtml(invite)
+      +'<div id="asStaffDeliverySetup" class="assal-staff-delivery-setup" hidden><small>رمز جهاز الاستلام · للاعتماد أول مرة</small><button id="asStaffDeliveryCode" type="button" aria-label="نسخ رمز جهاز الاستلام"></button><small>اضغط للنسخ وأرسله للمالك</small></div>'
+      +'<div id="asStaffDeliveryState" class="assal-staff-delivery-state" role="status" aria-live="polite">'+(pending?'جارٍ تجهيز بيانات الدخول…':'')+'</div>'
       +'<button id="asWelcomeSaveCard" class="assal-staff-save-card" type="button"><span><i class="fas fa-download" aria-hidden="true"></i> حفظ البطاقة صورة</span><small>في الاستوديو</small></button>'
-      +'<div id="asWelcomeSaveStatus" class="assal-staff-save-status" role="status" aria-live="polite"></div>'
-      +'<p class="assal-staff-invite-help">أدخل كلمة المرور التي سلّمها لك المالك. تفعيلك وبياناتك ومحادثاتك تبقى محفوظة.</p>',
+      +'<div id="asWelcomeSaveStatus" class="assal-staff-save-status" role="status" aria-live="polite"></div>',
     confirmButtonText:pending?'موافقة ودخول':'دخول الإدارة',showCancelButton:true,cancelButtonText:'لاحقاً',focusConfirm:false,
     showLoaderOnConfirm:true,allowOutsideClick:()=>!Swal.isLoading(),allowEscapeKey:()=>!Swal.isLoading(),
     didOpen:()=>{
@@ -26576,30 +26717,39 @@ async function assalShowStaffInvitation(invite){
         toggle.setAttribute('aria-label',visible?'إخفاء كلمة المرور':'إظهار كلمة المرور');
         toggle.innerHTML='<i class="fas '+(visible?'fa-eye-slash':'fa-eye')+'" aria-hidden="true"></i>';
       });
+      document.getElementById('asStaffDeliveryCode').addEventListener('click',async event=>{
+        const code=event.currentTarget.dataset.code || '';if(!code)return;let copied=false;
+        try{await navigator.clipboard.writeText(code);copied=true;}catch(_){}
+        if(!copied){const area=document.createElement('textarea');area.value=code;area.style.cssText='position:fixed;left:-9999px;top:-9999px';document.body.appendChild(area);area.select();try{copied=document.execCommand('copy');}catch(_){}area.remove();}
+        document.getElementById('asStaffDeliveryState').textContent=copied?'تم نسخ رمز الجهاز':'تعذّر النسخ؛ أرسل الرمز الظاهر للمالك';
+      });
       const save=document.getElementById('asWelcomeSaveCard'),status=document.getElementById('asWelcomeSaveStatus');
       save.addEventListener('click',async()=>{
         if(save.disabled || Swal.isLoading())return;
         const password=input.value,email=document.getElementById('asWelcomeEmail').value;
-        if(!password){Swal.showValidationMessage('أدخل كلمة المرور أولاً حتى تُحفظ داخل البطاقة.');input.focus();return;}
+        if(!password){Swal.showValidationMessage('انتظر تجهيز كلمة المرور حتى تُحفظ داخل البطاقة.');return;}
         Swal.resetValidationMessage();save.disabled=true;status.classList.remove('is-error');status.textContent='جارٍ حفظ صورة البطاقة…';
         try{status.textContent=await assalSaveStaffAccessCard(invite,email,password);}
         catch(error){status.classList.add('is-error');status.textContent=String(error?.message || 'تعذّر حفظ صورة البطاقة.');}
         finally{save.disabled=false;}
       });
+      window.addEventListener('assalStaffNativeReady',onNativeReady);if(pending)poll();
     },
     preConfirm:async()=>{
       const email=document.getElementById('asWelcomeEmail').value.trim(),input=document.getElementById('asWelcomePassword');
       const password=input.value,save=document.getElementById('asWelcomeSaveCard'),close=Swal.getCloseButton();
-      if(!password){Swal.showValidationMessage('أدخل كلمة مرور حسابك الإداري.');return false;}
+      if(!password){Swal.showValidationMessage('انتظر تجهيز كلمة المرور أو أدخل كلمة حسابك الحالية.');return false;}
       if(save.disabled){Swal.showValidationMessage('انتظر إكمال حفظ البطاقة ثم تابع الدخول.');return false;}
       save.disabled=true;input.readOnly=true;if(close)close.disabled=true;
       try{await window.assalStaffManagement.login(email,password,pending?{uid:invite.uid,revision:invite.revision}:null);return true;}
       catch(error){Swal.showValidationMessage(assalStaffHumanErrorMessage(error,'login'));return false;}
       finally{save.disabled=false;input.readOnly=false;if(close)close.disabled=false;}
     },
-    willClose:()=>{const input=document.getElementById('asWelcomePassword');if(input)input.value='';}
+    willClose:()=>{stop();const input=document.getElementById('asWelcomePassword');if(input)input.value='';},
+    didDestroy:stop
   });
 }
+
 (function(){
   let busy=false,seen='',watched='',unsubscribe=null,retry=0;
   async function check(){
@@ -39678,7 +39828,7 @@ function closeContactModal() {
      "simi_subscription_cta"   => صورة images/simi2.png مع زر الاشتراك
 
    ========================================================== */
-const AD_CHOICE = "simi_subscription"; // الإعلان الجديد مع زر الاشتراك؛ الصورة فقط: "simi_subscription"؛ الإيقاف: "off"
+const AD_CHOICE = "off"; // الإعلان الجديد مع زر الاشتراك؛ الصورة فقط: "simi_subscription"؛ الإيقاف: "off"
 
 // خيارات اضافية (اختياري)
 const AD_DELAY_MS = 45; // بعد جاهزية بوابة التحديث: ظهور شبه فوري بدون قفزة بصرية
@@ -70235,6 +70385,7 @@ html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-p
   let opener=null;
   let closeShieldTimer=0;
   function details(customer,staff){
+    window.assalClearStaffPasswordDetails?.();
     const parent=root();if(!parent||!parent.classList.contains('show'))return;
     const box=overlay();if(!box)return;
     const id=String(customer?.deviceId||customer?.id||staff?.staffCustomerId||'');
@@ -70262,6 +70413,7 @@ html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-p
     box.classList.remove('is-closing');
     box.classList.add('is-open');box.setAttribute('aria-hidden','false');
     box.querySelector('.assal-account-details-close')?.focus({preventScroll:true});
+    if(staff)window.assalLoadStaffPasswordDetails?.(staff);
   }
   window.openAssalAccountDetails=function(id){
     const customer=(typeof assalAllCustomersDirectory!=='undefined'?assalAllCustomersDirectory:[])
@@ -70278,6 +70430,7 @@ html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-p
     details(customer||null,staff);
   };
   window.closeAssalAccountDetails=function(event,immediate=false){
+    window.assalClearStaffPasswordDetails?.();
     // Do not let the closing X pass through to a customer row during Android touch synthesis.
     if(event?.preventDefault)event.preventDefault();
     if(event?.stopPropagation)event.stopPropagation();
@@ -70299,7 +70452,7 @@ html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-p
     closeShieldTimer=setTimeout(finish,400);
   };
   async function copyValue(id){
-    const box=overlay();const value=document.getElementById(id)?.textContent?.trim()||'';
+    const box=overlay();const element=document.getElementById(id);const value=String(element?.value ?? element?.textContent ?? '').trim();
     if(!value||value==='—')return;
     let ok=false;
     if(navigator.clipboard && typeof navigator.clipboard.writeText==='function'){
@@ -70372,7 +70525,11 @@ html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-p
   document.addEventListener('click',event=>{
     const box=overlay();if(!box?.classList.contains('is-open'))return;
     if(event.target===box){window.closeAssalAccountDetails(event);return;}
-    const btn=event.target instanceof Element?event.target.closest('[data-assal-copy]'):null;
+    const target=event.target instanceof Element?event.target:null;
+    if(target?.closest('[data-assal-password-toggle]')){event.preventDefault();const input=document.getElementById('assalAccountDetailsPassword');if(input)input.type=input.type==='password'?'text':'password';return;}
+    const repair=target?.closest('[data-assal-delivery-repair]');
+    if(repair&&box.contains(repair)){event.preventDefault();window.openAssalStaffDeliverySetup?.(repair.dataset.uid);return;}
+    const btn=target?.closest('[data-assal-copy]');
     if(btn&&box.contains(btn)){event.preventDefault();copyValue(btn.dataset.assalCopy);}
   },true);
 
@@ -70850,5 +71007,32 @@ html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-p
 .assal-flow-welcome .assal-staff-save-status.is-error{color:#ffc1c6}
 .assal-flow-welcome .assal-staff-invite-help{font:600 10px/1.9 'Assal Cairo','Cairo',Tahoma,sans-serif;color:#a5bbcd;text-align:center;margin:10px 3px 0}
 @media(max-width:360px){.assal-flow-welcome .assal-staff-access-card{padding:14px 11px 10px}.assal-flow-welcome .assal-staff-card-person{align-items:flex-start}.assal-flow-welcome input.assal-staff-card-input{font-size:11px!important}.assal-flow-welcome .assal-staff-invite-intro>strong{font-size:18px}}
+</style>
+
+
+<style id="assal-staff-delivery-v4">
+/* Scoped additions; all adopted styles and unrelated layouts remain byte-for-byte unchanged. */
+.assal-flow-welcome .assal-staff-card-brand{justify-content:center;flex-direction:column;gap:0;padding-bottom:11px}
+.assal-flow-welcome .assal-staff-card-mark{order:0;margin:0 auto;justify-items:center;align-items:center;text-align:center;font-size:28px;line-height:1.2}
+.assal-flow-welcome .assal-staff-card-mark>span{display:block;text-align:center;letter-spacing:1.4px;font-size:7.5px;margin-top:3px}
+.assal-flow-welcome .assal-staff-card-brand-ar{order:1;text-align:center;margin-top:4px}
+.assal-flow-welcome .assal-staff-card-brand-ar b{font-size:10px;line-height:1.8;color:#c7d9df}
+.assal-flow-welcome .assal-staff-card-brand-ar small,.assal-flow-welcome .assal-staff-card-seal{display:none}
+.assal-flow-welcome .assal-staff-card-foot{display:none}
+.assal-flow-welcome .assal-staff-access-card{padding-top:13px;padding-bottom:14px}
+.assal-flow-welcome .assal-staff-card-person{margin:9px 0}
+.assal-flow-welcome .assal-staff-delivery-setup{margin:10px 0 0;padding:8px 10px;border:1px solid rgba(180,167,224,.2);border-radius:11px;background:rgba(114,86,167,.09);text-align:center;color:#c5c1dd;font:600 9px/1.8 'Assal Cairo','Cairo',Tahoma,sans-serif}
+.assal-flow-welcome .assal-staff-delivery-setup[hidden]{display:none!important}
+.assal-flow-welcome .assal-staff-delivery-setup small{display:block;font:inherit}
+.assal-flow-welcome .assal-staff-delivery-setup button{display:block;width:100%;box-sizing:border-box;margin:4px 0;padding:7px 3px;border:1px solid rgba(198,189,231,.2);border-radius:8px;background:rgba(16,22,41,.6);color:#e5dcff;font:700 10px/1.5 monospace;letter-spacing:.2px;direction:ltr;cursor:pointer}
+.assal-flow-welcome .assal-staff-delivery-state{margin-top:7px;text-align:center;color:#adc9d2;font:600 10px/1.8 'Assal Cairo','Cairo',Tahoma,sans-serif}
+.assal-flow-welcome .assal-staff-delivery-state:empty{display:none}
+#assalAccountDetailsOverlay .assal-staff-password-controls{display:flex;align-items:center;gap:6px;min-width:0;width:100%}
+#assalAccountDetailsOverlay #assalAccountDetailsPassword{flex:1;min-width:0;width:80px;max-width:100%;box-sizing:border-box;height:35px;padding:5px 7px;border:1px solid rgba(160,194,210,.2);border-radius:8px;background:rgba(4,17,30,.6);color:#ffe4b6;font:700 12px 'Assal Cairo','Cairo',Tahoma,sans-serif;text-align:left;direction:ltr}
+#assalAccountDetailsOverlay .assal-staff-password-controls button{flex:none;width:32px;height:32px;border-radius:8px;border:1px solid rgba(166,191,208,.22);background:rgba(116,144,164,.1);color:#d4e9ec;cursor:pointer}
+#assalAccountDetailsOverlay .assal-staff-password-controls button:disabled{opacity:.4;cursor:default}
+#assalAccountDetailsOverlay #assalAccountDetailsPasswordMessage{display:block;font-size:9px;line-height:1.8;color:#9db4c9;margin-top:5px;overflow-wrap:anywhere}
+#assalAccountDetailsOverlay #assalAccountDetailsDeliveryRepair{margin-top:9px;width:100%;padding:9px;border-radius:9px;border:1px solid rgba(104,220,198,.24);background:rgba(27,155,135,.1);color:#a2f0db;font:700 11px 'Assal Cairo','Cairo',Tahoma,sans-serif;cursor:pointer}
+#assalAccountDetailsOverlay #assalAccountDetailsDeliveryRepair[hidden],#assalAccountDetailsOverlay #assalAccountDetailsPasswordRow[hidden]{display:none!important}
 </style>
 
