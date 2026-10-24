@@ -8551,7 +8551,7 @@ body.modal-lock{
   position: relative;
 }
 /* تجميد فعلي للخلفية أثناء أي نافذة/رسالة */
-body.modal-lock > *:not(.request-modal):not(.request-admin-modal):not(.request-track-modal):not(.stats-modal):not(.customer-profile-modal):not(.customers-admin-modal):not(.customer-blocked-overlay):not(.invoice-track-modal):not(.invoice-admin-modal):not(.activation-overlay):not(.swal2-container):not(#adModal):not(#adOverlay):not(#promoPopup):not(.assal-sub-manager){
+body.modal-lock > *:not(.assal-account-details-overlay):not(.request-modal):not(.request-admin-modal):not(.request-track-modal):not(.stats-modal):not(.customer-profile-modal):not(.customers-admin-modal):not(.customer-blocked-overlay):not(.invoice-track-modal):not(.invoice-admin-modal):not(.activation-overlay):not(.swal2-container):not(#adModal):not(#adOverlay):not(#promoPopup):not(.assal-sub-manager){
   pointer-events: none !important;
 }
 body.modal-lock .floating-new-btn,
@@ -18179,7 +18179,7 @@ html.assal-viewport-transition body {
 </button>
 
     
-    <input type="text" id="searchInput" placeholder=" " aria-label="اكتب اسم الآيتم أو اضغط المايك" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" lang="en" inputmode="latin" dir="ltr" data-assal-english-keyboard="true">
+    <input type="text" id="searchInput" placeholder=" " aria-label="اكتب اسم الآيتم أو اضغط المايك" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" lang="en" inputmode="text" dir="ltr" data-assal-english-keyboard="true">
     <span id="searchPlaceholderLabel" class="search-placeholder-label" aria-hidden="true">اكتب اسم الآيتم أو اضغط المايك</span>
     <div id="wholesaleSuggestions" class="wholesale-suggestions" aria-label="Wholesale suggestions"></div>
     <button id="clearBtn" class="clear-btn" onclick="clearSearch()" style="display: none;"><i class="fas fa-times"></i></button>
@@ -18741,11 +18741,11 @@ html.assal-viewport-transition body {
             </div>
       </div>
       <div id="customersAdminSearchHost" class="customers-admin-search-host" aria-hidden="true">
-        <div class="customers-admin-searchbar"><button class="customers-admin-searchback" type="button" onclick="hideCustomersSearchBar()" aria-label="إخفاء البحث" title="إخفاء البحث"><i class="fas fa-arrow-right"></i></button><i class="fas fa-search customers-admin-searchicon"></i><input id="customersAdminSearchInput" class="customers-admin-searchinput" type="search" oninput="applyCustomersAdminSearch()" autocomplete="off" placeholder="ابحث في الحسابات" dir="rtl"></div>
+        <div class="customers-admin-searchbar"><button class="customers-admin-searchback" type="button" onclick="hideCustomersSearchBar()" aria-label="إخفاء البحث" title="إخفاء البحث"><i class="fas fa-arrow-right"></i></button><i class="fas fa-search customers-admin-searchicon"></i><input id="customersAdminSearchInput" class="customers-admin-searchinput" type="search" oninput="applyCustomersAdminSearch(this)" autocomplete="off" placeholder="ابحث في الحسابات" dir="rtl"></div>
       </div>
     </div>
     <div class="customers-admin-body">
-      <label class="assal-accounts-searchbar" for="assalAccountsQuickSearch"><i class="fas fa-magnifying-glass" aria-hidden="true"></i><input id="assalAccountsQuickSearch" type="search" placeholder="اسم الزبون أو رقم الهاتف" autocomplete="off" dir="rtl" oninput="applyCustomersAdminSearch()" aria-label="بحث عن حساب"></label>
+      <label class="assal-accounts-searchbar" for="assalAccountsQuickSearch"><i class="fas fa-magnifying-glass" aria-hidden="true"></i><input id="assalAccountsQuickSearch" type="search" placeholder="اسم الزبون أو رقم الهاتف" autocomplete="off" dir="rtl" oninput="applyCustomersAdminSearch(this)" aria-label="بحث عن حساب"></label>
       <div id="customersStaffPanel" class="customers-admin-list request-panel is-active"><div class="customers-admin-empty">جاري تحميل الأدمنية...</div></div>
       <div id="customersActivePanel" class="customers-admin-list request-panel"><div class="customers-admin-empty">جاري تحميل الزبائن...</div></div>
       <div id="customersBlockedPanel" class="customers-admin-list request-panel"><div class="customers-admin-empty">قائمة الحظر فارغة حالياً.</div></div>
@@ -25955,8 +25955,37 @@ function normalizeCustomersAdminSearchText(value) {
     .trim();
 }
 
+function assalPrepareAccountsSearch() {
+  const modal = document.getElementById('customersAdminModal');
+  if (!modal || modal.dataset.assalSearchFocusBound === '1') return;
+  modal.dataset.assalSearchFocusBound = '1';
+  // Native focus first; only repair a missed tap in the same user gesture.
+  modal.addEventListener('click', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    const host = target?.closest('.assal-accounts-searchbar, .customers-admin-searchbar');
+    if (!host || target.closest('button') || !modal.classList.contains('show')) return;
+    if (document.querySelector('#assalAccountDetailsOverlay.is-open, #assalAccountDetailsOverlay.is-closing') ||
+        (window.Swal && Swal.isVisible()) || window.assalOfflineGuardIsOffline?.()) return;
+    const input = host.querySelector('input');
+    if (input && !input.disabled && !input.readOnly && input.getClientRects().length && document.activeElement !== input) {
+      input.focus({preventScroll: true});
+    }
+  });
+}
+function assalSyncAccountsSearchValue(source) {
+  const quick = document.getElementById('assalAccountsQuickSearch');
+  const legacy = document.getElementById('customersAdminSearchInput');
+  const input = source === quick || source === legacy ? source :
+    (customersAdminSearchVisible ? legacy : quick);
+  if (!input) return;
+  if (quick && quick !== input && quick.value !== input.value) quick.value = input.value;
+  if (legacy && legacy !== input && legacy.value !== input.value) legacy.value = input.value;
+}
+
 function getCustomersAdminSearchQuery() {
-  const input = document.getElementById("assalAccountsQuickSearch") || document.getElementById("customersAdminSearchInput");
+  const input = customersAdminSearchVisible
+    ? document.getElementById("customersAdminSearchInput")
+    : document.getElementById("assalAccountsQuickSearch") || document.getElementById("customersAdminSearchInput");
   return normalizeCustomersAdminSearchText(input?.value || "");
 }
 
@@ -26181,26 +26210,28 @@ window.switchCustomersView = function (view) {
 };
 
 window.showCustomersSearchBar = function () {
+  assalPrepareAccountsSearch();
+  assalSyncAccountsSearchValue(document.getElementById("assalAccountsQuickSearch"));
   setCustomersSearchVisibility(true);
   stopCustomersRotateAction();
   setCustomersRotateActionMode("refresh");
   renderCustomersAdminPanels();
   const input = document.getElementById("customersAdminSearchInput");
-  if (input) {
-    input.blur();
-  }
+  if (input) input.focus({preventScroll:true});
 };
 
 window.hideCustomersSearchBar = function (options = {}) {
   const config = options && typeof options === "object" ? options : {};
   const input = document.getElementById("customersAdminSearchInput");
   if (input && !config.preserveQuery) input.value = "";
+  assalSyncAccountsSearchValue(input);
   setCustomersSearchVisibility(false);
   renderCustomersAdminPanels();
   if (config.restartRotate !== false) startCustomersRotateAction();
 };
 
-window.applyCustomersAdminSearch = function () {
+window.applyCustomersAdminSearch = function (input) {
+  assalSyncAccountsSearchValue(input);
   renderCustomersAdminPanels();
 };
 
@@ -26210,6 +26241,7 @@ window.handleCustomersRotatingAction = async function () {
 
 window.openCustomersAdminModal = async function () {
   if (!isAdminUser()) return;
+  assalPrepareAccountsSearch();
   currentCustomersView = assalStaffIsOwner() ? "staff" : "active";
   setCustomersSearchVisibility(false);
   const input = document.getElementById("customersAdminSearchInput");
@@ -26221,6 +26253,8 @@ window.openCustomersAdminModal = async function () {
   if (!modal) return;
   modal.classList.add("show");
   modal.setAttribute("aria-hidden", "false");
+  document.documentElement.classList.add("assal-accounts-search-editable");
+  document.body.classList.add("assal-accounts-search-editable");
   syncGlobalModalLock();
   startCustomersRotateAction();
   await Promise.all([loadCustomersAdmin(), loadAssalStaffDirectory()]);
@@ -26233,6 +26267,8 @@ window.closeCustomersAdminModal = function () {
   closeAssalAccountDetails(null, true);
   modal.classList.remove("show");
   modal.setAttribute("aria-hidden", "true");
+  document.documentElement.classList.remove("assal-accounts-search-editable");
+  document.body.classList.remove("assal-accounts-search-editable");
   stopCustomersRotateAction();
   hideCustomersSearchBar({ restartRotate: false });
   syncGlobalModalLock();
@@ -26514,6 +26550,25 @@ function assalStaffPartialDetailsHtml(partial) {
     +'<small dir="ltr">UID: '+assalAccountEsc(String(partial.uid || ''))+'</small></div>';
 }
 
+function assalStaffButtonLoading(button, label) {
+  if (!button) return () => {};
+  const original = {html: button.innerHTML, disabled: button.disabled, busy: button.getAttribute('aria-busy')};
+  let restored = false;
+  button.classList.add('assal-staff-button-loading');
+  button.setAttribute('aria-busy', 'true');
+  button.disabled = true;
+  button.innerHTML = '<span class="assal-staff-button-label">' + assalAccountEsc(label) + '</span>';
+  return () => {
+    if (restored) return;
+    restored = true;
+    button.classList.remove('assal-staff-button-loading');
+    if (original.busy === null) button.removeAttribute('aria-busy');
+    else button.setAttribute('aria-busy', original.busy);
+    button.innerHTML = original.html;
+    button.disabled = original.disabled;
+  };
+}
+
 /* Owner-only delivery setup. A pending Auth/profile is never reported as active. */
 async function assalWaitStaffPairing(uid){
   let closed=false,timer=0,inFlight=false,confirming=false,popup=null,selected=null,explicit=false,requests=[],blockedUntil=0,signature='';
@@ -26556,7 +26611,7 @@ async function assalWaitStaffPairing(uid){
     }}finally{inFlight=false;if(live())timer=setTimeout(poll,3000);}
   }
   const result=await Swal.fire({title:'اعتماد جهاز الاستلام',showCloseButton:true,focusConfirm:false,
-    customClass:{popup:'assal-staff-premium assal-flow assal-flow-form assal-flow-pairing'},
+    customClass:{popup:'assal-staff-premium assal-flow assal-flow-form assal-flow-pairing assal-inline-confirm-flow'},
     html:'<div class="assal-pair-panel"><p class="assal-pair-intro">يصل الرمز هنا بعد أن يرسله الزبون</p>'
       +'<span id="asDeliveryPairCustomer" class="assal-pair-customer">الدعوة الحالية</span>'
       +'<div class="assal-flow-field assal-pair-field"><label for="asDeliveryDeviceCode" class="assal-flow-label"><i class="fas fa-key" aria-hidden="true"></i> رمز التسجيل</label>'
@@ -26579,13 +26634,14 @@ async function assalWaitStaffPairing(uid){
         render();Swal.showValidationMessage('انتظر إرسال رمز صالح من الزبون أولاً.');return false;
       }
       const current=selected,close=Swal.getCloseButton(),cancel=Swal.getCancelButton();confirming=true;
+      const finishLoading=assalStaffButtonLoading(Swal.getConfirmButton(),'جارٍ الاعتماد والتسليم…');
       if(close)close.disabled=true;if(cancel)cancel.disabled=true;
       try{
         const response=await window.assalStaffDelivery.approve(uid,current.code,current.requestId);
         if(response.auditPending&&typeof window.showElegantTopToast==='function')window.showElegantTopToast('تم الاعتماد؛ تعذّر تحديث سجل إكمال الطلب','warning',3000);
         return true;
       }catch(error){Swal.showValidationMessage(assalStaffHumanErrorMessage(error));return false;}
-      finally{confirming=false;if(close)close.disabled=false;if(cancel)cancel.disabled=false;}
+      finally{finishLoading();confirming=false;if(close)close.disabled=false;if(cancel)cancel.disabled=false;}
     },
     willClose:stop,didDestroy:stop
   });
@@ -26599,13 +26655,14 @@ async function assalCompleteStaffDelivery(uid,password=''){
   catch(error){
     if(!['PASSWORD_REQUIRED','PASSWORD_INVALID'].includes(error?.code))throw error;
     const result=await Swal.fire({title:'كلمة دخول الحساب القديم',showCloseButton:true,
-      customClass:{popup:'assal-staff-premium assal-flow assal-flow-form'},
+      customClass:{popup:'assal-staff-premium assal-flow assal-flow-form assal-inline-confirm-flow'},
       html:assalFlowNotice('fa-key','أدخل كلمة المرور الحالية. نتحقق منها فعلياً ونحفظ نسخة خاصة بالمالك؛ لا تتغيّر كلمة الحساب.')
         +'<div class="assal-flow-field"><input id="asDeliveryOldPassword" class="assal-premium-input" type="password" dir="ltr" autocomplete="off" placeholder="كلمة المرور الحالية"></div>',
       showCancelButton:true,cancelButtonText:'لاحقاً',confirmButtonText:'تحقق وجهّز الدعوة',showLoaderOnConfirm:true,
       allowOutsideClick:()=>!Swal.isLoading(),allowEscapeKey:()=>!Swal.isLoading(),
       preConfirm:async()=>{const value=document.getElementById('asDeliveryOldPassword').value;if(!value){Swal.showValidationMessage('أدخل كلمة المرور الحالية.');return false;}
-        try{return await window.assalStaffDelivery.prepare(uid,value);}catch(e){Swal.showValidationMessage(assalStaffHumanErrorMessage(e));return false;}},
+        const finishLoading=assalStaffButtonLoading(Swal.getConfirmButton(),'جارٍ التحقق والتجهيز…');
+        try{return await window.assalStaffDelivery.prepare(uid,value);}catch(e){Swal.showValidationMessage(assalStaffHumanErrorMessage(e));return false;}finally{finishLoading();}},
       willClose:()=>{const input=document.getElementById('asDeliveryOldPassword');if(input)input.value='';}
     });
     if(!result.isConfirmed)return false;prepared=result.value;
@@ -26791,7 +26848,17 @@ window.assalRevokeStaff=async function(uid){
 };
 window.openAssalManagedStaffLogin=async function(){
   if(isAdminUser()||localStorage.getItem('isActivated')!=='true')return;
-  const result=await Swal.fire({title:'دخول كادر عسل',customClass:{popup:'assal-staff-premium'},showCloseButton:true,
+  const customerId=String(getDeviceId());
+  let pendingInvite=null;
+  try{pendingInvite=await window.assalStaffManagement.lookupInvite(customerId);}
+  catch(error){console.warn('Staff pending invitation lookup:',error?.code||'unavailable');}
+  if(isAdminUser()||localStorage.getItem('isActivated')!=='true'||String(getDeviceId())!==customerId||Swal.isVisible())return;
+  if(pendingInvite?.status==='pending'){
+    const invitation=await assalShowStaffInvitation(pendingInvite);
+    if(invitation.isConfirmed&&invitation.value===true)location.reload();
+    return;
+  }
+  const result=await Swal.fire({title:'دخول كادر عسل',customClass:{popup:'assal-staff-premium assal-inline-confirm-flow'},showCloseButton:true,
     html:'<p class="assal-staff-hint">بدخولك تقبل دعوة الإدارة التي أرسلها المالك لحسابك. لا يتغير تفعيل الزبون أو محادثاته.</p>'
       +'<input id="asStaffEmail" class="assal-premium-input" type="email" dir="ltr" autocomplete="username" placeholder="البريد الإداري">'
       +'<input id="asStaffPassword" class="assal-premium-input" type="password" autocomplete="current-password" dir="ltr" placeholder="كلمة مرور الأدمن">',
@@ -26800,8 +26867,10 @@ window.openAssalManagedStaffLogin=async function(){
       const email=document.getElementById('asStaffEmail').value.trim();
       const password=document.getElementById('asStaffPassword').value;
       if(!email||!password){Swal.showValidationMessage('أدخل البريد وكلمة المرور.');return false;}
+      const finishLoading=assalStaffButtonLoading(Swal.getConfirmButton(),'جارٍ تسجيل الدخول…');
       try{await window.assalStaffManagement.login(email,password);return true;}
       catch(err){Swal.showValidationMessage(assalStaffHumanErrorMessage(err,'login'));return false;}
+      finally{finishLoading();}
     },allowOutsideClick:()=>!Swal.isLoading()
   });
   if(result.isConfirmed&&result.value===true)location.reload();
@@ -26889,8 +26958,9 @@ async function assalShowStaffInvitation(invite){
     if(!live()||!device)return;
     const code=document.getElementById('asStaffDeliveryCode'),setup=document.getElementById('asStaffDeliverySetup'),send=document.getElementById('asStaffDeliverySend');
     code.textContent=device.code;setup.hidden=delivered;
-    send.disabled=sending||!!device.sentAt;
-    send.innerHTML=sending?'<i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i> جارٍ الإرسال…':device.sentAt?'<i class="fas fa-check" aria-hidden="true"></i> تم الإرسال':'<i class="fas fa-paper-plane" aria-hidden="true"></i> إرسال للمالك';
+    if(sending)return;
+    send.disabled=!!device.sentAt;
+    send.innerHTML=device.sentAt?'<i class="fas fa-check" aria-hidden="true"></i> تم الإرسال':'<i class="fas fa-paper-plane" aria-hidden="true"></i> إرسال للمالك';
   }
   async function poll(){
     if(!live()||inFlight||delivered||!pending)return;
@@ -26915,7 +26985,7 @@ async function assalShowStaffInvitation(invite){
     finally{inFlight=false;if(live()&&!delivered)timer=setTimeout(poll,5000);}
   }
   return await Swal.fire({
-    title:pending?'دعوة إدارة عسل':'دخول كادر عسل',customClass:{popup:'assal-staff-premium assal-flow assal-flow-welcome'},showCloseButton:true,
+    title:pending?'دعوة إدارة عسل':'دخول كادر عسل',customClass:{popup:'assal-staff-premium assal-flow assal-flow-welcome assal-inline-confirm-flow'},showCloseButton:true,
     html:assalStaffWelcomeCardHtml(invite)
       +'<div id="asStaffDeliverySetup" class="assal-staff-delivery-setup assal-staff-send-setup" hidden><small>رمز التسجيل · للاعتماد أول مرة</small><strong id="asStaffDeliveryCode" dir="ltr" aria-label="رمز التسجيل"></strong><button id="asStaffDeliverySend" type="button"><i class="fas fa-paper-plane" aria-hidden="true"></i> إرسال للمالك</button></div>'
       +'<div id="asStaffDeliveryState" class="assal-staff-delivery-state" role="status" aria-live="polite">'+(pending?'جارٍ تجهيز بيانات الدخول…':'')+'</div>'
@@ -26933,7 +27003,8 @@ async function assalShowStaffInvitation(invite){
       });
       document.getElementById('asStaffDeliverySend').addEventListener('click',async()=>{
         if(!device||sending||device.sentAt||delivered||Swal.isLoading())return;
-        sending=true;renderCode();
+        sending=true;
+        const finishLoading=assalStaffButtonLoading(document.getElementById('asStaffDeliverySend'),'جارٍ إرسال الرمز…');
         const state=document.getElementById('asStaffDeliveryState');state.textContent='جارٍ إرسال رمز التسجيل…';
         try{
           const response=await window.assalStaffDelivery.send(invite,device);
@@ -26944,7 +27015,7 @@ async function assalShowStaffInvitation(invite){
         }catch(error){if(live()){
           state.textContent=String(error?.message||'تعذّر إرسال الرمز. حاول مجدداً.');
           if(['CODE_EXPIRED','INVITE_CHANGED','PAIR_MISSING'].includes(error?.code)){device=null;clearTimeout(timer);timer=setTimeout(poll,0);}
-        }}finally{sending=false;if(live())renderCode();}
+        }}finally{finishLoading();sending=false;if(live())renderCode();}
       });
       const save=document.getElementById('asWelcomeSaveCard'),status=document.getElementById('asWelcomeSaveStatus');
       save.addEventListener('click',async()=>{
@@ -26964,9 +27035,10 @@ async function assalShowStaffInvitation(invite){
       if(!password){Swal.showValidationMessage('انتظر تجهيز كلمة المرور أو أدخل كلمة حسابك الحالية.');return false;}
       if(save.disabled){Swal.showValidationMessage('انتظر إكمال حفظ البطاقة ثم تابع الدخول.');return false;}
       save.disabled=true;input.readOnly=true;if(close)close.disabled=true;
+      const finishLoading=assalStaffButtonLoading(Swal.getConfirmButton(),pending?'جارٍ الموافقة والدخول…':'جارٍ تسجيل الدخول…');
       try{await window.assalStaffManagement.login(email,password,pending?{uid:invite.uid,revision:invite.revision}:null);return true;}
       catch(error){Swal.showValidationMessage(assalStaffHumanErrorMessage(error,'login'));return false;}
-      finally{save.disabled=false;input.readOnly=false;if(close)close.disabled=false;}
+      finally{finishLoading();save.disabled=false;input.readOnly=false;if(close)close.disabled=false;}
     },
     willClose:()=>{stop();const input=document.getElementById('asWelcomePassword');if(input)input.value='';},didDestroy:stop
   });
@@ -27002,7 +27074,7 @@ async function assalShowStaffInvitation(invite){
     }
     await check();
   }
-  function boot(){setTimeout(bind,1100);document.addEventListener('visibilitychange',()=>{if(!document.hidden)bind();});}
+  function boot(){setTimeout(bind,1100);document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(seen.endsWith('|pending'))seen='';bind();}});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 
@@ -27959,22 +28031,31 @@ function clearSearch() {
   toggleScrollToTopButton(); // تحديث زر الرجوع لأعلى
 }
 
-// ربط حدث الكتابة بحقل البحث + ضبط اتجاه النص حسب اللغة
+// Keep Arabic/IME composition intact; update search chrome after a committed edit.
 const assalMainSearchInputEl = document.getElementById("searchInput");
 if (assalMainSearchInputEl) {
-  assalMainSearchInputEl.addEventListener("input", function () {
+  function syncAssalMainSearchInput() {
     toggleClearButton();
-    const v = (this.value || "").trim();
-    if (!v) {
-      this.setAttribute("dir", "rtl");
-    } else if (
-      /[A-Za-z0-9]/.test(v) &&
-      !(typeof hasArabicText === "function" && hasArabicText(v))
-    ) {
-      this.setAttribute("dir", "ltr");
-    } else {
-      this.setAttribute("dir", "rtl");
+    const value = (assalMainSearchInputEl.value || "").trim();
+    const direction = value && /[A-Za-z0-9]/.test(value) &&
+      !(typeof hasArabicText === "function" && hasArabicText(value)) ? "ltr" : "rtl";
+    if (assalMainSearchInputEl.getAttribute("dir") !== direction) {
+      assalMainSearchInputEl.setAttribute("dir", direction);
     }
+  }
+  assalMainSearchInputEl.addEventListener("compositionstart", function () {
+    this.__assalComposing = true;
+  });
+  assalMainSearchInputEl.addEventListener("compositionend", function () {
+    this.__assalComposing = false;
+    syncAssalMainSearchInput();
+  });
+  assalMainSearchInputEl.addEventListener("blur", function () {
+    this.__assalComposing = false;
+  });
+  assalMainSearchInputEl.addEventListener("input", function (event) {
+    if (this.__assalComposing || event.isComposing) return;
+    syncAssalMainSearchInput();
   });
 }
 
@@ -31718,6 +31799,7 @@ function getIconForCategory(category) {
 document
   .getElementById("searchInput")
   .addEventListener("keydown", function (event) {
+    if (event.isComposing || event.keyCode === 229 || this.__assalComposing) return;
     if (event.key === "Enter") {
       event.preventDefault(); // 🔴 منع إعادة تحميل الصفحة
       searchItems(); // ✅ استدعاء البحث
@@ -40056,7 +40138,7 @@ function closeContactModal() {
      "simi_subscription_cta"   => صورة images/simi2.png مع زر الاشتراك
 
    ========================================================== */
-const AD_CHOICE = "off"; // الإعلان الجديد مع زر الاشتراك؛ الصورة فقط: "simi_subscription"؛ الإيقاف: "off"
+const AD_CHOICE = "simi_subscription"; // الإعلان الجديد مع زر الاشتراك؛ الصورة فقط: "simi_subscription"؛ الإيقاف: "off"
 
 // خيارات اضافية (اختياري)
 const AD_DELAY_MS = 45; // بعد جاهزية بوابة التحديث: ظهور شبه فوري بدون قفزة بصرية
@@ -57575,57 +57657,24 @@ html.assal-offline-mode #assalOfflineBanner{
 </script>
 
 <script>
-// تفضيل لوحة المفاتيح الإنجليزية للبحث
-
-/* ===== ASSAL: Search input prefers English/Latin keyboard ===== */
+// A one-time preference for model search. The DOM editor owns native IME focus.
 (function () {
-  function applyAssalEnglishKeyboardHints() {
-    try {
-      var input = document.getElementById("searchInput");
-      if (!input) return;
-
-      input.setAttribute("lang", "en");
-      input.setAttribute("dir", "ltr");
-      input.setAttribute("inputmode", "latin");
-      input.setAttribute("autocomplete", "off");
-      input.setAttribute("autocorrect", "off");
-      input.setAttribute("autocapitalize", "characters");
-      input.setAttribute("spellcheck", "false");
-      input.setAttribute("data-assal-english-keyboard", "true");
-
-      if (!input.__assalEnglishKeyboardBound) {
-        input.__assalEnglishKeyboardBound = true;
-        input.addEventListener(
-          "focus",
-          function () {
-            try {
-              if (
-                window.Android &&
-                typeof window.Android.assalEnglishKeyboardFocus === "function"
-              ) {
-                window.Android.assalEnglishKeyboardFocus();
-              }
-            } catch (_) {}
-          },
-          true,
-        );
-      }
-    } catch (_) {}
+  function prepareAssalSearchKeyboard() {
+    const input = document.getElementById('searchInput');
+    if (!input || input.__assalStableTextInputHints) return;
+    input.__assalStableTextInputHints = true;
+    // Older APKs consult this flag before attaching their native focus callback.
+    input.__assalEnglishKeyboardBound = true;
+    // Never change keyboard attributes after the user has started editing.
+    if (document.activeElement === input) return;
+    const hints = {lang:'en',inputmode:'text',autocomplete:'off',autocorrect:'off',autocapitalize:'characters',spellcheck:'false'};
+    Object.entries(hints).forEach(([name,value]) => {
+      if (input.getAttribute(name) !== value) input.setAttribute(name,value);
+    });
   }
-
-  if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      applyAssalEnglishKeyboardHints,
-      { once: true },
-    );
-  } else {
-    applyAssalEnglishKeyboardHints();
-  }
-
-  window.addEventListener("focus", applyAssalEnglishKeyboardHints, true);
-  setTimeout(applyAssalEnglishKeyboardHints, 500);
-  setTimeout(applyAssalEnglishKeyboardHints, 1500);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded',prepareAssalSearchKeyboard,{once:true});
+  } else prepareAssalSearchKeyboard();
 })();
 </script>
 <!-- ASSAL SAFE ADDON: Community header menu + admin-only views counter (non-invasive) -->
@@ -71394,4 +71443,37 @@ html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-p
 .assal-flow-welcome #asStaffDeliverySend{display:inline-flex;align-items:center;justify-content:center;gap:7px;width:auto;max-width:100%;margin:0;padding:9px 11px;border:1px solid rgba(112,224,204,.28);border-radius:10px;background:linear-gradient(115deg,rgba(31,149,132,.25),rgba(31,104,144,.18));color:#bff8e9;font:750 10px/1.7 'Cairo',Tahoma,sans-serif;direction:rtl;letter-spacing:0;cursor:pointer}
 .assal-flow-welcome #asStaffDeliverySend:disabled{opacity:.68;cursor:default}
 @media(max-width:360px){.assal-flow-welcome #asStaffDeliveryCode{font-size:18px}.assal-flow-welcome #asStaffDeliverySend{padding:8px 9px;font-size:9px}.assal-flow-pairing .assal-pair-panel{gap:11px}}
+</style>
+
+<style id="assal-account-search-inline-loading-v6">
+/* Only the account search and staff handoff buttons. */
+html.modal-lock.assal-accounts-search-editable,
+body.modal-lock.assal-accounts-search-editable{touch-action:pan-y!important}
+#customersAdminModal .customers-admin-shell,
+#customersAdminModal .customers-admin-body{touch-action:pan-y!important}
+#customersAdminModal #assalAccountsQuickSearch,
+#customersAdminModal #customersAdminSearchInput{
+  -webkit-user-select:text!important;user-select:text!important;
+  touch-action:manipulation!important;caret-color:#67e8f9!important;cursor:text!important;
+}
+.swal2-popup.assal-inline-confirm-flow .swal2-loader{display:none!important}
+.swal2-popup.assal-inline-confirm-flow[data-loading="true"] .swal2-confirm{display:inline-flex!important;align-items:center;justify-content:center}
+.swal2-popup.assal-inline-confirm-flow .swal2-confirm.assal-staff-button-loading,
+.swal2-popup.assal-flow-welcome #asStaffDeliverySend.assal-staff-button-loading{
+  position:relative!important;isolation:isolate;overflow:hidden!important;opacity:1!important;
+  cursor:wait!important;filter:none!important;
+}
+.assal-staff-button-loading>.assal-staff-button-label{position:relative;z-index:1;white-space:nowrap}
+.assal-staff-button-loading::before{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(105deg,transparent 10%,rgba(255,255,255,.08) 35%,rgba(211,255,247,.24) 50%,rgba(255,255,255,.08) 65%,transparent 90%);
+  background-size:220% 100%;animation:assal-staff-button-sheen 1.3s linear infinite;
+}
+.assal-staff-button-loading::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:3px;z-index:2;pointer-events:none;
+  background:linear-gradient(90deg,transparent,#c7fff0,transparent);background-size:220% 100%;
+  animation:assal-staff-button-sheen 1.3s linear infinite;
+}
+@keyframes assal-staff-button-sheen{from{background-position:180% 0}to{background-position:-40% 0}}
+@media(prefers-reduced-motion:reduce){.assal-staff-button-loading::before,.assal-staff-button-loading::after{animation:none;background-position:50% 0}}
 </style>
