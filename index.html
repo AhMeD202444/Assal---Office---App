@@ -52538,7 +52538,7 @@ html body footer {
           '<div class="assal-community-text">' +
           textHtml +
           "</div>" +
-          (!deleted && msg.voice && window.assalVoiceMarkup ? window.assalVoiceMarkup(msg.voice) : "") +
+          (!deleted && msg.voice && window.assalVoiceMarkup ? window.assalVoiceMarkup(msg.voice,msg) : "") +
           editLabel +
           actions +
           "</div>"
@@ -68649,7 +68649,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     let html='';if(msg.senderRole!=='system')html+='<span class="am-sender">'+esc(msg.senderRole===S.role?'أنت':messageName(msg))+'</span>';
     if(msg.replyTo&&!msg.deletedAt){const q=msg.replyTo;const source=currentMessages().find(m=>m.id===q.id&&m.requestId===(q.requestId||msg.requestId)),photo=source&&!source.deletedAt&&/^data:image\/(jpeg|png|webp);base64,/i.test(source.image||'')?source.image:'';html+='<button type="button" class="am-quote" data-action="jump" data-quote-id="'+esc(q.id)+'" data-quote-request="'+esc(q.requestId||msg.requestId)+'" aria-label="الانتقال إلى الرسالة الأصلية">'+svg('reply')+'<span class="am-quote-copy"><b>رد على '+esc(q.senderName||'رسالة')+'</b><span>'+esc(source?.deletedAt?'تم حذف الرسالة':q.text||'صورة')+'</span></span>'+(photo?'<img class="am-quote-thumb" src="'+esc(photo)+'" alt="">':'')+'</button>';}
     const image=clean(msg.image);if(image&&!msg.deletedAt&&/^data:image\/(jpeg|png|webp);base64,/i.test(image))html+='<img class="am-photo" src="'+esc(image)+'" alt="صورة مرفقة" tabindex="0" role="button" aria-label="عرض الصورة وتكبيرها" data-action="view-image" width="280" loading="lazy">';
-    if(!msg.deletedAt&&msg.voice&&window.assalVoiceMarkup)html+=window.assalVoiceMarkup(msg.voice);
+    if(!msg.deletedAt&&msg.voice&&window.assalVoiceMarkup)html+=window.assalVoiceMarkup(msg.voice,msg);
     html+='<div class="am-body" dir="auto">'+esc(msg.deletedAt?'تم حذف الرسالة':msg.text||'')+'</div>';
     return html;
   }
@@ -69976,8 +69976,12 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   const safeString=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fdb=()=>{const f=window.firebaseDB;if(!f?.db||!f.ref||!f.get||!f.set||!f.runTransaction)throw Error('قاعدة البيانات غير جاهزة');return f;};
   const clock=s=>`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-  const infoHtml=meta=>'<div class="assal-voice-bubble" data-voice-id="'+safeString(meta.id)+'"><button type="button" class="assal-voice-play" data-assal-voice-play="'+safeString(meta.id)+'" title="تشغيل التسجيل" aria-label="تشغيل التسجيل">'+VOICE_ICON.play+'</button><div class="assal-voice-times"><span>'+clock(Number(meta.seconds)||0)+'</span><span class="assal-voice-progress"><span></span></span>'+VOICE_ICON.mic+'</div></div>';
-  window.assalVoiceMarkup=meta=>meta&&valid(meta.id)?infoHtml(meta):'';
+  const infoHtml=(meta,sender={})=>{
+    const portrait=typeof window.assalAccountMessengerPortrait==='function'?window.assalAccountMessengerPortrait(sender.deviceId||sender.senderName||sender.name||meta.id):VOICE_ICON.mic;
+    const bars=Array.from({length:36},(_,i)=>'<i style="height:'+([5,8,12,7,16,10,21,14,25,18,11,23][i%12])+'px"></i>').join('');
+    return '<div class="assal-voice-bubble" dir="ltr" data-voice-id="'+safeString(meta.id)+'" data-voice-seconds="'+(Math.max(0,Number(meta.seconds)||0))+'"><span class="assal-voice-avatar">'+portrait+'<b>'+VOICE_ICON.mic+'</b></span><button type="button" class="assal-voice-play" data-assal-voice-play="'+safeString(meta.id)+'" title="تشغيل التسجيل" aria-label="تشغيل التسجيل">'+VOICE_ICON.play+'</button><div class="assal-voice-track"><div class="assal-voice-waveform" style="--voice-progress:0%"><span class="assal-voice-bars" aria-hidden="true">'+bars+'</span><input class="assal-voice-seek" type="range" min="0" max="1000" value="0" step="1" dir="ltr" aria-label="موضع تشغيل التسجيل"></div><span class="assal-voice-elapsed">'+clock(Math.floor(Number(meta.seconds)||0))+'</span></div></div>';
+  };
+  window.assalVoiceMarkup=(meta,sender)=>meta&&valid(meta.id)?infoHtml(meta,sender):'';
   let state={session:0,phase:'idle',mode:'',target:'',stream:null,rec:null,blob:null,url:'',chunks:[],bytes:0,start:0,pauseStart:0,pausedMs:0,seconds:0,tick:0,bar:null,host:null,analyser:null,ctx:null,samples:null,wave:[],listen:null,busy:false,sendOnStop:false,overSize:false,watch:null,native:false};
   let gesture=null,suppressClickUntil=0,player=null,playUrl='',playButton=null;
   function currentContext(mode){if(mode==='private'){const c=window.__ASSAL_PRIVATE_VOICE_CONTEXT__?.();return c?.open&&c?.ready?c.group:'';}return qs('#assalCommunityModal.show')?'community':'';}
@@ -70147,40 +70151,71 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
       if(!sent)throw Error('تعذّر إرسال الرسالة للمحادثة');close();
     }catch(err){console.warn('ASSAL voice send:',err);if(state.session!==session)return;state.phase='ready';state.busy=false;hint(err?.message||'فشل الإرسال؛ أعد المحاولة');ui();}
   }
-  function stopPlayer(){if(player){player.pause();player.removeAttribute('src');player.load();player=null;}if(playUrl){URL.revokeObjectURL(playUrl);playUrl='';}if(playButton){playButton.innerHTML=VOICE_ICON.play;playButton=null;}}
-  async function play(btn){const id=btn.dataset.assalVoicePlay;if(!valid(id))return;
-    if(player&&playButton===btn){if(player.paused){player.play().catch(()=>{});btn.innerHTML=VOICE_ICON.pause;}else{player.pause();btn.innerHTML=VOICE_ICON.play;}return;}
-    stopPlayer();playButton=btn;btn.disabled=true;
-    try{const f=fdb(),snap=await f.get(f.ref(f.db,VOICE_ROOT+'/'+id));if(!snap.exists())throw Error('التسجيل غير موجود');
-      const val=snap.val();if(!val||typeof val.data!=='string'||val.data.length>200000||!/^data:audio\/(webm|mp4|ogg|mpeg|aac)[^,]*;base64,/i.test(val.data))throw Error('صيغة التسجيل غير مدعومة');
-      const response=await fetch(val.data);const blob=await response.blob();if(blob.size>MAX_BYTES)throw Error('ملف الصوت أكبر من المسموح');
-      playUrl=URL.createObjectURL(blob);player=new Audio(playUrl);player.preload='metadata';const control=btn.closest('.assal-voice-bubble');const progress=control?.querySelector('.assal-voice-progress>span');
-      player.ontimeupdate=()=>{if(progress&&player?.duration)progress.style.width=(100*player.currentTime/player.duration)+'%';};
-      player.onended=stopPlayer;player.onerror=stopPlayer;await player.play();btn.innerHTML=VOICE_ICON.pause;
-    }catch(err){console.warn('ASSAL voice playback:',err);stopPlayer();voiceNotice('تعذّر تشغيل التسجيل',err?.message||'تعذر تشغيل التسجيل');}finally{btn.disabled=false;}
+  let playbackSerial=0;
+  function updatePlayerUI(control,audio){
+    if(!control)return;
+    const duration=Number.isFinite(audio?.duration)&&audio.duration>0?audio.duration:Number(control.dataset.voiceSeconds)||0;
+    const current=Math.max(0,audio?.currentTime||0),ratio=duration?Math.min(1,current/duration):0;
+    control.querySelector('.assal-voice-waveform')?.style.setProperty('--voice-progress',(ratio*100)+'%');
+    control.querySelectorAll('.assal-voice-bars i').forEach((bar,i)=>{bar.style.background=i/36<ratio?'#75e6d0':'#789a99';});
+    if(!audio)control.dataset.voiceSeek='0';
+    const seek=control.querySelector('.assal-voice-seek');if(seek)seek.value=String(Math.round(ratio*1000));
+    const time=control.querySelector('.assal-voice-elapsed');if(time)time.textContent=clock(Math.floor(audio?current:duration));
   }
-  // WhatsApp-inspired gestures: tap = locked recorder; hold then release = send;
-  // drag LEFT = discard; drag UP = lock without auto-send.
+  function stopPlayer(){
+    ++playbackSerial;
+    if(player){player.ontimeupdate=player.onended=player.onerror=player.onloadedmetadata=null;player.pause();player.removeAttribute('src');player.load();player=null;}
+    if(playUrl){URL.revokeObjectURL(playUrl);playUrl='';}
+    if(playButton){playButton.innerHTML=VOICE_ICON.play;playButton.setAttribute('aria-label','تشغيل التسجيل');playButton.disabled=false;updatePlayerUI(playButton.closest('.assal-voice-bubble'),null);playButton=null;}
+  }
+  async function play(btn){
+    const id=btn.dataset.assalVoicePlay;if(!valid(id))return;
+    if(player&&playButton===btn){
+      if(player.paused){try{await player.play();btn.innerHTML=VOICE_ICON.pause;btn.setAttribute('aria-label','إيقاف مؤقت');}catch(_){stopPlayer();}}
+      else{player.pause();btn.innerHTML=VOICE_ICON.play;btn.setAttribute('aria-label','متابعة التسجيل');}return;
+    }
+    stopPlayer();const serial=playbackSerial;playButton=btn;btn.disabled=true;
+    try{
+      const f=fdb(),snap=await f.get(f.ref(f.db,VOICE_ROOT+'/'+id));if(serial!==playbackSerial)return;
+      if(!snap.exists())throw Error('التسجيل غير موجود');
+      const val=snap.val();if(!val||typeof val.data!=='string'||val.data.length>200000||!/^data:audio\/(webm|mp4|ogg|mpeg|aac)[^,]*;base64,/i.test(val.data))throw Error('صيغة التسجيل غير مدعومة');
+      const response=await fetch(val.data);const blob=await response.blob();if(serial!==playbackSerial)return;
+      if(blob.size>MAX_BYTES)throw Error('ملف الصوت أكبر من المسموح');
+      playUrl=URL.createObjectURL(blob);const audio=new Audio(playUrl);player=audio;audio.preload='metadata';
+      const control=btn.closest('.assal-voice-bubble');
+      audio.ontimeupdate=()=>{if(player===audio)updatePlayerUI(control,audio);};
+      audio.onloadedmetadata=()=>{if(player!==audio)return;const fraction=Number(control?.dataset.voiceSeek)||0;if(fraction&&Number.isFinite(audio.duration))audio.currentTime=fraction*audio.duration;updatePlayerUI(control,audio);};
+      audio.onended=()=>{if(player===audio)stopPlayer();};audio.onerror=()=>{if(player===audio)stopPlayer();};
+      await audio.play();if(serial!==playbackSerial)return;btn.innerHTML=VOICE_ICON.pause;btn.setAttribute('aria-label','إيقاف مؤقت');
+    }catch(err){if(serial!==playbackSerial)return;console.warn('ASSAL voice playback:',err);stopPlayer();voiceNotice('تعذّر تشغيل التسجيل',err?.message||'تعذر تشغيل التسجيل');}
+    finally{btn.disabled=false;}
+  }
+  document.addEventListener('input',e=>{
+    if(!e.target.matches?.('.assal-voice-seek'))return;
+    const control=e.target.closest('.assal-voice-bubble'),fraction=Math.max(0,Math.min(1,Number(e.target.value)/1000));
+    control.dataset.voiceSeek=String(fraction);control.querySelector('.assal-voice-waveform')?.style.setProperty('--voice-progress',(fraction*100)+'%');
+    if(player&&playButton?.closest('.assal-voice-bubble')===control&&Number.isFinite(player.duration)&&player.duration>0){player.currentTime=fraction*player.duration;updatePlayerUI(control,player);}
+    else{const time=control.querySelector('.assal-voice-elapsed');if(time)time.textContent=clock(Math.floor(fraction*(Number(control.dataset.voiceSeconds)||0)));}
+  },true);
+  // Hold to record; physical swipe RIGHT cancels; release sends.
   document.addEventListener('pointerdown',e=>{const b=e.target.closest?.('[data-assal-voice-record]');if(!b||e.button!==0)return;
     e.preventDefault();e.stopPropagation();if(state.phase!=='idle')close();
     gesture={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now(),decision:'',ready:false};
     suppressClickUntil=performance.now()+900;start(b.dataset.assalVoiceRecord);
   },true);
   document.addEventListener('pointermove',e=>{if(!gesture||gesture.id!==e.pointerId)return;
-    const dx=e.clientX-gesture.x,dy=e.clientY-gesture.y;
-    if(dx< -72){gesture.decision='discard';hint('ارفع إصبعك لإلغاء التسجيل');}
-    else if(dy< -62){gesture.decision='lock';hint('ارفع إصبعك لقفل التسجيل');}
-    else{gesture.decision='';if(state.phase==='recording')hint('جارٍ التسجيل');}
+    const dx=e.clientX-gesture.x;
+    if(dx>=72){suppressClickUntil=performance.now()+900;close();return;}
+    if(state.phase==='recording')hint(dx>18?'اسحب لليمين للإلغاء →':'جارٍ التسجيل · اسحب لليمين للإلغاء');
   },{passive:true});
   document.addEventListener('pointerup',e=>{if(!gesture||gesture.id!==e.pointerId)return;
-    const g=gesture;gesture=null;const duration=performance.now()-g.t;
-    if(g.decision==='discard'){close();return;}
-    if(g.decision==='lock'){hint('التسجيل مقفول؛ اضغط إرسال');return;}
-    if(duration>1000&&state.phase==='recording'&&ms()>900){finish(true);return;}
-    if(state.phase==='recording')hint('التسجيل مقفول؛ اضغط إرسال');
+    gesture=null;suppressClickUntil=performance.now()+900;
+    if(state.phase==='requesting'){close();return;}
+    if(state.phase==='recording'||state.phase==='paused'||state.phase==='ready')finish(true);
   },true);
   document.addEventListener('pointercancel',e=>{if(gesture?.id===e.pointerId){gesture=null;/* The Android runtime mic dialog may cancel the pointer; keep pending permission alive. */if(state.phase!=='idle'&&state.phase!=='requesting')close();}},true);
   document.addEventListener('click',e=>{
+    if(e.target.closest?.('.assal-voice-seek')){e.stopPropagation();return;}
     const rec=e.target.closest?.('[data-assal-voice-record]');if(rec){e.preventDefault();e.stopPropagation();if(performance.now()<suppressClickUntil)return;if(state.phase==='idle')start(rec.dataset.assalVoiceRecord);return;}
     const playback=e.target.closest?.('[data-assal-voice-play]');if(playback){e.preventDefault();e.stopPropagation();play(playback);}
   },true);
@@ -71508,4 +71543,30 @@ body.modal-lock.assal-accounts-search-editable{touch-action:pan-y!important}
 @keyframes assal-polish-spin{to{transform:rotate(360deg)}}
 @media(max-width:360px){.swal2-popup.assal-flow-welcome .assal-staff-send-setup{gap:8px;padding:10px!important}.swal2-popup.assal-flow-welcome #asStaffDeliveryCode{font-size:16px!important;letter-spacing:.7px}.swal2-popup.assal-flow-welcome #asStaffDeliverySend{padding:9px!important;font-size:9px!important}}
 @media(prefers-reduced-motion:reduce){.assal-staff-button-loading .assal-staff-button-spinner{animation:none;border-right-color:#e2fff6}}
+</style>
+
+<style id="assal-voice-wa-playback-final">
+.assal-voice-bubble{display:flex!important;flex-direction:row!important;direction:ltr!important;align-items:center!important;gap:10px!important;box-sizing:border-box;width:280px!important;max-width:100%!important;padding:5px 0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;min-width:0!important}
+.assal-voice-avatar{position:relative;display:block;flex:0 0 39px;width:39px;height:39px;border-radius:50%;background:#29596a;overflow:visible}
+.assal-voice-avatar>svg{width:100%;height:100%;border-radius:50%;stroke:none}
+.assal-voice-avatar>b{position:absolute;right:-4px;bottom:-4px;width:17px;height:20px;color:#6ce4cc;filter:drop-shadow(0 1px 2px #102630)}
+.assal-voice-avatar>b svg{width:17px;height:20px}
+.assal-voice-bubble .assal-voice-play{flex:0 0 28px!important;width:28px!important;height:35px!important;min-width:28px!important;min-height:35px!important;border:0!important;border-radius:0!important;background:transparent!important;padding:0!important;color:#b7d0d0!important;box-shadow:none!important}
+.assal-voice-play svg{width:28px!important;height:28px!important;fill:currentColor;stroke:currentColor;stroke-width:1.4}
+.assal-voice-track{flex:1;min-width:0;direction:ltr;display:flex;flex-direction:column;gap:2px}
+.assal-voice-waveform{height:30px;position:relative;direction:ltr!important}
+.assal-voice-bars{display:flex;align-items:center;justify-content:space-between;gap:2px;height:30px;background:linear-gradient(to right,#75e6d0 0%,#75e6d0 var(--voice-progress),#79999a var(--voice-progress),#79999a 100%);-webkit-mask:none;mask:none}
+.assal-voice-bars i{display:block;width:3px;flex:1;max-width:4px;border-radius:3px;background:#789a99}
+.assal-voice-bars{background:none}
+.assal-voice-bars i{background:linear-gradient(to right,#75e6d0,#75e6d0);opacity:.65}
+
+.assal-voice-seek{position:absolute!important;inset:0!important;width:100%!important;height:30px!important;margin:0!important;padding:0!important;direction:ltr!important;appearance:none!important;-webkit-appearance:none!important;background:transparent!important;border:0!important;box-shadow:none!important;cursor:pointer;touch-action:pan-y;z-index:1;opacity:1!important;min-height:0!important}
+.assal-voice-seek::-webkit-slider-runnable-track{height:2px;background:transparent}
+.assal-voice-seek::-moz-range-track{height:2px;background:transparent}
+.assal-voice-seek::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:11px;height:11px;margin-top:-4px;border-radius:50%;background:#b8d3d0;border:0}
+.assal-voice-seek::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:#b8d3d0;border:0}
+.assal-voice-elapsed{font:12px/1.2 Arial,sans-serif;color:#a6c6c4;font-variant-numeric:tabular-nums;direction:ltr;text-align:left}
+[data-assal-voice-record]{touch-action:none!important;user-select:none!important;-webkit-user-select:none!important}
+.assal-voice-seek:focus-visible{outline:2px solid #73d9c8!important;outline-offset:3px}
+@media(max-width:360px){.assal-voice-bubble{gap:7px!important;width:250px!important}.assal-voice-avatar{width:34px;height:34px;flex-basis:34px}}
 </style>
