@@ -69994,7 +69994,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     const host=hostFor(mode);if(!host)return false;state.host=host;host.classList.add('assal-wa-voice-active');
     const bar=document.createElement('div');bar.className='assal-wa-voice-bar is-loading';bar.setAttribute('role','group');bar.setAttribute('aria-label','تسجيل صوتي');
     bar.innerHTML='<div class="assal-wa-voice-top"><span class="assal-wa-voice-dot"></span><span class="assal-wa-voice-clock" data-wa="clock">00:00</span><div class="assal-wa-voice-wave" data-wa="wave" aria-hidden="true">'+Array.from({length:28},()=>'<span></span>').join('')+'</div><span class="assal-wa-voice-hint" data-wa="hint">جاري فتح المايك…</span></div><div class="assal-wa-voice-controls"><button type="button" class="assal-wa-voice-send" data-wa-action="send" title="إرسال التسجيل" aria-label="إرسال التسجيل">'+VOICE_ICON.send+'</button><button type="button" class="assal-wa-voice-pause" data-wa-action="pause" title="إيقاف مؤقت / استئناف"><span data-wa="pause-icon">'+VOICE_ICON.pause+'</span><span data-wa="pause-label">إيقاف مؤقت</span></button><button type="button" class="assal-wa-voice-delete" data-wa-action="discard" title="حذف التسجيل" aria-label="حذف التسجيل">'+VOICE_ICON.delete+'</button></div>';
-    bar.addEventListener('click',e=>{const b=e.target.closest('[data-wa-action]');if(!b)return;e.preventDefault();e.stopPropagation();const a=b.dataset.waAction;if(a==='discard')close();else if(a==='pause')togglePause();else if(a==='send')finish(true);});
+    bar.addEventListener('click',e=>{const b=e.target.closest('[data-wa-action]');if(!b)return;e.preventDefault();e.stopPropagation();if(performance.now()<suppressClickUntil)return;const a=b.dataset.waAction;if(a==='discard')close();else if(a==='pause')togglePause();else if(a==='send')finish(true);});
     host.appendChild(bar);state.bar=bar;state.wave=Array.from(bar.querySelectorAll('[data-wa="wave"] span'));
     const shell=mode==='private'?host.closest('.assal-msg'):document.getElementById('assalCommunityModal');
     if(shell&&window.MutationObserver){state.watch=new MutationObserver(()=>{if(state.phase!=='idle'&&!shell.classList.contains('show'))close();});state.watch.observe(shell,{attributes:true,attributeFilter:['class','aria-hidden']});}
@@ -70197,19 +70197,54 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     if(player&&playButton?.closest('.assal-voice-bubble')===control&&Number.isFinite(player.duration)&&player.duration>0){player.currentTime=fraction*player.duration;updatePlayerUI(control,player);}
     else{const time=control.querySelector('.assal-voice-elapsed');if(time)time.textContent=clock(Math.floor(fraction*(Number(control.dataset.voiceSeconds)||0)));}
   },true);
-  // Hold to record; physical swipe RIGHT cancels; release sends.
+  // Cancellation requires releasing inside the actual trash target, never distance alone.
+  const trashIcon=voiceSvg('<g class="assal-trash-lid"><path d="M4 7h16M9 7V4h6v3"/></g><path d="m6.5 9 1 11h9l1-11M10 11v6M14 11v6"/>');
+  function clearTrashGesture(){
+    const bar=state.bar;if(!bar)return;
+    bar.classList.remove('is-cancel-drag','is-trash-hover');
+    const send=bar.querySelector('[data-wa-action="send"]');
+    if(send){send.innerHTML=VOICE_ICON.send;send.setAttribute('aria-label','إرسال التسجيل');send.title='إرسال التسجيل';}
+  }
+  function trashGestureAt(x,y){
+    if(!gesture||!state.bar)return false;
+    const dragging=x-gesture.x>14;
+    const bar=state.bar,send=bar.querySelector('[data-wa-action="send"]');if(!send)return false;
+    if(dragging!==bar.classList.contains('is-cancel-drag')){
+      bar.classList.toggle('is-cancel-drag',dragging);send.innerHTML=dragging?trashIcon:VOICE_ICON.send;
+      send.setAttribute('aria-label',dragging?'اسحب هنا ثم ارفع إصبعك لحذف التسجيل':'إرسال التسجيل');send.title=dragging?'حذف التسجيل':'إرسال التسجيل';
+    }
+    // Rect is the fixed button box, independent of the animated lid or icon scale.
+    const r=send.getBoundingClientRect();
+    const inside=dragging&&r.width>0&&r.height>0&&x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom;
+    bar.classList.toggle('is-trash-hover',inside);
+    hint(inside?'ارفع إصبعك للحذف':dragging?'اسحب إلى السلة للإلغاء':'جارٍ التسجيل · اسحب لليمين للإلغاء');
+    return inside;
+  }
+  function discardWithMotion(){
+    const bar=state.bar;
+    if(bar&&typeof bar.animate==='function'){
+      const r=bar.getBoundingClientRect(),ghost=bar.cloneNode(true);ghost.classList.add('assal-trash-dismiss');ghost.setAttribute('aria-hidden','true');
+      Object.assign(ghost.style,{position:'fixed',inset:'auto',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',pointerEvents:'none',zIndex:'2147483646'});
+      document.body.appendChild(ghost);
+      try{const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+        const animation=ghost.animate([{opacity:1,transform:'translateY(0) scale(1)'},{opacity:0,transform:'translateY(7px) scale(.97)'}],{duration:reduced?0:180,easing:'ease-out',fill:'forwards'});
+        animation.onfinish=()=>ghost.remove();setTimeout(()=>ghost.remove(),260);
+      }catch(_){ghost.remove();}
+    }
+    close();
+  }
   document.addEventListener('pointerdown',e=>{const b=e.target.closest?.('[data-assal-voice-record]');if(!b||e.button!==0)return;
     e.preventDefault();e.stopPropagation();if(state.phase!=='idle')close();
     gesture={id:e.pointerId,x:e.clientX,y:e.clientY,t:performance.now(),decision:'',ready:false};
     suppressClickUntil=performance.now()+900;start(b.dataset.assalVoiceRecord);
   },true);
   document.addEventListener('pointermove',e=>{if(!gesture||gesture.id!==e.pointerId)return;
-    const dx=e.clientX-gesture.x;
-    if(dx>=72){suppressClickUntil=performance.now()+900;close();return;}
-    if(state.phase==='recording')hint(dx>18?'اسحب لليمين للإلغاء →':'جارٍ التسجيل · اسحب لليمين للإلغاء');
+    trashGestureAt(e.clientX,e.clientY);
   },{passive:true});
   document.addEventListener('pointerup',e=>{if(!gesture||gesture.id!==e.pointerId)return;
-    gesture=null;suppressClickUntil=performance.now()+900;
+    const discard=trashGestureAt(e.clientX,e.clientY);gesture=null;suppressClickUntil=performance.now()+900;
+    if(discard){discardWithMotion();return;}
+    clearTrashGesture();
     if(state.phase==='requesting'){close();return;}
     if(state.phase==='recording'||state.phase==='paused'||state.phase==='ready')finish(true);
   },true);
@@ -71569,4 +71604,18 @@ body.modal-lock.assal-accounts-search-editable{touch-action:pan-y!important}
 [data-assal-voice-record]{touch-action:none!important;user-select:none!important;-webkit-user-select:none!important}
 .assal-voice-seek:focus-visible{outline:2px solid #73d9c8!important;outline-offset:3px}
 @media(max-width:360px){.assal-voice-bubble{gap:7px!important;width:250px!important}.assal-voice-avatar{width:34px;height:34px;flex-basis:34px}}
+</style>
+
+<style id="assal-voice-trash-native-motion">
+.assal-wa-voice-bar{transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease}
+.assal-wa-voice-bar.is-cancel-drag{background:#371b25!important;border-color:rgba(255,111,131,.5)!important;box-shadow:inset 0 0 0 1px rgba(255,113,132,.06),0 4px 16px rgba(0,0,0,.2)!important}
+.assal-wa-voice-bar.is-cancel-drag .assal-wa-voice-hint{color:#ffc1ca!important;max-width:150px}
+.assal-wa-voice-bar.is-cancel-drag .assal-wa-voice-wave span{background:#ed8493!important}
+.assal-wa-voice-bar.is-cancel-drag .assal-wa-voice-send{background:#a93850!important;color:#fff1f3!important;opacity:1!important;transition:background-color .15s ease,box-shadow .15s ease}
+.assal-wa-voice-bar.is-cancel-drag .assal-wa-voice-pause,.assal-wa-voice-bar.is-cancel-drag .assal-wa-voice-delete{opacity:.18!important;pointer-events:none!important}
+.assal-wa-voice-bar .assal-trash-lid{transform-box:view-box;transform-origin:5px 7px;transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+.assal-wa-voice-bar.is-trash-hover .assal-trash-lid{transform:translateY(-2px) rotate(-28deg)}
+.assal-wa-voice-bar.is-trash-hover .assal-wa-voice-send{background:#d34861!important;box-shadow:0 0 0 5px rgba(255,109,135,.14)!important}
+.assal-wa-voice-bar.is-trash-hover{border-color:#ff8fa2!important}
+@media(prefers-reduced-motion:reduce){.assal-wa-voice-bar,.assal-wa-voice-bar .assal-trash-lid,.assal-wa-voice-bar.is-cancel-drag .assal-wa-voice-send{transition:none!important}}
 </style>
