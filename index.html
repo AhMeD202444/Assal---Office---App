@@ -22111,6 +22111,120 @@ function showStatsLoading() {
     `;
 }
 
+// نشاط التطبيق للزبون: لا يُسجّل إلا بعد اتصال Firebase وفي الواجهة الأمامية.
+window.assalCustomerAppPresence = (() => {
+  const validId = /^(?:DEV-[A-Z0-9-]{7,24}|AND-[A-F0-9]{32})$/;
+  const lease = 70000;
+  let readyId = '', pageSession = '', connected = false, offset = null;
+  let epoch = 0, generation = 0, foreground = false, pageHidden = false;
+  let offline = false, heartbeat = null, armedEpoch = -1, pending = null, running = false;
+  const api = () => window.firebaseDB || {};
+  function eligible() {
+    try {
+      return validId.test(readyId) && localStorage.getItem('device_id') === readyId &&
+        localStorage.getItem('isActivated') === 'true' &&
+        !window.__ASSAL_ANDROID_RESTORE_PENDING__ && !isAdminUser();
+    } catch (_) { return false; }
+  }
+  const canWrite = () => connected && !offline && navigator.onLine !== false && Number.isFinite(offset);
+  const visible = () => !document.hidden && !pageHidden;
+  const now = () => Math.round(Date.now() + offset);
+  function valid(op) {
+    return op.id === readyId && op.epoch === epoch && op.generation === generation && canWrite() &&
+      (!op.online || (foreground && visible() && eligible()));
+  }
+  function queue(online, at) {
+    pending = {id: readyId, key: pageSession, epoch, generation, online, at};
+    void drain();
+  }
+  async function drain() {
+    if (running) return;
+    running = true;
+    try {
+      while (pending) {
+        const op = pending; pending = null;
+        if (!valid(op)) continue;
+        const f = api(), path = `devices/${op.id}/appActivity`;
+        try {
+          if (op.online && armedEpoch !== op.epoch) {
+            await f.onDisconnect(f.ref(f.db, path + '/sessions/' + op.key)).remove();
+            if (!valid(op)) continue;
+            armedEpoch = op.epoch;
+          }
+          if (!valid(op)) continue;
+          await f.runTransaction(f.ref(f.db, path), previous => {
+            if (!valid(op)) return;
+            const value = previous && typeof previous === 'object' && !Array.isArray(previous) ? previous : {};
+            const sessions = {};
+            const clock = now();
+            Object.entries(value.sessions || {}).forEach(([key, entry]) => {
+              const at = Number(entry?.lastSeen);
+              if (key !== op.key && entry?.online === true && entry.foreground === true &&
+                  Number.isFinite(at) && at > clock - lease && at <= clock + 15000) sessions[key] = entry;
+            });
+            if (op.online) sessions[op.key] = {online: true, foreground: true, lastSeen: op.at};
+            const saved = Number(value.lastSeen);
+            const previousTime = Number.isFinite(saved) && saved > 0 && saved <= clock + 15000 ? saved : 0;
+            const lastSeen = Math.max(previousTime, op.at || 0);
+            if (!lastSeen) return;
+            const result = {...value, v: 1, lastSeen};
+            if (Object.keys(sessions).length) result.sessions = sessions;
+            else delete result.sessions;
+            return result;
+          }, {applyLocally: false});
+        } catch (_) {
+          // الحضور اختياري؛ لا يغيّر التفعيل أو الرسائل عند رفض الشبكة/القواعد للكتابة.
+        }
+      }
+    } finally { running = false; }
+  }
+  function refresh() {
+    const wanted = eligible() && canWrite() && visible();
+    if (wanted) {
+      if (!foreground) { foreground = true; generation++; }
+      queue(true, now());
+      if (!heartbeat) heartbeat = setInterval(refresh, 25000);
+    } else {
+      if (foreground) {
+        foreground = false; generation++;
+        // وقت الخروج يُلتقط الآن فقط إن كان الاتصال مؤكداً، ولا يُنشأ وقت من فتح أوفلاين.
+        queue(false, eligible() && canWrite() ? now() : 0);
+      }
+      clearInterval(heartbeat); heartbeat = null;
+    }
+  }
+  function readyDevice(id) {
+    if (readyId || !validId.test(String(id || ''))) return;
+    const f = api();
+    if (!f.db || !f.onValue || !f.runTransaction || !f.onDisconnect) return;
+    readyId = id;
+    pageSession = 'APP-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('pagehide', () => { pageHidden = true; refresh(); });
+    window.addEventListener('pageshow', () => { pageHidden = false; refresh(); });
+    const wentOffline = () => { offline = true; refresh(); };
+    const wentOnline = () => { offline = false; refresh(); };
+    window.addEventListener('offline', wentOffline);
+    window.addEventListener('assalOffline', wentOffline);
+    window.addEventListener('online', wentOnline);
+    window.addEventListener('assalOnline', wentOnline);
+    window.addEventListener('storage', refresh);
+    try {
+      f.onValue(f.ref(f.db, '.info/serverTimeOffset'), snap => {
+        const value = snap.val();
+        offset = typeof value === 'number' && Number.isFinite(value) ? value : null;
+        refresh();
+      }, () => { offset = null; refresh(); });
+      f.onValue(f.ref(f.db, '.info/connected'), snap => {
+        const value = snap.val() === true;
+        if (value !== connected) { connected = value; epoch++; armedEpoch = -1; }
+        refresh();
+      }, () => { connected = false; epoch++; armedEpoch = -1; refresh(); });
+    } catch (_) { connected = false; refresh(); }
+  }
+  return {readyDevice};
+})();
+
 // تسجيل الزيارة في Firebase
 async function registerVisitInFirebase() {
   if (!window.firebaseDB || !window.firebaseDB.db) return;
@@ -22162,12 +22276,13 @@ async function registerVisitInFirebase() {
     );
   } else {
     const old = deviceSnap.val() || {};
-    await set(deviceRef, {
-      ...old,
+    await window.firebaseDB.update(deviceRef, {
       lastSeen: now,
       ua: navigator.userAgent || old.ua || "unknown",
     });
   }
+
+  window.assalCustomerAppPresence?.readyDevice(deviceId);
 
   const dailyDeviceRef = ref(db, `dailyVisitors/${today}/${deviceId}`);
   const dailyDeviceSnap = await get(dailyDeviceRef);
@@ -39941,7 +40056,7 @@ function closeContactModal() {
      "simi_subscription_cta"   => صورة images/simi2.png مع زر الاشتراك
 
    ========================================================== */
-const AD_CHOICE = "off"; // الإعلان الجديد مع زر الاشتراك؛ الصورة فقط: "simi_subscription"؛ الإيقاف: "off"
+const AD_CHOICE = "simi_subscription"; // الإعلان الجديد مع زر الاشتراك؛ الصورة فقط: "simi_subscription"؛ الإيقاف: "off"
 
 // خيارات اضافية (اختياري)
 const AD_DELAY_MS = 45; // بعد جاهزية بوابة التحديث: ظهور شبه فوري بدون قفزة بصرية
@@ -68329,7 +68444,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   const dayKey = t => {const d = new Date(Number(t)||Date.now()); return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();};
   function inboxTime(t){if(!t)return '';if(dayKey(t)===dayKey(Date.now()))return clock(t);const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);return dayKey(t)===dayKey(yesterday)?'أمس':new Date(t).toLocaleDateString('ar-IQ-u-nu-latn',{day:'numeric',month:'numeric'});}
   function dayText(t){const d = new Date(Number(t)||Date.now()),y=new Date(); if(dayKey(d)===dayKey(y))return 'اليوم'; y.setDate(y.getDate()-1);if(dayKey(d)===dayKey(y))return 'أمس';return d.toLocaleDateString('ar-IQ',{day:'numeric',month:'long',year:'numeric'});}
-  const S = {open:false,role:'',identity:'',me:'',root:null,els:{},data:{},groups:[],groupMap:new Map(),active:'',inbox:false,profile:null,profileReady:false,extra:{},loaded:false,error:'',connected:null,unsub:null,connUnsub:null,openSeq:0,renderFrame:0,filter:'all',search:'',drafts:{},pending:{},reply:null,editing:null,photo:'',rows:new Map(),days:new Map(),listRows:new Map(),limit:80,lastCount:0,shownKeys:new Set(),forceBottom:false,unseen:0,typingStops:[],typingState:{},typingSignature:'',typingTimer:null,typingPulse:null,typingWrite:0,ownTypingPath:'',session:uid('S'),io:null,readQueue:{},readInFlight:new Set(),readTimer:null,targetRequest:'',targetMessage:'',query:'',matches:[],matchIndex:-1,menuKey:'',lastFocus:null,dialogResolve:null,contactFocus:null,returnFromCommunity:false,toastTimer:null,saveTimer:null,photoBusy:false,serverOffset:0,offsetUnsub:null,presence:{},presenceUnsub:null,presenceReady:false,presenceTimer:null,activityReady:false,activityPath:'',activityHeartbeat:null,activityGeneration:0,ownTypingPaths:[],typingGeneration:0,directoryStop:null,directoryData:[],directoryLoaded:false,directoryError:false,directoryQuery:'',directoryFocus:null,imageScale:1,imageX:0,imageY:0,imageWidth:0,imageHeight:0,imagePointers:new Map(),imageFocus:null,imageTap:null,imageLastTap:null};
+  const S = {open:false,role:'',identity:'',me:'',root:null,els:{},data:{},groups:[],groupMap:new Map(),active:'',inbox:false,profile:null,profileReady:false,extra:{},loaded:false,error:'',connected:null,unsub:null,connUnsub:null,openSeq:0,renderFrame:0,filter:'all',search:'',drafts:{},pending:{},reply:null,editing:null,photo:'',rows:new Map(),days:new Map(),listRows:new Map(),limit:80,lastCount:0,shownKeys:new Set(),forceBottom:false,unseen:0,typingStops:[],typingState:{},typingSignature:'',typingTimer:null,typingPulse:null,typingWrite:0,ownTypingPath:'',session:uid('S'),io:null,readQueue:{},readInFlight:new Set(),readTimer:null,targetRequest:'',targetMessage:'',query:'',matches:[],matchIndex:-1,menuKey:'',lastFocus:null,dialogResolve:null,contactFocus:null,returnFromCommunity:false,toastTimer:null,saveTimer:null,photoBusy:false,serverOffset:0,offsetUnsub:null,presence:{},presenceUnsub:null,presenceReady:false,presenceTimer:null,peerAppId:'',peerAppData:null,peerAppReady:false,peerAppError:false,peerAppUnsub:null,peerAppGeneration:0,activityReady:false,activityPath:'',activityHeartbeat:null,activityGeneration:0,ownTypingPaths:[],typingGeneration:0,directoryStop:null,directoryData:[],directoryLoaded:false,directoryError:false,directoryQuery:'',directoryFocus:null,imageScale:1,imageX:0,imageY:0,imageWidth:0,imageHeight:0,imagePointers:new Map(),imageFocus:null,imageTap:null,imageLastTap:null};
   const $ = key => S.els[key];
   const currentGroup = () => S.groupMap.get(S.active);
   const currentMessages = () => currentGroup() ? currentGroup().messages : [];
@@ -68492,7 +68607,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   function selectGroup(key){
     if(!S.groupMap.has(key))return;
     S.inbox=false;
-    if(key!==S.active){saveDraft();clearTyping();stopTypingListeners();S.active=key;S.rows.clear();S.days.clear();S.shownKeys.clear();S.limit=80;S.lastCount=0;S.forceBottom=true;S.query='';S.matches=[];$('chatSearchInput').value='';$('chatSearch').hidden=true;$('messages').replaceChildren();S.io?.disconnect();S.editing=null;const draft=S.drafts[key]||{};$('input').value=draft.text||'';S.reply=draft.reply||null;S.photo=draft.photo||'';renderPreview();resizeInput();}
+    if(key!==S.active){saveDraft();clearTyping();stopTypingListeners();stopPeerAppPresence();S.active=key;S.rows.clear();S.days.clear();S.shownKeys.clear();S.limit=80;S.lastCount=0;S.forceBottom=true;S.query='';S.matches=[];$('chatSearchInput').value='';$('chatSearch').hidden=true;$('messages').replaceChildren();S.io?.disconnect();S.editing=null;const draft=S.drafts[key]||{};$('input').value=draft.text||'';S.reply=draft.reply||null;S.photo=draft.photo||'';renderPreview();resizeInput();}
     $('app').classList.add('has-chat');$('welcome').hidden=true;$('conversation').hidden=false;hideMenu();clearNew();renderList();renderConversation();updateSend();
   }
   function bodyHTML(msg){
@@ -68560,9 +68675,52 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   const activityBucket = g => 'materialRequestTyping/'+safeKey('customer_'+(g?.deviceId||g?.key||S.me));
   function activityRecords(){return Object.values(S.typingState).flatMap(bucket=>Object.values(bucket||{})).filter(t=>t&&typeof t==='object');}
   function peerTyping(){return S.connected===true&&activityRecords().some(t=>t.kind!=='presence'&&(t.role||t.senderRole)!==S.role&&['admin','customer'].includes(t.role||t.senderRole)&&t.typing!==false&&Number(t.until||((t.at||t.timestamp||0)+7000))>serverNow());}
+  function stopPeerAppPresence(){
+    S.peerAppGeneration++;
+    try{S.peerAppUnsub?.();}catch(_){}
+    S.peerAppUnsub=null;S.peerAppId='';S.peerAppData=null;S.peerAppReady=false;S.peerAppError=false;
+  }
+  function syncPeerAppPresence(){
+    const g=currentGroup(),id=S.open&&S.role==='admin'&&!S.inbox?String(g?.deviceId||''):'';
+    if(!/^(?:DEV-[A-Z0-9-]{7,24}|AND-[A-F0-9]{32})$/.test(id)){if(S.peerAppId)stopPeerAppPresence();return;}
+    if(id===S.peerAppId)return;
+    stopPeerAppPresence();S.peerAppId=id;
+    const generation=S.peerAppGeneration,f=fb();
+    const same=()=>S.open&&S.role==='admin'&&S.peerAppId===id&&generation===S.peerAppGeneration&&currentGroup()?.deviceId===id;
+    try{S.peerAppUnsub=f.onValue(f.ref(f.db,'devices/'+id+'/appActivity'),snap=>{
+      if(!same())return;
+      const value=snap.val();S.peerAppData=value&&value.v===1?value:null;S.peerAppReady=true;S.peerAppError=false;renderPresence();
+    },()=>{if(!same())return;S.peerAppData=null;S.peerAppReady=true;S.peerAppError=true;renderPresence();});}
+    catch(_){S.peerAppReady=true;S.peerAppError=true;}
+  }
+  function peerAppTime(g){
+    if(S.role!=='admin'||S.peerAppId!==g?.deviceId||!S.peerAppReady)return 0;
+    const value=Number(S.peerAppData?.lastSeen),now=serverNow();
+    return Number.isFinite(value)&&value>0&&value<=now+15000?Math.min(value,now):0;
+  }
+  function peerAppOnline(g){
+    if(S.role!=='admin'||S.peerAppId!==g?.deviceId||!S.peerAppReady||!S.peerAppData)return null;
+    const now=serverNow();
+    return Object.values(S.peerAppData.sessions||{}).some(entry=>entry?.online===true&&entry.foreground===true&&Number(entry.lastSeen)>now-70000&&Number(entry.lastSeen)<=now+15000);
+  }
+  function peerAppExactTime(time){
+    return new Date(time).toLocaleString('ar-IQ-u-nu-latn',{timeZone:'Asia/Baghdad',year:'numeric',month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'});
+  }
+  function peerAppLastSeen(time){
+    const age=Math.max(0,serverNow()-time),minutes=Math.floor(age/60000),hours=Math.floor(age/3600000);
+    if(minutes<1)return 'آخر ظهور قبل لحظات';
+    if(minutes<60)return 'آخر ظهور قبل '+(minutes===1?'دقيقة':minutes===2?'دقيقتين':minutes+' '+(minutes<=10?'دقائق':'دقيقة'));
+    if(hours<24)return 'آخر ظهور قبل '+(hours===1?'ساعة':hours===2?'ساعتين':hours+' '+(hours<=10?'ساعات':'ساعة'));
+    return 'آخر ظهور '+peerAppExactTime(time);
+  }
   function peerOnline(g){
     if(S.connected!==true||!g)return false;
     const now=serverNow();
+    if(S.role==='admin'&&g.key===S.active&&!S.inbox){
+      const appOnline=peerAppOnline(g);
+      if(appOnline!==null)return appOnline;
+      return activityRecords().some(t=>t.kind==='presence'&&t.role==='customer'&&t.online===true&&Number(t.until)>now);
+    }
     if(g.key===S.active&&activityRecords().some(t=>t.kind==='presence'&&t.role!==S.role&&t.online===true&&Number(t.until)>now))return true;
     return S.role==='admin'&&Object.values(S.presence).some(p=>p&&p.deviceId===g.deviceId&&p.online===true&&Number(p.lastSeen)>now-70000&&Number(p.lastSeen)<now+15000);
   }
@@ -68573,10 +68731,13 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   }
   function renderTyping(){
     if(!S.open||!$('subtitle')||!currentGroup())return;
+    syncPeerAppPresence();
     const wasBottom=nearBottom(),typing=peerTyping(),online=peerOnline(currentGroup()),el=$('subtitle'),changed=$('typingLine').hidden===typing;
+    const lastSeen=peerAppTime(currentGroup());
+    el.title=lastSeen?'آخر ظهور: '+peerAppExactTime(lastSeen):'';
     el.classList.toggle('is-typing',typing);el.classList.toggle('is-online',online&&!typing);
     $('avatar').classList.toggle('is-online',online);
-    const value=typing?'<span class="am-typing-dots"><i></i><i></i><i></i></span>يكتب الآن…':online?'<span class="am-online-dot"></span>متصل الآن':S.connected===false?'بانتظار اتصالك…':currentGroup().archived?'محادثة مؤرشفة':(S.role==='admin'&&S.presenceReady||S.activityReady)?'غير متصل الآن':'محادثة خاصة مع '+(S.role==='admin'?'الزبون':'فريق عسل');
+    const value=typing?'<span class="am-typing-dots"><i></i><i></i><i></i></span>يكتب الآن…':online?'<span class="am-online-dot"></span>متصل الآن':S.connected===false?'بانتظار اتصالك…':lastSeen?esc(peerAppLastSeen(lastSeen)):S.role==='admin'&&S.peerAppId?(S.peerAppReady?'آخر ظهور غير متوفر':'جارٍ جلب آخر ظهور…'):currentGroup().archived?'محادثة مؤرشفة':(S.role==='admin'&&S.presenceReady||S.activityReady)?'غير متصل الآن':'محادثة خاصة مع '+(S.role==='admin'?'الزبون':'فريق عسل');
     if(el.innerHTML!==value)el.innerHTML=value;
     $('typingLine').hidden=!typing;if(changed&&wasBottom)requestAnimationFrame(scrollBottom);
   }
@@ -68644,9 +68805,9 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     S.unsub=f.onValue(f.ref(f.db,'materialRequests'),snap=>{if(identity!==S.identity)return;S.data=snap.exists()?snap.val()||{}:{};S.loaded=true;S.error='';Object.entries(S.pending).forEach(([key,p])=>{const stored=S.data[p.requestId]?.messages?.[p.msg.id];if(stored&&p.status==='sent')delete S.pending[key];});scheduleRender();},err=>{if(identity!==S.identity)return;S.error='تعذّر تحميل المحادثات. حاول مرة ثانية.';S.loaded=false;console.warn('ASSAL Messenger stream:',err);scheduleRender();});
   }
   function renderConnection(){if(!$('connection'))return;$('connection').dataset.connected=String(S.connected===true);$('connectionText').textContent=S.connected===true?'مكتب عسل':S.connected===false?'بانتظار الاتصال…':'جارٍ الاتصال…';$('connection').title=S.connected===true?'متصل بخدمة المحادثات':$('connectionText').textContent;}
-  function resetIdentity(){clearInterval(S.presenceTimer);S.presenceTimer=null;S.directoryStop?.();S.directoryStop=null;S.directoryData=[];S.directoryLoaded=false;S.presenceUnsub?.();S.presenceUnsub=null;S.presence={};S.presenceReady=false;S.offsetUnsub?.();S.offsetUnsub=null;S.serverOffset=0;if(S.unsub)S.unsub();if(S.connUnsub)S.connUnsub();S.unsub=S.connUnsub=null;clearTyping();stopTypingListeners();S.io?.disconnect();S.io=null;S.data={};S.extra={};S.groups=[];S.groupMap.clear();S.active='';S.inbox=false;S.rows.clear();S.days.clear();S.listRows.clear();S.loaded=false;S.profile=null;S.profileReady=false;S.connected=null;S.pending={};S.readQueue={};S.readInFlight.clear();}
+  function resetIdentity(){stopPeerAppPresence();clearInterval(S.presenceTimer);S.presenceTimer=null;S.directoryStop?.();S.directoryStop=null;S.directoryData=[];S.directoryLoaded=false;S.presenceUnsub?.();S.presenceUnsub=null;S.presence={};S.presenceReady=false;S.offsetUnsub?.();S.offsetUnsub=null;S.serverOffset=0;if(S.unsub)S.unsub();if(S.connUnsub)S.connUnsub();S.unsub=S.connUnsub=null;clearTyping();stopTypingListeners();S.io?.disconnect();S.io=null;S.data={};S.extra={};S.groups=[];S.groupMap.clear();S.active='';S.inbox=false;S.rows.clear();S.days.clear();S.listRows.clear();S.loaded=false;S.profile=null;S.profileReady=false;S.connected=null;S.pending={};S.readQueue={};S.readInFlight.clear();}
   function resetInboxOnEntry(resetFilters=true){
-    saveDraft();clearTyping();stopTypingListeners();hideMenu();S.io?.disconnect();
+    saveDraft();clearTyping();stopTypingListeners();stopPeerAppPresence();hideMenu();S.io?.disconnect();
     S.active='';S.inbox=true;S.targetRequest='';S.targetMessage='';S.editing=null;S.reply=null;S.photo='';
     S.rows.clear();S.days.clear();S.shownKeys.clear();S.limit=80;S.lastCount=0;S.forceBottom=false;
     S.query='';S.matches=[];S.matchIndex=-1;
@@ -68674,7 +68835,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     }
     await stream;if(seq!==S.openSeq)return false;if(options.deviceId){buildGroups();const g=S.groups.find(g=>g.deviceId===options.deviceId);if(g)selectGroup(g.key);}scheduleRender();return true;
   }
-  function close(){if(!S.open)return;closeImage();closeDirectory();saveDraft();saveLocal();clearTyping();stopTypingListeners();hideMenu();S.open=false;S.openSeq++;if(S.root){S.root.classList.remove('show');S.root.setAttribute('aria-hidden','true');}if(S.dialogResolve){S.dialogResolve(false);S.dialogResolve=null;}$('dialog').hidden=true;S.contactFocus=null;$('imageView').hidden=true;lock();try{if(S.lastFocus?.isConnected&&!S.lastFocus.matches('input,textarea'))S.lastFocus.focus({preventScroll:true});}catch(_){}}
+  function close(){if(!S.open)return;closeImage();closeDirectory();saveDraft();saveLocal();clearTyping();stopTypingListeners();stopPeerAppPresence();hideMenu();S.open=false;S.openSeq++;if(S.root){S.root.classList.remove('show');S.root.setAttribute('aria-hidden','true');}if(S.dialogResolve){S.dialogResolve(false);S.dialogResolve=null;}$('dialog').hidden=true;S.contactFocus=null;$('imageView').hidden=true;lock();try{if(S.lastFocus?.isConnected&&!S.lastFocus.matches('input,textarea'))S.lastFocus.focus({preventScroll:true});}catch(_){}}
 
   function createPending(text,voiceMeta){const g=currentGroup();let req=requestForGroup(g)||Object.values(S.pending).find(p=>p.groupKey===g.key)?.meta;const now=Date.now(),isFirst=!req;if(!req)req={id:uid('REQ'),deviceId:g.deviceId,name:S.role==='customer'?S.profile.name:g.name,phone:S.role==='customer'?S.profile.phone:g.phone,address:S.role==='customer'?S.profile.address:g.address,item:text||'صورة',createdAt:now,updatedAt:now,status:'processing',customerDeleted:false,customerArchived:false,archivedForAdmin:false,requestKind:'private_chat'};const id=uid('MSG');const msg={id,senderRole:S.role,senderName:S.role==='admin'?branch():S.profile.name,branchLabel:S.role==='admin'?branch():'',text,createdAt:now,seenByAdmin:S.role==='admin',seenByCustomer:S.role==='customer'};if(voiceMeta&&voiceMeta.id)msg.voice={id:voiceMeta.id,seconds:voiceMeta.seconds,bytes:voiceMeta.bytes,mime:voiceMeta.mime};if(S.photo)msg.image=S.photo;if(S.reply)msg.replyTo={id:S.reply.id,requestId:S.reply.requestId,senderName:S.reply.senderName,text:S.reply.text.slice(0,220)};return {key:fullKey(req.id,id),requestId:req.id,groupKey:g.key,meta:{...req,messages:undefined},msg,status:'sending',isFirst};}
   async function notifySent(p){if(typeof window.queuePushNotificationEvent!=='function')return;const adminSender=p.msg.senderRole==='admin';let payload={requestId:p.requestId,messageId:p.msg.id,requestKind:'private_chat',targetRole:adminSender?'customer':'admin',targetDeviceId:adminSender?p.meta.deviceId:'',customerName:p.meta.name,title:'رسالة جديدة',body:p.msg.text||(p.msg.image?'صورة':'رسالة'),senderName:p.msg.senderName,branchLabel:p.msg.branchLabel,data:{requestKind:'private_chat',requestId:p.requestId,messageId:p.msg.id,senderDisplayName:p.msg.senderName,senderName:p.msg.senderName,realCustomerName:p.meta.name}};if(!adminSender&&typeof window.buildAdminCustomerNotificationPayload==='function'){const info=window.buildAdminCustomerNotificationPayload({customerName:p.meta.name,customerPhone:p.meta.phone,deviceId:p.meta.deviceId,body:payload.body,extraData:payload.data});payload={...payload,...info,data:{...payload.data,...info?.data}};}try{const eventType=!adminSender&&p.isFirst?'customer_private_message':'customer_private_reply';if(p.isFirst)payload.item=p.meta.item||payload.body;const queued=await window.queuePushNotificationEvent(eventType,payload);if(queued===null)throw Error('notification-not-queued');}catch(err){console.warn('ASSAL Messenger notification queue:',err);if(S.open)toast('الرسالة انرسلت، لكن تعذّر إرسال التنبيه الخارجي.');}}
