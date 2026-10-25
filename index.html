@@ -17603,6 +17603,7 @@ html.assal-viewport-transition body {
 
 <button class="header-btn header-cart-btn"
         id="customersAdminHeaderBtn"
+        hidden aria-hidden="true"
         type="button"
         title="الزبائن"
         aria-label="الزبائن"
@@ -25943,7 +25944,11 @@ window.__ASSAL_CUSTOMER_BLOCKED__ = false;
 function updateCustomersAdminHeaderBtn() {
   const btn = document.getElementById("customersAdminHeaderBtn");
   if (!btn) return;
-  btn.style.display = isAdminUser() ? "inline-flex" : "none";
+  const allowed = isAdminUser() === true;
+  btn.hidden = !allowed;
+  btn.setAttribute("aria-hidden", String(!allowed));
+  // The tools rail uses display !important; enforce the permission at equal priority.
+  btn.style.setProperty("display", allowed ? "inline-flex" : "none", "important");
 }
 
 function normalizeCustomersAdminSearchText(value) {
@@ -65376,8 +65381,20 @@ html.low-end-device .header-buttons > .assal-static-header-btn{
     return total;
   }
 
+  function syncZeroToolBadges() {
+    const rail = byId(RAIL_ID);
+    if (!rail) return;
+    rail.querySelectorAll(".assal-tools-item .header-cart-badge").forEach((badge) => {
+      const hide = readBadgeNumber(badge) <= 0;
+      if (badge.classList.contains("assal-tool-zero-count") !== hide) {
+        badge.classList.toggle("assal-tool-zero-count", hide);
+      }
+    });
+  }
+
   function syncTotalBadge() {
     scheduled = false;
+    syncZeroToolBadges();
     const badge = ensureTotalBadge();
     if (!badge) return;
     const total = calculateTotal();
@@ -71613,8 +71630,31 @@ body.modal-lock.assal-accounts-search-editable{touch-action:pan-y!important}
 @media(prefers-reduced-motion:reduce){.assal-wa-voice-bar,.assal-wa-voice-bar .assal-trash-lid,.assal-wa-voice-bar.is-cancel-drag .assal-wa-voice-send{transition:none!important}}
 </style>
 
-<style>
-.news-bar:not(.assal-admin-compat-active) #newsTicker {
-  animation-duration: 180s !important;
+<style id="assal-customer-permission-tools-badge-final">
+/* Fail closed during startup; preserve the existing isAdminUser permission model. */
+.header .header-buttons #customersAdminHeaderBtn[hidden]{display:none!important}
+/* Match internal tool badges only while the tools rail is open. */
+.header .header-buttons .assal-header-tools-hub.is-open #assalHeaderToolsLauncher #assalHeaderToolsTotalBadge{
+ top:1px!important;right:-4px!important;
+ background:linear-gradient(135deg,#1f2937,#111827)!important;
+ color:#fff!important;border:1px solid rgba(255,255,255,.24)!important;
+ border-radius:999px!important;box-sizing:border-box!important;
+ box-shadow:0 0 0 2px rgba(8,12,22,.92),0 4px 10px rgba(0,0,0,.3)!important;
+ min-width:17px!important;height:17px!important;padding:0 4px!important;
+ font-size:10px!important;line-height:1!important;transform:none!important;
+}
+@media(max-width:768px){
+ .header .header-buttons .assal-header-tools-hub.is-open #assalHeaderToolsLauncher #assalHeaderToolsTotalBadge{
+  min-width:16px!important;height:16px!important;font-size:9px!important;
+ }
+}
+/* Preserve the user's adopted news slowdown; JS's 60s shorthand cannot override it. */
+.news-bar:not(.assal-admin-compat-active) #newsTicker{animation-duration:180s!important}
+</style>
+
+<style id="assal-tools-hide-zero-badges-final">
+/* Only badges inside the tools rail; never hide the tool buttons. */
+#assalHeaderToolsRail .assal-tools-item .header-cart-badge.assal-tool-zero-count {
+  display: none !important;
 }
 </style>
