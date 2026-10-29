@@ -18848,6 +18848,10 @@ import {
   runTransaction,
   onDisconnect,
   onValue,
+  query,
+  orderByChild,
+  equalTo,
+  limitToLast,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import {
   getMessaging,
@@ -18897,6 +18901,10 @@ window.firebaseDB = {
   runTransaction,
   onDisconnect,
   onValue,
+  query,
+  orderByChild,
+  equalTo,
+  limitToLast,
 };
 
 /* ===== ASSAL SECURE LOGIN / FIREBASE AUTH =====
@@ -23772,9 +23780,9 @@ function startAssalCommunityRealtime() {
   )
     return;
   stopAssalCommunityRealtime();
-  const { db, ref, onValue } = window.firebaseDB;
+  const { db, ref, onValue, query, orderByChild, limitToLast } = window.firebaseDB;
   assalCommunityUnsub = onValue(
-    ref(db, ASSAL_COMMUNITY_MESSAGES_PATH),
+    query(ref(db, ASSAL_COMMUNITY_MESSAGES_PATH), orderByChild('createdAt'), limitToLast(120)),
     (snap) => {
       const raw = snap.exists() ? snap.val() || {} : {};
       assalCommunityMessages = Object.entries(raw)
@@ -28372,7 +28380,7 @@ function buildOfferPriceHtml(originalPriceRaw, discountPriceRaw) {
   );
   if (!hasOriginalPrice) return "<p>غير متوفر</p>";
 
-  const originalFormatted = formatOfferPriceValue(originalPriceRaw);
+  const originalFormatted = escapeHtml(formatOfferPriceValue(originalPriceRaw));
   const hasDiscountPrice = !(
     discountPriceRaw === undefined ||
     discountPriceRaw === null ||
@@ -28383,7 +28391,7 @@ function buildOfferPriceHtml(originalPriceRaw, discountPriceRaw) {
     return `<p>${originalFormatted} د.ع</p>`;
   }
 
-  const discountFormatted = formatOfferPriceValue(discountPriceRaw);
+  const discountFormatted = escapeHtml(formatOfferPriceValue(discountPriceRaw));
 
   if (isLightOfferModeActive()) {
     return (
@@ -28634,7 +28642,7 @@ function renderOffers(list) {
       `
                         ` +
       '<div class="offer-title">' +
-      `${name}` +
+      `${escapeHtml(name)}` +
       "</div>" +
       `
                         ` +
@@ -28642,7 +28650,7 @@ function renderOffers(list) {
       `
                             ` +
       '<span class="offer-tag">' +
-      `${category}` +
+      `${escapeHtml(category)}` +
       "</span>" +
       `
                             ${saving > 0 ? `<span class="offer-save">وفر ${savingFormatted} د.ع</span>` : ``}
@@ -31730,7 +31738,7 @@ async function loadNewItems() {
       `
             ` +
       '<div class="category-circle">' +
-      `${item.category}` +
+      `${escapeHtml(item.category)}` +
       "</div>" +
       `
             ` +
@@ -31745,12 +31753,12 @@ async function loadNewItems() {
       "<h4>" +
       `<i class="${iconClass}">` +
       "</i>" +
-      ` ${item["Item Name"] || item["Item"]}` +
+      ` ${escapeHtml(item["Item Name"] || item["Item"])}` +
       "</h4>" +
       `
                 ` +
       "<p>" +
-      `${item["Price"].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} د.ع` +
+      `${escapeHtml(String(item["Price"] ?? "").replace(/\B(?=(\d{3})+(?!\d))/g, ","))} د.ع` +
       "</p>" +
       `
             ` +
@@ -35061,11 +35069,11 @@ function displayResults(results) {
         `
                     ${miniActions.length ? `<div class="result-card-mini-actions">${miniActions.join("")}</div>` : ""}
                     ` +
-        `<img class="${imgClass}" src="${imgSrc}" loading="lazy" decoding="async" data-assal-cache-src="${imgSrc}" data-assal-fallback-src="${imgFallbackSrc}" onload="try{if(this.classList.contains('assal-phone-model-image')&&window.assalTunePhoneImageCrop)window.assalTunePhoneImageCrop(this,'card');if(window.assalCacheImageUrl)window.assalCacheImageUrl(this.getAttribute('data-assal-cache-src')||this.src)}catch(_){}" onerror="try{if(window.assalUseCachedImage)window.assalUseCachedImage(this);else this.src=(this.getAttribute('data-assal-fallback-src')||'images/default.png')}catch(_){this.src=(this.getAttribute('data-assal-fallback-src')||'images/default.png')}" alt="Item Image">` +
+        `<img class="${imgClass}" src="${escapeHtml(imgSrc)}" loading="lazy" decoding="async" data-assal-cache-src="${escapeHtml(imgSrc)}" data-assal-fallback-src="${escapeHtml(imgFallbackSrc)}" onload="try{if(this.classList.contains('assal-phone-model-image')&&window.assalTunePhoneImageCrop)window.assalTunePhoneImageCrop(this,'card');if(window.assalCacheImageUrl)window.assalCacheImageUrl(this.getAttribute('data-assal-cache-src')||this.src)}catch(_){}" onerror="try{if(window.assalUseCachedImage)window.assalUseCachedImage(this);else this.src=(this.getAttribute('data-assal-fallback-src')||'images/default.png')}catch(_){this.src=(this.getAttribute('data-assal-fallback-src')||'images/default.png')}" alt="Item Image">` +
         `
                     ` +
         "<h4>" +
-        `${itemName}` +
+        `${escapeHtml(itemName)}` +
         "</h4>" +
         `
                     ${priceHtml}
@@ -38301,12 +38309,9 @@ function moneyIQD(n) {
 }
 
 function escapeHtml(s) {
-  return String(s ?? "")
-    .replaceAll("&", "&")
-    .replaceAll("<", "<")
-    .replaceAll(">", ">")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+  return String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  }[c]));
 }
 
 // إنشاء قالب الفاتورة
@@ -53841,7 +53846,7 @@ html body footer {
     updatePresence();
     try {
       unsubMessages = f.onValue(
-        f.ref(f.db, PATH_MESSAGES),
+        f.query(f.ref(f.db, PATH_MESSAGES), f.orderByChild('createdAt'), f.limitToLast(MAX_RENDER_MESSAGES)),
         (snap) => {
           const raw = snap.exists() ? snap.val() || {} : {};
           messages = Object.entries(raw)
@@ -54727,7 +54732,7 @@ html body footer {
     if (now() - lastSendAt < SEND_COOLDOWN_MS) return false;
     const user = await getProfile();
     if (await checkMuted() || isCommunityInputLocked()) return false;
-    const id = "CS-" + now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2,7).toUpperCase();
+    const id = "CS-VOICE-" + meta.id;
     const payload = {id,text:"",imageData:"",voice:{id:meta.id,seconds:meta.seconds,bytes:meta.bytes,mime:meta.mime},
       senderRole:user.role,senderName:user.name,customerPhone:user.phone||"",deviceId:user.deviceId,
       createdAt:now(),updatedAt:now(),replyTo:selectedReply?{id:selectedReply.id,senderName:selectedReply.senderName||"",text:selectedReply.text||"",createdAt:selectedReply.createdAt||0}:null};
@@ -54741,7 +54746,7 @@ html body footer {
         const body=(user.name||"زبون")+": أرسل رسالة صوتية";
         const event={title:"مجتمع عسل",body,customerName:user.name,item:"تسجيل صوتي",data:{communityMessageId:id,screen:"assal_community"}};
         await queuePushNotificationEvent("customer_space_message",{...event,targetRole:"admin"});
-        await queuePushNotificationEvent("customer_space_message",{...event,targetRole:"customer"});
+        if (!settings?.notificationsMuted) await queuePushNotificationEvent("customer_space_message",{...event,targetRole:"customer"});
       }
     }catch(e){console.warn("ASSAL voice notification:",e)}
     return true;
@@ -55260,6 +55265,7 @@ html body footer {
         imageData: "",
         pinned: false,
       });
+      if(msg.voice&&window.assalReleaseVoiceClip)try{await window.assalReleaseVoiceClip(msg.voice);}catch(err){console.warn('ASSAL deleted voice cleanup:',err);}
       toast("success", "تم حذف الرسالة");
     } catch (e) {
       console.error("HARD delete community:", e);
@@ -68847,7 +68853,9 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     if(S.unsub&&!force)return;const identity=S.identity;const f=await waitFirebase();if(identity!==S.identity)return;if(S.unsub)S.unsub();if(S.connUnsub)S.connUnsub();S.unsub=null;S.connUnsub=null;
     S.connUnsub=f.onValue(f.ref(f.db,'.info/connected'),snap=>{S.connected=!!snap.val();renderConnection();if(S.connected){scheduleReadVisible();startActivityPresence();if(clean($('input')?.value)&&document.activeElement===$('input'))writeTyping(true);}else{clearTyping();stopActivityPresence();}renderPresence();},()=>{S.connected=null;renderConnection();});
     if(!S.offsetUnsub)S.offsetUnsub=f.onValue(f.ref(f.db,'.info/serverTimeOffset'),snap=>{const offset=Number(snap.val())||0;if(offset!==S.serverOffset){S.serverOffset=offset;startActivityPresence();if(S.open&&document.activeElement===$('input')&&clean($('input').value)){S.typingWrite=0;writeTyping(true);}renderPresence();}},()=>{});startPresenceStream();
-    S.unsub=f.onValue(f.ref(f.db,'materialRequests'),snap=>{if(identity!==S.identity)return;S.data=snap.exists()?snap.val()||{}:{};S.loaded=true;S.error='';Object.entries(S.pending).forEach(([key,p])=>{const stored=S.data[p.requestId]?.messages?.[p.msg.id];if(stored&&p.status==='sent')delete S.pending[key];});scheduleRender();},err=>{if(identity!==S.identity)return;S.error='تعذّر تحميل المحادثات. حاول مرة ثانية.';S.loaded=false;console.warn('ASSAL Messenger stream:',err);scheduleRender();});
+    const requestsRef=f.ref(f.db,'materialRequests');
+    const scopedRequests=S.role==='admin'?requestsRef:f.query(requestsRef,f.orderByChild('deviceId'),f.equalTo(S.me));
+    S.unsub=f.onValue(scopedRequests,snap=>{if(identity!==S.identity)return;S.data=snap.exists()?snap.val()||{}:{};S.loaded=true;S.error='';Object.entries(S.pending).forEach(([key,p])=>{const stored=S.data[p.requestId]?.messages?.[p.msg.id];if(stored&&p.status==='sent')delete S.pending[key];});scheduleRender();},err=>{if(identity!==S.identity)return;S.error='تعذّر تحميل المحادثات. حاول مرة ثانية.';S.loaded=false;console.warn('ASSAL Messenger stream:',err);scheduleRender();});
   }
   function renderConnection(){if(!$('connection'))return;$('connection').dataset.connected=String(S.connected===true);$('connectionText').textContent=S.connected===true?'مكتب عسل':S.connected===false?'بانتظار الاتصال…':'جارٍ الاتصال…';$('connection').title=S.connected===true?'متصل بخدمة المحادثات':$('connectionText').textContent;}
   function resetIdentity(){stopPeerAppPresence();clearInterval(S.presenceTimer);S.presenceTimer=null;S.directoryStop?.();S.directoryStop=null;S.directoryData=[];S.directoryLoaded=false;S.presenceUnsub?.();S.presenceUnsub=null;S.presence={};S.presenceReady=false;S.offsetUnsub?.();S.offsetUnsub=null;S.serverOffset=0;if(S.unsub)S.unsub();if(S.connUnsub)S.connUnsub();S.unsub=S.connUnsub=null;clearTyping();stopTypingListeners();S.io?.disconnect();S.io=null;S.data={};S.extra={};S.groups=[];S.groupMap.clear();S.active='';S.inbox=false;S.rows.clear();S.days.clear();S.listRows.clear();S.loaded=false;S.profile=null;S.profileReady=false;S.connected=null;S.pending={};S.readQueue={};S.readInFlight.clear();}
@@ -68937,7 +68945,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     $('dialog').innerHTML='<div class="am-dialog am-contact-card" role="dialog" aria-modal="true" aria-label="'+title+'"><div class="am-contact-top"><span>'+title+'</span><button class="am-icon" data-action="dialog-cancel" aria-label="إغلاق بيانات المحادثة">'+svg('close')+'</button></div><div class="am-contact-hero"><span class="am-avatar" data-tone="'+avatarTone(g.deviceId||g.key)+'">'+(isAdmin?portrait(g.deviceId||g.key):svg('chat'))+'</span><h4>'+esc(name)+'</h4><span class="am-contact-caption">'+svg('chat')+'محادثات مكتب عسل</span></div>'+details+'<button class="am-contact-done" data-action="dialog-cancel">رجوع للمحادثة</button></div>';
     $('dialog').hidden=false;$('dialog').querySelector('[data-action="dialog-cancel"]').focus({preventScroll:true});
   }
-  async function deleteMessage(){const msg=findMessage(S.menuKey);if(!permissions(msg).delete)return;const ok=await confirmDialog('حذف الرسالة؟','راح تظهر مكانها عبارة «تم حذف الرسالة».','حذف',true);if(!ok||!allowed())return;const f=fb(),prefix='materialRequests/'+msg.requestId+'/messages/'+msg.id;try{await f.update(f.ref(f.db),{[prefix+'/text']:'',[prefix+'/image']:null,[prefix+'/replyTo']:null,[prefix+'/deletedAt']:Date.now(),[prefix+'/deletedBy']:S.role});}catch(_){toast('تعذّر حذف الرسالة.');}}
+  async function deleteMessage(){const msg=findMessage(S.menuKey);if(!permissions(msg).delete)return;const ok=await confirmDialog('حذف الرسالة؟','راح تظهر مكانها عبارة «تم حذف الرسالة».','حذف',true);if(!ok||!allowed())return;const f=fb(),prefix='materialRequests/'+msg.requestId+'/messages/'+msg.id;try{await f.update(f.ref(f.db),{[prefix+'/text']:'',[prefix+'/image']:null,[prefix+'/replyTo']:null,[prefix+'/deletedAt']:Date.now(),[prefix+'/deletedBy']:S.role});if(msg.voice&&window.assalReleaseVoiceClip)try{await window.assalReleaseVoiceClip(msg.voice);}catch(err){console.warn('ASSAL deleted voice cleanup:',err);}}catch(_){toast('تعذّر حذف الرسالة.');}}
   async function archiveGroup(){const g=currentGroup();if(!g)return;const value=!g.archived;const ok=await confirmDialog(value?'أرشفة المحادثة؟':'إرجاع المحادثة؟',value?'تبقى كل الرسائل محفوظة وتلكاها بالأرشيف. أي رسالة جديدة ترجعها للقائمة.':'راح ترجع المحادثة إلى القائمة الرئيسية.',value?'أرشفة':'إرجاع',false);if(!ok)return;const patch={};g.requests.forEach(req=>patch['materialRequests/'+req.id+'/'+(S.role==='admin'?'archivedForAdmin':'customerArchived')]=value);if(!Object.keys(patch).length)return;try{const f=fb();await f.update(f.ref(f.db),patch);toast(value?'تمت أرشفة المحادثة':'رجعت المحادثة للقائمة');}catch(_){toast('تعذّر تحديث الأرشيف.');}}
   async function copyMessage(){const msg=findMessage(S.menuKey);if(!msg?.text)return;try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(msg.text);else{const node=document.createElement('textarea');node.value=msg.text;node.style.cssText='position:fixed;opacity:0;pointer-events:none';S.root.append(node);node.select();if(!document.execCommand('copy'))throw Error('copy');node.remove();}toast('تم نسخ النص');}catch(_){toast('تعذّر النسخ. تكدر تحدد النص وتنسخه.');}}
   function jumpMessage(id,req){const msg=currentMessages().find(m=>m.id===id&&(!req||m.requestId===req));if(!msg){toast('الرسالة الأصلية غير متاحة.');return;}const index=currentMessages().findIndex(m=>m.key===msg.key);if(currentMessages().length-index>S.limit){S.limit=currentMessages().length-index+8;renderConversation();}const row=S.rows.get(msg.key);if(row){const box=$('messages');box.scrollTop+=row.getBoundingClientRect().top-box.getBoundingClientRect().top-box.clientHeight*.35;row.classList.remove('is-highlighted');requestAnimationFrame(()=>row.classList.add('is-highlighted'));setTimeout(()=>row.classList.remove('is-highlighted'),1700);}}
@@ -69992,7 +70000,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     return '<div class="assal-voice-bubble" dir="ltr" data-voice-id="'+safeString(meta.id)+'" data-voice-seconds="'+(Math.max(0,Number(meta.seconds)||0))+'"><span class="assal-voice-avatar">'+portrait+'<b>'+VOICE_ICON.mic+'</b></span><button type="button" class="assal-voice-play" data-assal-voice-play="'+safeString(meta.id)+'" title="تشغيل التسجيل" aria-label="تشغيل التسجيل">'+VOICE_ICON.play+'</button><div class="assal-voice-track"><div class="assal-voice-waveform" style="--voice-progress:0%"><span class="assal-voice-bars" aria-hidden="true">'+bars+'</span><input class="assal-voice-seek" type="range" min="0" max="1000" value="0" step="1" dir="ltr" aria-label="موضع تشغيل التسجيل"></div><span class="assal-voice-elapsed">'+clock(Math.floor(Number(meta.seconds)||0))+'</span></div></div>';
   };
   window.assalVoiceMarkup=(meta,sender)=>meta&&valid(meta.id)?infoHtml(meta,sender):'';
-  let state={session:0,phase:'idle',mode:'',target:'',stream:null,rec:null,blob:null,url:'',chunks:[],bytes:0,start:0,pauseStart:0,pausedMs:0,seconds:0,tick:0,bar:null,host:null,analyser:null,ctx:null,samples:null,wave:[],listen:null,busy:false,sendOnStop:false,overSize:false,watch:null,native:false};
+  let state={session:0,phase:'idle',mode:'',target:'',stream:null,rec:null,blob:null,url:'',chunks:[],bytes:0,start:0,pauseStart:0,pausedMs:0,seconds:0,tick:0,bar:null,host:null,analyser:null,ctx:null,samples:null,wave:[],listen:null,busy:false,sendOnStop:false,overSize:false,watch:null,native:false,delivery:null};
   let gesture=null,suppressClickUntil=0,player=null,playUrl='',playButton=null;
   function currentContext(mode){if(mode==='private'){const c=window.__ASSAL_PRIVATE_VOICE_CONTEXT__?.();return c?.open&&c?.ready?c.group:'';}return qs('#assalCommunityModal.show')?'community':'';}
   function ms(){return state.start?Math.max(0,Date.now()-state.start-state.pausedMs-(state.pauseStart?Date.now()-state.pauseStart:0)):0;}
@@ -70026,7 +70034,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   function stopLive(){stopTick();try{state.stream?.getTracks().forEach(t=>t.stop());}catch(_){}state.stream=null;
     try{state.ctx?.close();}catch(_){}state.ctx=null;state.analyser=null;state.samples=null;
   }
-  function cleanup(){stopLive();try{if(state.rec&&state.rec.state!=='inactive')state.rec.stop();}catch(_){}state.rec=null;
+  function cleanup(){const abandoned=state.delivery;state.delivery=null;if(abandoned&&!abandoned.inFlight&&!abandoned.mayBeReferenced)void releaseDelivery(abandoned);stopLive();try{if(state.rec&&state.rec.state!=='inactive')state.rec.stop();}catch(_){}state.rec=null;
     if(state.listen){try{state.listen.pause();state.listen.removeAttribute('src');state.listen.load();}catch(_){}state.listen=null;}
     if(state.url){URL.revokeObjectURL(state.url);state.url='';}state.blob=null;state.chunks=[];state.bytes=0;state.start=0;state.pauseStart=0;state.pausedMs=0;state.seconds=0;state.busy=false;state.sendOnStop=false;state.overSize=false;
   }
@@ -70070,7 +70078,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
       rec.ondataavailable=e=>{if(state.session!==session||!e.data?.size)return;state.chunks.push(e.data);state.bytes+=e.data.size;
         if(state.bytes>MAX_BYTES&&rec.state!=='inactive'){state.overSize=true;try{rec.stop();}catch(_){}}};
       rec.onerror=()=>{if(state.session!==session)return;state.overSize=true;hint('تعذّر التسجيل');try{if(rec.state!=='inactive')rec.stop();}catch(_){}};
-      rec.onstop=()=>{stopLive();if(state.session!==session)return;
+      rec.onstop=()=>{if(state.session!==session)return;stopLive();
         state.rec=null;const blob=new Blob(state.chunks,{type:rec.mimeType||selected||'audio/webm'});state.chunks=[];
         if(state.overSize||blob.size>MAX_BYTES){hint('الحجم تجاوز الحد؛ احذف وأعد التسجيل');state.phase='error';ui();return;}
         if(blob.size<900||state.seconds<1){hint('التسجيل قصير؛ احذف وأعد التسجيل');state.phase='error';ui();return;}
@@ -70140,26 +70148,83 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     try{state.rec.stop();}catch(_){close();}
   }
   async function asDataUrl(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(Error('فشل تجهيز التسجيل'));r.readAsDataURL(blob);});}
-  async function store(meta,blob){
-    const f=fdb(),clip=f.ref(f.db,VOICE_ROOT+'/'+meta.id),q=f.ref(f.db,QUOTA_PATH);let reserved=false;
-    try{const result=await f.runTransaction(q,current=>{const used=Number(current)||0;if(!Number.isFinite(used)||used<0||used+blob.size>MAX_GLOBAL_BYTES)return;return used+blob.size;},{applyLocally:false});
-      if(!result?.committed)throw Error('وصلت التسجيلات للحد الآمن المخصص للصوت.');reserved=true;
-      const data=await asDataUrl(blob);if(data.length>200000)throw Error('حجم التسجيل بعد التحويل أكبر من الحد الآمن.');
-      await f.set(clip,{data,mime:meta.mime,bytes:meta.bytes,seconds:meta.seconds,createdAt:Date.now()});return true;
-    }catch(err){if(reserved){try{await f.runTransaction(q,n=>Math.max(0,(Number(n)||0)-blob.size),{applyLocally:false});}catch(_){}}throw err;}
+  // A clip keeps its identity and quota reservation across retries.
+  // A failed/unknown message acknowledgement must never delete a potentially sent clip.
+  async function refundVoiceBytes(bytes){
+    const f=fdb();
+    await f.runTransaction(f.ref(f.db,QUOTA_PATH),n=>Math.max(0,(Number(n)||0)-bytes),{applyLocally:false});
+  }
+  async function releaseVoiceClip(meta){
+    if(!meta||!valid(meta.id))return false;
+    const f=fdb();let bytes=0;
+    const result=await f.runTransaction(f.ref(f.db,VOICE_ROOT+'/'+meta.id),clip=>{
+      bytes=0;
+      if(!clip||clip.releasedAt||!clip.data)return;
+      bytes=Math.max(0,Number(clip.bytes)||0);
+      // A tombstone gives concurrent deletions one winner, without reading other clips.
+      return {releasedAt:Date.now(),bytes:0};
+    },{applyLocally:false});
+    if(result?.committed&&bytes)await refundVoiceBytes(bytes);
+    return !!result?.committed;
+  }
+  window.assalReleaseVoiceClip=releaseVoiceClip;
+  async function releaseDelivery(delivery){
+    if(!delivery||delivery.released||delivery.mayBeReferenced)return;
+    delivery.released=true;
+    try{
+      if(delivery.reserved){
+        const f=fdb(),snapshot=await f.get(f.ref(f.db,VOICE_ROOT+'/'+delivery.meta.id));
+        if(snapshot.exists())await releaseVoiceClip(delivery.meta);
+        else await refundVoiceBytes(delivery.blob.size);
+      }
+    }catch(err){console.warn('ASSAL voice cleanup:',err);}
+  }
+  async function store(delivery){
+    if(delivery.stored)return;
+    const f=fdb(),blob=delivery.blob,meta=delivery.meta;
+    const data=await asDataUrl(blob);
+    if(data.length>200000)throw Error('حجم التسجيل بعد التحويل أكبر من الحد الآمن.');
+    if(!delivery.reserved){
+      const result=await f.runTransaction(f.ref(f.db,QUOTA_PATH),current=>{
+        const used=Number(current)||0;
+        if(!Number.isFinite(used)||used<0||used+blob.size>MAX_GLOBAL_BYTES)return;
+        return used+blob.size;
+      },{applyLocally:false});
+      if(!result?.committed)throw Error('وصلت التسجيلات للحد الآمن المخصص للصوت.');
+      delivery.reserved=true;
+    }
+    // If this write fails, retry the SAME path and reservation, never a new clip.
+    await f.set(f.ref(f.db,VOICE_ROOT+'/'+meta.id),{data,mime:meta.mime,bytes:meta.bytes,
+      seconds:meta.seconds,createdAt:meta.createdAt});
+    delivery.stored=true;
   }
   async function sendRecorded(){
     if(state.phase!=='ready'||!state.blob||state.busy)return;
     if(currentContext(state.mode)!==state.target){hint('المحادثة تغيّرت؛ احذف التسجيل');return;}
-    state.busy=true;state.phase='sending';hint('جارٍ الإرسال…');ui();const session=state.session;
-    const blob=state.blob,meta={id:'VN_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,12),seconds:state.seconds,bytes:blob.size,mime:blob.type||'audio/webm'};
-    try{const allowed=state.mode==='private'&&!!window.__ASSAL_PRIVATE_VOICE_SEND__||state.mode==='community'&&!!window.__ASSAL_COMMUNITY_VOICE_SEND__;
-      if(!allowed)throw Error('مسار المحادثة غير جاهز');await store(meta,blob);
-      if(state.session!==session)return;let sent=false;
-      if(state.mode==='private')sent=!!window.__ASSAL_PRIVATE_VOICE_SEND__(meta,state.target);
-      else sent=!!(await window.__ASSAL_COMMUNITY_VOICE_SEND__(meta));
-      if(!sent)throw Error('تعذّر إرسال الرسالة للمحادثة');close();
-    }catch(err){console.warn('ASSAL voice send:',err);if(state.session!==session)return;state.phase='ready';state.busy=false;hint(err?.message||'فشل الإرسال؛ أعد المحاولة');ui();}
+    state.busy=true;state.phase='sending';hint('جارٍ الإرسال…');ui();
+    const session=state.session,mode=state.mode,target=state.target;
+    const delivery=state.delivery||(state.delivery={blob:state.blob,reserved:false,stored:false,
+      released:false,inFlight:false,mayBeReferenced:false,meta:{
+        id:'VN_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,12),
+        seconds:state.seconds,bytes:state.blob.size,mime:state.blob.type||'audio/webm',createdAt:Date.now()}});
+    delivery.inFlight=true;
+    try{
+      const send=mode==='private'?window.__ASSAL_PRIVATE_VOICE_SEND__:window.__ASSAL_COMMUNITY_VOICE_SEND__;
+      if(typeof send!=='function')throw Error('مسار المحادثة غير جاهز');
+      await store(delivery);
+      if(state.session!==session){delivery.inFlight=false;await releaseDelivery(delivery);return;}
+      // Preserve the clip if Firebase accepted the message but its acknowledgement was lost.
+      delivery.mayBeReferenced=true;
+      const sent=!!(await send(delivery.meta,target));
+      if(!sent){delivery.mayBeReferenced=false;throw Error('تعذّر إرسال الرسالة للمحادثة');}
+      if(state.session===session)close();
+    }catch(err){
+      console.warn('ASSAL voice send:',err);
+      if(state.session===session){state.phase='ready';state.busy=false;hint(err?.message||'فشل الإرسال؛ أعد المحاولة');ui();}
+    }finally{
+      delivery.inFlight=false;
+      if(state.session!==session&&!delivery.mayBeReferenced)await releaseDelivery(delivery);
+    }
   }
   let playbackSerial=0;
   function updatePlayerUI(control,audio){
