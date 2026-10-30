@@ -46482,16 +46482,16 @@ html.low-end-device .update-success-shell{
     const versionName = escapeUpdateText(remote.versionName, "-");
     const currentName = escapeUpdateText(current.versionName, "-");
     return `<section class="force-update-shell" dir="rtl" aria-label="تحديث تطبيق عسل">
-      <header class="force-update-topline"><span class="force-update-brand" aria-label="عسل ASSAL"><span class="force-update-logo-mark" aria-hidden="true"><span class="force-update-logo-glyph">ع</span></span><span class="force-update-logo-type"><b>عسل</b><small>ASSAL</small></span></span><span class="force-update-badge">تحديث مطلوب</span></header><div class="force-update-body">
+      <div class="force-update-topline"><span class="force-update-brand" aria-label="عسل ASSAL"><span class="force-update-logo-mark" aria-hidden="true"><span class="force-update-logo-glyph">ع</span></span><span class="force-update-logo-type"><b>عسل</b><small>ASSAL</small></span></span><span class="force-update-badge">تحديث مطلوب</span></div><div class="force-update-body">
       <div class="force-update-orb-wrap" aria-hidden="true"><div class="force-update-icon"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M37 18a14 14 0 0 0-24-4l-4 5m0-10v10h10M11 30a14 14 0 0 0 24 4l4-5m0 10V29H29" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 31V18m-5 5 5-5 5 5" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="force-update-small-version">v${versionName}</span></div>
       <h2 class="force-update-title">${title}</h2><p class="force-update-subtitle">نسخة أحدث، وتجربة أفضل</p>
       <div class="force-update-notes"><span class="force-update-notes-label">الجديد في هذا الإصدار</span><ul class="force-update-feature-list">${buildUpdateFeatures(remote)}</ul></div>
       <div class="force-update-versions"><div class="force-update-version-card"><span>نسختك الحالية</span><strong>${currentName}</strong></div><span class="force-update-version-arrow" aria-hidden="true">←</span><div class="force-update-version-card active"><span>النسخة الجديدة</span><strong>${versionName}</strong></div></div>
-      </div><footer class="force-update-footer">
+      </div><div class="force-update-footer" role="group" aria-label="تنزيل التحديث">
       <div class="force-update-actions"><button id="appUpdateDownloadBtn" class="force-update-btn primary" type="button"><span class="force-update-button-content"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>تحديث الآن</span><span class="force-update-button-arrow" aria-hidden="true">←</span></span><span id="appUpdateProgressWrap" class="force-update-progress-wrap" style="display:none"><span class="force-update-progress-track"><span id="appUpdateProgressFill" class="force-update-progress-fill"></span></span><span class="force-update-progress-head"><span class="force-update-loading-label">جاري التنزيل</span><span id="appUpdateProgressValue">0%</span></span></span></button><button id="appUpdateInstallBtn" class="force-update-btn success" type="button" style="display:none"><span aria-hidden="true">✓</span><span>تثبيت التحديث</span><span aria-hidden="true">↗</span></button></div>
       <div id="appUpdateStatusText" class="force-update-status" role="status" aria-live="polite"></div>
       <div id="appUpdateInstallHint" class="force-update-hint" style="display:none">إذا لم تظهر شاشة التثبيت تلقائياً، اضغط تثبيت التحديث أو افتح الملف من التنزيلات.</div>
-      </footer>
+      </div>
     </section>`;
   }
 
@@ -46500,73 +46500,51 @@ html.low-end-device .update-success-shell{
     const style = document.createElement("style");
     style.id = "forceUpdateStyles";
     style.textContent = `
-.swal2-container.force-update-container{background:rgba(3,8,17,.88)!important;padding:16px!important;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))!important;box-sizing:border-box}
-.swal2-popup.force-update-popup{display:block!important;width:100%!important;max-width:420px!important;max-height:calc(100vh - 32px)!important;max-height:calc(100dvh - 32px)!important;margin:auto!important;padding:0!important;border:1px solid #304658!important;border-radius:26px!important;background:#101c2b!important;color:#f1f6fc!important;box-shadow:0 24px 64px #0008!important;overflow:auto!important;box-sizing:border-box!important}
-.force-update-popup .swal2-html-container{margin:0!important;padding:0!important;overflow:visible!important;color:inherit!important}
+.swal2-container.force-update-container{background:rgba(3,8,17,.88)!important;padding:16px!important;box-sizing:border-box}
+.swal2-popup.force-update-popup{display:block!important;width:calc(100vw - 28px)!important;max-width:390px!important;max-height:calc(100vh - 32px)!important;max-height:calc(100dvh - 32px)!important;padding:0!important;margin:auto!important;border:1px solid #728ca83b!important;border-radius:24px!important;background:#101d30!important;color:#f1f6fc!important;box-shadow:0 22px 60px #0007!important;overflow-x:hidden!important;overflow-y:auto!important;box-sizing:border-box!important}
+.force-update-popup .swal2-html-container{padding:0!important;margin:0!important;overflow:visible!important;color:inherit!important}
 .force-update-shell,.force-update-shell *{box-sizing:border-box}
-.force-update-shell{position:relative;padding:22px;text-align:center;font-family:'Cairo','Tajawal',sans-serif;background:radial-gradient(ellipse at 50% 0%,#173c4a 0%,transparent 58%),#101c2b;color:#f1f6fc;overflow-wrap:anywhere}
-.force-update-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
-.force-update-brand{font-size:18px;font-weight:900;color:#edfaff}.force-update-brand span{font:10px sans-serif;letter-spacing:2px;color:#94acbc;margin-right:7px}
-.force-update-badge{font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;border:1px solid #4d849044;background:#4acbc910;color:#9eece0}
-.force-update-orb-wrap{position:relative;width:100px;margin:0 auto 20px}.force-update-icon{width:88px;height:88px;margin:auto;border-radius:27px;background:linear-gradient(145deg,#1b555b,#1a354f);border:1px solid #7be9d93b;box-shadow:0 10px 26px #0003,inset 0 1px #ffffff16;display:grid;place-items:center;color:#9cf9e5}.force-update-icon svg{width:50px;height:50px}
-.force-update-small-version{position:relative;display:table;margin:-10px auto 0;padding:3px 12px;border-radius:12px;border:1px solid #49716f;background:#173438;color:#b9ffed;font:700 11px sans-serif;direction:ltr}
-.force-update-title{margin:0!important;color:#f5faff!important;font-size:22px!important;line-height:1.6!important;font-weight:800!important}.force-update-subtitle{font-size:12px;color:#9bb0c2;margin:4px 0 19px;line-height:1.7}
-.force-update-notes{text-align:right;border:1px solid #ffffff0c;border-radius:17px;padding:14px;background:#07121d55;margin-bottom:17px}.force-update-notes-label{display:block;font-size:10px;color:#91b5bd;font-weight:700;margin-bottom:10px}.force-update-feature-list{list-style:none;padding:0;margin:0;display:grid;gap:12px}.force-update-feature{display:flex;align-items:flex-start;gap:9px;font-size:12px;font-weight:600;line-height:1.9;color:#dbe7f0}.force-update-feature-check{flex:0 0 18px;height:18px;line-height:18px;text-align:center;border-radius:6px;background:#4be4bc14;color:#71dec2;font:12px/18px sans-serif;margin-top:4px}
-.force-update-versions{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:5px;align-items:center;margin-bottom:18px}.force-update-version-card{display:flex;flex-direction:column;gap:5px;padding:10px 5px;border-radius:13px;background:#ffffff03;border:1px solid #ffffff0a}.force-update-version-card span{font-size:10px;color:#91a6b9}.force-update-version-card strong{font:700 21px/1.4 sans-serif;direction:ltr;color:#d0dce6}.force-update-version-card.active{background:#4cd9b809;border-color:#68dbbd27}.force-update-version-card.active strong{color:#8aefd4}.force-update-version-arrow{color:#66848f;font-size:18px}
-.force-update-progress-wrap{padding:12px;border:1px solid #ffffff12;border-radius:13px;margin-bottom:12px;background:#07121d55}.force-update-progress-head{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:right;font-size:11px;line-height:1.8;color:#b6c9d6;margin-bottom:9px}#appUpdateProgressValue{flex-shrink:0;direction:ltr;color:#8aefd4;font:700 12px sans-serif}.force-update-progress-track{height:6px;border-radius:9px;overflow:hidden;background:#ffffff12;direction:ltr}.force-update-progress-fill{height:100%;width:0%;border-radius:9px;background:linear-gradient(90deg,#32bba0,#85edd3);transition:width .2s ease}
-.force-update-actions{display:grid;gap:9px}.force-update-btn{width:100%;min-height:50px;border:1px solid #ffffff20;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;font:800 14px/1.6 'Cairo','Tajawal',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s ease,opacity .15s ease}.force-update-btn.primary{color:#062d2b;background:linear-gradient(115deg,#67e5c7,#62ccda);box-shadow:0 7px 18px #1caf991a}.force-update-btn.success{background:#214d43;color:#bbffe9;border-color:#6ce3bf44}.force-update-btn:active{transform:scale(.985)}.force-update-btn:focus-visible{outline:2px solid #b3ffed;outline-offset:3px}.force-update-btn:disabled{cursor:default;opacity:.7}.force-update-hint{font-size:11px;color:#a2b5c5;line-height:1.9;margin-top:12px}
-@media(max-width:360px){.force-update-shell{padding:17px}.force-update-title{font-size:19px!important}.force-update-topline{margin-bottom:17px}.force-update-feature{font-size:11px}.force-update-brand{font-size:16px}}
-@media(max-height:600px){.force-update-shell{padding:15px 18px}.force-update-topline{margin-bottom:10px}.force-update-orb-wrap{margin-bottom:10px}.force-update-icon{width:64px;height:64px;border-radius:20px}.force-update-icon svg{width:39px;height:39px}.force-update-title{font-size:19px!important}.force-update-subtitle{margin-bottom:10px}.force-update-notes{padding:11px;margin-bottom:10px}.force-update-feature-list{gap:7px}.force-update-versions{margin-bottom:10px}}
-
-/* هوية عسل الداكنة ومراحل التحديث المختصرة */
-.swal2-popup.force-update-popup{max-width:390px!important;background:#0c1728!important;border-color:rgba(148,163,184,.22)!important;border-radius:23px!important;max-height:calc(100vh - 48px)!important;max-height:calc(100dvh - 48px)!important}
-.force-update-shell{padding:19px;background:linear-gradient(155deg,#16273b,#0e1b2e 52%,#0b1627)!important}
-.force-update-topline{margin-bottom:15px;min-height:40px}
-.force-update-brand{display:inline-flex!important;align-items:center;gap:9px;direction:rtl}
-.force-update-brand .force-update-logo-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;margin:0;background:linear-gradient(145deg,#237b83,#24577a);border:1px solid #acd6de30;color:#edfcff;font:900 27px/1 'Cairo',sans-serif;letter-spacing:0}
-.force-update-brand .force-update-logo-type{display:flex;flex-direction:column;align-items:center;margin:0;color:#edf6fc;letter-spacing:0;gap:4px}
-.force-update-logo-type b{font:900 23px/1.1 'Cairo',sans-serif}.force-update-logo-type small{font:700 8px/1 sans-serif;letter-spacing:3px;padding-left:3px;color:#91b7c9}
-.force-update-orb-wrap{width:80px;margin-bottom:13px}.force-update-icon{width:65px;height:65px;border-radius:21px;background:linear-gradient(145deg,#203e53,#183047);box-shadow:inset 0 1px #ffffff12;border-color:#86bbcb30;color:#9bd4df}.force-update-icon svg{width:39px;height:39px}.force-update-small-version{font-size:10px;background:#182c40;border-color:#547b91;color:#d0e7f1}
-.force-update-title{font-size:19px!important}.force-update-subtitle{font-size:11px;margin:3px 0 13px}.force-update-notes{padding:12px;margin-bottom:12px;background:#08142366;border-color:#819eb915}.force-update-feature-list{gap:8px}.force-update-feature{font-size:11px;line-height:1.8}.force-update-feature-check{background:#72aaba15;color:#8ccfcf}.force-update-notes-label{font-size:10px;margin-bottom:8px;color:#92adbf}
-.force-update-versions{margin-bottom:13px}.force-update-version-card{padding:8px 5px}.force-update-version-card strong{font-size:18px}.force-update-version-card.active{background:#4586a413;border-color:#749dbb30}.force-update-version-card.active strong{color:#b1dbe9}
-.force-update-btn.primary{background:linear-gradient(110deg,#206a7c,#285d83);color:#f0faff;box-shadow:0 6px 14px #0002;border-color:#93c7d333}.force-update-btn.success{background:linear-gradient(110deg,#22685f,#20596d);color:#effff9}.force-update-btn{min-height:47px;font-size:13px;border-radius:13px}
-.force-update-progress-fill{background:linear-gradient(90deg,#38879a,#8dcbd6)}#appUpdateProgressValue{color:#b2e2e9}.force-update-hint{font-size:10px;line-height:1.8}
-.force-update-shell[data-stage] .force-update-notes,.force-update-shell[data-stage] .force-update-versions{display:none!important}
-.force-update-shell[data-stage="ready"] #appUpdateDownloadBtn{display:none!important}
-.force-update-shell[data-stage] .force-update-orb-wrap{margin:6px auto 14px}
-.force-update-shell[data-stage] .force-update-progress-wrap{margin-top:17px}
-@media(max-height:550px){.force-update-shell{padding:13px 16px}.force-update-topline{margin-bottom:8px}.force-update-orb-wrap{margin-bottom:8px}.force-update-icon{width:52px;height:52px;border-radius:17px}.force-update-icon svg{width:32px;height:32px}.force-update-subtitle{margin-bottom:9px}.force-update-feature-list{gap:5px}.force-update-notes{padding:9px}.force-update-title{font-size:17px!important}}
-
-
-/* تنسيق نافذة التحديث فقط؛ نفس مرجع الإقلاع والتنزيل. */
-.force-update-shell{padding:0!important}
-.force-update-topline{padding:15px 18px;margin:0!important;background:#08142338;border-bottom:1px solid #a5c2d416}
-.force-update-body{padding:17px 18px 0}.force-update-footer{display:block;padding:13px 18px 16px;background:#08142355;border-top:1px solid #a5c2d416}
-.force-update-brand .force-update-logo-mark{display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;overflow:hidden;flex-shrink:0}
-.force-update-brand .force-update-logo-mark .force-update-logo-glyph{display:block!important;margin:0!important;padding:0!important;color:inherit!important;letter-spacing:0!important;font:900 27px/1 'Cairo',sans-serif!important;transform:translateY(-3px);text-align:center}
-.force-update-actions{gap:0!important}
-.force-update-btn.primary,.force-update-btn.success{position:relative;isolation:isolate;width:100%!important;height:47px!important;min-height:47px!important;padding:0 14px!important;border-radius:13px!important;font-size:13px!important;line-height:1!important;overflow:hidden}
-.force-update-btn.primary{border:1px solid #93c6d541!important;background:linear-gradient(115deg,#246b7c,#285b7c 70%,#294c6a)!important;box-shadow:inset 0 1px #ffffff1c,0 5px 12px #0003!important;color:#f4fbff!important}
-.force-update-btn.success{border:1px solid #90d1bd38!important;background:linear-gradient(115deg,#24695f,#265b70)!important;box-shadow:inset 0 1px #ffffff1a!important;color:#effff9!important;gap:11px!important}
-.force-update-button-content{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;position:relative;z-index:1}
-.force-update-button-content>svg{box-sizing:content-box;flex:none;padding:5px;border-radius:9px;background:#ffffff0d;border:1px solid #ffffff13}
-.force-update-button-arrow{position:absolute;left:1px;top:50%;transform:translateY(-50%);opacity:.7;font:17px/1 sans-serif}
-.force-update-btn .force-update-progress-wrap{position:absolute!important;inset:0!important;padding:0 15px!important;margin:0!important;min-height:0!important;border:0!important;border-radius:inherit!important;background:#14384a!important;box-shadow:none!important;pointer-events:none;overflow:hidden}
-.force-update-btn .force-update-progress-track{position:absolute;inset:0!important;height:100%!important;width:100%!important;background:transparent!important;border-radius:0!important;direction:ltr}
-.force-update-btn .force-update-progress-fill{display:block;position:absolute;left:0;top:0;height:100%!important;border-radius:0!important;background:linear-gradient(90deg,#22647b,#398c99)!important;box-shadow:inset -1px 0 #b5f3ee66!important;transition:width .25s ease!important}
-.force-update-btn .force-update-progress-head{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;height:100%;margin:0!important;color:#eefcff!important;font-size:12px;line-height:1!important;gap:12px}
-.force-update-btn #appUpdateProgressValue{font:700 16px/1 sans-serif!important;color:#e9ffff!important}
-.force-update-shell[data-stage="downloading"] #appUpdateDownloadBtn{opacity:1!important;cursor:wait}
+.force-update-shell{position:relative;padding:0;text-align:center;font-family:'Cairo','Tajawal',sans-serif;overflow-wrap:anywhere;background:linear-gradient(145deg,#182a40,#101d30 60%,#0b1728);color:#eff7ff}
+.force-update-shell .force-update-topline{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;margin:0;background:#07132138;border-bottom:1px solid #b0cce016}
+.force-update-brand{display:inline-flex;align-items:center;gap:9px;direction:rtl}
+.force-update-brand .force-update-logo-mark{display:flex;align-items:center;justify-content:center;width:38px;height:38px;flex:0 0 38px;border-radius:12px;border:1px solid #a9e6ea30;background:linear-gradient(145deg,#237b83,#24577a);overflow:hidden;color:#edfcff}
+.force-update-brand .force-update-logo-glyph{display:block;margin:0!important;padding:0!important;font:900 27px/1 'Cairo',sans-serif!important;letter-spacing:0!important;transform:translateY(-3px);color:inherit}
+.force-update-logo-type{display:flex;flex-direction:column;align-items:center;gap:4px}.force-update-logo-type b{font:900 23px/1.1 'Cairo',sans-serif}.force-update-logo-type small{font:700 8px/1 sans-serif;letter-spacing:3px;padding-left:3px;color:#9cbaca}
+.force-update-badge{font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;border:1px solid #78bcc230;background:#4acbc90b;color:#a4d9de}
+.force-update-body{padding:17px 18px 0}
+.force-update-orb-wrap{position:relative;width:80px;margin:0 auto 14px}.force-update-icon{display:grid;place-items:center;width:65px;height:65px;margin:auto;border:1px solid #86bbcb30;border-radius:21px;background:linear-gradient(145deg,#203e53,#183047);color:#a6dce7;box-shadow:inset 0 1px #ffffff12}.force-update-icon svg{width:39px;height:39px}
+.force-update-small-version{position:relative;display:table;margin:-9px auto 0;padding:3px 11px;border:1px solid #547b91;border-radius:12px;background:#182c40;color:#d0e7f1;font:700 10px/1.4 sans-serif;direction:ltr}
+.force-update-title{margin:0!important;font-size:19px!important;line-height:1.6!important;font-weight:800!important;color:#f5faff!important}.force-update-subtitle{margin:3px 0 13px;color:#a1b6c8;font-size:11px;line-height:1.8}
+.force-update-notes{padding:12px;margin-bottom:12px;text-align:right;border:1px solid #819eb915;border-radius:16px;background:#08142366}.force-update-notes-label{display:block;font-size:10px;font-weight:700;color:#92adbf;margin-bottom:8px}.force-update-feature-list{display:grid;gap:8px;list-style:none;padding:0;margin:0}.force-update-feature{display:flex;align-items:flex-start;gap:9px;font-size:11px;line-height:1.8;font-weight:600;color:#dbe7f0}.force-update-feature-check{display:block;flex:0 0 18px;height:18px;margin-top:2px;text-align:center;border-radius:6px;background:#72aaba15;color:#8ccfcf;font:12px/18px sans-serif}
+.force-update-versions{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:5px;align-items:center;margin-bottom:13px}.force-update-version-card{display:flex;flex-direction:column;gap:5px;padding:8px 5px;border-radius:13px;background:#ffffff03;border:1px solid #ffffff0a}.force-update-version-card span{font-size:10px;color:#91a6b9}.force-update-version-card strong{font:700 18px/1.4 sans-serif;direction:ltr;color:#d0dce6}.force-update-version-card.active{background:#4586a413;border-color:#749dbb30}.force-update-version-card.active strong{color:#b1dbe9}.force-update-version-arrow{font-size:18px;color:#66848f}
+.force-update-shell .force-update-footer{position:relative!important;inset:auto!important;transform:none!important;display:block!important;width:auto!important;height:auto!important;min-height:0!important;margin:0!important;padding:13px 18px 16px!important;background:#08142355!important;border-top:1px solid #a5c2d416;box-shadow:none!important;z-index:auto!important}
+.force-update-actions{position:relative;display:block;margin:0;padding:0}
+.force-update-shell .force-update-btn{position:relative!important;display:flex;align-items:center;justify-content:center;gap:10px;isolation:isolate;width:100%!important;height:47px!important;min-height:47px!important;margin:0!important;padding:0 14px!important;border:1px solid #93c6d54d!important;border-radius:13px!important;outline:0;color:#f4fbff!important;font:800 13px/1 'Cairo','Tajawal',sans-serif!important;overflow:hidden;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .15s ease}
+.force-update-shell .force-update-btn.primary{background:linear-gradient(110deg,#246d80,#285c7b 70%,#284c6a)!important;box-shadow:inset 0 1px #ffffff22,0 5px 12px #0003!important}
+.force-update-shell .force-update-btn.success{background:linear-gradient(110deg,#246b60,#265c71)!important;border-color:#90d1bd44!important;box-shadow:inset 0 1px #ffffff20!important}
+.force-update-btn:active{transform:scale(.985)}.force-update-btn:focus-visible{outline:2px solid #9ce8e6!important;outline-offset:3px}.force-update-btn:disabled{cursor:wait}
+.force-update-button-content{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:10px;width:100%}.force-update-button-content>svg{box-sizing:content-box;padding:5px;border-radius:9px;border:1px solid #ffffff13;background:#ffffff0d}.force-update-button-arrow{position:absolute;left:0;top:50%;transform:translateY(-50%);font:17px/1 sans-serif;opacity:.7}
+.force-update-shell #appUpdateProgressWrap{position:absolute!important;inset:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:inherit!important;overflow:hidden;background:#173e51!important;pointer-events:none;z-index:2!important}
+.force-update-progress-track{position:absolute!important;display:block!important;inset:0!important;width:100%!important;height:100%!important;background:transparent!important;direction:ltr}
+.force-update-shell #appUpdateProgressFill{position:absolute!important;display:block!important;left:0!important;top:0!important;height:100%!important;width:0%;border-radius:0!important;background:linear-gradient(90deg,#26758b,#48a7ae)!important;box-shadow:inset -2px 0 #a9fbf391;transition:width .22s linear}
+.force-update-progress-head{position:absolute!important;display:flex!important;inset:0!important;align-items:center;justify-content:space-between;gap:12px;margin:0!important;padding:0 15px!important;z-index:3!important;color:#fff!important;font-size:12px;line-height:1!important}
+.force-update-loading-label{font-size:12px;font-weight:700;text-shadow:0 1px 2px #0006}.force-update-shell #appUpdateProgressValue{display:block!important;font:800 17px/1 sans-serif!important;direction:ltr;color:#fff!important;text-shadow:0 1px 3px #0008}
+.force-update-shell[data-stage="downloading"] #appUpdateProgressWrap{display:block!important}
+.force-update-shell[data-stage="downloading"] #appUpdateDownloadBtn{opacity:1!important}
 .force-update-shell[data-stage="downloading"] .force-update-button-content{visibility:hidden!important}
+.force-update-shell[data-stage="ready"] #appUpdateDownloadBtn{display:none!important}
 .force-update-shell[data-stage="error"] #appUpdateProgressWrap{display:none!important}
-.force-update-status{display:none;font-size:10px;line-height:1.8;color:#a5bfce;text-align:center;margin-top:9px;overflow-wrap:anywhere}
-.force-update-shell[data-stage] .force-update-status:not(:empty){display:block}
-.force-update-shell[data-stage="ready"] .force-update-status{display:none!important}
-.force-update-hint{font-size:10px!important;margin-top:9px!important}
-@media(max-height:550px){.force-update-topline{padding:11px 15px}.force-update-body{padding:11px 15px 0}.force-update-footer{padding:11px 15px 13px}}
-
+.force-update-shell[data-stage] .force-update-notes,.force-update-shell[data-stage] .force-update-versions{display:none!important}
+.force-update-status{display:none;margin-top:9px;color:#adc5d3;font-size:10px;line-height:1.8;text-align:center;overflow-wrap:anywhere}.force-update-shell[data-stage] .force-update-status:not(:empty){display:block}.force-update-shell[data-stage="ready"] .force-update-status{display:none!important}.force-update-hint{margin-top:9px;color:#a7bdce;font-size:10px;line-height:1.8}
+@media(max-width:360px){.force-update-body{padding:13px 15px 0}.force-update-title{font-size:17px!important}.force-update-shell .force-update-topline{padding:12px 15px}}
+@media(max-height:550px){.force-update-shell .force-update-topline{padding:10px 15px}.force-update-body{padding:10px 15px 0}.force-update-orb-wrap{margin-bottom:9px}.force-update-icon{width:52px;height:52px;border-radius:17px}.force-update-icon svg{width:32px;height:32px}.force-update-title{font-size:17px!important}.force-update-subtitle{margin-bottom:9px}.force-update-feature-list{gap:5px}.force-update-notes{padding:9px}.force-update-shell .force-update-footer{padding:11px 15px 13px!important}}
+.swal2-popup.force-update-popup{overflow:hidden!important}
+.force-update-shell{display:flex!important;flex-direction:column!important;max-height:calc(100vh - 34px);max-height:calc(100dvh - 34px)}
+.force-update-shell .force-update-topline,.force-update-shell .force-update-footer{flex-shrink:0!important}
+.force-update-body{min-height:0;overflow-y:auto;overscroll-behavior:contain}
+@media(max-height:650px){.force-update-orb-wrap{margin-bottom:9px}.force-update-icon{width:53px;height:53px;border-radius:17px}.force-update-icon svg{width:32px;height:32px}.force-update-subtitle{margin-bottom:9px}.force-update-feature-list{gap:6px}}
 @media(prefers-reduced-motion:reduce){.force-update-shell *{animation:none!important;transition:none!important}}
-    `;
+`;
     document.head.appendChild(style);
   }
 
