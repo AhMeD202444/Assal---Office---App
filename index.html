@@ -2,6 +2,25 @@
 <!-- ===== ASSAL BATCH 3: NATIVE RUNTIME SAFE ===== -->
 <html lang="en">
 <head>
+<style id="assal-update-boot-style">
+html.assal-update-boot body{visibility:hidden!important}html.assal-update-boot:after{content:'عسل  /  ASSAL\A جاري التحقق من التحديث…';white-space:pre;position:fixed;inset:0;z-index:2147483647;display:grid;place-content:center;text-align:center;line-height:2.5;background:#0d192b;color:#cce5ef;font:600 15px/2.5 sans-serif;direction:rtl}
+</style>
+<script id="assal-update-early-priority">
+(function(){
+ if(!/Android/i.test(navigator.userAgent||''))return;
+ window.__ASSAL_FORCE_UPDATE_PENDING__=true;
+ document.documentElement.classList.add('assal-update-boot');
+ window.__assalReleaseUpdateBoot=function(){document.documentElement.classList.remove('assal-update-boot');clearTimeout(window.__assalUpdateBootTimer);};
+ window.__assalUpdateBootTimer=setTimeout(function(){window.__assalReleaseUpdateBoot();if(!window.__ASSAL_FORCE_UPDATE_ACTIVE__)window.__ASSAL_FORCE_UPDATE_PENDING__=false;},10000);
+ const controller=typeof AbortController==='function'?new AbortController():null;
+ const timer=setTimeout(function(){if(controller)controller.abort();},8000);
+ window.__assalEarlyVersionPromise=Promise.race([
+  fetch('https://raw.githubusercontent.com/AhMeD202444/assal-price-updates/main/version.json',{cache:'no-store',...(controller?{signal:controller.signal}:{})}).then(function(r){if(!r.ok)throw Error('Version fetch '+r.status);return r.json();}),
+  new Promise(function(_,reject){setTimeout(function(){reject(Error('Version check timeout'));},8000);})
+ ]).then(function(data){clearTimeout(timer);return {data:data};},function(){clearTimeout(timer);return {data:null};});
+})();
+</script>
+
 <script id="assal-android-identity-early-v1">
 /* ANDROID ONLY: never overwrite an existing DEV account or admin identity. */
 (function(){
@@ -41672,6 +41691,10 @@ const LuxAds = (() => {
       setTimeout(() => {
         // Revalidate after the animation delay so a pending ban/profile decision
         // cannot get an advertisement behind a security modal.
+        if (window.__ASSAL_FORCE_UPDATE_PENDING__ || window.__ASSAL_FORCE_UPDATE_ACTIVE__) {
+          startupAdShown = false; startupAdScheduled = false;
+          maybeShow(attempt + 1); return;
+        }
         if (!assalCustomerAdReady()) {
           startupAdShown = false;
           startupAdScheduled = false;
@@ -45976,7 +45999,7 @@ html.low-end-device .update-success-shell{
       إذا الشبكة أبطأ يكمل الفحص بالخلفية ولا يعلّق الإعلان لعدة ثوانٍ.
     */
     checkDelayMs: 0,
-    startupAdGateMs: 700,
+    startupAdGateMs: 10000,
     githubApkDirectUrl:
       "https://github.com/AhMeD202444/assal-price-updates/releases/download/v1.3/app-release.apk",
     acceptedVersionKeys: ["appv", "appVersion", "version"],
@@ -46167,7 +46190,7 @@ html.low-end-device .update-success-shell{
   function showProgressSection() {
     const wrap = document.getElementById("appUpdateProgressWrap");
     if (wrap) wrap.style.display = "block";
-    setUpdateVisualStage("downloading");
+    setUpdateVisualStage(updateState.installShown ? "ready" : "downloading");
   }
 
   function setUpdateVisualStage(stage) {
@@ -46178,8 +46201,8 @@ html.low-end-device .update-success-shell{
     if (popup) popup.scrollTop = 0;
     const badge = shell.querySelector(".force-update-badge");
     const subtitle = shell.querySelector(".force-update-subtitle");
-    if (badge) badge.textContent = stage === "ready" ? "جاهز للتثبيت" : "جاري التحديث";
-    if (subtitle) subtitle.textContent = stage === "ready" ? "الخطوة الأخيرة لتحديث تطبيق عسل" : "يرجى الانتظار حتى يكتمل التنزيل";
+    if (badge) badge.textContent = stage === "ready" ? "جاهز للتثبيت" : stage === "error" ? "حاول مجدداً" : "جاري التحديث";
+    if (subtitle) subtitle.textContent = stage === "ready" ? "الخطوة الأخيرة لتحديث تطبيق عسل" : stage === "error" ? "تعذر التنزيل، يمكنك إعادة المحاولة" : "يرجى الانتظار حتى يكتمل التنزيل";
   }
 
   function showInstallSection() {
@@ -46261,6 +46284,7 @@ html.low-end-device .update-success-shell{
   function setDownloadButtonState(disabled, text) {
     const btn = document.getElementById("appUpdateDownloadBtn");
     if (!btn) return;
+    if (!disabled) setUpdateVisualStage("error");
     btn.disabled = !!disabled;
     btn.style.opacity = disabled ? "0.7" : "1";
     if (text) btn.innerHTML = text;
@@ -46480,15 +46504,15 @@ html.low-end-device .update-success-shell{
     const versionName = escapeUpdateText(remote.versionName, "-");
     const currentName = escapeUpdateText(current.versionName, "-");
     return `<section class="force-update-shell" dir="rtl" aria-label="تحديث تطبيق عسل">
-      <header class="force-update-topline"><span class="force-update-brand" aria-label="عسل ASSAL"><span class="force-update-logo-mark" aria-hidden="true">ع</span><span class="force-update-logo-type"><b>عسل</b><small>ASSAL</small></span></span><span class="force-update-badge">تحديث مطلوب</span></header>
+      <header class="force-update-topline"><span class="force-update-brand" aria-label="عسل ASSAL"><span class="force-update-logo-mark" aria-hidden="true"><span class="force-update-logo-glyph">ع</span></span><span class="force-update-logo-type"><b>عسل</b><small>ASSAL</small></span></span><span class="force-update-badge">تحديث مطلوب</span></header><main class="force-update-body">
       <div class="force-update-orb-wrap" aria-hidden="true"><div class="force-update-icon"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M37 18a14 14 0 0 0-24-4l-4 5m0-10v10h10M11 30a14 14 0 0 0 24 4l4-5m0 10V29H29" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 31V18m-5 5 5-5 5 5" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="force-update-small-version">v${versionName}</span></div>
       <h2 class="force-update-title">${title}</h2><p class="force-update-subtitle">نسخة أحدث، وتجربة أفضل</p>
       <div class="force-update-notes"><span class="force-update-notes-label">الجديد في هذا الإصدار</span><ul class="force-update-feature-list">${buildUpdateFeatures(remote)}</ul></div>
       <div class="force-update-versions"><div class="force-update-version-card"><span>نسختك الحالية</span><strong>${currentName}</strong></div><span class="force-update-version-arrow" aria-hidden="true">←</span><div class="force-update-version-card active"><span>النسخة الجديدة</span><strong>${versionName}</strong></div></div>
-      <div id="appUpdateProgressWrap" class="force-update-progress-wrap" style="display:none"><div class="force-update-progress-head"><span id="appUpdateStatusText" role="status" aria-live="polite">جاري تهيئة تنزيل التحديث...</span><span id="appUpdateProgressValue">0%</span></div><div class="force-update-progress-track"><div id="appUpdateProgressFill" class="force-update-progress-fill"></div></div></div>
+      </main><footer class="force-update-footer"><div id="appUpdateProgressWrap" class="force-update-progress-wrap" style="display:none"><div class="force-update-progress-head"><span id="appUpdateStatusText" role="status" aria-live="polite">جاري تهيئة تنزيل التحديث...</span><span id="appUpdateProgressValue">0%</span></div><div class="force-update-progress-track"><div id="appUpdateProgressFill" class="force-update-progress-fill"></div></div></div>
       <div class="force-update-actions"><button id="appUpdateDownloadBtn" class="force-update-btn primary" type="button"><svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>تحديث الآن</span></button><button id="appUpdateInstallBtn" class="force-update-btn success" type="button" style="display:none"><span>تثبيت التحديث</span><span aria-hidden="true">↗</span></button></div>
       <div id="appUpdateInstallHint" class="force-update-hint" style="display:none">إذا لم تظهر شاشة التثبيت تلقائياً، اضغط فتح التثبيت أو افتح الملف من التنزيلات.</div>
-    </section>`;
+    </footer></section>`;
   }
 
   function injectUpdateStyles() {
@@ -46533,6 +46557,28 @@ html.low-end-device .update-success-shell{
 .force-update-shell[data-stage] .force-update-progress-wrap{margin-top:17px}
 @media(max-height:550px){.force-update-shell{padding:13px 16px}.force-update-topline{margin-bottom:8px}.force-update-orb-wrap{margin-bottom:8px}.force-update-icon{width:52px;height:52px;border-radius:17px}.force-update-icon svg{width:32px;height:32px}.force-update-subtitle{margin-bottom:9px}.force-update-feature-list{gap:5px}.force-update-notes{padding:9px}.force-update-title{font-size:17px!important}}
 
+
+.swal2-popup.force-update-popup{border-radius:24px!important;background:#0d192b!important}
+.force-update-shell{padding:0!important;background:linear-gradient(145deg,#17283e,#0d192b 70%)!important}
+.force-update-topline{margin:0!important;padding:16px 19px;border-bottom:1px solid #a1b8d015;background:#09142344}
+.force-update-body{display:block;padding:18px 19px 2px}.force-update-footer{display:block;padding:14px 19px 17px;border-top:1px solid #a1b8d015;background:#08132155}
+.force-update-brand .force-update-logo-mark{display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden;flex:none;padding:0!important}
+.force-update-brand .force-update-logo-mark .force-update-logo-glyph{display:block;margin:0!important;padding:0!important;letter-spacing:0!important;font:900 27px/1 'Cairo',sans-serif!important;color:inherit;transform:translateY(-3px);text-align:center}
+.force-update-btn.primary{position:relative;min-height:54px!important;padding:13px 18px!important;border-radius:16px!important;border:1px solid #97d8e446!important;background:linear-gradient(120deg,#246e80,#235674 65%,#284766)!important;box-shadow:inset 0 1px 0 #ffffff20,0 7px 16px #0003!important;color:#f4fcff!important;gap:12px!important;letter-spacing:0}
+.force-update-btn.primary svg{box-sizing:content-box;padding:7px;border-radius:10px;background:#ffffff12;border:1px solid #ffffff10}
+.force-update-btn.success{min-height:54px!important;border-radius:16px!important;background:linear-gradient(115deg,#226b60,#235b6d)!important;box-shadow:inset 0 1px #ffffff17,0 7px 16px #0002!important}
+.force-update-shell[data-stage="downloading"] #appUpdateDownloadBtn{display:none!important}
+.force-update-shell[data-stage="downloading"] .force-update-actions{display:none!important}
+.force-update-progress-wrap{position:relative;isolation:isolate;overflow:hidden;min-height:60px;padding:13px 15px!important;margin:0!important;border-radius:16px!important;border:1px solid #76c6d63b!important;background:#102e43!important;box-shadow:inset 0 1px #ffffff12}
+.force-update-progress-head{position:relative;z-index:2;margin:0!important;min-height:32px;gap:12px;font-size:11px;color:#eefaff!important}
+#appUpdateProgressValue{font-size:17px!important;color:#e1fbff!important}
+.force-update-progress-track{position:absolute;inset:0;height:100%!important;border-radius:0!important;background:transparent!important;z-index:0;opacity:.6}
+.force-update-progress-fill{border-radius:0!important;background:linear-gradient(90deg,#23556e,#348c99)!important;box-shadow:inset -1px 0 #99e2e95c;transition:width .25s ease}
+.force-update-shell[data-stage="ready"] .force-update-progress-wrap{display:none!important}
+.force-update-shell[data-stage="error"] .force-update-progress-wrap{margin-bottom:10px!important}
+.force-update-shell[data-stage] .force-update-body{padding-top:17px;padding-bottom:10px}
+@media(max-height:550px){.force-update-topline{padding:11px 16px}.force-update-body{padding:11px 16px 0}.force-update-footer{padding:11px 16px 13px}}
+
 @media(prefers-reduced-motion:reduce){.force-update-shell *{animation:none!important;transition:none!important}}
     `;
     document.head.appendChild(style);
@@ -46572,6 +46618,7 @@ html.low-end-device .update-success-shell{
       showCloseButton: false,
       heightAuto: false,
       didOpen: () => {
+        if (window.__assalReleaseUpdateBoot) window.__assalReleaseUpdateBoot();
         window.__ASSAL_FORCE_UPDATE_PENDING__ = false;
         window.__ASSAL_FORCE_UPDATE_ACTIVE__ = true;
         const downloadBtn = document.getElementById("appUpdateDownloadBtn");
@@ -46588,6 +46635,11 @@ html.low-end-device .update-success-shell{
   }
 
   async function fetchRemoteVersion() {
+    if (window.__assalEarlyVersionPromise) {
+      const result = await window.__assalEarlyVersionPromise;
+      if (!result.data) throw new Error("تعذر التحقق من الإصدار");
+      return result.data;
+    }
     const res = await fetch(APP_UPDATE_CONFIG.versionJsonUrl, {
       cache: "no-store",
     });
@@ -46600,16 +46652,6 @@ html.low-end-device .update-success-shell{
     updateCheckStarted = true;
     window.__ASSAL_FORCE_UPDATE_PENDING__ = true;
 
-    /*
-      لا نقطع fetch بعد انتهاء البوابة؛ نحرر الإعلان فقط.
-      إذا وصل لاحقاً تحديث إجباري حقيقي، يرجع Pending=true ثم يغلق الإعلان ويعرض التحديث.
-    */
-    clearTimeout(startupAdGateTimer);
-    startupAdGateTimer = setTimeout(() => {
-      if (!window.__ASSAL_FORCE_UPDATE_ACTIVE__) {
-        window.__ASSAL_FORCE_UPDATE_PENDING__ = false;
-      }
-    }, Math.max(300, Number(APP_UPDATE_CONFIG.startupAdGateMs) || 700));
 
     try {
       if (!isAndroidLikeEnvironment()) return;
@@ -46631,6 +46673,7 @@ html.low-end-device .update-success-shell{
     } catch (err) {
       console.error("Force update check failed:", err);
     } finally {
+      if (window.__assalReleaseUpdateBoot) window.__assalReleaseUpdateBoot();
       clearTimeout(startupAdGateTimer);
       startupAdGateTimer = null;
       if (!window.__ASSAL_FORCE_UPDATE_ACTIVE__) {
