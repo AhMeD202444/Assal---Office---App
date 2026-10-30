@@ -46167,11 +46167,25 @@ html.low-end-device .update-success-shell{
   function showProgressSection() {
     const wrap = document.getElementById("appUpdateProgressWrap");
     if (wrap) wrap.style.display = "block";
+    setUpdateVisualStage("downloading");
+  }
+
+  function setUpdateVisualStage(stage) {
+    const shell = document.querySelector(".force-update-shell");
+    if (!shell) return;
+    shell.dataset.stage = stage;
+    const popup = shell.closest(".force-update-popup");
+    if (popup) popup.scrollTop = 0;
+    const badge = shell.querySelector(".force-update-badge");
+    const subtitle = shell.querySelector(".force-update-subtitle");
+    if (badge) badge.textContent = stage === "ready" ? "جاهز للتثبيت" : "جاري التحديث";
+    if (subtitle) subtitle.textContent = stage === "ready" ? "الخطوة الأخيرة لتحديث تطبيق عسل" : "يرجى الانتظار حتى يكتمل التنزيل";
   }
 
   function showInstallSection() {
     if (updateState.installShown) return;
     updateState.installShown = true;
+    setUpdateVisualStage("ready");
     const installBtn = document.getElementById("appUpdateInstallBtn");
     const hint = document.getElementById("appUpdateInstallHint");
     if (installBtn) installBtn.style.display = "inline-flex";
@@ -46466,13 +46480,13 @@ html.low-end-device .update-success-shell{
     const versionName = escapeUpdateText(remote.versionName, "-");
     const currentName = escapeUpdateText(current.versionName, "-");
     return `<section class="force-update-shell" dir="rtl" aria-label="تحديث تطبيق عسل">
-      <header class="force-update-topline"><span class="force-update-brand">عسل <span>ASSAL</span></span><span class="force-update-badge">تحديث مطلوب</span></header>
+      <header class="force-update-topline"><span class="force-update-brand" aria-label="عسل ASSAL"><span class="force-update-logo-mark" aria-hidden="true">ع</span><span class="force-update-logo-type"><b>عسل</b><small>ASSAL</small></span></span><span class="force-update-badge">تحديث مطلوب</span></header>
       <div class="force-update-orb-wrap" aria-hidden="true"><div class="force-update-icon"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M37 18a14 14 0 0 0-24-4l-4 5m0-10v10h10M11 30a14 14 0 0 0 24 4l4-5m0 10V29H29" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M24 31V18m-5 5 5-5 5 5" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="force-update-small-version">v${versionName}</span></div>
       <h2 class="force-update-title">${title}</h2><p class="force-update-subtitle">نسخة أحدث، وتجربة أفضل</p>
       <div class="force-update-notes"><span class="force-update-notes-label">الجديد في هذا الإصدار</span><ul class="force-update-feature-list">${buildUpdateFeatures(remote)}</ul></div>
       <div class="force-update-versions"><div class="force-update-version-card"><span>نسختك الحالية</span><strong>${currentName}</strong></div><span class="force-update-version-arrow" aria-hidden="true">←</span><div class="force-update-version-card active"><span>النسخة الجديدة</span><strong>${versionName}</strong></div></div>
       <div id="appUpdateProgressWrap" class="force-update-progress-wrap" style="display:none"><div class="force-update-progress-head"><span id="appUpdateStatusText" role="status" aria-live="polite">جاري تهيئة تنزيل التحديث...</span><span id="appUpdateProgressValue">0%</span></div><div class="force-update-progress-track"><div id="appUpdateProgressFill" class="force-update-progress-fill"></div></div></div>
-      <div class="force-update-actions"><button id="appUpdateDownloadBtn" class="force-update-btn primary" type="button"><svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>تحديث الآن</span></button><button id="appUpdateInstallBtn" class="force-update-btn success" type="button" style="display:none"><span>فتح التثبيت</span><span aria-hidden="true">↗</span></button></div>
+      <div class="force-update-actions"><button id="appUpdateDownloadBtn" class="force-update-btn primary" type="button"><svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>تحديث الآن</span></button><button id="appUpdateInstallBtn" class="force-update-btn success" type="button" style="display:none"><span>تثبيت التحديث</span><span aria-hidden="true">↗</span></button></div>
       <div id="appUpdateInstallHint" class="force-update-hint" style="display:none">إذا لم تظهر شاشة التثبيت تلقائياً، اضغط فتح التثبيت أو افتح الملف من التنزيلات.</div>
     </section>`;
   }
@@ -46499,6 +46513,26 @@ html.low-end-device .update-success-shell{
 .force-update-actions{display:grid;gap:9px}.force-update-btn{width:100%;min-height:50px;border:1px solid #ffffff20;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;font:800 14px/1.6 'Cairo','Tajawal',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s ease,opacity .15s ease}.force-update-btn.primary{color:#062d2b;background:linear-gradient(115deg,#67e5c7,#62ccda);box-shadow:0 7px 18px #1caf991a}.force-update-btn.success{background:#214d43;color:#bbffe9;border-color:#6ce3bf44}.force-update-btn:active{transform:scale(.985)}.force-update-btn:focus-visible{outline:2px solid #b3ffed;outline-offset:3px}.force-update-btn:disabled{cursor:default;opacity:.7}.force-update-hint{font-size:11px;color:#a2b5c5;line-height:1.9;margin-top:12px}
 @media(max-width:360px){.force-update-shell{padding:17px}.force-update-title{font-size:19px!important}.force-update-topline{margin-bottom:17px}.force-update-feature{font-size:11px}.force-update-brand{font-size:16px}}
 @media(max-height:600px){.force-update-shell{padding:15px 18px}.force-update-topline{margin-bottom:10px}.force-update-orb-wrap{margin-bottom:10px}.force-update-icon{width:64px;height:64px;border-radius:20px}.force-update-icon svg{width:39px;height:39px}.force-update-title{font-size:19px!important}.force-update-subtitle{margin-bottom:10px}.force-update-notes{padding:11px;margin-bottom:10px}.force-update-feature-list{gap:7px}.force-update-versions{margin-bottom:10px}}
+
+/* هوية عسل الداكنة ومراحل التحديث المختصرة */
+.swal2-popup.force-update-popup{max-width:390px!important;background:#0c1728!important;border-color:rgba(148,163,184,.22)!important;border-radius:23px!important;max-height:calc(100vh - 48px)!important;max-height:calc(100dvh - 48px)!important}
+.force-update-shell{padding:19px;background:linear-gradient(155deg,#16273b,#0e1b2e 52%,#0b1627)!important}
+.force-update-topline{margin-bottom:15px;min-height:40px}
+.force-update-brand{display:inline-flex!important;align-items:center;gap:9px;direction:rtl}
+.force-update-brand .force-update-logo-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;margin:0;background:linear-gradient(145deg,#237b83,#24577a);border:1px solid #acd6de30;color:#edfcff;font:900 27px/1 'Cairo',sans-serif;letter-spacing:0}
+.force-update-brand .force-update-logo-type{display:flex;flex-direction:column;align-items:center;margin:0;color:#edf6fc;letter-spacing:0;gap:4px}
+.force-update-logo-type b{font:900 23px/1.1 'Cairo',sans-serif}.force-update-logo-type small{font:700 8px/1 sans-serif;letter-spacing:3px;padding-left:3px;color:#91b7c9}
+.force-update-orb-wrap{width:80px;margin-bottom:13px}.force-update-icon{width:65px;height:65px;border-radius:21px;background:linear-gradient(145deg,#203e53,#183047);box-shadow:inset 0 1px #ffffff12;border-color:#86bbcb30;color:#9bd4df}.force-update-icon svg{width:39px;height:39px}.force-update-small-version{font-size:10px;background:#182c40;border-color:#547b91;color:#d0e7f1}
+.force-update-title{font-size:19px!important}.force-update-subtitle{font-size:11px;margin:3px 0 13px}.force-update-notes{padding:12px;margin-bottom:12px;background:#08142366;border-color:#819eb915}.force-update-feature-list{gap:8px}.force-update-feature{font-size:11px;line-height:1.8}.force-update-feature-check{background:#72aaba15;color:#8ccfcf}.force-update-notes-label{font-size:10px;margin-bottom:8px;color:#92adbf}
+.force-update-versions{margin-bottom:13px}.force-update-version-card{padding:8px 5px}.force-update-version-card strong{font-size:18px}.force-update-version-card.active{background:#4586a413;border-color:#749dbb30}.force-update-version-card.active strong{color:#b1dbe9}
+.force-update-btn.primary{background:linear-gradient(110deg,#206a7c,#285d83);color:#f0faff;box-shadow:0 6px 14px #0002;border-color:#93c7d333}.force-update-btn.success{background:linear-gradient(110deg,#22685f,#20596d);color:#effff9}.force-update-btn{min-height:47px;font-size:13px;border-radius:13px}
+.force-update-progress-fill{background:linear-gradient(90deg,#38879a,#8dcbd6)}#appUpdateProgressValue{color:#b2e2e9}.force-update-hint{font-size:10px;line-height:1.8}
+.force-update-shell[data-stage] .force-update-notes,.force-update-shell[data-stage] .force-update-versions{display:none!important}
+.force-update-shell[data-stage="ready"] #appUpdateDownloadBtn{display:none!important}
+.force-update-shell[data-stage] .force-update-orb-wrap{margin:6px auto 14px}
+.force-update-shell[data-stage] .force-update-progress-wrap{margin-top:17px}
+@media(max-height:550px){.force-update-shell{padding:13px 16px}.force-update-topline{margin-bottom:8px}.force-update-orb-wrap{margin-bottom:8px}.force-update-icon{width:52px;height:52px;border-radius:17px}.force-update-icon svg{width:32px;height:32px}.force-update-subtitle{margin-bottom:9px}.force-update-feature-list{gap:5px}.force-update-notes{padding:9px}.force-update-title{font-size:17px!important}}
+
 @media(prefers-reduced-motion:reduce){.force-update-shell *{animation:none!important;transition:none!important}}
     `;
     document.head.appendChild(style);
