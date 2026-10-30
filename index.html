@@ -20339,6 +20339,127 @@ window.addEventListener("load", () => {
     console.error("ASSAL_FOREGROUND_PUSH_SETUP_ERROR", err);
   }
 })();
+
+/* ASSAL owner broadcast composer — no app startup or update flow changes. */
+(function(){
+ const API='https://purple-frog-c3b8.ahmed-al-bayatii-90.workers.dev/owner-broadcast/';
+ let root=null,button=null,timer=null,busy=false,confirming=false,draft=null,eventId='',pollCount=0,focusBefore=null;
+ const by=id=>document.getElementById('assalBroadcast'+id);
+ const owner=()=>assalStaffIsOwner();
+ const storageKey=()=> 'assalOwnerBroadcastV1:'+String(assalOfficeAuth.currentUser?.uid||'');
+ function remember(){try{localStorage.setItem(storageKey(),JSON.stringify({draft,eventId}));}catch(_){}}
+ function restore(){try{const v=JSON.parse(localStorage.getItem(storageKey())||'null');draft=v?.draft||null;eventId=v?.eventId||'';}catch(_){draft=null;eventId='';}}
+ function status(text,error=false){by('Status').textContent=text;by('Status').classList.toggle('is-error',error);}
+ function uuid(){return Array.from(crypto.getRandomValues(new Uint8Array(16)),x=>x.toString(16).padStart(2,'0')).join('');}
+ function preview(){by('PreviewTitle').textContent=by('Title').value.trim()||'عنوان الإشعار';by('PreviewBody').textContent=by('Message').value.trim()||'معاينة نص الرسالة';by('Count').textContent=by('Message').value.length+' / 600';by('TitleCount').textContent=by('Title').value.length+' / 80';confirming=false;by('Confirm').hidden=true;}
+ function controls(){const locked=busy||!!draft;by('Title').disabled=locked;by('Message').disabled=locked;by('Send').disabled=busy;by('Send').textContent=busy?'جارٍ تسجيل الإشعار…':eventId?'تحديث حالة الإرسال':draft?'إعادة نفس الطلب بأمان':'مراجعة الإشعار وإرساله';by('New').hidden=!eventId;root.querySelectorAll('[data-ab-template],#assalBroadcastClear').forEach(el=>el.disabled=locked);}
+ async function api(action,data){const user=assalOfficeAuth.currentUser;if(!owner()||!user)throw Error('سجّل دخول المالك الرئيسي مجدداً.');const uid=user.uid;const token=await user.getIdToken();const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),20000);try{const response=await fetch(API+action,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(data),signal:controller.signal,cache:'no-store'});let result;try{result=await response.json();}catch(_){throw Error('حدّث ملف الوركر أولاً ثم حاول مجدداً.');}if(!response.ok||!result.ok)throw Error(result.error||'تعذّر إرسال الطلب.');if(assalOfficeAuth.currentUser?.uid!==uid)throw Error('تغيّر الحساب أثناء العملية.');return result;}catch(e){if(e.name==='AbortError')throw Error('تأخر جواب الخادم. أعد نفس الطلب؛ لا تنشئ إشعاراً جديداً.');throw e;}finally{clearTimeout(timeout);}}
+ function renderResult(r){const accepted=Number(r.acceptedCount||0),total=Number(r.totalTargets||0),invalid=Number(r.invalidCount||0);by('Accepted').textContent=accepted;by('Total').textContent=total||'—';by('Results').hidden=false;
+   const labels={sent:'اكتملت معالجة الإشعار.',pending:'الإشعار في طابور الإرسال؛ تتم معالجته على دفعات.',processing:'جارٍ إرسال الإشعار على دفعات…',skipped:'لم توجد أجهزة مسجّلة مطابقة لهذا الإشعار.',failed_permanent:'انتهت المحاولات؛ قد تكون بعض الأجهزة لم تستقبل الإشعار.'};
+   status((labels[r.status]||'جارٍ التحقق من الحالة…')+(invalid?' تم استبعاد '+invalid+' رمز جهاز غير صالح.':''),r.status==='failed_permanent');
+   if(['sent','skipped','failed_permanent'].includes(r.status)){clearTimeout(timer);timer=null;return false;}return true;
+ }
+ async function refresh(){if(!eventId||busy||!root||root.hidden||!owner())return;busy=true;controls();try{const r=await api('status',{eventId});const more=renderResult(r);if(more&&pollCount++<25)timer=setTimeout(refresh,2500);else if(more)status('المعالجة مستمرة بالخلفية. اضغط تحديث الحالة لاحقاً.');}catch(e){status(e.message,true);}finally{busy=false;controls();}}
+ async function send(confirmed=false){if(busy)return;if(eventId){pollCount=0;return refresh();}if(!draft){const title=by('Title').value.trim(),message=by('Message').value.trim();if(!title||!message)return status('اكتب عنوان الإشعار ونص الرسالة أولاً.',true);if(confirmed!==true){switchView('preview');confirming=true;by('Confirm').hidden=false;by('ConfirmTitle').textContent=title;by('ConfirmBody').textContent=message;status('راجع المعاينة، ثم اضغط «تأكيد الإرسال للجميع».');return;}draft={requestId:uuid(),title,message};remember();}busy=true;controls();by('Confirm').hidden=true;try{const r=await api('send',draft);eventId=r.eventId;remember();renderResult(r);pollCount=0;timer=setTimeout(refresh,1200);}catch(e){status(e.message,true);}finally{busy=false;controls();}}
+ function close(){if(!root)return;root.hidden=true;clearTimeout(timer);timer=null;if(focusBefore?.isConnected)focusBefore.focus();}
+ async function open(){if(!owner())return;try{await assalAssertOwnerForStaff();}catch(e){if(window.Swal)Swal.fire({icon:'error',text:e.message});return;}ensure();focusBefore=document.activeElement;restore();root.hidden=false;by('Title').value=draft?.title||'';by('Message').value=draft?.message||'';preview();switchView(eventId?'preview':'edit');by('Results').hidden=true;status(eventId?'جارٍ استرجاع حالة آخر إشعار…':'');controls();if(eventId){pollCount=0;refresh();}else by('Title').focus();}
+ function switchView(view){const isPreview=view==='preview';by('Editor').hidden=isPreview;by('PreviewPane').hidden=!isPreview;by('EditTab').setAttribute('aria-selected',String(!isPreview));by('PreviewTab').setAttribute('aria-selected',String(isPreview));}
+ function applyTemplate(kind){if(busy||draft)return;const templates={stock:['وصل حديثاً إلى عسل','توفرت أصناف جديدة من قطع الغيار. اطّلع على الأسعار والتفاصيل داخل التطبيق.'],offer:['عروض عسل','اكتب تفاصيل العرض والمواد المشمولة هنا…'],notice:['تنويه من إدارة عسل','اكتب التنويه الذي تريد إبلاغ الزبائن والأدمنية به…']};const value=templates[kind];if(!value)return;by('Title').value=value[0];by('Message').value=value[1];preview();switchView('edit');status('');by('Message').focus();}
+ function ensure(){if(root)return;const style=document.createElement('style');style.textContent=`
+#assalBroadcastOverlay[hidden],#assalBroadcastOverlay [hidden],#assalOwnerBroadcastBtn[hidden]{display:none!important}
+#assalOwnerBroadcastBtn{background:linear-gradient(140deg,#24516b,#1b3a52);color:#d8f6ff;border:1px solid #90c5d333}
+#assalBroadcastOverlay{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:14px;background:#020712dd;direction:rtl;font-family:Cairo,Tajawal,sans-serif;color:#edf8ff;box-sizing:border-box}
+#assalBroadcastOverlay *{box-sizing:border-box}
+#assalBroadcastOverlay .ab-panel{display:flex;flex-direction:column;width:min(100%,410px);max-height:calc(100vh - 28px);max-height:calc(100dvh - 28px);border:1px solid #8aa7bd32;border-radius:22px;background:linear-gradient(150deg,#17293e,#101e31 65%,#0d192b);box-shadow:0 24px 64px #0009,inset 0 1px #ffffff08;overflow:hidden}
+#assalBroadcastOverlay .ab-head{display:flex;align-items:center;gap:9px;padding:13px 14px;border-bottom:1px solid #98b8d017;background:#07132124;flex:none}
+#assalBroadcastOverlay .ab-head>i{display:grid;place-items:center;width:34px;height:34px;flex:none;border:1px solid #8bc5ce25;border-radius:11px;background:linear-gradient(145deg,#22495c,#19364e);color:#a1e0e9;font-size:14px}
+#assalBroadcastOverlay h2{font-size:14px;line-height:1.7;margin:0;font-weight:800;color:#edf8ff}
+#assalBroadcastOverlay .ab-audience{display:inline-flex;align-items:center;gap:4px;margin-top:2px;color:#88afc1;font-size:9px;line-height:1.5}
+#assalBroadcastOverlay .ab-audience:before{content:'';display:block;width:4px;height:4px;border-radius:50%;background:#76cbb8}
+#assalBroadcastOverlay button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#assalBroadcastOverlay .ab-close{display:flex!important;align-items:center!important;justify-content:center!important;flex:0 0 31px!important;width:31px!important;height:31px!important;min-width:31px!important;min-height:31px!important;max-width:31px!important;max-height:31px!important;margin:0 auto 0 0!important;padding:0!important;border:1px solid #ef9c9c32!important;border-radius:50%!important;background:#702632!important;color:#fff!important;box-shadow:inset 0 1px #ffffff0d;line-height:1!important}
+#assalBroadcastOverlay .ab-close svg{display:block!important;width:12px!important;height:12px!important;margin:0!important;flex:none;pointer-events:none}
+#assalBroadcastOverlay .ab-body{min-height:0;overflow-y:auto;padding:13px 14px 12px;overscroll-behavior:contain}
+#assalBroadcastOverlay .ab-field{margin:0 0 10px}
+#assalBroadcastOverlay label{display:block;font-size:10px;line-height:1.7;font-weight:700;color:#b8cddd;margin:0 2px 5px}
+#assalBroadcastOverlay input,#assalBroadcastOverlay textarea{display:block;width:100%;margin:0;border:1px solid #829eb42b;border-radius:11px;background:#09162699;color:#ecf8ff;padding:8px 11px;font:12px/1.8 Cairo,Tajawal,sans-serif;outline:none;box-shadow:inset 0 1px 2px #0001;transition:border-color .15s ease}
+#assalBroadcastOverlay input{height:39px}
+#assalBroadcastOverlay textarea{height:81px;min-height:81px;max-height:140px;resize:none}
+#assalBroadcastOverlay input::placeholder,#assalBroadcastOverlay textarea::placeholder{color:#688496;font-size:11px}
+#assalBroadcastOverlay input:focus,#assalBroadcastOverlay textarea:focus{border-color:#78b6c485;background:#0a192a}
+#assalBroadcastOverlay input:disabled,#assalBroadcastOverlay textarea:disabled{opacity:.8}
+#assalBroadcastOverlay .ab-count{direction:ltr;font:9px/1.5 sans-serif;color:#6e8b9e;text-align:left;margin-top:4px;padding-left:2px}
+#assalBroadcastOverlay .ab-preview{display:flex;align-items:flex-start;gap:9px;padding:11px;margin:3px 0 0;border:1px solid #86b4c221;border-radius:13px;background:linear-gradient(115deg,#122a3c,#0c1c30)}
+#assalBroadcastOverlay .ab-preview>span{display:grid;place-items:center;flex:0 0 29px;height:29px;border:1px solid #8fc5d025;border-radius:10px;background:#245269;color:#d9faff;font-size:12px}
+#assalBroadcastOverlay .ab-preview>div{min-width:0;flex:1}
+#assalBroadcastOverlay .ab-preview strong{display:block;font-size:11px;line-height:1.8;overflow-wrap:anywhere;font-weight:700}
+#assalBroadcastOverlay .ab-preview p{font-size:10px;line-height:1.8;color:#94b0c4;margin:2px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+#assalBroadcastOverlay .ab-status{font-size:10px;line-height:1.85;color:#9cbdcd;margin:9px 0 0}
+#assalBroadcastOverlay .ab-status:empty{display:none}
+#assalBroadcastOverlay .is-error{color:#ffb8bd}
+#assalBroadcastOverlay .ab-results{display:flex;gap:7px;margin:9px 0 0}
+#assalBroadcastOverlay .ab-results>div{flex:1;text-align:center;border:1px solid #83b3bf24;background:#27516216;padding:8px;border-radius:11px;font-size:9px;color:#9fbdce}
+#assalBroadcastOverlay .ab-results b{display:block;font:700 18px/1.2 sans-serif;color:#afe4d8;margin-top:5px}
+#assalBroadcastOverlay .ab-confirm{padding:10px;border:1px solid #88c1b538;border-radius:12px;background:#287a6810;font-size:10px;line-height:1.8;margin-top:10px;white-space:pre-wrap;overflow-wrap:anywhere}
+#assalBroadcastOverlay .ab-confirm strong{display:block;margin-top:4px;font-size:11px}
+#assalBroadcastOverlay .ab-confirm button{width:100%;margin-top:8px}
+#assalBroadcastOverlay .ab-foot{position:relative;flex:none;padding:11px 14px 13px;background:#06102033;border-top:1px solid #98b8d017}
+#assalBroadcastOverlay .ab-send{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:41px;min-height:41px;border:1px solid #90d1dd3d;border-radius:12px;background:linear-gradient(115deg,#246c7d,#285576);box-shadow:inset 0 1px #ffffff17,0 4px 9px #0002;color:#f1fcff;font-size:11px;font-weight:800;margin:0;padding:0 12px;transition:transform .15s ease}
+#assalBroadcastOverlay .ab-send:active{transform:scale(.988)}
+#assalBroadcastOverlay .ab-send:disabled{opacity:.65;cursor:wait}
+#assalBroadcastOverlay .ab-new{display:block;width:100%;margin-top:6px;background:transparent;border:0;color:#9ec6d8;padding:3px;font-size:10px}
+#assalBroadcastOverlay button:focus-visible{outline:2px solid #a0eff0;outline-offset:2px}
+@media(max-height:480px){#assalBroadcastOverlay .ab-head{padding:10px 14px}#assalBroadcastOverlay .ab-body{padding-top:10px}#assalBroadcastOverlay textarea{height:65px;min-height:65px}}
+
+/* Professional composer layout: editing tools and preview use separate tabs. */
+#assalBroadcastOverlay .ab-panel{width:min(100%,440px);border-radius:24px;background:linear-gradient(150deg,#152a3c,#0d1c2e 65%,#0b1828);border-color:#94b3c62d}
+#assalBroadcastOverlay .ab-head{padding:15px 16px 13px;gap:11px;border-bottom:0;background:transparent}
+#assalBroadcastOverlay .ab-head>i{width:38px;height:38px;background:linear-gradient(145deg,#285f6b,#1b3c53);border-radius:13px;box-shadow:inset 0 1px #ffffff10}
+#assalBroadcastOverlay .ab-eyebrow{display:block;font-size:9px;line-height:1.5;letter-spacing:.2px;color:#88a9bd;margin-bottom:3px}
+#assalBroadcastOverlay h2{font-size:17px;font-weight:800;line-height:1.4}
+#assalBroadcastOverlay .ab-workbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px 12px;border-bottom:1px solid #a5c7dd14;flex:none}
+#assalBroadcastOverlay .ab-tabs{display:flex;gap:3px;padding:3px;border:1px solid #89a6bd1a;border-radius:11px;background:#07142277}
+#assalBroadcastOverlay .ab-tabs button{min-width:65px;height:29px;border:0;background:transparent;color:#7898ad;border-radius:8px;font-size:10px;font-weight:700;padding:0 12px}
+#assalBroadcastOverlay .ab-tabs button[aria-selected="true"]{background:linear-gradient(125deg,#27485e,#243d54);box-shadow:inset 0 1px #ffffff0a;color:#e2f6ff}
+#assalBroadcastOverlay .ab-target{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid #83c8b62b;border-radius:8px;background:#2987760c;color:#a8d9cd;font-size:10px;line-height:1.5}
+#assalBroadcastOverlay .ab-target>span{font-size:10px;color:#7ac6b6}
+#assalBroadcastOverlay .ab-body{padding:13px 16px 12px}
+#assalBroadcastOverlay .ab-templatebar{display:flex;gap:5px;align-items:center;margin:0 0 15px;flex-wrap:wrap}
+#assalBroadcastOverlay .ab-templatebar>span{font-size:9px;color:#7f9db1;margin-left:auto}
+#assalBroadcastOverlay .ab-templatebar button{height:27px;padding:0 9px;border:1px solid #89afc425;border-radius:8px;background:#43647a0a;color:#b7cedc;font-size:9px}
+#assalBroadcastOverlay .ab-templatebar button:hover{border-color:#72bdca77;background:#3d849f18}
+#assalBroadcastOverlay .ab-templatebar button:disabled{opacity:.45;cursor:default}
+#assalBroadcastOverlay .ab-labelrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+#assalBroadcastOverlay .ab-labelrow label{margin:0}
+#assalBroadcastOverlay .ab-counter{font:9px/1.5 sans-serif;color:#6d90a6;direction:ltr}
+#assalBroadcastOverlay .ab-field{margin-bottom:12px}
+#assalBroadcastOverlay label{font-size:10px;color:#abc4d4}
+#assalBroadcastOverlay input{height:42px;border-radius:12px}
+#assalBroadcastOverlay textarea{height:113px;min-height:90px;border-radius:12px;padding-top:10px}
+#assalBroadcastOverlay input,#assalBroadcastOverlay textarea{background:#07152488;border-color:#8aafc42b;font-size:12px}
+#assalBroadcastOverlay .ab-editor-bottom{display:flex;align-items:center;justify-content:space-between;direction:ltr;margin-top:6px}
+#assalBroadcastOverlay .ab-count{margin:0;padding:0;font-size:9px}
+#assalBroadcastOverlay .ab-clear{padding:2px 0;border:0;background:transparent;color:#8ba7ba;font-size:9px;direction:rtl}
+#assalBroadcastOverlay .ab-clear:disabled{opacity:.4;cursor:default}
+#assalBroadcastOverlay .ab-preview-caption{display:flex;align-items:center;justify-content:space-between;margin:3px 1px 10px;color:#7396ac;font-size:9px}
+#assalBroadcastOverlay .ab-preview-caption>span:first-child{font-size:12px;font-weight:800;color:#c5e5ef}
+#assalBroadcastOverlay #assalBroadcastPreviewPane{min-height:190px;padding:6px 0}
+#assalBroadcastOverlay .ab-preview{padding:15px 13px;border-radius:17px;background:linear-gradient(120deg,#193247,#122438);border-color:#94bfd136;box-shadow:0 9px 22px #0002;align-items:flex-start}
+#assalBroadcastOverlay .ab-preview strong{font-size:12px}
+#assalBroadcastOverlay .ab-preview p{font-size:11px;line-height:1.95;color:#b0c7d6}
+#assalBroadcastOverlay .ab-foot{padding:12px 16px 15px;background:#07132055}
+#assalBroadcastOverlay .ab-send{height:44px;border-radius:13px;background:linear-gradient(110deg,#287d88,#28657f);border-color:#9edce447;font-size:12px;box-shadow:inset 0 1px #ffffff21,0 5px 12px #0003}
+#assalBroadcastOverlay .ab-confirm{background:#276b5c14;border-color:#89c9b447}
+@media(max-width:350px){#assalBroadcastOverlay .ab-templatebar{gap:4px}#assalBroadcastOverlay .ab-templatebar button{padding:0 7px;font-size:8px}#assalBroadcastOverlay .ab-templatebar>span{font-size:8px}}
+@media(max-height:540px){#assalBroadcastOverlay .ab-head{padding-top:11px}#assalBroadcastOverlay .ab-workbar{padding-bottom:9px}#assalBroadcastOverlay .ab-templatebar{margin-bottom:10px}#assalBroadcastOverlay textarea{height:85px;min-height:75px}#assalBroadcastOverlay #assalBroadcastPreviewPane{min-height:140px}}
+
+@media(prefers-reduced-motion:reduce){#assalBroadcastOverlay *{transition:none!important}}
+`;document.head.appendChild(style);root=document.createElement('div');root.id='assalBroadcastOverlay';root.hidden=true;root.innerHTML=`<section class="ab-panel" role="dialog" aria-modal="true" aria-labelledby="assalBroadcastHeading"><div class="ab-head"><i aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="m4 10 14-5v14L4 14v-4Zm1 4 2 6h3l-2-5M21 9v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></i><div><span class="ab-eyebrow">عسل · لوحة المالك</span><h2 id="assalBroadcastHeading">إنشاء إشعار</h2></div><button class="ab-close" id="assalBroadcastClose" aria-label="إغلاق"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 3 10 10M13 3 3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="ab-workbar"><div class="ab-tabs" role="tablist" aria-label="محرر الإشعار"><button id="assalBroadcastEditTab" role="tab" aria-selected="true" aria-controls="assalBroadcastEditor">تحرير</button><button id="assalBroadcastPreviewTab" role="tab" aria-selected="false" aria-controls="assalBroadcastPreviewPane">معاينة</button></div><span class="ab-target"><span aria-hidden="true">◉</span> الجميع</span></div><div class="ab-body"><div id="assalBroadcastEditor" role="tabpanel" aria-labelledby="assalBroadcastEditTab"><div class="ab-templatebar"><span>قالب سريع</span><button data-ab-template="stock">بضاعة جديدة</button><button data-ab-template="offer">عرض</button><button data-ab-template="notice">تنويه</button></div><div class="ab-field"><div class="ab-labelrow"><label for="assalBroadcastTitle">عنوان الإشعار</label><span id="assalBroadcastTitleCount" class="ab-counter">0 / 80</span></div><input id="assalBroadcastTitle" maxlength="80" placeholder="مثلاً: وصول بضاعة جديدة"></div><div class="ab-field"><label for="assalBroadcastMessage">نص الرسالة</label><textarea id="assalBroadcastMessage" maxlength="600" placeholder="اكتب رسالتك للزبائن والأدمنية…"></textarea><div class="ab-editor-bottom"><span class="ab-count" id="assalBroadcastCount">0 / 600</span><button type="button" id="assalBroadcastClear" class="ab-clear">مسح الحقول</button></div></div></div><div id="assalBroadcastPreviewPane" role="tabpanel" aria-labelledby="assalBroadcastPreviewTab" hidden><div class="ab-preview-caption"><span>عسل</span><span>معاينة الإشعار</span></div><div class="ab-preview"><span aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9a6 6 0 0 1 12 0v6l2 3H4l2-3V9Zm4 12h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><strong id="assalBroadcastPreviewTitle"></strong><p id="assalBroadcastPreviewBody"></p></div></div></div><div id="assalBroadcastResults" class="ab-results" hidden><div>قبلتها خدمة الإشعارات<b id="assalBroadcastAccepted">0</b></div><div>الأجهزة المستهدفة<b id="assalBroadcastTotal">—</b></div></div><div id="assalBroadcastStatus" class="ab-status" role="status" aria-live="polite"></div><div id="assalBroadcastConfirm" class="ab-confirm" hidden>سيُرسل هذا الإشعار للجميع:<strong id="assalBroadcastConfirmTitle"></strong><div id="assalBroadcastConfirmBody"></div><button id="assalBroadcastConfirmSend" class="ab-send">تأكيد الإرسال للجميع</button></div></div><div class="ab-foot"><button id="assalBroadcastSend" class="ab-send">مراجعة الإشعار وإرساله</button><button id="assalBroadcastNew" class="ab-new" hidden>كتابة إشعار جديد</button></div></section>`;document.body.appendChild(root);by('Close').onclick=close;by('EditTab').onclick=()=>switchView('edit');by('PreviewTab').onclick=()=>switchView('preview');root.querySelectorAll('[data-ab-template]').forEach(el=>el.onclick=()=>applyTemplate(el.dataset.abTemplate));by('Clear').onclick=()=>{if(busy||draft)return;by('Title').value='';by('Message').value='';preview();status('');by('Title').focus();};by('Title').oninput=preview;by('Message').oninput=preview;by('Send').onclick=()=>send(false);by('ConfirmSend').onclick=()=>send(true);by('New').onclick=()=>{if(busy)return;clearTimeout(timer);draft=null;eventId='';remember();by('Title').value='';by('Message').value='';preview();by('Results').hidden=true;controls();status('');switchView('edit');by('Title').focus();};root.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();close();}if(e.key==='Tab'){const list=[...root.querySelectorAll('button,input,textarea')].filter(x=>!x.disabled&&x.getClientRects().length);if(e.shiftKey&&document.activeElement===list[0]){e.preventDefault();list.at(-1)?.focus();}else if(!e.shiftKey&&document.activeElement===list.at(-1)){e.preventDefault();list[0]?.focus();}}});}
+ function sync(){const permitted=owner();const rail=document.querySelector('.assal-tools-rail')||document.querySelector('.header-buttons');if(!rail)return;if(!button){button=document.createElement('button');button.id='assalOwnerBroadcastBtn';button.type='button';button.className='header-btn header-icon-btn assal-tools-item assal-tools-preserve';button.title='إرسال إشعار للجميع';button.setAttribute('aria-label','إرسال إشعار للجميع');button.innerHTML='<i class="fas fa-bullhorn" aria-hidden="true"></i>';button.onclick=open;rail.appendChild(button);}button.hidden=!permitted;button.style.setProperty('display',permitted?'':'none',permitted?'':'important');if(!permitted&&root&&!root.hidden)close();}
+ function init(){sync();const header=document.querySelector('.header-buttons');if(header)new MutationObserver(sync).observe(header,{childList:true,subtree:true});document.addEventListener('assal:admin-state-changed',sync);window.addEventListener('storage',sync);document.addEventListener('visibilitychange',()=>{sync();if(!document.hidden&&eventId&&root&&!root.hidden){pollCount=0;refresh();}});onAuthStateChanged(assalOfficeAuth,()=>setTimeout(sync,100));}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+
 </script>
 
 <style id="assal-admin-compat-feed-premium-search-dock-final-style">
