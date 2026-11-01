@@ -68763,7 +68763,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     if(e.key==='Tab'&&overlay){const nodes=Array.from(overlay.querySelectorAll('button:not(:disabled),a[href],input:not(:disabled)')).filter(el=>el.getClientRects().length),first=nodes[0],last=nodes[nodes.length-1];if(first&&e.shiftKey&&(document.activeElement===first||!overlay.contains(document.activeElement))){e.preventDefault();last.focus();}else if(last&&!e.shiftKey&&(document.activeElement===last||!overlay.contains(document.activeElement))){e.preventDefault();first.focus();}return;}
     if(!$('imageView').hidden){if(['+','=','-','0','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();if(e.key==='0')zoomImage(1);else if(e.key==='-')zoomImage(S.imageScale/1.25);else if(e.key==='+'||e.key==='=')zoomImage(S.imageScale*1.25);else{S.imageX+=e.key==='ArrowLeft'?-40:e.key==='ArrowRight'?40:0;S.imageY+=e.key==='ArrowUp'?-40:e.key==='ArrowDown'?40:0;updateImageTransform();}}return;}
     if(e.target===$('chatSearchInput')&&e.key==='Enter'&&!e.isComposing){e.preventDefault();nextSearchMatch();return;}
-    if(e.target===$('input')&&e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!matchMedia('(pointer:coarse)').matches){e.preventDefault();send();}
+    if(e.target===$('input')&&e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();send();}
   }
 
   function openDirectory(){
@@ -70064,7 +70064,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
   }
   function trashGestureAt(x,y){
     if(!gesture||!state.bar)return false;
-    const dragging=x-gesture.x>14;
+    const dragging=gesture.x-x>14;
     const bar=state.bar,send=bar.querySelector('[data-wa-action="send"]');if(!send)return false;
     if(dragging!==bar.classList.contains('is-cancel-drag')){
       bar.classList.toggle('is-cancel-drag',dragging);send.innerHTML=dragging?trashIcon:VOICE_ICON.send;
@@ -70074,7 +70074,7 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     const r=send.getBoundingClientRect();
     const inside=dragging&&r.width>0&&r.height>0&&x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom;
     bar.classList.toggle('is-trash-hover',inside);
-    hint(inside?'ارفع إصبعك للحذف':dragging?'اسحب إلى السلة للإلغاء':'جارٍ التسجيل · اسحب لليمين للإلغاء');
+    hint(inside?'ارفع إصبعك للحذف':dragging?'اسحب إلى السلة للإلغاء':'جارٍ التسجيل · اسحب لليسار للإلغاء');
     return inside;
   }
   function discardWithMotion(){
@@ -71505,3 +71505,79 @@ body.modal-lock.assal-accounts-search-editable{touch-action:pan-y!important}
   display: none !important;
 }
 </style>
+
+<!-- ASSAL: right send / left attachment, left trash gesture and stable composer focus. -->
+<style id="assal-chat-send-right-final">
+.assal-msg .am-write{direction:ltr!important}
+.assal-msg .am-write>.am-attach{order:0!important}
+.assal-msg .am-write>.am-input-wrap{order:1!important}
+.assal-msg .am-write>.am-send{order:2!important}
+#assalCommunityModal .assal-community-write-row{direction:ltr!important}
+#assalCommunityModal .assal-community-write-row>.assal-community-attach{order:0!important}
+#assalCommunityModal .assal-community-write-row>.assal-community-input{order:1!important;direction:rtl}
+#assalCommunityModal .assal-community-write-row>.assal-community-send{order:2!important}
+/* Trash target must be to the left of the microphone's starting position. */
+.assal-wa-voice-controls{direction:ltr!important}
+</style>
+<script id="assal-chat-keyboard-send-final">
+(function(){
+'use strict';
+const privateInput='.assal-msg [data-am="input"]';
+const communityInput='#assalCommunityInput';
+let shiftEnterInput=null;
+function isInput(el){return el?.matches?.(privateInput+','+communityInput);}
+function buttonFor(input){return input.id==='assalCommunityInput'?document.getElementById('assalCommunitySendBtn'):input.closest('.assal-msg')?.querySelector('[data-am="send"]');}
+function keepFocus(e){const button=e.target.closest?.('.assal-msg [data-am="send"],#assalCommunitySendBtn');if(!button||button.disabled||button.hasAttribute('data-assal-voice-record'))return;const input=button.id==='assalCommunitySendBtn'?document.getElementById('assalCommunityInput'):button.closest('.assal-msg')?.querySelector('[data-am="input"]');if(document.activeElement===input)e.preventDefault();}
+document.addEventListener('pointerdown',keepFocus,true);
+document.addEventListener('mousedown',keepFocus,true);
+function sendInput(e){const input=e.target;if(!isInput(input)||input.disabled||input.readOnly||e.isComposing||e.keyCode===229)return;const button=buttonFor(input);if(!button||button.disabled||button.hasAttribute('data-assal-voice-record'))return;e.preventDefault();e.stopImmediatePropagation();button.click();}
+// Capture also avoids duplicate community Enter handlers from earlier layers.
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.shiftKey){shiftEnterInput=e.target;return;}shiftEnterInput=null;sendInput(e);}},true);
+document.addEventListener('beforeinput',e=>{if(e.inputType==='insertParagraph'||e.inputType==='insertLineBreak'){if(shiftEnterInput===e.target){shiftEnterInput=null;return;}sendInput(e);}},true);
+function configure(input){if(!isInput(input))return;input.setAttribute('enterkeyhint','send');}
+document.addEventListener('focusin',e=>configure(e.target),true);
+document.querySelectorAll(privateInput+','+communityInput).forEach(configure);
+})();
+</script>
+
+<!-- ASSAL private Messenger integrated with the original application header/footer. -->
+<style id="assal-messenger-app-frame-final">
+body.assal-chat-frame-open>.header{position:fixed!important;top:var(--assal-chat-frame-offset,0px)!important;left:0!important;right:0!important;width:100%!important;margin:0!important;z-index:100060!important;transform:none!important}
+body.assal-chat-frame-open>footer{position:fixed!important;left:0!important;right:0!important;bottom:var(--assal-chat-frame-bottom,0px)!important;width:100%!important;margin:0!important;z-index:100060!important;transform:none!important}
+body.assal-chat-frame-open.assal-chat-frame-keyboard>footer{display:none!important}
+body.assal-chat-frame-open #requestAdminModal.assal-msg.show,
+body.assal-chat-frame-open #requestTrackModal.assal-msg.show,
+body.assal-chat-frame-open #assalCommunityModal.assal-community-modal.show{
+ inset:auto 0 auto 0!important;top:var(--assal-chat-frame-top,60px)!important;height:var(--assal-chat-frame-height,70vh)!important;max-height:var(--assal-chat-frame-height,70vh)!important;padding:0!important;overflow:hidden!important;background:var(--bg-0,#0b1220)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+body.assal-chat-frame-open #requestAdminModal.assal-msg .am-app,
+body.assal-chat-frame-open #requestTrackModal.assal-msg .am-app,
+body.assal-chat-frame-open #assalCommunityModal .assal-community-shell{height:100%!important;max-height:100%!important;width:100%!important;max-width:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;min-height:0!important}
+</style>
+<script id="assal-messenger-app-frame-final-script">
+(function(){
+'use strict';
+const roots=[document.getElementById('requestAdminModal'),document.getElementById('requestTrackModal'),document.getElementById('assalCommunityModal')].filter(Boolean);
+const header=document.querySelector('body>.header'),footer=document.querySelector('body>footer');
+if(!header||!footer||!roots.length)return;
+let frame=0,wasOpen=false,baseline=innerHeight;
+function set(name,value){const v=Math.round(value)+'px';if(document.body.style.getPropertyValue(name)!==v)document.body.style.setProperty(name,v);}
+function sync(){frame=0;const root=roots.find(el=>el.id==='assalCommunityModal'&&el.classList.contains('show'))||roots.find(el=>el.classList.contains('assal-msg')&&el.classList.contains('show'));
+ if(!root){document.body.classList.remove('assal-chat-frame-open','assal-chat-frame-keyboard');wasOpen=false;baseline=innerHeight;return;}
+ const vv=window.visualViewport,h=vv?.height||innerHeight,offset=vv?.offsetTop||0;
+ if(!wasOpen){baseline=Math.max(innerHeight,h);wasOpen=true;}
+ const focus=document.activeElement,typing=root.contains(focus)&&focus?.matches('textarea,input:not([type="file"])');
+ if(!typing)baseline=Math.max(baseline,innerHeight,h);
+ const keyboard=!!typing&&(innerHeight-h>110||baseline-h>110);
+ document.body.classList.add('assal-chat-frame-open');document.body.classList.toggle('assal-chat-frame-keyboard',keyboard);
+ const hh=header.getBoundingClientRect().height,fh=keyboard?0:footer.getBoundingClientRect().height;
+ set('--assal-chat-frame-offset',offset);set('--assal-chat-frame-bottom',Math.max(0,innerHeight-offset-h));set('--assal-chat-frame-top',offset+hh);set('--assal-chat-frame-height',Math.max(1,h-hh-fh));
+}
+function schedule(){if(!frame)frame=requestAnimationFrame(sync);}
+const observer=new MutationObserver(schedule);roots.forEach(root=>observer.observe(root,{attributes:true,attributeFilter:['class']}));
+if(window.ResizeObserver){const sizes=new ResizeObserver(schedule);sizes.observe(header);sizes.observe(footer);}
+window.addEventListener('resize',schedule,{passive:true});window.addEventListener('orientationchange',()=>{baseline=innerHeight;schedule();},{passive:true});
+window.visualViewport?.addEventListener('resize',schedule,{passive:true});window.visualViewport?.addEventListener('scroll',schedule,{passive:true});
+document.addEventListener('focusin',schedule,true);document.addEventListener('focusout',schedule,true);sync();
+})();
+</script>
