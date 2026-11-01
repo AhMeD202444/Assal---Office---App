@@ -24324,6 +24324,8 @@ setTimeout(() => {
         else alert(err.message || err);
       } finally {
         assalCommunityImageBusy = false;
+        const composerInput=document.getElementById('assalCommunityInput');
+        if(assalCommunityImageData&&document.getElementById('assalCommunityModal')?.classList.contains('show')&&composerInput&&!composerInput.disabled&&!composerInput.readOnly)composerInput.focus({preventScroll:true});
       }
     });
 }, 0);
@@ -54624,6 +54626,7 @@ html body footer {
         input.value = "";
         input.style.height = "";
       }
+      if(imageData&&document.activeElement===input)input.blur();
       // لا نفرغ الصورة قبل نجاح الكتابة الفعلية إلى Firebase.
       if (assalCommunityImageData === imageData) clearAssalCommunityImage();
       selectedReply = null;
@@ -68687,9 +68690,9 @@ html.low-end-device .assal-msg .am-typing-bubble{box-shadow:none}
     const p=createPending('',meta);S.pending[p.key]=p;S.reply=null;renderPreview();S.forceBottom=true;
     buildGroups();renderList();renderConversation();saveLocal();commitPending(p);return true;
   }
-  function send(){if(!S.open||!S.profileReady||!S.loaded||!currentGroup()||!allowed()||S.photoBusy)return;const text=clean($('input').value);if(!text&&!S.photo)return;if(S.editing){saveEdit(text);return;}const p=createPending(text);S.pending[p.key]=p;$('input').value='';S.reply=null;S.photo='';S.drafts[S.active]={text:'',reply:null,photo:''};clearTyping();resizeInput();renderPreview();S.forceBottom=true;buildGroups();renderList();renderConversation();saveLocal();commitPending(p);}
+  function send(){if(!S.open||!S.profileReady||!S.loaded||!currentGroup()||!allowed()||S.photoBusy)return;const text=clean($('input').value);if(!text&&!S.photo)return;if(S.editing){saveEdit(text);return;}const p=createPending(text);S.pending[p.key]=p;$('input').value='';S.reply=null;S.photo='';S.drafts[S.active]={text:'',reply:null,photo:''};clearTyping();resizeInput();renderPreview();S.forceBottom=true;buildGroups();renderList();renderConversation();saveLocal();commitPending(p);if(p.msg.image&&document.activeElement===$('input'))$('input').blur();}
   function retry(key){const p=S.pending[key];if(!p||p.inFlight||!S.profileReady||!S.loaded||!allowed())return;const stored=S.data[p.requestId]?.messages?.[p.msg.id];if(stored){delete S.pending[key];saveLocal();scheduleRender();return;}commitPending(p);}
-  async function pickImage(e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!/^image\//.test(file.type)||file.size>18*1024*1024){toast('اختار صورة بحجم أقل من 18 ميغابايت.');return;}const group=S.active;S.photoBusy=true;updateSend();try{const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});const img=await new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=data;});const scale=Math.min(1,1100/Math.max(img.width,img.height));const canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);let q=.8,url=canvas.toDataURL('image/jpeg',q);while(url.length>280000&&q>.35){q-=.1;url=canvas.toDataURL('image/jpeg',q);}if(url.length>480000)throw Error('large-image');if(group===S.active){S.photo=url;renderPreview();saveDraft();}}catch(_){toast('تعذّر تجهيز الصورة. جرّب صورة JPG أو PNG أصغر.');}finally{S.photoBusy=false;updateSend();}}
+  async function pickImage(e){const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!/^image\//.test(file.type)||file.size>18*1024*1024){toast('اختار صورة بحجم أقل من 18 ميغابايت.');return;}const group=S.active;S.photoBusy=true;updateSend();try{const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file);});const img=await new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=data;});const scale=Math.min(1,1100/Math.max(img.width,img.height));const canvas=document.createElement('canvas');canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);let q=.8,url=canvas.toDataURL('image/jpeg',q);while(url.length>280000&&q>.35){q-=.1;url=canvas.toDataURL('image/jpeg',q);}if(url.length>480000)throw Error('large-image');if(group===S.active){S.photo=url;renderPreview();saveDraft();}}catch(_){toast('تعذّر تجهيز الصورة. جرّب صورة JPG أو PNG أصغر.');}finally{S.photoBusy=false;updateSend();if(S.open&&group===S.active&&S.photo&&!$('input').disabled)$('input').focus({preventScroll:true});}}
 
   function findMessage(key){return currentMessages().find(m=>m.key===key);}
   function permissions(msg){return {edit:!!msg&&!msg.deletedAt&&msg.senderRole===S.role&&msg.senderRole!=='system'&&msg.localStatus==='sent',delete:!!msg&&!msg.deletedAt&&msg.senderRole!=='system'&&msg.localStatus==='sent'&&(S.role==='admin'||msg.senderRole==='customer')};}
@@ -71527,9 +71530,9 @@ const communityInput='#assalCommunityInput';
 let shiftEnterInput=null;
 function isInput(el){return el?.matches?.(privateInput+','+communityInput);}
 function buttonFor(input){return input.id==='assalCommunityInput'?document.getElementById('assalCommunitySendBtn'):input.closest('.assal-msg')?.querySelector('[data-am="send"]');}
-const sendSelector='.assal-msg [data-am="send"],#assalCommunitySendBtn';
+const sendSelector='.assal-msg [data-am="send"],#assalCommunitySendBtn,.assal-msg [data-am="attach"],#assalCommunityModal .assal-community-attach';
 let press=null,blockedClick=null;
-function inputFor(button){return button.id==='assalCommunitySendBtn'?document.getElementById('assalCommunityInput'):button.closest('.assal-msg')?.querySelector('[data-am="input"]');}
+function inputFor(button){return button.closest('#assalCommunityModal')?document.getElementById('assalCommunityInput'):button.closest('.assal-msg')?.querySelector('[data-am="input"]');}
 function textButton(target){const b=target.closest?.(sendSelector);return b&&!b.disabled&&!b.hasAttribute('data-assal-voice-record')?b:null;}
 // Own the touch sequence before WebView's focus/default handlers can dismiss the IME.
 window.addEventListener('pointerdown',e=>{const button=textButton(e.target);if(!button||e.button>0)return;const input=inputFor(button);if(document.activeElement!==input)return;press={button,input,id:e.pointerId,x:e.clientX,y:e.clientY};e.preventDefault();e.stopImmediatePropagation();},true);
