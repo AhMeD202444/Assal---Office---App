@@ -71527,9 +71527,18 @@ const communityInput='#assalCommunityInput';
 let shiftEnterInput=null;
 function isInput(el){return el?.matches?.(privateInput+','+communityInput);}
 function buttonFor(input){return input.id==='assalCommunityInput'?document.getElementById('assalCommunitySendBtn'):input.closest('.assal-msg')?.querySelector('[data-am="send"]');}
-function keepFocus(e){const button=e.target.closest?.('.assal-msg [data-am="send"],#assalCommunitySendBtn');if(!button||button.disabled||button.hasAttribute('data-assal-voice-record'))return;const input=button.id==='assalCommunitySendBtn'?document.getElementById('assalCommunityInput'):button.closest('.assal-msg')?.querySelector('[data-am="input"]');if(document.activeElement===input)e.preventDefault();}
-document.addEventListener('pointerdown',keepFocus,true);
-document.addEventListener('mousedown',keepFocus,true);
+const sendSelector='.assal-msg [data-am="send"],#assalCommunitySendBtn';
+let press=null,blockedClick=null;
+function inputFor(button){return button.id==='assalCommunitySendBtn'?document.getElementById('assalCommunityInput'):button.closest('.assal-msg')?.querySelector('[data-am="input"]');}
+function textButton(target){const b=target.closest?.(sendSelector);return b&&!b.disabled&&!b.hasAttribute('data-assal-voice-record')?b:null;}
+// Own the touch sequence before WebView's focus/default handlers can dismiss the IME.
+window.addEventListener('pointerdown',e=>{const button=textButton(e.target);if(!button||e.button>0)return;const input=inputFor(button);if(document.activeElement!==input)return;press={button,input,id:e.pointerId,x:e.clientX,y:e.clientY};e.preventDefault();e.stopImmediatePropagation();},true);
+window.addEventListener('touchstart',e=>{if(!press)return;if(press.button.contains(e.target)){e.preventDefault();e.stopImmediatePropagation();}},{capture:true,passive:false});
+window.addEventListener('pointerup',e=>{if(!press||press.id!==e.pointerId)return;const p=press;press=null;const r=p.button.getBoundingClientRect();const inside=e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;e.preventDefault();e.stopImmediatePropagation();blockedClick={button:p.button,until:performance.now()+900};if(!inside||p.button.disabled||!p.button.isConnected)return;if(p.input.isConnected&&!p.input.disabled&&!p.input.readOnly)p.input.focus({preventScroll:true});p.button.click();},true);
+window.addEventListener('pointercancel',()=>{press=null;},true);
+window.addEventListener('click',e=>{if(!e.isTrusted||!blockedClick||performance.now()>blockedClick.until)return;const b=e.target.closest?.(sendSelector);if(b===blockedClick.button){e.preventDefault();e.stopImmediatePropagation();blockedClick=null;}},true);
+// Desktop and older WebViews retain focus through their normal click path.
+window.addEventListener('mousedown',e=>{const b=textButton(e.target);if(b&&document.activeElement===inputFor(b))e.preventDefault();},true);
 function sendInput(e){const input=e.target;if(!isInput(input)||input.disabled||input.readOnly||e.isComposing||e.keyCode===229)return;const button=buttonFor(input);if(!button||button.disabled||button.hasAttribute('data-assal-voice-record'))return;e.preventDefault();e.stopImmediatePropagation();button.click();}
 // Capture also avoids duplicate community Enter handlers from earlier layers.
 document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.shiftKey){shiftEnterInput=e.target;return;}shiftEnterInput=null;sendInput(e);}},true);
