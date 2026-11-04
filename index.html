@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <!-- ===== ASSAL BATCH 3: NATIVE RUNTIME SAFE ===== -->
 <html lang="en">
@@ -15301,6 +15303,14 @@ html.assal-viewport-transition body {
     </button>
   </div>
 
+  <div class="contact-card branch-card">
+    <div class="contact-card-left branch-info">
+      <div class="branch-title">الفرع الخامس</div>
+      <div class="branch-name">مكتب عسل فرع الخالص</div>
+      <div class="branch-phone">رقم التواصل غير مضاف بعد</div>
+    </div>
+  </div>
+
   <div class="contact-note">اضغط على أيقونة واتساب لمراسلة الفرع مباشرة</div>
 </div>
 
@@ -19117,7 +19127,7 @@ function assalIsRealCustomerId(id) {
 /* STAFF INVITATIONS V3 — Firestore owner authority; no customer/Android identity writes. */
 const ASSAL_STAFF_EMAIL_RE = /^assal-[a-z0-9]{1,30}@assal\.app$/;
 const ASSAL_STAFF_UID_RE = /^[a-zA-Z0-9_-]{12,128}$/;
-const ASSAL_STAFF_BRANCHES = ["baqubah","tahrir","hay","baladruz"];
+const ASSAL_STAFF_BRANCHES = ["baqubah","tahrir","hay","baladruz","khalis"];
 let assalStaffMutationBusy = false;
 
 function assalStaffFailure(code, message, report = null, partial = null) {
@@ -21396,6 +21406,7 @@ const ADMIN_MANAGED_CUSTOMER_KEY = "assalAdminManagedCustomerId";
   t...  => التحرير
   h...  => الحي
   b...  => بلدروز
+  kh... => الخالص
   أي رمز آخر => المستخدم العادي
 
   بعد نجاح Firebase Auth لا تُمنح أي صلاحية من هذا التوجيه؛
@@ -21407,6 +21418,7 @@ const ASSAL_SECURE_LOGIN_ROUTES = Object.freeze({
   tahrir: Object.freeze({ email: "tahrir@assal.app" }),
   hay: Object.freeze({ email: "hay@assal.app" }),
   baladruz: Object.freeze({ email: "baladruz@assal.app" }),
+  khalis: Object.freeze({ email: "khalis@assal.app" }),
   customer: Object.freeze({ email: "customer@assal.app" }),
 });
 
@@ -21437,6 +21449,8 @@ function resolveAssalSecureLoginProfile(accessCode) {
       route: "baladruz",
       profile: ASSAL_SECURE_LOGIN_ROUTES.baladruz,
     };
+  if (value.startsWith("kh"))
+    return { route: "khalis", profile: ASSAL_SECURE_LOGIN_ROUTES.khalis };
   return {
     route: "customer",
     profile: ASSAL_SECURE_LOGIN_ROUTES.customer,
@@ -21479,7 +21493,7 @@ function normalizeAssalFirestoreAccessProfile(rawProfile, meta = {}) {
 
   if (
     role === "branch" &&
-    !["baqubah", "tahrir", "hay", "baladruz"].includes(branchCode)
+    !["baqubah", "tahrir", "hay", "baladruz", "khalis"].includes(branchCode)
   ) {
     return null;
   }
@@ -21495,6 +21509,7 @@ function normalizeAssalFirestoreAccessProfile(rawProfile, meta = {}) {
             tahrir: "مكتب عسل فرع التحرير",
             hay: "مكتب عسل فرع الحي",
             baladruz: "مكتب عسل فرع بلدروز",
+            khalis: "مكتب عسل فرع الخالص",
           }[branchCode] || "مكتب عسل"
         : "مستخدم عادي";
 
@@ -22041,6 +22056,7 @@ const ASSAL_AVAILABILITY_BRANCH_LABELS = Object.freeze({
   tahrir: "مكتب عسل فرع التحرير",
   hay: "مكتب عسل فرع الحي",
   baladruz: "مكتب عسل فرع بلدروز",
+  khalis: "مكتب عسل فرع الخالص",
 });
 
 /* كل استعلام موجود قبل هذا القطع يُعد منجزاً سابقاً لبعقوبة فقط. */
@@ -26761,7 +26777,7 @@ function renderAssalStaffDirectory(staff,query=''){
     .sort((a,b)=>Number(b.role==='owner')-Number(a.role==='owner') ||
       Number(b.active===true)-Number(a.active===true) || String(a.label||'').localeCompare(String(b.label||''),'ar'));
   if(p) sorted=sorted.filter(a=>[a.label,a.staffEmail,a.branchCode,a.staffCustomerId,a.uid].join(' ').toLowerCase().includes(p));
-  const labels={baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز'};
+  const labels={baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز',khalis:'الخالص'};
   const cards=sorted.map(a=>{
     const owner=a.role==='owner',managed=a.managedByOwner===true,active=a.active===true,pending=a.active===false&&a.inviteStatus==='pending';
     const customer=(assalAllCustomersDirectory||[]).find(x=>(x.deviceId||x.id)===a.staffCustomerId);
@@ -26826,7 +26842,7 @@ function assalStaffHumanErrorMessage(error, context='generic'){
 /* ASSAL STAFF FLOW 2026 — visual-only redesign of owner provisioning + revocation;
  * all writes remain inside the existing assalStaffManagement service. */
 function assalStaffBranchPickerHtml(){
-  const options=[['baqubah','بعقوبة','fa-location-dot'],['tahrir','التحرير','fa-building'],['hay','الحي','fa-shop'],['baladruz','بلدروز','fa-map-location-dot']];
+  const options=[['baqubah','بعقوبة','fa-location-dot'],['tahrir','التحرير','fa-building'],['hay','الحي','fa-shop'],['baladruz','بلدروز','fa-map-location-dot'],['khalis','الخالص','fa-location-dot']];
   return '<div class="assal-branch-picker assal-flow-field" data-branch-picker>'
     +'<label class="assal-flow-label" id="asBranchLabel" for="asBranchTrigger"><i class="fas fa-location-dot"></i> الفرع الإداري</label>'
     +'<button id="asBranchTrigger" class="assal-branch-trigger" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="asBranchMenu" aria-labelledby="asBranchLabel asBranchDisplay"><span class="assal-branch-trigger-main"><span class="assal-branch-trigger-icon"><i class="fas fa-building"></i></span><span id="asBranchDisplay" data-branch-display>بعقوبة</span></span><span class="assal-branch-chevron"><i class="fas fa-chevron-down"></i></span></button>'
@@ -26883,7 +26899,7 @@ function assalStaffRecoveryDetailsHtml(report, choose = false) {
   const esc=value=>assalAccountEsc(String(value ?? ""));
   const time=value=>Number.isSafeInteger(value)&&value>0 ? esc(new Date(value).toLocaleString('ar-IQ')) : 'غير مسجّل';
   const active=value=>value===true?'فعّال':value===false?'موقوف':'حالة غير صالحة: '+esc(value);
-  const branches={baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز'};
+  const branches={baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز',khalis:'الخالص'};
   let html=assalFlowNotice('fa-fingerprint','معرّف الزبون: <b dir="ltr">'+esc(report.customerId)+'</b>','info');
   if(report.invite){
     html+='<div class="assal-flow-credential"><span><i class="fas fa-link"></i> الدعوة المسجّلة — '+active(report.invite.active)+'</span>'
@@ -27261,7 +27277,7 @@ window.openAssalManagedStaffLogin=async function(){
 
 /* ASSAL PROMOTION WELCOME V3 — no password is read from or written to Firestore.
  * The card uses the existing Android PNG gallery bridge. Export does not accept an invitation. */
-function assalStaffCardBranch(code){return {baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز'}[code] || 'كادر عسل';}
+function assalStaffCardBranch(code){return {baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز',khalis:'الخالص'}[code] || 'كادر عسل';}
 function assalStaffWelcomeCardHtml(invite){
   const esc=value=>assalAccountEsc(String(value || ''));
   return '<section class="assal-staff-access-card" aria-label="بطاقة بيانات الدخول">'
@@ -44971,6 +44987,11 @@ html.low-end-device .update-success-shell{
       shortLabel: "التحرير",
       label: "مكتب عسل فرع التحرير",
     },
+    {
+      code: "khalis",
+      shortLabel: "الخالص",
+      label: "مكتب عسل فرع الخالص",
+    },
   ];
 
   // staffProfiles يستخدم معرفات ثابتة غير سرية للفروع. هذه الطبقة تربطها بمعرفات الفواتير القديمة
@@ -44980,6 +45001,7 @@ html.low-end-device .update-success-shell{
     baqubah: MAIN_INVOICE_BRANCH_CODE,
     hay: "t445566",
     baladruz: "y112233",
+    khalis: "khalis",
     tahrir: "u991100",
   });
 
@@ -70804,7 +70826,7 @@ html.modal-lock.assal-customer-profile-editable,body.modal-lock.assal-customer-p
     txt('assalAccountDetailsPhone',customer?.phone);
     txt('assalAccountDetailsId',id||(staff?.uid||''));
     txt('assalAccountDetailsAddress',customer?.address);
-    const branchNames={baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز'};
+    const branchNames={baqubah:'بعقوبة',tahrir:'التحرير',hay:'الحي',baladruz:'بلدروز',khalis:'الخالص'};
     if(staff){
       txt('assalAccountDetailsBranch',staff.role==='owner'?'المالك الرئيسي':(branchNames[staff.branchCode]||'أدمن عسل'));
       txt('assalAccountDetailsEmail',staff.staffEmail);
@@ -71719,8 +71741,13 @@ document.querySelectorAll(privateInput+','+communityInput).forEach(configure);
 
 <!-- ASSAL private Messenger integrated with the original application header/footer. -->
 <style id="assal-messenger-app-frame-final">
-body.assal-chat-frame-open>.header{position:fixed!important;top:var(--assal-chat-frame-offset,0px)!important;left:0!important;right:0!important;width:100%!important;margin:0!important;z-index:100060!important;transform:none!important}
-body.assal-chat-frame-open>footer{position:fixed!important;left:0!important;right:0!important;bottom:var(--assal-chat-frame-bottom,0px)!important;width:100%!important;margin:0!important;z-index:100060!important;transform:none!important}
+/* تبقى شاشات التطبيق والهيدر دون خلفية النوافذ العامة (9998). */
+body.assal-chat-frame-open #assalRepairWorkspace.show{z-index:9900!important}
+body.assal-chat-frame-open #requestAdminModal.assal-msg.show,
+body.assal-chat-frame-open #requestTrackModal.assal-msg.show{z-index:9910!important}
+body.assal-chat-frame-open #assalCommunityModal.assal-community-modal.show{z-index:9920!important}
+body.assal-chat-frame-open>.header{position:fixed!important;top:var(--assal-chat-frame-offset,0px)!important;left:0!important;right:0!important;width:100%!important;margin:0!important;z-index:9930!important;transform:none!important}
+body.assal-chat-frame-open>footer{position:fixed!important;left:0!important;right:0!important;bottom:var(--assal-chat-frame-bottom,0px)!important;width:100%!important;margin:0!important;z-index:9930!important;transform:none!important}
 body.assal-chat-frame-open.assal-chat-frame-keyboard>footer{display:none!important}
 body.assal-chat-frame-open #requestAdminModal.assal-msg.show,
 body.assal-chat-frame-open #requestTrackModal.assal-msg.show,
@@ -71739,7 +71766,7 @@ const header=document.querySelector('body>.header'),footer=document.querySelecto
 if(!header||!footer||!roots.length)return;
 let frame=0,wasOpen=false,baseline=innerHeight;
 function set(name,value){const v=Math.round(value)+'px';if(document.body.style.getPropertyValue(name)!==v)document.body.style.setProperty(name,v);}
-function sync(){frame=0;const root=roots.find(el=>el.id==='assalRepairWorkspace'&&el.classList.contains('show'))||roots.find(el=>el.id==='assalCommunityModal'&&el.classList.contains('show'))||roots.find(el=>el.classList.contains('assal-msg')&&el.classList.contains('show'));
+function sync(){frame=0;const root=roots.find(el=>el.id==='assalCommunityModal'&&el.classList.contains('show'))||roots.find(el=>el.classList.contains('assal-msg')&&el.classList.contains('show'))||roots.find(el=>el.id==='assalRepairWorkspace'&&el.classList.contains('show'));
  if(!root){document.body.classList.remove('assal-chat-frame-open','assal-chat-frame-keyboard');wasOpen=false;baseline=innerHeight;return;}
  const vv=window.visualViewport,h=vv?.height||innerHeight,offset=vv?.offsetTop||0;
  if(!wasOpen){baseline=Math.max(innerHeight,h);wasOpen=true;}
@@ -71940,3 +71967,5 @@ try{const back=JSON.parse(sessionStorage.getItem('assalRepairReturnV1')||'null')
 })();
 
 </script>
+
+
