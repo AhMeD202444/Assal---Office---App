@@ -72112,6 +72112,11 @@ body.assal-chat-frame-open #assalCommunityModal.assal-community-modal.show{z-ind
 body.assal-chat-frame-open>.header{position:fixed!important;top:var(--assal-chat-frame-offset,0px)!important;left:0!important;right:0!important;width:100%!important;margin:0!important;z-index:9930!important;transform:none!important}
 body.assal-chat-frame-open>footer{position:fixed!important;left:0!important;right:0!important;bottom:var(--assal-chat-frame-bottom,0px)!important;width:100%!important;margin:0!important;z-index:9930!important;transform:none!important}
 body.assal-chat-frame-open.assal-chat-frame-keyboard>footer{display:none!important}
+/* Reserve the footer boxes but suppress both painted strips before the IME starts. */
+body.assal-repair-ime>footer,
+body.assal-repair-ime #assalRepairWorkspace.show .rs-foot{
+ visibility:hidden!important;opacity:0!important;pointer-events:none!important;transition:none!important;
+}
 body.assal-chat-frame-open #requestAdminModal.assal-msg.show,
 body.assal-chat-frame-open #requestTrackModal.assal-msg.show,
 body.assal-chat-frame-open #assalCommunityModal.assal-community-modal.show{
@@ -72129,6 +72134,36 @@ const header=document.querySelector('body>.header'),footer=document.querySelecto
 if(!header||!footer||!roots.length)return;
 let frame=0,wasOpen=false,baseline=innerHeight;
 let repairRestHeight=0,repairWidth=0,repairEditing=false;
+const repairPane=document.getElementById('assalRepairWorkspace');
+const repairField='textarea:not([readonly]):not([disabled]),input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([readonly]):not([disabled])';
+let imeMasked=false,imeContracted=false,restoreTimer=0;
+function clearRepairMask(){
+ clearTimeout(restoreTimer);restoreTimer=0;imeMasked=false;imeContracted=false;
+ document.body.classList.remove('assal-repair-ime');
+}
+function maskRepairFooters(){
+ clearTimeout(restoreTimer);restoreTimer=0;
+ imeMasked=true;document.body.classList.add('assal-repair-ime');
+}
+function prepareRepairInput(event){
+ const field=event.target;
+ if(!repairPane?.classList.contains('show')||!repairPane.contains(field)||!field.matches?.(repairField))return;
+ if(!navigator.maxTouchPoints&&!window.matchMedia('(pointer: coarse)').matches)return;
+ if(!repairRestHeight||repairWidth!==innerWidth){
+   repairRestHeight=window.visualViewport?.height||innerHeight;repairWidth=innerWidth;
+ }
+ if(repairRestHeight-(window.visualViewport?.height||innerHeight)<=2)imeContracted=false;
+ maskRepairFooters();
+}
+function syncRepairMask(height,typing){
+ const loss=repairRestHeight-height;
+ if(typing&&loss>60&&!imeMasked)maskRepairFooters();
+ if(!imeMasked)return;
+ clearTimeout(restoreTimer);restoreTimer=0;
+ if(loss>2){imeContracted=true;return;}
+ // Android Back can dismiss the IME without blurring the field.
+ if(imeContracted||!typing)restoreTimer=setTimeout(clearRepairMask,220);
+}
 function repairFooterCover(height,typing,footerHeight){
  // Keep the pre-focus height through blur and keyboard dismissal, including a field switch.
  if(!repairRestHeight||repairWidth!==innerWidth){
@@ -72142,7 +72177,7 @@ function repairFooterCover(height,typing,footerHeight){
 function set(name,value){const v=Math.round(value)+'px';if(document.body.style.getPropertyValue(name)!==v)document.body.style.setProperty(name,v);}
 function sync(){frame=0;const root=roots.find(el=>el.id==='assalCommunityModal'&&el.classList.contains('show'))||roots.find(el=>el.classList.contains('assal-msg')&&el.classList.contains('show'))||roots.find(el=>el.id==='assalRepairWorkspace'&&el.classList.contains('show'));
  const repair=root?.id==='assalRepairWorkspace';
- if(!repair){repairRestHeight=0;repairEditing=false;}
+ if(!repair){if(imeMasked)clearRepairMask();repairRestHeight=0;repairEditing=false;}
  if(!root){document.body.classList.remove('assal-chat-frame-open','assal-chat-frame-keyboard');wasOpen=false;baseline=innerHeight;return;}
  const vv=window.visualViewport,h=vv?.height||innerHeight,offset=vv?.offsetTop||0;
  if(!wasOpen){baseline=Math.max(innerHeight,h);wasOpen=true;}
@@ -72153,6 +72188,7 @@ function sync(){frame=0;const root=roots.find(el=>el.id==='assalCommunityModal'&
  const hh=header.getBoundingClientRect().height,fh=keyboard?0:footer.getBoundingClientRect().height;
  // Slide the repair footer below the visible edge continuously. Keep it measurable throughout.
  const cover=repair?repairFooterCover(h,typing,fh):0;
+ if(repair)syncRepairMask(h,typing);
  set('--assal-chat-frame-offset',offset);set('--assal-chat-frame-bottom',Math.max(0,innerHeight-offset-h)-cover);
  set('--assal-chat-frame-top',offset+hh);set('--assal-chat-frame-height',Math.max(1,h-hh-fh+cover));
 }
@@ -72161,6 +72197,8 @@ const observer=new MutationObserver(schedule);roots.forEach(root=>observer.obser
 if(window.ResizeObserver){const sizes=new ResizeObserver(schedule);sizes.observe(header);sizes.observe(footer);}
 window.addEventListener('resize',schedule,{passive:true});window.addEventListener('orientationchange',()=>{baseline=innerHeight;schedule();},{passive:true});
 window.visualViewport?.addEventListener('resize',schedule,{passive:true});window.visualViewport?.addEventListener('scroll',schedule,{passive:true});
+document.addEventListener(window.PointerEvent?'pointerdown':'touchstart',prepareRepairInput,{capture:true,passive:true});
+document.addEventListener('focusin',prepareRepairInput,true);
 document.addEventListener('focusin',schedule,true);document.addEventListener('focusout',schedule,true);sync();
 })();
 </script>
